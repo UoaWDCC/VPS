@@ -1,12 +1,12 @@
 remote_theme: Drassil/git-wiki-theme@master
 # (string) Title of your wiki
-title: "ReactJS-Template"
+title: "Virtual Patient System"
 # Repository name to allow successful building on Netlify
-repository: lucas2005gao/ReactJS-Template
+repository: SoftEng761-2021/project-project-team-1
 
 # (string) if you've installed your wiki in subfolder, you must change this configuration
 # with your folder name, otherwise leave it empty
-baseurl: "/ReactJS-Template"
+baseurl: ""
 # (string) Description of your wiki
 description:
 # (boolean) Enable/disable wiki page list in sidebar
