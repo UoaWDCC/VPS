@@ -6,6 +6,12 @@ This project aims to provide Medical and Health Science students at the Universi
 
 This project is associated with The University of Auckland SOFTENG 761.
 
+Frontend: https://vps-frontend.netlify.app
+
+Backend: TBC
+
+Wiki: https://vps-wiki.netlify.app/
+
 <!-- prettier-ignore -->
 | CI                  | Status   |
 | ------------------- | -------- |
