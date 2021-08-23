@@ -1,3 +1,39 @@
 body {
   color: inherit;
 }
+
+/********************************** Buttons **********************************/
+.btn.side {
+  width: 15em;
+}
+
+.btn.top {
+  width: 10em;
+}
+
+.btn.contained.white {
+  background: #fafafa;
+  color: #008a7b;
+}
+
+.btn.contained.teal {
+  background: #008a7b;
+  color: #fafafa;
+}
+
+.btn.outlined.white {
+  color: #fafafa;
+  border-color: #fafafa;
+}
+
+.btn.outlined.teal {
+  color: #008a7b;
+  border-color: #008a7b;
+}
+
+// NOTE: Move this to seperate module scss file when working on the scenario list container
+/********************************** Scenario List **********************************/
+.scenarioListContainer {
+  width: 85vw;
+  height: 100vh;
+}

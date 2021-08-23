@@ -1,0 +1,16 @@
+.sideBar {
+  min-width: 250px;
+  width: 15vw;
+  height: 100vh;
+  background-color: #008a7b;
+  text-align: center;
+
+  .logo {
+    width: 250px;
+  }
+
+  .sideBarList {
+    list-style: none;
+    padding: 0;
+  }
+}
