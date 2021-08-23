@@ -5,7 +5,12 @@ body {
 .side-bar {
   width: 15vw;
   height: 100vh;
-  background-color: #008A7B;
+  background-color: #008a7b;
+  text-align: center;
+
+  .logo {
+    width: 250px;
+  }
 }
 
 .scenario-list-container {
