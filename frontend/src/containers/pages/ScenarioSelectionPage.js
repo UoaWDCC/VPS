@@ -1,9 +1,11 @@
 import React from "react";
+import SideBar from "../../components/SideBar";
 
 export default function ScenarioSelectionPage() {
   return (
     <>
-      <h1>Scenario Selection Page</h1>
+      <SideBar />
+      <div className="scenario-list-container" />
     </>
   );
 }
