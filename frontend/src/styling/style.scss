@@ -2,6 +2,21 @@ body {
   color: inherit;
 }
 
+/********************************** Buttons **********************************/
+.btn {
+  width: 15.0em;
+}
+
+.btn.white {
+  background: #fafafa;
+  color: #008a7b;
+}
+
+.btn.teal {
+  background: #008a7b;
+}
+
+/********************************** Side Bar **********************************/
 .side-bar {
   width: 15vw;
   height: 100vh;
@@ -11,8 +26,15 @@ body {
   .logo {
     width: 250px;
   }
+
+  .side-bar-list {
+    list-style: none;
+    padding: 0;
+  }
+
 }
 
+/********************************** Scenario List **********************************/
 .scenario-list-container {
   width: 85vw;
   height: 100vh;
