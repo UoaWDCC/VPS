@@ -11,9 +11,43 @@ on:
       - "docs/**"
 
 jobs:
-  run-linters:
-    name: Run linters
+  run-linters-frontend:
+    name: Run linters frontend
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./frontend
+
+    steps:
+      - name: Check out Git repository
+        uses: actions/checkout@v2
+
+      - uses: actions/cache@v2
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v1
+        with:
+          node-version: 12
+
+      # Installs dev dependencies
+      - name: Install dev dependencies
+        run: yarn install
+
+      # Runs ESLint
+      - name: Run code style check
+        run: yarn run lint
+
+  run-linters-backend:
+    name: Run linters backend
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./backend
 
     steps:
       - name: Check out Git repository
