@@ -5,22 +5,17 @@ import Button from "@material-ui/core/Button";
 export default function SideBar() {
   return (
     <>
-      <div className="side-bar">
-        <img
-          className="logo"
-          src="uoa-med-and-health-sci-logo.png"
-          alt="UoA Medical & Health Science Logo"
-        />
-        <ul className="side-bar-list">
+      <div className="top-bar">
+        <ul className="top-bar-list">
           <li className="list-item">
             <Button
-              className="btn side contained white"
+              className="btn top outlined white"
               color="default"
-              variant="contained"
+              variant="outlined"
               component={Link}
-              to="/changeThisToDynamicScenarioId"
+              to="/"
             >
-              Create
+              Back
             </Button>
           </li>
         </ul>

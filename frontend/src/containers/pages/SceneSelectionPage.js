@@ -1,9 +1,10 @@
 import React from "react";
+import TopBar from "../../components/TopBar";
 
 export default function SceneSelectionPage() {
   return (
     <>
-      <h1>Scene Selection Page</h1>
+      <TopBar />
     </>
   );
 }
