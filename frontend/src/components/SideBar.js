@@ -18,7 +18,7 @@ export default function SideBar() {
               color="default"
               variant="contained"
               component={Link}
-              to="/"
+              to="/changeThisToDynamicScenarioId"
             >
               Create
             </Button>
