@@ -1,0 +1,46 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Side Bar component snapshot test 1`] = `
+<div
+  className="sideBar"
+>
+  <img
+    alt="UoA Medical & Health Science Logo"
+    className="logo"
+    src="uoa-med-and-health-sci-logo.png"
+  />
+  <ul
+    className="sideBarList"
+  >
+    <li
+      className="listItem"
+    >
+      <a
+        aria-disabled={false}
+        className="MuiButtonBase-root MuiButton-root MuiButton-contained btn side contained white"
+        href="/scenario/changeThisToDynamicScenarioId"
+        onBlur={[Function]}
+        onClick={[Function]}
+        onDragLeave={[Function]}
+        onFocus={[Function]}
+        onKeyDown={[Function]}
+        onKeyUp={[Function]}
+        onMouseDown={[Function]}
+        onMouseLeave={[Function]}
+        onMouseUp={[Function]}
+        onTouchEnd={[Function]}
+        onTouchMove={[Function]}
+        onTouchStart={[Function]}
+        role="button"
+        tabIndex={0}
+      >
+        <span
+          className="MuiButton-label"
+        >
+          Create
+        </span>
+      </a>
+    </li>
+  </ul>
+</div>
+`;
