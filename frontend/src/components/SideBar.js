@@ -2,23 +2,25 @@ import React from "react";
 import { Link } from "react-router-dom";
 import Button from "@material-ui/core/Button";
 
+import styles from "../styling/SideBar.module.scss";
+
 export default function SideBar() {
   return (
     <>
-      <div className="side-bar">
+      <div className={styles.sideBar}>
         <img
-          className="logo"
+          className={styles.logo}
           src="uoa-med-and-health-sci-logo.png"
           alt="UoA Medical & Health Science Logo"
         />
-        <ul className="side-bar-list">
-          <li className="list-item">
+        <ul className={styles.sideBarList}>
+          <li className={styles.listItem}>
             <Button
               className="btn side contained white"
               color="default"
               variant="contained"
               component={Link}
-              to="/changeThisToDynamicScenarioId"
+              to="/scenario/changeThisToDynamicScenarioId"
             >
               Create
             </Button>

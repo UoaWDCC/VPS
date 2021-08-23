@@ -5,7 +5,7 @@ export default function ScenarioSelectionPage() {
   return (
     <>
       <SideBar />
-      <div className="scenario-list-container" />
+      <div className="scenarioListContainer" />
     </>
   );
 }

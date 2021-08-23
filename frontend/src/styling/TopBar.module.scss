@@ -1,0 +1,14 @@
+.topBar {
+  width: 100vw;
+  height: 10vh;
+  background-color: #008a7b;
+  display: flex;
+  align-items: center;
+  padding: 0em 2em;
+
+  .topBarList {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+}

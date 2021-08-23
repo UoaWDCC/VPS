@@ -31,41 +31,9 @@ body {
   border-color: #008a7b;
 }
 
-/********************************** Side Bar **********************************/
-.side-bar {
-  width: 15vw;
-  height: 100vh;
-  background-color: #008a7b;
-  text-align: center;
-
-  .logo {
-    width: 250px;
-  }
-
-  .side-bar-list {
-    list-style: none;
-    padding: 0;
-  }
-}
-
+// NOTE: Move this to seperate module scss file when working on the scenario list container
 /********************************** Scenario List **********************************/
-.scenario-list-container {
+.scenarioListContainer {
   width: 85vw;
   height: 100vh;
-}
-
-/********************************** Top Bar **********************************/
-.top-bar {
-  width: 100vw;
-  height: 10vh;
-  background-color: #008a7b;
-  display: flex;
-  align-items: center;
-  padding: 0em 2em;
-
-  .top-bar-list {
-    list-style: none;
-    margin: 0;
-    padding: 0;
-  }
 }
