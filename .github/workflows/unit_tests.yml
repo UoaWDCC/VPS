@@ -1,0 +1,42 @@
+name: Tests
+
+on:
+  push:
+    branches:
+      - master
+    paths-ignore:
+      - "docs/**"
+  pull_request:
+    paths-ignore:
+      - "docs/**"
+
+jobs:
+  unit-tests:
+    name: Run unit tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out Git repository
+        uses: actions/checkout@v2
+
+      - uses: actions/cache@v2
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v1
+        with:
+          node-version: 12
+
+      # Installs dev dependencies
+      - name: Install dev dependencies
+        run: yarn install
+
+      - name: Run build
+        run: yarn run build --if-present
+
+      - name: Run tests
+        run: yarn test

@@ -1,0 +1,24 @@
+{
+  "projectName": "REACT Template",
+  "projectOwner": "lucas2005gao",
+  "repoType": "github",
+  "repoHost": "",
+  "files": [
+    "README.md"
+  ],
+  "imageSize": 100,
+  "commit": true,
+  "commitConvention": "eslint",
+  "contributors": [
+    {
+      "login": "lucas2005gao",
+      "name": "Lucas Gao",
+      "avatar_url": "https://avatars.githubusercontent.com/u/48196609?v=4",
+      "profile": "https://github.com/lucas2005gao",
+      "contributions": [
+        "code"
+      ]
+    }
+  ],
+  "contributorsPerLine": 7
+}

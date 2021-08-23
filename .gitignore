@@ -1,0 +1,33 @@
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# dependencies
+*/node_modules
+/node_modules
+
+# testing
+/coverage
+
+# production
+/build
+
+# environment
+.env
+.env.*
+!.env.example
+
+# error and debug logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# misc
+.DS_Store
+
+# ide files
+.idea
+.vscode
+
+# docs folder
+docs/_site
+docs/Gemfile.*.lock
+docs/.sass-cache
