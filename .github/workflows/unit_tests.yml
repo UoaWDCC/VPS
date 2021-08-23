@@ -71,8 +71,5 @@ jobs:
       - name: Install dev dependencies
         run: yarn install
 
-      - name: Run build
-        run: yarn run build --if-present
-
       - name: Run tests
         run: yarn test
