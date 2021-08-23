@@ -1,3 +1,11 @@
+# Branch Name
+
+VPS-000/description-of-the-story
+
+# Commit message
+
+[VPS-000] Your commit message
+
 # Opinionated React Template
 
 <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
