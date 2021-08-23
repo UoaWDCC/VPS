@@ -31,6 +31,5 @@
     "jest/valid-expect": "error",
     "prettier/prettier": ["error", { "endOfLine": "auto" }],
     "no-unused-vars": "warn"
-  },
-  "root": true
+  }
 }
