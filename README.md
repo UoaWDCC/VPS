@@ -27,13 +27,33 @@ This project is associated with The University of Auckland SOFTENG 761.
 - Run `yarn run dev` in the root directory to start both `client` and `server` environments
 - Alternatively, run `yarn run start` (inside `client` directory) and `yarn run dev` (`server` directory) in separate terminals to have more fine grained control
 
-# Coding Conventions
+# File Structure
 
-## Commit message
+```.
+├── frontend/
+│ └── src
+├── backend/
+│ └── src
+├── wiki/
+│ ├── example-page.md
+│ └── ...
+├── README.md
+└── ...
+```
+
+## Wiki documentation
+
+Our wiki is is easily viewable through: https://vps-wiki.netlify.app/
+
+(Note: links to some images are broken due to CORS issues)
+
+## Coding Conventions
+
+### Commit message
 
 [VPS-000] Your commit message
 
-## Branch Name
+### Branch Name
 
 VPS-000/description-of-the-story
 
@@ -65,3 +85,7 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
 <!-- ALL-CONTRIBUTORS-LIST:END -->
 
 This project follows the [all-contributors](https://github.com/all-contributors/all-contributors) specification. Contributions of any kind welcome!
+
+```
+
+```
