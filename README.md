@@ -1,47 +1,43 @@
-# Branch Name
+# SOFTENG761 - Team1
 
-VPS-000/description-of-the-story
+![Faculty of Medicine and Health Science](https://i.ibb.co/HVLhJLC/1546995300879.png)
 
-# Commit message
+This project aims to provide Medical and Health Science students at the University of Auckland with a tool that supports interactive and immersive education through virtual patient scenarios.
+
+This project is associated with The University of Auckland SOFTENG 761.
+
+<!-- prettier-ignore -->
+| CI                  | Status   |
+| ------------------- | -------- |
+| ESLint              | [![ESLint](https://github.com/SoftEng761-2021/project-project-team-1/actions/workflows/eslint.yml/badge.svg)](https://github.com/SoftEng761-2021/project-project-team-1/actions/workflows/eslint.yml) |
+| Prettier            | [![Prettier](https://github.com/SoftEng761-2021/project-project-team-1/actions/workflows/prettier.yml/badge.svg)](https://github.com/SoftEng761-2021/project-project-team-1/actions/workflows/prettier.yml) |
+| Tests               |  [![Tests](https://github.com/SoftEng761-2021/project-project-team-1/actions/workflows/unit_tests.yml/badge.svg)](https://github.com/SoftEng761-2021/project-project-team-1/actions/workflows/unit_tests.yml) |
+| Contributors        | [![All Contributors](https://img.shields.io/badge/all_contributors-8-orange.svg?style=flat-square)](#contributors-) |
+
+# Setting up
+
+### Setup
+
+- You should ideally be using yarn version `14.5.*` to make this repository work.
+- Run `yarn install` in the root directory
+- Run `yarn run init` in the root directory (installs dependencies for `client` and `server` directories)
+
+### Run
+
+- Run `yarn run dev` in the root directory to start both `client` and `server` environments
+- Alternatively, run `yarn run start` (inside `client` directory) and `yarn run dev` (`server` directory) in separate terminals to have more fine grained control
+
+# Coding Conventions
+
+## Commit message
 
 [VPS-000] Your commit message
 
-# Opinionated React Template
+## Branch Name
 
-<!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
+VPS-000/description-of-the-story
 
-[![All Contributors](https://img.shields.io/badge/all_contributors-1-orange.svg?style=flat-square)](#contributors-)
-
-<!-- ALL-CONTRIBUTORS-BADGE:END -->
-
-This is a template repository used to quickly bootstrap ReactJS applications.
-
-### Default Technologies
-
-#### Client Side
-
-![ReactJS](https://img.shields.io/badge/Framework-React%20JS-lightblue)
-
-![React Router](https://img.shields.io/badge/Routing-react--router-orange)
-
-![Material UI](https://img.shields.io/badge/library-materialui-blue)
-
-![Material UI Icons](https://img.shields.io/badge/library-materialui--icons-green)
-
-![[Documentation git-wiki-skeleton](https://github.com/Drassil/git-wiki-skeleton)](https://img.shields.io/badge/documentation-git--wiki--skeleton-ff69b4)
-
-### Setup & Run
-
-- Update `title` and `baseurl` in docs/\_config.yml to be your repository name
-- Navigate to Settings -> Pages -> Source and configure the source to be `master` and `/docs`
-- Run `yarn install` in the root directory
-- Run `yarn run start` in the root directory to start the frontend
-
-### Attributions & References
-
-- Thanks to UoA Web Development Consulting Club's President Raymond Feng (Github: Ray-F) for his MERN Template
-
-## Contributors ✨
+# Contributors ✨
 
 Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/docs/en/emoji-key)):
 
@@ -51,6 +47,15 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
 <table>
   <tr>
     <td align="center"><a href="https://github.com/lucas2005gao"><img src="https://avatars.githubusercontent.com/u/48196609?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Lucas Gao</b></sub></a><br /><a href="https://github.com/lucas2005gao/REACT Template/commits?author=lucas2005gao" title="Code">💻</a></td>
+    <td align="center"><a href="https://github.com/flexzy"><img src="https://avatars.githubusercontent.com/u/49087744?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Felix Yang</b></sub></a><br /><a href="https://github.com/lucas2005gao/REACT Template/commits?author=flexzy" title="Code">💻</a></td>
+    <td align="center"><a href="https://github.com/David-Xia0"><img src="https://avatars.githubusercontent.com/u/50573329?v=4?s=100" width="100px;" alt=""/><br /><sub><b>David Xiao</b></sub></a><br /><a href="https://github.com/lucas2005gao/REACT Template/commits?author=David-Xia0" title="Code">💻</a></td>
+    <td align="center"><a href="https://github.com/zyan225"><img src="https://avatars.githubusercontent.com/u/52368549?v=4?s=100" width="100px;" alt=""/><br /><sub><b>zyan225</b></sub></a><br /><a href="https://github.com/lucas2005gao/REACT Template/commits?author=zyan225" title="Code">💻</a></td>
+    <td align="center"><a href="https://github.com/dongmeilim"><img src="https://avatars.githubusercontent.com/u/52555301?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Dong Mei Lim</b></sub></a><br /><a href="https://github.com/lucas2005gao/REACT Template/commits?author=dongmeilim" title="Code">💻</a></td>
+    <td align="center"><a href="https://github.com/annithinggoes"><img src="https://avatars.githubusercontent.com/u/52563454?v=4?s=100" width="100px;" alt=""/><br /><sub><b>annithinggoes</b></sub></a><br /><a href="https://github.com/lucas2005gao/REACT Template/commits?author=annithinggoes" title="Code">💻</a></td>
+    <td align="center"><a href="https://github.com/afei088"><img src="https://avatars.githubusercontent.com/u/60560589?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Andrew Fei</b></sub></a><br /><a href="https://github.com/lucas2005gao/REACT Template/commits?author=afei088" title="Code">💻</a></td>
+  </tr>
+  <tr>
+    <td align="center"><a href="https://github.com/NatalyMartini"><img src="https://avatars.githubusercontent.com/u/79951216?v=4?s=100" width="100px;" alt=""/><br /><sub><b>NatalyMartini</b></sub></a><br /><a href="#business-NatalyMartini" title="Business development">💼</a> <a href="#content-NatalyMartini" title="Content">🖋</a></td>
   </tr>
 </table>
 

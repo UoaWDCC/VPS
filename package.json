@@ -8,7 +8,9 @@
   "scripts": {
     "start": "yarn run dev",
     "dev": "concurrently \"cd frontend && yarn run start\" \"cd backend && yarn run start\"",
-    "init": "concurrently \"cd frontend && yarn install\" \"cd backend && yarn install\""
+    "init": "concurrently \"cd frontend && yarn install\" \"cd backend && yarn install\"",
+    "contributors:add": "all-contributors add",
+    "contributors:generate": "all-contributors generate"
   },
   "dependencies": {
     "concurrently": "^6.2.1"
