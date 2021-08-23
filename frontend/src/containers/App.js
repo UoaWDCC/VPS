@@ -12,7 +12,7 @@ export default function App() {
       <BrowserRouter>
         <Switch>
           <Route exact path="/" component={ScenarioSelectionPage} />
-          <Route path="/:scenarioId" component={SceneSelectionPage} />
+          <Route path="/scenario/:scenarioId" component={SceneSelectionPage} />
 
           {/* Default path if nothing matches */}
           <Route path="/" component={ScenarioSelectionPage} />
