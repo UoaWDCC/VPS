@@ -7,7 +7,9 @@
     "start": "node -r esm ./src/server.js",
     "test": "jest",
     "lint": "eslint --ext .js,.jsx .",
-    "lint:fix": "eslint --fix --ext .js,.jsx ."
+    "lint:fix": "eslint --fix --ext .js,.jsx .",
+    "prettier": "prettier --check src",
+    "prettify": "prettier --write src"
   },
   "engines": {
     "node": "12.18.4",
