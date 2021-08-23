@@ -11,7 +11,7 @@ on:
       - "docs/**"
 
 jobs:
-unit-tests-frontend:
+  unit-tests-frontend:
     name: Run unit tests frontend
     runs-on: ubuntu-latest
     defaults:
@@ -43,7 +43,6 @@ unit-tests-frontend:
 
       - name: Run tests
         run: yarn test
-
 
   unit-tests-backend:
     name: Run unit tests backend
