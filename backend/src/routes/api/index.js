@@ -1,8 +1,9 @@
 import { Router } from "express";
 
-import api from "./api";
+import scenario from "./scenario";
 
 const router = Router();
-router.use("/api", api);
+
+router.use("/scenario", scenario);
 
 export default router;
