@@ -1,19 +1,29 @@
 ---
-name: Pull Request Template
-about: Write about the changes in the Pull Request
 title: "[VPS-000] Title of your story"
-labels:
-assignees: ""
 ---
 
-**Describe the issue**
+## Describe the issue
+
 A clear and concise description of what the issue is.
 
-**Describe the solution**
+## Describe the solution
+
 A clear and concise description of what the solution is.
 
-**Risk**
+## Risk
+
 Potential risks that this PR might brings
 
-**Reviewed By**
+## DoD
+
+- [ ] Code peer-reviewed
+- [ ] Wiki Documentation is written and up to date
+- [ ] Unit tests written and passing
+- [ ] Integration tests written and passing
+- [ ] Continuous Integration build passing
+- [ ] Acceptance criteria met
+- [ ] Deployed to production environment
+
+## Reviewed By
+
 Who reviewed your PR - for commit history once merged
