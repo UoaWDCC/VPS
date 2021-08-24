@@ -62,9 +62,9 @@ describe("Scenario API tests", () => {
     expect(scenario.scenes).toEqual([]);
 
     // check if scenario has been persisted to db
-    const dbScenario = await Scenario.findById(scenario._id);
+    const dbScenario = await Scenario.findById(scenario._id).lean();
     expect(dbScenario).toBeDefined();
     expect(dbScenario.name).toEqual(reqData.name);
-    expect(Array.from(dbScenario.scenes)).toEqual([]);
+    expect(dbScenario.scenes).toEqual([]);
   });
 });
