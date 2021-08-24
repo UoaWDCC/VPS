@@ -22,9 +22,6 @@ app.use(express.static(join(__dirname, "../public")));
 if (process.env.NODE_ENV === "production") {
   // eslint-disable-next-line no-console
   console.log("Running in production!");
-
-  // Make all files in that folder public
-  app.use(express.static(express.join(__dirname, "../../frontend/build")));
 }
 
 // Start the DB running. Then, once it's connected, start the server.
