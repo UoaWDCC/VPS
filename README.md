@@ -24,7 +24,7 @@ Backend: TBC
 
 ### Setup
 
-- You should ideally be using yarn version `14.5.*` to make this repository work.
+- You should ideally be using yarn version `1.22.*` to make this repository work.
 - Run `yarn install` in the root directory
 - Run `yarn run init` in the root directory (installs dependencies for `client` and `server` directories)
 
