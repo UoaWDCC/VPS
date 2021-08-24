@@ -18,6 +18,7 @@
     "dotenv": "^8.2.0",
     "esm": "^3.2.25",
     "express": "~4.16.1",
+    "mongodb-memory-server": "^7.3.6",
     "mongoose": "^5.12.3"
   },
   "devDependencies": {
