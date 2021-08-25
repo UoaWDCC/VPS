@@ -7,12 +7,12 @@ export default function ScenarioSelectionPage() {
   const dummyData = [
     {
       id: 1,
-      name: "scenario 1",
+      name: "Scenario 1",
       img: "https://hatrabbits.com/wp-content/uploads/2017/01/random.jpg",
     },
     {
       id: 2,
-      name: "scenario 2",
+      name: "Scenario 2",
       img: "https://hatrabbits.com/wp-content/uploads/2017/01/random.jpg",
     },
   ];
@@ -20,7 +20,7 @@ export default function ScenarioSelectionPage() {
   for (let i = 3; i < 30; i += 1) {
     dummyData.push({
       id: i,
-      name: `scenario ${i}`,
+      name: `Scenario ${i}`,
       img: "",
     });
   }

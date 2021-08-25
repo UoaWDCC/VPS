@@ -9,24 +9,20 @@ export default function ListContainer({ data }) {
     <>
       <div className={styles.scenarioListContainer}>
         {data.length > 0 ? (
-          <ImageList rowHeight={200} className={styles.imageList} cols={4}>
+          <ImageList rowHeight={200} cols={4}>
             {data.map((item) => (
-              <ImageListItem key={item.id} cols={1}>
+              <ImageListItem key={item.id} cols={1} height={200}>
                 <div className={styles.imageListItem}>
                   <Box
                     height={150}
                     border={1}
                     borderRadius={10}
+                    borderColor="#747474"
                     overflow="hidden"
-                    bgcolor="#008a7b"
-                    color="white"
+                    bgcolor="#f1f1f1"
                     textAlign="center"
                   >
-                    <img
-                      className={styles.itemImage}
-                      src={item.img}
-                      alt={item.name}
-                    />
+                    <img className={styles.itemImage} src={item.img} alt="" />
                   </Box>
                   <p className={styles.text}>{item.name}</p>
                 </div>
