@@ -104,7 +104,7 @@ describe("Scene API tests", () => {
 
     // check scene is not added to unrelatd scenario
     const dbScenario2 = await Scenario.findById(scenario2._id).lean();
-    expect(dbScenario2.scenes).toEqual([]);
+    expect(dbScenario2.scenes).toEqual([scene1._id, scene2._id]);
   });
 
   it("GET api/scenario/:scenarioId/scene retrieve all scenes successfully", async () => {
