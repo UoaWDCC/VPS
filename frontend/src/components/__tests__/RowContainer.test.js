@@ -1,19 +1,15 @@
 import React from "react";
 import renderer from "react-test-renderer";
 import { BrowserRouter } from "react-router-dom";
-import ListContainer from "../ListContainer";
+import RowContainer from "../RowContainer";
 
-test("ListContainer component snapshot test", () => {
-  const testData = [
-    {
-      id: 1,
-      name: "Scenario 1",
-      img: "",
-    },
-  ];
+test("RowContainer component snapshot test", () => {
   const component = renderer.create(
     <BrowserRouter>
-      <ListContainer data={testData} />
+      <RowContainer>
+        <div>test</div>
+        <div>test</div>
+      </RowContainer>
     </BrowserRouter>
   );
 
