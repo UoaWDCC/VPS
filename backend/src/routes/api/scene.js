@@ -1,6 +1,6 @@
 import { Router } from "express";
 
-import { createScene } from "../../db/daos/sceneDao";
+import { createScene, retrieveSceneList } from "../../db/daos/sceneDao";
 
 const router = Router({ mergeParams: true });
 
@@ -12,6 +12,12 @@ router.post("/", async (req, res) => {
   const scene = await createScene(req.params.scenarioId, name);
 
   res.status(HTTP_OK).json(scene);
+});
+
+router.get("/", async (req, res) => {
+  const scenes = await retrieveSceneList(req.params.scenarioId);
+
+  res.json(scenes);
 });
 
 export default router;

@@ -16,5 +16,15 @@ const createScene = async (scenarioId, name) => {
   return dbScene;
 };
 
+const retrieveSceneList = async (scenarioId) => {
+  const dbScenario = await Scenario.findById(scenarioId);
+  const dbScenes = await Scene.find(
+    { _id: { $in: dbScenario.scenes } },
+    "name"
+  );
+
+  return dbScenes;
+};
+
 // eslint-disable-next-line import/prefer-default-export
-export { createScene };
+export { createScene, retrieveSceneList };
