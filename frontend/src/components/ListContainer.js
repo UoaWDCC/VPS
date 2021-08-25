@@ -21,9 +21,7 @@ export default function ListContainer({ data }) {
                     overflow="hidden"
                     bgcolor="#f1f1f1"
                     textAlign="center"
-                  >
-                    <img className={styles.itemImage} src={item.img} alt="" />
-                  </Box>
+                  />
                   <p className={styles.text}>{item.name}</p>
                 </div>
               </ImageListItem>
