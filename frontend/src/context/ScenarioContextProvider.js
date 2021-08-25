@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
 import ScenarioContext from "./ScenarioContext";
+
+const axios = require("axios");
 
 export default function ScenarioContextProvider({ useTestData, children }) {
   const [data, setData] = useState([]);
