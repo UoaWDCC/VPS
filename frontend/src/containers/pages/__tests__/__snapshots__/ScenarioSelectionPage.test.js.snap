@@ -1,7 +1,9 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Scenario Selection page snapshot test 1`] = `
-Array [
+<div
+  className="rowContainer"
+>
   <div
     className="sideBar"
   >
@@ -43,9 +45,1005 @@ Array [
         </a>
       </li>
     </ul>
-  </div>,
+  </div>
   <div
     className="scenarioListContainer"
-  />,
-]
+  >
+    <ul
+      className="MuiImageList-root"
+      style={
+        Object {
+          "margin": -15,
+        }
+      }
+    >
+      <li
+        className="MuiImageListItem-root"
+        height={200}
+        style={
+          Object {
+            "height": 240,
+            "padding": 15,
+            "width": "25%",
+          }
+        }
+      >
+        <div
+          className="MuiImageListItem-item"
+        >
+          <div
+            className="imageListItem"
+          >
+            <div
+              className="MuiBox-root MuiBox-root-1"
+            >
+              <img
+                alt=""
+                className="itemImage"
+                src="https://unidirectory.auckland.ac.nz/people/imageraw/n-giacaman/11018090/biggest"
+              />
+            </div>
+            <p
+              className="text"
+            >
+              Scenario 1
+            </p>
+          </div>
+        </div>
+      </li>
+      <li
+        className="MuiImageListItem-root"
+        height={200}
+        style={
+          Object {
+            "height": 240,
+            "padding": 15,
+            "width": "25%",
+          }
+        }
+      >
+        <div
+          className="MuiImageListItem-item"
+        >
+          <div
+            className="imageListItem"
+          >
+            <div
+              className="MuiBox-root MuiBox-root-2"
+            >
+              <img
+                alt=""
+                className="itemImage"
+                src="https://unidirectory.auckland.ac.nz/people/imageraw/reza-shahamiri/11450631/biggest"
+              />
+            </div>
+            <p
+              className="text"
+            >
+              Scenario 2
+            </p>
+          </div>
+        </div>
+      </li>
+      <li
+        className="MuiImageListItem-root"
+        height={200}
+        style={
+          Object {
+            "height": 240,
+            "padding": 15,
+            "width": "25%",
+          }
+        }
+      >
+        <div
+          className="MuiImageListItem-item"
+        >
+          <div
+            className="imageListItem"
+          >
+            <div
+              className="MuiBox-root MuiBox-root-3"
+            >
+              <img
+                alt=""
+                className="itemImage"
+                src=""
+              />
+            </div>
+            <p
+              className="text"
+            >
+              Scenario 3
+            </p>
+          </div>
+        </div>
+      </li>
+      <li
+        className="MuiImageListItem-root"
+        height={200}
+        style={
+          Object {
+            "height": 240,
+            "padding": 15,
+            "width": "25%",
+          }
+        }
+      >
+        <div
+          className="MuiImageListItem-item"
+        >
+          <div
+            className="imageListItem"
+          >
+            <div
+              className="MuiBox-root MuiBox-root-4"
+            >
+              <img
+                alt=""
+                className="itemImage"
+                src=""
+              />
+            </div>
+            <p
+              className="text"
+            >
+              Scenario 4
+            </p>
+          </div>
+        </div>
+      </li>
+      <li
+        className="MuiImageListItem-root"
+        height={200}
+        style={
+          Object {
+            "height": 240,
+            "padding": 15,
+            "width": "25%",
+          }
+        }
+      >
+        <div
+          className="MuiImageListItem-item"
+        >
+          <div
+            className="imageListItem"
+          >
+            <div
+              className="MuiBox-root MuiBox-root-5"
+            >
+              <img
+                alt=""
+                className="itemImage"
+                src=""
+              />
+            </div>
+            <p
+              className="text"
+            >
+              Scenario 5
+            </p>
+          </div>
+        </div>
+      </li>
+      <li
+        className="MuiImageListItem-root"
+        height={200}
+        style={
+          Object {
+            "height": 240,
+            "padding": 15,
+            "width": "25%",
+          }
+        }
+      >
+        <div
+          className="MuiImageListItem-item"
+        >
+          <div
+            className="imageListItem"
+          >
+            <div
+              className="MuiBox-root MuiBox-root-6"
+            >
+              <img
+                alt=""
+                className="itemImage"
+                src=""
+              />
+            </div>
+            <p
+              className="text"
+            >
+              Scenario 6
+            </p>
+          </div>
+        </div>
+      </li>
+      <li
+        className="MuiImageListItem-root"
+        height={200}
+        style={
+          Object {
+            "height": 240,
+            "padding": 15,
+            "width": "25%",
+          }
+        }
+      >
+        <div
+          className="MuiImageListItem-item"
+        >
+          <div
+            className="imageListItem"
+          >
+            <div
+              className="MuiBox-root MuiBox-root-7"
+            >
+              <img
+                alt=""
+                className="itemImage"
+                src=""
+              />
+            </div>
+            <p
+              className="text"
+            >
+              Scenario 7
+            </p>
+          </div>
+        </div>
+      </li>
+      <li
+        className="MuiImageListItem-root"
+        height={200}
+        style={
+          Object {
+            "height": 240,
+            "padding": 15,
+            "width": "25%",
+          }
+        }
+      >
+        <div
+          className="MuiImageListItem-item"
+        >
+          <div
+            className="imageListItem"
+          >
+            <div
+              className="MuiBox-root MuiBox-root-8"
+            >
+              <img
+                alt=""
+                className="itemImage"
+                src=""
+              />
+            </div>
+            <p
+              className="text"
+            >
+              Scenario 8
+            </p>
+          </div>
+        </div>
+      </li>
+      <li
+        className="MuiImageListItem-root"
+        height={200}
+        style={
+          Object {
+            "height": 240,
+            "padding": 15,
+            "width": "25%",
+          }
+        }
+      >
+        <div
+          className="MuiImageListItem-item"
+        >
+          <div
+            className="imageListItem"
+          >
+            <div
+              className="MuiBox-root MuiBox-root-9"
+            >
+              <img
+                alt=""
+                className="itemImage"
+                src=""
+              />
+            </div>
+            <p
+              className="text"
+            >
+              Scenario 9
+            </p>
+          </div>
+        </div>
+      </li>
+      <li
+        className="MuiImageListItem-root"
+        height={200}
+        style={
+          Object {
+            "height": 240,
+            "padding": 15,
+            "width": "25%",
+          }
+        }
+      >
+        <div
+          className="MuiImageListItem-item"
+        >
+          <div
+            className="imageListItem"
+          >
+            <div
+              className="MuiBox-root MuiBox-root-10"
+            >
+              <img
+                alt=""
+                className="itemImage"
+                src=""
+              />
+            </div>
+            <p
+              className="text"
+            >
+              Scenario 10
+            </p>
+          </div>
+        </div>
+      </li>
+      <li
+        className="MuiImageListItem-root"
+        height={200}
+        style={
+          Object {
+            "height": 240,
+            "padding": 15,
+            "width": "25%",
+          }
+        }
+      >
+        <div
+          className="MuiImageListItem-item"
+        >
+          <div
+            className="imageListItem"
+          >
+            <div
+              className="MuiBox-root MuiBox-root-11"
+            >
+              <img
+                alt=""
+                className="itemImage"
+                src=""
+              />
+            </div>
+            <p
+              className="text"
+            >
+              Scenario 11
+            </p>
+          </div>
+        </div>
+      </li>
+      <li
+        className="MuiImageListItem-root"
+        height={200}
+        style={
+          Object {
+            "height": 240,
+            "padding": 15,
+            "width": "25%",
+          }
+        }
+      >
+        <div
+          className="MuiImageListItem-item"
+        >
+          <div
+            className="imageListItem"
+          >
+            <div
+              className="MuiBox-root MuiBox-root-12"
+            >
+              <img
+                alt=""
+                className="itemImage"
+                src=""
+              />
+            </div>
+            <p
+              className="text"
+            >
+              Scenario 12
+            </p>
+          </div>
+        </div>
+      </li>
+      <li
+        className="MuiImageListItem-root"
+        height={200}
+        style={
+          Object {
+            "height": 240,
+            "padding": 15,
+            "width": "25%",
+          }
+        }
+      >
+        <div
+          className="MuiImageListItem-item"
+        >
+          <div
+            className="imageListItem"
+          >
+            <div
+              className="MuiBox-root MuiBox-root-13"
+            >
+              <img
+                alt=""
+                className="itemImage"
+                src=""
+              />
+            </div>
+            <p
+              className="text"
+            >
+              Scenario 13
+            </p>
+          </div>
+        </div>
+      </li>
+      <li
+        className="MuiImageListItem-root"
+        height={200}
+        style={
+          Object {
+            "height": 240,
+            "padding": 15,
+            "width": "25%",
+          }
+        }
+      >
+        <div
+          className="MuiImageListItem-item"
+        >
+          <div
+            className="imageListItem"
+          >
+            <div
+              className="MuiBox-root MuiBox-root-14"
+            >
+              <img
+                alt=""
+                className="itemImage"
+                src=""
+              />
+            </div>
+            <p
+              className="text"
+            >
+              Scenario 14
+            </p>
+          </div>
+        </div>
+      </li>
+      <li
+        className="MuiImageListItem-root"
+        height={200}
+        style={
+          Object {
+            "height": 240,
+            "padding": 15,
+            "width": "25%",
+          }
+        }
+      >
+        <div
+          className="MuiImageListItem-item"
+        >
+          <div
+            className="imageListItem"
+          >
+            <div
+              className="MuiBox-root MuiBox-root-15"
+            >
+              <img
+                alt=""
+                className="itemImage"
+                src=""
+              />
+            </div>
+            <p
+              className="text"
+            >
+              Scenario 15
+            </p>
+          </div>
+        </div>
+      </li>
+      <li
+        className="MuiImageListItem-root"
+        height={200}
+        style={
+          Object {
+            "height": 240,
+            "padding": 15,
+            "width": "25%",
+          }
+        }
+      >
+        <div
+          className="MuiImageListItem-item"
+        >
+          <div
+            className="imageListItem"
+          >
+            <div
+              className="MuiBox-root MuiBox-root-16"
+            >
+              <img
+                alt=""
+                className="itemImage"
+                src=""
+              />
+            </div>
+            <p
+              className="text"
+            >
+              Scenario 16
+            </p>
+          </div>
+        </div>
+      </li>
+      <li
+        className="MuiImageListItem-root"
+        height={200}
+        style={
+          Object {
+            "height": 240,
+            "padding": 15,
+            "width": "25%",
+          }
+        }
+      >
+        <div
+          className="MuiImageListItem-item"
+        >
+          <div
+            className="imageListItem"
+          >
+            <div
+              className="MuiBox-root MuiBox-root-17"
+            >
+              <img
+                alt=""
+                className="itemImage"
+                src=""
+              />
+            </div>
+            <p
+              className="text"
+            >
+              Scenario 17
+            </p>
+          </div>
+        </div>
+      </li>
+      <li
+        className="MuiImageListItem-root"
+        height={200}
+        style={
+          Object {
+            "height": 240,
+            "padding": 15,
+            "width": "25%",
+          }
+        }
+      >
+        <div
+          className="MuiImageListItem-item"
+        >
+          <div
+            className="imageListItem"
+          >
+            <div
+              className="MuiBox-root MuiBox-root-18"
+            >
+              <img
+                alt=""
+                className="itemImage"
+                src=""
+              />
+            </div>
+            <p
+              className="text"
+            >
+              Scenario 18
+            </p>
+          </div>
+        </div>
+      </li>
+      <li
+        className="MuiImageListItem-root"
+        height={200}
+        style={
+          Object {
+            "height": 240,
+            "padding": 15,
+            "width": "25%",
+          }
+        }
+      >
+        <div
+          className="MuiImageListItem-item"
+        >
+          <div
+            className="imageListItem"
+          >
+            <div
+              className="MuiBox-root MuiBox-root-19"
+            >
+              <img
+                alt=""
+                className="itemImage"
+                src=""
+              />
+            </div>
+            <p
+              className="text"
+            >
+              Scenario 19
+            </p>
+          </div>
+        </div>
+      </li>
+      <li
+        className="MuiImageListItem-root"
+        height={200}
+        style={
+          Object {
+            "height": 240,
+            "padding": 15,
+            "width": "25%",
+          }
+        }
+      >
+        <div
+          className="MuiImageListItem-item"
+        >
+          <div
+            className="imageListItem"
+          >
+            <div
+              className="MuiBox-root MuiBox-root-20"
+            >
+              <img
+                alt=""
+                className="itemImage"
+                src=""
+              />
+            </div>
+            <p
+              className="text"
+            >
+              Scenario 20
+            </p>
+          </div>
+        </div>
+      </li>
+      <li
+        className="MuiImageListItem-root"
+        height={200}
+        style={
+          Object {
+            "height": 240,
+            "padding": 15,
+            "width": "25%",
+          }
+        }
+      >
+        <div
+          className="MuiImageListItem-item"
+        >
+          <div
+            className="imageListItem"
+          >
+            <div
+              className="MuiBox-root MuiBox-root-21"
+            >
+              <img
+                alt=""
+                className="itemImage"
+                src=""
+              />
+            </div>
+            <p
+              className="text"
+            >
+              Scenario 21
+            </p>
+          </div>
+        </div>
+      </li>
+      <li
+        className="MuiImageListItem-root"
+        height={200}
+        style={
+          Object {
+            "height": 240,
+            "padding": 15,
+            "width": "25%",
+          }
+        }
+      >
+        <div
+          className="MuiImageListItem-item"
+        >
+          <div
+            className="imageListItem"
+          >
+            <div
+              className="MuiBox-root MuiBox-root-22"
+            >
+              <img
+                alt=""
+                className="itemImage"
+                src=""
+              />
+            </div>
+            <p
+              className="text"
+            >
+              Scenario 22
+            </p>
+          </div>
+        </div>
+      </li>
+      <li
+        className="MuiImageListItem-root"
+        height={200}
+        style={
+          Object {
+            "height": 240,
+            "padding": 15,
+            "width": "25%",
+          }
+        }
+      >
+        <div
+          className="MuiImageListItem-item"
+        >
+          <div
+            className="imageListItem"
+          >
+            <div
+              className="MuiBox-root MuiBox-root-23"
+            >
+              <img
+                alt=""
+                className="itemImage"
+                src=""
+              />
+            </div>
+            <p
+              className="text"
+            >
+              Scenario 23
+            </p>
+          </div>
+        </div>
+      </li>
+      <li
+        className="MuiImageListItem-root"
+        height={200}
+        style={
+          Object {
+            "height": 240,
+            "padding": 15,
+            "width": "25%",
+          }
+        }
+      >
+        <div
+          className="MuiImageListItem-item"
+        >
+          <div
+            className="imageListItem"
+          >
+            <div
+              className="MuiBox-root MuiBox-root-24"
+            >
+              <img
+                alt=""
+                className="itemImage"
+                src=""
+              />
+            </div>
+            <p
+              className="text"
+            >
+              Scenario 24
+            </p>
+          </div>
+        </div>
+      </li>
+      <li
+        className="MuiImageListItem-root"
+        height={200}
+        style={
+          Object {
+            "height": 240,
+            "padding": 15,
+            "width": "25%",
+          }
+        }
+      >
+        <div
+          className="MuiImageListItem-item"
+        >
+          <div
+            className="imageListItem"
+          >
+            <div
+              className="MuiBox-root MuiBox-root-25"
+            >
+              <img
+                alt=""
+                className="itemImage"
+                src=""
+              />
+            </div>
+            <p
+              className="text"
+            >
+              Scenario 25
+            </p>
+          </div>
+        </div>
+      </li>
+      <li
+        className="MuiImageListItem-root"
+        height={200}
+        style={
+          Object {
+            "height": 240,
+            "padding": 15,
+            "width": "25%",
+          }
+        }
+      >
+        <div
+          className="MuiImageListItem-item"
+        >
+          <div
+            className="imageListItem"
+          >
+            <div
+              className="MuiBox-root MuiBox-root-26"
+            >
+              <img
+                alt=""
+                className="itemImage"
+                src=""
+              />
+            </div>
+            <p
+              className="text"
+            >
+              Scenario 26
+            </p>
+          </div>
+        </div>
+      </li>
+      <li
+        className="MuiImageListItem-root"
+        height={200}
+        style={
+          Object {
+            "height": 240,
+            "padding": 15,
+            "width": "25%",
+          }
+        }
+      >
+        <div
+          className="MuiImageListItem-item"
+        >
+          <div
+            className="imageListItem"
+          >
+            <div
+              className="MuiBox-root MuiBox-root-27"
+            >
+              <img
+                alt=""
+                className="itemImage"
+                src=""
+              />
+            </div>
+            <p
+              className="text"
+            >
+              Scenario 27
+            </p>
+          </div>
+        </div>
+      </li>
+      <li
+        className="MuiImageListItem-root"
+        height={200}
+        style={
+          Object {
+            "height": 240,
+            "padding": 15,
+            "width": "25%",
+          }
+        }
+      >
+        <div
+          className="MuiImageListItem-item"
+        >
+          <div
+            className="imageListItem"
+          >
+            <div
+              className="MuiBox-root MuiBox-root-28"
+            >
+              <img
+                alt=""
+                className="itemImage"
+                src=""
+              />
+            </div>
+            <p
+              className="text"
+            >
+              Scenario 28
+            </p>
+          </div>
+        </div>
+      </li>
+      <li
+        className="MuiImageListItem-root"
+        height={200}
+        style={
+          Object {
+            "height": 240,
+            "padding": 15,
+            "width": "25%",
+          }
+        }
+      >
+        <div
+          className="MuiImageListItem-item"
+        >
+          <div
+            className="imageListItem"
+          >
+            <div
+              className="MuiBox-root MuiBox-root-29"
+            >
+              <img
+                alt=""
+                className="itemImage"
+                src=""
+              />
+            </div>
+            <p
+              className="text"
+            >
+              Scenario 29
+            </p>
+          </div>
+        </div>
+      </li>
+    </ul>
+  </div>
+</div>
 `;
