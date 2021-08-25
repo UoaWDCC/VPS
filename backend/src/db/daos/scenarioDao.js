@@ -9,5 +9,9 @@ const createScenario = async (name) => {
   return dbScenario;
 };
 
+const retrieveScenarioList = async () => {
+  return Scenario.find({}, "name");
+};
+
 // eslint-disable-next-line import/prefer-default-export
-export { createScenario };
+export { createScenario, retrieveScenarioList };
