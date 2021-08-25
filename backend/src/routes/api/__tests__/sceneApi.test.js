@@ -14,8 +14,26 @@ describe("Scene API tests", () => {
   let server;
   let port;
 
-  let scenario1;
-  let scenario2;
+  const scene1 = {
+    _id: new mongoose.mongo.ObjectId("000000000000000000000003"),
+    name: "Test Scene 1",
+  };
+
+  const scene2 = {
+    _id: new mongoose.mongo.ObjectId("000000000000000000000004"),
+    name: "Test Scene 2",
+  };
+
+  const scenario1 = {
+    _id: new mongoose.mongo.ObjectId("000000000000000000000001"),
+    name: "Test Scenario 1",
+  };
+
+  const scenario2 = {
+    _id: new mongoose.mongo.ObjectId("000000000000000000000002"),
+    name: "Test Scenario 2",
+    scenes: [scene1._id, scene2._id],
+  };
 
   // setup in-memory mongodb and express API
   beforeAll(async () => {
@@ -37,10 +55,8 @@ describe("Scene API tests", () => {
 
   // populate database with dummy scenarios
   beforeEach(async () => {
-    scenario1 = new Scenario({ name: "Test Scenario 1" });
-    scenario2 = new Scenario({ name: "Test Scenario 2" });
-    await scenario1.save();
-    await scenario2.save();
+    await Scenario.create([scenario1, scenario2]);
+    await Scene.create([scene1, scene2]);
   });
 
   // clear the database
@@ -88,6 +104,25 @@ describe("Scene API tests", () => {
 
     // check scene is not added to unrelatd scenario
     const dbScenario2 = await Scenario.findById(scenario2._id).lean();
-    expect(dbScenario2.scenes).toEqual([]);
+    expect(dbScenario2.scenes).toEqual([scene1._id, scene2._id]);
+  });
+
+  it("GET api/scenario/:scenarioId/scene retrieve all scenes successfully", async () => {
+    const response = await axios.get(
+      `http://localhost:${port}/api/scenario/${scenario2._id}/scene/`
+    );
+    expect(response.status).toBe(HTTP_OK);
+
+    // check correct scenes are returned
+    const scenes = response.data;
+    expect(scenes).toHaveLength(2);
+
+    expect(scenes[0]._id).toBe(scene1._id.toString());
+    expect(scenes[0].name).toEqual(scene1.name);
+    expect(scenes[0].components).toBeUndefined();
+
+    expect(scenes[1]._id).toBe(scene2._id.toString());
+    expect(scenes[1].name).toEqual(scene2.name);
+    expect(scenes[1].components).toBeUndefined();
   });
 });
