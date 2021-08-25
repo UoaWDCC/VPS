@@ -14,13 +14,13 @@ describe("Scenario API tests", () => {
   let port;
 
   const scenario1 = {
-    _id: new mongoose.mongo.ObjectId('000000000000000000000001'),
-    name: "Scenario 1"
-  }
+    _id: new mongoose.mongo.ObjectId("000000000000000000000001"),
+    name: "Scenario 1",
+  };
   const scenario2 = {
-    _id: new mongoose.mongo.ObjectId('000000000000000000000002'),
-    name: "Scenario 2"
-  }
+    _id: new mongoose.mongo.ObjectId("000000000000000000000002"),
+    name: "Scenario 2",
+  };
 
   // setup in-memory mongodb and express API
   beforeAll(async () => {
@@ -42,7 +42,7 @@ describe("Scenario API tests", () => {
 
   beforeEach(async () => {
     // Add scenario to database
-    await Scenario.create([scenario1,scenario2]);
+    await Scenario.create([scenario1, scenario2]);
   });
 
   // clear the database
@@ -85,15 +85,15 @@ describe("Scenario API tests", () => {
   it("GET /scenario: retrieve all scenarios successfully", async () => {
     const response = await axios.get(`http://localhost:${port}/api/scenario/`);
     expect(response.status).toBe(HTTP_OK);
-    
+
     // check correct scenario is returned
     const scenarios = response.data;
-    expect(scenarios.length).toBe(2);
+    expect(scenarios).toHaveLength(2);
 
     expect(scenarios[0]._id).toBe(scenario1._id.toString());
     expect(scenarios[0].name).toEqual(scenario1.name);
     expect(scenarios[0].scenes).toBeUndefined();
-    
+
     expect(scenarios[1]._id).toBe(scenario2._id.toString());
     expect(scenarios[1].name).toEqual(scenario2.name);
     expect(scenarios[1].scenes).toBeUndefined();

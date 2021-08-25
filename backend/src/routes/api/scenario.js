@@ -1,6 +1,9 @@
 import { Router } from "express";
 
-import { createScenario, retrieveScenarioList } from "../../db/daos/scenarioDao";
+import {
+  createScenario,
+  retrieveScenarioList,
+} from "../../db/daos/scenarioDao";
 
 import scene from "./scene";
 
@@ -17,7 +20,6 @@ router.post("/", async (req, res) => {
 });
 
 router.get("/", async (req, res) => {
-
   const scenarios = await retrieveScenarioList();
 
   res.status(HTTP_OK).json(scenarios);
