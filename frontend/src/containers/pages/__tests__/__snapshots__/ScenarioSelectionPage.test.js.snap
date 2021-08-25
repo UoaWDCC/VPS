@@ -1,7 +1,9 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Scenario Selection page snapshot test 1`] = `
-Array [
+<div
+  className="rowContainer"
+>
   <div
     className="sideBar"
   >
@@ -43,9 +45,15 @@ Array [
         </a>
       </li>
     </ul>
-  </div>,
+  </div>
   <div
     className="scenarioListContainer"
-  />,
-]
+  >
+    <p
+      className="text"
+    >
+      No Scenarios
+    </p>
+  </div>
+</div>
 `;

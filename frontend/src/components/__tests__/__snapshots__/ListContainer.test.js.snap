@@ -1,0 +1,45 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`ListContainer component snapshot test 1`] = `
+<div
+  className="scenarioListContainer"
+>
+  <ul
+    className="MuiImageList-root"
+    style={
+      Object {
+        "margin": -15,
+      }
+    }
+  >
+    <li
+      className="MuiImageListItem-root"
+      height={200}
+      style={
+        Object {
+          "height": 240,
+          "padding": 15,
+          "width": "25%",
+        }
+      }
+    >
+      <div
+        className="MuiImageListItem-item"
+      >
+        <div
+          className="imageListItem"
+        >
+          <div
+            className="MuiBox-root MuiBox-root-1"
+          />
+          <p
+            className="text"
+          >
+            Scenario 1
+          </p>
+        </div>
+      </div>
+    </li>
+  </ul>
+</div>
+`;

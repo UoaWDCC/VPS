@@ -1,0 +1,19 @@
+.scenarioListContainer {
+  width: 85vw;
+  height: 100vh;
+  overflow-y: scroll;
+  overflow-x: hidden;
+  padding-right: 30px;
+  padding-left: 30px;
+}
+
+.imageListItem {
+  padding-top: 20px;
+}
+
+.text {
+  font-family: "Lucida Sans", "Lucida Sans Regular", "Lucida Grande",
+    "Lucida Sans Unicode", Geneva, Verdana, sans-serif;
+  text-align: center;
+  margin: 5px;
+}
