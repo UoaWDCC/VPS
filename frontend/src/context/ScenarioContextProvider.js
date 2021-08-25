@@ -20,7 +20,6 @@ export default function ScenarioContextProvider({ useTestData, children }) {
         testData.push({
           id: i,
           name: `Scenario ${i}`,
-          img: "",
         });
       }
       setData(testData);
