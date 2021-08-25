@@ -5,6 +5,7 @@ const axios = require("axios");
 
 export default function ScenarioContextProvider({ useTestData, children }) {
   const [data, setData] = useState([]);
+  const [scenario, setScenario] = useState();
   useEffect(() => {
     if (useTestData) {
       // fill with dummy data
@@ -36,6 +37,8 @@ export default function ScenarioContextProvider({ useTestData, children }) {
     <ScenarioContext.Provider
       value={{
         scenarios: data,
+        scenario,
+        setScenario,
       }}
     >
       {children}
