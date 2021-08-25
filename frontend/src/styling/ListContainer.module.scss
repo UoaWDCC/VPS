@@ -3,12 +3,11 @@
   height: 100vh;
   overflow-y: scroll;
   overflow-x: hidden;
-  padding-right: 20px;
-  padding-left: 20px;
+  padding-right: 30px;
+  padding-left: 30px;
 }
 
 .imageListItem {
-  padding: 10px;
   padding-top: 20px;
 }
 
@@ -17,7 +16,7 @@
   height: 100%;
 }
 .text {
-  font-family: "Gill Sans", "Gill Sans MT", Calibri, "Trebuchet MS", sans-serif;
+  font-family:'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
   text-align: center;
-  margin-top: 5px;
+  margin: 5px;
 }

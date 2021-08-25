@@ -9,12 +9,12 @@ export default function ListContainer({ data }) {
     <>
       <div className={styles.scenarioListContainer}>
         {data.length > 0 ? (
-          <ImageList rowHeight={200} cols={4}>
+          <ImageList rowHeight={210} cols={4} gap={30}>
             {data.map((item) => (
               <ImageListItem key={item.id} cols={1} height={200}>
                 <div className={styles.imageListItem}>
                   <Box
-                    height={150}
+                    height={160}
                     border={1}
                     borderRadius={10}
                     borderColor="#747474"
