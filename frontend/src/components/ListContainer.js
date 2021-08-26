@@ -4,12 +4,7 @@ import ImageListItem from "@material-ui/core/ImageListItem";
 import { Box } from "@material-ui/core";
 import styles from "../styling/ListContainer.module.scss";
 
-export default function ListContainer({
-  data,
-  onItemSelected,
-  placeholderText,
-  wide,
-}) {
+export default function ListContainer({ data, onItemSelected, wide, addCard }) {
   const [selected, setSelected] = useState();
   const columns = wide ? 5 : 4;
   const onItemClick = (item) => {
@@ -23,37 +18,43 @@ export default function ListContainer({
           wide ? styles.scenarioListContainerWide : styles.scenarioListContainer
         }
       >
-        {data.length > 0 ? (
-          <ImageList rowHeight={210} cols={columns} gap={30}>
-            {data.map((item) => (
-              <ImageListItem
-                key={item.id}
-                cols={1}
-                height={200}
-                onClick={() => onItemClick(item)}
+        <ImageList rowHeight={210} cols={columns} gap={30}>
+          {addCard ? (
+            <ImageListItem key={-1} cols={1} height={200}>
+              <addCard.DashedCard onClick={addCard.createNewScene} />
+            </ImageListItem>
+          ) : null}
+          {data.map((item) => (
+            <ImageListItem
+              key={item.id}
+              cols={1}
+              height={200}
+              onClick={() => onItemClick(item)}
+            >
+              <div
+                className={
+                  wide ? styles.imageListItemWide : styles.imageListItem
+                }
               >
-                <div
-                  className={
-                    wide ? styles.imageListItemWide : styles.imageListItem
-                  }
-                >
-                  <Box
-                    height={160}
-                    border={5}
-                    borderRadius={10}
-                    borderColor={item.id === selected ? "#008a7b" : "#747474"}
-                    overflow="hidden"
-                    bgcolor="#f1f1f1"
-                    textAlign="center"
-                  />
-                  <p className={styles.text}>{item.name}</p>
-                </div>
-              </ImageListItem>
-            ))}
-          </ImageList>
-        ) : (
-          <p className={styles.text}>{placeholderText || "No Scenarios"}</p>
-        )}
+                <Box
+                  height={160}
+                  border={5}
+                  borderRadius={10}
+                  borderColor={item.id === selected ? "#008a7b" : "#747474"}
+                  overflow="hidden"
+                  textAlign="center"
+                  sx={{
+                    background: "#f1f1f1",
+                    "&:hover": {
+                      background: "#cccccc",
+                    },
+                  }}
+                />
+                <p className={styles.text}>{item.name}</p>
+              </div>
+            </ImageListItem>
+          ))}
+        </ImageList>
       </div>
     </>
   );

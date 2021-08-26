@@ -4,7 +4,7 @@ import Button from "@material-ui/core/Button";
 
 import styles from "../styling/TopBar.module.scss";
 
-export default function SideBar() {
+export default function TopBar({ back = "/" }) {
   return (
     <>
       <div className={styles.topBar}>
@@ -15,7 +15,7 @@ export default function SideBar() {
               color="default"
               variant="outlined"
               component={Link}
-              to="/"
+              to={back}
             >
               Back
             </Button>

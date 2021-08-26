@@ -1,0 +1,35 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Dashed Card component snapshot test 1`] = `
+<div
+  className="imageListItem"
+>
+  <a
+    className="MuiBox-root MuiBox-root-1"
+    href="/"
+    onClick={[Function]}
+  />
+  <p
+    className="text"
+  >
+    Create New Scene
+  </p>
+</div>
+`;
+
+exports[`Side Bar component snapshot test 1`] = `
+<div
+  className="imageListItem"
+>
+  <a
+    className="MuiBox-root MuiBox-root-1"
+    href="/"
+    onClick={[Function]}
+  />
+  <p
+    className="text"
+  >
+    Create New Scene
+  </p>
+</div>
+`;
