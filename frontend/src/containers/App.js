@@ -12,17 +12,16 @@ export default function App() {
   return (
     <>
       <ScenarioContextProvider>
-        <SceneContextProvider>
-          <BrowserRouter>
-            <Switch>
-              <Route exact path="/" component={ScenarioSelectionPage} />
+        <BrowserRouter>
+          <Switch>
+            <Route exact path="/" component={ScenarioSelectionPage} />
+            <SceneContextProvider>
               <Route path="/scenario/:scenarioId" component={ScenePage} />
-
-              {/* Default path if nothing matches */}
-              <Route path="/" component={ScenarioSelectionPage} />
-            </Switch>
-          </BrowserRouter>
-        </SceneContextProvider>
+            </SceneContextProvider>
+            {/* Default path if nothing matches */}
+            <Route path="/" component={ScenarioSelectionPage} />
+          </Switch>
+        </BrowserRouter>
       </ScenarioContextProvider>
     </>
   );

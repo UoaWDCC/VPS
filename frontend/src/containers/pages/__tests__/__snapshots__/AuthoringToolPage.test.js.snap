@@ -1,7 +1,9 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Scenario Selection page snapshot test 1`] = `
-Array [
+<div
+  className="colContainer"
+>
   <div
     className="topBar"
   >
@@ -14,7 +16,7 @@ Array [
         <a
           aria-disabled={false}
           className="MuiButtonBase-root MuiButton-root MuiButton-outlined btn top outlined white"
-          href="/scenario/ID"
+          href="/scenario/undefined"
           onBlur={[Function]}
           onClick={[Function]}
           onDragLeave={[Function]}
@@ -38,9 +40,9 @@ Array [
         </a>
       </li>
     </ul>
-  </div>,
+  </div>
   <h1>
     Authoring Tool Page
-  </h1>,
-]
+  </h1>
+</div>
 `;

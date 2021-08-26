@@ -1,25 +1,16 @@
 import React, { useContext, useEffect } from "react";
-import {
-  useParams,
-  useHistory,
-  Route,
-  useRouteMatch,
-  Switch,
-} from "react-router-dom";
+import { useParams, Route, useRouteMatch, Switch } from "react-router-dom";
 import DashedCard from "../../components/DashedCard";
 import TopBar from "../../components/TopBar";
 import ListContainer from "../../components/ListContainer";
 import ScreenContainer from "../../components/ScreenContainer";
 import SceneContext from "../../context/SceneContext";
 import AuthoringToolPage from "./AuthoringToolPage";
-import { usePost } from "../../hooks/crudHooks";
 
 const axios = require("axios");
 
 function SceneSelectionPage({ useTestData }) {
   const { scenarioId } = useParams();
-  const { url } = useRouteMatch();
-  const history = useHistory();
   const { scenes, setScenes, setCurrentScene } = useContext(SceneContext);
 
   useEffect(() => {
@@ -53,14 +44,7 @@ function SceneSelectionPage({ useTestData }) {
   }, []);
 
   async function createNewScene() {
-    const data = await usePost(`/api/scenario/${scenarioId}/scene`, {
-      name: `Scene ${scenes.length}`,
-    });
-    setCurrentScene(data);
-    history.push({
-      pathname: `${url}/scene/${data.name.replace(" ", "")}`,
-      scenarioId,
-    });
+    // PLACEHOLDER
   }
 
   return (

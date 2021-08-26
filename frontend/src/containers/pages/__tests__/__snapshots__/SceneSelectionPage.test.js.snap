@@ -44,18 +44,44 @@ exports[`Scene Selection page snapshot test 1`] = `
   <div
     className="scenarioListContainerWide"
   >
-<<<<<<< HEAD
-=======
-    <div
-      className="MuiBox-root MuiBox-root-1"
-      onClick={[Function]}
-    />
->>>>>>> 3cd4f4e... [VPS-13] fixed snapshot tests
-    <p
-      className="text"
+    <ul
+      className="MuiImageList-root"
+      style={
+        Object {
+          "margin": -15,
+        }
+      }
     >
-      No Scenes
-    </p>
+      <li
+        className="MuiImageListItem-root"
+        height={200}
+        style={
+          Object {
+            "height": 240,
+            "padding": 15,
+            "width": "20%",
+          }
+        }
+      >
+        <div
+          className="MuiImageListItem-item"
+        >
+          <div
+            className="imageListItemWide"
+          >
+            <div
+              className="MuiBox-root MuiBox-root-1"
+              onClick={[Function]}
+            />
+            <p
+              className="text"
+            >
+              Create New Scene
+            </p>
+          </div>
+        </div>
+      </li>
+    </ul>
   </div>
 </div>
 `;
