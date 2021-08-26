@@ -16,6 +16,7 @@ export default function ListContainer({
     setSelected(item.id);
     onItemSelected(item);
   };
+
   return (
     <>
       <div
@@ -38,6 +39,9 @@ export default function ListContainer({
                   }
                 >
                   <Box
+                    boxShadow={
+                      item.id === selectedScenarioId ? "0 0 5px #008A7B" : ""
+                    }
                     height={160}
                     border={5}
                     borderRadius={10}
