@@ -4,11 +4,16 @@ import { BrowserRouter } from "react-router-dom";
 import ScenarioSelectionPage from "../ScenarioSelectionPage";
 import ScenarioContextProvider from "../../../context/ScenarioContextProvider";
 
+const dummyScenarios = [
+  { id: 1, name: "test1" },
+  { id: 2, name: "test2" },
+];
+
 test("Scenario Selection page snapshot test", () => {
   const component = renderer.create(
     <BrowserRouter>
       <ScenarioContextProvider>
-        <ScenarioSelectionPage useTestData />
+        <ScenarioSelectionPage data={dummyScenarios} />
       </ScenarioContextProvider>
     </BrowserRouter>
   );
