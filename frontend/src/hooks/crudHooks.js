@@ -1,4 +1,4 @@
-import { useState, useEffect, useContext } from "react";
+import { useState, useEffect } from "react";
 import axios from "axios";
 // import { AppContext } from "../AppContextProvider";
 
@@ -46,13 +46,10 @@ export function useGet(url, initialState = null) {
 
 export function usePost(url, requestBody = null) {
   //   const { firebaseUserIdToken } = useContext(AppContext);
-  const [data, setData] = useState(null);
-  const [isLoading, setLoading] = useState(false);
 
-  async function fetchData() {
+  async function postData() {
     let errorData;
     let hasError = false;
-    setLoading(true);
     const response = await axios
       .post(url, requestBody)
       // {
@@ -65,23 +62,19 @@ export function usePost(url, requestBody = null) {
         }
       });
 
-    setData(hasError ? errorData : response?.data);
-    setLoading(false);
+    return hasError ? errorData : response?.data;
   }
 
-  fetchData();
-  return { data, isLoading };
+  return postData();
 }
 
 export function usePut(url, requestBody = null) {
   //   const { firebaseUserIdToken } = useContext(AppContext);
-  const [data, setData] = useState(requestBody);
-  const [isLoading, setLoading] = useState(false);
 
-  async function fetchData() {
+  async function putData() {
     let errorData;
     let hasError = false;
-    setLoading(true);
+
     const response = await axios
       .post(url, requestBody)
       // {
@@ -94,10 +87,8 @@ export function usePut(url, requestBody = null) {
         }
       });
 
-    setData(hasError ? errorData : response?.data);
-    setLoading(false);
+    return hasError ? errorData : response?.data;
   }
 
-  fetchData();
-  return { data, isLoading };
+  return putData();
 }

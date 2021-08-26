@@ -52,18 +52,15 @@ function SceneSelectionPage({ useTestData }) {
     }
   }, []);
 
-  function createNewScene() {
-    const post = usePost(`/api/scenario/${scenarioId}/scene`, {
+  async function createNewScene() {
+    const data = await usePost(`/api/scenario/${scenarioId}/scene`, {
       name: `Scene ${scenes.length}`,
     });
-
-    useEffect(() => {
-      setCurrentScene(post.data);
-      history.push({
-        pathname: `${url}/scene/ID2`,
-        scenarioId,
-      });
-    }, [post.data]);
+    setCurrentScene(data);
+    history.push({
+      pathname: `${url}/scene/${data.name.replace(" ", "")}`,
+      scenarioId,
+    });
   }
 
   return (
