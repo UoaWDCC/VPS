@@ -4,17 +4,27 @@ import ImageListItem from "@material-ui/core/ImageListItem";
 import { Box } from "@material-ui/core";
 import styles from "../styling/ListContainer.module.scss";
 
-export default function ListContainer({ data, onItemSelected }) {
+export default function ListContainer({
+  data,
+  onItemSelected,
+  placeholderText,
+  wide,
+}) {
   const [selected, setSelected] = useState();
+  const columns = wide ? 5 : 4;
   const onItemClick = (item) => {
     setSelected(item.id);
     onItemSelected(item);
   };
   return (
     <>
-      <div className={styles.scenarioListContainer}>
+      <div
+        className={
+          wide ? styles.scenarioListContainerWide : styles.scenarioListContainer
+        }
+      >
         {data.length > 0 ? (
-          <ImageList rowHeight={210} cols={4} gap={30}>
+          <ImageList rowHeight={210} cols={columns} gap={30}>
             {data.map((item) => (
               <ImageListItem
                 key={item.id}
@@ -22,7 +32,11 @@ export default function ListContainer({ data, onItemSelected }) {
                 height={200}
                 onClick={() => onItemClick(item)}
               >
-                <div className={styles.imageListItem}>
+                <div
+                  className={
+                    wide ? styles.imageListItemWide : styles.imageListItem
+                  }
+                >
                   <Box
                     height={160}
                     border={5}
@@ -38,7 +52,7 @@ export default function ListContainer({ data, onItemSelected }) {
             ))}
           </ImageList>
         ) : (
-          <p className={styles.text}>No Scenarios</p>
+          <p className={styles.text}>{placeholderText || "No Scenarios"}</p>
         )}
       </div>
     </>
