@@ -1,15 +1,15 @@
 import React, { useContext, useEffect } from "react";
+import { useParams } from "react-router-dom";
 import TopBar from "../../components/TopBar";
 import ListContainer from "../../components/ListContainer";
 import ScreenContainer from "../../components/ScreenContainer";
 import SceneContext from "../../context/SceneContext";
-import ScenarioContext from "../../context/ScenarioContext";
 
 const axios = require("axios");
 
 export default function SceneSelectionPage({ useTestData }) {
+  const { scenarioId } = useParams();
   const { scenes, setScenes, setCurrentScene } = useContext(SceneContext);
-  const { currentScenario } = useContext(ScenarioContext);
   useEffect(() => {
     if (useTestData) {
       // fill with dummy data
@@ -21,21 +21,19 @@ export default function SceneSelectionPage({ useTestData }) {
         });
       }
       setScenes(testData);
-    } else if (currentScenario) {
+    } else if (scenarioId !== "changeThisToDynamicScenarioId") {
       // fetch scenarios
-      axios
-        .get(`/api/scenario/${currentScenario.id}/scene`)
-        .then((response) => {
-          const processedData = [];
-          response.data.map((item) =>
-            processedData.push({
-              // eslint-disable-next-line dot-notation
-              id: item["_id"],
-              name: item.name,
-            })
-          );
-          setScenes(processedData);
-        });
+      axios.get(`/api/scenario/${scenarioId}/scene`).then((response) => {
+        const processedData = [];
+        response.data.map((item) =>
+          processedData.push({
+            // eslint-disable-next-line dot-notation
+            id: item["_id"],
+            name: item.name,
+          })
+        );
+        setScenes(processedData);
+      });
     } else {
       // TODO remove this else clause when Create button is implemented
       setScenes([]);
