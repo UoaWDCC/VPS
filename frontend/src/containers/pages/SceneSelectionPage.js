@@ -17,7 +17,7 @@ export function SceneSelectionPage({ data = null }) {
   const { scenarioId } = useParams();
   const { url } = useRouteMatch();
   const history = useHistory();
-  const { scenes, setCurrentScene } = useContext(SceneContext);
+  const { scenes, setCurrentScene, reFetch } = useContext(SceneContext);
 
   async function createNewScene() {
     const newScene = await usePost(`/api/scenario/${scenarioId}/scene`, {
@@ -29,9 +29,12 @@ export function SceneSelectionPage({ data = null }) {
     });
   }
 
-  // useEffect(() => {
-  //   console.log(scenes);
-  // });
+  useEffect(() => {
+    setCurrentScene(null);
+    if (reFetch) {
+      reFetch();
+    }
+  }, []);
 
   return (
     <ScreenContainer vertical>

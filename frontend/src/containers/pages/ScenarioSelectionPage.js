@@ -5,7 +5,7 @@ import ScreenContainer from "../../components/ScreenContainer";
 import ScenarioContext from "../../context/ScenarioContext";
 
 export default function ScenarioSelectionPage({ data = null }) {
-  const { scenarios, currentScenario, setCurrentScenario, reFetch } =
+  const { scenarios, setCurrentScenario, reFetch } =
     useContext(ScenarioContext);
 
   useEffect(() => {

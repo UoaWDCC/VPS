@@ -25,7 +25,7 @@ export function useGet(url, setData) {
       console.log(url);
       setLoading(true);
       const response = await axios
-        .get({ baseURL: url })
+        .get(url)
         // {
         //   headers: { Authorization: `Bearer ${firebaseUserIdToken}` },
         // })

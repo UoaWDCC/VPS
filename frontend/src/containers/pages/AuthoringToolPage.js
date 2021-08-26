@@ -1,14 +1,14 @@
-import React from "react";
-import { useLocation } from "react-router-dom";
+import React, { useContext } from "react";
 import TopBar from "../../components/TopBar";
 import ScreenContainer from "../../components/ScreenContainer";
+import ScenarioContext from "../../context/ScenarioContext";
 
 export default function AuthoringToolPage() {
-  const location = useLocation();
+  const { currentScenario } = useContext(ScenarioContext);
   return (
     <>
       <ScreenContainer vertical>
-        <TopBar back={`/scenario/${location.scenarioId}`} />
+        <TopBar back={`/scenario/${currentScenario?.id}`} />
         <h1>Authoring Tool Page</h1>
       </ScreenContainer>
     </>
