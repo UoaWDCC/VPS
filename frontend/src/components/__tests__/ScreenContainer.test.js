@@ -1,9 +1,9 @@
 import React from "react";
 import renderer from "react-test-renderer";
 import { BrowserRouter } from "react-router-dom";
-import RowContainer from "../RowContainer";
+import RowContainer from "../ScreenContainer";
 
-test("RowContainer component snapshot test", () => {
+test("ScreenContainer component snapshot test", () => {
   const component = renderer.create(
     <BrowserRouter>
       <RowContainer>
