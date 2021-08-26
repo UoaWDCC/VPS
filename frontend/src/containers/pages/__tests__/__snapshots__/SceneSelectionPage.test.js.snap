@@ -44,6 +44,13 @@ exports[`Scene Selection page snapshot test 1`] = `
   <div
     className="scenarioListContainerWide"
   >
+<<<<<<< HEAD
+=======
+    <div
+      className="MuiBox-root MuiBox-root-1"
+      onClick={[Function]}
+    />
+>>>>>>> 3cd4f4e... [VPS-13] fixed snapshot tests
     <p
       className="text"
     >
