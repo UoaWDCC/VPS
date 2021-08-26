@@ -6,7 +6,7 @@ import ScenarioContext from "../context/ScenarioContext";
 import styles from "../styling/SideBar.module.scss";
 
 export default function SideBar() {
-  const { scenario } = useContext(ScenarioContext);
+  const { currentScenario, setCurrentScenario } = useContext(ScenarioContext);
   return (
     <>
       <div className={styles.sideBar}>
@@ -23,6 +23,9 @@ export default function SideBar() {
               variant="contained"
               component={Link}
               to="/scenario/changeThisToDynamicScenarioId"
+              onClick={() => {
+                setCurrentScenario(null);
+              }}
             >
               Create
             </Button>
@@ -33,7 +36,7 @@ export default function SideBar() {
               color="default"
               variant="contained"
               component={Link}
-              to={scenario ? `/scenario/${scenario.id}` : ""}
+              to={currentScenario ? `/scenario/${currentScenario.id}` : "/"}
             >
               Edit
             </Button>
