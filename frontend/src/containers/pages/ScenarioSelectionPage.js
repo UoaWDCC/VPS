@@ -11,8 +11,6 @@ export default function ScenarioSelectionPage({ useTestData }) {
     useContext(ScenarioContext);
   useEffect(() => {
     setCurrentScenario(null);
-  }, []);
-  useEffect(() => {
     if (useTestData) {
       // fill with dummy data
       const testData = [];
