@@ -39,13 +39,11 @@ exports[`Side Bar component snapshot test 1`] = `
         </span>
       </a>
     </li>
-    <li
-      className="listItem"
-    >
+    <li>
       <a
-        aria-disabled={false}
-        className="MuiButtonBase-root MuiButton-root MuiButton-contained btn side contained white"
-        href="/"
+        aria-disabled={true}
+        className="MuiButtonBase-root MuiButton-root MuiButton-contained btn side contained white buttonDisabled   Mui-disabled Mui-disabled"
+        href="/scenario/null"
         onBlur={[Function]}
         onClick={[Function]}
         onDragLeave={[Function]}
@@ -59,7 +57,7 @@ exports[`Side Bar component snapshot test 1`] = `
         onTouchMove={[Function]}
         onTouchStart={[Function]}
         role="button"
-        tabIndex={0}
+        tabIndex={-1}
       >
         <span
           className="MuiButton-label"
