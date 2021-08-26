@@ -1,66 +1,52 @@
 import React, { useContext, useEffect } from "react";
-import { useParams, Route, useRouteMatch, Switch } from "react-router-dom";
-import DashedCard from "../../components/DashedCard";
+import {
+  useParams,
+  Route,
+  useRouteMatch,
+  Switch,
+  useHistory,
+} from "react-router-dom";
 import TopBar from "../../components/TopBar";
 import ListContainer from "../../components/ListContainer";
 import ScreenContainer from "../../components/ScreenContainer";
 import SceneContext from "../../context/SceneContext";
 import AuthoringToolPage from "./AuthoringToolPage";
+import { usePost } from "../../hooks/crudHooks";
 
-const axios = require("axios");
-
-function SceneSelectionPage({ useTestData }) {
+export function SceneSelectionPage({ data = null }) {
   const { scenarioId } = useParams();
-  const { scenes, setScenes, setCurrentScene } = useContext(SceneContext);
-
-  useEffect(() => {
-    if (useTestData) {
-      // fill with dummy data
-      const testData = [];
-      for (let i = 1; i < 30; i += 1) {
-        testData.push({
-          id: i,
-          name: `Scene ${i}`,
-        });
-      }
-      setScenes(testData);
-    } else if (scenarioId !== "changeThisToDynamicScenarioId") {
-      // fetch scenarios
-      axios.get(`/api/scenario/${scenarioId}/scene`).then((response) => {
-        const processedData = [];
-        response.data.map((item) =>
-          processedData.push({
-            // eslint-disable-next-line dot-notation
-            id: item["_id"],
-            name: item.name,
-          })
-        );
-        setScenes(processedData);
-      });
-    } else {
-      // TODO remove this else clause when Create button is implemented
-      setScenes([]);
-    }
-  }, []);
+  const { url } = useRouteMatch();
+  const history = useHistory();
+  const { scenes, setCurrentScene } = useContext(SceneContext);
 
   async function createNewScene() {
-    // PLACEHOLDER
+    const newScene = await usePost(`/api/scenario/${scenarioId}/scene`, {
+      name: `Scene ${scenes.length}`,
+    });
+    setCurrentScene(newScene);
+    history.push({
+      pathname: `${url}/scene/${newScene.name.replace(" ", "")}`,
+    });
   }
+
+  // useEffect(() => {
+  //   console.log(scenes);
+  // });
 
   return (
     <ScreenContainer vertical>
       <TopBar />
       <ListContainer
-        data={scenes}
+        data={data || scenes}
         onItemSelected={setCurrentScene}
-        addCard={{ DashedCard, createNewScene }}
+        addCard={createNewScene}
         wide
       />
     </ScreenContainer>
   );
 }
 
-export default function ScenePage() {
+export function ScenePage() {
   const { path } = useRouteMatch();
   return (
     <Switch>

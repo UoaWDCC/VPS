@@ -81,7 +81,66 @@ exports[`Scenario Selection page snapshot test 1`] = `
           "margin": -15,
         }
       }
-    />
+    >
+      <li
+        className="MuiImageListItem-root"
+        height={200}
+        onClick={[Function]}
+        style={
+          Object {
+            "height": 240,
+            "padding": 15,
+            "width": "25%",
+          }
+        }
+      >
+        <div
+          className="MuiImageListItem-item"
+        >
+          <div
+            className="imageListItem"
+          >
+            <div
+              className="MuiBox-root MuiBox-root-1"
+            />
+            <p
+              className="text"
+            >
+              test1
+            </p>
+          </div>
+        </div>
+      </li>
+      <li
+        className="MuiImageListItem-root"
+        height={200}
+        onClick={[Function]}
+        style={
+          Object {
+            "height": 240,
+            "padding": 15,
+            "width": "25%",
+          }
+        }
+      >
+        <div
+          className="MuiImageListItem-item"
+        >
+          <div
+            className="imageListItem"
+          >
+            <div
+              className="MuiBox-root MuiBox-root-2"
+            />
+            <p
+              className="text"
+            >
+              test2
+            </p>
+          </div>
+        </div>
+      </li>
+    </ul>
   </div>
 </div>
 `;

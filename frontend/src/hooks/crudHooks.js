@@ -1,5 +1,8 @@
 import { useState, useEffect } from "react";
-import axios from "axios";
+
+const axios = require("axios");
+
+axios.defaults.baseURL = "/";
 // import { AppContext } from "../AppContextProvider";
 
 /**
@@ -7,9 +10,8 @@ import axios from "axios";
  * whether the data is still being loaded or not.
  * Code adapted from SOFTENG750 lab4 https://gitlab.com/cs732-s1c/cs732-labs/cs732-lab-04/-/blob/master/frontend/src/hooks/useGet.js
  */
-export function useGet(url, initialState = null) {
+export function useGet(url, setData) {
   //   const { firebaseUserIdToken } = useContext(AppContext);
-  const [data, setData] = useState(initialState);
   const [isLoading, setLoading] = useState(false);
   const [version, setVersion] = useState(0);
 
@@ -19,29 +21,39 @@ export function useGet(url, initialState = null) {
 
   useEffect(() => {
     async function fetchData() {
-      let errorData;
       let hasError = false;
-
+      console.log(url);
       setLoading(true);
       const response = await axios
-        .get(url)
+        .get({ baseURL: url })
         // {
         //   headers: { Authorization: `Bearer ${firebaseUserIdToken}` },
         // })
         .catch((err) => {
           if (err.response.status === 404) {
-            errorData = err.response.data;
             hasError = true;
           }
         });
 
-      setData(hasError ? errorData : response?.data);
+      if (!hasError) {
+        setData(
+          hasError
+            ? null
+            : response.data.map((item) => {
+                return {
+                  // eslint-disable-next-line no-underscore-dangle
+                  id: item._id,
+                  ...item,
+                };
+              })
+        );
+      }
       setLoading(false);
     }
     fetchData();
   }, [url, version]);
 
-  return { data, isLoading, reFetch };
+  return { isLoading, reFetch };
 }
 
 export function usePost(url, requestBody = null) {

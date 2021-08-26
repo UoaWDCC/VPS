@@ -1,8 +1,9 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import ImageList from "@material-ui/core/ImageList";
 import ImageListItem from "@material-ui/core/ImageListItem";
 import { Box } from "@material-ui/core";
 import styles from "../styling/ListContainer.module.scss";
+import DashedCard from "./DashedCard";
 
 export default function ListContainer({ data, onItemSelected, wide, addCard }) {
   const [selected, setSelected] = useState();
@@ -11,6 +12,9 @@ export default function ListContainer({ data, onItemSelected, wide, addCard }) {
     setSelected(item.id);
     onItemSelected(item);
   };
+  useEffect(() => {
+    console.log(data);
+  }, []);
 
   return (
     <>
@@ -22,39 +26,41 @@ export default function ListContainer({ data, onItemSelected, wide, addCard }) {
         <ImageList rowHeight={210} cols={columns} gap={30}>
           {addCard ? (
             <ImageListItem key={-1} cols={1} height={200}>
-              <addCard.DashedCard onClick={addCard.createNewScene} />
+              <DashedCard onClick={addCard} />
             </ImageListItem>
           ) : null}
-          {data.map((item) => (
-            <ImageListItem
-              key={item.id}
-              cols={1}
-              height={200}
-              onClick={() => onItemClick(item)}
-            >
-              <div
-                className={
-                  wide ? styles.imageListItemWide : styles.imageListItem
-                }
-              >
-                <Box
-                  height={160}
-                  border={5}
-                  borderRadius={10}
-                  borderColor={item.id === selected ? "#008a7b" : "#747474"}
-                  overflow="hidden"
-                  textAlign="center"
-                  sx={{
-                    background: "#f1f1f1",
-                    "&:hover": {
-                      background: "#cccccc",
-                    },
-                  }}
-                />
-                <p className={styles.text}>{item.name}</p>
-              </div>
-            </ImageListItem>
-          ))}
+          {data && data.length > 0
+            ? data.map((item) => (
+                <ImageListItem
+                  key={item.id}
+                  cols={1}
+                  height={200}
+                  onClick={() => onItemClick(item)}
+                >
+                  <div
+                    className={
+                      wide ? styles.imageListItemWide : styles.imageListItem
+                    }
+                  >
+                    <Box
+                      height={160}
+                      border={5}
+                      borderRadius={10}
+                      borderColor={item.id === selected ? "#008a7b" : "#747474"}
+                      overflow="hidden"
+                      textAlign="center"
+                      sx={{
+                        background: "#f1f1f1",
+                        "&:hover": {
+                          background: "#cccccc",
+                        },
+                      }}
+                    />
+                    <p className={styles.text}>{item.name}</p>
+                  </div>
+                </ImageListItem>
+              ))
+            : null}
         </ImageList>
       </div>
     </>

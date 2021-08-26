@@ -1,7 +1,7 @@
 import React from "react";
 import { BrowserRouter, Switch, Route } from "react-router-dom";
 import ScenarioSelectionPage from "./pages/ScenarioSelectionPage";
-import ScenePage from "./pages/SceneSelectionPage";
+import { ScenePage } from "./pages/SceneSelectionPage";
 import ScenarioContextProvider from "../context/ScenarioContextProvider";
 import SceneContextProvider from "../context/SceneContextProvider";
 
