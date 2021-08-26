@@ -1,0 +1,16 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Dashed Card component snapshot test 1`] = `
+<div
+  className="imageListItemWide"
+>
+  <div
+    className="MuiBox-root MuiBox-root-1"
+  />
+  <p
+    className="text"
+  >
+    Create New Scene
+  </p>
+</div>
+`;

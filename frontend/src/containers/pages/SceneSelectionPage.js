@@ -1,15 +1,18 @@
 import React, { useContext, useEffect } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, Route, useRouteMatch, Switch } from "react-router-dom";
+import DashedCard from "../../components/DashedCard";
 import TopBar from "../../components/TopBar";
 import ListContainer from "../../components/ListContainer";
 import ScreenContainer from "../../components/ScreenContainer";
 import SceneContext from "../../context/SceneContext";
+import AuthoringToolPage from "./AuthoringToolPage";
 
 const axios = require("axios");
 
-export default function SceneSelectionPage({ useTestData }) {
+function SceneSelectionPage({ useTestData }) {
   const { scenarioId } = useParams();
   const { scenes, setScenes, setCurrentScene } = useContext(SceneContext);
+
   useEffect(() => {
     if (useTestData) {
       // fill with dummy data
@@ -39,15 +42,30 @@ export default function SceneSelectionPage({ useTestData }) {
       setScenes([]);
     }
   }, []);
+
+  async function createNewScene() {
+    // PLACEHOLDER
+  }
+
   return (
     <ScreenContainer vertical>
       <TopBar />
       <ListContainer
         data={scenes}
         onItemSelected={setCurrentScene}
-        placeholderText="No Scenes"
+        addCard={{ DashedCard, createNewScene }}
         wide
       />
     </ScreenContainer>
+  );
+}
+
+export default function ScenePage() {
+  const { path } = useRouteMatch();
+  return (
+    <Switch>
+      <Route exact path={path} component={SceneSelectionPage} />
+      <Route path={`${path}/scene/:sceneId`} component={AuthoringToolPage} />
+    </Switch>
   );
 }

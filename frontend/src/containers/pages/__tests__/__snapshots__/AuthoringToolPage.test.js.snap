@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`Scene Selection page snapshot test 1`] = `
+exports[`Scenario Selection page snapshot test 1`] = `
 <div
   className="colContainer"
 >
@@ -16,7 +16,7 @@ exports[`Scene Selection page snapshot test 1`] = `
         <a
           aria-disabled={false}
           className="MuiButtonBase-root MuiButton-root MuiButton-outlined btn top outlined white"
-          href="/"
+          href="/scenario/undefined"
           onBlur={[Function]}
           onClick={[Function]}
           onDragLeave={[Function]}
@@ -41,47 +41,8 @@ exports[`Scene Selection page snapshot test 1`] = `
       </li>
     </ul>
   </div>
-  <div
-    className="scenarioListContainerWide"
-  >
-    <ul
-      className="MuiImageList-root"
-      style={
-        Object {
-          "margin": -15,
-        }
-      }
-    >
-      <li
-        className="MuiImageListItem-root"
-        height={200}
-        style={
-          Object {
-            "height": 240,
-            "padding": 15,
-            "width": "20%",
-          }
-        }
-      >
-        <div
-          className="MuiImageListItem-item"
-        >
-          <div
-            className="imageListItemWide"
-          >
-            <div
-              className="MuiBox-root MuiBox-root-1"
-              onClick={[Function]}
-            />
-            <p
-              className="text"
-            >
-              Create New Scene
-            </p>
-          </div>
-        </div>
-      </li>
-    </ul>
-  </div>
+  <h1>
+    Authoring Tool Page
+  </h1>
 </div>
 `;
