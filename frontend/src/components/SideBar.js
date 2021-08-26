@@ -4,6 +4,7 @@ import Button from "@material-ui/core/Button";
 import ScenarioContext from "../context/ScenarioContext";
 
 import styles from "../styling/SideBar.module.scss";
+import ScenarioContext from "../context/ScenarioContext";
 
 export default function SideBar() {
   const { currentScenario, setCurrentScenario } = useContext(ScenarioContext);
@@ -36,7 +37,7 @@ export default function SideBar() {
               color="default"
               variant="contained"
               component={Link}
-              to="/scenario/changeThisToDynamicScenarioId"
+              to={`/scenario/${currentScenario}`}
             >
               Edit
             </Button>
