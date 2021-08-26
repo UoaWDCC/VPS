@@ -22,7 +22,6 @@ export function useGet(url, setData) {
   useEffect(() => {
     async function fetchData() {
       let hasError = false;
-      console.log(url);
       setLoading(true);
       const response = await axios
         .get(url)
