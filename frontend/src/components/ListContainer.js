@@ -11,6 +11,7 @@ export default function ListContainer({ data, onItemSelected, wide, addCard }) {
     setSelected(item.id);
     onItemSelected(item);
   };
+
   return (
     <>
       <div

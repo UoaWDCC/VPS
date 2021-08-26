@@ -2,7 +2,6 @@ import React, { useContext } from "react";
 import { Link } from "react-router-dom";
 import Button from "@material-ui/core/Button";
 import ScenarioContext from "../context/ScenarioContext";
-
 import styles from "../styling/SideBar.module.scss";
 
 export default function SideBar() {
@@ -30,13 +29,20 @@ export default function SideBar() {
               Create
             </Button>
           </li>
-          <li className={styles.listItem}>
+          <li>
             <Button
-              className="btn side contained white"
+              className={`btn side contained white ${
+                currentScenario ? "" : styles.buttonDisabled
+              }  `}
               color="default"
               variant="contained"
               component={Link}
-              to={currentScenario ? `/scenario/${currentScenario.id}` : "/"}
+              to={
+                currentScenario
+                  ? `/scenario/${currentScenario.id}`
+                  : "/scenario/null"
+              }
+              disabled={!currentScenario}
             >
               Edit
             </Button>
