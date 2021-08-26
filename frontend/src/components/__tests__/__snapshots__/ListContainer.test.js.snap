@@ -15,6 +15,7 @@ exports[`ListContainer component snapshot test 1`] = `
     <li
       className="MuiImageListItem-root"
       height={200}
+      onClick={[Function]}
       style={
         Object {
           "height": 240,
