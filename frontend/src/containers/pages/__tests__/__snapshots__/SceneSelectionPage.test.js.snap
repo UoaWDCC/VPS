@@ -2,40 +2,53 @@
 
 exports[`Scene Selection page snapshot test 1`] = `
 <div
-  className="topBar"
+  className="colContainer"
 >
-  <ul
-    className="topBarList"
+  <div
+    className="topBar"
   >
-    <li
-      className="listItem"
+    <ul
+      className="topBarList"
     >
-      <a
-        aria-disabled={false}
-        className="MuiButtonBase-root MuiButton-root MuiButton-outlined btn top outlined white"
-        href="/"
-        onBlur={[Function]}
-        onClick={[Function]}
-        onDragLeave={[Function]}
-        onFocus={[Function]}
-        onKeyDown={[Function]}
-        onKeyUp={[Function]}
-        onMouseDown={[Function]}
-        onMouseLeave={[Function]}
-        onMouseUp={[Function]}
-        onTouchEnd={[Function]}
-        onTouchMove={[Function]}
-        onTouchStart={[Function]}
-        role="button"
-        tabIndex={0}
+      <li
+        className="listItem"
       >
-        <span
-          className="MuiButton-label"
+        <a
+          aria-disabled={false}
+          className="MuiButtonBase-root MuiButton-root MuiButton-outlined btn top outlined white"
+          href="/"
+          onBlur={[Function]}
+          onClick={[Function]}
+          onDragLeave={[Function]}
+          onFocus={[Function]}
+          onKeyDown={[Function]}
+          onKeyUp={[Function]}
+          onMouseDown={[Function]}
+          onMouseLeave={[Function]}
+          onMouseUp={[Function]}
+          onTouchEnd={[Function]}
+          onTouchMove={[Function]}
+          onTouchStart={[Function]}
+          role="button"
+          tabIndex={0}
         >
-          Back
-        </span>
-      </a>
-    </li>
-  </ul>
+          <span
+            className="MuiButton-label"
+          >
+            Back
+          </span>
+        </a>
+      </li>
+    </ul>
+  </div>
+  <div
+    className="scenarioListContainerWide"
+  >
+    <p
+      className="text"
+    >
+      No Scenes
+    </p>
+  </div>
 </div>
 `;

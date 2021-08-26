@@ -7,8 +7,8 @@ import ScenarioContextProvider from "../../../context/ScenarioContextProvider";
 test("Scenario Selection page snapshot test", () => {
   const component = renderer.create(
     <BrowserRouter>
-      <ScenarioContextProvider useTestData>
-        <ScenarioSelectionPage />
+      <ScenarioContextProvider>
+        <ScenarioSelectionPage useTestData />
       </ScenarioContextProvider>
     </BrowserRouter>
   );
