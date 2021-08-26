@@ -9,6 +9,7 @@ const axios = require("axios");
 export default function ScenarioSelectionPage({ useTestData }) {
   const { scenarios, setScenarios, setCurrentScenario } =
     useContext(ScenarioContext);
+
   useEffect(() => {
     setCurrentScenario(null);
     if (useTestData) {

@@ -1,9 +1,8 @@
-import React, { useContext, useEffect } from "react";
+import React, { useState } from "react";
 import ImageList from "@material-ui/core/ImageList";
 import ImageListItem from "@material-ui/core/ImageListItem";
 import { Box } from "@material-ui/core";
 import styles from "../styling/ListContainer.module.scss";
-import ScenarioContext from "../context/ScenarioContext";
 
 export default function ListContainer({
   data,
@@ -40,7 +39,6 @@ export default function ListContainer({
                   }
                 >
                   <Box
-                    boxShadow={item.id === scenarioId ? "0 0 5px #008A7B" : ""}
                     height={160}
                     border={5}
                     borderRadius={10}

@@ -16,9 +16,9 @@
     li:not(:last-child) {
       margin-bottom: 10%;
     }
-  }
 
-  .listItem {
-    margin-top: 60px;
+    .buttonDisabled {
+      opacity: 0.3;
+    }
   }
 }
