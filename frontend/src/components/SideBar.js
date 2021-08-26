@@ -30,13 +30,13 @@ export default function SideBar() {
               Create
             </Button>
           </li>
-          <li className={styles.listItem}>
+          <li>
             <Button
               className="btn side contained white"
               color="default"
               variant="contained"
               component={Link}
-              to={currentScenario ? `/scenario/${currentScenario.id}` : "/"}
+              to="/scenario/changeThisToDynamicScenarioId"
             >
               Edit
             </Button>

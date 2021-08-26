@@ -12,6 +12,10 @@
   .sideBarList {
     list-style: none;
     padding: 0;
+
+    li:not(:last-child) {
+      margin-bottom: 10%;
+    }
   }
 
   .listItem {
