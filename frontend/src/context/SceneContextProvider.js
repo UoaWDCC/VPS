@@ -9,7 +9,8 @@ export default function SceneContextProvider({ children }) {
   const [currentScene, setCurrentScene] = useState();
   let reFetch = null;
   if (currentScenario) {
-    reFetch = useGet(`api/scenario/${currentScenario.id}/scene`, setScenes);
+    // eslint-disable-next-line no-underscore-dangle
+    reFetch = useGet(`api/scenario/${currentScenario._id}/scene`, setScenes);
   }
 
   return (
