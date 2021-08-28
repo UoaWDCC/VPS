@@ -8,7 +8,7 @@ export default function AuthoringToolPage() {
   return (
     <>
       <ScreenContainer vertical>
-        <TopBar back={`/scenario/${currentScenario?.id}`} />
+        <TopBar back={`/scenario/${currentScenario?._id}`} />
         <h1>Authoring Tool Page</h1>
       </ScreenContainer>
     </>
