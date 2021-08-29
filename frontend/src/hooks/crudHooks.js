@@ -40,7 +40,6 @@ export function useGet(url, setData) {
             ? null
             : response.data.map((item) => {
                 return {
-                  // eslint-disable-next-line no-underscore-dangle
                   id: item._id,
                   ...item,
                 };

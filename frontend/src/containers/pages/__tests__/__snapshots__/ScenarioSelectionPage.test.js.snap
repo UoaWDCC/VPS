@@ -16,10 +16,9 @@ exports[`Scenario Selection page snapshot test 1`] = `
       className="sideBarList"
     >
       <li>
-        <a
-          aria-disabled={false}
+        <button
           className="MuiButtonBase-root MuiButton-root MuiButton-contained btn side contained white"
-          href="/scenario/changeThisToDynamicScenarioId"
+          disabled={false}
           onBlur={[Function]}
           onClick={[Function]}
           onDragLeave={[Function]}
@@ -32,15 +31,15 @@ exports[`Scenario Selection page snapshot test 1`] = `
           onTouchEnd={[Function]}
           onTouchMove={[Function]}
           onTouchStart={[Function]}
-          role="button"
           tabIndex={0}
+          type="button"
         >
           <span
             className="MuiButton-label"
           >
             Create
           </span>
-        </a>
+        </button>
       </li>
       <li>
         <a

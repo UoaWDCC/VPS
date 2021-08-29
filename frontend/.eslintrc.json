@@ -23,13 +23,17 @@
     "react/jsx-props-no-spreading": "off",
     "jsx-a11y/label-has-associated-control": "off",
     "react/jsx-no-bind": "off",
-    "react/jsx-filename-extension": [1, { "extensions": [".js", ".jsx", ".test.js"] }],
+    "react/jsx-filename-extension": [
+      1,
+      { "extensions": [".js", ".jsx", ".test.js"] }
+    ],
     "jest/no-disabled-tests": "warn",
     "jest/no-focused-tests": "error",
     "jest/no-identical-title": "error",
     "jest/prefer-to-have-length": "warn",
     "jest/valid-expect": "error",
     "prettier/prettier": ["error", { "endOfLine": "auto" }],
-    "no-unused-vars": "warn"
+    "no-unused-vars": "warn",
+    "no-underscore-dangle": "off"
   }
 }
