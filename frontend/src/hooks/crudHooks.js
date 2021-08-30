@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 
 const axios = require("axios");
 
-axios.defaults.baseURL = "/";
+axios.defaults.baseURL = `${process.env.REACT_APP_SERVER_URL}`;
 // import { AppContext } from "../AppContextProvider";
 
 /**
