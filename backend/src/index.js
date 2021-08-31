@@ -11,8 +11,8 @@ const app = express();
 const port = process.env.PORT || 3000;
 
 // Setup body-parser
-app.use(express.json());
 app.use(cors());
+app.use(express.json());
 app.use("/", routes);
 
 // Make the "public" folder available statically
