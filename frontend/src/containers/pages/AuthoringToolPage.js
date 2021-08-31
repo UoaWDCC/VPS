@@ -8,7 +8,7 @@ import { useGet } from "../../hooks/crudHooks";
 export default function AuthoringToolPage() {
   const { currentScene, setCurrentScene } = useContext(SceneContext);
   const { currentScenario } = useContext(ScenarioContext);
-  const getCurrentScene = useGet(
+  useGet(
     `/api/scenario/${currentScenario?._id}/scene/full/${currentScene?._id}`,
     setCurrentScene
   );

@@ -26,7 +26,8 @@
     justify-content: flex-end;
   }
 
-  .rightTopBarList > * { // gives all children in list padding
+  .rightTopBarList > * {
+    // gives all children in list padding
     display: inline;
     text-align: center;
     margin: 16px;
