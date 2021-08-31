@@ -17,9 +17,7 @@ const CustomTextField = withStyles({
 })(TextField);
 
 export default function SceneSettings() {
-  const { currentScene } = useContext(SceneContext);
-
-  console.log(currentScene);
+  const { currentScene, setCurrentScene } = useContext(SceneContext);
 
   return (
     <>
@@ -30,6 +28,12 @@ export default function SceneSettings() {
             label="Scene Name"
             value={currentScene.name}
             fullWidth
+            onChange={(event) => {
+              setCurrentScene({
+                ...currentScene,
+                name: event.target.value,
+              });
+            }}
           />
         </div>
       </div>
