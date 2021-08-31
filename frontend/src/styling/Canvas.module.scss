@@ -1,0 +1,15 @@
+.canvasContainer {
+  flex: 1 1 auto;
+  width: 75vw;
+  background-color: #fafafa;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  .canvas {
+    height: 75%;
+    width: 90%;
+    background-color: #ffffff;
+    filter: drop-shadow(0 2.5px 5px rgba(0, 0, 0, 0.25));
+  }
+}

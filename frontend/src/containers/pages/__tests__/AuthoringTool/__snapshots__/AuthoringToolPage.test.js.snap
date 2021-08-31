@@ -1,0 +1,127 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Scenario Selection page snapshot test 1`] = `
+<div
+  className="colContainer"
+>
+  <div
+    className="topBar"
+  >
+    <ul
+      className="topBarList"
+    >
+      <li
+        className="listItem"
+      >
+        <a
+          aria-disabled={false}
+          className="MuiButtonBase-root MuiButton-root MuiButton-outlined btn top outlined white"
+          href="/scenario/undefined"
+          onBlur={[Function]}
+          onClick={[Function]}
+          onDragLeave={[Function]}
+          onFocus={[Function]}
+          onKeyDown={[Function]}
+          onKeyUp={[Function]}
+          onMouseDown={[Function]}
+          onMouseLeave={[Function]}
+          onMouseUp={[Function]}
+          onTouchEnd={[Function]}
+          onTouchMove={[Function]}
+          onTouchStart={[Function]}
+          role="button"
+          tabIndex={0}
+        >
+          <span
+            className="MuiButton-label"
+          >
+            Back
+          </span>
+        </a>
+      </li>
+    </ul>
+  </div>
+  <div
+    className="toolBar"
+  />
+  <div
+    className="flex"
+    style={
+      Object {
+        "height": "100%",
+      }
+    }
+  >
+    <div
+      className="canvasContainer"
+    >
+      <div
+        className="canvas"
+      />
+    </div>
+    <div
+      className="sideBar"
+    >
+      <div
+        className="sceneSettingsContainer"
+      >
+        <h1
+          className="sideBarHeader"
+        >
+          Scene Settings
+        </h1>
+        <div
+          className="sideBarBody"
+        >
+          <div
+            className="MuiFormControl-root MuiTextField-root WithStyles(ForwardRef(TextField))-root-1 MuiFormControl-fullWidth"
+          >
+            <label
+              className="MuiFormLabel-root MuiInputLabel-root MuiInputLabel-formControl MuiInputLabel-animated MuiInputLabel-shrink MuiFormLabel-filled"
+              data-shrink={true}
+            >
+              Scene Name
+            </label>
+            <div
+              className="MuiInputBase-root MuiInput-root MuiInput-underline MuiInputBase-fullWidth MuiInput-fullWidth MuiInputBase-formControl MuiInput-formControl"
+              onClick={[Function]}
+            >
+              <input
+                aria-invalid={false}
+                autoFocus={false}
+                className="MuiInputBase-input MuiInput-input"
+                disabled={false}
+                onAnimationStart={[Function]}
+                onBlur={[Function]}
+                onChange={[Function]}
+                onFocus={[Function]}
+                required={false}
+                type="text"
+                value="Scene"
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+      <div
+        className="componentPropertiesContainer"
+      >
+        <h1
+          className="sideBarHeader"
+        >
+          Component Properties
+        </h1>
+        <div
+          className="sideBarBody empty"
+        >
+          <p
+            className="noComponentSelectedText"
+          >
+            No component selected
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+`;

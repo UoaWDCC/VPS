@@ -1,5 +1,13 @@
+html {
+  font-family: Arial, Helvetica, sans-serif;
+}
+
 body {
   color: inherit;
+}
+
+.flex {
+  display: flex;
 }
 
 /********************************** Buttons **********************************/
@@ -29,4 +37,10 @@ body {
 .btn.outlined.teal {
   color: #008a7b;
   border-color: #008a7b;
+}
+
+/********************************** Text Field **********************************/
+
+.textField.standard {
+  border-bottom: aquamarine;
 }

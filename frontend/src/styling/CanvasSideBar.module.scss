@@ -1,0 +1,50 @@
+.sideBar {
+  flex: 1 1 auto;
+  width: 25vw;
+  background-color: #ffffff;
+  filter: drop-shadow(-2.5px 0 5px rgba(0, 0, 0, 0.1));
+  display: flex;
+  flex-direction: column;
+
+  .componentPropertiesContainer {
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+
+    .sideBarBody {
+      flex: 1 1 auto;
+      padding: 2.5em 2.5em;
+      margin: 0em;
+      background-color: #f0f0f0;
+
+      .noComponentSelectedText {
+        font-size: 90%;
+        font-weight: 500;
+        letter-spacing: 1px;
+        color: #999999;
+      }
+    }
+
+    .sideBarBody.empty {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+  }
+}
+
+.sideBarHeader {
+  padding: 1.5em 2.5em;
+  margin: 0em;
+  font-size: 100%;
+  font-weight: 600;
+  letter-spacing: 1px;
+  color: #727272;
+  background-color: #ffffff;
+}
+
+.sideBarBody {
+  padding: 2.5em 2.5em;
+  margin: 0em;
+  background-color: #f0f0f0;
+}
