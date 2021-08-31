@@ -26,7 +26,7 @@ export default function SceneSettings() {
         <div className={styles.sideBarBody}>
           <CustomTextField
             label="Scene Name"
-            value={currentScene.name}
+            value={currentScene?.name}
             fullWidth
             onChange={(event) => {
               setCurrentScene({

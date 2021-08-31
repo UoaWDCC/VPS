@@ -19,8 +19,8 @@ exports[`Scenario Selection page snapshot test 1`] = `
         className="MuiFormControl-root MuiTextField-root WithStyles(ForwardRef(TextField))-root-1 MuiFormControl-fullWidth"
       >
         <label
-          className="MuiFormLabel-root MuiInputLabel-root MuiInputLabel-formControl MuiInputLabel-animated MuiInputLabel-shrink MuiFormLabel-filled"
-          data-shrink={true}
+          className="MuiFormLabel-root MuiInputLabel-root MuiInputLabel-formControl MuiInputLabel-animated"
+          data-shrink={false}
         >
           Scene Name
         </label>
@@ -39,7 +39,6 @@ exports[`Scenario Selection page snapshot test 1`] = `
             onFocus={[Function]}
             required={false}
             type="text"
-            value="Scene"
           />
         </div>
       </div>
