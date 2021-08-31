@@ -10,7 +10,7 @@ import TopBar from "../../components/TopBar";
 import ListContainer from "../../components/ListContainer";
 import ScreenContainer from "../../components/ScreenContainer";
 import SceneContext from "../../context/SceneContext";
-import AuthoringToolPage from "./AuthoringToolPage";
+import AuthoringToolPage from "./AuthoringTool/AuthoringToolPage";
 import { usePost } from "../../hooks/crudHooks";
 
 export function SceneSelectionPage({ data = null }) {
