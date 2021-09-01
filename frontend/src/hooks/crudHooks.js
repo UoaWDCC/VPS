@@ -2,8 +2,11 @@ import { useState, useEffect } from "react";
 // import axios from "axios";
 const axios = require("axios");
 
-// axios.defaults.baseURL = "/";
-axios.defaults.baseURL = `${process.env.REACT_APP_SERVER_URL}`;
+if (process.env.REACT_APP_SERVER_URL === undefined) {
+  axios.defaults.baseURL = "/";
+} else {
+  axios.defaults.baseURL = `${process.env.REACT_APP_SERVER_URL}`;
+}
 // import { AppContext } from "../AppContextProvider";
 
 /**
