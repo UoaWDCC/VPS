@@ -13,5 +13,14 @@ const retrieveScenarioList = async () => {
   return Scenario.find({}, "name");
 };
 
-// eslint-disable-next-line import/prefer-default-export
-export { createScenario, retrieveScenarioList };
+const deleteScenario = async (scenarioId) => {
+  try {
+    const scenario = await Scenario.findById(scenarioId);
+    await scenario.remove();
+    return true;
+  } catch (e) {
+    return false;
+  }
+};
+
+export { createScenario, retrieveScenarioList, deleteScenario };
