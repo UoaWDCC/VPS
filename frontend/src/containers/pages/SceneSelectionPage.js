@@ -6,6 +6,7 @@ import {
   Switch,
   useHistory,
 } from "react-router-dom";
+import { Button } from "@material-ui/core";
 import TopBar from "../../components/TopBar";
 import ListContainer from "../../components/ListContainer";
 import ScreenContainer from "../../components/ScreenContainer";
@@ -17,7 +18,8 @@ export function SceneSelectionPage({ data = null }) {
   const { scenarioId } = useParams();
   const { url } = useRouteMatch();
   const history = useHistory();
-  const { scenes, setCurrentScene, reFetch } = useContext(SceneContext);
+  const { scenes, currentScene, setCurrentScene, reFetch } =
+    useContext(SceneContext);
 
   async function createNewScene() {
     const newScene = await usePost(`/api/scenario/${scenarioId}/scene`, {
@@ -29,6 +31,14 @@ export function SceneSelectionPage({ data = null }) {
     });
   }
 
+  async function editScene() {
+    if (currentScene != null) {
+      history.push({
+        pathname: `${url}/scene/${currentScene.name.replace(" ", "")}`,
+      });
+    }
+  }
+
   useEffect(() => {
     setCurrentScene(null);
     if (reFetch) {
@@ -38,7 +48,16 @@ export function SceneSelectionPage({ data = null }) {
 
   return (
     <ScreenContainer vertical>
-      <TopBar />
+      <TopBar>
+        <Button
+          className="btn top outlined white"
+          color="default"
+          variant="outlined"
+          onClick={editScene}
+        >
+          edit
+        </Button>
+      </TopBar>
       <ListContainer
         data={data || scenes}
         onItemSelected={setCurrentScene}

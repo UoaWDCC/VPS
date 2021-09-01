@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import ImageList from "@material-ui/core/ImageList";
 import ImageListItem from "@material-ui/core/ImageListItem";
 import { Box } from "@material-ui/core";
@@ -9,12 +9,9 @@ export default function ListContainer({ data, onItemSelected, wide, addCard }) {
   const [selected, setSelected] = useState();
   const columns = wide ? 5 : 4;
   const onItemClick = (item) => {
-    setSelected(item.id);
+    setSelected(item._id);
     onItemSelected(item);
   };
-  useEffect(() => {
-    console.log(data);
-  }, []);
 
   return (
     <>
@@ -32,7 +29,7 @@ export default function ListContainer({ data, onItemSelected, wide, addCard }) {
           {data && data.length > 0
             ? data.map((item) => (
                 <ImageListItem
-                  key={item.id}
+                  key={item._id}
                   cols={1}
                   height={200}
                   onClick={() => onItemClick(item)}
@@ -46,7 +43,9 @@ export default function ListContainer({ data, onItemSelected, wide, addCard }) {
                       height={160}
                       border={5}
                       borderRadius={10}
-                      borderColor={item.id === selected ? "#008a7b" : "#747474"}
+                      borderColor={
+                        item._id === selected ? "#008a7b" : "#747474"
+                      }
                       overflow="hidden"
                       textAlign="center"
                       sx={{

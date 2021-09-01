@@ -26,5 +26,11 @@ const retrieveSceneList = async (scenarioId) => {
   return dbScenes;
 };
 
+const retrieveScene = async (sceneId) => {
+  const dbScene = await Scene.findById(sceneId);
+
+  return dbScene;
+};
+
 // eslint-disable-next-line import/prefer-default-export
-export { createScene, retrieveSceneList };
+export { createScene, retrieveSceneList, retrieveScene };

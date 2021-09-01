@@ -6,10 +6,10 @@ import SceneContext from "./SceneContext";
 export default function SceneContextProvider({ children }) {
   const { currentScenario } = useContext(ScenarioContext);
   const [scenes, setScenes] = useState([]);
-  const [currentScene, setCurrentScene] = useState();
-  let reFetch = null;
+  const [currentScene, setCurrentScene] = useState(null);
+  let getScenes = null;
   if (currentScenario) {
-    reFetch = useGet(`api/scenario/${currentScenario._id}/scene`, setScenes);
+    getScenes = useGet(`api/scenario/${currentScenario._id}/scene`, setScenes);
   }
 
   return (
@@ -17,7 +17,7 @@ export default function SceneContextProvider({ children }) {
       value={{
         scenes,
         setScenes,
-        reFetch: reFetch?.reFetch,
+        reFetch: getScenes?.reFetch,
         currentScene,
         setCurrentScene,
       }}

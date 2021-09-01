@@ -125,4 +125,18 @@ describe("Scene API tests", () => {
     expect(scenes[1].name).toEqual(scene2.name);
     expect(scenes[1].components).toBeUndefined();
   });
+
+  it("GET api/scenario/:scenarioId/scene/full/:sceneId retrieve scene successfully", async () => {
+    const response = await axios.get(
+      `http://localhost:${port}/api/scenario/${
+        scenario2._id
+      }/scene/full/${scene1._id.toString()}`
+    );
+    expect(response.status).toBe(HTTP_OK);
+
+    // check correct scenes are returned
+    const scene = response.data;
+    expect(scene).toBeDefined();
+    expect(scene._id).toBe(scene1._id.toString());
+  });
 });
