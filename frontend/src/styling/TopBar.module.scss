@@ -5,11 +5,31 @@
   background-color: #008a7b;
   display: flex;
   align-items: center;
+  justify-content: space-between;
   padding: 0em 2em;
+  flex-direction: row;
 
-  .topBarList {
+  .leftTopBarList {
     list-style: none;
     margin: 0;
     padding: 0;
+    overflow: hidden;
+    justify-self: flex-start;
+  }
+
+  .rightTopBarList {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    padding-right: 32px;
+    overflow: hidden;
+    justify-content: flex-end;
+  }
+
+  .rightTopBarList > * {
+    // gives all children in list padding
+    display: inline;
+    text-align: center;
+    margin: 16px;
   }
 }

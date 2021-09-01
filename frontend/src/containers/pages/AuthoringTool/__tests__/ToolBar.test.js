@@ -1,12 +1,12 @@
 import React from "react";
 import renderer from "react-test-renderer";
 import { BrowserRouter } from "react-router-dom";
-import Canvas from "../../AuthoringTool/Canvas";
+import ToolBar from "../ToolBar";
 
 test("Scenario Selection page snapshot test", () => {
   const component = renderer.create(
     <BrowserRouter>
-      <Canvas />
+      <ToolBar />
     </BrowserRouter>
   );
 

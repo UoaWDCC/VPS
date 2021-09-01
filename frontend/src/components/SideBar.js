@@ -49,7 +49,7 @@ export default function SideBar() {
               component={Link}
               to={
                 currentScenario
-                  ? `/scenario/${currentScenario.id}`
+                  ? `/scenario/${currentScenario._id}`
                   : "/scenario/null"
               }
               disabled={!currentScenario}

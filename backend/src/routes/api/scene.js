@@ -1,6 +1,10 @@
 import { Router } from "express";
 
-import { createScene, retrieveSceneList } from "../../db/daos/sceneDao";
+import {
+  createScene,
+  retrieveSceneList,
+  retrieveScene,
+} from "../../db/daos/sceneDao";
 
 const router = Router({ mergeParams: true });
 
@@ -18,6 +22,12 @@ router.get("/", async (req, res) => {
   const scenes = await retrieveSceneList(req.params.scenarioId);
 
   res.json(scenes);
+});
+
+router.get("/full/:sceneId", async (req, res) => {
+  const scene = await retrieveScene(req.params.sceneId);
+
+  res.json(scene);
 });
 
 export default router;

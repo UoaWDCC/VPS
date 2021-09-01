@@ -5,7 +5,7 @@ exports[`Top Bar component snapshot test 1`] = `
   className="topBar"
 >
   <ul
-    className="topBarList"
+    className="leftTopBarList"
   >
     <li
       className="listItem"
@@ -37,5 +37,8 @@ exports[`Top Bar component snapshot test 1`] = `
       </a>
     </li>
   </ul>
+  <ul
+    className="rightTopBarList"
+  />
 </div>
 `;

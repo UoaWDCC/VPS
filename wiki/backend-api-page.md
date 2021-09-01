@@ -37,3 +37,17 @@ Returns:
     }
 ]
 ```
+
+**Retrieve a Scene for a given Scene Id:**
+
+`GET /api/scenario/:scenarioId/scene/full/:sceneId`
+
+Returns:
+```
+
+{
+    "_id": "000001",
+    "name": "Scene 1"
+}
+
+```

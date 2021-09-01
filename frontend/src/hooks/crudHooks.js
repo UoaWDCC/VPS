@@ -36,16 +36,7 @@ export function useGet(url, setData) {
         });
 
       if (!hasError) {
-        setData(
-          hasError
-            ? null
-            : response.data.map((item) => {
-                return {
-                  id: item._id,
-                  ...item,
-                };
-              })
-        );
+        setData(response.data);
       }
       setLoading(false);
     }

@@ -8,7 +8,7 @@ exports[`Scene Selection page snapshot test 1`] = `
     className="topBar"
   >
     <ul
-      className="topBarList"
+      className="leftTopBarList"
     >
       <li
         className="listItem"
@@ -39,6 +39,34 @@ exports[`Scene Selection page snapshot test 1`] = `
           </span>
         </a>
       </li>
+    </ul>
+    <ul
+      className="rightTopBarList"
+    >
+      <button
+        className="MuiButtonBase-root MuiButton-root MuiButton-outlined btn top outlined white"
+        disabled={false}
+        onBlur={[Function]}
+        onClick={[Function]}
+        onDragLeave={[Function]}
+        onFocus={[Function]}
+        onKeyDown={[Function]}
+        onKeyUp={[Function]}
+        onMouseDown={[Function]}
+        onMouseLeave={[Function]}
+        onMouseUp={[Function]}
+        onTouchEnd={[Function]}
+        onTouchMove={[Function]}
+        onTouchStart={[Function]}
+        tabIndex={0}
+        type="button"
+      >
+        <span
+          className="MuiButton-label"
+        >
+          edit
+        </span>
+      </button>
     </ul>
   </div>
   <div
