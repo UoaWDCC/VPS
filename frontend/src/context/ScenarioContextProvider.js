@@ -1,11 +1,19 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useGet } from "../hooks/crudHooks";
+import useLocalStorage from "../hooks/useLocalStorage";
 import ScenarioContext from "./ScenarioContext";
 
 export default function ScenarioContextProvider({ children }) {
-  const [currentScenario, setCurrentScenario] = useState(null);
+  const [currentScenario, setCurrentScenario] = useLocalStorage(
+    "currentScenario",
+    null
+  );
   const [scenarios, setScenarios] = useState();
   const { reFetch } = useGet(`api/scenario`, setScenarios);
+
+  useEffect(() => {
+    reFetch();
+  }, []);
 
   return (
     <ScenarioContext.Provider
