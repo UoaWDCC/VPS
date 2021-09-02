@@ -129,7 +129,8 @@ describe("Scene API tests", () => {
 
   it("GET api/scenario/:scenarioId/scene/full/:sceneId retrieve scene successfully", async () => {
     const response = await axios.get(
-      `http://localhost:${port}/api/scenario/${scenario2._id
+      `http://localhost:${port}/api/scenario/${
+        scenario2._id
       }/scene/full/${scene1._id.toString()}`
     );
     expect(response.status).toBe(HTTP_OK);
