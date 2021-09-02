@@ -15,6 +15,11 @@ const sceneSchema = new Schema({
   ],
 });
 
+sceneSchema.pre("remove", async () => {
+  // TODO: delete components
+  // await Component.deleteMany({ _id: { $in: this.components } });
+});
+
 const Scene = mongoose.model("Scene", sceneSchema);
 
 export default Scene;

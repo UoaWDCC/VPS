@@ -5,13 +5,25 @@ import mongoose from "mongoose";
 import axios from "axios";
 import routes from "../..";
 import Scenario from "../../../db/models/scenario";
+import Scene from "../../../db/models/scene";
 
 describe("Scenario API tests", () => {
   const HTTP_OK = 200;
+  const HTTP_NO_CONTENT = 204;
 
   let mongoServer;
   let server;
   let port;
+
+  const scene1 = {
+    _id: new mongoose.mongo.ObjectId("000000000000000000000003"),
+    name: "Scene 1",
+  };
+
+  const scene2 = {
+    _id: new mongoose.mongo.ObjectId("000000000000000000000004"),
+    name: "Scene 2",
+  };
 
   const scenario1 = {
     _id: new mongoose.mongo.ObjectId("000000000000000000000001"),
@@ -20,6 +32,7 @@ describe("Scenario API tests", () => {
   const scenario2 = {
     _id: new mongoose.mongo.ObjectId("000000000000000000000002"),
     name: "Scenario 2",
+    scenes: [scene1._id, scene2._id],
   };
 
   // setup in-memory mongodb and express API
@@ -43,6 +56,7 @@ describe("Scenario API tests", () => {
   beforeEach(async () => {
     // Add scenario to database
     await Scenario.create([scenario1, scenario2]);
+    await Scene.create([scene1, scene2]);
   });
 
   // clear the database
@@ -97,5 +111,33 @@ describe("Scenario API tests", () => {
     expect(scenarios[1]._id).toBe(scenario2._id.toString());
     expect(scenarios[1].name).toEqual(scenario2.name);
     expect(scenarios[1].scenes).toBeUndefined();
+  });
+
+  it("DELETE api/scenario/:scenarioId deletes a valid scenario", async () => {
+    const response = await axios.delete(
+      `http://localhost:${port}/api/scenario/${scenario2._id}/`
+    );
+    expect(response.status).toBe(HTTP_NO_CONTENT);
+
+    // check scenario has been removed
+    const dbScenario2 = await Scenario.findById(scenario2._id);
+    expect(dbScenario2).toEqual(null);
+
+    // check corresponding scenes are removed
+    const dbScene1 = await Scene.findById(scene1._id);
+    const dbScene2 = await Scene.findById(scene2._id);
+    expect(dbScene1).toEqual(null);
+    expect(dbScene2).toEqual(null);
+
+    // TODO: check corresponding components are removed
+  });
+
+  it("DELETE api/scenario/:scenarioId returns 404 with invalid ID", async () => {
+    // bad scenarioId
+    await expect(
+      axios.delete(
+        `http://localhost:${port}/api/scenario/000000000000000000000009/`
+      )
+    ).rejects.toThrow();
   });
 });

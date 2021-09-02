@@ -32,5 +32,22 @@ const retrieveScene = async (sceneId) => {
   return dbScene;
 };
 
-// eslint-disable-next-line import/prefer-default-export
-export { createScene, retrieveSceneList, retrieveScene };
+const deleteScene = async (scenarioId, sceneId) => {
+  const scenarioRes = await Scenario.updateOne(
+    { _id: scenarioId },
+    { $pull: { scenes: sceneId } }
+  );
+  if (scenarioRes.n !== 1) {
+    return false;
+  }
+
+  try {
+    const scene = await Scene.findById(sceneId);
+    await scene.remove();
+    return true;
+  } catch (e) {
+    return false;
+  }
+};
+
+export { createScene, retrieveSceneList, retrieveScene, deleteScene };
