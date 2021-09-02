@@ -51,3 +51,27 @@ Returns:
 }
 
 ```
+**Update a Scene for a given Scene Id:**
+
+`POST /api/scenario/:scenarioId/scene/:sceneId`
+
+Body:
+```
+
+{
+    "name": "Scene 1",
+    "components": []
+}
+
+```
+
+Returns:
+```
+
+{
+    "_id": "000001",
+    "name": "Scene 1",
+    "components": []
+}
+
+```
