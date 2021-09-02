@@ -53,7 +53,7 @@ Returns:
 ```
 **Update a Scene for a given Scene Id:**
 
-`POST /api/scenario/:scenarioId/scene/:sceneId`
+`PUT /api/scenario/:scenarioId/scene/:sceneId`
 
 Body:
 ```

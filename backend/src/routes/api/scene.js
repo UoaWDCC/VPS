@@ -31,7 +31,7 @@ router.get("/full/:sceneId", async (req, res) => {
   res.json(scene);
 });
 
-router.post("/:sceneId", async (req, res) => {
+router.put("/:sceneId", async (req, res) => {
   const { name, components } = req.body;
 
   const scene = await updateScene(req.params.sceneId, { name, components });

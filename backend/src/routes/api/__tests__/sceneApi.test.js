@@ -146,7 +146,7 @@ describe("Scene API tests", () => {
       components: [],
     };
 
-    const response = await axios.post(
+    const response = await axios.put(
       `http://localhost:${port}/api/scenario/${scenario2._id}/scene/${scene1._id}`,
       reqData
     );
