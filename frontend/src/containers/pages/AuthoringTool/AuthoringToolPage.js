@@ -1,4 +1,5 @@
 import React, { useContext } from "react";
+import { Button } from "@material-ui/core";
 import TopBar from "../../../components/TopBar";
 import ToolBar from "./ToolBar";
 import Canvas from "./Canvas";
@@ -18,7 +19,15 @@ export default function AuthoringToolPage() {
   return (
     <>
       <ScreenContainer vertical>
-        <TopBar back={`/scenario/${currentScenario?._id}`} />
+        <TopBar back={`/scenario/${currentScenario?._id}`}>
+          <Button
+            className="btn top contained white"
+            color="default"
+            variant="contained"
+          >
+            Save
+          </Button>
+        </TopBar>
         <ToolBar />
         <div className="flex" style={{ height: "100%" }}>
           <Canvas />

@@ -21,7 +21,9 @@ export default function TopBar({ back = "/", children = [] }) {
             </Button>
           </li>
         </ul>
-        <ul className={styles.rightTopBarList}>{children}</ul>
+        <ul className={styles.rightTopBarList}>
+          <li className={styles.listItem}>{children}</li>
+        </ul>
       </div>
     </>
   );
