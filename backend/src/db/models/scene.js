@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 
 const { Schema } = mongoose;
+mongoose.set("useFindAndModify", false);
 
 const sceneSchema = new Schema({
   name: {

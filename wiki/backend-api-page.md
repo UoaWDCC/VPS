@@ -92,6 +92,30 @@ Returns:
 }
 
 ```
+**Update a Scene for a given Scene Id:**
+
+`PUT /api/scenario/:scenarioId/scene/:sceneId`
+
+Body:
+```
+
+{
+    "name": "Scene 1",
+    "components": []
+}
+
+```
+
+Returns:
+```
+
+{
+    "_id": "000001",
+    "name": "Scene 1",
+    "components": []
+}
+
+```
 
 **Delete scene for a given scenario Id with a given scene Id:**
 

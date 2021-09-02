@@ -4,6 +4,7 @@ import {
   createScene,
   retrieveSceneList,
   retrieveScene,
+  updateScene,
   deleteScene,
 } from "../../db/daos/sceneDao";
 
@@ -31,6 +32,14 @@ router.get("/full/:sceneId", async (req, res) => {
   const scene = await retrieveScene(req.params.sceneId);
 
   res.json(scene);
+});
+
+router.put("/:sceneId", async (req, res) => {
+  const { name, components } = req.body;
+
+  const scene = await updateScene(req.params.sceneId, { name, components });
+
+  res.status(HTTP_OK).json(scene);
 });
 
 router.delete("/:sceneId", async (req, res) => {
