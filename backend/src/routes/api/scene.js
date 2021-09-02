@@ -4,6 +4,7 @@ import {
   createScene,
   retrieveSceneList,
   retrieveScene,
+  updateScene,
 } from "../../db/daos/sceneDao";
 
 const router = Router({ mergeParams: true });
@@ -28,6 +29,14 @@ router.get("/full/:sceneId", async (req, res) => {
   const scene = await retrieveScene(req.params.sceneId);
 
   res.json(scene);
+});
+
+router.post("/:sceneId", async (req, res) => {
+  const { name, components } = req.body;
+
+  const scene = await updateScene(req.params.sceneId, { name, components });
+
+  res.status(HTTP_OK).json(scene);
 });
 
 export default router;
