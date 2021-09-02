@@ -2,11 +2,26 @@
 
 ### Routes
 
+**Create new Scenario:**
+
+`POST /api/scenario`
+
+Returns:
+
+```
+{
+    "_id": "000001",
+    "name": "Scenario 1",
+    "scenes": []
+}
+```
+
 **Retrieve all Scenarios:**
 
 `GET /api/scenario`
 
 Returns:
+
 ```
 [
     {
@@ -20,11 +35,36 @@ Returns:
 ]
 ```
 
+**Delete scenario with given scenario Id:**
+
+`DELETE /api/scenario/:scenarioId`
+
+Returns:
+
+```
+NO CONTENT
+```
+
+**Create new scene for a given Scenario Id:**
+
+`POST /api/scenario/:scenarioId/scene`
+
+Returns:
+
+```
+{
+    "_id": "000001",
+    "name": "Scene 1",
+    "components": []
+}
+```
+
 **Retrieve all Scenes for a given Scenario Id:**
 
 `GET /api/scenario/:scenarioId/scene`
 
 Returns:
+
 ```
 [
     {
@@ -43,6 +83,7 @@ Returns:
 `GET /api/scenario/:scenarioId/scene/full/:sceneId`
 
 Returns:
+
 ```
 
 {
@@ -74,4 +115,14 @@ Returns:
     "components": []
 }
 
+```
+
+**Delete scene for a given scenario Id with a given scene Id:**
+
+`DELETE /api/scenario/:scenarioId/scene/:sceneId`
+
+Returns:
+
+```
+NO CONTENT
 ```

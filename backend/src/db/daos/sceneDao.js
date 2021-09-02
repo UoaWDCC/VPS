@@ -40,5 +40,29 @@ const updateScene = async (sceneId, updatedScene) => {
   return dbScene;
 };
 
+const deleteScene = async (scenarioId, sceneId) => {
+  const scenarioRes = await Scenario.updateOne(
+    { _id: scenarioId },
+    { $pull: { scenes: sceneId } }
+  );
+  if (scenarioRes.n !== 1) {
+    return false;
+  }
+
+  try {
+    const scene = await Scene.findById(sceneId);
+    await scene.remove();
+    return true;
+  } catch (e) {
+    return false;
+  }
+};
+
 // eslint-disable-next-line import/prefer-default-export
-export { createScene, retrieveSceneList, retrieveScene, updateScene };
+export {
+  createScene,
+  retrieveSceneList,
+  retrieveScene,
+  deleteScene,
+  updateScene,
+};

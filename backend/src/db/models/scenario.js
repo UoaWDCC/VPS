@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import Scene from "./scene";
 
 const { Schema } = mongoose;
 
@@ -13,6 +14,13 @@ const scenarioSchema = new Schema({
       ref: "Scene",
     },
   ],
+});
+
+scenarioSchema.pre("remove", async function () {
+  this.scenes.forEach(async (sceneId) => {
+    const scene = await Scene.findById(sceneId);
+    await scene.remove();
+  });
 });
 
 const Scenario = mongoose.model("Scenario", scenarioSchema);

@@ -9,6 +9,7 @@ import Scenario from "../../../db/models/scenario";
 
 describe("Scene API tests", () => {
   const HTTP_OK = 200;
+  const HTTP_NO_CONTENT = 204;
 
   let mongoServer;
   let server;
@@ -128,8 +129,7 @@ describe("Scene API tests", () => {
 
   it("GET api/scenario/:scenarioId/scene/full/:sceneId retrieve scene successfully", async () => {
     const response = await axios.get(
-      `http://localhost:${port}/api/scenario/${
-        scenario2._id
+      `http://localhost:${port}/api/scenario/${scenario2._id
       }/scene/full/${scene1._id.toString()}`
     );
     expect(response.status).toBe(HTTP_OK);
@@ -157,5 +157,38 @@ describe("Scene API tests", () => {
     expect(responseScene._id).toBe(scene1._id.toString());
     expect(responseScene.name).toEqual(reqData.name);
     expect(responseScene.components).toEqual(reqData.components);
+  });
+
+  it("DELETE api/scenario/:scenarioId/scene/:sceneId deletes a valid scene", async () => {
+    const response = await axios.delete(
+      `http://localhost:${port}/api/scenario/${scenario2._id}/scene/${scene1._id}/`
+    );
+    expect(response.status).toBe(HTTP_NO_CONTENT);
+
+    // check scene has been removed
+    const dbScene1 = await Scene.findById(scene1._id);
+    expect(dbScene1).toEqual(null);
+
+    // check scene is removed from corresponding scenario
+    const dbScenario2 = await Scenario.findById(scenario2._id).lean();
+    expect(dbScenario2.scenes).toEqual([scene2._id]);
+
+    // TODO: check corresponding components are removed
+  });
+
+  it("DELETE api/scenario/:scenarioId/scene/:sceneId returns 404 with invalid IDs", async () => {
+    // bad sceneId
+    await expect(
+      axios.delete(
+        `http://localhost:${port}/api/scenario/${scenario2._id}/scene/000000000000000000000009/`
+      )
+    ).rejects.toThrow();
+
+    // bad scenarioId
+    await expect(
+      axios.delete(
+        `http://localhost:${port}/api/scenario/000000000000000000000009/scene/${scene1._id}/`
+      )
+    ).rejects.toThrow();
   });
 });
