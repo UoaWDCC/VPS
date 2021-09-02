@@ -139,4 +139,23 @@ describe("Scene API tests", () => {
     expect(scene).toBeDefined();
     expect(scene._id).toBe(scene1._id.toString());
   });
+
+  it("updates and returns the newly updated scene", async () => {
+    const reqData = {
+      name: "Test Scene 1 updated name",
+      components: [],
+    };
+
+    const response = await axios.post(
+      `http://localhost:${port}/api/scenario/${scenario2._id}/scene/${scene1._id}`,
+      reqData
+    );
+    expect(response.status).toBe(HTTP_OK);
+
+    // check correct scene is returned
+    const responseScene = response.data;
+    expect(responseScene._id).toBe(scene1._id.toString());
+    expect(responseScene.name).toEqual(reqData.name);
+    expect(responseScene.components).toEqual(reqData.components);
+  });
 });
