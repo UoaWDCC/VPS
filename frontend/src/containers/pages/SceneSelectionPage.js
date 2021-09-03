@@ -27,14 +27,14 @@ export function SceneSelectionPage({ data = null }) {
     });
     setCurrentScene(newScene);
     history.push({
-      pathname: `${url}/scene/${newScene.name.replace(" ", "")}`,
+      pathname: `${url}/scene/${newScene._id}`,
     });
   }
 
   async function editScene() {
     if (currentScene != null) {
       history.push({
-        pathname: `${url}/scene/${currentScene.name.replace(" ", "")}`,
+        pathname: `${url}/scene/${currentScene._id}`,
       });
     }
   }
@@ -55,7 +55,7 @@ export function SceneSelectionPage({ data = null }) {
           variant="outlined"
           onClick={editScene}
         >
-          edit
+          Edit
         </Button>
       </TopBar>
       <ListContainer

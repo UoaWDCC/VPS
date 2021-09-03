@@ -81,7 +81,7 @@ export function usePut(url, requestBody = null) {
     let hasError = false;
 
     const response = await axios
-      .post(url, requestBody)
+      .put(url, requestBody)
       // {
       //   headers: { Authorization: `Bearer ${firebaseUserIdToken}` },
       // })
