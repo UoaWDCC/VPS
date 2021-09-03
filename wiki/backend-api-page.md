@@ -92,11 +92,13 @@ Returns:
 }
 
 ```
+
 **Update a Scene for a given Scene Id:**
 
 `PUT /api/scenario/:scenarioId/scene/:sceneId`
 
 Body:
+
 ```
 
 {
@@ -107,6 +109,7 @@ Body:
 ```
 
 Returns:
+
 ```
 
 {
@@ -125,4 +128,26 @@ Returns:
 
 ```
 NO CONTENT
+```
+
+**Store image urls in database - developer use only:**
+
+`POST /api/image`
+
+Body:
+
+```
+
+{
+    "urls": []
+}
+
+```
+
+Returns:
+
+```
+{
+    "image received"
+}
 ```
