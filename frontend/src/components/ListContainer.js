@@ -40,7 +40,6 @@ export default function ListContainer({ data, onItemSelected, wide, addCard }) {
                     }
                   >
                     <Box
-                      className={styles.box}
                       height={160}
                       border={5}
                       borderRadius={10}
