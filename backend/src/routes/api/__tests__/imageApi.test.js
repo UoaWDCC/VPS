@@ -45,20 +45,23 @@ describe("Image API tests", () => {
   });
 
   it("creates images in the database", async () => {
-    const urls = [
-      "https://drive.google.com/uc?export=view&id=1IExv9SGZq_KFFGOxBzhz_OfO6UAWLL5z",
-      "https://drive.google.com/uc?export=view&id=1uRyrBAvCZf2dPHXR0TjsPVncU_rz0vuZ",
-    ];
-    const response = await axios.post(`http://localhost:${port}/api/image/`, {
-      urls: urls,
-    });
+    const body = {
+      urls: [
+        "https://drive.google.com/uc?export=view&id=1IExv9SGZq_KFFGOxBzhz_OfO6UAWLL5z",
+        "https://drive.google.com/uc?export=view&id=1uRyrBAvCZf2dPHXR0TjsPVncU_rz0vuZ",
+      ],
+    };
+    const response = await axios.post(
+      `http://localhost:${port}/api/image/`,
+      body
+    );
     expect(response.status).toBe(HTTP_OK);
 
     // check if scenario has been persisted to db
     const dbImages = await Image.find();
 
-    expect(dbImages.length).toEqual(2);
-    expect(dbImages[0].url).toEqual(urls[0]);
-    expect(dbImages[1].url).toEqual(urls[1]);
+    expect(dbImages).toHaveLength(2);
+    expect(dbImages[0].url).toEqual(body.urls[0]);
+    expect(dbImages[1].url).toEqual(body.urls[1]);
   });
 });
