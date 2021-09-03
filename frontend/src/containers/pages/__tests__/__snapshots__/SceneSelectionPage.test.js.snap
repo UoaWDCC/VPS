@@ -132,7 +132,7 @@ exports[`Scene Selection page snapshot test 1`] = `
             className="imageListItemWide"
           >
             <div
-              className="MuiBox-root MuiBox-root-2 box"
+              className="MuiBox-root MuiBox-root-2"
             />
             <p
               className="text"
@@ -161,7 +161,7 @@ exports[`Scene Selection page snapshot test 1`] = `
             className="imageListItemWide"
           >
             <div
-              className="MuiBox-root MuiBox-root-3 box"
+              className="MuiBox-root MuiBox-root-3"
             />
             <p
               className="text"
