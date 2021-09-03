@@ -39,6 +39,10 @@ exports[`Top Bar component snapshot test 1`] = `
   </ul>
   <ul
     className="rightTopBarList"
-  />
+  >
+    <li
+      className="listItem"
+    />
+  </ul>
 </div>
 `;

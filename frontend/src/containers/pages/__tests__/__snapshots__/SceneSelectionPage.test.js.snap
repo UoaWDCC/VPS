@@ -43,30 +43,34 @@ exports[`Scene Selection page snapshot test 1`] = `
     <ul
       className="rightTopBarList"
     >
-      <button
-        className="MuiButtonBase-root MuiButton-root MuiButton-outlined btn top outlined white"
-        disabled={false}
-        onBlur={[Function]}
-        onClick={[Function]}
-        onDragLeave={[Function]}
-        onFocus={[Function]}
-        onKeyDown={[Function]}
-        onKeyUp={[Function]}
-        onMouseDown={[Function]}
-        onMouseLeave={[Function]}
-        onMouseUp={[Function]}
-        onTouchEnd={[Function]}
-        onTouchMove={[Function]}
-        onTouchStart={[Function]}
-        tabIndex={0}
-        type="button"
+      <li
+        className="listItem"
       >
-        <span
-          className="MuiButton-label"
+        <button
+          className="MuiButtonBase-root MuiButton-root MuiButton-outlined btn top outlined white"
+          disabled={false}
+          onBlur={[Function]}
+          onClick={[Function]}
+          onDragLeave={[Function]}
+          onFocus={[Function]}
+          onKeyDown={[Function]}
+          onKeyUp={[Function]}
+          onMouseDown={[Function]}
+          onMouseLeave={[Function]}
+          onMouseUp={[Function]}
+          onTouchEnd={[Function]}
+          onTouchMove={[Function]}
+          onTouchStart={[Function]}
+          tabIndex={0}
+          type="button"
         >
-          edit
-        </span>
-      </button>
+          <span
+            className="MuiButton-label"
+          >
+            Edit
+          </span>
+        </button>
+      </li>
     </ul>
   </div>
   <div
@@ -128,7 +132,7 @@ exports[`Scene Selection page snapshot test 1`] = `
             className="imageListItemWide"
           >
             <div
-              className="MuiBox-root MuiBox-root-2"
+              className="MuiBox-root MuiBox-root-2 box"
             />
             <p
               className="text"
@@ -157,7 +161,7 @@ exports[`Scene Selection page snapshot test 1`] = `
             className="imageListItemWide"
           >
             <div
-              className="MuiBox-root MuiBox-root-3"
+              className="MuiBox-root MuiBox-root-3 box"
             />
             <p
               className="text"

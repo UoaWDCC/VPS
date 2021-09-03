@@ -100,7 +100,7 @@ exports[`Scenario Selection page snapshot test 1`] = `
             className="imageListItem"
           >
             <div
-              className="MuiBox-root MuiBox-root-1"
+              className="MuiBox-root MuiBox-root-1 box"
             />
             <p
               className="text"
@@ -129,7 +129,7 @@ exports[`Scenario Selection page snapshot test 1`] = `
             className="imageListItem"
           >
             <div
-              className="MuiBox-root MuiBox-root-2"
+              className="MuiBox-root MuiBox-root-2 box"
             />
             <p
               className="text"
