@@ -27,6 +27,9 @@
 
     .listItem {
       margin: 0;
+      > Button {
+        margin-left: 20px;
+      }
     }
   }
 
