@@ -97,3 +97,28 @@ export function usePut(url, requestBody = null) {
 
   return putData();
 }
+
+export function useDelete(url) {
+  //   const { firebaseUserIdToken } = useContext(AppContext);
+
+  async function deleteData() {
+    let errorData;
+    let hasError = false;
+
+    const response = await axios
+      .delete(url)
+      // {
+      //   headers: { Authorization: `Bearer ${firebaseUserIdToken}` },
+      // })
+      .catch((err) => {
+        if (err.response.status === 404) {
+          errorData = err.response.data;
+          hasError = true;
+        }
+      });
+
+    return hasError ? errorData : response?.data;
+  }
+
+  return deleteData();
+}

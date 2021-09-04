@@ -12,7 +12,8 @@ import ListContainer from "../../components/ListContainer";
 import ScreenContainer from "../../components/ScreenContainer";
 import SceneContext from "../../context/SceneContext";
 import AuthoringToolPage from "./AuthoringTool/AuthoringToolPage";
-import { usePost } from "../../hooks/crudHooks";
+import { usePost, useDelete } from "../../hooks/crudHooks";
+import DeleteButton from "../../components/DeleteButton";
 
 export function SceneSelectionPage({ data = null }) {
   const { scenarioId } = useParams();
@@ -39,6 +40,14 @@ export function SceneSelectionPage({ data = null }) {
     }
   }
 
+  async function deleteScene() {
+    if (currentScene != null) {
+      await useDelete(`/api/scenario/${scenarioId}/scene/${currentScene._id}`);
+      setCurrentScene(null);
+      reFetch();
+    }
+  }
+
   useEffect(() => {
     setCurrentScene(null);
     if (reFetch) {
@@ -49,10 +58,20 @@ export function SceneSelectionPage({ data = null }) {
   return (
     <ScreenContainer vertical>
       <TopBar>
+        <DeleteButton
+          className="btn top"
+          color="default"
+          variant="contained"
+          disabled={!currentScene}
+          onClick={deleteScene}
+        >
+          Delete
+        </DeleteButton>
         <Button
           className="btn top outlined white"
           color="default"
           variant="outlined"
+          disabled={!currentScene}
           onClick={editScene}
         >
           Edit
