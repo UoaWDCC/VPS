@@ -47,8 +47,8 @@ exports[`Scene Selection page snapshot test 1`] = `
         className="listItem"
       >
         <button
-          className="MuiButtonBase-root MuiButton-root MuiButton-outlined btn top outlined white"
-          disabled={false}
+          className="MuiButtonBase-root MuiButton-root WithStyles(ForwardRef(Button))-root-1 MuiButton-contained btn top Mui-disabled Mui-disabled"
+          disabled={true}
           onBlur={[Function]}
           onClick={[Function]}
           onDragLeave={[Function]}
@@ -61,7 +61,31 @@ exports[`Scene Selection page snapshot test 1`] = `
           onTouchEnd={[Function]}
           onTouchMove={[Function]}
           onTouchStart={[Function]}
-          tabIndex={0}
+          tabIndex={-1}
+          type="button"
+        >
+          <span
+            className="MuiButton-label"
+          >
+            Delete
+          </span>
+        </button>
+        <button
+          className="MuiButtonBase-root MuiButton-root MuiButton-outlined btn top outlined white Mui-disabled Mui-disabled"
+          disabled={true}
+          onBlur={[Function]}
+          onClick={[Function]}
+          onDragLeave={[Function]}
+          onFocus={[Function]}
+          onKeyDown={[Function]}
+          onKeyUp={[Function]}
+          onMouseDown={[Function]}
+          onMouseLeave={[Function]}
+          onMouseUp={[Function]}
+          onTouchEnd={[Function]}
+          onTouchMove={[Function]}
+          onTouchStart={[Function]}
+          tabIndex={-1}
           type="button"
         >
           <span
@@ -102,7 +126,7 @@ exports[`Scene Selection page snapshot test 1`] = `
             className="imageListItemWide"
           >
             <div
-              className="MuiBox-root MuiBox-root-1"
+              className="MuiBox-root MuiBox-root-2"
               onClick={[Function]}
             />
             <p
@@ -132,7 +156,7 @@ exports[`Scene Selection page snapshot test 1`] = `
             className="imageListItemWide"
           >
             <div
-              className="MuiBox-root MuiBox-root-2"
+              className="MuiBox-root MuiBox-root-3"
             />
             <p
               className="text"
@@ -161,7 +185,7 @@ exports[`Scene Selection page snapshot test 1`] = `
             className="imageListItemWide"
           >
             <div
-              className="MuiBox-root MuiBox-root-3"
+              className="MuiBox-root MuiBox-root-4"
             />
             <p
               className="text"
