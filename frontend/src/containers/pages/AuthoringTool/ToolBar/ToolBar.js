@@ -1,12 +1,5 @@
 import React, { useState } from "react";
-import {
-  Box,
-  Tooltip,
-  Button,
-  MenuList,
-  Menu,
-  MenuItem,
-} from "@material-ui/core";
+import { Box, Tooltip, Button, MenuList, Menu } from "@material-ui/core";
 import ArrowDropDownIcon from "@material-ui/icons/ArrowDropDown";
 import toolBarData from "./ToolBarData";
 import styles from "../../../../styling/ToolBar.module.scss";
@@ -63,6 +56,8 @@ export default function ToolBar() {
   );
 }
 
+// This is the tool dropdown
+// It is only rendered when the tool component has a dropdown
 const SubMenu = ({ tool, open, anchorEl, handleDropdownClose }) => {
   return (
     <Menu
@@ -81,19 +76,7 @@ const SubMenu = ({ tool, open, anchorEl, handleDropdownClose }) => {
       }}
     >
       {tool.dropdown.map((dropdown) => {
-        return (
-          <Tooltip title={dropdown.title} enterDelay={200} key={dropdown.title}>
-            <MenuItem
-              className={styles.menuItem}
-              key={dropdown.title}
-              onClick={dropdown.menuOnClick}
-            >
-              {dropdown.icon}
-              &nbsp;&nbsp;
-              {dropdown.title}
-            </MenuItem>
-          </Tooltip>
-        );
+        return dropdown.component;
       })}
     </Menu>
   );
