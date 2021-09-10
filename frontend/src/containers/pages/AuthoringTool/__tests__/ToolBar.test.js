@@ -1,7 +1,7 @@
 import React from "react";
 import renderer from "react-test-renderer";
 import { BrowserRouter } from "react-router-dom";
-import ToolBar from "../ToolBar";
+import ToolBar from "../ToolBar/ToolBar";
 
 test("Scenario Selection page snapshot test", () => {
   const component = renderer.create(
