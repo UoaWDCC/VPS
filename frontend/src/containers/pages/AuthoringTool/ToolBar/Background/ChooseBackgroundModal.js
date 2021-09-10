@@ -1,5 +1,4 @@
 import React from "react";
-import ReactDOM from "react-dom";
 import { withStyles } from "@material-ui/core/styles";
 import Button from "@material-ui/core/Button";
 import Dialog from "@material-ui/core/Dialog";
@@ -45,12 +44,13 @@ const DialogTitle = withStyles(styles)((props) => {
 
 export default function ChooseBackgroundModal({ isShowing, hide }) {
   console.log(isShowing);
-  return ReactDOM.createPortal(
+  return (
     <div>
       <Dialog
         onClose={hide}
         aria-labelledby="customized-dialog-title"
         open={isShowing}
+        container={modalRoot}
       >
         <DialogTitle id="customized-dialog-title" onClose={hide}>
           Modal title
@@ -78,7 +78,6 @@ export default function ChooseBackgroundModal({ isShowing, hide }) {
           </Button>
         </MuiDialogActions>
       </Dialog>
-    </div>,
-    modalRoot
+    </div>
   );
 }
