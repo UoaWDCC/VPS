@@ -9,8 +9,6 @@ import IconButton from "@material-ui/core/IconButton";
 import CloseIcon from "@material-ui/icons/Close";
 import Typography from "@material-ui/core/Typography";
 
-const modalRoot = document.querySelector("#modal-root");
-
 const styles = (theme) => ({
   root: {
     margin: 0,
@@ -50,7 +48,6 @@ export default function ChooseBackgroundModal({ isShowing, hide }) {
         onClose={hide}
         aria-labelledby="customized-dialog-title"
         open={isShowing}
-        container={modalRoot}
       >
         <DialogTitle id="customized-dialog-title" onClose={hide}>
           Modal title
