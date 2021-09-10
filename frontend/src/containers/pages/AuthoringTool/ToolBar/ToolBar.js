@@ -75,8 +75,9 @@ const SubMenu = ({ tool, open, anchorEl, handleDropdownClose }) => {
         horizontal: "left",
       }}
     >
-      {tool.dropdown.map((dropdown) => {
-        return dropdown.component;
+      {tool.dropdown.map((dropdown, index) => {
+        // eslint-disable-next-line react/no-array-index-key
+        return <div key={index}>{dropdown.component}</div>;
       })}
     </Menu>
   );
