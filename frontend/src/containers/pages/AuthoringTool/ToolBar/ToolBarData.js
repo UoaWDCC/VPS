@@ -29,14 +29,29 @@ const toolBarData = [
   {
     title: "Text",
     icon: <TextFieldsIcon fontSize="medium" />,
-    dropdown: [],
+    onClick: () => {
+      console.log("audio clicked");
+    },
   },
   {
     title: "Audio",
     icon: <VolumeUpIcon fontSize="medium" />,
-    onClick: () => {
-      console.log("audio clicked");
-    },
+    dropdown: [
+      {
+        title: "choose from bank",
+        icon: <CloudQueueIcon fontSize="medium" />,
+        onClick: () => {
+          console.log("choose from bank");
+        },
+      },
+      {
+        title: "upload",
+        icon: <PublishIcon fontSize="medium" />,
+        onClick: () => {
+          console.log("upload");
+        },
+      },
+    ],
   },
 ];
 
