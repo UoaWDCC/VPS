@@ -12,13 +12,7 @@ function ChooseBackgroundSubMenu() {
   const { isShowing, hide, show } = useChooseBackgroundModal();
   return (
     <>
-      <MenuItem
-        className={styles.menuItem}
-        onClick={() => {
-          console.log("yesme");
-          show();
-        }}
-      >
+      <MenuItem className={styles.menuItem} onClick={show}>
         <CloudQueueIcon fontSize="medium" />
         &nbsp;&nbsp;Choose background
       </MenuItem>

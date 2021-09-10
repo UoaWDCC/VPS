@@ -41,7 +41,6 @@ const DialogTitle = withStyles(styles)((props) => {
 });
 
 export default function ChooseBackgroundModal({ isShowing, hide }) {
-  console.log(isShowing);
   return (
     <div>
       <Dialog
