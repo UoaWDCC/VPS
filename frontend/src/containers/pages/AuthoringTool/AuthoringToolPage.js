@@ -2,7 +2,7 @@ import React, { useContext } from "react";
 import { useParams } from "react-router-dom";
 import { Button } from "@material-ui/core";
 import TopBar from "../../../components/TopBar";
-import ToolBar from "./ToolBar";
+import ToolBar from "./ToolBar/ToolBar";
 import Canvas from "./Canvas";
 import CanvasSideBar from "./CanvasSideBar/CanvasSideBar";
 import ScreenContainer from "../../../components/ScreenContainer";
