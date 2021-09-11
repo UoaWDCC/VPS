@@ -3,7 +3,7 @@ import renderer from "react-test-renderer";
 import { BrowserRouter } from "react-router-dom";
 import ChooseBackgroundModal from "../Background/ChooseBackgroundModal";
 
-test("Scenario Selection page snapshot test", () => {
+test("ChooseBackgroundModal component snapshot test", () => {
   const component = renderer.create(
     <BrowserRouter>
       <ChooseBackgroundModal />

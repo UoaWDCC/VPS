@@ -3,7 +3,7 @@ import renderer from "react-test-renderer";
 import { BrowserRouter } from "react-router-dom";
 import ChooseBackgroundSubMenu from "../Background/ChooseBackgroundSubMenu";
 
-test("Scenario Selection page snapshot test", () => {
+test("ChooseBackgroundSubMenu component snapshot test", () => {
   const component = renderer.create(
     <BrowserRouter>
       <ChooseBackgroundSubMenu />
