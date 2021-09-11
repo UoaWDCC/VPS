@@ -2,13 +2,22 @@ import Button from "@material-ui/core/Button";
 import Dialog from "@material-ui/core/Dialog";
 import Typography from "@material-ui/core/Typography";
 import React, { useContext } from "react";
-import { DialogActions, DialogContent, DialogTitle } from "@material-ui/core";
+import { DialogContent, DialogTitle } from "@material-ui/core";
+import MuiDialogActions from "@material-ui/core/DialogActions";
 import { Link } from "react-router-dom";
+import { withStyles } from "@material-ui/core/styles";
 import styles from "../styling/BackModal.module.scss";
 import ScenarioContext from "../context/ScenarioContext";
 
 export default function BackModal({ isOpen, handleClose }) {
   const { currentScenario } = useContext(ScenarioContext);
+
+  const DialogActions = withStyles(() => ({
+    root: {
+      justifyContent: "space-between",
+    },
+  }))(MuiDialogActions);
+
   return (
     <div>
       <Dialog
@@ -25,9 +34,7 @@ export default function BackModal({ isOpen, handleClose }) {
             Are you sure you want to leave? Unsaved changes will be lost.
           </Typography>
         </DialogContent>
-        <DialogActions
-          className={`${styles.dialogBody} ${styles.dialogActions} `}
-        >
+        <DialogActions className={`${styles.dialogBody}`}>
           <Button
             className="btn contained red"
             autoFocus
