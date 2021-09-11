@@ -68,9 +68,9 @@ export function SceneSelectionPage({ data = null }) {
           Delete
         </DeleteButton>
         <Button
-          className="btn top outlined white"
+          className="btn top white"
           color="default"
-          variant="outlined"
+          variant="contained"
           disabled={!currentScene}
           onClick={editScene}
         >
