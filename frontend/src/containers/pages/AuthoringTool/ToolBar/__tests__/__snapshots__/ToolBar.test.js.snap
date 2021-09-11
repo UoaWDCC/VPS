@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`Scenario Selection page snapshot test 1`] = `
+exports[`ToolBar component snapshot test 1`] = `
 <ul
   className="MuiList-root toolBar MuiList-padding"
   onKeyDown={[Function]}
