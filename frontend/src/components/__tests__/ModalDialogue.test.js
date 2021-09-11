@@ -1,12 +1,12 @@
 import React from "react";
 import renderer from "react-test-renderer";
 import { BrowserRouter } from "react-router-dom";
-import ToolBar from "../ToolBar";
+import ModalDialogue from "../ModalDialogue";
 
-test("Scenario Selection page snapshot test", () => {
+test("ModalDialogue component snapshot test", () => {
   const component = renderer.create(
     <BrowserRouter>
-      <ToolBar />
+      <ModalDialogue />
     </BrowserRouter>
   );
 
