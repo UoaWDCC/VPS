@@ -6,10 +6,10 @@ import { DialogContent, DialogTitle } from "@material-ui/core";
 import MuiDialogActions from "@material-ui/core/DialogActions";
 import { Link } from "react-router-dom";
 import { withStyles } from "@material-ui/core/styles";
-import styles from "../styling/BackModal.module.scss";
-import ScenarioContext from "../context/ScenarioContext";
+import styles from "../../../styling/BackModal.module.scss";
+import ScenarioContext from "../../../context/ScenarioContext";
 
-export default function BackModal({ isOpen, handleClose }) {
+export default function BackModal({ isOpen = true, handleClose }) {
   const { currentScenario } = useContext(ScenarioContext);
 
   const DialogActions = withStyles(() => ({

@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import Button from "@material-ui/core/Button";
 
 import styles from "../styling/TopBar.module.scss";
-import BackModal from "./BackModal";
+import BackModal from "../containers/pages/AuthoringTool/BackModal";
 
 export default function TopBar({
   back = "/",
