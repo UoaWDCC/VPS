@@ -40,7 +40,7 @@ exports[`Scene Selection page snapshot test 1`] = `
             class="listItem"
           >
             <button
-              class="MuiButtonBase-root MuiButton-root WithStyles(ForwardRef(Button))-root-1 MuiButton-contained btn top"
+              class="MuiButtonBase-root MuiButton-root WithStyles(ForwardRef(Button))-root-1 MuiButton-contained btn top contained   "
               tabindex="0"
               type="button"
             >
@@ -54,7 +54,7 @@ exports[`Scene Selection page snapshot test 1`] = `
               />
             </button>
             <button
-              class="MuiButtonBase-root MuiButton-root MuiButton-outlined btn top outlined white"
+              class="MuiButtonBase-root MuiButton-root MuiButton-contained btn top contained white   "
               tabindex="0"
               type="button"
             >

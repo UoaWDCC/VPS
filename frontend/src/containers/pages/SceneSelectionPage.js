@@ -61,7 +61,7 @@ export function SceneSelectionPage({ data = null }) {
     <ScreenContainer vertical>
       <TopBar>
         <DeleteButton
-          className="btn top"
+          className={`btn top contained ${currentScene ? "" : "disabled"}  `}
           color="default"
           variant="contained"
           disabled={!currentScene}
@@ -70,9 +70,11 @@ export function SceneSelectionPage({ data = null }) {
           Delete
         </DeleteButton>
         <Button
-          className="btn top outlined white"
+          className={`btn top contained white ${
+            currentScene ? "" : "disabled"
+          }  `}
           color="default"
-          variant="outlined"
+          variant="contained"
           disabled={!currentScene}
           onClick={editScene}
         >

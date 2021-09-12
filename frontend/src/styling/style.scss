@@ -39,6 +39,10 @@ body {
   border-color: #008a7b;
 }
 
+.btn.disabled {
+  opacity: 0.3;
+}
+
 .btn.contained.red {
   background-color: #e53935;
   color: #fafafa;
