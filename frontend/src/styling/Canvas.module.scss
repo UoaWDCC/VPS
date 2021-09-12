@@ -19,12 +19,6 @@
 }
 
 .moveable {
-  display: block;
-  font-family: "Roboto", sans-serif;
-  position: relative;
-  width: 50px;
-  height: 50px;
-  text-align: center;
-  margin: 0px;
-  background-color: #008a7b;
+  background-color: #008a7b !important;
+  border-radius: 5px;
 }

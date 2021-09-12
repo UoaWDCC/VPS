@@ -1,9 +1,9 @@
 import React from "react";
 import renderer from "react-test-renderer";
 import { BrowserRouter } from "react-router-dom";
-import AuthoringToolPage from "../AuthoringToolPage";
-import SceneContextProvider from "../../../../context/SceneContextProvider";
-import ScenarioContext from "../../../../context/ScenarioContext";
+import AuthoringToolPage from "../../AuthoringToolPage";
+import SceneContextProvider from "../../../../../context/SceneContextProvider";
+import ScenarioContext from "../../../../../context/ScenarioContext";
 
 test("Scenario Selection page snapshot test", () => {
   const context = {
