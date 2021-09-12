@@ -78,7 +78,6 @@ exports[`ShareModal component snapshot test 1`] = `
                 </legend>
               </fieldset>
             </div>
-            
           </div>
           <button
             class="MuiButtonBase-root MuiButton-root MuiButton-text btn contained white dialogItem MuiButton-textPrimary Mui-focusVisible Mui-focusVisible"
