@@ -50,7 +50,7 @@ export default function SideBar() {
           <li>
             <Button
               className={`btn side contained white ${
-                currentScenario ? "" : styles.buttonDisabled
+                currentScenario ? "" : "disabled"
               }  `}
               color="default"
               variant="contained"
