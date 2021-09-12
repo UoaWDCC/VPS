@@ -44,7 +44,7 @@ exports[`Scenario Selection page snapshot test 1`] = `
       <li>
         <a
           aria-disabled={true}
-          className="MuiButtonBase-root MuiButton-root MuiButton-contained btn side contained white buttonDisabled   Mui-disabled Mui-disabled"
+          className="MuiButtonBase-root MuiButton-root MuiButton-contained btn side contained white disabled   Mui-disabled Mui-disabled"
           href="/scenario/null"
           onBlur={[Function]}
           onClick={[Function]}

@@ -47,7 +47,7 @@ exports[`Scene Selection page snapshot test 1`] = `
         className="listItem"
       >
         <button
-          className="MuiButtonBase-root MuiButton-root WithStyles(ForwardRef(Button))-root-1 MuiButton-contained btn top Mui-disabled Mui-disabled"
+          className="MuiButtonBase-root MuiButton-root WithStyles(ForwardRef(Button))-root-1 MuiButton-contained btn top contained disabled   Mui-disabled Mui-disabled"
           disabled={true}
           onBlur={[Function]}
           onClick={[Function]}
@@ -71,7 +71,7 @@ exports[`Scene Selection page snapshot test 1`] = `
           </span>
         </button>
         <button
-          className="MuiButtonBase-root MuiButton-root MuiButton-contained btn top white Mui-disabled Mui-disabled"
+          className="MuiButtonBase-root MuiButton-root MuiButton-contained btn top contained white disabled   Mui-disabled Mui-disabled"
           disabled={true}
           onBlur={[Function]}
           onClick={[Function]}

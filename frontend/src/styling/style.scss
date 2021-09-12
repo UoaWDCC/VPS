@@ -39,6 +39,9 @@ body {
   border-color: #008a7b;
 }
 
+.btn.disabled {
+  opacity: 0.3;
+}
 /********************************** Text Field **********************************/
 
 .textField.standard {
