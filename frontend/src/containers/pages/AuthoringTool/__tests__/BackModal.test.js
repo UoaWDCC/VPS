@@ -1,25 +1,24 @@
 import React from "react";
-import renderer from "react-test-renderer";
 import { BrowserRouter } from "react-router-dom";
-import AuthoringToolPage from "../AuthoringToolPage";
-import SceneContextProvider from "../../../../context/SceneContextProvider";
+import { render } from "@testing-library/react";
+import BackModal from "../BackModal";
 import ScenarioContext from "../../../../context/ScenarioContext";
+import SceneContextProvider from "../../../../context/SceneContextProvider";
 
-test("Scenario Selection page snapshot test", () => {
+test("BackModal component snapshot test", () => {
   const context = {
     currentScenario: { _id: "scenarioId" },
   };
 
-  const component = renderer.create(
+  const { baseElement } = render(
     <BrowserRouter>
       <ScenarioContext.Provider value={context}>
         <SceneContextProvider>
-          <AuthoringToolPage />
+          <BackModal isOpen />
         </SceneContextProvider>
       </ScenarioContext.Provider>
     </BrowserRouter>
   );
 
-  const tree = component.toJSON();
-  expect(tree).toMatchSnapshot();
+  expect(baseElement).toMatchSnapshot();
 });

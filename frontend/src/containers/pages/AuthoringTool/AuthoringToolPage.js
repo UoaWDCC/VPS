@@ -29,7 +29,7 @@ export default function AuthoringToolPage() {
   return (
     <>
       <ScreenContainer vertical>
-        <TopBar back={`/scenario/${currentScenario?._id}`}>
+        <TopBar back={`/scenario/${currentScenario?._id}`} confirmModal>
           <Button
             className="btn top contained white"
             color="default"
