@@ -1,4 +1,4 @@
-import React, { useContext, useEffect } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import {
   useParams,
   Route,
@@ -14,8 +14,10 @@ import SceneContext from "../../context/SceneContext";
 import AuthoringToolPage from "./AuthoringTool/AuthoringToolPage";
 import { usePost, useDelete } from "../../hooks/crudHooks";
 import DeleteButton from "../../components/DeleteButton";
+import ShareModal from "../../components/ShareModal";
 
 export function SceneSelectionPage({ data = null }) {
+  const [isShareModalOpen, setShareModalOpen] = useState(false);
   const { scenarioId } = useParams();
   const { url } = useRouteMatch();
   const history = useHistory();
@@ -76,12 +78,24 @@ export function SceneSelectionPage({ data = null }) {
         >
           Edit
         </Button>
+        <Button
+          className="btn top contained white"
+          color="default"
+          variant="outlined"
+          onClick={() => setShareModalOpen(true)}
+        >
+          Share
+        </Button>
       </TopBar>
       <ListContainer
         data={data || scenes}
         onItemSelected={setCurrentScene}
         addCard={createNewScene}
         wide
+      />
+      <ShareModal
+        isOpen={isShareModalOpen}
+        handleClose={() => setShareModalOpen(false)}
       />
     </ScreenContainer>
   );
