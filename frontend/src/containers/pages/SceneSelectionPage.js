@@ -79,12 +79,12 @@ export function SceneSelectionPage({ data = null }) {
           Edit
         </Button>
         <Button
-          className="btn top outlined white"
+          className="btn top contained white"
           color="default"
           variant="outlined"
           onClick={() => setShareModalOpen(true)}
         >
-          share
+          Share
         </Button>
       </TopBar>
       <ListContainer
