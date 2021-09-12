@@ -11,17 +11,20 @@ export default function ShareModal({ isOpen, handleClose }) {
   const [copySuccess, setCopySuccess] = useState(false);
   const url = `${window.location.origin}/play/${currentScenario._id}`;
 
+  function onClose() {
+    handleClose();
+    setCopySuccess(false);
+  }
+
   return (
     <div>
       <Dialog
         className={styles.dialog}
-        onClose={handleClose}
+        onClose={onClose}
         open={isOpen}
         fullWidth="sm"
       >
-        <DialogTitle className={styles.dialogTitle} onClose={handleClose}>
-          Shareable Link
-        </DialogTitle>
+        <DialogTitle className={styles.dialogTitle}>Shareable Link</DialogTitle>
         <DialogContent className={styles.dialogContent}>
           <Typography className={styles.dialogItem}>
             Give this link to others so they can play this scenario
@@ -34,7 +37,6 @@ export default function ShareModal({ isOpen, handleClose }) {
             }}
             variant="outlined"
             fullWidth
-            helperText={copySuccess ? "Copied!" : ""}
           />
           <Button
             className={`btn contained white ${styles.dialogItem}`}
@@ -45,7 +47,7 @@ export default function ShareModal({ isOpen, handleClose }) {
             }}
             color="primary"
           >
-            Copy Link
+            {copySuccess ? "Copied!" : "Copy Link"}
           </Button>
         </DialogContent>
       </Dialog>
