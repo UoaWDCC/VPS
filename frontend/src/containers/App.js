@@ -1,6 +1,7 @@
 import React from "react";
 import { BrowserRouter, Switch, Route } from "react-router-dom";
 import ScenarioSelectionPage from "./pages/ScenarioSelectionPage";
+import PlayScenarioPage from "./pages/PlayScenarioPage";
 import { ScenePage } from "./pages/SceneSelectionPage";
 import ScenarioContextProvider from "../context/ScenarioContextProvider";
 import SceneContextProvider from "../context/SceneContextProvider";
@@ -15,6 +16,7 @@ export default function App() {
         <BrowserRouter>
           <Switch>
             <Route exact path="/" component={ScenarioSelectionPage} />
+            <Route path="/play/:scenarioId" component={PlayScenarioPage} />
             <SceneContextProvider>
               <Route path="/scenario/:scenarioId" component={ScenePage} />
             </SceneContextProvider>

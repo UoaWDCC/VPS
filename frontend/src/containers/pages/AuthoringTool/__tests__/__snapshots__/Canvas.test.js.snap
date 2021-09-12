@@ -13,10 +13,9 @@ exports[`Scenario Selection page snapshot test 1`] = `
       <li
         className="listItem"
       >
-        <a
-          aria-disabled={false}
+        <button
           className="MuiButtonBase-root MuiButton-root MuiButton-outlined btn top outlined white"
-          href="/scenario/undefined"
+          disabled={false}
           onBlur={[Function]}
           onClick={[Function]}
           onDragLeave={[Function]}
@@ -29,8 +28,8 @@ exports[`Scenario Selection page snapshot test 1`] = `
           onTouchEnd={[Function]}
           onTouchMove={[Function]}
           onTouchStart={[Function]}
-          role="button"
           tabIndex={0}
+          type="button"
         >
           <span
             className="MuiButton-label"
@@ -40,7 +39,7 @@ exports[`Scenario Selection page snapshot test 1`] = `
           <span
             className="MuiTouchRipple-root"
           />
-        </a>
+        </button>
       </li>
     </ul>
     <ul
@@ -79,6 +78,7 @@ exports[`Scenario Selection page snapshot test 1`] = `
       </li>
     </ul>
   </div>
+  <div />
   <ul
     className="MuiList-root toolBar MuiList-padding"
     onKeyDown={[Function]}
