@@ -33,14 +33,13 @@ export default function Canvas() {
 
       <div className={styles.canvasContainer}>
         <div id="canvas" className={styles.canvas}>
-          {[{ type: "test" }, ...currentScene.components].map(
-            (component, index) =>
+          {[{ type: "test" }]
+            .concat(currentScene.components)
+            .map((component, index) =>
               componentResolver(component, index, selectElement)
-          )}
+            )}
         </div>
       </div>
     </>
   );
 }
-
-// 8 8 5 2 2 3 5 2 5

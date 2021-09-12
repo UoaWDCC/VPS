@@ -1,8 +1,8 @@
 import React from "react";
-import renderer from "react-test-renderer";
+import { render } from "@testing-library/react";
 import { BrowserRouter } from "react-router-dom";
 import { SceneSelectionPage } from "../SceneSelectionPage";
-import SceneContextProvider from "../../../context/SceneContextProvider";
+import SceneContext from "../../../context/SceneContext";
 import ScenarioContext from "../../../context/ScenarioContext";
 
 const dummyScenes = [
@@ -13,18 +13,19 @@ const dummyScenes = [
 test("Scene Selection page snapshot test", () => {
   const context = {
     currentScenario: { _id: "scenarioId" },
+    currentScene: { _id: "sceneId", components: [] },
+    setCurrentScene: () => {},
   };
 
-  const component = renderer.create(
+  const { baseElement } = render(
     <BrowserRouter>
       <ScenarioContext.Provider value={context}>
-        <SceneContextProvider>
+        <SceneContext.Provider value={context}>
           <SceneSelectionPage data={dummyScenes} />
-        </SceneContextProvider>
+        </SceneContext.Provider>
       </ScenarioContext.Provider>
     </BrowserRouter>
   );
 
-  const tree = component.toJSON();
-  expect(tree).toMatchSnapshot();
+  expect(baseElement).toMatchSnapshot();
 });
