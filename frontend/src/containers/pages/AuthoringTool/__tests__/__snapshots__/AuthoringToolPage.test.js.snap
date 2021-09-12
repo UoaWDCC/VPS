@@ -258,7 +258,9 @@ exports[`Authoring Tool page snapshot test 1`] = `
             <div
               class="MuiBox-root MuiBox-root-2"
               id="0"
-            />
+            >
+              Hello World
+            </div>
           </div>
         </div>
         <div
