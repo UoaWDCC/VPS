@@ -1,48 +1,51 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Top Bar component snapshot test 1`] = `
-<div
-  className="topBar"
->
-  <ul
-    className="leftTopBarList"
+Array [
+  <div
+    className="topBar"
   >
-    <li
-      className="listItem"
+    <ul
+      className="leftTopBarList"
     >
-      <a
-        aria-disabled={false}
-        className="MuiButtonBase-root MuiButton-root MuiButton-outlined btn top outlined white"
-        href="/"
-        onBlur={[Function]}
-        onClick={[Function]}
-        onDragLeave={[Function]}
-        onFocus={[Function]}
-        onKeyDown={[Function]}
-        onKeyUp={[Function]}
-        onMouseDown={[Function]}
-        onMouseLeave={[Function]}
-        onMouseUp={[Function]}
-        onTouchEnd={[Function]}
-        onTouchMove={[Function]}
-        onTouchStart={[Function]}
-        role="button"
-        tabIndex={0}
+      <li
+        className="listItem"
       >
-        <span
-          className="MuiButton-label"
+        <a
+          aria-disabled={false}
+          className="MuiButtonBase-root MuiButton-root MuiButton-outlined btn top outlined white"
+          href="/"
+          onBlur={[Function]}
+          onClick={[Function]}
+          onDragLeave={[Function]}
+          onFocus={[Function]}
+          onKeyDown={[Function]}
+          onKeyUp={[Function]}
+          onMouseDown={[Function]}
+          onMouseLeave={[Function]}
+          onMouseUp={[Function]}
+          onTouchEnd={[Function]}
+          onTouchMove={[Function]}
+          onTouchStart={[Function]}
+          role="button"
+          tabIndex={0}
         >
-          Back
-        </span>
-      </a>
-    </li>
-  </ul>
-  <ul
-    className="rightTopBarList"
-  >
-    <li
-      className="listItem"
-    />
-  </ul>
-</div>
+          <span
+            className="MuiButton-label"
+          >
+            Back
+          </span>
+        </a>
+      </li>
+    </ul>
+    <ul
+      className="rightTopBarList"
+    >
+      <li
+        className="listItem"
+      />
+    </ul>
+  </div>,
+  <div />,
+]
 `;
