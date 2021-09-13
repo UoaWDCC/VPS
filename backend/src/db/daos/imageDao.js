@@ -8,5 +8,9 @@ const createImage = async (url) => {
   await dbImage.save();
 };
 
+const retrieveImageList = async () => {
+  return Image.find();
+};
+
 // eslint-disable-next-line import/prefer-default-export
-export { createImage };
+export { createImage, retrieveImageList };

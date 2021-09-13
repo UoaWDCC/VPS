@@ -1,6 +1,6 @@
 import { Router } from "express";
 
-import { createImage } from "../../db/daos/imageDao";
+import { createImage, retrieveImageList } from "../../db/daos/imageDao";
 
 const router = Router();
 
@@ -11,6 +11,12 @@ router.post("/", async (req, res) => {
   urls.forEach((url) => createImage(url));
 
   res.status(HTTP_OK).json("image received");
+});
+
+router.get("/", async (req, res) => {
+  const images = await retrieveImageList();
+
+  res.status(HTTP_OK).json(images);
 });
 
 export default router;
