@@ -8,6 +8,7 @@ import componentResolver from "./componentResolver";
 
 export default function Canvas() {
   const [select, setSelect] = useState(0);
+  const [bounds, setBounds] = useState();
   const { currentScene } = useContext(SceneContext);
 
   function selectElement({ target }) {
@@ -19,10 +20,37 @@ export default function Canvas() {
       <Moveable
         target={document.getElementById(select)}
         draggable
-        scalable
-        throttleDrag={0}
+        snappable
+        snapThreshold={5}
+        throttleDrag={1}
+        bounds={bounds}
+        onDragStart={() => {
+          const canvas = document
+            .getElementById("canvas")
+            .getBoundingClientRect();
+          setBounds({
+            left: canvas.left,
+            top: canvas.top,
+            bottom: canvas.bottom,
+            right: canvas.right,
+          });
+        }}
         onDrag={({ target, transform }) => {
           target.style.transform = transform;
+        }}
+        onDragEnd={({ target }) => {
+          const canvas = document
+            .getElementById("canvas")
+            .getBoundingClientRect();
+          const transfromMatrix = window
+            .getComputedStyle(target)
+            .transform.match(/(-?[0-9\\.]+)/g);
+          // X is pos 4, y is pos 5
+          // position is top left
+          if (transfromMatrix != null) {
+            console.log(`x: ${(transfromMatrix[4] * 100) / canvas.width}`);
+            console.log(`y: ${(transfromMatrix[5] * 100) / canvas.height}`);
+          }
         }}
         onScale={({ target, scale, drag }) => {
           target.style.transform =
