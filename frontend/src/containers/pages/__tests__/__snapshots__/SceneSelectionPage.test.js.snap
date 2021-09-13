@@ -1,227 +1,167 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Scene Selection page snapshot test 1`] = `
-<div
-  className="colContainer"
->
-  <div
-    className="topBar"
-  >
-    <ul
-      className="leftTopBarList"
+<body>
+  <div>
+    <div
+      class="colContainer"
     >
-      <li
-        className="listItem"
+      <div
+        class="topBar"
       >
-        <a
-          aria-disabled={false}
-          className="MuiButtonBase-root MuiButton-root MuiButton-outlined btn top outlined white"
-          href="/"
-          onBlur={[Function]}
-          onClick={[Function]}
-          onDragLeave={[Function]}
-          onFocus={[Function]}
-          onKeyDown={[Function]}
-          onKeyUp={[Function]}
-          onMouseDown={[Function]}
-          onMouseLeave={[Function]}
-          onMouseUp={[Function]}
-          onTouchEnd={[Function]}
-          onTouchMove={[Function]}
-          onTouchStart={[Function]}
-          role="button"
-          tabIndex={0}
+        <ul
+          class="leftTopBarList"
         >
-          <span
-            className="MuiButton-label"
+          <li
+            class="listItem"
           >
-            Back
-          </span>
-        </a>
-      </li>
-    </ul>
-    <ul
-      className="rightTopBarList"
-    >
-      <li
-        className="listItem"
+            <a
+              aria-disabled="false"
+              class="MuiButtonBase-root MuiButton-root MuiButton-outlined btn top outlined white"
+              href="/"
+              role="button"
+              tabindex="0"
+            >
+              <span
+                class="MuiButton-label"
+              >
+                Back
+              </span>
+              <span
+                class="MuiTouchRipple-root"
+              />
+            </a>
+          </li>
+        </ul>
+        <ul
+          class="rightTopBarList"
+        >
+          <li
+            class="listItem"
+          >
+            <button
+              class="MuiButtonBase-root MuiButton-root WithStyles(ForwardRef(Button))-root-1 MuiButton-contained btn top contained   "
+              tabindex="0"
+              type="button"
+            >
+              <span
+                class="MuiButton-label"
+              >
+                Delete
+              </span>
+              <span
+                class="MuiTouchRipple-root"
+              />
+            </button>
+            <button
+              class="MuiButtonBase-root MuiButton-root MuiButton-contained btn top contained white   "
+              tabindex="0"
+              type="button"
+            >
+              <span
+                class="MuiButton-label"
+              >
+                Edit
+              </span>
+              <span
+                class="MuiTouchRipple-root"
+              />
+            </button>
+            <button
+              class="MuiButtonBase-root MuiButton-root MuiButton-outlined btn top contained white"
+              tabindex="0"
+              type="button"
+            >
+              <span
+                class="MuiButton-label"
+              >
+                Share
+              </span>
+              <span
+                class="MuiTouchRipple-root"
+              />
+            </button>
+          </li>
+        </ul>
+      </div>
+      <div />
+      <div
+        class="scenarioListContainerWide"
       >
-        <button
-          className="MuiButtonBase-root MuiButton-root WithStyles(ForwardRef(Button))-root-1 MuiButton-contained btn top contained disabled   Mui-disabled Mui-disabled"
-          disabled={true}
-          onBlur={[Function]}
-          onClick={[Function]}
-          onDragLeave={[Function]}
-          onFocus={[Function]}
-          onKeyDown={[Function]}
-          onKeyUp={[Function]}
-          onMouseDown={[Function]}
-          onMouseLeave={[Function]}
-          onMouseUp={[Function]}
-          onTouchEnd={[Function]}
-          onTouchMove={[Function]}
-          onTouchStart={[Function]}
-          tabIndex={-1}
-          type="button"
+        <ul
+          class="MuiImageList-root"
+          style="margin: -15px;"
         >
-          <span
-            className="MuiButton-label"
+          <li
+            class="MuiImageListItem-root"
+            height="200"
+            style="width: 20%; height: 240px; padding: 15px;"
           >
-            Delete
-          </span>
-        </button>
-        <button
-          className="MuiButtonBase-root MuiButton-root MuiButton-contained btn top contained white disabled   Mui-disabled Mui-disabled"
-          disabled={true}
-          onBlur={[Function]}
-          onClick={[Function]}
-          onDragLeave={[Function]}
-          onFocus={[Function]}
-          onKeyDown={[Function]}
-          onKeyUp={[Function]}
-          onMouseDown={[Function]}
-          onMouseLeave={[Function]}
-          onMouseUp={[Function]}
-          onTouchEnd={[Function]}
-          onTouchMove={[Function]}
-          onTouchStart={[Function]}
-          tabIndex={-1}
-          type="button"
-        >
-          <span
-            className="MuiButton-label"
+            <div
+              class="MuiImageListItem-item"
+            >
+              <div
+                class="imageListItemWide"
+              >
+                <div
+                  class="MuiBox-root MuiBox-root-2"
+                />
+                <p
+                  class="text"
+                >
+                  Create New Scene
+                </p>
+              </div>
+            </div>
+          </li>
+          <li
+            class="MuiImageListItem-root"
+            height="200"
+            style="width: 20%; height: 240px; padding: 15px;"
           >
-            Edit
-          </span>
-        </button>
-        <button
-          className="MuiButtonBase-root MuiButton-root MuiButton-outlined btn top contained white"
-          disabled={false}
-          onBlur={[Function]}
-          onClick={[Function]}
-          onDragLeave={[Function]}
-          onFocus={[Function]}
-          onKeyDown={[Function]}
-          onKeyUp={[Function]}
-          onMouseDown={[Function]}
-          onMouseLeave={[Function]}
-          onMouseUp={[Function]}
-          onTouchEnd={[Function]}
-          onTouchMove={[Function]}
-          onTouchStart={[Function]}
-          tabIndex={0}
-          type="button"
-        >
-          <span
-            className="MuiButton-label"
+            <div
+              class="MuiImageListItem-item"
+            >
+              <div
+                class="imageListItemWide"
+              >
+                <div
+                  class="MuiBox-root MuiBox-root-3"
+                />
+                <p
+                  class="text"
+                >
+                  test1
+                </p>
+              </div>
+            </div>
+          </li>
+          <li
+            class="MuiImageListItem-root"
+            height="200"
+            style="width: 20%; height: 240px; padding: 15px;"
           >
-            Share
-          </span>
-        </button>
-      </li>
-    </ul>
+            <div
+              class="MuiImageListItem-item"
+            >
+              <div
+                class="imageListItemWide"
+              >
+                <div
+                  class="MuiBox-root MuiBox-root-4"
+                />
+                <p
+                  class="text"
+                >
+                  test2
+                </p>
+              </div>
+            </div>
+          </li>
+        </ul>
+      </div>
+      <div />
+    </div>
   </div>
-  <div />
-  <div
-    className="scenarioListContainerWide"
-  >
-    <ul
-      className="MuiImageList-root"
-      style={
-        Object {
-          "margin": -15,
-        }
-      }
-    >
-      <li
-        className="MuiImageListItem-root"
-        height={200}
-        style={
-          Object {
-            "height": 240,
-            "padding": 15,
-            "width": "20%",
-          }
-        }
-      >
-        <div
-          className="MuiImageListItem-item"
-        >
-          <div
-            className="imageListItemWide"
-          >
-            <div
-              className="MuiBox-root MuiBox-root-2"
-              onClick={[Function]}
-            />
-            <p
-              className="text"
-            >
-              Create New Scene
-            </p>
-          </div>
-        </div>
-      </li>
-      <li
-        className="MuiImageListItem-root"
-        height={200}
-        onClick={[Function]}
-        style={
-          Object {
-            "height": 240,
-            "padding": 15,
-            "width": "20%",
-          }
-        }
-      >
-        <div
-          className="MuiImageListItem-item"
-        >
-          <div
-            className="imageListItemWide"
-          >
-            <div
-              className="MuiBox-root MuiBox-root-3"
-            />
-            <p
-              className="text"
-            >
-              test1
-            </p>
-          </div>
-        </div>
-      </li>
-      <li
-        className="MuiImageListItem-root"
-        height={200}
-        onClick={[Function]}
-        style={
-          Object {
-            "height": 240,
-            "padding": 15,
-            "width": "20%",
-          }
-        }
-      >
-        <div
-          className="MuiImageListItem-item"
-        >
-          <div
-            className="imageListItemWide"
-          >
-            <div
-              className="MuiBox-root MuiBox-root-4"
-            />
-            <p
-              className="text"
-            >
-              test2
-            </p>
-          </div>
-        </div>
-      </li>
-    </ul>
-  </div>
-  <div />
-</div>
+</body>
 `;

@@ -3,7 +3,7 @@ import { useParams } from "react-router-dom";
 import { Button } from "@material-ui/core";
 import TopBar from "../../../components/TopBar";
 import ToolBar from "./ToolBar/ToolBar";
-import Canvas from "./Canvas";
+import Canvas from "./Canvas/Canvas";
 import CanvasSideBar from "./CanvasSideBar/CanvasSideBar";
 import ScreenContainer from "../../../components/ScreenContainer";
 import ScenarioContext from "../../../context/ScenarioContext";

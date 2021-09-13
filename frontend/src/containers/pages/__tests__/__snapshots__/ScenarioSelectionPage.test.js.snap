@@ -1,171 +1,128 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Scenario Selection page snapshot test 1`] = `
-<div
-  className="rowContainer"
->
-  <div
-    className="sideBar"
-  >
-    <img
-      alt="UoA Medical & Health Science Logo"
-      className="logo"
-      src="uoa-med-and-health-sci-logo.png"
-    />
-    <ul
-      className="sideBarList"
+<body>
+  <div>
+    <div
+      class="rowContainer"
     >
-      <li>
-        <button
-          className="MuiButtonBase-root MuiButton-root MuiButton-contained btn side contained white"
-          disabled={false}
-          onBlur={[Function]}
-          onClick={[Function]}
-          onDragLeave={[Function]}
-          onFocus={[Function]}
-          onKeyDown={[Function]}
-          onKeyUp={[Function]}
-          onMouseDown={[Function]}
-          onMouseLeave={[Function]}
-          onMouseUp={[Function]}
-          onTouchEnd={[Function]}
-          onTouchMove={[Function]}
-          onTouchStart={[Function]}
-          tabIndex={0}
-          type="button"
-        >
-          <span
-            className="MuiButton-label"
-          >
-            Create
-          </span>
-        </button>
-      </li>
-      <li>
-        <a
-          aria-disabled={true}
-          className="MuiButtonBase-root MuiButton-root MuiButton-contained btn side contained white disabled   Mui-disabled Mui-disabled"
-          href="/scenario/null"
-          onBlur={[Function]}
-          onClick={[Function]}
-          onDragLeave={[Function]}
-          onFocus={[Function]}
-          onKeyDown={[Function]}
-          onKeyUp={[Function]}
-          onMouseDown={[Function]}
-          onMouseLeave={[Function]}
-          onMouseUp={[Function]}
-          onTouchEnd={[Function]}
-          onTouchMove={[Function]}
-          onTouchStart={[Function]}
-          role="button"
-          tabIndex={-1}
-        >
-          <span
-            className="MuiButton-label"
-          >
-            Edit
-          </span>
-        </a>
-      </li>
-      <li>
-        <button
-          className="MuiButtonBase-root MuiButton-root WithStyles(ForwardRef(Button))-root-1 MuiButton-contained btn side contained Mui-disabled Mui-disabled"
-          disabled={true}
-          onBlur={[Function]}
-          onClick={[Function]}
-          onDragLeave={[Function]}
-          onFocus={[Function]}
-          onKeyDown={[Function]}
-          onKeyUp={[Function]}
-          onMouseDown={[Function]}
-          onMouseLeave={[Function]}
-          onMouseUp={[Function]}
-          onTouchEnd={[Function]}
-          onTouchMove={[Function]}
-          onTouchStart={[Function]}
-          tabIndex={-1}
-          type="button"
-        >
-          <span
-            className="MuiButton-label"
-          >
-            Delete
-          </span>
-        </button>
-      </li>
-    </ul>
-  </div>
-  <div
-    className="scenarioListContainer"
-  >
-    <ul
-      className="MuiImageList-root"
-      style={
-        Object {
-          "margin": -15,
-        }
-      }
-    >
-      <li
-        className="MuiImageListItem-root"
-        height={200}
-        onClick={[Function]}
-        style={
-          Object {
-            "height": 240,
-            "padding": 15,
-            "width": "25%",
-          }
-        }
+      <div
+        class="sideBar"
       >
-        <div
-          className="MuiImageListItem-item"
+        <img
+          alt="UoA Medical & Health Science Logo"
+          class="logo"
+          src="uoa-med-and-health-sci-logo.png"
+        />
+        <ul
+          class="sideBarList"
         >
-          <div
-            className="imageListItem"
+          <li>
+            <button
+              class="MuiButtonBase-root MuiButton-root MuiButton-contained btn side contained white"
+              tabindex="0"
+              type="button"
+            >
+              <span
+                class="MuiButton-label"
+              >
+                Create
+              </span>
+              <span
+                class="MuiTouchRipple-root"
+              />
+            </button>
+          </li>
+          <li>
+            <a
+              aria-disabled="false"
+              class="MuiButtonBase-root MuiButton-root MuiButton-contained btn side contained white   "
+              href="/scenario/scenarioId"
+              role="button"
+              tabindex="0"
+            >
+              <span
+                class="MuiButton-label"
+              >
+                Edit
+              </span>
+              <span
+                class="MuiTouchRipple-root"
+              />
+            </a>
+          </li>
+          <li>
+            <button
+              class="MuiButtonBase-root MuiButton-root WithStyles(ForwardRef(Button))-root-1 MuiButton-contained btn side contained"
+              tabindex="0"
+              type="button"
+            >
+              <span
+                class="MuiButton-label"
+              >
+                Delete
+              </span>
+              <span
+                class="MuiTouchRipple-root"
+              />
+            </button>
+          </li>
+        </ul>
+      </div>
+      <div
+        class="scenarioListContainer"
+      >
+        <ul
+          class="MuiImageList-root"
+          style="margin: -15px;"
+        >
+          <li
+            class="MuiImageListItem-root"
+            height="200"
+            style="width: 25%; height: 240px; padding: 15px;"
           >
             <div
-              className="MuiBox-root MuiBox-root-2"
-            />
-            <p
-              className="text"
+              class="MuiImageListItem-item"
             >
-              test1
-            </p>
-          </div>
-        </div>
-      </li>
-      <li
-        className="MuiImageListItem-root"
-        height={200}
-        onClick={[Function]}
-        style={
-          Object {
-            "height": 240,
-            "padding": 15,
-            "width": "25%",
-          }
-        }
-      >
-        <div
-          className="MuiImageListItem-item"
-        >
-          <div
-            className="imageListItem"
+              <div
+                class="imageListItem"
+              >
+                <div
+                  class="MuiBox-root MuiBox-root-2"
+                />
+                <p
+                  class="text"
+                >
+                  test1
+                </p>
+              </div>
+            </div>
+          </li>
+          <li
+            class="MuiImageListItem-root"
+            height="200"
+            style="width: 25%; height: 240px; padding: 15px;"
           >
             <div
-              className="MuiBox-root MuiBox-root-3"
-            />
-            <p
-              className="text"
+              class="MuiImageListItem-item"
             >
-              test2
-            </p>
-          </div>
-        </div>
-      </li>
-    </ul>
+              <div
+                class="imageListItem"
+              >
+                <div
+                  class="MuiBox-root MuiBox-root-3"
+                />
+                <p
+                  class="text"
+                >
+                  test2
+                </p>
+              </div>
+            </div>
+          </li>
+        </ul>
+      </div>
+    </div>
   </div>
-</div>
+</body>
 `;

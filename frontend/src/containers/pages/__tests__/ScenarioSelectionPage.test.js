@@ -1,23 +1,30 @@
 import React from "react";
-import renderer from "react-test-renderer";
+import { render } from "@testing-library/react";
 import { BrowserRouter } from "react-router-dom";
 import ScenarioSelectionPage from "../ScenarioSelectionPage";
-import ScenarioContextProvider from "../../../context/ScenarioContextProvider";
+import ScenarioContext from "../../../context/ScenarioContext";
 
 const dummyScenarios = [
   { id: 1, name: "test1" },
   { id: 2, name: "test2" },
 ];
 
+const context = {
+  currentScenario: { _id: "scenarioId" },
+  currentScene: { _id: "sceneId", components: [] },
+  scenarios: dummyScenarios,
+  setCurrentScenario: () => {},
+  reFetch: () => {},
+};
+
 test("Scenario Selection page snapshot test", () => {
-  const component = renderer.create(
+  const { baseElement } = render(
     <BrowserRouter>
-      <ScenarioContextProvider>
-        <ScenarioSelectionPage data={dummyScenarios} />
-      </ScenarioContextProvider>
+      <ScenarioContext.Provider value={context}>
+        <ScenarioSelectionPage />
+      </ScenarioContext.Provider>
     </BrowserRouter>
   );
 
-  const tree = component.toJSON();
-  expect(tree).toMatchSnapshot();
+  expect(baseElement).toMatchSnapshot();
 });
