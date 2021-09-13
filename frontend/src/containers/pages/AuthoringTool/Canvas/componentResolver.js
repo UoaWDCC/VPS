@@ -7,7 +7,7 @@ export default function componentResolver(component, id, selectElement) {
     case "TEST":
       break;
     default:
-      return <BoxComponent id={id} selectElement={selectElement} />;
+      return <BoxComponent id={id} selectElement={selectElement} key={id} />;
   }
 
   return <div />;
