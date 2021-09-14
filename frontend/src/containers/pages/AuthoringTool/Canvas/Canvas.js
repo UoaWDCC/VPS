@@ -10,6 +10,7 @@ import componentResolver from "./componentResolver";
 
 export default function Canvas() {
   const [select, setSelect] = useState(null);
+  const [bounds, setBounds] = useState(null);
   const { currentScene } = useContext(SceneContext);
   const [shiftPressed, setShiftPressed] = useState(false);
 
@@ -43,10 +44,41 @@ export default function Canvas() {
       <Moveable
         target={document.getElementById(select)}
         draggable
-        resizable
         throttleDrag={0}
+        resizable
+        keepRatio={shiftPressed}
+        snappable
+        bounds={bounds}
+        onDragStart={() => {
+          const canvas = document
+            .getElementById("canvas")
+            .getBoundingClientRect();
+          setBounds({
+            left: canvas.left,
+            top: canvas.top,
+            bottom: canvas.bottom,
+            right: canvas.right,
+          });
+        }}
         onDrag={({ target, transform }) => {
           target.style.transform = transform;
+        }}
+        onDragEnd={({ target }) => {
+          const canvas = document
+            .getElementById("canvas")
+            .getBoundingClientRect();
+          const transfromMatrix = window
+            .getComputedStyle(target)
+            .transform.match(/(-?[0-9\\.]+)/g);
+          // X is pos 4, y is pos 5
+          // position is top left
+          if (transfromMatrix != null) {
+            // this if will always be false because it clogs command line, but is here because it contains logic for storing correct positions
+            if (transfromMatrix == null) {
+              console.log(`x: ${(transfromMatrix[4] * 100) / canvas.width}`);
+              console.log(`y: ${(transfromMatrix[5] * 100) / canvas.height}`);
+            }
+          }
         }}
         onResize={({ target, width, height, drag }) => {
           target.style.width = `${width}px`;
@@ -70,7 +102,6 @@ export default function Canvas() {
           target.style.width = relWidth;
           target.style.height = relHeight;
         }}
-        keepRatio={shiftPressed}
       />
 
       <div className={styles.canvasContainer}>

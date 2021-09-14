@@ -164,6 +164,7 @@ exports[`Scenario Selection page snapshot test 1`] = `
           data-able-origin="true"
           data-able-padding="true"
           data-able-resizable="true"
+          data-able-snappable="true"
           data-styled-id="rCSuehiy8"
           style="position: absolute; display: none; transform: translate3d(0px, 0px, 0); --zoom: 1; --zoompx: 1px;"
         >
@@ -256,9 +257,8 @@ exports[`Scenario Selection page snapshot test 1`] = `
             id="canvas"
           >
             <button
-              class="MuiButtonBase-root MuiButton-root MuiButton-contained btn top contained white"
+              class="MuiButtonBase-root MuiButton-root MuiButton-contained btn top contained white makeStyles-testButton-2"
               id="0"
-              style="position: absolute;"
               tabindex="0"
               type="button"
             >
@@ -272,9 +272,8 @@ exports[`Scenario Selection page snapshot test 1`] = `
               />
             </button>
             <button
-              class="MuiButtonBase-root MuiButton-root MuiButton-contained btn top contained white"
+              class="MuiButtonBase-root MuiButton-root MuiButton-contained btn top contained white makeStyles-testButton-2"
               id="1"
-              style="position: absolute;"
               tabindex="0"
               type="button"
             >
@@ -304,7 +303,7 @@ exports[`Scenario Selection page snapshot test 1`] = `
               class="sideBarBody"
             >
               <div
-                class="MuiFormControl-root MuiTextField-root WithStyles(ForwardRef(TextField))-root-2 MuiFormControl-fullWidth"
+                class="MuiFormControl-root MuiTextField-root WithStyles(ForwardRef(TextField))-root-3 MuiFormControl-fullWidth"
               >
                 <label
                   class="MuiFormLabel-root MuiInputLabel-root MuiInputLabel-formControl MuiInputLabel-animated"
