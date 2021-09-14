@@ -30,7 +30,7 @@ exports[`ShareModal component snapshot test 1`] = `
       tabindex="-1"
     >
       <div
-        class="MuiPaper-root MuiDialog-paper MuiDialog-paperScrollPaper MuiDialog-paperWidthSm MuiDialog-paperFullWidth MuiPaper-elevation24 MuiPaper-rounded"
+        class="MuiPaper-root MuiDialog-paper MuiDialog-paperScrollPaper MuiDialog-paperWidthSm MuiPaper-elevation24 MuiPaper-rounded"
         role="dialog"
       >
         <div
