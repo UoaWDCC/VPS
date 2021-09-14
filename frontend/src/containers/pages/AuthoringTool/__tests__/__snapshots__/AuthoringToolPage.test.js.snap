@@ -159,13 +159,13 @@ exports[`Authoring Tool page snapshot test 1`] = `
         style="height: 100%;"
       >
         <div
-          class="moveable-control-box moveable-reverse   rCSuehiy8"
+          class="moveable-control-box    rCSuehiy8"
           data-able-draggable="true"
           data-able-origin="true"
           data-able-padding="true"
           data-able-resizable="true"
           data-styled-id="rCSuehiy8"
-          style="position: absolute; display: block; transform: translate3d(0px, 0px, 0); --zoom: 1; --zoompx: 1px;"
+          style="position: absolute; display: none; transform: translate3d(0px, 0px, 0); --zoom: 1; --zoompx: 1px;"
         >
           <div
             class="moveable-control moveable-direction moveable-n "
@@ -194,25 +194,25 @@ exports[`Authoring Tool page snapshot test 1`] = `
           <div
             class="moveable-control moveable-direction moveable-nw "
             data-direction="nw"
-            data-rotation="45"
+            data-rotation="135"
             style="transform: translateZ(0px) translate(0px, 0px) rotate(0rad) scale(1);"
           />
           <div
             class="moveable-control moveable-direction moveable-ne "
             data-direction="ne"
-            data-rotation="135"
+            data-rotation="45"
             style="transform: translateZ(0px) translate(0px, 0px) rotate(0rad) scale(1);"
           />
           <div
             class="moveable-control moveable-direction moveable-sw "
             data-direction="sw"
-            data-rotation="135"
+            data-rotation="45"
             style="transform: translateZ(0px) translate(0px, 0px) rotate(0rad) scale(1);"
           />
           <div
             class="moveable-control moveable-direction moveable-se "
             data-direction="se"
-            data-rotation="45"
+            data-rotation="135"
             style="transform: translateZ(0px) translate(0px, 0px) rotate(0rad) scale(1);"
           />
           <div
