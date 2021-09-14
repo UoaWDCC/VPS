@@ -48,7 +48,6 @@ export default function Canvas() {
         resizable
         keepRatio={shiftPressed}
         snappable
-        snapThreshold={5}
         bounds={bounds}
         onDragStart={() => {
           const canvas = document
