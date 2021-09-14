@@ -7,6 +7,7 @@ import ImageListContainer from "../../../../../components/ImageListContainer";
 
 export default function ChooseBackgroundModal({ isShowing, hide }) {
   const [images, setImages] = useState();
+  // eslint-disable-next-line no-unused-vars
   const [selectedImage, setSelectedImage] = useState();
   const saveButton = (
     <Button autoFocus onClick={hide} className={styles.dialogueActionButton}>
