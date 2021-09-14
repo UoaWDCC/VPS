@@ -151,3 +151,21 @@ Returns:
     "image received"
 }
 ```
+**Get images from database**
+
+`GET /api/image`
+
+Returns:
+
+```
+[
+    {
+        "_id": "000001",
+        "url": "https://drive.google.com/uc?export=view&id=18XRH_KNKSjhjTKxonEinMSZXnK1OU2at"
+    },
+    {
+        "_id": "000002",
+        "url": "https://drive.google.com/uc?export=view&id=1DkoIzDkld0yogdPNVIvZIAOeoobFVOE2"
+    }
+]
+```
