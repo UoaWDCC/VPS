@@ -9,7 +9,7 @@ import styles from "../../../../styling/Canvas.module.scss";
 import componentResolver from "./componentResolver";
 
 export default function Canvas() {
-  const [select, setSelect] = useState(0);
+  const [select, setSelect] = useState(null);
   const { currentScene } = useContext(SceneContext);
   const [shiftPressed, setShiftPressed] = useState(false);
 

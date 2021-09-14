@@ -1,5 +1,5 @@
 import React from "react";
-import TestButtonComponent from "./BoxComponent/BoxComponent";
+import TestButtonComponent from "./TestButtonComponent/TestButtonComponent";
 
 export default function componentResolver(component, id, selectElement) {
   switch (component.type) {
