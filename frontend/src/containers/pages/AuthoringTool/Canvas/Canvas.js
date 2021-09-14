@@ -74,8 +74,11 @@ export default function Canvas() {
           // X is pos 4, y is pos 5
           // position is top left
           if (transfromMatrix != null) {
-            console.log(`x: ${(transfromMatrix[4] * 100) / canvas.width}`);
-            console.log(`y: ${(transfromMatrix[5] * 100) / canvas.height}`);
+            // this if will always be false because it clogs command line, but is here because it contains logic for storing correct positions
+            if (transfromMatrix == null) {
+              console.log(`x: ${(transfromMatrix[4] * 100) / canvas.width}`);
+              console.log(`y: ${(transfromMatrix[5] * 100) / canvas.height}`);
+            }
           }
         }}
         onResize={({ target, width, height, drag }) => {
