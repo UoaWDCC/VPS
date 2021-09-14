@@ -9,7 +9,11 @@ import { withStyles } from "@material-ui/core/styles";
 import styles from "../../../styling/BackModal.module.scss";
 import ScenarioContext from "../../../context/ScenarioContext";
 
-export default function BackModal({ isOpen = true, handleClose }) {
+export default function BackModal({
+  isOpen = true,
+  handleClose,
+  handleDisgard,
+}) {
   const { currentScenario } = useContext(ScenarioContext);
 
   const DialogActions = withStyles(() => ({
@@ -41,6 +45,7 @@ export default function BackModal({ isOpen = true, handleClose }) {
             component={Link}
             to={`/scenario/${currentScenario._id}`}
             color="primary"
+            onClick={handleDisgard}
           >
             Yes, discard changes
           </Button>

@@ -9,6 +9,7 @@ test("Scenario Selection page snapshot test", () => {
   const context = {
     currentScenario: { _id: "scenarioId" },
     currentScene: { _id: "sceneId", components: [] },
+    setMonitorChange: () => {},
   };
 
   const { baseElement } = render(

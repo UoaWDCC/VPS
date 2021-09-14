@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
-// import axios from "axios";
-const axios = require("axios");
+import axios from "axios";
 
 if (process.env.REACT_APP_SERVER_URL === undefined) {
   axios.defaults.baseURL = "/";

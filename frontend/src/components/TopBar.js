@@ -1,9 +1,11 @@
-import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import React, { useState, useContext } from "react";
+import { Link, useHistory } from "react-router-dom";
 import Button from "@material-ui/core/Button";
 
 import styles from "../styling/TopBar.module.scss";
 import BackModal from "../containers/pages/AuthoringTool/BackModal";
+import SceneContext from "../context/SceneContext";
+import ScenarioContext from "../context/ScenarioContext";
 
 export default function TopBar({
   back = "/",
@@ -11,6 +13,19 @@ export default function TopBar({
   children = [],
 }) {
   const [showModal, setShowModal] = useState(false);
+  const { hasChange, setMonitorChange } = useContext(SceneContext);
+  const { currentScenario } = useContext(ScenarioContext);
+  const history = useHistory();
+
+  function handleLeaveAuthoringTool() {
+    if (!hasChange) {
+      setMonitorChange(false);
+      history.push(`/scenario/${currentScenario._id}`);
+    } else {
+      setShowModal(true);
+    }
+  }
+
   return (
     <>
       <div className={styles.topBar}>
@@ -21,7 +36,7 @@ export default function TopBar({
                 className="btn top outlined white"
                 color="default"
                 variant="outlined"
-                onClick={() => setShowModal(true)}
+                onClick={handleLeaveAuthoringTool}
               >
                 Back
               </Button>
@@ -42,7 +57,13 @@ export default function TopBar({
           <li className={styles.listItem}>{children}</li>
         </ul>
       </div>
-      <BackModal isOpen={showModal} handleClose={() => setShowModal(false)} />
+      <BackModal
+        isOpen={showModal}
+        handleClose={() => setShowModal(false)}
+        handleDisgard={() => {
+          setMonitorChange(false);
+        }}
+      />
     </>
   );
 }

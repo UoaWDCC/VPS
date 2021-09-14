@@ -6,8 +6,8 @@ import SceneContext from "../../../context/SceneContext";
 import ScenarioContext from "../../../context/ScenarioContext";
 
 const dummyScenes = [
-  { id: 1, name: "test1" },
-  { id: 2, name: "test2" },
+  { _id: 1, name: "test1" },
+  { _id: 2, name: "test2" },
 ];
 
 test("Scene Selection page snapshot test", () => {

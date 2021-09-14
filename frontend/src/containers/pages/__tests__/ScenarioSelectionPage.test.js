@@ -5,8 +5,8 @@ import ScenarioSelectionPage from "../ScenarioSelectionPage";
 import ScenarioContext from "../../../context/ScenarioContext";
 
 const dummyScenarios = [
-  { id: 1, name: "test1" },
-  { id: 2, name: "test2" },
+  { _id: 1, name: "test1" },
+  { _id: 2, name: "test2" },
 ];
 
 const context = {
