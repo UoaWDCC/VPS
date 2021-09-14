@@ -1,4 +1,4 @@
-import React, { useContext } from "react";
+import React, { useContext, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { Button } from "@material-ui/core";
 import TopBar from "../../../components/TopBar";
@@ -12,18 +12,24 @@ import SceneContext from "../../../context/SceneContext";
 
 export default function AuthoringToolPage() {
   const { scenarioId, sceneId } = useParams();
-  const { currentScene, setCurrentScene } = useContext(SceneContext);
+  const { currentScene, setCurrentScene, setMonitorChange, setHasChange } =
+    useContext(SceneContext);
   const { currentScenario } = useContext(ScenarioContext);
   useGet(
     `/api/scenario/${currentScenario?._id}/scene/full/${currentScene?._id}`,
     setCurrentScene
   );
 
+  useEffect(() => {
+    setMonitorChange(true);
+  }, []);
+
   async function saveScene() {
     await usePut(`/api/scenario/${scenarioId}/scene/${sceneId}`, {
       name: currentScene.name,
       components: currentScene?.components,
     });
+    setHasChange(false);
   }
 
   return (

@@ -1,4 +1,4 @@
-import React, { useContext, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { useGet } from "../hooks/crudHooks";
 import useLocalStorage from "../hooks/useLocalStorage";
 import ScenarioContext from "./ScenarioContext";
@@ -8,9 +8,25 @@ export default function SceneContextProvider({ children }) {
   const { currentScenario } = useContext(ScenarioContext);
   const [scenes, setScenes] = useState([]);
   const [currentScene, setCurrentScene] = useLocalStorage("currentScene", null);
+  const [monitorChange, setMonitorChange] = useState(false);
+  const [hasChange, setHasChange] = useState(false);
+
   let getScenes = null;
   if (currentScenario) {
     getScenes = useGet(`api/scenario/${currentScenario._id}/scene`, setScenes);
+  }
+
+  useEffect(() => {
+    if (!monitorChange) {
+      setHasChange(false);
+    }
+  }, [monitorChange]);
+
+  function changeScene(newScene) {
+    if (monitorChange) {
+      setHasChange(true);
+    }
+    setCurrentScene(newScene);
   }
 
   return (
@@ -20,7 +36,10 @@ export default function SceneContextProvider({ children }) {
         setScenes,
         reFetch: getScenes?.reFetch,
         currentScene,
-        setCurrentScene,
+        setCurrentScene: changeScene,
+        hasChange,
+        setHasChange,
+        setMonitorChange,
       }}
     >
       {children}
