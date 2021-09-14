@@ -11,6 +11,7 @@ import componentResolver from "./componentResolver";
 export default function Canvas() {
   const [select, setSelect] = useState(null);
   const [bounds, setBounds] = useState(null);
+  const [scalable, setScalable] = useState(false);
   const { currentScene } = useContext(SceneContext);
   const [shiftPressed, setShiftPressed] = useState(false);
 
@@ -30,6 +31,7 @@ export default function Canvas() {
   document.addEventListener("keyup", keyUp);
 
   function selectElement({ currentTarget }) {
+    setScalable(currentTarget.firstElementChild.nodeName === "IMG");
     setSelect(currentTarget.id);
   }
 
@@ -45,7 +47,8 @@ export default function Canvas() {
         target={document.getElementById(select)}
         draggable
         throttleDrag={0}
-        resizable
+        resizable={!scalable}
+        scalable={scalable}
         keepRatio={shiftPressed}
         snappable
         bounds={bounds}
@@ -79,6 +82,11 @@ export default function Canvas() {
               console.log(`y: ${(transfromMatrix[5] * 100) / canvas.height}`);
             }
           }
+        }}
+        onScale={({ target, scale, drag }) => {
+          target.style.transform =
+            `translate(${drag.beforeTranslate[0]}px, ${drag.beforeTranslate[1]}px)` +
+            `scale(${scale[0]}, ${scale[1]})`;
         }}
         onResize={({ target, width, height, drag }) => {
           target.style.width = `${width}px`;
