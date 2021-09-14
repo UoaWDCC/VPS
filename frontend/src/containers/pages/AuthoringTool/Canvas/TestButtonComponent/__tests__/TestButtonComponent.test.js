@@ -1,9 +1,9 @@
 import React from "react";
 import { render } from "@testing-library/react";
-import BoxComponent from "../BoxComponent";
+import TestButtonComponent from "../TestButtonComponent";
 
 test("Scenario Selection page snapshot test", () => {
-  const { baseElement } = render(<BoxComponent />);
+  const { baseElement } = render(<TestButtonComponent />);
 
   expect(baseElement).toMatchSnapshot();
 });
