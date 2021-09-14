@@ -10,7 +10,7 @@ export default function ChooseBackgroundModal({ isShowing, hide }) {
   const [selectedImage, setSelectedImage] = useState();
   const saveButton = (
     <Button autoFocus onClick={hide} className={styles.dialogueActionButton}>
-      Save changes
+      Add image
     </Button>
   );
 
