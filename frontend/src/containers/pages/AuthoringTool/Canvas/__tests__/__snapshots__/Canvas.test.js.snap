@@ -256,24 +256,36 @@ exports[`Scenario Selection page snapshot test 1`] = `
             class="canvas"
             id="canvas"
           >
-            <div
-              class="MuiBox-root MuiBox-root-3 btn top  white makeStyles-testButton-2"
+            <button
+              class="MuiButtonBase-root MuiButton-root MuiButton-contained btn top contained white makeStyles-testButton-2"
               id="0"
+              tabindex="0"
+              type="button"
             >
-              <img
-                alt="1"
-                src="https://avatars.githubusercontent.com/u/52368549?v=4"
+              <span
+                class="MuiButton-label"
+              >
+                TEST COMPONENT
+              </span>
+              <span
+                class="MuiTouchRipple-root"
               />
-            </div>
-            <div
-              class="MuiBox-root MuiBox-root-4 btn top  white makeStyles-testButton-2"
+            </button>
+            <button
+              class="MuiButtonBase-root MuiButton-root MuiButton-contained btn top contained white makeStyles-testButton-2"
               id="1"
+              tabindex="0"
+              type="button"
             >
-              <img
-                alt="1"
-                src="https://avatars.githubusercontent.com/u/52368549?v=4"
+              <span
+                class="MuiButton-label"
+              >
+                TEST COMPONENT
+              </span>
+              <span
+                class="MuiTouchRipple-root"
               />
-            </div>
+            </button>
           </div>
         </div>
         <div
@@ -291,7 +303,7 @@ exports[`Scenario Selection page snapshot test 1`] = `
               class="sideBarBody"
             >
               <div
-                class="MuiFormControl-root MuiTextField-root WithStyles(ForwardRef(TextField))-root-5 MuiFormControl-fullWidth"
+                class="MuiFormControl-root MuiTextField-root WithStyles(ForwardRef(TextField))-root-3 MuiFormControl-fullWidth"
               >
                 <label
                   class="MuiFormLabel-root MuiInputLabel-root MuiInputLabel-formControl MuiInputLabel-animated"

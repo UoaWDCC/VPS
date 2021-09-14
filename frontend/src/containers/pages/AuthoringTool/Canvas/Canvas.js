@@ -100,11 +100,11 @@ export default function Canvas() {
           }
           const absWidth = Number(target.style.width.slice(0, -2));
           const absHeight = Number(target.style.height.slice(0, -2));
-          const canvasElement = document.getElementById("canvas");
-          const relWidth = `${(absWidth / canvasElement.offsetWidth) * 100}%`;
-          const relHeight = `${
-            (absHeight / canvasElement.offsetHeight) * 100
-          }%`;
+          const canvas = document
+            .getElementById("canvas")
+            .getBoundingClientRect();
+          const relWidth = `${(absWidth / canvas.width) * 100}%`;
+          const relHeight = `${(absHeight / canvas.height) * 100}%`;
           console.log(`width: ${relWidth}`);
           console.log(`height: ${relHeight}`);
           target.style.width = relWidth;
