@@ -2,6 +2,7 @@ function addButton(currentScene, setCurrentScene) {
   const newButton = {
     type: "BUTTON",
     text: "Button",
+    nextScene: null,
     border: true,
     left: "50%",
     top: "50%",
