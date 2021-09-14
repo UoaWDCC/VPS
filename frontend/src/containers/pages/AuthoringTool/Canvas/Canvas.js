@@ -11,6 +11,7 @@ import componentResolver from "./componentResolver";
 export default function Canvas() {
   const [select, setSelect] = useState(null);
   const [bounds, setBounds] = useState(null);
+  const [scalable, setScalable] = useState(false);
   const { currentScene } = useContext(SceneContext);
   const [shiftPressed, setShiftPressed] = useState(false);
 
@@ -30,6 +31,7 @@ export default function Canvas() {
   document.addEventListener("keyup", keyUp);
 
   function selectElement({ currentTarget }) {
+    setScalable(currentTarget.firstElementChild.nodeName === "IMG");
     setSelect(currentTarget.id);
   }
 
@@ -45,7 +47,8 @@ export default function Canvas() {
         target={document.getElementById(select)}
         draggable
         throttleDrag={0}
-        resizable
+        resizable={!scalable}
+        scalable={scalable}
         keepRatio={shiftPressed}
         snappable
         bounds={bounds}
@@ -80,6 +83,11 @@ export default function Canvas() {
             }
           }
         }}
+        onScale={({ target, scale, drag }) => {
+          target.style.transform =
+            `translate(${drag.beforeTranslate[0]}px, ${drag.beforeTranslate[1]}px)` +
+            `scale(${scale[0]}, ${scale[1]})`;
+        }}
         onResize={({ target, width, height, drag }) => {
           target.style.width = `${width}px`;
           target.style.height = `${height}px`;
@@ -92,11 +100,11 @@ export default function Canvas() {
           }
           const absWidth = Number(target.style.width.slice(0, -2));
           const absHeight = Number(target.style.height.slice(0, -2));
-          const canvasElement = document.getElementById("canvas");
-          const relWidth = `${(absWidth / canvasElement.offsetWidth) * 100}%`;
-          const relHeight = `${
-            (absHeight / canvasElement.offsetHeight) * 100
-          }%`;
+          const canvas = document
+            .getElementById("canvas")
+            .getBoundingClientRect();
+          const relWidth = `${(absWidth / canvas.width) * 100}%`;
+          const relHeight = `${(absHeight / canvas.height) * 100}%`;
           console.log(`width: ${relWidth}`);
           console.log(`height: ${relHeight}`);
           target.style.width = relWidth;
