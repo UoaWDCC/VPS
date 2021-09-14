@@ -1,7 +1,7 @@
 import { Button } from "@material-ui/core";
 import React from "react";
 
-export default function BoxComponent({ id, selectElement }) {
+export default function TestButtonComponent({ id, selectElement }) {
   return (
     <Button
       className="btn top contained white"

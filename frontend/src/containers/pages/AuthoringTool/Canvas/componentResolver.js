@@ -1,5 +1,5 @@
 import React from "react";
-import BoxComponent from "./BoxComponent/BoxComponent";
+import TestButtonComponent from "./BoxComponent/BoxComponent";
 
 export default function componentResolver(component, id, selectElement) {
   switch (component.type) {
@@ -7,7 +7,9 @@ export default function componentResolver(component, id, selectElement) {
     case "TEST":
       break;
     default:
-      return <BoxComponent id={id} selectElement={selectElement} key={id} />;
+      return (
+        <TestButtonComponent id={id} selectElement={selectElement} key={id} />
+      );
   }
 
   return <div />;

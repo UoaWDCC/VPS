@@ -54,6 +54,10 @@ export default function Canvas() {
           target.style.transform = `translate(${drag.beforeTranslate[0]}px, ${drag.beforeTranslate[1]}px)`;
         }}
         onResizeEnd={({ target }) => {
+          // cover case where no resizing occurs (onResize is not called)
+          if (target.style.width.slice(-2) !== "px") {
+            return;
+          }
           const absWidth = Number(target.style.width.slice(0, -2));
           const absHeight = Number(target.style.height.slice(0, -2));
           const canvasElement = document.getElementById("canvas");
