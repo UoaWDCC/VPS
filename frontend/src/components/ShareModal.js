@@ -22,7 +22,7 @@ export default function ShareModal({ isOpen, handleClose }) {
         className={styles.dialog}
         onClose={onClose}
         open={isOpen}
-        fullWidth="sm"
+        maxWidth="sm"
       >
         <DialogTitle className={styles.dialogTitle}>Shareable Link</DialogTitle>
         <DialogContent className={styles.dialogContent}>

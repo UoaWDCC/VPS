@@ -64,4 +64,27 @@ describe("Image API tests", () => {
     expect(dbImages[0].url).toEqual(body.urls[0]);
     expect(dbImages[1].url).toEqual(body.urls[1]);
   });
+
+  it("GET/image: retrieves all images in the database", async () => {
+    const urls = [
+      "https://drive.google.com/uc?export=view&id=1IExv9SGZq_KFFGOxBzhz_OfO6UAWLL5z",
+      "https://drive.google.com/uc?export=view&id=1uRyrBAvCZf2dPHXR0TjsPVncU_rz0vuZ",
+    ];
+    urls.forEach((url) => {
+      const dbImage = new Image({
+        url,
+      });
+      dbImage.save();
+    });
+
+    const response = await axios.get(`http://localhost:${port}/api/image/`);
+    expect(response.status).toBe(HTTP_OK);
+
+    // check correct images are returned
+    const images = response.data;
+    expect(images).toHaveLength(2);
+
+    expect(images[0].url).toEqual(urls[0]);
+    expect(images[1].url).toEqual(urls[1]);
+  });
 });

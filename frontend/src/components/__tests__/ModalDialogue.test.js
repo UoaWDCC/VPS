@@ -1,15 +1,14 @@
 import React from "react";
-import renderer from "react-test-renderer";
+import { render } from "@testing-library/react";
 import { BrowserRouter } from "react-router-dom";
 import ModalDialogue from "../ModalDialogue";
 
 test("ModalDialogue component snapshot test", () => {
-  const component = renderer.create(
+  const { baseElement } = render(
     <BrowserRouter>
-      <ModalDialogue />
+      <ModalDialogue isShowing />
     </BrowserRouter>
   );
 
-  const tree = component.toJSON();
-  expect(tree).toMatchSnapshot();
+  expect(baseElement).toMatchSnapshot();
 });

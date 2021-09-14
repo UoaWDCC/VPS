@@ -6,7 +6,7 @@ import ListContainer from "../ListContainer";
 test("ListContainer component snapshot test", () => {
   const testData = [
     {
-      id: 1,
+      _id: 1,
       name: "Scenario 1",
       img: "",
     },

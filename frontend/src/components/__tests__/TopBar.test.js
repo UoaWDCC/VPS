@@ -3,6 +3,7 @@ import renderer from "react-test-renderer";
 import { BrowserRouter } from "react-router-dom";
 import TopBar from "../TopBar";
 import ScenarioContext from "../../context/ScenarioContext";
+import SceneContextProvider from "../../context/SceneContextProvider";
 
 test("Top Bar component snapshot test", () => {
   const context = {
@@ -12,7 +13,9 @@ test("Top Bar component snapshot test", () => {
   const component = renderer.create(
     <BrowserRouter>
       <ScenarioContext.Provider value={context}>
-        <TopBar />
+        <SceneContextProvider>
+          <TopBar />
+        </SceneContextProvider>
       </ScenarioContext.Provider>
     </BrowserRouter>
   );
