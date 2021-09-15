@@ -1,19 +1,26 @@
 /* eslint-disable jsx-a11y/no-static-element-interactions */
 /* eslint-disable jsx-a11y/click-events-have-key-events */
 /* eslint-disable no-param-reassign */
-import React, { useContext, useState } from "react";
+import React, { useContext } from "react";
 
 import Moveable from "react-moveable";
+import AuthoringToolContext from "../../../../context/AuthoringToolContext";
 import SceneContext from "../../../../context/SceneContext";
 import styles from "../../../../styling/Canvas.module.scss";
 import componentResolver from "./componentResolver";
 
 export default function Canvas() {
-  const [select, setSelect] = useState(null);
-  const [bounds, setBounds] = useState(null);
-  const [scalable, setScalable] = useState(false);
   const { currentScene } = useContext(SceneContext);
-  const [shiftPressed, setShiftPressed] = useState(false);
+  const {
+    select,
+    scalable,
+    selectElement,
+    clearElement,
+    bounds,
+    setBounds,
+    shiftPressed,
+    setShiftPressed,
+  } = useContext(AuthoringToolContext);
 
   const keyDown = ({ key }) => {
     if (key === "Shift") {
@@ -29,17 +36,6 @@ export default function Canvas() {
 
   document.addEventListener("keydown", keyDown);
   document.addEventListener("keyup", keyUp);
-
-  function selectElement({ currentTarget }) {
-    setScalable(currentTarget.firstElementChild.nodeName === "IMG");
-    setSelect(currentTarget.id);
-  }
-
-  const clearElement = ({ target }) => {
-    if (target.id === "canvas") {
-      setSelect(null);
-    }
-  };
 
   return (
     <>
