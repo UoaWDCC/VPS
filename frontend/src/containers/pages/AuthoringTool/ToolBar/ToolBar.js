@@ -1,10 +1,13 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import { Box, Tooltip, Button, MenuList, Menu } from "@material-ui/core";
 import ArrowDropDownIcon from "@material-ui/icons/ArrowDropDown";
 import toolBarData from "./ToolBarData";
+import SceneContext from "../../../../context/SceneContext";
 import styles from "../../../../styling/ToolBar.module.scss";
 
 export default function ToolBar() {
+  const { currentScene, setCurrentScene } = useContext(SceneContext);
+
   const [anchorEl, setAnchorEl] = useState(null);
   const [triggerElTitle, setTriggerElTitle] = useState(null);
   const handleDropdownClick = (e, title) => {
@@ -25,7 +28,7 @@ export default function ToolBar() {
               ? (event) => {
                   handleDropdownClick(event, tool.title);
                 }
-              : tool.onClick;
+              : () => tool.onClick(currentScene, setCurrentScene);
             const open = tool.title === triggerElTitle;
             return (
               <div key={tool.title}>

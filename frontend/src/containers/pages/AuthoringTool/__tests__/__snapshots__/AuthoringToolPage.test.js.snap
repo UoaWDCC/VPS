@@ -130,6 +130,32 @@ exports[`Authoring Tool page snapshot test 1`] = `
             <button
               class="MuiButtonBase-root MuiButton-root MuiButton-text menuItem"
               tabindex="0"
+              title="Button"
+              type="button"
+            >
+              <span
+                class="MuiButton-label"
+              >
+                <svg
+                  aria-hidden="true"
+                  class="MuiSvgIcon-root"
+                  focusable="false"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm5 11h-4v4h-2v-4H7v-2h4V7h2v4h4v2z"
+                  />
+                </svg>
+              </span>
+              <span
+                class="MuiTouchRipple-root"
+              />
+            </button>
+          </div>
+          <div>
+            <button
+              class="MuiButtonBase-root MuiButton-root MuiButton-text menuItem"
+              tabindex="0"
               title="Audio"
               type="button"
             >
