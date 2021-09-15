@@ -3,9 +3,10 @@ function addButton(currentScene, setCurrentScene) {
     type: "BUTTON",
     text: "Button",
     nextScene: null,
-    border: true,
     left: "50%",
     top: "50%",
+    height: "30px",
+    width: "50px",
   };
 
   const updatedComponents = currentScene.components;
