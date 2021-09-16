@@ -64,6 +64,7 @@ export default function ButtonPropertiesComponent({
       <FormControl fullWidth className={styles.componentProperty}>
         <CustomInputLabel shrink>Variant</CustomInputLabel>
         <CustomSelect
+          className={styles.selectInput}
           value={component.variant}
           onChange={(event) => {
             const updatedComponents = currentScene.components;
@@ -82,6 +83,7 @@ export default function ButtonPropertiesComponent({
       <FormControl fullWidth className={styles.componentProperty}>
         <CustomInputLabel shrink>Colour</CustomInputLabel>
         <CustomSelect
+          className={styles.selectInput}
           value={component.colour}
           onChange={(event) => {
             const updatedComponents = currentScene.components;
@@ -100,6 +102,7 @@ export default function ButtonPropertiesComponent({
       <FormControl fullWidth className={styles.componentProperty}>
         <CustomInputLabel shrink>Next Scene</CustomInputLabel>
         <CustomSelect
+          className={styles.selectInput}
           value={component.nextScene}
           onChange={(event) => {
             const updatedComponents = currentScene.components;

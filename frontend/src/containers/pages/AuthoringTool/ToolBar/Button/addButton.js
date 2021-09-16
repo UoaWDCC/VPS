@@ -7,8 +7,8 @@ function addButton(currentScene, setCurrentScene) {
     nextScene: "",
     left: 50, // as percentage
     top: 50, // as percentage
-    height: 6, // in pixels
-    width: 8, // in pixels
+    height: 6, // as percentage
+    width: 8, // as percentage
   };
 
   const updatedComponents = currentScene.components;
