@@ -57,6 +57,24 @@ export default function SideBar() {
               component={Link}
               to={
                 currentScenario
+                  ? `/play/${currentScenario._id}`
+                  : "/scenario/null"
+              }
+              disabled={!currentScenario}
+            >
+              Play
+            </Button>
+          </li>
+          <li>
+            <Button
+              className={`btn side contained white ${
+                currentScenario ? "" : "disabled"
+              }  `}
+              color="default"
+              variant="contained"
+              component={Link}
+              to={
+                currentScenario
                   ? `/scenario/${currentScenario._id}`
                   : "/scenario/null"
               }
