@@ -30,14 +30,6 @@ const CustomInputLabel = withStyles({
   },
 })(InputLabel);
 
-const CustomSelect = withStyles({
-  root: {
-    "& .MuiInput-underline.MuiInput-formControl:after": {
-      borderBottomColor: "#008a7b",
-    },
-  },
-})(Select);
-
 export default function ButtonPropertiesComponent({
   component,
   componentIndex,
@@ -63,7 +55,7 @@ export default function ButtonPropertiesComponent({
       />
       <FormControl fullWidth className={styles.componentProperty}>
         <CustomInputLabel shrink>Variant</CustomInputLabel>
-        <CustomSelect
+        <Select
           className={styles.selectInput}
           value={component.variant}
           onChange={(event) => {
@@ -78,11 +70,11 @@ export default function ButtonPropertiesComponent({
         >
           <MenuItem value="contained">Contained</MenuItem>
           <MenuItem value="outlined">Outlined</MenuItem>
-        </CustomSelect>
+        </Select>
       </FormControl>
       <FormControl fullWidth className={styles.componentProperty}>
         <CustomInputLabel shrink>Colour</CustomInputLabel>
-        <CustomSelect
+        <Select
           className={styles.selectInput}
           value={component.colour}
           onChange={(event) => {
@@ -97,11 +89,11 @@ export default function ButtonPropertiesComponent({
         >
           <MenuItem value="white">White</MenuItem>
           <MenuItem value="teal">Teal</MenuItem>
-        </CustomSelect>
+        </Select>
       </FormControl>
       <FormControl fullWidth className={styles.componentProperty}>
         <CustomInputLabel shrink>Next Scene</CustomInputLabel>
-        <CustomSelect
+        <Select
           className={styles.selectInput}
           value={component.nextScene}
           onChange={(event) => {
@@ -121,7 +113,7 @@ export default function ButtonPropertiesComponent({
           {scenes.map((scene) => {
             return <MenuItem value={scene.name}>{scene.name}</MenuItem>;
           })}
-        </CustomSelect>
+        </Select>
       </FormControl>
     </>
   );

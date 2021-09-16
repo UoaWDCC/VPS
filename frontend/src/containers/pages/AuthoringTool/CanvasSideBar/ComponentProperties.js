@@ -9,9 +9,6 @@ export default function ComponentProperties() {
   const { select } = useContext(AuthoringToolContext);
   const { currentScene } = useContext(SceneContext);
 
-  console.log(`id: ${select}`);
-  console.log(currentScene.components);
-
   return (
     <>
       <div className={styles.componentPropertiesContainer}>

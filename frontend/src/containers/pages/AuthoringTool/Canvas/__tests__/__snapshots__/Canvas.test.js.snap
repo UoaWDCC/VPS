@@ -281,38 +281,7 @@ exports[`Scenario Selection page snapshot test 1`] = `
           <div
             class="canvas"
             id="canvas"
-          >
-            <button
-              class="MuiButtonBase-root MuiButton-root MuiButton-contained btn top contained white makeStyles-testButton-2"
-              id="0"
-              tabindex="0"
-              type="button"
-            >
-              <span
-                class="MuiButton-label"
-              >
-                TEST COMPONENT
-              </span>
-              <span
-                class="MuiTouchRipple-root"
-              />
-            </button>
-            <button
-              class="MuiButtonBase-root MuiButton-root MuiButton-contained btn top contained white makeStyles-testButton-2"
-              id="1"
-              tabindex="0"
-              type="button"
-            >
-              <span
-                class="MuiButton-label"
-              >
-                TEST COMPONENT
-              </span>
-              <span
-                class="MuiTouchRipple-root"
-              />
-            </button>
-          </div>
+          />
         </div>
         <div
           class="sideBar"
@@ -329,7 +298,7 @@ exports[`Scenario Selection page snapshot test 1`] = `
               class="sideBarBody"
             >
               <div
-                class="MuiFormControl-root MuiTextField-root WithStyles(ForwardRef(TextField))-root-3 MuiFormControl-fullWidth"
+                class="MuiFormControl-root MuiTextField-root WithStyles(ForwardRef(TextField))-root-2 MuiFormControl-fullWidth"
               >
                 <label
                   class="MuiFormLabel-root MuiInputLabel-root MuiInputLabel-formControl MuiInputLabel-animated"
