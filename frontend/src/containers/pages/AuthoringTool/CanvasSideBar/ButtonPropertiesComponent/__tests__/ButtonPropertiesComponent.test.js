@@ -6,11 +6,18 @@ import ButtonPropertiesComponent from "../ButtonPropertiesComponent";
 
 test("Button properties component snapshot test", () => {
   const { baseElement } = render(
-      <ScenarioContextProvider>
-        <SceneContextProvider>
-          <ButtonPropertiesComponent component={{ type: "BUTTON", variant: "contained", colour: "white", nextScene: ""}} />
-        </SceneContextProvider>
-      </ScenarioContextProvider>
+    <ScenarioContextProvider>
+      <SceneContextProvider>
+        <ButtonPropertiesComponent
+          component={{
+            type: "BUTTON",
+            variant: "contained",
+            colour: "white",
+            nextScene: "",
+          }}
+        />
+      </SceneContextProvider>
+    </ScenarioContextProvider>
   );
 
   expect(baseElement).toMatchSnapshot();
