@@ -36,7 +36,7 @@ exports[`Scenario Selection page snapshot test 1`] = `
           <li>
             <a
               aria-disabled="false"
-              class="MuiButtonBase-root MuiButton-root MuiButton-contained btn side contained white   "
+              class="MuiButtonBase-root MuiButton-root MuiButton-contained btn side contained white margin-top   "
               href="/play/scenarioId"
               role="button"
               tabindex="0"
