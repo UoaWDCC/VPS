@@ -30,6 +30,7 @@ export default function ImageListContainer({ data, onItemSelected }) {
                   sx={{
                     "&:hover": {
                       opacity: "0.5",
+                      cursor: "pointer",
                     },
                     backgroundImage: `url(${item.url})`,
                     backgroundSize: "cover",
