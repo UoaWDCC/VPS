@@ -73,20 +73,24 @@ export default function Canvas() {
           const transfromMatrix = window
             .getComputedStyle(target)
             .transform.match(/(-?[0-9\\.]+)/g);
-          // X is pos 4, y is pos 5
-          // position is top left
           if (transfromMatrix != null) {
-            // this if will always be false because it clogs command line, but is here because it contains logic for storing correct positions
-            if (transfromMatrix == null) {
-              console.log(`x: ${(transfromMatrix[4] * 100) / canvas.width}`);
-              console.log(`y: ${(transfromMatrix[5] * 100) / canvas.height}`);
-            }
+            console.log(`x: ${(transfromMatrix[4] * 100) / canvas.width}`);
+            console.log(`y: ${(transfromMatrix[5] * 100) / canvas.height}`);
           }
         }}
         onScale={({ target, scale, drag }) => {
           target.style.transform =
             `translate(${drag.beforeTranslate[0]}px, ${drag.beforeTranslate[1]}px)` +
             `scale(${scale[0]}, ${scale[1]})`;
+        }}
+        onScaleEnd={({ target }) => {
+          const transfromMatrix = window
+            .getComputedStyle(target)
+            .transform.match(/(-?[0-9\\.]+)/g);
+          if (transfromMatrix != null) {
+            console.log(`x-scale: ${transfromMatrix[0]}`);
+            console.log(`y-scale: ${transfromMatrix[3]}`);
+          }
         }}
         onResize={({ target, width, height, drag }) => {
           target.style.width = `${width}px`;
