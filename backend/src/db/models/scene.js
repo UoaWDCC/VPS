@@ -10,8 +10,7 @@ const sceneSchema = new Schema({
   },
   components: [
     {
-      type: Schema.Types.ObjectId,
-      ref: "Component",
+      type: Object,
     },
   ],
 });

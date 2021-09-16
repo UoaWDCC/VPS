@@ -1,15 +1,19 @@
 import React from "react";
-import TestButtonComponent from "./TestButtonComponent/TestButtonComponent";
+import ButtonComponent from "../Components/ButtonComponent/ButtonComponent";
 
 export default function componentResolver(component, id, selectElement) {
   switch (component.type) {
     // ADD NEW COMPONENT TYPES HERE
-    case "TEST":
-      break;
-    default:
+    case "BUTTON":
       return (
-        <TestButtonComponent id={id} selectElement={selectElement} key={id} />
+        <ButtonComponent
+          id={id}
+          selectElement={selectElement}
+          component={component}
+        />
       );
+    default:
+      break;
   }
 
   return <div />;

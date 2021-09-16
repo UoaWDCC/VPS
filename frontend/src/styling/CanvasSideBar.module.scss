@@ -48,3 +48,15 @@
   margin: 0em;
   background-color: #f0f0f0;
 }
+
+.componentProperty:first-child {
+  margin-top: 0 !important;
+}
+
+.componentProperty {
+  margin-top: 2em !important;
+}
+
+.selectInput:after {
+  border-bottom-color: #008a7b !important;
+}

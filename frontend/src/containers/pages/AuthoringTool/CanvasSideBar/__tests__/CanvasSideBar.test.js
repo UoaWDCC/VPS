@@ -4,13 +4,16 @@ import { BrowserRouter } from "react-router-dom";
 import CanvasSideBar from "../CanvasSideBar";
 import ScenarioContextProvider from "../../../../../context/ScenarioContextProvider";
 import SceneContextProvider from "../../../../../context/SceneContextProvider";
+import AuthoringToolContextProvider from "../../../../../context/AuthoringToolContextProvider";
 
 test("Scenario Selection page snapshot test", () => {
   const component = renderer.create(
     <BrowserRouter>
       <ScenarioContextProvider>
         <SceneContextProvider>
-          <CanvasSideBar />
+          <AuthoringToolContextProvider>
+            <CanvasSideBar />
+          </AuthoringToolContextProvider>
         </SceneContextProvider>
       </ScenarioContextProvider>
     </BrowserRouter>
