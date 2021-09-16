@@ -4,11 +4,11 @@ function addButton(currentScene, setCurrentScene) {
     text: "Button",
     variant: "contained",
     colour: "white",
-    nextScene: null,
-    left: "50%",
-    top: "50%",
-    height: "40px",
-    width: "50px",
+    nextScene: "",
+    left: 50, // as percentage
+    top: 50, // as percentage
+    height: 6, // in pixels
+    width: 8, // in pixels
   };
 
   const updatedComponents = currentScene.components;

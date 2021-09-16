@@ -5,11 +5,11 @@ export default function ButtonComponent({ id, selectElement, component }) {
   const useStyles = makeStyles({
     buttonComponent: {
       position: "absolute",
-      top: `${component.top}`,
-      left: `${component.left}`,
-      transform: `translate(-${component.top}, -${component.left})`,
-      height: `${component.height}`,
-      width: `${component.width}`,
+      top: `${component.top}%`,
+      left: `${component.left}%`,
+      transform: `translate(-${component.top}%, -${component.left}%)`,
+      height: `${component.height}%`,
+      width: `${component.width}%`,
     },
   });
 

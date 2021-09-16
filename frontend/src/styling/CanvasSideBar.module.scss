@@ -48,3 +48,11 @@
   margin: 0em;
   background-color: #f0f0f0;
 }
+
+.componentProperty:first-child {
+    margin-top: 0 !important;
+}
+
+.componentProperty {
+    margin-top: 2.0em !important;
+}
