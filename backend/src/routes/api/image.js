@@ -1,6 +1,10 @@
 import { Router } from "express";
 
-import { createImage, retrieveImageList } from "../../db/daos/imageDao";
+import {
+  createImage,
+  retrieveImage,
+  retrieveImageList,
+} from "../../db/daos/imageDao";
 
 const router = Router();
 
@@ -17,6 +21,11 @@ router.get("/", async (req, res) => {
   const images = await retrieveImageList();
 
   res.status(HTTP_OK).json(images);
+});
+
+router.get("/:imageId", async (req, res) => {
+  const image = await retrieveImage(req.params.imageId);
+  res.status(HTTP_OK).json(image);
 });
 
 export default router;
