@@ -49,7 +49,7 @@ export default function SideBar() {
           </li>
           <li>
             <Button
-              className={`btn side contained white ${
+              className={`btn side contained white margin-top ${
                 currentScenario ? "" : "disabled"
               }  `}
               color="default"
