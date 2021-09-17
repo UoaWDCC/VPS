@@ -15,7 +15,13 @@ export default function componentResolver(component, id, selectElement) {
         />
       );
     case "TEXT":
-      return <TextComponent />;
+      return (
+        <TextComponent
+          id={id}
+          selectElement={selectElement}
+          component={component}
+        />
+      );
     case "IMAGE":
       return (
         <ImageComponent
