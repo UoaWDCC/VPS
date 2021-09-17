@@ -34,12 +34,10 @@ exports[`Scenario Selection page snapshot test 1`] = `
             </button>
           </li>
           <li>
-            <a
-              aria-disabled="false"
+            <button
               class="MuiButtonBase-root MuiButton-root MuiButton-contained btn side contained white margin-top   "
-              href="/play/scenarioId"
-              role="button"
               tabindex="0"
+              type="button"
             >
               <span
                 class="MuiButton-label"
@@ -49,7 +47,7 @@ exports[`Scenario Selection page snapshot test 1`] = `
               <span
                 class="MuiTouchRipple-root"
               />
-            </a>
+            </button>
           </li>
           <li>
             <a
