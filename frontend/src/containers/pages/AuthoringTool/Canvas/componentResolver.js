@@ -1,6 +1,7 @@
 import React from "react";
 import ButtonComponent from "../Components/ButtonComponent/ButtonComponent";
 import TextComponent from "../Components/TextComponent";
+import ImageComponent from "../Components/ImageComponent/ImageComponent";
 
 export default function componentResolver(component, id, selectElement) {
   switch (component.type) {
@@ -14,8 +15,10 @@ export default function componentResolver(component, id, selectElement) {
         />
       );
     case "TEXT":
+      return <TextComponent />;
+    case "IMAGE":
       return (
-        <TextComponent
+        <ImageComponent
           id={id}
           selectElement={selectElement}
           component={component}
