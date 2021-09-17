@@ -12,7 +12,7 @@ export default function ImageComponent({ id, selectElement, component }) {
       id={id}
       src={image ? image.url : ""}
       imageStyle={imageStyles(component)}
-      style={imageContainerStyles(component)}
+      style={imageContainerStyles()}
       onClick={selectElement}
     />
   );

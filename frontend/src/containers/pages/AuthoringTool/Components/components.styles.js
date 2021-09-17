@@ -25,7 +25,7 @@ export function imageStyles(component) {
   };
 }
 
-export function imageContainerStyles(component) {
+export function imageContainerStyles() {
   return {
     display: "contents",
     cursor: "pointer",
