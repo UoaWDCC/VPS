@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import Image from "material-ui-image";
 import { useGet } from "../../../../../hooks/crudHooks";
+import { imageStyles, imageContainerStyles } from "../components.styles";
 
 export default function ImageComponent({ id, selectElement, component }) {
   const [image, setImage] = useState();
@@ -10,19 +11,8 @@ export default function ImageComponent({ id, selectElement, component }) {
     <Image
       id={id}
       src={image ? image.url : ""}
-      imageStyle={{
-        maxHeight: "100%",
-        maxWidth: "100%",
-        width:
-          component.width === "auto" ? component.width : `${component.width}%`,
-        height:
-          component.height === "auto"
-            ? component.height
-            : `${component.height}%`,
-      }}
-      style={{
-        display: "contents",
-      }}
+      imageStyle={imageStyles(component)}
+      style={imageContainerStyles(component)}
       onClick={selectElement}
     />
   );
