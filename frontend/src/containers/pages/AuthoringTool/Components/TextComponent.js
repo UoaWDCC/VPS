@@ -4,7 +4,8 @@ import useStyles from "./components.styles";
 
 export default function TextComponent({ id, selectElement, component }) {
   const styles = useStyles(component);
-  // Need border
+  // Potential properties
+  // Border
   // Text
   // font size
   // font color
