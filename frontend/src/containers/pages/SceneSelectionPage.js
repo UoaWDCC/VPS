@@ -5,7 +5,6 @@ import {
   useRouteMatch,
   Switch,
   useHistory,
-  Link,
 } from "react-router-dom";
 import { Button } from "@material-ui/core";
 import TopBar from "../../components/TopBar";
