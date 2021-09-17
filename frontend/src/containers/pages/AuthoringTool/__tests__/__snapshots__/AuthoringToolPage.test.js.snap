@@ -68,7 +68,7 @@ exports[`Authoring Tool page snapshot test 1`] = `
             <button
               class="MuiButtonBase-root MuiButton-root MuiButton-text menuItem"
               tabindex="0"
-              title="Background Image"
+              title="Image"
               type="button"
             >
               <span

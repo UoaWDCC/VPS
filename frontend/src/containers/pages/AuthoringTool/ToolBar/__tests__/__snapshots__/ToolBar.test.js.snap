@@ -30,7 +30,7 @@ exports[`ToolBar component snapshot test 1`] = `
         onTouchMove={[Function]}
         onTouchStart={[Function]}
         tabIndex={0}
-        title="Background Image"
+        title="Image"
         type="button"
       >
         <span
