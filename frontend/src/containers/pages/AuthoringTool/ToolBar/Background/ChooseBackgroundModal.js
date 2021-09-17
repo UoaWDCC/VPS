@@ -33,7 +33,7 @@ export default function ChooseBackgroundModal({ isShowing, hide }) {
 
   return (
     <ModalDialogue
-      title="Choose Background"
+      title="Choose Image"
       isShowing={isShowing}
       hide={hide}
       dialogueAction={saveButton}

@@ -14,7 +14,7 @@ function ChooseBackgroundSubMenu() {
     <>
       <MenuItem className={styles.menuItem} onClick={show}>
         <CloudQueueIcon fontSize="medium" />
-        &nbsp;&nbsp;Choose background
+        &nbsp;&nbsp;Choose Image
       </MenuItem>
       <ChooseBackgroundModal isShowing={isShowing} hide={hide} />
     </>

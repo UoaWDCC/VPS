@@ -8,7 +8,7 @@ import { addButton, addText } from "./ToolBarActions";
 
 const toolBarData = [
   {
-    title: "Background Image",
+    title: "Image",
     icon: <ImageIcon fontSize="medium" />,
     dropdown: [
       {
