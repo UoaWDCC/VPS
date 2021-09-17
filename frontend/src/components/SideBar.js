@@ -49,6 +49,24 @@ export default function SideBar() {
           </li>
           <li>
             <Button
+              className={`btn side contained white margin-top ${
+                currentScenario ? "" : "disabled"
+              }  `}
+              color="default"
+              variant="contained"
+              component={Link}
+              to={
+                currentScenario
+                  ? `/play/${currentScenario._id}`
+                  : "/scenario/null"
+              }
+              disabled={!currentScenario}
+            >
+              Play
+            </Button>
+          </li>
+          <li>
+            <Button
               className={`btn side contained white ${
                 currentScenario ? "" : "disabled"
               }  `}
