@@ -87,4 +87,27 @@ describe("Image API tests", () => {
     expect(images[0].url).toEqual(urls[0]);
     expect(images[1].url).toEqual(urls[1]);
   });
+
+  it("GET/image: retrieves a specific image in the database", async () => {
+    const image1 = {
+      _id: new mongoose.mongo.ObjectId("000000000000000000000001"),
+      url: "https://drive.google.com/uc?export=view&id=1IExv9SGZq_KFFGOxBzhz_OfO6UAWLL5z",
+    };
+
+    const image2 = {
+      _id: new mongoose.mongo.ObjectId("000000000000000000000002"),
+      url: "https://drive.google.com/uc?export=view&id=1uRyrBAvCZf2dPHXR0TjsPVncU_rz0vuZ",
+    };
+
+    await Image.create([image1, image2]);
+
+    const response = await axios.get(
+      `http://localhost:${port}/api/image/${image2._id}`
+    );
+    expect(response.status).toBe(HTTP_OK);
+
+    // check correct image is returned
+    const image = response.data;
+    expect(image.url).toEqual(image2.url);
+  });
 });
