@@ -4,7 +4,7 @@ exports[`Add button component snapshot test 1`] = `
 <body>
   <div>
     <button
-      class="MuiButtonBase-root MuiButton-root MuiButton-text btn top undefined undefined makeStyles-buttonComponent-1"
+      class="MuiButtonBase-root MuiButton-root MuiButton-text btn top undefined undefined makeStyles-defaultComponentStyling-1"
       tabindex="0"
       type="button"
     >

@@ -7,7 +7,7 @@ export default function ButtonComponent({ id, selectElement, component }) {
 
   return (
     <Button
-      className={`btn top ${component.variant} ${component.colour} ${styles.buttonComponent}`}
+      className={`btn top ${component.variant} ${component.colour} ${styles.defaultComponentStyling}`}
       color="default"
       variant={component.variant}
       id={id}

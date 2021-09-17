@@ -2,7 +2,7 @@ import { makeStyles } from "@material-ui/core";
 
 export default function useStyles(component) {
   return makeStyles({
-    buttonComponent: {
+    defaultComponentStyling: {
       position: "absolute",
       top: `${component.top}%`,
       left: `${component.left}%`,

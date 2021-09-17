@@ -4,7 +4,7 @@ import TextFieldsIcon from "@material-ui/icons/TextFields";
 import ButtonIcon from "@material-ui/icons/AddCircle";
 import VolumeUpIcon from "@material-ui/icons/VolumeUp";
 import ChooseBackgroundSubMenu from "./Background/ChooseBackgroundSubMenu";
-import addButton from "./Button/addButton";
+import { addButton, addText } from "./ToolBarActions";
 
 const toolBarData = [
   {
@@ -19,9 +19,7 @@ const toolBarData = [
   {
     title: "Text",
     icon: <TextFieldsIcon fontSize="medium" />,
-    onClick: () => {
-      console.log("text clicked");
-    },
+    onClick: addText,
   },
   {
     title: "Button",

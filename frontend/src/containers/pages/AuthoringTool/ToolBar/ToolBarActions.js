@@ -21,4 +21,24 @@ function addButton(currentScene, setCurrentScene) {
   });
 }
 
-export default addButton;
+function addText(currentScene, setCurrentScene) {
+  const newText = {
+    type: "TEXT",
+    text: "default text",
+    left: 50, // as percentage
+    top: 50, // as percentage
+    height: 10, // as percentage
+    width: 20, // as percentage
+  };
+
+  const updatedComponents = currentScene.components;
+
+  updatedComponents.push(newText);
+
+  setCurrentScene({
+    ...currentScene,
+    components: updatedComponents,
+  });
+}
+
+export { addButton, addText };
