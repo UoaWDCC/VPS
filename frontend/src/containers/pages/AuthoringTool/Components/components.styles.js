@@ -10,6 +10,15 @@ export default function useStyles(component) {
       height: `${component.height}%`,
       width: `${component.width}%`,
     },
+    textComponentStyles: {
+      borderStyle: component.border ? "solid" : "none",
+      borderColor: "black",
+      fontSize: component.fontSize,
+      paddingInline: "5px",
+      overflow: "hidden",
+      color: component.color, // text colour
+      textAlign: component.textAlign,
+    },
   })();
 }
 

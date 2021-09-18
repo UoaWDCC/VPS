@@ -13,7 +13,7 @@ export default function TextComponent({ id, onClick, component }) {
   // bold/italics?
   return (
     <Typography
-      className={`${styles.defaultComponentStyling}`}
+      className={`${styles.defaultComponentStyling} ${styles.textComponentStyles}`}
       id={id}
       onClick={onClick}
     >

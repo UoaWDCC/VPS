@@ -25,6 +25,10 @@ function addText(currentScene, setCurrentScene) {
   const newText = {
     type: "TEXT",
     text: "default text",
+    border: true,
+    fontSize: 16, // pt
+    color: "black",
+    textAlign: "left",
     left: 50, // as percentage
     top: 50, // as percentage
     height: 10, // as percentage
