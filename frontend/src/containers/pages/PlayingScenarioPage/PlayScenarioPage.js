@@ -1,37 +1,27 @@
-import React, { useEffect, useContext } from "react";
-import { useParams } from "react-router-dom";
+import React, { useState, useContext } from "react";
 import useStyles from "./playingScenarioPage.styles";
+import { useGet } from "../../../hooks/crudHooks";
 import componentResolver from "./componentResolver";
 import PlayingScenarioContext from "../../../context/PlayingScenarioContext";
 
 export default function PlayScenarioPage() {
   const styles = useStyles();
-  const { setCurrentScenarioId } = useContext(PlayingScenarioContext);
-  const { scenarioId } = useParams();
-  console.log(scenarioId);
+  const [currentScene, setCurrentScene] = useState(null);
+  // eslint-disable-next-line no-unused-vars
+  const { scenarioId, currentSceneId, setCurrentSceneId } = useContext(
+    PlayingScenarioContext
+  );
 
-  useEffect(() => {
-    setCurrentScenarioId(scenarioId);
-  }, []);
+  useGet(
+    `/api/scenario/${scenarioId}/scene/full/${currentSceneId}`,
+    setCurrentScene
+  );
 
   const componentOnClick = () => {
-    console.log("asdf");
+    console.log(`Component is clicked`);
+    // setCurrentSceneId(null);
   };
-  const currentScene = {
-    components: [
-      {
-        type: "TEXT",
-        text: "default text",
-        left: 50,
-        top: 50,
-        height: 10,
-        width: 20,
-      },
-    ],
-    _id: "6132d3e88aac6e3678f3c6ec",
-    name: "Scene 0",
-    __v: 0,
-  };
+
   return (
     <>
       <div className={styles.canvasContainer}>
