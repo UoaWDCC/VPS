@@ -5,7 +5,7 @@ import AuthoringToolPage from "../../AuthoringToolPage";
 import ScenarioContext from "../../../../../context/ScenarioContext";
 import SceneContext from "../../../../../context/SceneContext";
 
-test("Scenario Selection page snapshot test", () => {
+test("Authoring Tool page snapshot test", () => {
   const context = {
     currentScenario: { _id: "scenarioId" },
     currentScene: { _id: "sceneId", components: [] },

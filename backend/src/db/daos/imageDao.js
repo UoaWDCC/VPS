@@ -12,5 +12,9 @@ const retrieveImageList = async () => {
   return Image.find();
 };
 
+const retrieveImage = async (imageId) => {
+  return Image.findById(imageId);
+};
+
 // eslint-disable-next-line import/prefer-default-export
-export { createImage, retrieveImageList };
+export { createImage, retrieveImageList, retrieveImage };
