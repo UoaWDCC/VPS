@@ -1,24 +1,37 @@
 import React, { useContext, useEffect, useState } from "react";
 import { useGet } from "../hooks/crudHooks";
 import PlayingScenarioContext from "./PlayingScenarioContext";
-import SceneContext from "./SceneContext";
 
-export default function SceneContextProvider({ children }) {
-  const { currentScenario } = useContext(PlayingScenarioContext);
+export default function PlayingScenarioContextProvider({ children }) {
+  const [currentScenarioId, setCurrentScenarioId] = useState(null);
+  const [currentScenario, setCurrentScenario] = useState(null);
+  const [currentSceneId, setCurrentSceneId] = useState(null);
 
-  let getScenes = null;
-  if (currentScenario) {
-    getScenes = useGet(`api/scenario/${currentScenario._id}/scene`, setScenes);
-  }
+  console.log(`Context ScenarioId= ${currentScenarioId}`);
+  console.log(currentScenario);
+  console.log("=============================");
+
+  const { reFetch } = useGet(
+    `api/scenario/${currentScenarioId}/scene`,
+    setCurrentScenario
+  );
+
+  useEffect(() => {
+    if (currentScenarioId) {
+      reFetch();
+    }
+  }, [currentScenarioId]);
 
   return (
-    <SceneContext.Provider
+    <PlayingScenarioContext.Provider
       value={{
-        currentScene,
-        setCurrentScene: changeScene,
+        currentScenarioId,
+        setCurrentScenarioId,
+        currentScenario,
+        currentSceneId,
       }}
     >
       {children}
-    </SceneContext.Provider>
+    </PlayingScenarioContext.Provider>
   );
 }

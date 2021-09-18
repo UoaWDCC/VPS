@@ -5,7 +5,7 @@ export default function useStyles() {
     canvasContainer: {
       height: "100vh",
       width: "100vw",
-      backgroundColor: "red",
+      backgroundColor: "#CAF4F4",
     },
   })();
 }

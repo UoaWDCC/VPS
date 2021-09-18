@@ -1,12 +1,18 @@
-import React from "react";
+import React, { useEffect, useContext } from "react";
 import { useParams } from "react-router-dom";
 import useStyles from "./playingScenarioPage.styles";
 import componentResolver from "./componentResolver";
+import PlayingScenarioContext from "../../../context/PlayingScenarioContext";
 
 export default function PlayScenarioPage() {
   const styles = useStyles();
+  const { setCurrentScenarioId } = useContext(PlayingScenarioContext);
   const { scenarioId } = useParams();
   console.log(scenarioId);
+
+  useEffect(() => {
+    setCurrentScenarioId(scenarioId);
+  }, []);
 
   const componentOnClick = () => {
     console.log("asdf");
