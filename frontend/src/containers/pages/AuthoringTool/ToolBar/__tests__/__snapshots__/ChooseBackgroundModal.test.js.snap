@@ -41,7 +41,7 @@ exports[`ChooseBackgroundModal component snapshot test 1`] = `
           <h6
             class="MuiTypography-root MuiTypography-h6"
           >
-            Choose Background
+            Choose Image
           </h6>
         </div>
         <div
@@ -56,26 +56,15 @@ exports[`ChooseBackgroundModal component snapshot test 1`] = `
           class="MuiDialogActions-root MuiDialogActions-spacing"
         >
           <button
-            class="MuiButtonBase-root MuiButton-root MuiButton-text dialogueActionButton Mui-focusVisible Mui-focusVisible"
-            tabindex="0"
+            class="MuiButtonBase-root MuiButton-root MuiButton-text dialogueActionButton Mui-disabled Mui-disabled"
+            disabled=""
+            tabindex="-1"
             type="button"
           >
             <span
               class="MuiButton-label"
             >
               Add image
-            </span>
-            <span
-              class="MuiTouchRipple-root"
-            >
-              <span
-                class="MuiTouchRipple-ripple MuiTouchRipple-rippleVisible MuiTouchRipple-ripplePulsate"
-                style="width: 1px; height: 1px; top: -0.5px; left: -0.5px;"
-              >
-                <span
-                  class="MuiTouchRipple-child MuiTouchRipple-childPulsate"
-                />
-              </span>
             </span>
           </button>
         </div>

@@ -1,25 +1,39 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import Button from "@material-ui/core/Button";
 import ModalDialogue from "../../../../../components/ModalDialogue";
 import { useGet } from "../../../../../hooks/crudHooks";
 import styles from "../../../../../styling/ChooseBackgroundModal.module.scss";
 import ImageListContainer from "../../../../../components/ImageListContainer";
+import { addImage } from "../ToolBarActions";
+import SceneContext from "../../../../../context/SceneContext";
 
 export default function ChooseBackgroundModal({ isShowing, hide }) {
+  const { currentScene, setCurrentScene } = useContext(SceneContext);
   const [images, setImages] = useState();
+
   // eslint-disable-next-line no-unused-vars
   const [selectedImage, setSelectedImage] = useState();
+  useGet("/api/image", setImages);
+
+  function handleButtonClick() {
+    hide();
+    addImage(currentScene, setCurrentScene, selectedImage);
+  }
+
   const saveButton = (
-    <Button autoFocus onClick={hide} className={styles.dialogueActionButton}>
+    <Button
+      autoFocus
+      onClick={handleButtonClick}
+      className={styles.dialogueActionButton}
+      disabled={!selectedImage}
+    >
       Add image
     </Button>
   );
 
-  useGet("/api/image", setImages);
-
   return (
     <ModalDialogue
-      title="Choose Background"
+      title="Choose Image"
       isShowing={isShowing}
       hide={hide}
       dialogueAction={saveButton}

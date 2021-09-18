@@ -26,6 +26,10 @@ export default function SideBar() {
     reFetch();
   }
 
+  function playScenario() {
+    window.open(`/play/${currentScenario._id}`, "_blank");
+  }
+
   return (
     <>
       <div className={styles.sideBar}>
@@ -54,12 +58,7 @@ export default function SideBar() {
               }  `}
               color="default"
               variant="contained"
-              component={Link}
-              to={
-                currentScenario
-                  ? `/play/${currentScenario._id}`
-                  : "/scenario/null"
-              }
+              onClick={playScenario}
               disabled={!currentScenario}
             >
               Play

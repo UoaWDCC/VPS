@@ -5,7 +5,6 @@ import {
   useRouteMatch,
   Switch,
   useHistory,
-  Link,
 } from "react-router-dom";
 import { Button } from "@material-ui/core";
 import TopBar from "../../components/TopBar";
@@ -51,6 +50,10 @@ export function SceneSelectionPage({ data = null }) {
     }
   }
 
+  function playScenario() {
+    window.open(`/play/${scenarioId}`, "_blank");
+  }
+
   useEffect(() => {
     setCurrentScene(null);
     if (reFetch) {
@@ -82,11 +85,10 @@ export function SceneSelectionPage({ data = null }) {
           Edit
         </Button>
         <Button
-          className="btn top contained white margin-left"
+          className="btn top contained white"
           color="default"
           variant="contained"
-          component={Link}
-          to={`/play/${scenarioId}`}
+          onClick={playScenario}
         >
           Play
         </Button>

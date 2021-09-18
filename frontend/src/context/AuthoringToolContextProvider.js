@@ -4,12 +4,11 @@ import AuthoringToolContext from "./AuthoringToolContext";
 export default function AuthoringToolContextProvider({ children }) {
   const [select, setSelect] = useState(null);
   const [bounds, setBounds] = useState(null);
-  const [scalable, setScalable] = useState(false);
   const [shiftPressed, setShiftPressed] = useState(false);
 
   function selectElement({ currentTarget }) {
-    setScalable(currentTarget.firstElementChild.nodeName === "IMG");
-    setSelect(currentTarget.id);
+    const image = currentTarget.firstElementChild.nodeName === "IMG";
+    setSelect(image ? currentTarget.firstElementChild.id : currentTarget.id);
   }
 
   const clearElement = ({ target }) => {
@@ -22,7 +21,6 @@ export default function AuthoringToolContextProvider({ children }) {
     <AuthoringToolContext.Provider
       value={{
         select,
-        scalable,
         selectElement,
         clearElement,
         bounds,
