@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import Image from "material-ui-image";
-import { useGet } from "../../../../../hooks/crudHooks";
-import { imageStyles, imageContainerStyles } from "../components.styles";
+import { useGet } from "../../../../hooks/crudHooks";
+import { imageStyles, imageContainerStyles } from "./components.styles";
 
 export default function ImageComponent({ id, selectElement, component }) {
   const [image, setImage] = useState();
