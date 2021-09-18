@@ -25,7 +25,7 @@
     "react/jsx-no-bind": "off",
     "react/jsx-filename-extension": [
       1,
-      { "extensions": [".js", ".jsx", ".test.js"] }
+      { "extensions": [".js", ".jsx", ".ts", ".tsx", ".test.js"] }
     ],
     "jest/no-disabled-tests": "warn",
     "jest/no-focused-tests": "error",
