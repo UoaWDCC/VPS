@@ -9,17 +9,13 @@ export default function componentResolver(component, id, selectElement) {
       return (
         <ButtonComponent
           id={id}
-          selectElement={selectElement}
+          onClick={selectElement}
           component={component}
         />
       );
     case "TEXT":
       return (
-        <TextComponent
-          id={id}
-          selectElement={selectElement}
-          component={component}
-        />
+        <TextComponent id={id} onClick={selectElement} component={component} />
       );
     default:
       break;
