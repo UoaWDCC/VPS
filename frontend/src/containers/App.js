@@ -16,13 +16,16 @@ export default function App() {
         <BrowserRouter>
           <Switch>
             <Route exact path="/" component={ScenarioSelectionPage} />
-            <PlayingScenarioContextProvider>
-              <Route path="/play/:scenarioId" component={PlayScenarioPage} />
-            </PlayingScenarioContextProvider>
-            <Route path="/play/:scenarioId" component={PlayScenarioPage} />
-            <SceneContextProvider>
-              <Route path="/scenario/:scenarioId" component={ScenePage} />
-            </SceneContextProvider>
+            <Route path="/play/:scenarioId">
+              <PlayingScenarioContextProvider>
+                <PlayScenarioPage />
+              </PlayingScenarioContextProvider>
+            </Route>
+            <Route path="/scenario/:scenarioId">
+              <SceneContextProvider>
+                <ScenePage />
+              </SceneContextProvider>
+            </Route>
             {/* Default path if nothing matches */}
             <Route path="/" component={ScenarioSelectionPage} />
           </Switch>
