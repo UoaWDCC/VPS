@@ -4,7 +4,7 @@ import ModalDialogue from "../../../../../components/ModalDialogue";
 import { useGet } from "../../../../../hooks/crudHooks";
 import styles from "../../../../../styling/ChooseBackgroundModal.module.scss";
 import ImageListContainer from "../../../../../components/ImageListContainer";
-import addImage from "./addImage";
+import { addImage } from "../ToolBarActions";
 import SceneContext from "../../../../../context/SceneContext";
 
 export default function ChooseBackgroundModal({ isShowing, hide }) {
