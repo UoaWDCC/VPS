@@ -16,13 +16,21 @@ export default function componentResolver(component, id, selectElement) {
       );
     case "TEXT":
       return (
-        <TextComponent id={id} onClick={selectElement} component={component} />
+        <TextComponent
+          id={id}
+          onClick={() => {
+            console.log("text clicked");
+          }}
+          component={component}
+        />
       );
     case "IMAGE":
       return (
         <ImageComponent
           id={id}
-          selectElement={selectElement}
+          onClick={() => {
+            console.log("image clicked");
+          }}
           component={component}
         />
       );
