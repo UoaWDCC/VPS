@@ -40,14 +40,6 @@ export default function TextPropertiesComponent({ component, componentIndex }) {
     });
   }
 
-  // Potential properties
-  // Text
-  // Border
-  // font size
-  // font color
-  // alignment
-  // bold/italics?
-
   return (
     <>
       <FormControl fullWidth className={styles.componentProperty}>
