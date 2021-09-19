@@ -13,9 +13,6 @@ export default function PlayScenarioContextProvider({ children }) {
     setCurrentScenario
   );
 
-  console.log("=============================");
-  console.log(currentScenario);
-
   useEffect(() => {
     if (currentScenario) {
       setCurrentSceneId(currentScenario[0]?._id);
