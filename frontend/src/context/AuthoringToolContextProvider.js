@@ -7,7 +7,7 @@ export default function AuthoringToolContextProvider({ children }) {
   const [shiftPressed, setShiftPressed] = useState(false);
 
   function selectElement({ currentTarget }) {
-    const image = currentTarget.firstElementChild.nodeName === "IMG";
+    const image = currentTarget.firstElementChild?.nodeName === "IMG";
     setSelect(image ? currentTarget.firstElementChild.id : currentTarget.id);
   }
 
