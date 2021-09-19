@@ -8,12 +8,31 @@ export default function componentResolver(component, id, onClick) {
     // ADD NEW COMPONENT TYPES HERE
     case "BUTTON":
       return (
-        <ButtonComponent id={id} onClick={onClick} component={component} />
+        <ButtonComponent
+          key={id}
+          id={id}
+          onClick={onClick}
+          component={component}
+        />
       );
     case "TEXT":
-      return <TextComponent id={id} onClick={onClick} component={component} />;
+      return (
+        <TextComponent
+          key={id}
+          id={id}
+          onClick={onClick}
+          component={component}
+        />
+      );
     case "IMAGE":
-      return <ImageComponent id={id} onClick={onClick} component={component} />;
+      return (
+        <ImageComponent
+          key={id}
+          id={id}
+          onClick={onClick}
+          component={component}
+        />
+      );
     default:
       break;
   }
