@@ -12,10 +12,12 @@
     flex-direction: column;
 
     .sideBarBody {
-      flex: 1 1 auto;
+      flex: 1 1;
+      flex-basis: 0px;
       padding: 2.5em 2.5em;
       margin: 0em;
       background-color: #f0f0f0;
+      overflow-y: scroll;
 
       .noComponentSelectedText {
         font-size: 90%;
