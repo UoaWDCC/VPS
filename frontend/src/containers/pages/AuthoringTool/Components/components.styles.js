@@ -13,6 +13,7 @@ export default function useStyles(component) {
     textComponentStyles: {
       borderStyle: component.border ? "solid" : "none",
       borderColor: "black",
+      backgroundColor: component.border ? "white" : "none",
       fontSize: component.fontSize,
       paddingInline: "5px",
       overflow: "hidden",
