@@ -7,8 +7,8 @@ import {
   MenuItem,
 } from "@material-ui/core";
 import SceneContext from "../../../../../context/SceneContext";
-import CustomTextFieldStyles from "../Properties/CustomTextFieldStyles";
-import CustomInputLabelStyles from "../Properties/CustomInputLabelStyles";
+import CustomTextFieldStyles from "../CustomPropertyInputStyles/CustomTextFieldStyles";
+import CustomInputLabelStyles from "../CustomPropertyInputStyles/CustomInputLabelStyles";
 
 import styles from "../../../../../styling/CanvasSideBar.module.scss";
 

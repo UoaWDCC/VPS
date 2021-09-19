@@ -14,9 +14,9 @@ import FormatAlignCenterIcon from "@material-ui/icons/FormatAlignCenter";
 import FormatAlignRightIcon from "@material-ui/icons/FormatAlignRight";
 import FormatAlignJustifyIcon from "@material-ui/icons/FormatAlignJustify";
 import SceneContext from "../../../../../context/SceneContext";
-import CustomTextFieldStyles from "../Properties/CustomTextFieldStyles";
-import CustomInputLabelStyles from "../Properties/CustomInputLabelStyles";
-import CustomCheckBoxStyles from "../Properties/CustomCheckBoxStyles";
+import CustomTextFieldStyles from "../CustomPropertyInputStyles/CustomTextFieldStyles";
+import CustomInputLabelStyles from "../CustomPropertyInputStyles/CustomInputLabelStyles";
+import CustomCheckBoxStyles from "../CustomPropertyInputStyles/CustomCheckBoxStyles";
 
 import styles from "../../../../../styling/CanvasSideBar.module.scss";
 import useStyles from "./TextPropertiesComponent.styles";
