@@ -3,16 +3,12 @@ import ButtonComponent from "../Components/ButtonComponent";
 import TextComponent from "../Components/TextComponent";
 import ImageComponent from "../Components/ImageComponent";
 
-export default function componentResolver(component, id, selectElement) {
+export default function componentResolver(component, id, onClick) {
   switch (component.type) {
     // ADD NEW COMPONENT TYPES HERE
     case "BUTTON":
       return (
-        <ButtonComponent
-          id={id}
-          onClick={selectElement}
-          component={component}
-        />
+        <ButtonComponent id={id} onClick={onClick} component={component} />
       );
     case "TEXT":
       return (
