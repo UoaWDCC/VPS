@@ -1,12 +1,12 @@
 import React, { useContext } from "react";
 import {
-  TextField,
   FormControl,
   InputLabel,
   Select,
   MenuItem,
   FormControlLabel,
   Checkbox,
+  OutlinedInput,
 } from "@material-ui/core";
 import { ToggleButton, ToggleButtonGroup } from "@mui/material";
 import FormatAlignLeftIcon from "@material-ui/icons/FormatAlignLeft";
@@ -14,14 +14,12 @@ import FormatAlignCenterIcon from "@material-ui/icons/FormatAlignCenter";
 import FormatAlignRightIcon from "@material-ui/icons/FormatAlignRight";
 import FormatAlignJustifyIcon from "@material-ui/icons/FormatAlignJustify";
 import SceneContext from "../../../../../context/SceneContext";
-import CustomTextFieldStyles from "../CustomPropertyInputStyles/CustomTextFieldStyles";
 import CustomInputLabelStyles from "../CustomPropertyInputStyles/CustomInputLabelStyles";
 import CustomCheckBoxStyles from "../CustomPropertyInputStyles/CustomCheckBoxStyles";
 
 import styles from "../../../../../styling/CanvasSideBar.module.scss";
 import useStyles from "./TextPropertiesComponent.styles";
 
-const CustomTextField = CustomTextFieldStyles()(TextField);
 const CustomInputLabel = CustomInputLabelStyles()(InputLabel);
 const CustomCheckBox = CustomCheckBoxStyles()(Checkbox);
 const sizes = [6, 8, 9, 10, 11, 12, 14, 16, 18, 20, 24, 30, 36, 42, 48, 60, 72];
@@ -44,12 +42,11 @@ export default function TextPropertiesComponent({ component, componentIndex }) {
     <>
       <FormControl fullWidth className={styles.componentProperty}>
         <CustomInputLabel shrink>Text</CustomInputLabel>
-        <CustomTextField
+        <OutlinedInput
           className={textComponentStyles.textArea}
           value={component.text}
           fullWidth
           multiline
-          variant="outlined"
           rows={5}
           onChange={(event) =>
             updateComponentProperty("text", event.target.value)
