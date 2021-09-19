@@ -2,7 +2,7 @@ import { Button } from "@material-ui/core";
 import React from "react";
 import useStyles from "./components.styles";
 
-export default function ButtonComponent({ id, selectElement, component }) {
+export default function ButtonComponent({ id, onClick, component }) {
   const styles = useStyles(component);
 
   return (
@@ -11,7 +11,7 @@ export default function ButtonComponent({ id, selectElement, component }) {
       color="default"
       variant={component.variant}
       id={id}
-      onClick={selectElement}
+      onClick={onClick}
     >
       {component.text}
     </Button>
