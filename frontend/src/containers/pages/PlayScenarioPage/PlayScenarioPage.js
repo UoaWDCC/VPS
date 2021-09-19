@@ -1,12 +1,12 @@
 import React, { useContext } from "react";
-import useStyles from "./playingScenarioPage.styles";
-import PlayingScenarioContext from "../../../context/PlayingScenarioContext";
-import PlayingScenarioCanvas from "./PlayingScenarioCanvas";
+import useStyles from "./playScenarioPage.styles";
+import PlayScenarioContext from "../../../context/PlayScenarioContext";
+import PlayScenarioCanvas from "./PlayScenarioCanvas";
 import LoadingPage from "../LoadingPage";
 
 export default function PlayScenarioPage() {
   const styles = useStyles();
-  const { currentSceneId } = useContext(PlayingScenarioContext);
+  const { currentSceneId } = useContext(PlayScenarioContext);
 
   if (!currentSceneId) {
     return <LoadingPage />;
@@ -16,7 +16,7 @@ export default function PlayScenarioPage() {
     <>
       <div className={styles.canvasContainer}>
         <div className={styles.canvas}>
-          <PlayingScenarioCanvas />
+          <PlayScenarioCanvas />
         </div>
       </div>
     </>

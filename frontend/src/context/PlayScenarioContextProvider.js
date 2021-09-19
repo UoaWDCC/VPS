@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { useGet } from "../hooks/crudHooks";
-import PlayingScenarioContext from "./PlayingScenarioContext";
+import PlayScenarioContext from "./PlayScenarioContext";
 
-export default function PlayingScenarioContextProvider({ children }) {
+export default function PlayScenarioContextProvider({ children }) {
   const [currentScenario, setCurrentScenario] = useState(null);
   const [currentSceneId, setCurrentSceneId] = useState(null);
   const { scenarioId } = useParams();
@@ -23,7 +23,7 @@ export default function PlayingScenarioContextProvider({ children }) {
   }, [currentScenario]);
 
   return (
-    <PlayingScenarioContext.Provider
+    <PlayScenarioContext.Provider
       value={{
         scenarioId,
         currentScenario,
@@ -33,6 +33,6 @@ export default function PlayingScenarioContextProvider({ children }) {
       }}
     >
       {children}
-    </PlayingScenarioContext.Provider>
+    </PlayScenarioContext.Provider>
   );
 }

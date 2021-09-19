@@ -1,14 +1,13 @@
 import React, { useState, useContext } from "react";
 import { useGet } from "../../../hooks/crudHooks";
 import componentResolver from "../AuthoringTool/Canvas/componentResolver";
-import PlayingScenarioContext from "../../../context/PlayingScenarioContext";
+import PlayScenarioContext from "../../../context/PlayScenarioContext";
 
-export default function PlayingScenarioCanvas() {
+export default function PlayScenarioCanvas() {
   const [currentScene, setCurrentScene] = useState(null);
   // eslint-disable-next-line no-unused-vars
-  const { scenarioId, currentSceneId, setCurrentSceneId } = useContext(
-    PlayingScenarioContext
-  );
+  const { scenarioId, currentSceneId, setCurrentSceneId } =
+    useContext(PlayScenarioContext);
 
   useGet(
     `/api/scenario/${scenarioId}/scene/full/${currentSceneId}`,
