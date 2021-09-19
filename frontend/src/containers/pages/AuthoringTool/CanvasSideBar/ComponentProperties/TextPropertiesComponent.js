@@ -19,6 +19,7 @@ import CustomInputLabelStyles from "../Properties/CustomInputLabelStyles";
 import CustomCheckBoxStyles from "../Properties/CustomCheckBoxStyles";
 
 import styles from "../../../../../styling/CanvasSideBar.module.scss";
+import useStyles from "./TextPropertiesComponent.styles";
 
 const CustomTextField = CustomTextFieldStyles()(TextField);
 const CustomInputLabel = CustomInputLabelStyles()(InputLabel);
@@ -26,6 +27,7 @@ const CustomCheckBox = CustomCheckBoxStyles()(Checkbox);
 const sizes = [6, 8, 9, 10, 11, 12, 14, 16, 18, 20, 24, 30, 36, 42, 48, 60, 72];
 
 export default function TextPropertiesComponent({ component, componentIndex }) {
+  const textComponentStyles = useStyles();
   const { currentScene, setCurrentScene } = useContext(SceneContext);
 
   function updateComponentProperty(property, newValue) {
@@ -48,12 +50,10 @@ export default function TextPropertiesComponent({ component, componentIndex }) {
 
   return (
     <>
-      <FormControl className={styles.componentProperty}>
-        <CustomInputLabel fullWidth shrink>
-          Text
-        </CustomInputLabel>
+      <FormControl fullWidth className={styles.componentProperty}>
+        <CustomInputLabel shrink>Text</CustomInputLabel>
         <CustomTextField
-          className={styles.textArea}
+          className={textComponentStyles.textArea}
           value={component.text}
           fullWidth
           multiline
@@ -64,11 +64,11 @@ export default function TextPropertiesComponent({ component, componentIndex }) {
           }
         />
       </FormControl>
-      <div className={styles.componentProperty}>
+      <div
+        className={`${styles.componentProperty} ${textComponentStyles.inlineRow}`}
+      >
         <FormControl>
-          <CustomInputLabel fullWidth shrink>
-            Font size
-          </CustomInputLabel>
+          <CustomInputLabel shrink>Font size</CustomInputLabel>
           <Select
             className={styles.selectInput}
             value={component.fontSize}
@@ -85,8 +85,8 @@ export default function TextPropertiesComponent({ component, componentIndex }) {
           value={component.textAlign}
           exclusive
           size="small"
-          onChange={(event) =>
-            updateComponentProperty("textAlign", event.target.value)
+          onChange={(event, value) =>
+            updateComponentProperty("textAlign", value)
           }
           aria-label="text alignment"
         >
