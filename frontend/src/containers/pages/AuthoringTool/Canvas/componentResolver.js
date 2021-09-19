@@ -11,25 +11,9 @@ export default function componentResolver(component, id, onClick) {
         <ButtonComponent id={id} onClick={onClick} component={component} />
       );
     case "TEXT":
-      return (
-        <TextComponent
-          id={id}
-          onClick={() => {
-            console.log("text clicked");
-          }}
-          component={component}
-        />
-      );
+      return <TextComponent id={id} onClick={onClick} component={component} />;
     case "IMAGE":
-      return (
-        <ImageComponent
-          id={id}
-          onClick={() => {
-            console.log("image clicked");
-          }}
-          component={component}
-        />
-      );
+      return <ImageComponent id={id} onClick={onClick} component={component} />;
     default:
       break;
   }
