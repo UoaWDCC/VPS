@@ -33,10 +33,22 @@ const retrieveScene = async (sceneId) => {
 };
 
 const updateScene = async (sceneId, updatedScene) => {
-  const dbScene = await Scene.findOneAndUpdate({ _id: sceneId }, updatedScene, {
-    new: true,
-  });
+  // makes sure when we update components is not null
+  if (updatedScene.components) {
+    const dbScene = await Scene.findOneAndUpdate(
+      { _id: sceneId },
+      updatedScene,
+      {
+        new: true,
+      }
+    );
+    return dbScene;
+  }
 
+  // if we are updating name only, components will be null
+  const dbScene = await Scene.findById(sceneId);
+  dbScene.name = updatedScene.name;
+  await dbScene.save();
   return dbScene;
 };
 

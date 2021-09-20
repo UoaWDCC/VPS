@@ -66,7 +66,11 @@ export default function TextPropertiesComponent({ component, componentIndex }) {
             }
           >
             {sizes.map((size) => {
-              return <MenuItem value={size}>{size}</MenuItem>;
+              return (
+                <MenuItem value={size} key={size}>
+                  {size}
+                </MenuItem>
+              );
             })}
           </Select>
         </FormControl>

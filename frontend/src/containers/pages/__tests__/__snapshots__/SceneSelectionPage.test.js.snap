@@ -107,29 +107,7 @@ exports[`Scene Selection page snapshot test 1`] = `
           style="margin: -15px;"
         >
           <li
-            class="MuiImageListItem-root"
-            height="200"
-            style="width: 20%; height: 240px; padding: 15px;"
-          >
-            <div
-              class="MuiImageListItem-item"
-            >
-              <div
-                class="imageListItemWide"
-              >
-                <div
-                  class="MuiBox-root MuiBox-root-2"
-                />
-                <p
-                  class="text"
-                >
-                  Create New Scene
-                </p>
-              </div>
-            </div>
-          </li>
-          <li
-            class="MuiImageListItem-root"
+            class="MuiImageListItem-root makeStyles-listContainerItem-2"
             height="200"
             style="width: 20%; height: 240px; padding: 15px;"
           >
@@ -145,13 +123,13 @@ exports[`Scene Selection page snapshot test 1`] = `
                 <p
                   class="text"
                 >
-                  test1
+                  Create New Scene
                 </p>
               </div>
             </div>
           </li>
           <li
-            class="MuiImageListItem-root"
+            class="MuiImageListItem-root makeStyles-listContainerItem-2"
             height="200"
             style="width: 20%; height: 240px; padding: 15px;"
           >
@@ -164,11 +142,31 @@ exports[`Scene Selection page snapshot test 1`] = `
                 <div
                   class="MuiBox-root MuiBox-root-4"
                 />
-                <p
+                <input
                   class="text"
-                >
-                  test2
-                </p>
+                  value="test1"
+                />
+              </div>
+            </div>
+          </li>
+          <li
+            class="MuiImageListItem-root makeStyles-listContainerItem-2"
+            height="200"
+            style="width: 20%; height: 240px; padding: 15px;"
+          >
+            <div
+              class="MuiImageListItem-item"
+            >
+              <div
+                class="imageListItemWide"
+              >
+                <div
+                  class="MuiBox-root MuiBox-root-5"
+                />
+                <input
+                  class="text"
+                  value="test2"
+                />
               </div>
             </div>
           </li>
