@@ -13,6 +13,13 @@ const retrieveScenarioList = async () => {
   return Scenario.find({}, "name");
 };
 
+const updateScenario = async (scenarioId, updatedScenario) => {
+  const scenario = await Scenario.findById(scenarioId);
+  scenario.name = updatedScenario.name;
+  await scenario.save();
+  return scenario;
+};
+
 const deleteScenario = async (scenarioId) => {
   try {
     const scenario = await Scenario.findById(scenarioId);
@@ -23,4 +30,4 @@ const deleteScenario = async (scenarioId) => {
   }
 };
 
-export { createScenario, retrieveScenarioList, deleteScenario };
+export { createScenario, retrieveScenarioList, updateScenario, deleteScenario };

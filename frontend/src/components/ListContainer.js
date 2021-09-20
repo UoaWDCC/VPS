@@ -6,7 +6,13 @@ import styles from "../styling/ListContainer.module.scss";
 import DashedCard from "./DashedCard";
 import useStyles from "./component.styles";
 
-export default function ListContainer({ data, onItemSelected, wide, addCard }) {
+export default function ListContainer({
+  data,
+  onItemSelected,
+  wide,
+  addCard,
+  onItemBlur,
+}) {
   const classes = useStyles();
   const [selected, setSelected] = useState();
   const columns = wide ? 5 : 4;
@@ -63,7 +69,12 @@ export default function ListContainer({ data, onItemSelected, wide, addCard }) {
                         },
                       }}
                     />
-                    <input className={styles.text} defaultValue={item.name} />
+                    <input
+                      className={styles.text}
+                      defaultValue={item.name}
+                      onBlur={onItemBlur}
+                      key={item._id}
+                    />
                   </div>
                 </ImageListItem>
               ))
