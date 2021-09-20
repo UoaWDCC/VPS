@@ -7,43 +7,39 @@ exports[`Button properties component snapshot test 1`] = `
       class="MuiFormControl-root componentProperty MuiFormControl-fullWidth"
     >
       <label
-        class="MuiFormLabel-root MuiInputLabel-root WithStyles(ForwardRef(InputLabel))-root-3 MuiInputLabel-formControl MuiInputLabel-animated MuiInputLabel-shrink"
+        class="MuiFormLabel-root MuiInputLabel-root WithStyles(ForwardRef(InputLabel))-root-3 MuiInputLabel-formControl MuiInputLabel-animated MuiInputLabel-shrink MuiFormLabel-filled"
         data-shrink="true"
       >
         Text
       </label>
       <div
-        class="MuiFormControl-root MuiTextField-root WithStyles(ForwardRef(TextField))-root-4 makeStyles-textArea-14 MuiFormControl-fullWidth"
+        class="MuiInputBase-root MuiOutlinedInput-root makeStyles-textArea-13 MuiInputBase-fullWidth MuiInputBase-formControl MuiInputBase-multiline MuiOutlinedInput-multiline"
       >
-        <div
-          class="MuiInputBase-root MuiOutlinedInput-root MuiInputBase-fullWidth MuiInputBase-formControl MuiInputBase-multiline MuiOutlinedInput-multiline"
+        <textarea
+          aria-invalid="false"
+          class="MuiInputBase-input MuiOutlinedInput-input MuiInputBase-inputMultiline MuiOutlinedInput-inputMultiline"
+          rows="5"
         >
-          <textarea
-            aria-invalid="false"
-            class="MuiInputBase-input MuiOutlinedInput-input MuiInputBase-inputMultiline MuiOutlinedInput-inputMultiline"
-            rows="5"
+          default text
+        </textarea>
+        <fieldset
+          aria-hidden="true"
+          class="PrivateNotchedOutline-root-4 MuiOutlinedInput-notchedOutline"
+          style="padding-left: 8px;"
+        >
+          <legend
+            class="PrivateNotchedOutline-legend-5"
+            style="width: 0.01px;"
           >
-            default text
-          </textarea>
-          <fieldset
-            aria-hidden="true"
-            class="PrivateNotchedOutline-root-5 MuiOutlinedInput-notchedOutline"
-            style="padding-left: 8px;"
-          >
-            <legend
-              class="PrivateNotchedOutline-legend-6"
-              style="width: 0.01px;"
-            >
-              <span>
-                ​
-              </span>
-            </legend>
-          </fieldset>
-        </div>
+            <span>
+              ​
+            </span>
+          </legend>
+        </fieldset>
       </div>
     </div>
     <div
-      class="componentProperty makeStyles-inlineRow-15"
+      class="componentProperty makeStyles-inlineRow-14"
     >
       <div
         class="MuiFormControl-root"
@@ -224,14 +220,14 @@ exports[`Button properties component snapshot test 1`] = `
       >
         <span
           aria-disabled="false"
-          class="MuiButtonBase-root MuiIconButton-root PrivateSwitchBase-root-10 MuiCheckbox-root WithStyles(ForwardRef(Checkbox))-root-9 PrivateSwitchBase-checked-11 Mui-checked"
+          class="MuiButtonBase-root MuiIconButton-root PrivateSwitchBase-root-9 MuiCheckbox-root WithStyles(ForwardRef(Checkbox))-root-8 PrivateSwitchBase-checked-10 Mui-checked"
         >
           <span
             class="MuiIconButton-label"
           >
             <input
               checked=""
-              class="PrivateSwitchBase-input-13"
+              class="PrivateSwitchBase-input-12"
               data-indeterminate="false"
               type="checkbox"
               value=""

@@ -26,15 +26,9 @@ export default function ToolBar() {
         <Box
           display="flex"
           flexDirection="row"
-          onClick={
-            setSelect
-              ? () => {
-                  setSelect(null);
-                }
-              : () => {
-                  console.log("test");
-                }
-          }
+          onClick={() => {
+            setSelect(null);
+          }}
         >
           {toolBarData.map((tool) => {
             const menuOnClick = tool.dropdown
