@@ -9,13 +9,14 @@ import ScreenContainer from "../../../components/ScreenContainer";
 import ScenarioContext from "../../../context/ScenarioContext";
 import { useGet, usePut } from "../../../hooks/crudHooks";
 import SceneContext from "../../../context/SceneContext";
-import AuthoringToolContextProvider from "../../../context/AuthoringToolContextProvider";
+import AuthoringToolContext from "../../../context/AuthoringToolContext";
 
 export default function AuthoringToolPage() {
   const { scenarioId, sceneId } = useParams();
   const { currentScene, setCurrentScene, setMonitorChange, setHasChange } =
     useContext(SceneContext);
   const { currentScenario } = useContext(ScenarioContext);
+  const { setSelect } = useContext(AuthoringToolContext);
   const [firstTimeRender, setFirstTimeRender] = useState(true);
 
   useGet(
@@ -32,6 +33,7 @@ export default function AuthoringToolPage() {
   }, [currentScene]);
 
   async function saveScene() {
+    setSelect(null);
     await usePut(`/api/scenario/${scenarioId}/scene/${sceneId}`, {
       name: currentScene.name,
       components: currentScene?.components,
@@ -41,25 +43,23 @@ export default function AuthoringToolPage() {
 
   return (
     <>
-      <AuthoringToolContextProvider>
-        <ScreenContainer vertical>
-          <TopBar back={`/scenario/${currentScenario?._id}`} confirmModal>
-            <Button
-              className="btn top contained white"
-              color="default"
-              variant="contained"
-              onClick={saveScene}
-            >
-              Save
-            </Button>
-          </TopBar>
-          <ToolBar />
-          <div className="flex" style={{ height: "100%" }}>
-            <Canvas />
-            <CanvasSideBar />
-          </div>
-        </ScreenContainer>
-      </AuthoringToolContextProvider>
+      <ScreenContainer vertical>
+        <TopBar back={`/scenario/${currentScenario?._id}`} confirmModal>
+          <Button
+            className="btn top contained white"
+            color="default"
+            variant="contained"
+            onClick={saveScene}
+          >
+            Save
+          </Button>
+        </TopBar>
+        <ToolBar />
+        <div className="flex" style={{ height: "100%" }}>
+          <Canvas />
+          <CanvasSideBar />
+        </div>
+      </ScreenContainer>
     </>
   );
 }

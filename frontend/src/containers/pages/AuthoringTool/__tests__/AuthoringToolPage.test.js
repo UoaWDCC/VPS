@@ -4,6 +4,7 @@ import { BrowserRouter } from "react-router-dom";
 import AuthoringToolPage from "../AuthoringToolPage";
 import SceneContext from "../../../../context/SceneContext";
 import ScenarioContext from "../../../../context/ScenarioContext";
+import AuthoringToolContextProvider from "../../../../context/AuthoringToolContextProvider";
 
 test("Authoring Tool page snapshot test", () => {
   const context = {
@@ -14,11 +15,13 @@ test("Authoring Tool page snapshot test", () => {
 
   const { baseElement } = render(
     <BrowserRouter>
-      <ScenarioContext.Provider value={context}>
-        <SceneContext.Provider value={context}>
-          <AuthoringToolPage />
-        </SceneContext.Provider>
-      </ScenarioContext.Provider>
+      <AuthoringToolContextProvider>
+        <ScenarioContext.Provider value={context}>
+          <SceneContext.Provider value={context}>
+            <AuthoringToolPage />
+          </SceneContext.Provider>
+        </ScenarioContext.Provider>
+      </AuthoringToolContextProvider>
     </BrowserRouter>
   );
 

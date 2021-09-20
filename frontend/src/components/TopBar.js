@@ -6,6 +6,7 @@ import styles from "../styling/TopBar.module.scss";
 import BackModal from "../containers/pages/AuthoringTool/BackModal";
 import SceneContext from "../context/SceneContext";
 import ScenarioContext from "../context/ScenarioContext";
+import AuthoringToolContext from "../context/AuthoringToolContext";
 
 export default function TopBar({
   back = "/",
@@ -15,9 +16,17 @@ export default function TopBar({
   const [showModal, setShowModal] = useState(false);
   const { hasChange, setMonitorChange } = useContext(SceneContext);
   const { currentScenario } = useContext(ScenarioContext);
+  let setSelect;
+  if (confirmModal) {
+    setSelect = useContext(AuthoringToolContext).setSelect;
+  }
   const history = useHistory();
 
   function handleLeaveAuthoringTool() {
+    if (setSelect) {
+      setSelect(null);
+    }
+
     if (!hasChange) {
       setMonitorChange(false);
       history.push(`/scenario/${currentScenario._id}`);
