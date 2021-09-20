@@ -23,6 +23,7 @@ export default function ButtonPropertiesComponent({
 
   function updateComponentProperty(event, property) {
     const updatedComponents = currentScene.components;
+    console.log(event.target.value);
     updatedComponents[componentIndex][property] = event.target.value;
 
     setCurrentScene({
@@ -75,7 +76,7 @@ export default function ButtonPropertiesComponent({
           </MenuItem>
           {scenes.map((scene) => {
             return (
-              <MenuItem key={scene._id} value={scene.name}>
+              <MenuItem key={scene._id} value={scene._id}>
                 {scene.name}
               </MenuItem>
             );
