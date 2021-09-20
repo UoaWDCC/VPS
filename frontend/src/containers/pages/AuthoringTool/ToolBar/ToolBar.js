@@ -4,10 +4,11 @@ import ArrowDropDownIcon from "@material-ui/icons/ArrowDropDown";
 import toolBarData from "./ToolBarData";
 import SceneContext from "../../../../context/SceneContext";
 import styles from "../../../../styling/ToolBar.module.scss";
+import AuthoringToolContext from "../../../../context/AuthoringToolContext";
 
 export default function ToolBar() {
   const { currentScene, setCurrentScene } = useContext(SceneContext);
-
+  const { setSelect } = useContext(AuthoringToolContext);
   const [anchorEl, setAnchorEl] = useState(null);
   const [triggerElTitle, setTriggerElTitle] = useState(null);
   const handleDropdownClick = (e, title) => {
@@ -22,7 +23,19 @@ export default function ToolBar() {
   return (
     <>
       <MenuList className={styles.toolBar}>
-        <Box display="flex" flexDirection="row">
+        <Box
+          display="flex"
+          flexDirection="row"
+          onClick={
+            setSelect
+              ? () => {
+                  setSelect(null);
+                }
+              : () => {
+                  console.log("test");
+                }
+          }
+        >
           {toolBarData.map((tool) => {
             const menuOnClick = tool.dropdown
               ? (event) => {

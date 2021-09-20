@@ -21,6 +21,7 @@ export default function AuthoringToolContextProvider({ children }) {
     <AuthoringToolContext.Provider
       value={{
         select,
+        setSelect,
         selectElement,
         clearElement,
         bounds,
