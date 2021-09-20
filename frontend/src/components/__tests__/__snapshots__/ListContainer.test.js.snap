@@ -13,7 +13,7 @@ exports[`ListContainer component snapshot test 1`] = `
     }
   >
     <li
-      className="MuiImageListItem-root"
+      className="MuiImageListItem-root makeStyles-listContainerItem-1"
       height={200}
       onClick={[Function]}
       style={
@@ -31,13 +31,12 @@ exports[`ListContainer component snapshot test 1`] = `
           className="imageListItem"
         >
           <div
-            className="MuiBox-root MuiBox-root-1"
+            className="MuiBox-root MuiBox-root-2"
           />
-          <p
+          <input
             className="text"
-          >
-            Scenario 1
-          </p>
+            defaultValue="Scenario 1"
+          />
         </div>
       </div>
     </li>

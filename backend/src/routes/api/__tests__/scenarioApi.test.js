@@ -140,4 +140,24 @@ describe("Scenario API tests", () => {
       )
     ).rejects.toThrow();
   });
+
+  it("update a scenarios name", async () => {
+    const response = await axios.put(
+      `http://localhost:${port}/api/scenario/${scenario1._id}`,
+      { name: "Scenario 2" }
+    );
+    expect(response.status).toBe(HTTP_OK);
+
+    // check correct scenario is returned
+    const scenario = response.data;
+    expect(scenario._id).toBeDefined();
+    expect(scenario.name).toEqual("Scenario 2");
+    expect(scenario.scenes).toEqual([]);
+
+    // check if scenario has been persisted to db
+    const dbScenario = await Scenario.findById(scenario._id).lean();
+    expect(dbScenario).toBeDefined();
+    expect(dbScenario.name).toEqual("Scenario 2");
+    expect(dbScenario.scenes).toEqual([]);
+  });
 });

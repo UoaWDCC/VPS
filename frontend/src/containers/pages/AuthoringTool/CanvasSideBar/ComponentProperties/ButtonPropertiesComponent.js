@@ -74,7 +74,11 @@ export default function ButtonPropertiesComponent({
             <em>None</em>
           </MenuItem>
           {scenes.map((scene) => {
-            return <MenuItem value={scene.name}>{scene.name}</MenuItem>;
+            return (
+              <MenuItem key={scene._id} value={scene.name}>
+                {scene.name}
+              </MenuItem>
+            );
           })}
         </Select>
       </FormControl>
