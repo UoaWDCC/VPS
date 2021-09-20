@@ -3,6 +3,7 @@ import { Router } from "express";
 import {
   createScenario,
   retrieveScenarioList,
+  updateScenario,
   deleteScenario,
 } from "../../db/daos/scenarioDao";
 
@@ -22,6 +23,15 @@ router.post("/", async (req, res) => {
   res.status(HTTP_OK).json(scenario);
 });
 
+router.put("/:scenarioId", async (req, res) => {
+  const { name } = req.body;
+  const scenario = await updateScenario(req.params.scenarioId, {
+    name,
+  });
+
+  res.status(HTTP_OK).json(scenario);
+});
+
 router.get("/", async (req, res) => {
   const scenarios = await retrieveScenarioList();
 
@@ -30,7 +40,6 @@ router.get("/", async (req, res) => {
 
 router.delete("/:scenarioId", async (req, res) => {
   const deleted = await deleteScenario(req.params.scenarioId);
-
   if (deleted) {
     res.sendStatus(HTTP_NO_CONTENT);
   } else {

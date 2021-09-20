@@ -7,7 +7,6 @@ import styles from "../../../../styling/ToolBar.module.scss";
 
 export default function ToolBar() {
   const { currentScene, setCurrentScene } = useContext(SceneContext);
-
   const [anchorEl, setAnchorEl] = useState(null);
   const [triggerElTitle, setTriggerElTitle] = useState(null);
   const handleDropdownClick = (e, title) => {

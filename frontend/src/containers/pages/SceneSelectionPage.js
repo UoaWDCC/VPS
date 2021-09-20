@@ -12,7 +12,7 @@ import ListContainer from "../../components/ListContainer";
 import ScreenContainer from "../../components/ScreenContainer";
 import SceneContext from "../../context/SceneContext";
 import AuthoringToolPage from "./AuthoringTool/AuthoringToolPage";
-import { usePost, useDelete } from "../../hooks/crudHooks";
+import { usePost, usePut, useDelete } from "../../hooks/crudHooks";
 import DeleteButton from "../../components/DeleteButton";
 import ShareModal from "../../components/ShareModal";
 
@@ -52,6 +52,13 @@ export function SceneSelectionPage({ data = null }) {
 
   function playScenario() {
     window.open(`/play/${scenarioId}`, "_blank");
+  }
+
+  async function changeSceneName({ target }) {
+    await usePut(`/api/scenario/${scenarioId}/scene/${currentScene._id}`, {
+      name: target.value,
+    });
+    reFetch();
   }
 
   useEffect(() => {
@@ -106,6 +113,7 @@ export function SceneSelectionPage({ data = null }) {
         onItemSelected={setCurrentScene}
         addCard={createNewScene}
         wide
+        onItemBlur={changeSceneName}
       />
       <ShareModal
         isOpen={isShareModalOpen}
