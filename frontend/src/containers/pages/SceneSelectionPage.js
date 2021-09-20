@@ -15,6 +15,7 @@ import AuthoringToolPage from "./AuthoringTool/AuthoringToolPage";
 import { usePost, useDelete } from "../../hooks/crudHooks";
 import DeleteButton from "../../components/DeleteButton";
 import ShareModal from "../../components/ShareModal";
+import AuthoringToolContextProvider from "../../context/AuthoringToolContextProvider";
 
 export function SceneSelectionPage({ data = null }) {
   const [isShareModalOpen, setShareModalOpen] = useState(false);
@@ -120,7 +121,9 @@ export function ScenePage() {
   return (
     <Switch>
       <Route exact path={path} component={SceneSelectionPage} />
-      <Route path={`${path}/scene/:sceneId`} component={AuthoringToolPage} />
+      <AuthoringToolContextProvider>
+        <Route path={`${path}/scene/:sceneId`} component={AuthoringToolPage} />
+      </AuthoringToolContextProvider>
     </Switch>
   );
 }
