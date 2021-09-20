@@ -23,7 +23,6 @@ export default function ButtonPropertiesComponent({
 
   function updateComponentProperty(event, property) {
     const updatedComponents = currentScene.components;
-    console.log(event.target.value);
     updatedComponents[componentIndex][property] = event.target.value;
 
     setCurrentScene({
