@@ -10,7 +10,6 @@ export default function ScenarioSelectionPage({ data = null }) {
     useContext(ScenarioContext);
 
   async function changeScenarioName({ target }) {
-    setCurrentScenario({ ...currentScenario, name: target.value });
     await usePut(`/api/scenario/${currentScenario._id}`, {
       ...currentScenario,
       name: target.value,
