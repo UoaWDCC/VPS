@@ -4,8 +4,10 @@ import ImageListItem from "@material-ui/core/ImageListItem";
 import { Box } from "@material-ui/core";
 import styles from "../styling/ListContainer.module.scss";
 import DashedCard from "./DashedCard";
+import useStyles from "./component.styles";
 
 export default function ListContainer({ data, onItemSelected, wide, addCard }) {
+  const classes = useStyles();
   const [selected, setSelected] = useState();
   const columns = wide ? 5 : 4;
   const onItemClick = (item) => {
@@ -22,13 +24,19 @@ export default function ListContainer({ data, onItemSelected, wide, addCard }) {
       >
         <ImageList rowHeight={210} cols={columns} gap={30}>
           {addCard ? (
-            <ImageListItem key={-1} cols={1} height={200}>
+            <ImageListItem
+              className={classes.listContainerItem}
+              key={-1}
+              cols={1}
+              height={200}
+            >
               <DashedCard onClick={addCard} />
             </ImageListItem>
           ) : null}
           {data && data.length > 0
             ? data.map((item) => (
                 <ImageListItem
+                  className={classes.listContainerItem}
                   key={item._id}
                   cols={1}
                   height={200}
@@ -55,7 +63,7 @@ export default function ListContainer({ data, onItemSelected, wide, addCard }) {
                         },
                       }}
                     />
-                    <p className={styles.text}>{item.name}</p>
+                    <input className={styles.text} defaultValue={item.name} />
                   </div>
                 </ImageListItem>
               ))
