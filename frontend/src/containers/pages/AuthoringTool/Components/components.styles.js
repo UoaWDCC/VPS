@@ -6,9 +6,9 @@ export default function useStyles(component) {
       position: "absolute",
       top: `${component.top}%`,
       left: `${component.left}%`,
-      transform: `translate(-${component.top}%, -${component.left}%)`,
       height: `${component.height}%`,
       width: `${component.width}%`,
+      boxSizing: "border-box",
     },
     textComponentStyles: {
       borderStyle: component.border ? "solid" : "none",
