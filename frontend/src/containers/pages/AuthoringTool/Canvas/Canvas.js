@@ -1,7 +1,7 @@
 /* eslint-disable jsx-a11y/no-static-element-interactions */
 /* eslint-disable jsx-a11y/click-events-have-key-events */
 /* eslint-disable no-param-reassign */
-import React, { useContext } from "react";
+import React, { useContext, useEffect } from "react";
 
 import Moveable from "react-moveable";
 import AuthoringToolContext from "../../../../context/AuthoringToolContext";
@@ -19,22 +19,27 @@ export default function Canvas() {
     setBounds,
     shiftPressed,
     setShiftPressed,
+    deleteElement,
   } = useContext(AuthoringToolContext);
 
-  const keyDown = ({ key }) => {
-    if (key === "Shift") {
-      setShiftPressed(true);
-    }
-  };
+  useEffect(() => {
+    const keyDown = ({ key }) => {
+      if (key === "Shift") {
+        setShiftPressed(true);
+      } else if (key === "Backspace") {
+        deleteElement();
+      }
+    };
 
-  const keyUp = ({ key }) => {
-    if (key === "Shift") {
-      setShiftPressed(false);
-    }
-  };
+    const keyUp = ({ key }) => {
+      if (key === "Shift") {
+        setShiftPressed(false);
+      }
+    };
 
-  document.addEventListener("keydown", keyDown);
-  document.addEventListener("keyup", keyUp);
+    document.addEventListener("keydown", keyDown);
+    document.addEventListener("keyup", keyUp);
+  }, []);
 
   return (
     <>

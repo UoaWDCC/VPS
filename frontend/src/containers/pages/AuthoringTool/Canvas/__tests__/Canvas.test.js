@@ -15,13 +15,13 @@ test("Authoring Tool page snapshot test", () => {
 
   const { baseElement } = render(
     <BrowserRouter>
-      <AuthoringToolContextProvider>
-        <ScenarioContext.Provider value={context}>
-          <SceneContext.Provider value={context}>
+      <ScenarioContext.Provider value={context}>
+        <SceneContext.Provider value={context}>
+          <AuthoringToolContextProvider>
             <AuthoringToolPage />
-          </SceneContext.Provider>
-        </ScenarioContext.Provider>
-      </AuthoringToolContextProvider>
+          </AuthoringToolContextProvider>
+        </SceneContext.Provider>
+      </ScenarioContext.Provider>
     </BrowserRouter>
   );
 

@@ -3,7 +3,7 @@ import ButtonPropertiesComponent from "./ComponentProperties/ButtonPropertiesCom
 import TextPropertiesComponent from "./ComponentProperties/TextPropertiesComponent";
 
 export default function componentPropertiesResolver(component, componentIndex) {
-  switch (component.type) {
+  switch (component?.type) {
     // ADD NEW COMPONENT TYPES HERE
     case "BUTTON":
       return (
