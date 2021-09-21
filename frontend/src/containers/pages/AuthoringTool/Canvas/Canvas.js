@@ -23,11 +23,13 @@ export default function Canvas() {
   } = useContext(AuthoringToolContext);
 
   useEffect(() => {
-    const keyDown = ({ key }) => {
+    const keyDown = ({ key, target }) => {
       if (key === "Shift") {
         setShiftPressed(true);
-      } else if (key === "Backspace") {
-        deleteElement();
+      } else if (key === "Delete") {
+        if (target.tagName === "BODY" || target.tagName === "BUTTON") {
+          deleteElement();
+        }
       }
     };
 
