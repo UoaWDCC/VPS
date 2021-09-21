@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useEffect, useState, useRef } from "react";
 import { useGet } from "../hooks/crudHooks";
 import useLocalStorage from "../hooks/useLocalStorage";
 import ScenarioContext from "./ScenarioContext";
@@ -10,6 +10,8 @@ export default function SceneContextProvider({ children }) {
   const [currentScene, setCurrentScene] = useLocalStorage("currentScene", null);
   const [monitorChange, setMonitorChange] = useState(false);
   const [hasChange, setHasChange] = useState(false);
+
+  const currentSceneComponentsRef = useRef(currentScene?.components);
 
   let getScenes = null;
   if (currentScenario) {
@@ -27,6 +29,7 @@ export default function SceneContextProvider({ children }) {
       setHasChange(true);
     }
     setCurrentScene(newScene);
+    currentSceneComponentsRef.current = newScene?.components;
   }
 
   return (
@@ -40,6 +43,7 @@ export default function SceneContextProvider({ children }) {
         hasChange,
         setHasChange,
         setMonitorChange,
+        currentSceneComponentsRef,
       }}
     >
       {children}

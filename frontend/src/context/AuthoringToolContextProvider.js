@@ -1,35 +1,40 @@
-import React, { useState, useContext } from "react";
+import React, { useState, useContext, useRef } from "react";
 import AuthoringToolContext from "./AuthoringToolContext";
 import SceneContext from "./SceneContext";
 
 export default function AuthoringToolContextProvider({ children }) {
-  const { currentScene, setCurrentScene } = useContext(SceneContext);
+  const { currentScene, setCurrentScene, currentSceneComponentsRef } =
+    useContext(SceneContext);
 
   const [select, setSelect] = useState(null);
   const [bounds, setBounds] = useState(null);
   const [shiftPressed, setShiftPressed] = useState(false);
 
+  const selectRef = useRef(select);
+
   function selectElement({ currentTarget }) {
     const image = currentTarget.firstElementChild?.nodeName === "IMG";
+    selectRef.current = image
+      ? currentTarget.firstElementChild.id
+      : currentTarget.id;
     setSelect(image ? currentTarget.firstElementChild.id : currentTarget.id);
   }
 
   const clearElement = ({ target }) => {
     if (target.id === "canvas") {
       setSelect(null);
+      selectRef.current = null;
     }
   };
 
   function deleteElement() {
-    if (select !== null) {
-      console.log(currentScene.components);
-      console.log(select);
-      const updatedComponents = currentScene.components;
-      console.log(updatedComponents.splice(select, 1));
-
-      console.log(updatedComponents);
+    console.log(selectRef);
+    if (selectRef.current !== null) {
+      const updatedComponents = currentSceneComponentsRef.current;
+      updatedComponents.splice(parseInt(selectRef.current, 10), 1);
 
       setSelect(null);
+      selectRef.current = null;
 
       setCurrentScene({
         ...currentScene,
