@@ -5,10 +5,10 @@ function addButton(currentScene, setCurrentScene) {
     variant: "contained",
     colour: "white",
     nextScene: "",
-    left: 50, // as percentage
-    top: 50, // as percentage
+    left: 0, // as percentage
+    top: 0, // as percentage
     height: 6, // as percentage
-    width: 8, // as percentage
+    width: 20, // as percentage
   };
 
   const updatedComponents = currentScene.components;
@@ -29,8 +29,8 @@ function addText(currentScene, setCurrentScene) {
     fontSize: 16, // pt
     color: "black",
     textAlign: "left",
-    left: 50, // as percentage
-    top: 50, // as percentage
+    left: 0, // as percentage
+    top: 0, // as percentage
     height: 10, // as percentage
     width: 20, // as percentage
   };

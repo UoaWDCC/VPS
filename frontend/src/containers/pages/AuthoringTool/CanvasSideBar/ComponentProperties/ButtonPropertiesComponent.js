@@ -19,17 +19,7 @@ export default function ButtonPropertiesComponent({
   component,
   componentIndex,
 }) {
-  const { scenes, currentScene, setCurrentScene } = useContext(SceneContext);
-
-  function updateComponentProperty(event, property) {
-    const updatedComponents = currentScene.components;
-    updatedComponents[componentIndex][property] = event.target.value;
-
-    setCurrentScene({
-      ...currentScene,
-      components: updatedComponents,
-    });
-  }
+  const { scenes, updateComponentProperty } = useContext(SceneContext);
 
   return (
     <>
@@ -37,7 +27,9 @@ export default function ButtonPropertiesComponent({
         label="Text"
         value={component.text}
         fullWidth
-        onChange={(event) => updateComponentProperty(event, "text")}
+        onChange={(event) =>
+          updateComponentProperty(componentIndex, "text", event.target.value)
+        }
         className={styles.componentProperty}
       />
       <FormControl fullWidth className={styles.componentProperty}>
@@ -45,7 +37,13 @@ export default function ButtonPropertiesComponent({
         <Select
           className={styles.selectInput}
           value={component.variant}
-          onChange={(event) => updateComponentProperty(event, "variant")}
+          onChange={(event) =>
+            updateComponentProperty(
+              componentIndex,
+              "variant",
+              event.target.value
+            )
+          }
         >
           <MenuItem value="contained">Contained</MenuItem>
           <MenuItem value="outlined">Outlined</MenuItem>
@@ -56,7 +54,13 @@ export default function ButtonPropertiesComponent({
         <Select
           className={styles.selectInput}
           value={component.colour}
-          onChange={(event) => updateComponentProperty(event, "colour")}
+          onChange={(event) =>
+            updateComponentProperty(
+              componentIndex,
+              "colour",
+              event.target.value
+            )
+          }
         >
           <MenuItem value="white">White</MenuItem>
           <MenuItem value="teal">Teal</MenuItem>
@@ -67,7 +71,13 @@ export default function ButtonPropertiesComponent({
         <Select
           className={styles.selectInput}
           value={component.nextScene}
-          onChange={(event) => updateComponentProperty(event, "nextScene")}
+          onChange={(event) =>
+            updateComponentProperty(
+              componentIndex,
+              "nextScene",
+              event.target.value
+            )
+          }
           displayEmpty
         >
           <MenuItem value="">

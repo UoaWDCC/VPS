@@ -10,10 +10,9 @@ import styles from "../../../../styling/Canvas.module.scss";
 import componentResolver from "./componentResolver";
 
 export default function Canvas() {
-  const { currentScene } = useContext(SceneContext);
+  const { currentScene, updateComponentProperty } = useContext(SceneContext);
   const {
     select,
-    scalable,
     selectElement,
     clearElement,
     bounds,
@@ -43,12 +42,11 @@ export default function Canvas() {
         target={document.getElementById(select)}
         draggable
         throttleDrag={0}
-        resizable={!scalable}
-        scalable={scalable}
+        resizable
         keepRatio={shiftPressed}
         snappable
         bounds={bounds}
-        onDragStart={() => {
+        onRenderStart={() => {
           const canvas = document
             .getElementById("canvas")
             .getBoundingClientRect();
@@ -59,56 +57,47 @@ export default function Canvas() {
             right: canvas.right,
           });
         }}
-        onDrag={({ target, transform }) => {
-          target.style.transform = transform;
+        onDrag={({ target, left, top }) => {
+          target.style.left = `${left}px`;
+          target.style.top = `${top}px`;
         }}
         onDragEnd={({ target }) => {
-          const canvas = document
-            .getElementById("canvas")
-            .getBoundingClientRect();
-          const transfromMatrix = window
-            .getComputedStyle(target)
-            .transform.match(/(-?[0-9\\.]+)/g);
-          if (transfromMatrix != null) {
-            console.log(`x: ${(transfromMatrix[4] * 100) / canvas.width}`);
-            console.log(`y: ${(transfromMatrix[5] * 100) / canvas.height}`);
-          }
-        }}
-        onScale={({ target, scale, drag }) => {
-          target.style.transform =
-            `translate(${drag.beforeTranslate[0]}px, ${drag.beforeTranslate[1]}px)` +
-            `scale(${scale[0]}, ${scale[1]})`;
-        }}
-        onScaleEnd={({ target }) => {
-          const transfromMatrix = window
-            .getComputedStyle(target)
-            .transform.match(/(-?[0-9\\.]+)/g);
-          if (transfromMatrix != null) {
-            console.log(`x-scale: ${transfromMatrix[0]}`);
-            console.log(`y-scale: ${transfromMatrix[3]}`);
-          }
+          const canvas = document.getElementById("canvas");
+          const targetDoc = document.getElementById(target.id);
+
+          const left = (targetDoc.offsetLeft * 100) / canvas.offsetWidth;
+          const top = (targetDoc.offsetTop * 100) / canvas.offsetHeight;
+          console.log("---------------");
+          console.log(`x: ${left}`);
+          console.log(`y: ${top}`);
+          updateComponentProperty(select, "left", left);
+          updateComponentProperty(select, "top", top);
         }}
         onResize={({ target, width, height, drag }) => {
           target.style.width = `${width}px`;
           target.style.height = `${height}px`;
-          target.style.transform = `translate(${drag.beforeTranslate[0]}px, ${drag.beforeTranslate[1]}px)`;
+          target.style.left = `${drag.left}px`;
+          target.style.top = `${drag.top}px`;
         }}
         onResizeEnd={({ target }) => {
-          // cover case where no resizing occurs (onResize is not called)
-          if (target.style.width.slice(-2) !== "px") {
-            return;
-          }
-          const absWidth = Number(target.style.width.slice(0, -2));
-          const absHeight = Number(target.style.height.slice(0, -2));
-          const canvas = document
-            .getElementById("canvas")
-            .getBoundingClientRect();
-          const relWidth = `${(absWidth / canvas.width) * 100}%`;
-          const relHeight = `${(absHeight / canvas.height) * 100}%`;
+          const canvas = document.getElementById("canvas");
+          const targetDoc = document.getElementById(target.id);
+
+          const relWidth = (targetDoc.offsetWidth / canvas.offsetWidth) * 100;
+          const relHeight =
+            (targetDoc.offsetHeight / canvas.offsetHeight) * 100;
+          console.log("---------------");
           console.log(`width: ${relWidth}`);
           console.log(`height: ${relHeight}`);
-          target.style.width = relWidth;
-          target.style.height = relHeight;
+          updateComponentProperty(select, "width", relWidth);
+          updateComponentProperty(select, "height", relHeight);
+
+          const left = (targetDoc.offsetLeft * 100) / canvas.offsetWidth;
+          const top = (targetDoc.offsetTop * 100) / canvas.offsetHeight;
+          console.log(`x: ${left}`);
+          console.log(`y: ${top}`);
+          updateComponentProperty(select, "left", left);
+          updateComponentProperty(select, "top", top);
         }}
       />
 
