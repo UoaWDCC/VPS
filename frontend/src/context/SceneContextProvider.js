@@ -29,6 +29,16 @@ export default function SceneContextProvider({ children }) {
     setCurrentScene(newScene);
   }
 
+  function updateComponentProperty(componentIndex, property, newValue) {
+    const updatedComponents = currentScene.components;
+    updatedComponents[componentIndex][property] = newValue;
+
+    setCurrentScene({
+      ...currentScene,
+      components: updatedComponents,
+    });
+  }
+
   return (
     <SceneContext.Provider
       value={{
@@ -40,6 +50,7 @@ export default function SceneContextProvider({ children }) {
         hasChange,
         setHasChange,
         setMonitorChange,
+        updateComponentProperty,
       }}
     >
       {children}

@@ -7,7 +7,7 @@ export default function ButtonComponent({ id, onClick, component }) {
 
   return (
     <Button
-      className={`btn top ${component.variant} ${component.colour} ${styles.defaultComponentStyling}`}
+      className={`btn ${component.variant} ${component.colour} ${styles.defaultComponentStyling}`}
       color="default"
       variant={component.variant}
       id={id}

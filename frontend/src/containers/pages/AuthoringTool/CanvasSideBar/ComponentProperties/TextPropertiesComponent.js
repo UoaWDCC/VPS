@@ -26,17 +26,7 @@ const sizes = [6, 8, 9, 10, 11, 12, 14, 16, 18, 20, 24, 30, 36, 42, 48, 60, 72];
 
 export default function TextPropertiesComponent({ component, componentIndex }) {
   const textComponentStyles = useStyles();
-  const { currentScene, setCurrentScene } = useContext(SceneContext);
-
-  function updateComponentProperty(property, newValue) {
-    const updatedComponents = currentScene.components;
-    updatedComponents[componentIndex][property] = newValue;
-
-    setCurrentScene({
-      ...currentScene,
-      components: updatedComponents,
-    });
-  }
+  const { updateComponentProperty } = useContext(SceneContext);
 
   return (
     <>
@@ -49,7 +39,7 @@ export default function TextPropertiesComponent({ component, componentIndex }) {
           multiline
           rows={5}
           onChange={(event) =>
-            updateComponentProperty("text", event.target.value)
+            updateComponentProperty(componentIndex, "text", event.target.value)
           }
         />
       </FormControl>
@@ -62,7 +52,11 @@ export default function TextPropertiesComponent({ component, componentIndex }) {
             className={styles.selectInput}
             value={component.fontSize}
             onChange={(event) =>
-              updateComponentProperty("fontSize", event.target.value)
+              updateComponentProperty(
+                componentIndex,
+                "fontSize",
+                event.target.value
+              )
             }
           >
             {sizes.map((size) => {
@@ -79,7 +73,7 @@ export default function TextPropertiesComponent({ component, componentIndex }) {
           exclusive
           size="small"
           onChange={(event, value) =>
-            updateComponentProperty("textAlign", value)
+            updateComponentProperty(componentIndex, "textAlign", value)
           }
           aria-label="text alignment"
         >
@@ -103,7 +97,7 @@ export default function TextPropertiesComponent({ component, componentIndex }) {
           className={styles.selectInput}
           value={component.color}
           onChange={(event) =>
-            updateComponentProperty("color", event.target.value)
+            updateComponentProperty(componentIndex, "color", event.target.value)
           }
         >
           <MenuItem value="black">Black</MenuItem>
@@ -119,7 +113,11 @@ export default function TextPropertiesComponent({ component, componentIndex }) {
               checked={component.border}
               color="default"
               onChange={(event) =>
-                updateComponentProperty("border", event.target.checked)
+                updateComponentProperty(
+                  componentIndex,
+                  "border",
+                  event.target.checked
+                )
               }
             />
           }
