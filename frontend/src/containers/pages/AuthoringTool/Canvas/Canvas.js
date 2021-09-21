@@ -26,7 +26,7 @@ export default function Canvas() {
     const keyDown = ({ key, target }) => {
       if (key === "Shift") {
         setShiftPressed(true);
-      } else if (key === "Delete") {
+      } else if (key === "Delete" || key === "Backspace") {
         if (target.tagName === "BODY" || target.tagName === "BUTTON") {
           deleteElement();
         }
