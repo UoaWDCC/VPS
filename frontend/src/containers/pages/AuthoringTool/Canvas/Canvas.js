@@ -20,11 +20,15 @@ export default function Canvas() {
     setBounds,
     shiftPressed,
     setShiftPressed,
+    deleteElement,
   } = useContext(AuthoringToolContext);
 
   const keyDown = ({ key }) => {
+    console.log(key);
     if (key === "Shift") {
       setShiftPressed(true);
+    } else if (key === "Backspace") {
+      deleteElement();
     }
   };
 

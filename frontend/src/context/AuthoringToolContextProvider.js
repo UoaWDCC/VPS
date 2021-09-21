@@ -1,7 +1,10 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import AuthoringToolContext from "./AuthoringToolContext";
+import SceneContext from "./SceneContext";
 
 export default function AuthoringToolContextProvider({ children }) {
+  const { currentScene, setCurrentScene } = useContext(SceneContext);
+
   const [select, setSelect] = useState(null);
   const [bounds, setBounds] = useState(null);
   const [shiftPressed, setShiftPressed] = useState(false);
@@ -17,6 +20,24 @@ export default function AuthoringToolContextProvider({ children }) {
     }
   };
 
+  function deleteElement() {
+    if (select !== null) {
+      console.log(currentScene.components);
+      console.log(select);
+      const updatedComponents = currentScene.components;
+      console.log(updatedComponents.splice(select, 1));
+
+      console.log(updatedComponents);
+
+      setSelect(null);
+
+      setCurrentScene({
+        ...currentScene,
+        components: updatedComponents,
+      });
+    }
+  }
+
   return (
     <AuthoringToolContext.Provider
       value={{
@@ -28,6 +49,7 @@ export default function AuthoringToolContextProvider({ children }) {
         setBounds,
         shiftPressed,
         setShiftPressed,
+        deleteElement,
       }}
     >
       {children}
