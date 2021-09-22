@@ -2,10 +2,8 @@
 import Scene from "../models/scene";
 import Scenario from "../models/scenario";
 
-const createScene = async (scenarioId, name) => {
-  const dbScene = new Scene({
-    name,
-  });
+const createScene = async (scenarioId, scene) => {
+  const dbScene = new Scene(scene);
   await dbScene.save();
 
   await Scenario.updateOne(
@@ -70,6 +68,23 @@ const deleteScene = async (scenarioId, sceneId) => {
   }
 };
 
+const duplicateScene = async (scenarioId, sceneId) => {
+  const sceneToCopy = await Scene.findById(sceneId);
+  const newScene = {
+    name: `${sceneToCopy.name} Copy`,
+    components: sceneToCopy.components,
+  };
+  const dbScene = new Scene(newScene);
+  await dbScene.save();
+
+  await Scenario.updateOne(
+    { _id: scenarioId },
+    { $push: { scenes: dbScene._id } }
+  );
+
+  return dbScene;
+};
+
 // eslint-disable-next-line import/prefer-default-export
 export {
   createScene,
@@ -77,4 +92,5 @@ export {
   retrieveScene,
   deleteScene,
   updateScene,
+  duplicateScene,
 };

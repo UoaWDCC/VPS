@@ -51,6 +51,14 @@ export function SceneSelectionPage({ data = null }) {
     }
   }
 
+  async function duplicateScene() {
+    console.log(scenes);
+    await usePost(
+      `/api/scenario/${scenarioId}/scene/duplicate/${currentScene._id}`
+    );
+    reFetch();
+  }
+
   function playScenario() {
     window.open(`/play/${scenarioId}`, "_blank");
   }
@@ -91,6 +99,17 @@ export function SceneSelectionPage({ data = null }) {
           onClick={editScene}
         >
           Edit
+        </Button>
+        <Button
+          className={`btn top contained white ${
+            currentScene ? "" : "disabled"
+          }  `}
+          color="default"
+          variant="contained"
+          disabled={!currentScene}
+          onClick={duplicateScene}
+        >
+          Duplicate
         </Button>
         <Button
           className="btn top contained white"

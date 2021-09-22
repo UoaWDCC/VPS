@@ -6,6 +6,7 @@ import {
   retrieveScene,
   updateScene,
   deleteScene,
+  duplicateScene,
 } from "../../db/daos/sceneDao";
 
 const router = Router({ mergeParams: true });
@@ -15,9 +16,9 @@ const HTTP_NO_CONTENT = 204;
 const HTTP_NOT_FOUND = 404;
 
 router.post("/", async (req, res) => {
-  const { name } = req.body;
+  const { name, components } = req.body;
 
-  const scene = await createScene(req.params.scenarioId, name);
+  const scene = await createScene(req.params.scenarioId, { name, components });
 
   res.status(HTTP_OK).json(scene);
 });
@@ -50,6 +51,12 @@ router.delete("/:sceneId", async (req, res) => {
   } else {
     res.sendStatus(HTTP_NOT_FOUND);
   }
+});
+
+router.post("/duplicate/:sceneId", async (req, res) => {
+  const scene = await duplicateScene(req.params.scenarioId, req.params.sceneId);
+
+  res.status(HTTP_OK).json(scene);
 });
 
 export default router;
