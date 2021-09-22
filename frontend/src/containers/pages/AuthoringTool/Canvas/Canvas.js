@@ -1,7 +1,7 @@
 /* eslint-disable jsx-a11y/no-static-element-interactions */
 /* eslint-disable jsx-a11y/click-events-have-key-events */
 /* eslint-disable no-param-reassign */
-import React, { useContext, useEffect } from "react";
+import React, { useState, useContext, useEffect } from "react";
 
 import Moveable from "react-moveable";
 import AuthoringToolContext from "../../../../context/AuthoringToolContext";
@@ -11,6 +11,7 @@ import componentResolver from "./componentResolver";
 
 export default function Canvas() {
   const { currentScene, updateComponentProperty } = useContext(SceneContext);
+  const [rerender, setRerender] = useState(100);
   const {
     select,
     selectElement,
@@ -21,6 +22,17 @@ export default function Canvas() {
     setShiftPressed,
     deleteElement,
   } = useContext(AuthoringToolContext);
+
+  useEffect(() => {
+    /* rerender makes sure that the index positon of our compoentns are unique compared to the last rerender, therefore all compoentns will be forced to rerender in the correct postions.
+    To determine the array position of the selected component do a modulus of the array size.
+     */
+    if (rerender < 1) {
+      setRerender(100);
+    } else {
+      setRerender(rerender - 1);
+    }
+  }, [currentScene]);
 
   useEffect(() => {
     const keyDown = ({ key, target }) => {
@@ -89,7 +101,6 @@ export default function Canvas() {
         onResizeEnd={({ target }) => {
           const canvas = document.getElementById("canvas");
           const targetDoc = document.getElementById(target.id);
-
           const relWidth = (targetDoc.offsetWidth / canvas.offsetWidth) * 100;
           const relHeight =
             (targetDoc.offsetHeight / canvas.offsetHeight) * 100;
@@ -110,8 +121,12 @@ export default function Canvas() {
 
       <div className={styles.canvasContainer}>
         <div id="canvas" className={styles.canvas} onClick={clearElement}>
-          {currentScene?.components?.map((component, index) =>
-            componentResolver(component, index, selectElement)
+          {currentScene?.components?.map((component, index, array) =>
+            componentResolver(
+              component,
+              rerender * array.length + index,
+              selectElement
+            )
           )}
         </div>
       </div>

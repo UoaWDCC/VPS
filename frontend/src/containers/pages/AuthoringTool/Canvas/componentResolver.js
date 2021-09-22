@@ -3,14 +3,14 @@ import ButtonComponent from "../Components/ButtonComponent";
 import TextComponent from "../Components/TextComponent";
 import ImageComponent from "../Components/ImageComponent";
 
-export default function componentResolver(component, id, onClick) {
+export default function componentResolver(component, index, onClick) {
   switch (component.type) {
     // ADD NEW COMPONENT TYPES HERE
     case "BUTTON":
       return (
         <ButtonComponent
-          key={id}
-          id={id}
+          key={index}
+          id={index}
           onClick={onClick}
           component={component}
         />
@@ -18,8 +18,8 @@ export default function componentResolver(component, id, onClick) {
     case "TEXT":
       return (
         <TextComponent
-          key={id}
-          id={id}
+          key={index}
+          id={index}
           onClick={onClick}
           component={component}
         />
@@ -27,8 +27,8 @@ export default function componentResolver(component, id, onClick) {
     case "IMAGE":
       return (
         <ImageComponent
-          key={id}
-          id={id}
+          key={index}
+          id={index}
           onClick={onClick}
           component={component}
         />

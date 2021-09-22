@@ -3,8 +3,7 @@ import AuthoringToolContext from "./AuthoringToolContext";
 import SceneContext from "./SceneContext";
 
 export default function AuthoringToolContextProvider({ children }) {
-  const { currentScene, setCurrentScene, currentSceneComponentsRef } =
-    useContext(SceneContext);
+  const { setCurrentScene, currentSceneRef } = useContext(SceneContext);
 
   const [select, setSelect] = useState(null);
   const [bounds, setBounds] = useState(null);
@@ -29,14 +28,19 @@ export default function AuthoringToolContextProvider({ children }) {
 
   function deleteElement() {
     if (selectRef.current !== null) {
-      const updatedComponents = currentSceneComponentsRef.current;
-      updatedComponents.splice(parseInt(selectRef.current, 10), 1);
-
+      const updatedComponents = currentSceneRef.current.components;
+      updatedComponents.splice(
+        parseInt(
+          selectRef.current % currentSceneRef.current.components.length,
+          10
+        ),
+        1
+      );
       setSelect(null);
       selectRef.current = null;
 
       setCurrentScene({
-        ...currentScene,
+        ...currentSceneRef.current,
         components: updatedComponents,
       });
     }

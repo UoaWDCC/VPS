@@ -11,7 +11,7 @@ export default function SceneContextProvider({ children }) {
   const [monitorChange, setMonitorChange] = useState(false);
   const [hasChange, setHasChange] = useState(false);
 
-  const currentSceneComponentsRef = useRef(currentScene?.components);
+  const currentSceneRef = useRef(currentScene);
 
   let getScenes = null;
   if (currentScenario) {
@@ -28,13 +28,14 @@ export default function SceneContextProvider({ children }) {
     if (monitorChange) {
       setHasChange(true);
     }
-    currentSceneComponentsRef.current = currentScene?.components;
+    currentSceneRef.current = currentScene;
   }, [currentScene]);
 
   function updateComponentProperty(componentIndex, property, newValue) {
     const updatedComponents = currentScene.components;
-    updatedComponents[componentIndex][property] = newValue;
-
+    updatedComponents[componentIndex % updatedComponents.length][property] =
+      newValue;
+    currentSceneRef.current = currentScene;
     setCurrentScene({
       ...currentScene,
       components: updatedComponents,
@@ -52,7 +53,7 @@ export default function SceneContextProvider({ children }) {
         hasChange,
         setHasChange,
         setMonitorChange,
-        currentSceneComponentsRef,
+        currentSceneRef,
         updateComponentProperty,
       }}
     >
