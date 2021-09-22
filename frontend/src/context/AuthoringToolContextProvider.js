@@ -28,7 +28,6 @@ export default function AuthoringToolContextProvider({ children }) {
   };
 
   function deleteElement() {
-    console.log(selectRef);
     if (selectRef.current !== null) {
       const updatedComponents = currentSceneComponentsRef.current;
       updatedComponents.splice(parseInt(selectRef.current, 10), 1);

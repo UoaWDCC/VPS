@@ -24,13 +24,12 @@ export default function SceneContextProvider({ children }) {
     }
   }, [monitorChange]);
 
-  function changeScene(newScene) {
+  useEffect(() => {
     if (monitorChange) {
       setHasChange(true);
     }
-    setCurrentScene(newScene);
-    currentSceneComponentsRef.current = newScene?.components;
-  }
+    currentSceneComponentsRef.current = currentScene?.components;
+  }, [currentScene]);
 
   function updateComponentProperty(componentIndex, property, newValue) {
     const updatedComponents = currentScene.components;
@@ -49,7 +48,7 @@ export default function SceneContextProvider({ children }) {
         setScenes,
         reFetch: getScenes?.reFetch,
         currentScene,
-        setCurrentScene: changeScene,
+        setCurrentScene,
         hasChange,
         setHasChange,
         setMonitorChange,
