@@ -6,6 +6,7 @@ import {
   retrieveScene,
   updateScene,
   deleteScene,
+  duplicateScene,
 } from "../../db/daos/sceneDao";
 
 const router = Router({ mergeParams: true });
@@ -50,6 +51,12 @@ router.delete("/:sceneId", async (req, res) => {
   } else {
     res.sendStatus(HTTP_NOT_FOUND);
   }
+});
+
+router.post("/duplicate/:sceneId", async (req, res) => {
+  const scene = await duplicateScene(req.params.scenarioId, req.params.sceneId);
+
+  res.status(HTTP_OK).json(scene);
 });
 
 export default router;
