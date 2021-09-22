@@ -5,10 +5,13 @@ import ScenarioContext from "../context/ScenarioContext";
 import styles from "../styling/SideBar.module.scss";
 import { usePost, useDelete } from "../hooks/crudHooks";
 import DeleteButton from "./DeleteButton";
+import AuthenticationContext from "../context/AuthenticationContext";
 
 export default function SideBar() {
   const { currentScenario, setCurrentScenario, reFetch } =
     useContext(ScenarioContext);
+  const { signOut } = useContext(AuthenticationContext);
+
   const history = useHistory();
 
   async function createScenario(name = "no name") {
@@ -92,6 +95,16 @@ export default function SideBar() {
             >
               Delete
             </DeleteButton>
+          </li>
+          <li>
+            <Button
+              className="btn side contained white"
+              color="default"
+              variant="contained"
+              onClick={signOut}
+            >
+              Logout
+            </Button>
           </li>
         </ul>
       </div>
