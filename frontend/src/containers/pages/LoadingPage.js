@@ -1,7 +1,7 @@
 import React from "react";
 import { CircularProgress, Grid, Typography } from "@material-ui/core";
 
-function LoadingPage() {
+function LoadingPage({ text }) {
   return (
     <Grid
       container
@@ -21,7 +21,7 @@ function LoadingPage() {
           <CircularProgress style={{ color: "#008a7b" }} />
         </Grid>
         <Grid item>
-          <Typography>Loading contents...</Typography>
+          <Typography>{text}</Typography>
         </Grid>
       </Grid>
     </Grid>
