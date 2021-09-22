@@ -15,9 +15,9 @@ const HTTP_NO_CONTENT = 204;
 const HTTP_NOT_FOUND = 404;
 
 router.post("/", async (req, res) => {
-  const { name } = req.body;
+  const { name, components } = req.body;
 
-  const scene = await createScene(req.params.scenarioId, name);
+  const scene = await createScene(req.params.scenarioId, { name, components });
 
   res.status(HTTP_OK).json(scene);
 });

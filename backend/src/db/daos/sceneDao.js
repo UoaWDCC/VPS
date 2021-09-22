@@ -2,10 +2,8 @@
 import Scene from "../models/scene";
 import Scenario from "../models/scenario";
 
-const createScene = async (scenarioId, name) => {
-  const dbScene = new Scene({
-    name,
-  });
+const createScene = async (scenarioId, scene) => {
+  const dbScene = new Scene(scene);
   await dbScene.save();
 
   await Scenario.updateOne(
