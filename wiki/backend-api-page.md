@@ -130,6 +130,20 @@ Returns:
 NO CONTENT
 ```
 
+**Duplicate a scene for a given Scenario Id and Scene Id:**
+
+`POST /api/scenario/:scenarioId/scene/duplicate/:sceneId`
+
+Returns:
+
+```
+{
+    "_id": "000001",
+    "name": "Scene 1",
+    "components": []
+}
+```
+
 **Store image urls in database - developer use only:**
 
 `POST /api/image`
