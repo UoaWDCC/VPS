@@ -14,15 +14,16 @@ export default function PlayScenarioCanvas() {
     setCurrentScene
   );
 
-  const componentOnClick = () => {
-    console.log(`Component is clicked`);
-    // setCurrentSceneId(null);
+  const componentOnClick = (component) => {
+    if (component.type === "BUTTON" && component.nextScene !== "") {
+      setCurrentSceneId(component.nextScene);
+    }
   };
 
   return (
     <>
       {currentScene?.components?.map((component, index) =>
-        componentResolver(component, index, componentOnClick)
+        componentResolver(component, index, () => componentOnClick(component))
       )}
     </>
   );
