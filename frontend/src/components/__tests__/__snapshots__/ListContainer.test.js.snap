@@ -32,7 +32,60 @@ exports[`ListContainer component snapshot test 1`] = `
         >
           <div
             className="MuiBox-root MuiBox-root-2"
-          />
+          >
+            <div
+              style={
+                Object {
+                  "alignItems": "center",
+                  "display": "flex",
+                  "height": "100%",
+                  "justifyContent": "center",
+                  "width": "100%",
+                }
+              }
+            >
+              <div
+                style={
+                  Object {
+                    "backgroundColor": "white",
+                    "filter": "drop-shadow(1px 1px 2px grey)",
+                    "maxHeight": "150px",
+                    "maxWidth": "200px",
+                  }
+                }
+              >
+                <div
+                  style={
+                    Object {
+                      "height": "150px",
+                      "maxWidth": "200px",
+                      "position": "absolute",
+                      "width": "100%",
+                      "zIndex": "10",
+                    }
+                  }
+                >
+                   
+                </div>
+                <iframe
+                  sandbox="allow-scripts allow-same-origin"
+                  scrolling="no"
+                  src="/play/1"
+                  style={
+                    Object {
+                      "border": "0px",
+                      "height": "1500px",
+                      "transform": "scaleX(0.1) scaleY(0.1)",
+                      "transformOrigin": "0 0",
+                      "width": "2000px",
+                    }
+                  }
+                  tabIndex="-1"
+                  title="asdf"
+                />
+              </div>
+            </div>
+          </div>
           <input
             className="text"
             defaultValue="Scenario 1"

@@ -105,7 +105,29 @@ exports[`Scenario Selection page snapshot test 1`] = `
               >
                 <div
                   class="MuiBox-root MuiBox-root-3"
-                />
+                >
+                  <div
+                    style="display: flex; align-items: center; justify-content: center; width: 100%; height: 100%;"
+                  >
+                    <div
+                      style="max-width: 200px; max-height: 150px; background-color: white; filter: drop-shadow(1px 1px 2px grey);"
+                    >
+                      <div
+                        style="position: absolute; width: 100%; height: 150px; max-width: 200px; z-index: 10;"
+                      >
+                         
+                      </div>
+                      <iframe
+                        sandbox="allow-scripts allow-same-origin"
+                        scrolling="no"
+                        src="/play/1"
+                        style="transform: scaleX(0.1) scaleY(0.1); transform-origin: 0 0; width: 2000px; height: 1500px; border: 0px;"
+                        tabindex="-1"
+                        title="asdf"
+                      />
+                    </div>
+                  </div>
+                </div>
                 <input
                   class="text"
                   value="test1"
@@ -126,7 +148,29 @@ exports[`Scenario Selection page snapshot test 1`] = `
               >
                 <div
                   class="MuiBox-root MuiBox-root-4"
-                />
+                >
+                  <div
+                    style="display: flex; align-items: center; justify-content: center; width: 100%; height: 100%;"
+                  >
+                    <div
+                      style="max-width: 200px; max-height: 150px; background-color: white; filter: drop-shadow(1px 1px 2px grey);"
+                    >
+                      <div
+                        style="position: absolute; width: 100%; height: 150px; max-width: 200px; z-index: 10;"
+                      >
+                         
+                      </div>
+                      <iframe
+                        sandbox="allow-scripts allow-same-origin"
+                        scrolling="no"
+                        src="/play/2"
+                        style="transform: scaleX(0.1) scaleY(0.1); transform-origin: 0 0; width: 2000px; height: 1500px; border: 0px;"
+                        tabindex="-1"
+                        title="asdf"
+                      />
+                    </div>
+                  </div>
+                </div>
                 <input
                   class="text"
                   value="test2"
