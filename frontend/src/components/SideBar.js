@@ -10,14 +10,17 @@ import AuthenticationContext from "../context/AuthenticationContext";
 export default function SideBar() {
   const { currentScenario, setCurrentScenario, reFetch } =
     useContext(ScenarioContext);
-  const { signOut } = useContext(AuthenticationContext);
-
+  const { signOut, getUserIdToken } = useContext(AuthenticationContext);
   const history = useHistory();
 
   async function createScenario(name = "no name") {
-    const newScenario = await usePost(`/api/scenario`, {
-      name,
-    });
+    const newScenario = await usePost(
+      `/api/scenario`,
+      {
+        name,
+      },
+      getUserIdToken
+    );
     setCurrentScenario(newScenario);
     // eslint-disable-next-line no-underscore-dangle
     history.push(`/scenario/${newScenario._id}`);

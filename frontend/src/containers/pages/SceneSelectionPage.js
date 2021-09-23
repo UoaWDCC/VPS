@@ -16,6 +16,7 @@ import { usePost, usePut, useDelete } from "../../hooks/crudHooks";
 import DeleteButton from "../../components/DeleteButton";
 import ShareModal from "../../components/ShareModal";
 import AuthoringToolContextProvider from "../../context/AuthoringToolContextProvider";
+import AuthenticationContext from "../../context/AuthenticationContext";
 
 export function SceneSelectionPage({ data = null }) {
   const [isShareModalOpen, setShareModalOpen] = useState(false);
@@ -24,11 +25,17 @@ export function SceneSelectionPage({ data = null }) {
   const history = useHistory();
   const { scenes, currentScene, setCurrentScene, reFetch } =
     useContext(SceneContext);
+  const { getUserIdToken } = useContext(AuthenticationContext);
 
   async function createNewScene() {
-    const newScene = await usePost(`/api/scenario/${scenarioId}/scene`, {
-      name: `Scene ${scenes.length}`,
-    });
+    const newScene = await usePost(
+      `/api/scenario/${scenarioId}/scene`,
+      {
+        name: `Scene ${scenes.length}`,
+      },
+      getUserIdToken
+    );
+
     setCurrentScene(newScene);
     history.push({
       pathname: `${url}/scene/${newScene._id}`,
@@ -52,9 +59,10 @@ export function SceneSelectionPage({ data = null }) {
   }
 
   async function duplicateScene() {
-    console.log(scenes);
     await usePost(
-      `/api/scenario/${scenarioId}/scene/duplicate/${currentScene._id}`
+      `/api/scenario/${scenarioId}/scene/duplicate/${currentScene._id}`,
+      {},
+      getUserIdToken
     );
     reFetch();
   }
