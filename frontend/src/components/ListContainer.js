@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import ImageList from "@material-ui/core/ImageList";
 import ImageListItem from "@material-ui/core/ImageListItem";
 import { Box } from "@material-ui/core";
+import Thumbnail from "./Thumbnail";
 import styles from "../styling/ListContainer.module.scss";
 import DashedCard from "./DashedCard";
 import useStyles from "./component.styles";
@@ -68,7 +69,11 @@ export default function ListContainer({
                           background: "#cccccc",
                         },
                       }}
-                    />
+                    >
+                      <Thumbnail
+                        url={`${process.env.PUBLIC_URL}/play/${item._id}`}
+                      />
+                    </Box>
                     <input
                       className={styles.text}
                       defaultValue={item.name}
