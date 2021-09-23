@@ -28,8 +28,9 @@ export function useGet(url, setData, requireAuth = true) {
       setLoading(true);
 
       let config = {};
+      let token = null;
       if (requireAuth) {
-        const token = await getUserIdToken();
+        token = await getUserIdToken();
         config = {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -37,15 +38,21 @@ export function useGet(url, setData, requireAuth = true) {
         };
       }
 
-      const response = await axios.get(url, config).catch((err) => {
-        if (err.response.status === 404) {
-          hasError = true;
-        }
-      });
+      // This is a walkaround for a bug.
+      // When useGet called, it's possible that firebase is still loading and token is null.
+      // In this case, we do not call backend and just wait for this function to be triggered again.
+      if (!requireAuth || (requireAuth && token)) {
+        const response = await axios.get(url, config).catch((err) => {
+          if (err.response.status === 404 || err.response.status === 401) {
+            hasError = true;
+          }
+        });
 
-      if (!hasError) {
-        setData(response.data);
+        if (!hasError) {
+          setData(response.data);
+        }
       }
+
       setLoading(false);
     }
     fetchData();
@@ -70,7 +77,7 @@ export function usePost(url, requestBody = null, getUserIdToken = null) {
     }
 
     const response = await axios.post(url, requestBody, config).catch((err) => {
-      if (err.response.status === 404) {
+      if (err.response.status === 404 || err.response.status === 401) {
         errorData = err.response.data;
         hasError = true;
       }
@@ -98,7 +105,7 @@ export function usePut(url, requestBody = null, getUserIdToken = null) {
     }
 
     const response = await axios.put(url, requestBody, config).catch((err) => {
-      if (err.response.status === 404) {
+      if (err.response.status === 404 || err.response.status === 401) {
         errorData = err.response.data;
         hasError = true;
       }
@@ -126,7 +133,7 @@ export function useDelete(url, getUserIdToken = null) {
     }
 
     const response = await axios.delete(url, config).catch((err) => {
-      if (err.response.status === 404) {
+      if (err.response.status === 404 || err.response.status === 401) {
         errorData = err.response.data;
         hasError = true;
       }
