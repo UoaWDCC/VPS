@@ -7,7 +7,6 @@ if (process.env.REACT_APP_SERVER_URL === undefined) {
 } else {
   axios.defaults.baseURL = `${process.env.REACT_APP_SERVER_URL}`;
 }
-// import { AppContext } from "../AppContextProvider";
 
 /**
  * A custom hook which fetches data from the given URL. Includes functionality to determine

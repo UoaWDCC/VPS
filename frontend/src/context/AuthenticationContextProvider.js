@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React from "react";
 import { signInWithRedirect } from "firebase/auth";
 import { useAuthState } from "react-firebase-hooks/auth";
 import AuthenticationContext from "./AuthenticationContext";
