@@ -15,25 +15,33 @@ export default function App() {
   return (
     <>
       <ThemeProvider theme={theme}>
-        <ScenarioContextProvider>
-          <BrowserRouter>
-            <Switch>
-              <Route exact path="/" component={ScenarioSelectionPage} />
-              <Route path="/play/:scenarioId">
-                <PlayingScenarioContextProvider>
-                  <PlayScenarioPage />
-                </PlayingScenarioContextProvider>
-              </Route>
-              <Route path="/scenario/:scenarioId">
+        <BrowserRouter>
+          <Switch>
+            <Route exact path="/">
+              <ScenarioContextProvider>
+                <ScenarioSelectionPage />
+              </ScenarioContextProvider>
+            </Route>
+            <Route path="/play/:scenarioId">
+              <PlayingScenarioContextProvider>
+                <PlayScenarioPage />
+              </PlayingScenarioContextProvider>
+            </Route>
+            <Route path="/scenario/:scenarioId">
+              <ScenarioContextProvider>
                 <SceneContextProvider>
                   <ScenePage />
                 </SceneContextProvider>
-              </Route>
-              {/* Default path if nothing matches */}
-              <Route path="/" component={ScenarioSelectionPage} />
-            </Switch>
-          </BrowserRouter>
-        </ScenarioContextProvider>
+              </ScenarioContextProvider>
+            </Route>
+            {/* Default path if nothing matches */}
+            <Route path="/">
+              <ScenarioContextProvider>
+                <ScenarioSelectionPage />
+              </ScenarioContextProvider>
+            </Route>
+          </Switch>
+        </BrowserRouter>
       </ThemeProvider>
     </>
   );
