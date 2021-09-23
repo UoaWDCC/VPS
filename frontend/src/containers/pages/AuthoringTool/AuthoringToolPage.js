@@ -13,8 +13,13 @@ import AuthoringToolContext from "../../../context/AuthoringToolContext";
 
 export default function AuthoringToolPage() {
   const { scenarioId, sceneId } = useParams();
-  const { currentScene, setCurrentScene, setMonitorChange, setHasChange } =
-    useContext(SceneContext);
+  const {
+    currentScene,
+    setCurrentScene,
+    setMonitorChange,
+    setHasChange,
+    reFetch,
+  } = useContext(SceneContext);
   const { currentScenario } = useContext(ScenarioContext);
   const { setSelect } = useContext(AuthoringToolContext);
   const [firstTimeRender, setFirstTimeRender] = useState(true);
@@ -38,6 +43,7 @@ export default function AuthoringToolPage() {
       name: currentScene.name,
       components: currentScene?.components,
     });
+    reFetch();
     setHasChange(false);
   }
 
