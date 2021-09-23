@@ -12,7 +12,6 @@
     "@testing-library/react": "^11.1.0",
     "@testing-library/user-event": "^12.1.10",
     "axios": "^0.21.1",
-    "dotenv": "^10.0.0",
     "firebase": "^9.0.2",
     "material-ui-image": "^3.3.2",
     "node-sass": "^6.0.0",

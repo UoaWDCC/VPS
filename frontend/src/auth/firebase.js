@@ -1,8 +1,5 @@
-import dotenv from "dotenv";
 import * as firebase from "firebase/app";
 import { getAuth, GoogleAuthProvider } from "firebase/auth";
-
-dotenv.config();
 
 firebase.initializeApp({
   apiKey: process.env.REACT_APP_API_KEY,
