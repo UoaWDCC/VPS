@@ -22,7 +22,7 @@ export default function SceneContextProvider({ children }) {
 
   useEffect(() => {
     if (!loading) {
-      getScenes.reFetch();
+      getScenes?.reFetch();
     }
   }, [loading]);
 

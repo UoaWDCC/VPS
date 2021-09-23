@@ -4,6 +4,7 @@ import { BrowserRouter } from "react-router-dom";
 import { SceneSelectionPage } from "../SceneSelectionPage";
 import SceneContext from "../../../context/SceneContext";
 import ScenarioContext from "../../../context/ScenarioContext";
+import AuthenticationContextProvider from "../../../context/AuthenticationContextProvider";
 
 const dummyScenes = [
   { _id: 1, name: "test1" },
@@ -19,11 +20,13 @@ test("Scene Selection page snapshot test", () => {
 
   const { baseElement } = render(
     <BrowserRouter>
-      <ScenarioContext.Provider value={context}>
-        <SceneContext.Provider value={context}>
-          <SceneSelectionPage data={dummyScenes} />
-        </SceneContext.Provider>
-      </ScenarioContext.Provider>
+      <AuthenticationContextProvider>
+        <ScenarioContext.Provider value={context}>
+          <SceneContext.Provider value={context}>
+            <SceneSelectionPage data={dummyScenes} />
+          </SceneContext.Provider>
+        </ScenarioContext.Provider>
+      </AuthenticationContextProvider>
     </BrowserRouter>
   );
 

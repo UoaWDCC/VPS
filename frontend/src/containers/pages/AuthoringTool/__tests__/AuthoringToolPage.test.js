@@ -5,6 +5,7 @@ import AuthoringToolPage from "../AuthoringToolPage";
 import SceneContext from "../../../../context/SceneContext";
 import ScenarioContext from "../../../../context/ScenarioContext";
 import AuthoringToolContextProvider from "../../../../context/AuthoringToolContextProvider";
+import AuthenticationContextProvider from "../../../../context/AuthenticationContextProvider";
 
 test("Authoring Tool page snapshot test", () => {
   const context = {
@@ -15,13 +16,15 @@ test("Authoring Tool page snapshot test", () => {
 
   const { baseElement } = render(
     <BrowserRouter>
-      <ScenarioContext.Provider value={context}>
-        <SceneContext.Provider value={context}>
-          <AuthoringToolContextProvider>
-            <AuthoringToolPage />
-          </AuthoringToolContextProvider>
-        </SceneContext.Provider>
-      </ScenarioContext.Provider>
+      <AuthenticationContextProvider>
+        <ScenarioContext.Provider value={context}>
+          <SceneContext.Provider value={context}>
+            <AuthoringToolContextProvider>
+              <AuthoringToolPage />
+            </AuthoringToolContextProvider>
+          </SceneContext.Provider>
+        </ScenarioContext.Provider>
+      </AuthenticationContextProvider>
     </BrowserRouter>
   );
 

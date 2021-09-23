@@ -5,17 +5,20 @@ import ChooseBackgroundSubMenu from "../Background/ChooseBackgroundSubMenu";
 import SceneContextProvider from "../../../../../context/SceneContextProvider";
 import ScenarioContextProvider from "../../../../../context/ScenarioContextProvider";
 import ToolbarContextProvider from "../../../../../context/ToolbarContextProvider";
+import AuthenticationContextProvider from "../../../../../context/AuthenticationContextProvider";
 
 test("ChooseBackgroundSubMenu component snapshot test", () => {
   const component = renderer.create(
     <BrowserRouter>
-      <ScenarioContextProvider>
-        <SceneContextProvider>
-          <ToolbarContextProvider>
-            <ChooseBackgroundSubMenu />
-          </ToolbarContextProvider>
-        </SceneContextProvider>
-      </ScenarioContextProvider>
+      <AuthenticationContextProvider>
+        <ScenarioContextProvider>
+          <SceneContextProvider>
+            <ToolbarContextProvider>
+              <ChooseBackgroundSubMenu />
+            </ToolbarContextProvider>
+          </SceneContextProvider>
+        </ScenarioContextProvider>
+      </AuthenticationContextProvider>
     </BrowserRouter>
   );
 
