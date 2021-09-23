@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import axios from "axios";
 import AuthenticationContext from "../context/AuthenticationContext";
 
@@ -30,7 +30,7 @@ export function useGet(url, setData, requireAuth = true) {
 
       let config = {};
       if (requireAuth) {
-        const token = getUserIdToken();
+        const token = await getUserIdToken();
         config = {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -64,7 +64,7 @@ export function usePost(url, requestBody = null, requireAuth = true) {
 
     let config = {};
     if (requireAuth) {
-      const token = getUserIdToken();
+      const token = await getUserIdToken();
       config = {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -94,7 +94,7 @@ export function usePut(url, requestBody = null, requireAuth = true) {
 
     let config = {};
     if (requireAuth) {
-      const token = getUserIdToken();
+      const token = await getUserIdToken();
       config = {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -124,7 +124,7 @@ export function useDelete(url, requireAuth = true) {
 
     let config = {};
     if (requireAuth) {
-      const token = getUserIdToken();
+      const token = await getUserIdToken();
       config = {
         headers: {
           Authorization: `Bearer ${token}`,

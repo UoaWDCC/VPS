@@ -10,7 +10,8 @@ export default function PlayScenarioContextProvider({ children }) {
 
   const getScenesFromHook = useGet(
     `api/scenario/${scenarioId}/scene`,
-    setCurrentScenario
+    setCurrentScenario,
+    false
   );
 
   useEffect(() => {
