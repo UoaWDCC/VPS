@@ -4,7 +4,9 @@ import AuthenticationContext from "../../context/AuthenticationContext";
 import LoadingPage from "./LoadingPage";
 
 export default function LoginPage() {
-  const { user } = useContext(AuthenticationContext);
+  const { user, loading, signInUsingGoogle } = useContext(
+    AuthenticationContext
+  );
   const history = useHistory();
 
   useEffect(() => {
@@ -12,6 +14,12 @@ export default function LoginPage() {
       history.push("/");
     }
   }, [user]);
+
+  useEffect(() => {
+    if (!loading && !user) {
+      signInUsingGoogle();
+    }
+  }, [loading]);
 
   return <LoadingPage text="Redirecting..." />;
 }
