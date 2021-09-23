@@ -118,7 +118,7 @@ export default function Canvas() {
           {currentScene?.components?.map((component, index, array) =>
             componentResolver(
               component,
-              rerender * array.length + index,
+              rerender.current * array.length + index,
               selectElement
             )
           )}
