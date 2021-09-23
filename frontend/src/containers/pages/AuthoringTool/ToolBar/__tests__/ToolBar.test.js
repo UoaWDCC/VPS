@@ -5,6 +5,7 @@ import ScenarioContextProvider from "../../../../../context/ScenarioContextProvi
 import SceneContextProvider from "../../../../../context/SceneContextProvider";
 import ToolBar from "../ToolBar";
 import AuthoringToolContextProvider from "../../../../../context/AuthoringToolContextProvider";
+import ToolbarContextProvider from "../../../../../context/ToolbarContextProvider";
 
 test("ToolBar component snapshot test", () => {
   const component = renderer.create(
@@ -12,7 +13,9 @@ test("ToolBar component snapshot test", () => {
       <ScenarioContextProvider>
         <SceneContextProvider>
           <AuthoringToolContextProvider>
-            <ToolBar />
+            <ToolbarContextProvider>
+              <ToolBar />
+            </ToolbarContextProvider>
           </AuthoringToolContextProvider>
         </SceneContextProvider>
       </ScenarioContextProvider>
