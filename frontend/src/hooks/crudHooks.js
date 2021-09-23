@@ -15,9 +15,9 @@ if (process.env.REACT_APP_SERVER_URL === undefined) {
  * Code adapted from SOFTENG750 lab4 https://gitlab.com/cs732-s1c/cs732-labs/cs732-lab-04/-/blob/master/frontend/src/hooks/useGet.js
  */
 export function useGet(url, setData, requireAuth = true) {
-  const { getUserIdToken } = useContext(AuthenticationContext);
   const [isLoading, setLoading] = useState(false);
   const [version, setVersion] = useState(0);
+  const { getUserIdToken } = useContext(AuthenticationContext);
 
   function reFetch() {
     setVersion(version + 1);
@@ -55,15 +55,13 @@ export function useGet(url, setData, requireAuth = true) {
   return { isLoading, reFetch };
 }
 
-export function usePost(url, requestBody = null, requireAuth = true) {
-  const { getUserIdToken } = useContext(AuthenticationContext);
-
+export function usePost(url, requestBody = null, getUserIdToken = null) {
   async function postData() {
     let errorData;
     let hasError = false;
 
     let config = {};
-    if (requireAuth) {
+    if (getUserIdToken) {
       const token = await getUserIdToken();
       config = {
         headers: {
