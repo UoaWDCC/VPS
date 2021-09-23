@@ -22,7 +22,7 @@ export default function App() {
                 <ScenarioSelectionPage />
               </ScenarioContextProvider>
             </Route>
-            <Route path="/play/:scenarioId">
+            <Route path="/play/:scenarioId/:sceneId?">
               <PlayingScenarioContextProvider>
                 <PlayScenarioPage />
               </PlayingScenarioContextProvider>
