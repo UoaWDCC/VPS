@@ -111,15 +111,13 @@ export function usePut(url, requestBody = null, getUserIdToken = null) {
   return putData();
 }
 
-export function useDelete(url, requireAuth = true) {
-  const { getUserIdToken } = useContext(AuthenticationContext);
-
+export function useDelete(url, getUserIdToken = null) {
   async function deleteData() {
     let errorData;
     let hasError = false;
 
     let config = {};
-    if (requireAuth) {
+    if (getUserIdToken) {
       const token = await getUserIdToken();
       config = {
         headers: {

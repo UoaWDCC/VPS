@@ -11,6 +11,7 @@ import { useGet, usePut } from "../../../hooks/crudHooks";
 import SceneContext from "../../../context/SceneContext";
 import AuthoringToolContext from "../../../context/AuthoringToolContext";
 import ToolbarContextProvider from "../../../context/ToolbarContextProvider";
+import AuthenticationContext from "../../../context/AuthenticationContext";
 
 export default function AuthoringToolPage() {
   const { scenarioId, sceneId } = useParams();
@@ -23,6 +24,7 @@ export default function AuthoringToolPage() {
   } = useContext(SceneContext);
   const { currentScenario } = useContext(ScenarioContext);
   const { setSelect } = useContext(AuthoringToolContext);
+  const { getUserIdToken } = useContext(AuthenticationContext);
   const [firstTimeRender, setFirstTimeRender] = useState(true);
 
   useGet(

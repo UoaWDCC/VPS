@@ -52,7 +52,10 @@ export function SceneSelectionPage({ data = null }) {
 
   async function deleteScene() {
     if (currentScene != null) {
-      await useDelete(`/api/scenario/${scenarioId}/scene/${currentScene._id}`);
+      await useDelete(
+        `/api/scenario/${scenarioId}/scene/${currentScene._id}`,
+        getUserIdToken
+      );
       setCurrentScene(null);
       reFetch();
     }

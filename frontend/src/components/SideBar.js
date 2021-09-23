@@ -27,7 +27,7 @@ export default function SideBar() {
   }
 
   async function deleteScenario() {
-    await useDelete(`/api/scenario/${currentScenario._id}`);
+    await useDelete(`/api/scenario/${currentScenario._id}`, getUserIdToken);
     setCurrentScenario(null);
     reFetch();
   }
