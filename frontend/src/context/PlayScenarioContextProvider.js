@@ -6,7 +6,7 @@ import PlayScenarioContext from "./PlayScenarioContext";
 export default function PlayScenarioContextProvider({ children }) {
   const [currentScenario, setCurrentScenario] = useState(null);
   const [currentSceneId, setCurrentSceneId] = useState(null);
-  const { scenarioId } = useParams();
+  const { scenarioId, sceneId } = useParams();
 
   const getScenesFromHook = useGet(
     `api/scenario/${scenarioId}/scene`,
@@ -14,7 +14,9 @@ export default function PlayScenarioContextProvider({ children }) {
   );
 
   useEffect(() => {
-    if (currentScenario) {
+    if (sceneId) {
+      setCurrentSceneId(sceneId);
+    } else if (currentScenario) {
       setCurrentSceneId(currentScenario[0]?._id);
     }
   }, [currentScenario]);
