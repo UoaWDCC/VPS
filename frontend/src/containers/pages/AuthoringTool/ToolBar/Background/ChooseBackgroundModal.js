@@ -6,17 +6,24 @@ import styles from "../../../../../styling/ChooseBackgroundModal.module.scss";
 import ImageListContainer from "../../../../../components/ImageListContainer";
 import { addImage } from "../ToolBarActions";
 import SceneContext from "../../../../../context/SceneContext";
+import ToolbarContext from "../../../../../context/ToolbarContext";
 
 export default function ChooseBackgroundModal({ isShowing, hide }) {
   const { currentScene, setCurrentScene } = useContext(SceneContext);
   const [images, setImages] = useState();
+  const { handleDropdownClose } = useContext(ToolbarContext);
 
   // eslint-disable-next-line no-unused-vars
   const [selectedImage, setSelectedImage] = useState();
   useGet("/api/image", setImages);
 
-  function handleButtonClick() {
+  function closeDialogues() {
     hide();
+    handleDropdownClose();
+  }
+
+  function handleButtonClick() {
+    closeDialogues();
     addImage(currentScene, setCurrentScene, selectedImage);
   }
 
@@ -35,7 +42,7 @@ export default function ChooseBackgroundModal({ isShowing, hide }) {
     <ModalDialogue
       title="Choose Image"
       isShowing={isShowing}
-      hide={hide}
+      hide={closeDialogues}
       dialogueAction={saveButton}
     >
       <ImageListContainer data={images} onItemSelected={setSelectedImage} />

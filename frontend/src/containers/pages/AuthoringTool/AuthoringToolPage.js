@@ -10,6 +10,7 @@ import ScenarioContext from "../../../context/ScenarioContext";
 import { useGet, usePut } from "../../../hooks/crudHooks";
 import SceneContext from "../../../context/SceneContext";
 import AuthoringToolContext from "../../../context/AuthoringToolContext";
+import ToolbarContextProvider from "../../../context/ToolbarContextProvider";
 
 export default function AuthoringToolPage() {
   const { scenarioId, sceneId } = useParams();
@@ -60,7 +61,9 @@ export default function AuthoringToolPage() {
             Save
           </Button>
         </TopBar>
-        <ToolBar />
+        <ToolbarContextProvider>
+          <ToolBar />
+        </ToolbarContextProvider>
         <div className="flex" style={{ height: "100%" }}>
           <Canvas />
           <CanvasSideBar />
