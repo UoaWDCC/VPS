@@ -13,6 +13,8 @@ export default function ListContainer({
   wide,
   addCard,
   onItemBlur,
+  sceneSelectionPage,
+  scenarioId,
 }) {
   const classes = useStyles();
   const [selected, setSelected] = useState();
@@ -70,9 +72,15 @@ export default function ListContainer({
                         },
                       }}
                     >
-                      <Thumbnail
-                        url={`${process.env.PUBLIC_URL}/play/${item._id}`}
-                      />
+                      {sceneSelectionPage ? (
+                        <Thumbnail
+                          url={`${process.env.PUBLIC_URL}/play/${scenarioId}/${item._id}`}
+                        />
+                      ) : (
+                        <Thumbnail
+                          url={`${process.env.PUBLIC_URL}/play/${item._id}`}
+                        />
+                      )}
                     </Box>
                     <input
                       className={styles.text}
