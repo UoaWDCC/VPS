@@ -72,9 +72,13 @@ export function SceneSelectionPage({ data = null }) {
   }
 
   async function changeSceneName({ target }) {
-    await usePut(`/api/scenario/${scenarioId}/scene/${currentScene._id}`, {
-      name: target.value,
-    });
+    await usePut(
+      `/api/scenario/${scenarioId}/scene/${currentScene._id}`,
+      {
+        name: target.value,
+      },
+      getUserIdToken
+    );
     reFetch();
   }
 

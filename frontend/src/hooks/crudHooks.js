@@ -83,15 +83,13 @@ export function usePost(url, requestBody = null, getUserIdToken = null) {
   return postData();
 }
 
-export function usePut(url, requestBody = null, requireAuth = true) {
-  const { getUserIdToken } = useContext(AuthenticationContext);
-
+export function usePut(url, requestBody = null, getUserIdToken = null) {
   async function putData() {
     let errorData;
     let hasError = false;
 
     let config = {};
-    if (requireAuth) {
+    if (getUserIdToken) {
       const token = await getUserIdToken();
       config = {
         headers: {

@@ -40,12 +40,16 @@ export default function AuthoringToolPage() {
 
   async function saveScene() {
     setSelect(null);
-    await usePut(`/api/scenario/${scenarioId}/scene/${sceneId}`, {
-      name: currentScene.name,
-      components: currentScene?.components,
-    });
-    reFetch();
+    await usePut(
+      `/api/scenario/${scenarioId}/scene/${sceneId}`,
+      {
+        name: currentScene.name,
+        components: currentScene?.components,
+      },
+      getUserIdToken
+    );
     setHasChange(false);
+    reFetch();
   }
 
   return (
