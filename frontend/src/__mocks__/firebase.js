@@ -37,9 +37,7 @@ const mockFirebaseAuth = {
       signOut: jest.fn(() => {}),
     }),
   }),
-  GoogleAuthProvider: class {
-    addScope = jest.fn();
-  },
+  GoogleAuthProvider: class {},
 };
 
 const mockFirebaseHooks = {
