@@ -8,7 +8,7 @@ export default function PlayScenarioPage() {
   const styles = useStyles();
   const { currentSceneId } = useContext(PlayScenarioContext);
 
-  if (!currentSceneId) {
+  if (currentSceneId === null) {
     return <LoadingPage text="Loading contents..." />;
   }
 
