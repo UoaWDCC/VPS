@@ -14,11 +14,13 @@ export default function PlayScenarioPage() {
 
   return (
     <>
-      <div className={styles.canvasContainer}>
-        <div className={styles.canvas}>
-          <PlayScenarioCanvas />
+      {currentSceneId && (
+        <div className={styles.canvasContainer}>
+          <div className={styles.canvas}>
+            <PlayScenarioCanvas />
+          </div>
         </div>
-      </div>
+      )}
     </>
   );
 }

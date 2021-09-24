@@ -4,6 +4,7 @@ import { useGet } from "../hooks/crudHooks";
 import PlayScenarioContext from "./PlayScenarioContext";
 
 export default function PlayScenarioContextProvider({ children }) {
+  // currentScenario could be 1.null (initial state) 2.[] (no scenes) 3.[obj,obj..]
   const [currentScenario, setCurrentScenario] = useState(null);
   const [currentSceneId, setCurrentSceneId] = useState(null);
   const { scenarioId, urlSceneId } = useParams();
