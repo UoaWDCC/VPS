@@ -4,6 +4,7 @@ import { BrowserRouter } from "react-router-dom";
 import TopBar from "../TopBar";
 import ScenarioContext from "../../context/ScenarioContext";
 import SceneContextProvider from "../../context/SceneContextProvider";
+import AuthenticationContextProvider from "../../context/AuthenticationContextProvider";
 
 test("Top Bar component snapshot test", () => {
   const context = {
@@ -12,11 +13,13 @@ test("Top Bar component snapshot test", () => {
 
   const component = renderer.create(
     <BrowserRouter>
-      <ScenarioContext.Provider value={context}>
-        <SceneContextProvider>
-          <TopBar />
-        </SceneContextProvider>
-      </ScenarioContext.Provider>
+      <AuthenticationContextProvider>
+        <ScenarioContext.Provider value={context}>
+          <SceneContextProvider>
+            <TopBar />
+          </SceneContextProvider>
+        </ScenarioContext.Provider>
+      </AuthenticationContextProvider>
     </BrowserRouter>
   );
 

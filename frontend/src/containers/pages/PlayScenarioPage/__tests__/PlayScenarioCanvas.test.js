@@ -3,6 +3,7 @@ import { render } from "@testing-library/react";
 import { BrowserRouter } from "react-router-dom";
 import PlayScenarioCanvas from "../PlayScenarioCanvas";
 import PlayScenarioContext from "../../../../context/PlayScenarioContext";
+import AuthenticationContextProvider from "../../../../context/AuthenticationContextProvider";
 
 test("PlayScenarioCanvas component snapshot test", () => {
   const context = {
@@ -13,9 +14,11 @@ test("PlayScenarioCanvas component snapshot test", () => {
 
   const { baseElement } = render(
     <BrowserRouter>
-      <PlayScenarioContext.Provider value={context}>
-        <PlayScenarioCanvas />
-      </PlayScenarioContext.Provider>
+      <AuthenticationContextProvider>
+        <PlayScenarioContext.Provider value={context}>
+          <PlayScenarioCanvas />
+        </PlayScenarioContext.Provider>
+      </AuthenticationContextProvider>
     </BrowserRouter>
   );
 

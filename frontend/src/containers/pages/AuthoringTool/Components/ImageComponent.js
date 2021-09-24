@@ -6,7 +6,7 @@ import { imageStyles, imageContainerStyles } from "./components.styles";
 
 export default function ImageComponent({ id, onClick, component }) {
   const [image, setImage] = useState();
-  useGet(`/api/image/${component.imageId}`, setImage);
+  useGet(`/api/image/${component.imageId}`, setImage, false);
 
   useEffect(() => {
     // The below is used to recalculate the height and width of an image. Especially when it is intiallised using auto

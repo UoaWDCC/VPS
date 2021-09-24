@@ -9,7 +9,7 @@ export default function PlayScenarioPage() {
   const { currentSceneId } = useContext(PlayScenarioContext);
 
   if (!currentSceneId) {
-    return <LoadingPage />;
+    return <LoadingPage text="Loading contents..." />;
   }
 
   return (

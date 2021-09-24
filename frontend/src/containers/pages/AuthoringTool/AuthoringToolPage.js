@@ -11,6 +11,7 @@ import { useGet, usePut } from "../../../hooks/crudHooks";
 import SceneContext from "../../../context/SceneContext";
 import AuthoringToolContext from "../../../context/AuthoringToolContext";
 import ToolbarContextProvider from "../../../context/ToolbarContextProvider";
+import AuthenticationContext from "../../../context/AuthenticationContext";
 
 export default function AuthoringToolPage() {
   const { scenarioId, sceneId } = useParams();
@@ -23,11 +24,13 @@ export default function AuthoringToolPage() {
   } = useContext(SceneContext);
   const { currentScenario } = useContext(ScenarioContext);
   const { setSelect } = useContext(AuthoringToolContext);
+  const { getUserIdToken } = useContext(AuthenticationContext);
   const [firstTimeRender, setFirstTimeRender] = useState(true);
 
   useGet(
     `/api/scenario/${currentScenario?._id}/scene/full/${currentScene?._id}`,
-    setCurrentScene
+    setCurrentScene,
+    false
   );
 
   useEffect(() => {
@@ -40,12 +43,16 @@ export default function AuthoringToolPage() {
 
   async function saveScene() {
     setSelect(null);
-    await usePut(`/api/scenario/${scenarioId}/scene/${sceneId}`, {
-      name: currentScene.name,
-      components: currentScene?.components,
-    });
-    reFetch();
+    await usePut(
+      `/api/scenario/${scenarioId}/scene/${sceneId}`,
+      {
+        name: currentScene.name,
+        components: currentScene?.components,
+      },
+      getUserIdToken
+    );
     setHasChange(false);
+    reFetch();
   }
 
   return (

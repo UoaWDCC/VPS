@@ -3,6 +3,7 @@ import { render } from "@testing-library/react";
 import { BrowserRouter } from "react-router-dom";
 import ScenarioSelectionPage from "../ScenarioSelectionPage";
 import ScenarioContext from "../../../context/ScenarioContext";
+import AuthenticationContextProvider from "../../../context/AuthenticationContextProvider";
 
 const dummyScenarios = [
   { _id: 1, name: "test1" },
@@ -20,9 +21,11 @@ const context = {
 test("Scenario Selection page snapshot test", () => {
   const { baseElement } = render(
     <BrowserRouter>
-      <ScenarioContext.Provider value={context}>
-        <ScenarioSelectionPage />
-      </ScenarioContext.Provider>
+      <AuthenticationContextProvider>
+        <ScenarioContext.Provider value={context}>
+          <ScenarioSelectionPage />
+        </ScenarioContext.Provider>
+      </AuthenticationContextProvider>
     </BrowserRouter>
   );
 

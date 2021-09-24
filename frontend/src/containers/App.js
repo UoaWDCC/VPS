@@ -10,30 +10,41 @@ import PlayingScenarioContextProvider from "../context/PlayScenarioContextProvid
 import "normalize.css";
 import "../styling/style.scss";
 import theme from "./theme/App.theme";
+import ProtectedRoute from "../auth/ProtectedRoute";
+import LoginPage from "./pages/LoginPage";
+import AuthenticationContextProvider from "../context/AuthenticationContextProvider";
 
 export default function App() {
   return (
     <>
       <ThemeProvider theme={theme}>
-        <ScenarioContextProvider>
-          <BrowserRouter>
-            <Switch>
-              <Route exact path="/" component={ScenarioSelectionPage} />
-              <Route path="/play/:scenarioId">
-                <PlayingScenarioContextProvider>
-                  <PlayScenarioPage />
-                </PlayingScenarioContextProvider>
-              </Route>
-              <Route path="/scenario/:scenarioId">
+        <AuthenticationContextProvider>
+          <ScenarioContextProvider>
+            <BrowserRouter>
+              <Switch>
+                <Route exact path="/login" component={LoginPage} />
+                <Route exact path="/play/:scenarioId">
+                  <PlayingScenarioContextProvider>
+                    <PlayScenarioPage />
+                  </PlayingScenarioContextProvider>
+                </Route>
+                <ProtectedRoute
+                  exact
+                  path="/"
+                  component={ScenarioSelectionPage}
+                />
                 <SceneContextProvider>
-                  <ScenePage />
+                  <ProtectedRoute
+                    path="/scenario/:scenarioId"
+                    component={ScenePage}
+                  />
                 </SceneContextProvider>
-              </Route>
-              {/* Default path if nothing matches */}
-              <Route path="/" component={ScenarioSelectionPage} />
-            </Switch>
-          </BrowserRouter>
-        </ScenarioContextProvider>
+                {/* Default path if nothing matches */}
+                <ProtectedRoute path="/" component={ScenarioSelectionPage} />
+              </Switch>
+            </BrowserRouter>
+          </ScenarioContextProvider>
+        </AuthenticationContextProvider>
       </ThemeProvider>
     </>
   );

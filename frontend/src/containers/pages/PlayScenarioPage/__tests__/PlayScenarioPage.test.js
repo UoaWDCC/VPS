@@ -3,6 +3,7 @@ import { render } from "@testing-library/react";
 import { BrowserRouter } from "react-router-dom";
 import PlayScenarioPage from "../PlayScenarioPage";
 import PlayScenarioContext from "../../../../context/PlayScenarioContext";
+import AuthenticationContextProvider from "../../../../context/AuthenticationContextProvider";
 
 test("PlayScenario page snapshot test", () => {
   const context = {
@@ -11,9 +12,11 @@ test("PlayScenario page snapshot test", () => {
 
   const { baseElement } = render(
     <BrowserRouter>
-      <PlayScenarioContext.Provider value={context}>
-        <PlayScenarioPage />
-      </PlayScenarioContext.Provider>
+      <AuthenticationContextProvider>
+        <PlayScenarioContext.Provider value={context}>
+          <PlayScenarioPage />
+        </PlayScenarioContext.Provider>
+      </AuthenticationContextProvider>
     </BrowserRouter>
   );
 
@@ -27,9 +30,11 @@ test("PlayScenario page when no current SceneID snapshot test", () => {
 
   const { baseElement } = render(
     <BrowserRouter>
-      <PlayScenarioContext.Provider value={context}>
-        <PlayScenarioPage />
-      </PlayScenarioContext.Provider>
+      <AuthenticationContextProvider>
+        <PlayScenarioContext.Provider value={context}>
+          <PlayScenarioPage />
+        </PlayScenarioContext.Provider>
+      </AuthenticationContextProvider>
     </BrowserRouter>
   );
 
