@@ -1,4 +1,5 @@
-import React from "react";
+import React, { useState } from "react";
+import Skeleton from "react-loading-skeleton";
 
 function Thumbnail({
   url = "https://canvas.ac.nz/",
@@ -7,7 +8,11 @@ function Thumbnail({
   width = 266,
   height = 150,
   interactive = false,
+  style: customStyle,
+  onLoad,
 }) {
+  const [loading, setLoading] = useState(true);
+
   const xscale = width / iframeWidth;
   const yscale = height / iframeHeight;
   const iframe = {
@@ -17,6 +22,7 @@ function Thumbnail({
     height: `${iframeHeight}px`,
     border: "0px",
   };
+
   const iframeShade = {
     position: "absolute",
     width: "100%",
@@ -40,21 +46,40 @@ function Thumbnail({
     height: "100%",
   };
 
+  const combinedOnLoad = () => {
+    if (onLoad) {
+      onLoad();
+    }
+    setLoading(false);
+  };
+
   return (
-    <div style={outerWrapper}>
-      <div style={iframeWrapper}>
+    <div
+      style={{ ...outerWrapper, ...customStyle }}
+      data-testid="div-outer-wrapper"
+    >
+      <div style={iframeWrapper} data-testid="div-iframe-wrapper">
         {!interactive && <div style={iframeShade}> </div>}
+        {loading && (
+          <Skeleton
+            style={{ position: "absolute", zIndex: "15" }}
+            width={width}
+            height={height}
+            duration={0.8}
+          />
+        )}
         <iframe
           tabIndex="-1"
           style={iframe}
-          title="asdf"
+          title="webpage-thumbnail"
           src={url}
           sandbox="allow-scripts allow-same-origin"
           scrolling="no"
+          onLoad={combinedOnLoad}
         />
       </div>
     </div>
   );
 }
-
+// TODO write proptypes
 export default Thumbnail;
