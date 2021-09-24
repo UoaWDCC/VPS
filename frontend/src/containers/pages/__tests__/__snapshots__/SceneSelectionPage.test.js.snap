@@ -157,23 +157,33 @@ exports[`Scene Selection page snapshot test 1`] = `
                   class="MuiBox-root MuiBox-root-4"
                 >
                   <div
+                    data-testid="div-outer-wrapper"
                     style="display: flex; align-items: center; justify-content: center; width: 100%; height: 100%;"
                   >
                     <div
-                      style="max-width: 200px; max-height: 150px; background-color: white; filter: drop-shadow(1px 1px 2px grey);"
+                      data-testid="div-iframe-wrapper"
+                      style="max-width: 266px; max-height: 150px; background-color: white; filter: drop-shadow(1px 1px 2px grey);"
                     >
                       <div
-                        style="position: absolute; width: 100%; height: 150px; max-width: 200px; z-index: 10;"
+                        style="position: absolute; width: 100%; height: 150px; max-width: 266px; z-index: 10;"
                       >
                          
                       </div>
+                      <span>
+                        <span
+                          class="react-loading-skeleton css-bvijti-skeletonStyles-Skeleton"
+                          style="position: absolute; z-index: 15; width: 266px; height: 150px;"
+                        >
+                          ‌
+                        </span>
+                      </span>
                       <iframe
                         sandbox="allow-scripts allow-same-origin"
                         scrolling="no"
                         src="/play/undefined/1"
-                        style="transform: scaleX(0.1) scaleY(0.1); transform-origin: 0 0; width: 2000px; height: 1500px; border: 0px;"
+                        style="transform: scaleX(0.13854166666666667) scaleY(0.1388888888888889); transform-origin: 0 0; width: 1920px; height: 1080px; border: 0px;"
                         tabindex="-1"
-                        title="asdf"
+                        title="webpage-thumbnail"
                       />
                     </div>
                   </div>
@@ -200,23 +210,33 @@ exports[`Scene Selection page snapshot test 1`] = `
                   class="MuiBox-root MuiBox-root-5"
                 >
                   <div
+                    data-testid="div-outer-wrapper"
                     style="display: flex; align-items: center; justify-content: center; width: 100%; height: 100%;"
                   >
                     <div
-                      style="max-width: 200px; max-height: 150px; background-color: white; filter: drop-shadow(1px 1px 2px grey);"
+                      data-testid="div-iframe-wrapper"
+                      style="max-width: 266px; max-height: 150px; background-color: white; filter: drop-shadow(1px 1px 2px grey);"
                     >
                       <div
-                        style="position: absolute; width: 100%; height: 150px; max-width: 200px; z-index: 10;"
+                        style="position: absolute; width: 100%; height: 150px; max-width: 266px; z-index: 10;"
                       >
                          
                       </div>
+                      <span>
+                        <span
+                          class="react-loading-skeleton css-bvijti-skeletonStyles-Skeleton"
+                          style="position: absolute; z-index: 15; width: 266px; height: 150px;"
+                        >
+                          ‌
+                        </span>
+                      </span>
                       <iframe
                         sandbox="allow-scripts allow-same-origin"
                         scrolling="no"
                         src="/play/undefined/2"
-                        style="transform: scaleX(0.1) scaleY(0.1); transform-origin: 0 0; width: 2000px; height: 1500px; border: 0px;"
+                        style="transform: scaleX(0.13854166666666667) scaleY(0.1388888888888889); transform-origin: 0 0; width: 1920px; height: 1080px; border: 0px;"
                         tabindex="-1"
-                        title="asdf"
+                        title="webpage-thumbnail"
                       />
                     </div>
                   </div>
