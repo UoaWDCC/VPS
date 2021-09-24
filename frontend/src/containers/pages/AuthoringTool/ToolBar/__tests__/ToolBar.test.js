@@ -5,17 +5,23 @@ import ScenarioContextProvider from "../../../../../context/ScenarioContextProvi
 import SceneContextProvider from "../../../../../context/SceneContextProvider";
 import ToolBar from "../ToolBar";
 import AuthoringToolContextProvider from "../../../../../context/AuthoringToolContextProvider";
+import ToolbarContextProvider from "../../../../../context/ToolbarContextProvider";
+import AuthenticationContextProvider from "../../../../../context/AuthenticationContextProvider";
 
 test("ToolBar component snapshot test", () => {
   const component = renderer.create(
     <BrowserRouter>
-      <ScenarioContextProvider>
-        <SceneContextProvider>
-          <AuthoringToolContextProvider>
-            <ToolBar />
-          </AuthoringToolContextProvider>
-        </SceneContextProvider>
-      </ScenarioContextProvider>
+      <AuthenticationContextProvider>
+        <ScenarioContextProvider>
+          <SceneContextProvider>
+            <AuthoringToolContextProvider>
+              <ToolbarContextProvider>
+                <ToolBar />
+              </ToolbarContextProvider>
+            </AuthoringToolContextProvider>
+          </SceneContextProvider>
+        </ScenarioContextProvider>
+      </AuthenticationContextProvider>
     </BrowserRouter>
   );
 

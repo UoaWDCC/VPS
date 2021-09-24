@@ -11,7 +11,8 @@ export default function PlayScenarioCanvas() {
 
   useGet(
     `/api/scenario/${scenarioId}/scene/full/${currentSceneId}`,
-    setCurrentScene
+    setCurrentScene,
+    false
   );
 
   const componentOnClick = (component) => {

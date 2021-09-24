@@ -117,6 +117,32 @@ exports[`Side Bar component snapshot test 1`] = `
         </span>
       </button>
     </li>
+    <li>
+      <button
+        className="MuiButtonBase-root MuiButton-root MuiButton-contained btn side contained white"
+        disabled={false}
+        onBlur={[Function]}
+        onClick={[Function]}
+        onDragLeave={[Function]}
+        onFocus={[Function]}
+        onKeyDown={[Function]}
+        onKeyUp={[Function]}
+        onMouseDown={[Function]}
+        onMouseLeave={[Function]}
+        onMouseUp={[Function]}
+        onTouchEnd={[Function]}
+        onTouchMove={[Function]}
+        onTouchStart={[Function]}
+        tabIndex={0}
+        type="button"
+      >
+        <span
+          className="MuiButton-label"
+        >
+          Logout
+        </span>
+      </button>
+    </li>
   </ul>
 </div>
 `;

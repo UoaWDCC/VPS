@@ -4,16 +4,22 @@ import ListContainer from "../../components/ListContainer";
 import ScreenContainer from "../../components/ScreenContainer";
 import ScenarioContext from "../../context/ScenarioContext";
 import { usePut } from "../../hooks/crudHooks";
+import AuthenticationContext from "../../context/AuthenticationContext";
 
 export default function ScenarioSelectionPage({ data = null }) {
   const { scenarios, currentScenario, setCurrentScenario, reFetch } =
     useContext(ScenarioContext);
+  const { getUserIdToken } = useContext(AuthenticationContext);
 
   async function changeScenarioName({ target }) {
-    await usePut(`/api/scenario/${currentScenario._id}`, {
-      ...currentScenario,
-      name: target.value,
-    });
+    await usePut(
+      `/api/scenario/${currentScenario._id}`,
+      {
+        ...currentScenario,
+        name: target.value,
+      },
+      getUserIdToken
+    );
     reFetch();
   }
 

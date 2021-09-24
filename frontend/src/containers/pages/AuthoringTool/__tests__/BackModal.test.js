@@ -4,6 +4,7 @@ import { render } from "@testing-library/react";
 import BackModal from "../BackModal";
 import ScenarioContext from "../../../../context/ScenarioContext";
 import SceneContextProvider from "../../../../context/SceneContextProvider";
+import AuthenticationContextProvider from "../../../../context/AuthenticationContextProvider";
 
 test("BackModal component snapshot test", () => {
   const context = {
@@ -12,11 +13,13 @@ test("BackModal component snapshot test", () => {
 
   const { baseElement } = render(
     <BrowserRouter>
-      <ScenarioContext.Provider value={context}>
-        <SceneContextProvider>
-          <BackModal isOpen />
-        </SceneContextProvider>
-      </ScenarioContext.Provider>
+      <AuthenticationContextProvider>
+        <ScenarioContext.Provider value={context}>
+          <SceneContextProvider>
+            <BackModal isOpen />
+          </SceneContextProvider>
+        </ScenarioContext.Provider>
+      </AuthenticationContextProvider>
     </BrowserRouter>
   );
 

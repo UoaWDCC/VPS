@@ -5,23 +5,29 @@ import ScenarioContext from "../context/ScenarioContext";
 import styles from "../styling/SideBar.module.scss";
 import { usePost, useDelete } from "../hooks/crudHooks";
 import DeleteButton from "./DeleteButton";
+import AuthenticationContext from "../context/AuthenticationContext";
 
 export default function SideBar() {
   const { currentScenario, setCurrentScenario, reFetch } =
     useContext(ScenarioContext);
+  const { signOut, getUserIdToken } = useContext(AuthenticationContext);
   const history = useHistory();
 
   async function createScenario(name = "no name") {
-    const newScenario = await usePost(`/api/scenario`, {
-      name,
-    });
+    const newScenario = await usePost(
+      `/api/scenario`,
+      {
+        name,
+      },
+      getUserIdToken
+    );
     setCurrentScenario(newScenario);
     // eslint-disable-next-line no-underscore-dangle
     history.push(`/scenario/${newScenario._id}`);
   }
 
   async function deleteScenario() {
-    await useDelete(`/api/scenario/${currentScenario._id}`);
+    await useDelete(`/api/scenario/${currentScenario._id}`, getUserIdToken);
     setCurrentScenario(null);
     reFetch();
   }
@@ -92,6 +98,16 @@ export default function SideBar() {
             >
               Delete
             </DeleteButton>
+          </li>
+          <li>
+            <Button
+              className="btn side contained white"
+              color="default"
+              variant="contained"
+              onClick={signOut}
+            >
+              Logout
+            </Button>
           </li>
         </ul>
       </div>

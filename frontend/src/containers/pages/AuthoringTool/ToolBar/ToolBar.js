@@ -1,25 +1,18 @@
-import React, { useState, useContext } from "react";
+import React, { useContext } from "react";
 import { Box, Tooltip, Button, MenuList, Menu } from "@material-ui/core";
 import ArrowDropDownIcon from "@material-ui/icons/ArrowDropDown";
 import toolBarData from "./ToolBarData";
 import SceneContext from "../../../../context/SceneContext";
 import styles from "../../../../styling/ToolBar.module.scss";
 import AuthoringToolContext from "../../../../context/AuthoringToolContext";
+import ToolbarContext from "../../../../context/ToolbarContext";
 
 export default function ToolBar() {
   const { currentScene, setCurrentScene } = useContext(SceneContext);
   const { setSelect } = useContext(AuthoringToolContext);
-  const [anchorEl, setAnchorEl] = useState(null);
-  const [triggerElTitle, setTriggerElTitle] = useState(null);
-  const handleDropdownClick = (e, title) => {
-    setTriggerElTitle(title);
-    setAnchorEl(e.currentTarget);
-  };
+  const { anchorEl, triggerElTitle, handleDropdownClick, handleDropdownClose } =
+    useContext(ToolbarContext);
 
-  const handleDropdownClose = () => {
-    setTriggerElTitle(null);
-    setAnchorEl(null);
-  };
   return (
     <>
       <MenuList className={styles.toolBar}>
@@ -36,7 +29,6 @@ export default function ToolBar() {
                   handleDropdownClick(event, tool.title);
                 }
               : () => tool.onClick(currentScene, setCurrentScene);
-            const open = tool.title === triggerElTitle;
             return (
               <div key={tool.title}>
                 <Tooltip title={tool.title} enterDelay={200} key={tool.title}>
@@ -52,7 +44,7 @@ export default function ToolBar() {
                 {tool.dropdown && (
                   <SubMenu
                     tool={tool}
-                    open={open}
+                    open={tool.title === triggerElTitle}
                     anchorEl={anchorEl}
                     handleDropdownClose={handleDropdownClose}
                   />
