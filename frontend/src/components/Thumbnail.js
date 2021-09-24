@@ -2,9 +2,9 @@ import React from "react";
 
 function Thumbnail({
   url = "https://canvas.ac.nz/",
-  iframeWidth = 2000,
-  iframeHeight = 1500,
-  width = 200,
+  iframeWidth = 1920,
+  iframeHeight = 1080,
+  width = 266,
   height = 150,
   interactive = false,
 }) {
