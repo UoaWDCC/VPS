@@ -1,13 +1,11 @@
 import React, { useContext, useEffect, useState, useRef } from "react";
 import { useGet } from "../hooks/crudHooks";
 import useLocalStorage from "../hooks/useLocalStorage";
-import AuthenticationContext from "./AuthenticationContext";
 import ScenarioContext from "./ScenarioContext";
 import SceneContext from "./SceneContext";
 
 export default function SceneContextProvider({ children }) {
   const { currentScenario } = useContext(ScenarioContext);
-  const { loading } = useContext(AuthenticationContext);
   const [scenes, setScenes] = useState([]);
   const [currentScene, setCurrentScene] = useLocalStorage("currentScene", null);
   const [monitorChange, setMonitorChange] = useState(false);
@@ -17,14 +15,12 @@ export default function SceneContextProvider({ children }) {
 
   let getScenes = null;
   if (currentScenario) {
-    getScenes = useGet(`api/scenario/${currentScenario._id}/scene`, setScenes);
+    getScenes = useGet(
+      `api/scenario/${currentScenario._id}/scene`,
+      setScenes,
+      false
+    );
   }
-
-  useEffect(() => {
-    if (!loading) {
-      getScenes?.reFetch();
-    }
-  }, [loading]);
 
   useEffect(() => {
     if (!monitorChange) {
