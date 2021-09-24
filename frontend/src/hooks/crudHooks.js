@@ -38,19 +38,14 @@ export function useGet(url, setData, requireAuth = true) {
         };
       }
 
-      // This is a walkaround for a bug.
-      // When useGet called, it's possible that firebase is still loading and token is null.
-      // In this case, we do not call backend and just wait for this function to be triggered again.
-      if (!requireAuth || (requireAuth && token)) {
-        const response = await axios.get(url, config).catch((err) => {
-          if (err.response.status === 404 || err.response.status === 401) {
-            hasError = true;
-          }
-        });
-
-        if (!hasError) {
-          setData(response.data);
+      const response = await axios.get(url, config).catch((err) => {
+        if (err.response.status === 404 || err.response.status === 401) {
+          hasError = true;
         }
+      });
+
+      if (!hasError) {
+        setData(response.data);
       }
 
       setLoading(false);
