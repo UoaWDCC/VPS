@@ -19,31 +19,38 @@ export default function App() {
     <>
       <ThemeProvider theme={theme}>
         <AuthenticationContextProvider>
-          <ScenarioContextProvider>
-            <BrowserRouter>
-              <Switch>
-                <Route exact path="/login" component={LoginPage} />
-                <Route exact path="/play/:scenarioId">
-                  <PlayingScenarioContextProvider>
-                    <PlayScenarioPage />
-                  </PlayingScenarioContextProvider>
-                </Route>
-                <ProtectedRoute
-                  exact
-                  path="/"
-                  component={ScenarioSelectionPage}
-                />
-                <SceneContextProvider>
-                  <ProtectedRoute
-                    path="/scenario/:scenarioId"
-                    component={ScenePage}
-                  />
-                </SceneContextProvider>
-                {/* Default path if nothing matches */}
-                <ProtectedRoute path="/" component={ScenarioSelectionPage} />
-              </Switch>
-            </BrowserRouter>
-          </ScenarioContextProvider>
+          <BrowserRouter>
+            <Switch>
+              <Route exact path="/login" component={LoginPage} />
+
+              <Route path="/play/:scenarioId/:sceneId?">
+                <PlayingScenarioContextProvider>
+                  <PlayScenarioPage />
+                </PlayingScenarioContextProvider>
+              </Route>
+
+              <ProtectedRoute exact path="/">
+                <ScenarioContextProvider>
+                  <ScenarioSelectionPage />
+                </ScenarioContextProvider>
+              </ProtectedRoute>
+
+              <ProtectedRoute path="/scenario/:scenarioId">
+                <ScenarioContextProvider>
+                  <SceneContextProvider>
+                    <ScenePage />
+                  </SceneContextProvider>
+                </ScenarioContextProvider>
+              </ProtectedRoute>
+
+              {/* Default path if nothing matches */}
+              <ProtectedRoute path="/">
+                <ScenarioContextProvider>
+                  <ScenarioSelectionPage />
+                </ScenarioContextProvider>
+              </ProtectedRoute>
+            </Switch>
+          </BrowserRouter>
         </AuthenticationContextProvider>
       </ThemeProvider>
     </>

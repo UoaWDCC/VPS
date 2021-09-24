@@ -149,6 +149,8 @@ export function SceneSelectionPage({ data = null }) {
         addCard={createNewScene}
         wide
         onItemBlur={changeSceneName}
+        sceneSelectionPage
+        scenarioId={scenarioId}
       />
       <ShareModal
         isOpen={isShareModalOpen}
