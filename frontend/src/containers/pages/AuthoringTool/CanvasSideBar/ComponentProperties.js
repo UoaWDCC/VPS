@@ -23,10 +23,7 @@ export default function ComponentProperties() {
               No component selected
             </p>
           ) : (
-            componentPropertiesResolver(
-              currentScene.components[select % currentScene.components.length],
-              select
-            )
+            componentPropertiesResolver(currentScene.components[select], select)
           )}
         </div>
       </div>

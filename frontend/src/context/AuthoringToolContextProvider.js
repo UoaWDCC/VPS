@@ -29,13 +29,7 @@ export default function AuthoringToolContextProvider({ children }) {
   function deleteElement() {
     if (selectRef.current !== null) {
       const updatedComponents = currentSceneRef.current.components;
-      updatedComponents.splice(
-        parseInt(
-          selectRef.current % currentSceneRef.current.components.length,
-          10
-        ),
-        1
-      );
+      updatedComponents.splice(parseInt(selectRef.current, 10), 1);
       setSelect(null);
       selectRef.current = null;
 
