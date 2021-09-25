@@ -36,7 +36,6 @@ router.use(auth);
 router.use(scenarioAuth);
 
 router.post("/", async (req, res) => {
-  console.log(`post scene ${req.body.uid}`);
   const { name, components } = req.body;
 
   const scene = await createScene(req.params.scenarioId, { name, components });
@@ -45,7 +44,6 @@ router.post("/", async (req, res) => {
 });
 
 router.put("/:sceneId", async (req, res) => {
-  console.log(`put scene ${req.body.uid}`);
   const { name, components } = req.body;
 
   const scene = await updateScene(req.params.sceneId, { name, components });
@@ -54,7 +52,6 @@ router.put("/:sceneId", async (req, res) => {
 });
 
 router.delete("/:sceneId", async (req, res) => {
-  console.log(`delete scene ${req.body.uid}`);
   const deleted = await deleteScene(req.params.scenarioId, req.params.sceneId);
 
   if (deleted) {
@@ -65,7 +62,6 @@ router.delete("/:sceneId", async (req, res) => {
 });
 
 router.post("/duplicate/:sceneId", async (req, res) => {
-  console.log(`dup scene ${req.body.uid}`);
   const scene = await duplicateScene(req.params.scenarioId, req.params.sceneId);
 
   res.status(HTTP_OK).json(scene);

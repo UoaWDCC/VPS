@@ -24,7 +24,6 @@ router.use(auth);
 
 // Retrieve scenarios for a given user
 router.get("/", async (req, res) => {
-  console.log(`get ${req.body.uid}`);
   const scenarios = await retrieveScenarioList(req.body.uid);
 
   res.status(HTTP_OK).json(scenarios);
@@ -32,7 +31,6 @@ router.get("/", async (req, res) => {
 
 // Create a scenario for a user
 router.post("/", async (req, res) => {
-  console.log(`post ${req.body.uid}`);
   const { name, uid } = req.body;
 
   const scenario = await createScenario(name, uid);
@@ -45,7 +43,6 @@ router.use("/:scenarioId", scenarioAuth);
 
 // Update a scenario by a user
 router.put("/:scenarioId", async (req, res) => {
-  console.log(`put ${req.body.uid}`);
   const { name } = req.body;
   const scenario = await updateScenario(req.params.scenarioId, {
     name,
@@ -56,7 +53,6 @@ router.put("/:scenarioId", async (req, res) => {
 
 // Delete a scenario of a user
 router.delete("/:scenarioId", async (req, res) => {
-  console.log(`delete ${req.body.uid}`);
   const deleted = await deleteScenario(req.params.scenarioId);
   if (deleted) {
     res.sendStatus(HTTP_NO_CONTENT);

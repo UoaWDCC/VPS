@@ -15,7 +15,6 @@ const HTTP_UNAUTHORISED = 401;
  * @param {*} req  must contain authorization header
  */
 export default async function auth(req, res, next) {
-  console.log(req.originalUrl);
   if (!req.headers.authorization) {
     res.sendStatus(HTTP_UNAUTHORISED);
   } else {
@@ -29,8 +28,7 @@ export default async function auth(req, res, next) {
         req.body.uid = uid;
         next();
       })
-      .catch((err) => {
-        console.log(err);
+      .catch(() => {
         res.sendStatus(HTTP_UNAUTHORISED);
       });
   }

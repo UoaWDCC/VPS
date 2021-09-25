@@ -12,7 +12,6 @@ export default async function scenarioAuth(req, res, next) {
 
   if (dbScenario) {
     if (req.body.uid === dbScenario.uid) {
-      console.log("hit scenario uid");
       next();
     } else {
       res.sendStatus(HTTP_UNAUTHORISED);
