@@ -6,6 +6,31 @@ import axios from "axios";
 import routes from "../..";
 import Scene from "../../../db/models/scene";
 import Scenario from "../../../db/models/scenario";
+import auth from "../../../middleware/firebase-auth";
+import scenarioAuth from "../../../middleware/scenario-auth";
+
+jest.mock("../../../middleware/firebase-auth");
+jest.mock("../../../middleware/scenario-auth");
+jest.mock("firebase-admin"); // Needed to mock the firebase-admin dependency in firebase-auth.js
+
+// Mock the firebase auth middleware to have the auth token be the user id
+auth.mockImplementation(async (req, res, next) => {
+  // eslint-disable-next-line prefer-destructuring
+  req.body.uid = req.headers.authorization.split(" ")[1];
+  next();
+});
+
+scenarioAuth.mockImplementation(async (req, res, next) => {
+  next();
+});
+
+function authHeaders(id) {
+  return {
+    headers: {
+      Authorization: `Bearer ${id}`,
+    },
+  };
+}
 
 describe("Scene API tests", () => {
   const HTTP_OK = 200;
@@ -38,12 +63,14 @@ describe("Scene API tests", () => {
   const scenario1 = {
     _id: new mongoose.mongo.ObjectId("000000000000000000000001"),
     name: "Test Scenario 1",
+    uid: "user1",
   };
 
   const scenario2 = {
     _id: new mongoose.mongo.ObjectId("000000000000000000000002"),
     name: "Test Scenario 2",
     scenes: [scene1._id, scene2._id],
+    uid: "user1",
   };
 
   // setup in-memory mongodb and express API
@@ -90,7 +117,8 @@ describe("Scene API tests", () => {
 
     const response = await axios.post(
       `http://localhost:${port}/api/scenario/${scenario1._id}/scene/`,
-      reqData
+      reqData,
+      authHeaders("user1")
     );
     expect(response.status).toBe(HTTP_OK);
 
@@ -130,7 +158,8 @@ describe("Scene API tests", () => {
 
     const response = await axios.post(
       `http://localhost:${port}/api/scenario/${scenario1._id}/scene/`,
-      reqData
+      reqData,
+      authHeaders("user1")
     );
     expect(response.status).toBe(HTTP_OK);
 
@@ -201,7 +230,8 @@ describe("Scene API tests", () => {
 
     const response = await axios.put(
       `http://localhost:${port}/api/scenario/${scenario2._id}/scene/${scene1._id}`,
-      reqData
+      reqData,
+      authHeaders("user1")
     );
     expect(response.status).toBe(HTTP_OK);
 
@@ -214,7 +244,8 @@ describe("Scene API tests", () => {
 
   it("DELETE api/scenario/:scenarioId/scene/:sceneId deletes a valid scene", async () => {
     const response = await axios.delete(
-      `http://localhost:${port}/api/scenario/${scenario2._id}/scene/${scene1._id}/`
+      `http://localhost:${port}/api/scenario/${scenario2._id}/scene/${scene1._id}/`,
+      authHeaders("user1")
     );
     expect(response.status).toBe(HTTP_NO_CONTENT);
 
@@ -233,21 +264,25 @@ describe("Scene API tests", () => {
     // bad sceneId
     await expect(
       axios.delete(
-        `http://localhost:${port}/api/scenario/${scenario2._id}/scene/000000000000000000000009/`
+        `http://localhost:${port}/api/scenario/${scenario2._id}/scene/000000000000000000000009/`,
+        authHeaders("user1")
       )
     ).rejects.toThrow();
 
     // bad scenarioId
     await expect(
       axios.delete(
-        `http://localhost:${port}/api/scenario/000000000000000000000009/scene/${scene1._id}/`
+        `http://localhost:${port}/api/scenario/000000000000000000000009/scene/${scene1._id}/`,
+        authHeaders("user1")
       )
     ).rejects.toThrow();
   });
 
   it("POST /duplicate: duplicates a scene and returns the newly persisted scene", async () => {
     const response = await axios.post(
-      `http://localhost:${port}/api/scenario/${scenario2._id}/scene/duplicate/${scene1._id}`
+      `http://localhost:${port}/api/scenario/${scenario2._id}/scene/duplicate/${scene1._id}`,
+      {},
+      authHeaders("user1")
     );
     expect(response.status).toBe(HTTP_OK);
 

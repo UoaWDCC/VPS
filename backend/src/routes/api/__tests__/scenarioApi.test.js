@@ -6,6 +6,31 @@ import axios from "axios";
 import routes from "../..";
 import Scenario from "../../../db/models/scenario";
 import Scene from "../../../db/models/scene";
+import auth from "../../../middleware/firebase-auth";
+import scenarioAuth from "../../../middleware/scenario-auth";
+
+jest.mock("../../../middleware/firebase-auth");
+jest.mock("../../../middleware/scenario-auth");
+jest.mock("firebase-admin"); // Needed to mock the firebase-admin dependency in firebase-auth.js
+
+// Mock the firebase auth middleware to have the auth token be the user id
+auth.mockImplementation(async (req, res, next) => {
+  // eslint-disable-next-line prefer-destructuring
+  req.body.uid = req.headers.authorization.split(" ")[1];
+  next();
+});
+
+scenarioAuth.mockImplementation(async (req, res, next) => {
+  next();
+});
+
+function authHeaders(id) {
+  return {
+    headers: {
+      Authorization: `Bearer ${id}`,
+    },
+  };
+}
 
 describe("Scenario API tests", () => {
   const HTTP_OK = 200;
@@ -28,11 +53,13 @@ describe("Scenario API tests", () => {
   const scenario1 = {
     _id: new mongoose.mongo.ObjectId("000000000000000000000001"),
     name: "Scenario 1",
+    uid: "user1",
   };
   const scenario2 = {
     _id: new mongoose.mongo.ObjectId("000000000000000000000002"),
     name: "Scenario 2",
     scenes: [scene1._id, scene2._id],
+    uid: "user1",
   };
 
   // setup in-memory mongodb and express API
@@ -79,7 +106,8 @@ describe("Scenario API tests", () => {
 
     const response = await axios.post(
       `http://localhost:${port}/api/scenario/`,
-      reqData
+      reqData,
+      authHeaders("user1")
     );
     expect(response.status).toBe(HTTP_OK);
 
@@ -88,16 +116,21 @@ describe("Scenario API tests", () => {
     expect(scenario._id).toBeDefined();
     expect(scenario.name).toEqual(reqData.name);
     expect(scenario.scenes).toEqual([]);
+    expect(scenario.uid).toEqual("user1");
 
     // check if scenario has been persisted to db
     const dbScenario = await Scenario.findById(scenario._id).lean();
     expect(dbScenario).toBeDefined();
     expect(dbScenario.name).toEqual(reqData.name);
     expect(dbScenario.scenes).toEqual([]);
+    expect(dbScenario.uid).toEqual("user1");
   });
 
   it("GET /scenario: retrieve all scenarios successfully", async () => {
-    const response = await axios.get(`http://localhost:${port}/api/scenario/`);
+    const response = await axios.get(
+      `http://localhost:${port}/api/scenario/`,
+      authHeaders("user1")
+    );
     expect(response.status).toBe(HTTP_OK);
 
     // check correct scenario is returned
@@ -115,7 +148,8 @@ describe("Scenario API tests", () => {
 
   it("DELETE api/scenario/:scenarioId deletes a valid scenario", async () => {
     const response = await axios.delete(
-      `http://localhost:${port}/api/scenario/${scenario2._id}/`
+      `http://localhost:${port}/api/scenario/${scenario2._id}/`,
+      authHeaders("user1")
     );
     expect(response.status).toBe(HTTP_NO_CONTENT);
 
@@ -136,7 +170,8 @@ describe("Scenario API tests", () => {
     // bad scenarioId
     await expect(
       axios.delete(
-        `http://localhost:${port}/api/scenario/000000000000000000000009/`
+        `http://localhost:${port}/api/scenario/000000000000000000000009/`,
+        authHeaders("user1")
       )
     ).rejects.toThrow();
   });
@@ -144,7 +179,8 @@ describe("Scenario API tests", () => {
   it("update a scenarios name", async () => {
     const response = await axios.put(
       `http://localhost:${port}/api/scenario/${scenario1._id}`,
-      { name: "Scenario 2" }
+      { name: "Scenario 2" },
+      authHeaders("user1")
     );
     expect(response.status).toBe(HTTP_OK);
 
