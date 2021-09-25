@@ -2,7 +2,7 @@ import React from "react";
 import { signInWithRedirect } from "firebase/auth";
 import { useAuthState } from "react-firebase-hooks/auth";
 import AuthenticationContext from "./AuthenticationContext";
-import { auth, googleProvider } from "../auth/firebase";
+import { auth, googleProvider } from "../firebase/firebase";
 
 export default function AuthenticationContextProvider({ children }) {
   const [user, loading, error] = useAuthState(auth);
