@@ -8,8 +8,8 @@ import {
   deleteScene,
   duplicateScene,
 } from "../../db/daos/sceneDao";
-import auth from "../../middleware/firebase-auth";
-import scenarioAuth from "../../middleware/scenario-auth";
+import auth from "../../middleware/firebaseAuth";
+import scenarioAuth from "../../middleware/scenarioAuth";
 
 const router = Router({ mergeParams: true });
 

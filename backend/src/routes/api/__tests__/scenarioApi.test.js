@@ -6,11 +6,11 @@ import axios from "axios";
 import routes from "../..";
 import Scenario from "../../../db/models/scenario";
 import Scene from "../../../db/models/scene";
-import auth from "../../../middleware/firebase-auth";
-import scenarioAuth from "../../../middleware/scenario-auth";
+import auth from "../../../middleware/firebaseAuth";
+import scenarioAuth from "../../../middleware/scenarioAuth";
 
-jest.mock("../../../middleware/firebase-auth");
-jest.mock("../../../middleware/scenario-auth");
+jest.mock("../../../middleware/firebaseAuth");
+jest.mock("../../../middleware/scenarioAuth");
 jest.mock("firebase-admin"); // Needed to mock the firebase-admin dependency in firebase-auth.js
 
 // Mock the firebase auth middleware to have the auth token be the user id
