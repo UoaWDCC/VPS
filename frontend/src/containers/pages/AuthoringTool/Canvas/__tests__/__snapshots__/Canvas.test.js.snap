@@ -4,341 +4,103 @@ exports[`Authoring Tool page snapshot test 1`] = `
 <body>
   <div>
     <div
-      class="colContainer"
+      class="moveable-control-box    rCSuehiy8"
+      data-able-draggable="true"
+      data-able-origin="true"
+      data-able-padding="true"
+      data-able-resizable="true"
+      data-able-snappable="true"
+      data-styled-id="rCSuehiy8"
+      style="position: absolute; display: none; transform: translate3d(0px, 0px, 0); --zoom: 1; --zoompx: 1px;"
     >
       <div
-        class="topBar"
-      >
-        <ul
-          class="leftTopBarList"
-        >
-          <li
-            class="listItem"
-          >
-            <button
-              class="MuiButtonBase-root MuiButton-root MuiButton-outlined btn top outlined white"
-              tabindex="0"
-              type="button"
-            >
-              <span
-                class="MuiButton-label"
-              >
-                Back
-              </span>
-              <span
-                class="MuiTouchRipple-root"
-              />
-            </button>
-          </li>
-        </ul>
-        <ul
-          class="rightTopBarList"
-        >
-          <li
-            class="listItem"
-          >
-            <button
-              class="MuiButtonBase-root MuiButton-root MuiButton-contained btn top contained white"
-              tabindex="0"
-              type="button"
-            >
-              <span
-                class="MuiButton-label"
-              >
-                Save
-              </span>
-              <span
-                class="MuiTouchRipple-root"
-              />
-            </button>
-          </li>
-        </ul>
-      </div>
-      <div />
-      <ul
-        class="MuiList-root toolBar MuiList-padding"
-        role="menu"
-        tabindex="-1"
-      >
-        <div
-          class="MuiBox-root MuiBox-root-1"
-          tabindex="0"
-        >
-          <div>
-            <button
-              class="MuiButtonBase-root MuiButton-root MuiButton-text menuItem"
-              tabindex="0"
-              title="Image"
-              type="button"
-            >
-              <span
-                class="MuiButton-label"
-              >
-                <svg
-                  aria-hidden="true"
-                  class="MuiSvgIcon-root"
-                  focusable="false"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"
-                  />
-                </svg>
-                <svg
-                  aria-hidden="true"
-                  class="MuiSvgIcon-root MuiSvgIcon-fontSizeSmall"
-                  focusable="false"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    d="M7 10l5 5 5-5z"
-                  />
-                </svg>
-              </span>
-              <span
-                class="MuiTouchRipple-root"
-              />
-            </button>
-          </div>
-          <div>
-            <button
-              class="MuiButtonBase-root MuiButton-root MuiButton-text menuItem"
-              tabindex="0"
-              title="Text"
-              type="button"
-            >
-              <span
-                class="MuiButton-label"
-              >
-                <svg
-                  aria-hidden="true"
-                  class="MuiSvgIcon-root"
-                  focusable="false"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    d="M2.5 4v3h5v12h3V7h5V4h-13zm19 5h-9v3h3v7h3v-7h3V9z"
-                  />
-                </svg>
-              </span>
-              <span
-                class="MuiTouchRipple-root"
-              />
-            </button>
-          </div>
-          <div>
-            <button
-              class="MuiButtonBase-root MuiButton-root MuiButton-text menuItem"
-              tabindex="0"
-              title="Button"
-              type="button"
-            >
-              <span
-                class="MuiButton-label"
-              >
-                <svg
-                  aria-hidden="true"
-                  class="MuiSvgIcon-root"
-                  focusable="false"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm5 11h-4v4h-2v-4H7v-2h4V7h2v4h4v2z"
-                  />
-                </svg>
-              </span>
-              <span
-                class="MuiTouchRipple-root"
-              />
-            </button>
-          </div>
-          <div>
-            <button
-              class="MuiButtonBase-root MuiButton-root MuiButton-text menuItem"
-              tabindex="0"
-              title="Audio"
-              type="button"
-            >
-              <span
-                class="MuiButton-label"
-              >
-                <svg
-                  aria-hidden="true"
-                  class="MuiSvgIcon-root"
-                  focusable="false"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"
-                  />
-                </svg>
-              </span>
-              <span
-                class="MuiTouchRipple-root"
-              />
-            </button>
-          </div>
-        </div>
-      </ul>
+        class="moveable-control moveable-direction moveable-n "
+        data-direction="n"
+        data-rotation="0"
+        style="transform: translateZ(0px) translate(0px, 0px) rotate(0rad) scale(1);"
+      />
       <div
-        class="flex"
-        style="height: 100%;"
-      >
-        <div
-          class="moveable-control-box    rCSuehiy8"
-          data-able-draggable="true"
-          data-able-origin="true"
-          data-able-padding="true"
-          data-able-resizable="true"
-          data-able-snappable="true"
-          data-styled-id="rCSuehiy8"
-          style="position: absolute; display: none; transform: translate3d(0px, 0px, 0); --zoom: 1; --zoompx: 1px;"
-        >
-          <div
-            class="moveable-control moveable-direction moveable-n "
-            data-direction="n"
-            data-rotation="0"
-            style="transform: translateZ(0px) translate(0px, 0px) rotate(0rad) scale(1);"
-          />
-          <div
-            class="moveable-control moveable-direction moveable-w "
-            data-direction="w"
-            data-rotation="90"
-            style="transform: translateZ(0px) translate(0px, 0px) rotate(0rad) scale(1);"
-          />
-          <div
-            class="moveable-control moveable-direction moveable-s "
-            data-direction="s"
-            data-rotation="0"
-            style="transform: translateZ(0px) translate(0px, 0px) rotate(0rad) scale(1);"
-          />
-          <div
-            class="moveable-control moveable-direction moveable-e "
-            data-direction="e"
-            data-rotation="90"
-            style="transform: translateZ(0px) translate(0px, 0px) rotate(0rad) scale(1);"
-          />
-          <div
-            class="moveable-control moveable-direction moveable-nw "
-            data-direction="nw"
-            data-rotation="135"
-            style="transform: translateZ(0px) translate(0px, 0px) rotate(0rad) scale(1);"
-          />
-          <div
-            class="moveable-control moveable-direction moveable-ne "
-            data-direction="ne"
-            data-rotation="45"
-            style="transform: translateZ(0px) translate(0px, 0px) rotate(0rad) scale(1);"
-          />
-          <div
-            class="moveable-control moveable-direction moveable-sw "
-            data-direction="sw"
-            data-rotation="45"
-            style="transform: translateZ(0px) translate(0px, 0px) rotate(0rad) scale(1);"
-          />
-          <div
-            class="moveable-control moveable-direction moveable-se "
-            data-direction="se"
-            data-rotation="135"
-            style="transform: translateZ(0px) translate(0px, 0px) rotate(0rad) scale(1);"
-          />
-          <div
-            class="moveable-control moveable-origin"
-            style="transform: translateZ(0px) translate(0px, 0px) rotate(0rad) scale(1);"
-          />
-          <div
-            class="moveable-line moveable-direction "
-            data-direction=""
-            data-line-index="0"
-            data-rotation="-1"
-            style="transform: translateY(-50%) translate(0px, 0px) rotate(0rad) scaleY(1); width: 0px;"
-          />
-          <div
-            class="moveable-line moveable-direction "
-            data-direction=""
-            data-line-index="1"
-            data-rotation="-1"
-            style="transform: translateY(-50%) translate(0px, 0px) rotate(0rad) scaleY(1); width: 0px;"
-          />
-          <div
-            class="moveable-line moveable-direction "
-            data-direction=""
-            data-line-index="2"
-            data-rotation="-1"
-            style="transform: translateY(-50%) translate(0px, 0px) rotate(0rad) scaleY(1); width: 0px;"
-          />
-          <div
-            class="moveable-line moveable-direction "
-            data-direction=""
-            data-line-index="3"
-            data-rotation="-1"
-            style="transform: translateY(-50%) translate(0px, 0px) rotate(0rad) scaleY(1); width: 0px;"
-          />
-        </div>
-        <div
-          class="canvasContainer"
-        >
-          <div
-            class="canvas"
-            id="canvas"
-          />
-        </div>
-        <div
-          class="sideBar"
-        >
-          <div
-            class="sceneSettingsContainer"
-          >
-            <h1
-              class="sideBarHeader"
-            >
-              Scene Settings
-            </h1>
-            <div
-              class="sideBarBody"
-            >
-              <div
-                class="MuiFormControl-root MuiTextField-root WithStyles(ForwardRef(TextField))-root-2 MuiFormControl-fullWidth"
-              >
-                <label
-                  class="MuiFormLabel-root MuiInputLabel-root MuiInputLabel-formControl MuiInputLabel-animated"
-                  data-shrink="false"
-                >
-                  Scene Name
-                </label>
-                <div
-                  class="MuiInputBase-root MuiInput-root MuiInput-underline MuiInputBase-fullWidth MuiInput-fullWidth MuiInputBase-formControl MuiInput-formControl"
-                >
-                  <input
-                    aria-invalid="false"
-                    class="MuiInputBase-input MuiInput-input"
-                    type="text"
-                    value=""
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
-          <div
-            class="componentPropertiesContainer"
-          >
-            <h1
-              class="sideBarHeader"
-            >
-              Component Properties
-            </h1>
-            <div
-              class="sideBarBody empty"
-            >
-              <p
-                class="noComponentSelectedText"
-              >
-                No component selected
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
+        class="moveable-control moveable-direction moveable-w "
+        data-direction="w"
+        data-rotation="90"
+        style="transform: translateZ(0px) translate(0px, 0px) rotate(0rad) scale(1);"
+      />
+      <div
+        class="moveable-control moveable-direction moveable-s "
+        data-direction="s"
+        data-rotation="0"
+        style="transform: translateZ(0px) translate(0px, 0px) rotate(0rad) scale(1);"
+      />
+      <div
+        class="moveable-control moveable-direction moveable-e "
+        data-direction="e"
+        data-rotation="90"
+        style="transform: translateZ(0px) translate(0px, 0px) rotate(0rad) scale(1);"
+      />
+      <div
+        class="moveable-control moveable-direction moveable-nw "
+        data-direction="nw"
+        data-rotation="135"
+        style="transform: translateZ(0px) translate(0px, 0px) rotate(0rad) scale(1);"
+      />
+      <div
+        class="moveable-control moveable-direction moveable-ne "
+        data-direction="ne"
+        data-rotation="45"
+        style="transform: translateZ(0px) translate(0px, 0px) rotate(0rad) scale(1);"
+      />
+      <div
+        class="moveable-control moveable-direction moveable-sw "
+        data-direction="sw"
+        data-rotation="45"
+        style="transform: translateZ(0px) translate(0px, 0px) rotate(0rad) scale(1);"
+      />
+      <div
+        class="moveable-control moveable-direction moveable-se "
+        data-direction="se"
+        data-rotation="135"
+        style="transform: translateZ(0px) translate(0px, 0px) rotate(0rad) scale(1);"
+      />
+      <div
+        class="moveable-control moveable-origin"
+        style="transform: translateZ(0px) translate(0px, 0px) rotate(0rad) scale(1);"
+      />
+      <div
+        class="moveable-line moveable-direction "
+        data-direction=""
+        data-line-index="0"
+        data-rotation="-1"
+        style="transform: translateY(-50%) translate(0px, 0px) rotate(0rad) scaleY(1); width: 0px;"
+      />
+      <div
+        class="moveable-line moveable-direction "
+        data-direction=""
+        data-line-index="1"
+        data-rotation="-1"
+        style="transform: translateY(-50%) translate(0px, 0px) rotate(0rad) scaleY(1); width: 0px;"
+      />
+      <div
+        class="moveable-line moveable-direction "
+        data-direction=""
+        data-line-index="2"
+        data-rotation="-1"
+        style="transform: translateY(-50%) translate(0px, 0px) rotate(0rad) scaleY(1); width: 0px;"
+      />
+      <div
+        class="moveable-line moveable-direction "
+        data-direction=""
+        data-line-index="3"
+        data-rotation="-1"
+        style="transform: translateY(-50%) translate(0px, 0px) rotate(0rad) scaleY(1); width: 0px;"
+      />
+    </div>
+    <div
+      class="canvasContainer"
+    >
+      <div
+        class="canvas"
+        id="canvas"
+      />
     </div>
   </div>
 </body>
