@@ -1,4 +1,5 @@
 import { Router } from "express";
+import auth from "../../auth/firebase";
 
 import {
   createScenario,
@@ -15,10 +16,13 @@ const HTTP_OK = 200;
 const HTTP_NO_CONTENT = 204;
 const HTTP_NOT_FOUND = 404;
 
-router.post("/", async (req, res) => {
-  const { name } = req.body;
+router.get("/", auth);
+router.post("/", auth);
 
-  const scenario = await createScenario(name);
+router.post("/", async (req, res) => {
+  const { name, uid } = req.body;
+
+  const scenario = await createScenario(name, uid);
 
   res.status(HTTP_OK).json(scenario);
 });
@@ -33,7 +37,7 @@ router.put("/:scenarioId", async (req, res) => {
 });
 
 router.get("/", async (req, res) => {
-  const scenarios = await retrieveScenarioList();
+  const scenarios = await retrieveScenarioList(req.body.uid);
 
   res.status(HTTP_OK).json(scenarios);
 });

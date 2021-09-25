@@ -1,16 +1,17 @@
 import Scenario from "../models/scenario";
 
-const createScenario = async (name) => {
+const createScenario = async (name, uid) => {
   const dbScenario = new Scenario({
     name,
+    uid,
   });
   await dbScenario.save();
 
   return dbScenario;
 };
 
-const retrieveScenarioList = async () => {
-  return Scenario.find({}, "name");
+const retrieveScenarioList = async (uid) => {
+  return Scenario.find({ uid }, "name");
 };
 
 const updateScenario = async (scenarioId, updatedScenario) => {

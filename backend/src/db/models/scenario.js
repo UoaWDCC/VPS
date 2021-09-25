@@ -8,6 +8,10 @@ const scenarioSchema = new Schema({
     type: String,
     required: true,
   },
+  uid: {
+    type: String,
+    required: true,
+  },
   scenes: [
     {
       type: Schema.Types.ObjectId,
