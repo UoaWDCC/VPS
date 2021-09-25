@@ -1,3 +1,4 @@
+/* eslint-disable no-param-reassign */
 import React from "react";
 import ButtonComponent from "../Components/ButtonComponent";
 import TextComponent from "../Components/TextComponent";
@@ -9,7 +10,7 @@ export default function componentResolver(component, index, onClick) {
     case "BUTTON":
       return (
         <ButtonComponent
-          key={index}
+          key={component.id}
           id={index}
           onClick={onClick}
           component={component}
@@ -18,7 +19,7 @@ export default function componentResolver(component, index, onClick) {
     case "TEXT":
       return (
         <TextComponent
-          key={index}
+          key={component.id}
           id={index}
           onClick={onClick}
           component={component}
@@ -27,7 +28,7 @@ export default function componentResolver(component, index, onClick) {
     case "IMAGE":
       return (
         <ImageComponent
-          key={index}
+          key={component.id}
           id={index}
           onClick={onClick}
           component={component}

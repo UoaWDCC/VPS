@@ -37,8 +37,7 @@ export default function SceneContextProvider({ children }) {
 
   function updateComponentProperty(componentIndex, property, newValue) {
     const updatedComponents = currentScene.components;
-    updatedComponents[componentIndex % updatedComponents.length][property] =
-      newValue;
+    updatedComponents[componentIndex][property] = newValue;
     currentSceneRef.current = currentScene;
     setCurrentScene({
       ...currentScene,

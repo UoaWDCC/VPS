@@ -1,3 +1,5 @@
+import { v4 } from "uuid";
+
 function addButton(currentScene, setCurrentScene) {
   const newButton = {
     type: "BUTTON",
@@ -9,6 +11,7 @@ function addButton(currentScene, setCurrentScene) {
     top: 0, // as percentage
     height: 6, // as percentage
     width: 20, // as percentage
+    id: v4(),
   };
 
   const updatedComponents = currentScene.components;
@@ -33,6 +36,7 @@ function addText(currentScene, setCurrentScene) {
     top: 0, // as percentage
     height: 10, // as percentage
     width: 20, // as percentage
+    id: v4(),
   };
 
   const updatedComponents = currentScene.components;
@@ -53,6 +57,7 @@ function addImage(currentScene, setCurrentScene, image) {
     top: 0, // as percentage
     height: "auto", // as percentage
     width: "auto", // as percentage
+    id: v4(),
   };
 
   const updatedComponents = currentScene.components;

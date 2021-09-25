@@ -1,7 +1,7 @@
 /* eslint-disable jsx-a11y/no-static-element-interactions */
 /* eslint-disable jsx-a11y/click-events-have-key-events */
 /* eslint-disable no-param-reassign */
-import React, { useContext, useEffect, useRef } from "react";
+import React, { useContext, useEffect } from "react";
 
 import Moveable from "react-moveable";
 import AuthoringToolContext from "../../../../context/AuthoringToolContext";
@@ -11,7 +11,6 @@ import componentResolver from "./componentResolver";
 
 export default function Canvas() {
   const { currentScene, updateComponentProperty } = useContext(SceneContext);
-  const rerender = useRef(100);
   const {
     select,
     selectElement,
@@ -29,11 +28,6 @@ export default function Canvas() {
         setShiftPressed(true);
       } else if (key === "Delete" || key === "Backspace") {
         if (target.tagName === "BODY" || target.tagName === "BUTTON") {
-          if (rerender.current < 1) {
-            rerender.current = 100;
-          } else {
-            rerender.current -= 1;
-          }
           deleteElement();
         }
       }
@@ -115,12 +109,8 @@ export default function Canvas() {
 
       <div className={styles.canvasContainer}>
         <div id="canvas" className={styles.canvas} onClick={clearElement}>
-          {currentScene?.components?.map((component, index, array) =>
-            componentResolver(
-              component,
-              rerender.current * array.length + index,
-              selectElement
-            )
+          {currentScene?.components?.map((component, index) =>
+            componentResolver(component, index, selectElement)
           )}
         </div>
       </div>
