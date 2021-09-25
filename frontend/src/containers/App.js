@@ -23,7 +23,7 @@ export default function App() {
             <Switch>
               <Route exact path="/login" component={LoginPage} />
 
-              <Route path="/play/:scenarioId/:sceneId?">
+              <Route path="/play/:scenarioId/:urlSceneId?">
                 <PlayingScenarioContextProvider>
                   <PlayScenarioPage />
                 </PlayingScenarioContextProvider>

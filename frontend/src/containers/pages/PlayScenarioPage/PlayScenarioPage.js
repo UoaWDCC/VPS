@@ -8,17 +8,19 @@ export default function PlayScenarioPage() {
   const styles = useStyles();
   const { currentSceneId } = useContext(PlayScenarioContext);
 
-  if (!currentSceneId) {
+  if (currentSceneId === null) {
     return <LoadingPage text="Loading contents..." />;
   }
 
   return (
     <>
-      <div className={styles.canvasContainer}>
-        <div className={styles.canvas}>
-          <PlayScenarioCanvas />
+      {currentSceneId && (
+        <div className={styles.canvasContainer}>
+          <div className={styles.canvas}>
+            <PlayScenarioCanvas />
+          </div>
         </div>
-      </div>
+      )}
     </>
   );
 }

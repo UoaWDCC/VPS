@@ -4,9 +4,10 @@ import { useGet } from "../hooks/crudHooks";
 import PlayScenarioContext from "./PlayScenarioContext";
 
 export default function PlayScenarioContextProvider({ children }) {
+  // currentScenario could be 1.null (initial state) 2.[] (no scenes) 3.[obj,obj..]
   const [currentScenario, setCurrentScenario] = useState(null);
   const [currentSceneId, setCurrentSceneId] = useState(null);
-  const { scenarioId, sceneId } = useParams();
+  const { scenarioId, urlSceneId } = useParams();
 
   const getScenesFromHook = useGet(
     `api/scenario/${scenarioId}/scene`,
@@ -15,8 +16,8 @@ export default function PlayScenarioContextProvider({ children }) {
   );
 
   useEffect(() => {
-    if (sceneId) {
-      setCurrentSceneId(sceneId);
+    if (urlSceneId) {
+      setCurrentSceneId(urlSceneId);
     } else if (currentScenario) {
       setCurrentSceneId(currentScenario[0]?._id);
     }
