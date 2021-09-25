@@ -1,5 +1,6 @@
 import { Router } from "express";
-import auth from "../../auth/firebase";
+import auth from "../../middleware/firebase-auth";
+import scenarioAuth from "../../middleware/scenario-auth";
 
 import {
   createScenario,
@@ -16,10 +17,22 @@ const HTTP_OK = 200;
 const HTTP_NO_CONTENT = 204;
 const HTTP_NOT_FOUND = 404;
 
-router.get("/", auth);
-router.post("/", auth);
+router.use("/:scenarioId/scene", scene);
 
+// Apply auth middleware to all routes below this point
+router.use(auth);
+
+// Retrieve scenarios for a given user
+router.get("/", async (req, res) => {
+  console.log(`get ${req.body.uid}`);
+  const scenarios = await retrieveScenarioList(req.body.uid);
+
+  res.status(HTTP_OK).json(scenarios);
+});
+
+// Create a scenario for a user
 router.post("/", async (req, res) => {
+  console.log(`post ${req.body.uid}`);
   const { name, uid } = req.body;
 
   const scenario = await createScenario(name, uid);
@@ -27,7 +40,12 @@ router.post("/", async (req, res) => {
   res.status(HTTP_OK).json(scenario);
 });
 
+// Apply scenario auth middleware
+router.use("/:scenarioId", scenarioAuth);
+
+// Update a scenario by a user
 router.put("/:scenarioId", async (req, res) => {
+  console.log(`put ${req.body.uid}`);
   const { name } = req.body;
   const scenario = await updateScenario(req.params.scenarioId, {
     name,
@@ -36,13 +54,9 @@ router.put("/:scenarioId", async (req, res) => {
   res.status(HTTP_OK).json(scenario);
 });
 
-router.get("/", async (req, res) => {
-  const scenarios = await retrieveScenarioList(req.body.uid);
-
-  res.status(HTTP_OK).json(scenarios);
-});
-
+// Delete a scenario of a user
 router.delete("/:scenarioId", async (req, res) => {
+  console.log(`delete ${req.body.uid}`);
   const deleted = await deleteScenario(req.params.scenarioId);
   if (deleted) {
     res.sendStatus(HTTP_NO_CONTENT);
@@ -50,7 +64,5 @@ router.delete("/:scenarioId", async (req, res) => {
     res.sendStatus(HTTP_NOT_FOUND);
   }
 });
-
-router.use("/:scenarioId/scene", scene);
 
 export default router;
