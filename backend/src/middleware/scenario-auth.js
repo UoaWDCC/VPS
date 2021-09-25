@@ -1,5 +1,8 @@
 import { retrieveScenario } from "../db/daos/scenarioDao";
 
+const HTTP_UNAUTHORISED = 401;
+const HTTP_NOT_FOUND = 404;
+
 /**
  * Checks if the scenario belongs to the user
  * @param {*} req params must have scenarioId
@@ -9,11 +12,12 @@ export default async function scenarioAuth(req, res, next) {
 
   if (dbScenario) {
     if (req.body.uid === dbScenario.uid) {
+      console.log("hit scenario uid");
       next();
     } else {
-      res.sendStatus(401);
+      res.sendStatus(HTTP_UNAUTHORISED);
     }
   } else {
-    res.sendStatus(404);
+    res.sendStatus(HTTP_NOT_FOUND);
   }
 }

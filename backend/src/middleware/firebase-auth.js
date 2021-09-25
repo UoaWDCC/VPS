@@ -8,6 +8,8 @@ admin.initializeApp({
   }),
 });
 
+const HTTP_UNAUTHORISED = 401;
+
 /**
  * Verify user firebase token
  * @param {*} req  must contain authorization header
@@ -15,7 +17,7 @@ admin.initializeApp({
 export default async function auth(req, res, next) {
   console.log(req.originalUrl);
   if (!req.headers.authorization) {
-    res.sendStatus(401);
+    res.sendStatus(HTTP_UNAUTHORISED);
   } else {
     const idToken = req.headers.authorization.split(" ")[1];
 
@@ -29,7 +31,7 @@ export default async function auth(req, res, next) {
       })
       .catch((err) => {
         console.log(err);
-        res.sendStatus(401);
+        res.sendStatus(HTTP_UNAUTHORISED);
       });
   }
 }
