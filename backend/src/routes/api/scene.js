@@ -8,6 +8,8 @@ import {
   deleteScene,
   duplicateScene,
 } from "../../db/daos/sceneDao";
+import auth from "../../middleware/firebaseAuth";
+import scenarioAuth from "../../middleware/scenarioAuth";
 
 const router = Router({ mergeParams: true });
 
@@ -15,12 +17,11 @@ const HTTP_OK = 200;
 const HTTP_NO_CONTENT = 204;
 const HTTP_NOT_FOUND = 404;
 
-router.post("/", async (req, res) => {
-  const { name, components } = req.body;
+// Get scene infromation
+router.get("/full/:sceneId", async (req, res) => {
+  const scene = await retrieveScene(req.params.sceneId);
 
-  const scene = await createScene(req.params.scenarioId, { name, components });
-
-  res.status(HTTP_OK).json(scene);
+  res.json(scene);
 });
 
 router.get("/", async (req, res) => {
@@ -29,10 +30,17 @@ router.get("/", async (req, res) => {
   res.json(scenes);
 });
 
-router.get("/full/:sceneId", async (req, res) => {
-  const scene = await retrieveScene(req.params.sceneId);
+// Apply auth middleware to all routes below this point
+router.use(auth);
+// // Apply scenario auth middleware
+router.use(scenarioAuth);
 
-  res.json(scene);
+router.post("/", async (req, res) => {
+  const { name, components } = req.body;
+
+  const scene = await createScene(req.params.scenarioId, { name, components });
+
+  res.status(HTTP_OK).json(scene);
 });
 
 router.put("/:sceneId", async (req, res) => {

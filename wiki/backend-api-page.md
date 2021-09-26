@@ -2,7 +2,7 @@
 
 ### Routes
 
-**Create new Scenario:**
+**Create new Scenario:\***
 
 `POST /api/scenario`
 
@@ -35,7 +35,7 @@ Returns:
 ]
 ```
 
-**Delete scenario with given scenario Id:**
+**Delete scenario with given scenario Id:\***
 
 `DELETE /api/scenario/:scenarioId`
 
@@ -45,7 +45,7 @@ Returns:
 NO CONTENT
 ```
 
-**Create new scene for a given Scenario Id:**
+**Create new scene for a given Scenario Id:\***
 
 `POST /api/scenario/:scenarioId/scene`
 
@@ -93,7 +93,7 @@ Returns:
 
 ```
 
-**Update a Scene for a given Scene Id:**
+**Update a Scene for a given Scene Id:\***
 
 `PUT /api/scenario/:scenarioId/scene/:sceneId`
 
@@ -120,7 +120,7 @@ Returns:
 
 ```
 
-**Delete scene for a given scenario Id with a given scene Id:**
+**Delete scene for a given scenario Id with a given scene Id:\***
 
 `DELETE /api/scenario/:scenarioId/scene/:sceneId`
 
@@ -130,7 +130,7 @@ Returns:
 NO CONTENT
 ```
 
-**Duplicate a scene for a given Scenario Id and Scene Id:**
+**Duplicate a scene for a given Scenario Id and Scene Id:\***
 
 `POST /api/scenario/:scenarioId/scene/duplicate/:sceneId`
 
@@ -165,7 +165,8 @@ Returns:
     "image received"
 }
 ```
-**Get images from database**
+
+**Get images from database:**
 
 `GET /api/image`
 
@@ -182,4 +183,27 @@ Returns:
         "url": "https://drive.google.com/uc?export=view&id=1DkoIzDkld0yogdPNVIvZIAOeoobFVOE2"
     }
 ]
+```
+
+**Get image from database for a given id:**
+
+`GET /api/image/:imageId`
+
+Returns:
+
+```
+{
+    "_id": "000001",
+    "url": "https://drive.google.com/uc?export=view&id=18XRH_KNKSjhjTKxonEinMSZXnK1OU2at"
+}
+
+```
+
+## Notes
+\* Requires authorisation header
+
+```
+headers: {
+      Authorization: `Bearer ${firebase-token}`,
+    }
 ```

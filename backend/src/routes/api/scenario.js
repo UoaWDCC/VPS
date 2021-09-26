@@ -1,4 +1,6 @@
 import { Router } from "express";
+import auth from "../../middleware/firebaseAuth";
+import scenarioAuth from "../../middleware/scenarioAuth";
 
 import {
   createScenario,
@@ -15,14 +17,31 @@ const HTTP_OK = 200;
 const HTTP_NO_CONTENT = 204;
 const HTTP_NOT_FOUND = 404;
 
-router.post("/", async (req, res) => {
-  const { name } = req.body;
+router.use("/:scenarioId/scene", scene);
 
-  const scenario = await createScenario(name);
+// Apply auth middleware to all routes below this point
+router.use(auth);
+
+// Retrieve scenarios for a given user
+router.get("/", async (req, res) => {
+  const scenarios = await retrieveScenarioList(req.body.uid);
+
+  res.status(HTTP_OK).json(scenarios);
+});
+
+// Create a scenario for a user
+router.post("/", async (req, res) => {
+  const { name, uid } = req.body;
+
+  const scenario = await createScenario(name, uid);
 
   res.status(HTTP_OK).json(scenario);
 });
 
+// Apply scenario auth middleware
+router.use("/:scenarioId", scenarioAuth);
+
+// Update a scenario by a user
 router.put("/:scenarioId", async (req, res) => {
   const { name } = req.body;
   const scenario = await updateScenario(req.params.scenarioId, {
@@ -32,12 +51,7 @@ router.put("/:scenarioId", async (req, res) => {
   res.status(HTTP_OK).json(scenario);
 });
 
-router.get("/", async (req, res) => {
-  const scenarios = await retrieveScenarioList();
-
-  res.status(HTTP_OK).json(scenarios);
-});
-
+// Delete a scenario of a user
 router.delete("/:scenarioId", async (req, res) => {
   const deleted = await deleteScenario(req.params.scenarioId);
   if (deleted) {
@@ -46,7 +60,5 @@ router.delete("/:scenarioId", async (req, res) => {
     res.sendStatus(HTTP_NOT_FOUND);
   }
 });
-
-router.use("/:scenarioId/scene", scene);
 
 export default router;

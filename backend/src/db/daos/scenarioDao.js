@@ -1,16 +1,22 @@
 import Scenario from "../models/scenario";
 
-const createScenario = async (name) => {
+const createScenario = async (name, uid) => {
   const dbScenario = new Scenario({
     name,
+    uid,
   });
   await dbScenario.save();
 
   return dbScenario;
 };
 
-const retrieveScenarioList = async () => {
-  return Scenario.find({}, "name");
+const retrieveScenarioList = async (uid) => {
+  return Scenario.find({ uid }, "name");
+};
+
+const retrieveScenario = async (scenarioId) => {
+  const scenario = await Scenario.findById(scenarioId);
+  return scenario;
 };
 
 const updateScenario = async (scenarioId, updatedScenario) => {
@@ -30,4 +36,10 @@ const deleteScenario = async (scenarioId) => {
   }
 };
 
-export { createScenario, retrieveScenarioList, updateScenario, deleteScenario };
+export {
+  createScenario,
+  retrieveScenarioList,
+  retrieveScenario,
+  updateScenario,
+  deleteScenario,
+};
