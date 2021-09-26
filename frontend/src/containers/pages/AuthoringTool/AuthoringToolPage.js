@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useEffect, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
 import { Button } from "@material-ui/core";
 import TopBar from "../../../components/TopBar";
@@ -12,6 +12,7 @@ import SceneContext from "../../../context/SceneContext";
 import AuthoringToolContext from "../../../context/AuthoringToolContext";
 import ToolbarContextProvider from "../../../context/ToolbarContextProvider";
 import AuthenticationContext from "../../../context/AuthenticationContext";
+import { uploadFile } from "../../../firebase/storage";
 
 export default function AuthoringToolPage() {
   const { scenarioId, sceneId } = useParams();
@@ -55,10 +56,31 @@ export default function AuthoringToolPage() {
     reFetch();
   }
 
+  const inputFile = useRef(null);
+
+  const handleFileInput = (e) => {
+    uploadFile(e.target.files[0], currentScenario._id, currentScene._id);
+    inputFile.current.value = null;
+  };
+
   return (
     <>
       <ScreenContainer vertical>
         <TopBar back={`/scenario/${currentScenario?._id}`} confirmModal>
+          <input
+            type="file"
+            ref={inputFile}
+            style={{ display: "none" }}
+            onChange={handleFileInput}
+          />
+          <Button
+            className="btn top contained white"
+            color="default"
+            variant="contained"
+            onClick={() => inputFile.current.click()}
+          >
+            upload file
+          </Button>
           <Button
             className="btn top contained white"
             color="default"

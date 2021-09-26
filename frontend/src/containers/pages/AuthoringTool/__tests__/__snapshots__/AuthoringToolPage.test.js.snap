@@ -37,6 +37,24 @@ exports[`Authoring Tool page snapshot test 1`] = `
           <li
             class="listItem"
           >
+            <input
+              style="display: none;"
+              type="file"
+            />
+            <button
+              class="MuiButtonBase-root MuiButton-root MuiButton-contained btn top contained white"
+              tabindex="0"
+              type="button"
+            >
+              <span
+                class="MuiButton-label"
+              >
+                upload file
+              </span>
+              <span
+                class="MuiTouchRipple-root"
+              />
+            </button>
             <button
               class="MuiButtonBase-root MuiButton-root MuiButton-contained btn top contained white"
               tabindex="0"

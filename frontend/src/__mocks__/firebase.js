@@ -52,6 +52,9 @@ const mockFirebaseHooks = {
   },
 };
 
+const mockFirebaseStorage = { getStorage: jest.fn().mockReturnValue({}) };
+
 jest.mock("firebase/app", () => mockFirebase);
 jest.mock("firebase/auth", () => mockFirebaseAuth);
 jest.mock("react-firebase-hooks/auth", () => mockFirebaseHooks);
+jest.mock("firebase/storage", () => mockFirebaseStorage);

@@ -10,7 +10,7 @@ import PlayingScenarioContextProvider from "../context/PlayScenarioContextProvid
 import "normalize.css";
 import "../styling/style.scss";
 import theme from "./theme/App.theme";
-import ProtectedRoute from "../auth/ProtectedRoute";
+import ProtectedRoute from "../firebase/ProtectedRoute";
 import LoginPage from "./pages/LoginPage";
 import AuthenticationContextProvider from "../context/AuthenticationContextProvider";
 
