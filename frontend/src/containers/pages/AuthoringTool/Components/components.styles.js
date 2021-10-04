@@ -19,6 +19,7 @@ export default function useStyles(component) {
       overflow: "hidden",
       color: component.color, // text colour
       textAlign: component.textAlign,
+      whiteSpace: "pre-wrap",
     },
   })();
 }
