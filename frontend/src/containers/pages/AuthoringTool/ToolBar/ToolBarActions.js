@@ -70,4 +70,26 @@ function addImage(currentScene, setCurrentScene, image) {
   });
 }
 
-export { addButton, addText, addImage };
+function addFirebaseImage(currentScene, setCurrentScene, fileObject) {
+  const newImage = {
+    type: "FIREBASEIMAGE",
+    new: true,
+    fileObject,
+    left: 0, // as percentage
+    top: 0, // as percentage
+    height: "auto", // as percentage
+    width: "auto", // as percentage
+    id: v4(),
+  };
+
+  const updatedComponents = currentScene.components;
+
+  updatedComponents.push(newImage);
+
+  setCurrentScene({
+    ...currentScene,
+    components: updatedComponents,
+  });
+}
+
+export { addButton, addText, addImage, addFirebaseImage };

@@ -5,6 +5,7 @@ import ButtonIcon from "@material-ui/icons/AddCircle";
 import VolumeUpIcon from "@material-ui/icons/VolumeUp";
 import ChooseBackgroundSubMenu from "./Background/ChooseBackgroundSubMenu";
 import { addButton, addText } from "./ToolBarActions";
+import UploadImage from "./Background/UploadImage";
 
 const toolBarData = [
   {
@@ -13,6 +14,9 @@ const toolBarData = [
     dropdown: [
       {
         component: <ChooseBackgroundSubMenu />,
+      },
+      {
+        component: <UploadImage />,
       },
     ],
   },
