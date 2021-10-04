@@ -3,6 +3,7 @@
 import {
   ref,
   uploadBytesResumable,
+  updateMetadata,
   getDownloadURL,
   deleteObject,
 } from "firebase/storage";
@@ -15,6 +16,12 @@ const uploadFile = async (file, scenarioId, sceneId) => {
   const uploadTask = await uploadBytesResumable(storageRef, file);
   const url = await getDownloadURL(uploadTask.ref);
   console.log("File available at", url);
+  const metaData = {
+    customMetadata: {
+      count: 1,
+    },
+  };
+  await updateMetadata(storageRef, metaData);
   return url;
 };
 
