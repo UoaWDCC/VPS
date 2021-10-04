@@ -12,6 +12,7 @@ import SceneContext from "../../../context/SceneContext";
 import AuthoringToolContext from "../../../context/AuthoringToolContext";
 import ToolbarContextProvider from "../../../context/ToolbarContextProvider";
 import AuthenticationContext from "../../../context/AuthenticationContext";
+import { uploadFiles } from "../../../firebase/storage";
 
 export default function AuthoringToolPage() {
   const { scenarioId, sceneId } = useParams();
@@ -47,6 +48,11 @@ export default function AuthoringToolPage() {
 
   async function saveScene() {
     setSelect(null);
+    await uploadFiles(
+      currentScene?.components,
+      currentScenario._id,
+      currentScene._id
+    );
     await usePut(
       `/api/scenario/${scenarioId}/scene/${sceneId}`,
       {
