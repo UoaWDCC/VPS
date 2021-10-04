@@ -3,7 +3,7 @@ import AttachFileIcon from "@material-ui/icons/AttachFile";
 import React, { useContext, useRef } from "react";
 import SceneContext from "../../../../../context/SceneContext";
 import styles from "../../../../../styling/ToolBar.module.scss";
-import { addFirebaseImage } from "../ToolBarActions";
+import { addFirebaseAudio } from "../ToolBarActions";
 
 function UploadAudio() {
   const { currentScene, setCurrentScene } = useContext(SceneContext);
@@ -11,7 +11,7 @@ function UploadAudio() {
 
   const handleFileInput = async (e) => {
     const url = await URL.createObjectURL(e.target.files[0]);
-    addFirebaseImage(currentScene, setCurrentScene, e.target.files[0], url);
+    addFirebaseAudio(currentScene, setCurrentScene, e.target.files[0], url);
     inputFile.current.value = null;
   };
 

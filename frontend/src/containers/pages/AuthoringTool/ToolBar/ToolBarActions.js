@@ -93,4 +93,9 @@ function addFirebaseImage(currentScene, setCurrentScene, fileObject, url) {
   });
 }
 
-export { addButton, addText, addImage, addFirebaseImage };
+function addFirebaseAudio() {
+  // TODO
+  console.log("Firebase audio added");
+}
+
+export { addButton, addText, addImage, addFirebaseImage, addFirebaseAudio };
