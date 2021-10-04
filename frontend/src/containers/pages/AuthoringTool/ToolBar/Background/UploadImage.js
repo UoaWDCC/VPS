@@ -1,0 +1,37 @@
+import { MenuItem } from "@material-ui/core";
+import AttachFileIcon from "@material-ui/icons/AttachFile";
+import React, { useContext, useRef } from "react";
+import SceneContext from "../../../../../context/SceneContext";
+import styles from "../../../../../styling/ToolBar.module.scss";
+import { addFirebaseImage } from "../ToolBarActions";
+
+export default function UploadImage() {
+  const { currentScene, setCurrentScene } = useContext(SceneContext);
+  const inputFile = useRef(null);
+
+  const handleFileInput = (e) => {
+    addFirebaseImage(currentScene, setCurrentScene, e.target.files[0]);
+    console.log(e.target.files[0]);
+    inputFile.current.value = null;
+  };
+
+  return (
+    <div>
+      <input
+        type="file"
+        ref={inputFile}
+        style={{ display: "none" }}
+        onChange={handleFileInput}
+      />
+      <MenuItem
+        className={styles.menuItem}
+        color="default"
+        variant="contained"
+        onClick={() => inputFile.current.click()}
+      >
+        <AttachFileIcon />
+        &nbsp;&nbsp;Upload Image
+      </MenuItem>
+    </div>
+  );
+}
