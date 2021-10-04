@@ -34,6 +34,10 @@ export default function AuthoringToolPage() {
   );
 
   useEffect(() => {
+    reFetch();
+  }, []);
+
+  useEffect(() => {
     if (firstTimeRender) {
       setFirstTimeRender(false);
     } else {

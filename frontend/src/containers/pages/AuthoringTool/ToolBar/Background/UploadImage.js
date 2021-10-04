@@ -9,9 +9,9 @@ export default function UploadImage() {
   const { currentScene, setCurrentScene } = useContext(SceneContext);
   const inputFile = useRef(null);
 
-  const handleFileInput = (e) => {
-    addFirebaseImage(currentScene, setCurrentScene, e.target.files[0]);
-    console.log(e.target.files[0]);
+  const handleFileInput = async (e) => {
+    const url = await URL.createObjectURL(e.target.files[0]);
+    addFirebaseImage(currentScene, setCurrentScene, e.target.files[0], url);
     inputFile.current.value = null;
   };
 

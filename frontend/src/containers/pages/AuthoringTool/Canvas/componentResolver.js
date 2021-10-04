@@ -3,6 +3,7 @@ import React from "react";
 import ButtonComponent from "../Components/ButtonComponent";
 import TextComponent from "../Components/TextComponent";
 import ImageComponent from "../Components/ImageComponent";
+import FirebaseImageComponent from "../Components/FirebaseImageComponent";
 
 export default function componentResolver(component, index, onClick) {
   switch (component.type) {
@@ -28,6 +29,15 @@ export default function componentResolver(component, index, onClick) {
     case "IMAGE":
       return (
         <ImageComponent
+          key={component.id}
+          id={index}
+          onClick={onClick}
+          component={component}
+        />
+      );
+    case "FIREBASEIMAGE":
+      return (
+        <FirebaseImageComponent
           key={component.id}
           id={index}
           onClick={onClick}

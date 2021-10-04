@@ -70,11 +70,12 @@ function addImage(currentScene, setCurrentScene, image) {
   });
 }
 
-function addFirebaseImage(currentScene, setCurrentScene, fileObject) {
+function addFirebaseImage(currentScene, setCurrentScene, fileObject, url) {
   const newImage = {
     type: "FIREBASEIMAGE",
     new: true,
     fileObject,
+    url,
     left: 0, // as percentage
     top: 0, // as percentage
     height: "auto", // as percentage
