@@ -1,7 +1,7 @@
 /* eslint-disable no-underscore-dangle */
 import Scene from "../models/scene";
 import Scenario from "../models/scenario";
-import { tryDeleteFile } from "../../firebase/storage";
+import { tryDeleteFile, updateFileMetadata } from "../../firebase/storage";
 
 const createScene = async (scenarioId, scene) => {
   const dbScene = new Scene(scene);
@@ -87,6 +87,12 @@ const duplicateScene = async (scenarioId, sceneId) => {
   };
   const dbScene = new Scene(newScene);
   await dbScene.save();
+
+  dbScene.components.forEach((c) => {
+    if (c.type === "FIREBASEIMAGE") {
+      updateFileMetadata(c.url);
+    }
+  });
 
   await Scenario.updateOne(
     { _id: scenarioId },
