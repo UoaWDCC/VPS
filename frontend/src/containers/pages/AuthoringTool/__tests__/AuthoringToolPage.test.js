@@ -12,6 +12,7 @@ test("Authoring Tool page snapshot test", () => {
     currentScenario: { _id: "scenarioId" },
     currentScene: { _id: "sceneId", components: [] },
     setMonitorChange: () => {},
+    reFetch: () => {},
   };
 
   const { baseElement } = render(
