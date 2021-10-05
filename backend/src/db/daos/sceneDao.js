@@ -1,6 +1,7 @@
 /* eslint-disable no-underscore-dangle */
 import Scene from "../models/scene";
 import Scenario from "../models/scenario";
+import { tryDeleteFile } from "../../firebase/storage";
 
 const createScene = async (scenarioId, scene) => {
   const dbScene = new Scene(scene);
@@ -33,6 +34,16 @@ const retrieveScene = async (sceneId) => {
 const updateScene = async (sceneId, updatedScene) => {
   // makes sure when we update components is not null
   if (updatedScene.components) {
+    const prevDbScene = await Scene.findById(sceneId);
+    // if previous firebase image component no longer exists, try to delete file from firebase storage
+    prevDbScene.components.forEach((c) => {
+      if (c.type === "FIREBASEIMAGE") {
+        // checks for non-existance in new components array
+        if (!updatedScene.components.some((newC) => newC.id === c.id)) {
+          tryDeleteFile(c.url);
+        }
+      }
+    });
     const dbScene = await Scene.findOneAndUpdate(
       { _id: sceneId },
       updatedScene,
