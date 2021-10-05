@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import { tryDeleteFile } from "../../firebase/storage";
 
 const { Schema } = mongoose;
 mongoose.set("useFindAndModify", false);
@@ -15,9 +16,12 @@ const sceneSchema = new Schema({
   ],
 });
 
-sceneSchema.pre("remove", async () => {
-  // TODO: delete components
-  // await Component.deleteMany({ _id: { $in: this.components } });
+sceneSchema.pre("remove", function () {
+  this.components.forEach((c) => {
+    if (c.type === "FIREBASEIMAGE") {
+      tryDeleteFile(c.url);
+    }
+  });
 });
 
 const Scene = mongoose.model("Scene", sceneSchema);
