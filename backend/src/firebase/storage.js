@@ -12,7 +12,7 @@ const tryDeleteFile = (fileUrl) => {
 
   getMetadata(fileRef).then((metadata) => {
     const prevCount = parseInt(metadata.customMetadata.count, 10);
-    if (prevCount < 1) {
+    if (prevCount > 1) {
       const newMetadata = {
         customMetadata: {
           count: prevCount - 1,

@@ -6,6 +6,7 @@ import VolumeUpIcon from "@material-ui/icons/VolumeUp";
 import ChooseBackgroundSubMenu from "./Background/ChooseBackgroundSubMenu";
 import { addButton, addText } from "./ToolBarActions";
 import UploadImage from "./Background/UploadImage";
+import UploadAudio from "./Audio/UploadAudio";
 
 const toolBarData = [
   {
@@ -33,9 +34,11 @@ const toolBarData = [
   {
     title: "Audio",
     icon: <VolumeUpIcon fontSize="medium" />,
-    onClick: () => {
-      console.log("audio clicked");
-    },
+    dropdown: [
+      {
+        component: <UploadAudio />,
+      },
+    ],
   },
 ];
 
