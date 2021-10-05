@@ -25,4 +25,18 @@ const tryDeleteFile = (fileUrl) => {
   });
 };
 
-export { tryDeleteFile };
+const updateFileMetadata = (fileUrl) => {
+  const fileRef = ref(storage, fileUrl);
+
+  getMetadata(fileRef).then((metadata) => {
+    const prevCount = parseInt(metadata.customMetadata.count, 10);
+    const newMetadata = {
+      customMetadata: {
+        count: prevCount + 1,
+      },
+    };
+    updateMetadata(fileRef, newMetadata);
+  });
+};
+
+export { tryDeleteFile, updateFileMetadata };
