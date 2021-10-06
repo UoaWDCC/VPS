@@ -97,6 +97,7 @@ function addFirebaseAudio(currentScene, setCurrentScene, fileObject, url) {
     type: "FIREBASEAUDIO",
     fileObject,
     url,
+    loop: false,
     left: 0, // as percentage
     top: 0, // as percentage
     height: 10, // as percentage
