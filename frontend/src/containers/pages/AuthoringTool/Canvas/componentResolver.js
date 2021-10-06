@@ -4,6 +4,7 @@ import ButtonComponent from "../Components/ButtonComponent";
 import TextComponent from "../Components/TextComponent";
 import ImageComponent from "../Components/ImageComponent";
 import FirebaseImageComponent from "../Components/FirebaseImageComponent";
+import FirebaseAudioComponent from "../Components/FirebaseAudioComponent";
 
 export default function componentResolver(component, index, onClick) {
   switch (component.type) {
@@ -38,6 +39,15 @@ export default function componentResolver(component, index, onClick) {
     case "FIREBASEIMAGE":
       return (
         <FirebaseImageComponent
+          key={component.id}
+          id={index}
+          onClick={onClick}
+          component={component}
+        />
+      );
+    case "FIREBASEAUDIO":
+      return (
+        <FirebaseAudioComponent
           key={component.id}
           id={index}
           onClick={onClick}
