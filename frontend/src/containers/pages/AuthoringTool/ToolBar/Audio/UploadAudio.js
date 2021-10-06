@@ -19,6 +19,7 @@ function UploadAudio() {
     <div>
       <input
         type="file"
+        accept=".mp3"
         ref={inputFile}
         style={{ display: "none" }}
         onChange={handleFileInput}
