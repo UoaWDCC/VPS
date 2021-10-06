@@ -23,10 +23,15 @@ export default function FirebaseAudioPropertiesComponent({
   const audioComponentStyles = useStyles();
 
   const { updateComponentProperty } = useContext(SceneContext);
-  const [audio] = useState(new Audio(component.url));
+  const [audio, setAudio] = useState(new Audio(component.url));
   const [playing, setPlaying] = useState(false);
 
   const toggle = () => setPlaying(!playing);
+
+  useEffect(() => {
+    console.log(audio.title);
+    setAudio(new Audio(component.url));
+  }, [component]);
 
   useEffect(() => {
     if (playing) {
@@ -53,7 +58,6 @@ export default function FirebaseAudioPropertiesComponent({
   return (
     <div onBlur={(e) => handleDeselect(e)}>
       <div className={`${styles.componentProperty}`}>
-        {/* <CustomInputLabel shrink>Preview audio</CustomInputLabel> */}
         <TextField
           label="Audio"
           value={component.name}
