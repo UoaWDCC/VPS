@@ -37,7 +37,7 @@ const updateScene = async (sceneId, updatedScene) => {
     const prevDbScene = await Scene.findById(sceneId);
     // if previous firebase image component no longer exists, try to delete file from firebase storage
     prevDbScene.components.forEach((c) => {
-      if (c.type === "FIREBASEIMAGE") {
+      if (c.type === "FIREBASEIMAGE" || c.type === "FIREBASEAUDIO") {
         // checks for non-existance in new components array
         if (!updatedScene.components.some((newC) => newC.id === c.id)) {
           tryDeleteFile(c.url);
