@@ -92,9 +92,26 @@ function addFirebaseImage(currentScene, setCurrentScene, fileObject, url) {
   });
 }
 
-function addFirebaseAudio() {
-  // TODO
-  console.log("Firebase audio added");
+function addFirebaseAudio(currentScene, setCurrentScene, fileObject, url) {
+  const newAudio = {
+    type: "FIREBASEAUDIO",
+    fileObject,
+    url,
+    left: 0, // as percentage
+    top: 0, // as percentage
+    height: 10, // as percentage
+    width: "auto", // icon ratio is fixed
+    id: v4(),
+  };
+
+  const updatedComponents = currentScene.components;
+
+  updatedComponents.push(newAudio);
+
+  setCurrentScene({
+    ...currentScene,
+    components: updatedComponents,
+  });
 }
 
 export { addButton, addText, addImage, addFirebaseImage, addFirebaseAudio };
