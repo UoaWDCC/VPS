@@ -7,8 +7,7 @@ export default function useStyles(component) {
       top: `${component.top}%`,
       left: `${component.left}%`,
       height: `${component.height}%`,
-      width:
-        component.width === "auto" ? component.width : `${component.width}%`,
+      width: `${component.width}%`,
       boxSizing: "border-box",
     },
     textComponentStyles: {
