@@ -24,6 +24,8 @@ export default function useStyles(component) {
     },
     audioComponentStyles: {
       color: "#999999",
+      width: "100%",
+      height: "100%",
     },
   })();
 }

@@ -29,7 +29,6 @@ export default function FirebaseAudioPropertiesComponent({
   const toggle = () => setPlaying(!playing);
 
   useEffect(() => {
-    console.log(audio.title);
     setAudio(new Audio(component.url));
   }, [component]);
 
