@@ -39,8 +39,9 @@ const deleteFile = (fileUrl) => {
 const uploadFiles = async (components, scenarioId, sceneId) => {
   for (let i = 0; i < components.length; i += 1) {
     if (
-      components[i].type === "FIREBASEIMAGE" &&
-      components[i].fileObject != null
+      (components[i].type === "FIREBASEIMAGE" ||
+        components[i].type === "FIREBASEAUDIO") &&
+      "fileObject" in components[i]
     ) {
       components[i].url = await uploadFile(
         components[i].fileObject,
