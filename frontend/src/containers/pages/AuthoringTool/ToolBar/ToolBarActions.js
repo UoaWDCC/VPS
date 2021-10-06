@@ -95,6 +95,7 @@ function addFirebaseImage(currentScene, setCurrentScene, fileObject, url) {
 function addFirebaseAudio(currentScene, setCurrentScene, fileObject, url) {
   const newAudio = {
     type: "FIREBASEAUDIO",
+    name: fileObject.name,
     fileObject,
     url,
     loop: false,

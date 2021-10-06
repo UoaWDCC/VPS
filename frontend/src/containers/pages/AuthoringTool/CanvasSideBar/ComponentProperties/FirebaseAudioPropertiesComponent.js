@@ -1,26 +1,27 @@
 import React, { useContext, useEffect, useState } from "react";
 import {
   FormControl,
-  InputLabel,
   FormControlLabel,
   Checkbox,
-  IconButton,
+  Button,
+  TextField,
 } from "@material-ui/core";
-import PlayArrowIcon from "@material-ui/icons/PlayArrow";
-import PauseIcon from "@material-ui/icons/Pause";
+import PlayArrowIcon from "@material-ui/icons/PlayArrowRounded";
+import PauseIcon from "@material-ui/icons/PauseRounded";
 import SceneContext from "../../../../../context/SceneContext";
-import CustomInputLabelStyles from "../CustomPropertyInputStyles/CustomInputLabelStyles";
 import CustomCheckBoxStyles from "../CustomPropertyInputStyles/CustomCheckBoxStyles";
 
 import styles from "../../../../../styling/CanvasSideBar.module.scss";
+import useStyles from "./FirebaseAudioPropertiesComponent.styles";
 
-const CustomInputLabel = CustomInputLabelStyles()(InputLabel);
 const CustomCheckBox = CustomCheckBoxStyles()(Checkbox);
 
 export default function FirebaseAudioPropertiesComponent({
   component,
   componentIndex,
 }) {
+  const audioComponentStyles = useStyles();
+
   const { updateComponentProperty } = useContext(SceneContext);
   const [audio] = useState(new Audio(component.url));
   const [playing, setPlaying] = useState(false);
@@ -42,17 +43,34 @@ export default function FirebaseAudioPropertiesComponent({
     };
   }, []);
 
+  function handleDeselect(e) {
+    // Checks if currently focussed on div children
+    if (!e.currentTarget.contains(e.relatedTarget)) {
+      setPlaying(false);
+    }
+  }
+
   return (
-    <>
+    <div onBlur={(e) => handleDeselect(e)}>
       <div className={`${styles.componentProperty}`}>
-        <CustomInputLabel shrink>Preview audio</CustomInputLabel>
-        <IconButton onClick={toggle} size="large" color="primary">
-          {playing ? (
-            <PauseIcon fontSize="inherit" />
-          ) : (
-            <PlayArrowIcon fontSize="inherit" />
-          )}
-        </IconButton>
+        {/* <CustomInputLabel shrink>Preview audio</CustomInputLabel> */}
+        <TextField
+          label="Audio"
+          value={component.name}
+          fullWidth
+          InputProps={{
+            readOnly: true,
+          }}
+        />
+        <Button
+          className={audioComponentStyles.playButton}
+          onClick={toggle}
+          size="small"
+          color="primary"
+          variant="contained"
+        >
+          {playing ? <PauseIcon /> : <PlayArrowIcon />}
+        </Button>
       </div>
 
       <FormControl fullWidth className={styles.componentProperty}>
@@ -73,6 +91,6 @@ export default function FirebaseAudioPropertiesComponent({
           label="Loop"
         />
       </FormControl>
-    </>
+    </div>
   );
 }
