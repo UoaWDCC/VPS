@@ -45,7 +45,7 @@ export default function FirebaseAudioPropertiesComponent({
     return () => {
       audio.removeEventListener("ended", () => setPlaying(false));
     };
-  }, []);
+  }, [audio]);
 
   function handleDeselect(e) {
     // Checks if currently focussed on div children
