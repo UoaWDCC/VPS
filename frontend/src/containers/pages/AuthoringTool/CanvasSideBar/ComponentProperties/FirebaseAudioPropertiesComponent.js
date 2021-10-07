@@ -38,6 +38,10 @@ export default function FirebaseAudioPropertiesComponent({
     } else {
       audio.pause();
     }
+
+    return () => {
+      audio.pause();
+    };
   }, [playing]);
 
   useEffect(() => {
