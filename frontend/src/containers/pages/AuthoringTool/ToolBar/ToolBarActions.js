@@ -95,13 +95,14 @@ function addFirebaseImage(currentScene, setCurrentScene, fileObject, url) {
 function addFirebaseAudio(currentScene, setCurrentScene, fileObject, url) {
   const newAudio = {
     type: "FIREBASEAUDIO",
+    name: fileObject.name,
     fileObject,
     url,
     loop: false,
     left: 0, // as percentage
     top: 0, // as percentage
     height: 10, // as percentage
-    width: "auto", // icon ratio is fixed
+    width: 5, // as percentage
     id: v4(),
   };
 
