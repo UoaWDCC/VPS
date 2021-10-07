@@ -89,7 +89,7 @@ const duplicateScene = async (scenarioId, sceneId) => {
   await dbScene.save();
 
   dbScene.components.forEach((c) => {
-    if (c.type === "FIREBASEIMAGE") {
+    if (c.type === "FIREBASEIMAGE" || c.type === "FIREBASEAUDIO") {
       updateFileMetadata(c.url);
     }
   });
