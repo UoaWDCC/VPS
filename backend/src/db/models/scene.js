@@ -18,7 +18,7 @@ const sceneSchema = new Schema({
 
 sceneSchema.pre("remove", function () {
   this.components.forEach((c) => {
-    if (c.type === "FIREBASEIMAGE") {
+    if (c.type === "FIREBASEIMAGE" || c.type === "FIREBASEAUDIO") {
       tryDeleteFile(c.url);
     }
   });
