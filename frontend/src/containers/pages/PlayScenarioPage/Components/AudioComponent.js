@@ -7,7 +7,7 @@ function AudioComponent({ id, component }) {
     window.location === window.parent.location && (
       <ReactAudioPlayer
         muted={!!(window.location !== window.parent.location)}
-        id={id.toString()}
+        id={id?.toString()}
         src={`${component.url}`}
         autoPlay
         loop={!!component.loop}
