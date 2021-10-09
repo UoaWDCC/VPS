@@ -1,6 +1,6 @@
 import React, { useState, useContext } from "react";
 import { useGet } from "../../../hooks/crudHooks";
-import componentResolver from "../AuthoringTool/Canvas/componentResolver";
+import componentResolver from "./componentResolver";
 import PlayScenarioContext from "../../../context/PlayScenarioContext";
 
 export default function PlayScenarioCanvas() {

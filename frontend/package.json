@@ -17,6 +17,7 @@
     "node-sass": "^6.0.0",
     "normalize.css": "^8.0.1",
     "react": "^17.0.2",
+    "react-audio-player": "^0.17.0",
     "react-dom": "^17.0.2",
     "react-firebase-hooks": "^3.0.4",
     "react-loading-skeleton": "^2.2.0",
