@@ -2,13 +2,17 @@ import React from "react";
 import ReactAudioPlayer from "react-audio-player";
 
 function AudioComponent({ id, component }) {
+  // (window.location === window.parent.location) is true if it's not inside of an iframe
   return (
-    <ReactAudioPlayer
-      id={id}
-      src={`${component.url}`}
-      autoPlay
-      loop={!!component.loop}
-    />
+    window.location === window.parent.location && (
+      <ReactAudioPlayer
+        muted={!!(window.location !== window.parent.location)}
+        id={id.toString()}
+        src={`${component.url}`}
+        autoPlay
+        loop={!!component.loop}
+      />
+    )
   );
 }
 
