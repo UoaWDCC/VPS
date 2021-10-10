@@ -3,6 +3,7 @@ import useStyles from "./playScenarioPage.styles";
 import PlayScenarioContext from "../../../context/PlayScenarioContext";
 import PlayScenarioCanvas from "./PlayScenarioCanvas";
 import LoadingPage from "../LoadingPage";
+import ScenarioPreloader from "./Components/ScenarioPreloader";
 
 export default function PlayScenarioPage() {
   const styles = useStyles();
@@ -21,6 +22,9 @@ export default function PlayScenarioPage() {
           </div>
         </div>
       )}
+      {window.location === window.parent.location ? (
+        <ScenarioPreloader key={1} />
+      ) : null}
     </>
   );
 }
