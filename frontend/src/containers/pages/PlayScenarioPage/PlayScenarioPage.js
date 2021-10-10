@@ -22,7 +22,9 @@ export default function PlayScenarioPage() {
           </div>
         </div>
       )}
-      <ScenarioPreloader />
+      {window.location === window.parent.location ? (
+        <ScenarioPreloader key={1} />
+      ) : null}
     </>
   );
 }

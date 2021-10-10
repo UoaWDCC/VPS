@@ -10,13 +10,17 @@ function ImagePreloader({ scenarioId, scene }) {
     false
   );
   return (
-    <div>
+    <div key={scene._id}>
       {fullScene?.components.map((component) => {
         if (component.type === "FIREBASEIMAGE") {
-          return <PreloadFirebaseImage component={component} />;
+          return (
+            <PreloadFirebaseImage component={component} key={component.id} />
+          );
         }
         if (component.type === "IMAGE") {
-          return <PreloadGoogleDriveImage component={component} />;
+          return (
+            <PreloadGoogleDriveImage component={component} key={component.id} />
+          );
         }
         return null;
       })}
@@ -30,13 +34,13 @@ function PreloadGoogleDriveImage({ component }) {
     img.src = image.url;
   }
   useGet(`/api/image/${component.imageId}`, setImage, false);
-  return <div />;
+  return null;
 }
 
 function PreloadFirebaseImage({ component }) {
   const img = new Image();
   img.src = component.url;
-  return <div />;
+  return null;
 }
 
 function ScenarioPreloader() {
@@ -47,9 +51,9 @@ function ScenarioPreloader() {
   }
 
   return (
-    <div>
+    <div key={scenarioId}>
       {scenes?.map((scene) => (
-        <ImagePreloader scenarioId={scenarioId} scene={scene} />
+        <ImagePreloader scenarioId={scenarioId} scene={scene} key={scene.id} />
       ))}
     </div>
   );
