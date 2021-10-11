@@ -2,6 +2,7 @@ import { initializeApp } from "firebase/app";
 import { getAuth, GoogleAuthProvider } from "firebase/auth";
 import { getStorage } from "firebase/storage";
 
+// Initialising FirebaseApp with the credentials given in .env file
 const app = initializeApp({
   apiKey: process.env.REACT_APP_API_KEY,
   authDomain: process.env.REACT_APP_AUTH_DOMAIN,
@@ -12,6 +13,7 @@ const app = initializeApp({
   measurementId: process.env.REACT_APP_MEASUREMENT_ID,
 });
 
+// using the app defined earlier to get the services from Firebase
 const auth = getAuth(app);
 const googleProvider = new GoogleAuthProvider();
 const storage = getStorage(app);

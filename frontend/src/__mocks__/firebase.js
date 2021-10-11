@@ -1,3 +1,15 @@
+/**
+ * This file is imported in setupTests.js (react automatically runs setupTests.js when running tests)
+ *
+ * In the context/FirebaseContextProvider, it imports the following libraries:
+ * - Firebase
+ * - FirebaseAuth
+ * - FirebaseHooks
+ * - FirebaseStorage
+ *
+ * This file when imported, mocks those libraries and therefore react tests will use the code below as the above libraries
+ */
+
 const mockFirebase = {
   initializeApp: jest.fn().mockReturnValue({}),
 };

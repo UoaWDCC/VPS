@@ -2,6 +2,10 @@ import { useState, useEffect, useContext } from "react";
 import axios from "axios";
 import AuthenticationContext from "../context/AuthenticationContext";
 
+/**
+ * Code below handles the server URL for axios calls when .env file is missing
+ * When .env file is missing, React will take the proxy route as server URL as defined in package.json
+ */
 if (process.env.REACT_APP_SERVER_URL === undefined) {
   axios.defaults.baseURL = "/";
 } else {
@@ -56,6 +60,10 @@ export function useGet(url, setData, requireAuth = true) {
   return { isLoading, reFetch };
 }
 
+/**
+ * A custom hook which posts data to the given URL.
+ * Code adapted from SOFTENG750 lab4 https://gitlab.com/cs732-s1c/cs732-labs/cs732-lab-04/-/blob/master/frontend/src/hooks/useGet.js
+ */
 export function usePost(url, requestBody = null, getUserIdToken = null) {
   async function postData() {
     let errorData;
@@ -84,6 +92,10 @@ export function usePost(url, requestBody = null, getUserIdToken = null) {
   return postData();
 }
 
+/**
+ * A custom hook which puts data to the given URL.
+ * Code adapted from SOFTENG750 lab4 https://gitlab.com/cs732-s1c/cs732-labs/cs732-lab-04/-/blob/master/frontend/src/hooks/useGet.js
+ */
 export function usePut(url, requestBody = null, getUserIdToken = null) {
   async function putData() {
     let errorData;
@@ -112,6 +124,10 @@ export function usePut(url, requestBody = null, getUserIdToken = null) {
   return putData();
 }
 
+/**
+ * A custom hook which calls the given URL with HTTP DELETE method.
+ * Code adapted from SOFTENG750 lab4 https://gitlab.com/cs732-s1c/cs732-labs/cs732-lab-04/-/blob/master/frontend/src/hooks/useGet.js
+ */
 export function useDelete(url, getUserIdToken = null) {
   async function deleteData() {
     let errorData;
