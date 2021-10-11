@@ -3,6 +3,10 @@ import { useGet } from "../hooks/crudHooks";
 import useLocalStorage from "../hooks/useLocalStorage";
 import ScenarioContext from "./ScenarioContext";
 
+/**
+ * This is a Context Provider made with the React Context API
+ * ScenarioContextProvider allows access to scenario info and the refetch function
+ */
 export default function ScenarioContextProvider({ children }) {
   const [currentScenario, setCurrentScenario] = useLocalStorage(
     "currentScenario",

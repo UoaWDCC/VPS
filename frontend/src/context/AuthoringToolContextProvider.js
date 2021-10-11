@@ -2,6 +2,11 @@ import React, { useState, useContext, useRef } from "react";
 import AuthoringToolContext from "./AuthoringToolContext";
 import SceneContext from "./SceneContext";
 
+/**
+ * This is a Context Provider made with the React Context API
+ * AuthoringToolContextProvider grants access to information related to AuthoringTool
+ * This includes: component that are selected, state of whether or not SHIFT is pressed...etc
+ */
 export default function AuthoringToolContextProvider({ children }) {
   const { setCurrentScene, currentSceneRef } = useContext(SceneContext);
 

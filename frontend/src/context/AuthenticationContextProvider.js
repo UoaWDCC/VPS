@@ -4,6 +4,10 @@ import { useAuthState } from "react-firebase-hooks/auth";
 import AuthenticationContext from "./AuthenticationContext";
 import { auth, googleProvider } from "../firebase/firebase";
 
+/**
+ * This is a Context Provider made with the React Context API
+ * AuthenticationContext grants access to functions and variables related to Firebase login
+ */
 export default function AuthenticationContextProvider({ children }) {
   const [user, loading, error] = useAuthState(auth);
 

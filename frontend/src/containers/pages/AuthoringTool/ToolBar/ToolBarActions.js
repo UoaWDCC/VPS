@@ -1,5 +1,10 @@
 import { v4 } from "uuid";
 
+/**
+ * function to be put into ToolBarData when button is added
+ * @param {object} currentScene
+ * @param {function} setCurrentScene
+ */
 function addButton(currentScene, setCurrentScene) {
   const newButton = {
     type: "BUTTON",
@@ -24,6 +29,11 @@ function addButton(currentScene, setCurrentScene) {
   });
 }
 
+/**
+ * function to be put into ToolBarData when text is added
+ * @param {object} currentScene
+ * @param {function} setCurrentScene
+ */
 function addText(currentScene, setCurrentScene) {
   const newText = {
     type: "TEXT",
@@ -49,6 +59,11 @@ function addText(currentScene, setCurrentScene) {
   });
 }
 
+/**
+ * function to be put into ToolBarData when image is added
+ * @param {object} currentScene
+ * @param {function} setCurrentScene
+ */
 function addImage(currentScene, setCurrentScene, image) {
   const newImage = {
     type: "IMAGE",
