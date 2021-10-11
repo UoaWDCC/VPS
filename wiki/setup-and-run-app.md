@@ -1,4 +1,4 @@
-# Setting up
+# Setup and Run App
 
 ### Setup
 
@@ -14,13 +14,19 @@ Alternative way to set up
 ### Run
 
 - Run `yarn run dev` in the root directory to start both `frontend` and `backend` environments
-- Alternatively, run `yarn run start` (inside `client` directory) and `yarn run dev` (`server` directory) in separate terminals to have more fine grained control
 
 Alternative way to run app
 
 - Open two terminals
 - Change directory by running `cd frontend` and `cd backend` in each terminal
 - Run `yarn start` in the each terminal
+
+### Test and Continuous Integration
+
+- Open terminal and `cd frontend` or `cd backend` depending on which folder you are testing
+- Run `yarn run test` to run unit tests;
+- Run `yarn run lint` to lint; Run `yarn run lint:fix` to fix linting;
+- Run `yarn run prettier` to test for prettier; Run `yarn run prettify` to fix prettier issues;
 
 ### Tool versions
 
