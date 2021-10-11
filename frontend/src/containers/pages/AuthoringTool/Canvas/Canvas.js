@@ -74,9 +74,6 @@ export default function Canvas() {
 
           const left = (targetDoc.offsetLeft * 100) / canvas.offsetWidth;
           const top = (targetDoc.offsetTop * 100) / canvas.offsetHeight;
-          console.log("---------------");
-          console.log(`x: ${left}`);
-          console.log(`y: ${top}`);
           updateComponentProperty(select, "left", left);
           updateComponentProperty(select, "top", top);
         }}
@@ -92,16 +89,11 @@ export default function Canvas() {
           const relWidth = (targetDoc.offsetWidth / canvas.offsetWidth) * 100;
           const relHeight =
             (targetDoc.offsetHeight / canvas.offsetHeight) * 100;
-          console.log("---------------");
-          console.log(`width: ${relWidth}`);
-          console.log(`height: ${relHeight}`);
           updateComponentProperty(select, "width", relWidth);
           updateComponentProperty(select, "height", relHeight);
 
           const left = (targetDoc.offsetLeft * 100) / canvas.offsetWidth;
           const top = (targetDoc.offsetTop * 100) / canvas.offsetHeight;
-          console.log(`x: ${left}`);
-          console.log(`y: ${top}`);
           updateComponentProperty(select, "left", left);
           updateComponentProperty(select, "top", top);
         }}

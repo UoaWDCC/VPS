@@ -15,7 +15,6 @@ const uploadFile = async (file, scenarioId, sceneId) => {
   const storageRef = ref(storage, `${scenarioId}/${sceneId}/${fileUUID}`);
   const uploadTask = await uploadBytesResumable(storageRef, file);
   const url = await getDownloadURL(uploadTask.ref);
-  console.log("File available at", url);
   const metaData = {
     customMetadata: {
       count: 1,
@@ -28,9 +27,7 @@ const uploadFile = async (file, scenarioId, sceneId) => {
 const deleteFile = (fileUrl) => {
   const fileRef = ref(storage, fileUrl);
   deleteObject(fileRef)
-    .then(() => {
-      console.log("File deleted successfully");
-    })
+    .then(() => {})
     .catch((error) => {
       console.log("Error to delete file:", error);
     });
