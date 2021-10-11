@@ -53,7 +53,7 @@ function ScenarioPreloader() {
   return (
     <div key={scenarioId}>
       {scenes?.map((scene) => (
-        <ImagePreloader scenarioId={scenarioId} scene={scene} key={scene.id} />
+        <ImagePreloader scenarioId={scenarioId} scene={scene} key={scene._id} />
       ))}
     </div>
   );
