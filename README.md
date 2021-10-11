@@ -6,11 +6,13 @@ This project aims to provide Medical and Health Science students at the Universi
 
 This project is associated with The University of Auckland SOFTENG 761.
 
+# Live deployments
+
 Wiki: https://vps-wiki.netlify.app/
 
 Frontend: https://vps-frontend.netlify.app
 
-Backend: TBC
+Backend: https://virtual-patient-system.herokuapp.com/
 
 <!-- prettier-ignore -->
 | CI                  | Status   |
@@ -20,30 +22,57 @@ Backend: TBC
 | Tests               |  [![Tests](https://github.com/SoftEng761-2021/project-project-team-1/actions/workflows/unit_tests.yml/badge.svg)](https://github.com/SoftEng761-2021/project-project-team-1/actions/workflows/unit_tests.yml) |
 | Contributors        | [![All Contributors](https://img.shields.io/badge/all_contributors-8-orange.svg?style=flat-square)](#contributors-) |
 
-# Setting up
+# Setup and Run App
 
 ### Setup
 
-- You should ideally be using yarn version `1.22.*` to make this repository work.
 - Run `yarn install` in the root directory
-- Run `yarn run init` in the root directory (installs dependencies for `client` and `server` directories)
+- Run `yarn run init` in the root directory (installs dependencies for `frontend` and `backend` directories)
+
+Alternative way to set up
+
+- Open two terminals
+- Change directory by running `cd frontend` and `cd backend` in each terminal
+- Run `yarn install` in the each terminal
 
 ### Run
 
-- Run `yarn run dev` in the root directory to start both `client` and `server` environments
-- Alternatively, run `yarn run start` (inside `client` directory) and `yarn run dev` (`server` directory) in separate terminals to have more fine grained control
+- Run `yarn run dev` in the root directory to start both `frontend` and `backend` environments
+
+Alternative way to run app
+
+- Open two terminals
+- Change directory by running `cd frontend` and `cd backend` in each terminal
+- Run `yarn start` in the each terminal
+
+### Test and Continuous Integration
+
+- Open terminal and `cd frontend` or `cd backend` depending on which folder you are testing
+- Run `yarn run test` to run unit tests;
+- Run `yarn run lint` to lint; Run `yarn run lint:fix` to fix linting;
+- Run `yarn run prettier` to test for prettier; Run `yarn run prettify` to fix prettier issues;
+
+### Tool versions
+
+- Ideally you should use the following versions to make this repository work.
+- node v14.17.\*
+- yarn 1.22.\*
+- NPM 6.14.\*
 
 # File Structure
 
 ```.
 ├── frontend/
 │ └── src
+│ └── package.json
 ├── backend/
 │ └── src
+│ └── package.json
 ├── wiki/
-│ ├── example-page.md
+│ ├── react-movable.md
 │ └── ...
 ├── README.md
+├── package.json
 └── ...
 ```
 
