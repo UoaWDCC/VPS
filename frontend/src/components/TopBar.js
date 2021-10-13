@@ -8,6 +8,19 @@ import SceneContext from "../context/SceneContext";
 import ScenarioContext from "../context/ScenarioContext";
 import AuthoringToolContext from "../context/AuthoringToolContext";
 
+/**
+ * Component used for navigation and executing actions located at the top of the screen.
+ *
+ * @component
+ * @example
+ * const back = "/"
+ * const confirmModel = true
+ * return (
+ *   <TopBar back={back} confirmModel={confirmModel}>
+ *     { ... }
+ *   </TopBar>
+ * )
+ */
 export default function TopBar({
   back = "/",
   confirmModal = false,
@@ -22,8 +35,12 @@ export default function TopBar({
   }
   const history = useHistory();
 
+  /**
+   * Function for changing variables to their appropriate states when the back button is pressed.
+   */
   function handleLeaveAuthoringTool() {
     if (setSelect) {
+      /** Deselect any components */
       setSelect(null);
     }
 

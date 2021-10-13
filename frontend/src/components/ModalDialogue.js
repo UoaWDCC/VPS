@@ -21,6 +21,15 @@ const styles = (theme) => ({
   },
 });
 
+/**
+ * Material-UI dialog title component with custom styling used as a dialog title.
+ *
+ * @component
+ * @example
+ * return (
+ *   <DialogTitle />
+ * )
+ */
 const DialogTitle = withStyles(styles)((props) => {
   const { children, classes, onClose, ...other } = props;
   return (
@@ -39,6 +48,23 @@ const DialogTitle = withStyles(styles)((props) => {
   );
 });
 
+/**
+ * Component used to a display a model on the screen.
+ *
+ * @component
+ * @example
+ * const title = "Title"
+ * const dialogueAction = { ... }
+ * const isShowing = false
+ * function hide() {
+ *   console.log("Hidden.")
+ * }
+ * return (
+ *   <ModalDialogue title={title} dialogueAction={dialogueAction} isShowing={isShowing} hide={hide} >
+ *     { ... }
+ *   </ModalDialogue>
+ * )
+ */
 export default function ModalDialogue({
   title,
   children,
