@@ -7,12 +7,22 @@ import { usePost, useDelete } from "../hooks/crudHooks";
 import DeleteButton from "./DeleteButton";
 import AuthenticationContext from "../context/AuthenticationContext";
 
+/**
+ * Component used for navigation and executing actions located at the left side of the screen.
+ *
+ * @component
+ * @example
+ * return (
+ *   <SideBar/ >
+ * )
+ */
 export default function SideBar() {
   const { currentScenario, setCurrentScenario, reFetch } =
     useContext(ScenarioContext);
   const { signOut, getUserIdToken } = useContext(AuthenticationContext);
   const history = useHistory();
 
+  /** Calls backend end point to create a new empty scenario. */
   async function createScenario(name = "no name") {
     const newScenario = await usePost(
       `/api/scenario`,
@@ -26,12 +36,14 @@ export default function SideBar() {
     history.push(`/scenario/${newScenario._id}`);
   }
 
+  /** Calls backend end point to delete a scenario. */
   async function deleteScenario() {
     await useDelete(`/api/scenario/${currentScenario._id}`, getUserIdToken);
     setCurrentScenario(null);
     reFetch();
   }
 
+  /** Opens new window to play selected scenario. */
   function playScenario() {
     window.open(`/play/${currentScenario._id}`, "_blank");
   }

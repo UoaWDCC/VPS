@@ -3,9 +3,24 @@ import ImageList from "@material-ui/core/ImageList";
 import ImageListItem from "@material-ui/core/ImageListItem";
 import { Box } from "@material-ui/core";
 
+/**
+ * Component used to display images in a list format.
+ *
+ * @component
+ * @example
+ * const data = [ ... ]
+ * function onItemSelected() {
+ *   console.log("Selected.")
+ * }
+ * return (
+ *   <ImageListContainer data={data} onItemSelected={onItemSelected} />
+ * )
+ */
 export default function ImageListContainer({ data, onItemSelected }) {
   const rowHeight = 150;
   const [selected, setSelected] = useState();
+
+  /** Function which executes when an image in the image list is clicked. */
   const onItemClick = (item) => {
     setSelected(item._id);
     onItemSelected(item);

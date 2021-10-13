@@ -1,6 +1,20 @@
 import React, { useState } from "react";
 import Skeleton from "react-loading-skeleton";
 
+/**
+ * Component used for thumbnails.
+ *
+ * @component
+ * @example
+ * const url = "https://canvas.ac.nz/"
+ * const interactive = false
+ * function onLoad() {
+ *   console.log("Loading...")
+ * }
+ * return (
+ *   <Thumbnail url={url} interactive={interactive} onLoad={onLoad} />
+ * )
+ */
 function Thumbnail({
   url = "https://canvas.ac.nz/",
   iframeWidth = 1920,
@@ -46,6 +60,7 @@ function Thumbnail({
     height: "100%",
   };
 
+  /** Function which executes while the thumbnail is loading. */
   const combinedOnLoad = () => {
     if (onLoad) {
       onLoad();

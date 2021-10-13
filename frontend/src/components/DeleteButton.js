@@ -2,6 +2,15 @@ import Button from "@material-ui/core/Button";
 import { withStyles } from "@material-ui/core/styles";
 import { red } from "@material-ui/core/colors";
 
+/**
+ * Material-UI button component with custom styling used as a delete button.
+ *
+ * @component
+ * @example
+ * return (
+ *   <DeleteButton />
+ * )
+ */
 const DeleteButton = withStyles((theme) => ({
   root: {
     color: theme.palette.getContrastText(red[600]),

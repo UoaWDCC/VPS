@@ -7,6 +7,36 @@ import styles from "../styling/ListContainer.module.scss";
 import DashedCard from "./DashedCard";
 import useStyles from "./component.styles";
 
+/**
+ * Component used to display cards in a list format for scenario and scene selection.
+ *
+ * @component
+ * @example
+ * const data = [ ... ]
+ * const wide = true
+ * const sceneSelectionPage = false
+ * const scenarioId = "1ef4cD1wsd676dS"
+ * function onItemSelected() {
+ *   console.log("Selected.")
+ * }
+ * function addCard() {
+ *   console.log("Card Added.")
+ * }
+ * function onItemBlur() {
+ *   console.log("Item Blurred."")
+ * }
+ * return (
+ *   <ListContainer
+ *     data={data}
+ *     wide={wide}
+ *     sceneSelectionPage={sceneSelectionPage}
+ *     scenarioId={scenarioId}
+ *     onItemSelected={onItemSelected}
+ *     addCard={addCard}
+ *     onItemBlur={onItemBlur}
+ *   />
+ * )
+ */
 export default function ListContainer({
   data,
   onItemSelected,
@@ -19,6 +49,8 @@ export default function ListContainer({
   const classes = useStyles();
   const [selected, setSelected] = useState();
   const columns = wide ? 5 : 4;
+
+  /** Function which executes when an image in the image list is clicked. */
   const onItemClick = (item) => {
     setSelected(item._id);
     onItemSelected(item);
