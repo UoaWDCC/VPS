@@ -10,17 +10,17 @@ On entering the default website url, users will be prompted to login using a goo
 
 ## Scenario Dashboard Page
 
-Upon successfully logging in, Users will be greeted by their Scenario Dashboard Page. This page contains alls scenarios created by the logged in user.
+Upon successfully logging in, Users will be greeted by their Scenario Dashboard Page. This page contains all scenarios created by the logged in user.
 
-(1) This button allows the user to create new scenario and will be redirected to the Scene Dashboard Page.
+(1) This button allows the user to create new scenario and will redirect them to the Scene Dashboard Page.
 
 (2) This area contains all scenarios created by the user. Clicking on a scenario card will select the scenario.
 
-(3) Clicking on the scenario name allows the user to edit and change the name of their scenario.
+(3) Clicking on the scenario name allows the user to edit and change the name of their scenario. The name change is automatically saved when the text is unfocused.
 
-(4) This button allows the user to play the currently selected scenario. Clicking will redirect to the Play Scenario Page.
+(4) This button allows the user to play the currently selected scenario. Clicking will redirect them to the Play Scenario Page.
 
-(5) This button allows the user to edit their selected scenario and will be redirected to the Scene Dashboard Page.
+(5) This button allows the user to edit their selected scenario and will redirect them to the Scene Dashboard Page.
 
 (6) This button deletes the selected scenario.
 
@@ -39,15 +39,16 @@ The page contains all the scenes created within a scenario.
 
 (3) This area contains all scenes within this scenario. Clicking on a scene card will select the scene.
 
-(4) Clicking on the scene name allows the user to edit and change the name of the scene.
+(4) Clicking on the scene name allows the user to edit and change the name of the scene. The name change is automatically saved when the text is unfocused.
+
 
 (5) This button deletes the selected scene.
 
 (6) This button allows the user to edit a selected scene and redirects them to the Authoring Tool Page.
 
-(7) This button allows the user to duplicate a selected scene with all its components and setup.
+(7) This button allows the user to duplicate a selected scene with all its components and their properties.
 
-(8) This button allows the user to play the current scenario. Clicking will redirect to the Play Scenario Page.
+(8) This button allows the user to play the current scenario. Clicking will redirect them to the Play Scenario Page.
 
 (9) This button allows the user to share the current scenario. Clicking will present a share modal.
 
@@ -148,6 +149,15 @@ This component is used to play sound on a scenes. Once the scene loads the audio
 (2) This toggle can be used to loop the audio once playing.
 
 ![Audio Component](images/audioComponent.png)
+
+
+## Resizing and Dragging Components
+All components can be dragged and resized. Clicking on an component will select that component. Selected components are outlined with a resizable box. Dragging on dots of the resizeable box will resize the component according to your new cursor position. Dragging the component will cause the component to change positions acccording to your new cursor position. 
+
+![Component Select](images/componentSelect.png)
+
+## Deleting Components
+Selected components can be deleted by pressing the "backspace" or "delete" key.
 
 
 
