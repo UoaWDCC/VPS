@@ -7,6 +7,12 @@ import {
 } from "firebase/storage";
 import { storage } from "./firebase";
 
+/**
+ * Attempts to delete a file from the firebase storage.
+ * A file is deleted if only one scene uses it (metadata count of 1).
+ * Otherwise, the file remains and the metadata is decremented.
+ * @param {String} fileUrl firebase storage link to file
+ */
 const tryDeleteFile = (fileUrl) => {
   const fileRef = ref(storage, fileUrl);
 
@@ -25,6 +31,10 @@ const tryDeleteFile = (fileUrl) => {
   });
 };
 
+/**
+ * Increments the metadata count of a file in firebase storage
+ * @param {String} fileUrl firebase storage link to file
+ */
 const updateFileMetadata = (fileUrl) => {
   const fileRef = ref(storage, fileUrl);
 
