@@ -20,6 +20,7 @@ const scenarioSchema = new Schema({
   ],
 });
 
+// before removal of a scenario from the database, first remove all its scenes
 scenarioSchema.pre("remove", async function () {
   this.scenes.forEach(async (sceneId) => {
     const scene = await Scene.findById(sceneId);
