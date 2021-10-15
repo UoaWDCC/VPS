@@ -5,6 +5,10 @@ import componentPropertiesResolver from "./componentPropertiesResolver";
 
 import styles from "../../../../styling/CanvasSideBar.module.scss";
 
+/**
+ * This component displays the properties the selected scene component
+ * @component
+ */
 export default function ComponentProperties() {
   const { select } = useContext(AuthoringToolContext);
   const { currentScene } = useContext(SceneContext);

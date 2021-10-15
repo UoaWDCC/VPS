@@ -2,6 +2,16 @@ import { Button } from "@material-ui/core";
 import React from "react";
 import useStyles from "./components.styles";
 
+/**
+ * This component represents a button scene component
+ * @component
+ * @example
+ * <ButtonComponent
+ *    id={index}
+ *    onClick={onClick}
+ *    component={component}
+ * />
+ */
 export default function ButtonComponent({ id, onClick, component }) {
   const styles = useStyles(component);
 

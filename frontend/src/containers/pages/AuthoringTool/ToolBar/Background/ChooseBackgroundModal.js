@@ -8,6 +8,10 @@ import { addImage } from "../ToolBarActions";
 import SceneContext from "../../../../../context/SceneContext";
 import ToolbarContext from "../../../../../context/ToolbarContext";
 
+/**
+ * This component is a modal that displays the default images for users to select.
+ * @component
+ */
 export default function ChooseBackgroundModal({ isShowing, hide }) {
   const { currentScene, setCurrentScene } = useContext(SceneContext);
   const [images, setImages] = useState();

@@ -1,6 +1,9 @@
 import { withStyles } from "@material-ui/core/styles";
 
-export default function CustomInputLabelStyles() {
+/**
+ * This function contains the styles for checkbox components of scene component properties
+ */
+export default function CustomCheckBoxStyles() {
   return withStyles({
     root: {
       "&.Mui-checked": {

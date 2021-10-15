@@ -5,6 +5,11 @@ import SceneContext from "../../../../../context/SceneContext";
 import styles from "../../../../../styling/ToolBar.module.scss";
 import { addFirebaseImage } from "../ToolBarActions";
 
+/**
+ * This component is a dropdown item for the image button in the ToolBar.
+ * It allows the user to upload image files.
+ * @component
+ */
 export default function UploadImage() {
   const { currentScene, setCurrentScene } = useContext(SceneContext);
   const inputFile = useRef(null);

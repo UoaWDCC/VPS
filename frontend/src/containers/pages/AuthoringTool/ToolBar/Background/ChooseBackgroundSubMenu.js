@@ -5,9 +5,11 @@ import styles from "../../../../../styling/ToolBar.module.scss";
 import ChooseBackgroundModal from "./ChooseBackgroundModal";
 import useChooseBackgroundModal from "./useChooseBackgroundModal";
 
-/* This component is the submenu for for background component
+/**
+ * This component is the submenu for for background component
  * Beaware that the modal needs to be rendered outside of the MenuItem: https://stackoverflow.com/a/41991884
- * */
+ * @component
+ */
 function ChooseBackgroundSubMenu() {
   const { isShowing, hide, show } = useChooseBackgroundModal();
   return (

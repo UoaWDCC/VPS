@@ -15,6 +15,10 @@ import styles from "../../../../../styling/CanvasSideBar.module.scss";
 const CustomTextField = CustomTextFieldStyles()(TextField);
 const CustomInputLabel = CustomInputLabelStyles()(InputLabel);
 
+/**
+ * This component displays the properties in the sidebar for a button scene component.
+ * @component
+ */
 export default function ButtonPropertiesComponent({
   component,
   componentIndex,

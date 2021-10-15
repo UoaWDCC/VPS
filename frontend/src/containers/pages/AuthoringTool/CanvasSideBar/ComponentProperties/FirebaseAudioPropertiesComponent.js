@@ -16,6 +16,10 @@ import useStyles from "./FirebaseAudioPropertiesComponent.styles";
 
 const CustomCheckBox = CustomCheckBoxStyles()(Checkbox);
 
+/**
+ * This component displays the properties in the sidebar for a audio scene component.
+ * @component
+ */
 export default function FirebaseAudioPropertiesComponent({
   component,
   componentIndex,

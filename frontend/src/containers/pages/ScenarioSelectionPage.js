@@ -6,11 +6,17 @@ import ScenarioContext from "../../context/ScenarioContext";
 import { usePut } from "../../hooks/crudHooks";
 import AuthenticationContext from "../../context/AuthenticationContext";
 
+/**
+ * Page that shows the user's existing scenarios.
+ *
+ * @container
+ */
 export default function ScenarioSelectionPage({ data = null }) {
   const { scenarios, currentScenario, setCurrentScenario, reFetch } =
     useContext(ScenarioContext);
   const { getUserIdToken } = useContext(AuthenticationContext);
 
+  /** function is called when the user unfocuses from a scenario name */
   async function changeScenarioName({ target }) {
     await usePut(
       `/api/scenario/${currentScenario._id}`,

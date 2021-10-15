@@ -9,6 +9,10 @@ import { withStyles } from "@material-ui/core/styles";
 import styles from "../../../styling/BackModal.module.scss";
 import ScenarioContext from "../../../context/ScenarioContext";
 
+/**
+ * This component shows a confirmation model. It is shown when the user exits the editing tool without saving.
+ * @component
+ */
 export default function BackModal({
   isOpen = true,
   handleClose,

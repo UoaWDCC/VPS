@@ -3,6 +3,16 @@ import React from "react";
 import Image from "material-ui-image";
 import { imageStyles, imageContainerStyles } from "./components.styles";
 
+/**
+ * This component represents a firebase image scene component
+ * @component
+ * @example
+ * <FirebaseImageComponent
+ *    id={index}
+ *    onClick={onClick}
+ *    component={component}
+ * />
+ */
 export default function FirebaseImageComponent({ id, onClick, component }) {
   const setSize = () => {
     // The below is used to recalculate the height and width of an image. Especially when it is intiallised using auto

@@ -9,6 +9,12 @@ import SceneContext from "../../../../context/SceneContext";
 import styles from "../../../../styling/Canvas.module.scss";
 import componentResolver from "./componentResolver";
 
+/**
+ * This component represents the editable version of the screen that is shown when a scene is played.
+ * It is used to display the scene components on the editing screen. It also bounds the movable components
+ * so that they cannot be moved outside of the canvas.
+ * @component
+ */
 export default function Canvas() {
   const { currentScene, updateComponentProperty } = useContext(SceneContext);
   const {

@@ -4,6 +4,10 @@ import ComponentProperties from "./ComponentProperties";
 
 import styles from "../../../../styling/CanvasSideBar.module.scss";
 
+/**
+ * This component displays the properties of scene components in a sidebar
+ * @component
+ */
 export default function CanvasSideBar() {
   return (
     <>
