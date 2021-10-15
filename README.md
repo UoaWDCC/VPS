@@ -8,9 +8,9 @@ This project is associated with The University of Auckland SOFTENG 761.
 
 # Live deployments
 
-Wiki: https://vps-wiki.netlify.app/
+Frontend: https://vps-uoa.netlify.app
 
-Frontend: https://vps-frontend.netlify.app
+Wiki: https://vps-uoa-wiki.netlify.app
 
 Backend: https://virtual-patient-system.herokuapp.com/
 
@@ -78,7 +78,7 @@ Alternative way to run app
 
 ## Wiki documentation
 
-Our wiki is is easily viewable through: https://vps-wiki.netlify.app/
+Our wiki is is easily viewable through: https://vps-uoa-wiki.netlify.app
 
 (Note: links to some images are broken due to CORS issues)
 
