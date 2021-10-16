@@ -24,6 +24,7 @@ router.get("/full/:sceneId", async (req, res) => {
   res.json(scene);
 });
 
+// Retrieve all scenes of a scenario
 router.get("/", async (req, res) => {
   const scenes = await retrieveSceneList(req.params.scenarioId);
 
@@ -35,6 +36,7 @@ router.use(auth);
 // // Apply scenario auth middleware
 router.use(scenarioAuth);
 
+// Create a scene for a scenario
 router.post("/", async (req, res) => {
   const { name, components } = req.body;
 
@@ -43,6 +45,7 @@ router.post("/", async (req, res) => {
   res.status(HTTP_OK).json(scene);
 });
 
+// Update a scene
 router.put("/:sceneId", async (req, res) => {
   const { name, components } = req.body;
 
@@ -51,6 +54,7 @@ router.put("/:sceneId", async (req, res) => {
   res.status(HTTP_OK).json(scene);
 });
 
+// Delete a scene
 router.delete("/:sceneId", async (req, res) => {
   const deleted = await deleteScene(req.params.scenarioId, req.params.sceneId);
 
@@ -61,6 +65,7 @@ router.delete("/:sceneId", async (req, res) => {
   }
 });
 
+// Duplicate a scene
 router.post("/duplicate/:sceneId", async (req, res) => {
   const scene = await duplicateScene(req.params.scenarioId, req.params.sceneId);
 

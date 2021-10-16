@@ -3,6 +3,12 @@ import Scene from "../models/scene";
 import Scenario from "../models/scenario";
 import { tryDeleteFile, updateFileMetadata } from "../../firebase/storage";
 
+/**
+ * Creates a scene in the database, and updates its parent scenario to contain the scene
+ * @param {String} scenarioId MongoDB ID of parent scenario
+ * @param {{name: String, components: Object[]}} scene scene object
+ * @returns the created database scene object
+ */
 const createScene = async (scenarioId, scene) => {
   const dbScene = new Scene(scene);
   await dbScene.save();
@@ -15,6 +21,11 @@ const createScene = async (scenarioId, scene) => {
   return dbScene;
 };
 
+/**
+ * Retrieves all scenes of a scenario
+ * @param {String} scenarioId MongoDB ID of scenario
+ * @returns list of database scene objects
+ */
 const retrieveSceneList = async (scenarioId) => {
   const dbScenario = await Scenario.findById(scenarioId);
   const dbScenes = await Scene.find(
@@ -25,12 +36,23 @@ const retrieveSceneList = async (scenarioId) => {
   return dbScenes;
 };
 
+/**
+ * Retrieves a scene from the database
+ * @param {String} sceneId MongoDB ID of scene
+ * @returns database scene object
+ */
 const retrieveScene = async (sceneId) => {
   const dbScene = await Scene.findById(sceneId);
 
   return dbScene;
 };
 
+/**
+ * Updates a scene in the database
+ * @param {String} sceneId MongoDB ID of scene
+ * @param {{name: String, components: Object[]}} updatedScene updated scene object
+ * @returns updated database scene object
+ */
 const updateScene = async (sceneId, updatedScene) => {
   // makes sure when we update components is not null
   if (updatedScene.components) {
@@ -61,6 +83,12 @@ const updateScene = async (sceneId, updatedScene) => {
   return dbScene;
 };
 
+/**
+ * Deletes a scene from the database, and removes it from its parent scenario
+ * @param {String} scenarioId MongoDB ID of scenario
+ * @param {String} sceneId MongoDB ID of scene
+ * @returns {Boolean} True if successfully deleted, False if error
+ */
 const deleteScene = async (scenarioId, sceneId) => {
   const scenarioRes = await Scenario.updateOne(
     { _id: scenarioId },
@@ -79,6 +107,12 @@ const deleteScene = async (scenarioId, sceneId) => {
   }
 };
 
+/**
+ * Duplicates a scene in the database and updates its parent scenario to contain the new scene
+ * @param {String} scenarioId MongoDB ID of scenario
+ * @param {String} sceneId MongoDB ID of scene
+ * @returns duplicated database scene object
+ */
 const duplicateScene = async (scenarioId, sceneId) => {
   const sceneToCopy = await Scene.findById(sceneId);
   const newScene = {
