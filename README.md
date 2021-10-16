@@ -22,42 +22,42 @@ Backend: https://virtual-patient-system.herokuapp.com/
 | Tests               |  [![Tests](https://github.com/SoftEng761-2021/project-project-team-1/actions/workflows/unit_tests.yml/badge.svg)](https://github.com/SoftEng761-2021/project-project-team-1/actions/workflows/unit_tests.yml) |
 | Contributors        | [![All Contributors](https://img.shields.io/badge/all_contributors-8-orange.svg?style=flat-square)](#contributors-) |
 
-# Setup and Run App
+# Setup & Run
 
-### Setup
-
-- Run `yarn install` in the root directory
-- Run `yarn run init` in the root directory (installs dependencies for `frontend` and `backend` directories)
-
-Alternative way to set up
-
-- Open two terminals
-- Change directory by running `cd frontend` and `cd backend` in each terminal
-- Run `yarn install` in the each terminal
-
-### Run
-
-- Run `yarn run dev` in the root directory to start both `frontend` and `backend` environments
-
-Alternative way to run app
-
-- Open two terminals
-- Change directory by running `cd frontend` and `cd backend` in each terminal
-- Run `yarn start` in the each terminal
-
-### Test and Continuous Integration
-
-- Open terminal and `cd frontend` or `cd backend` depending on which folder you are testing
-- Run `yarn run test` to run unit tests;
-- Run `yarn run lint` to lint; Run `yarn run lint:fix` to fix linting;
-- Run `yarn run prettier` to test for prettier; Run `yarn run prettify` to fix prettier issues;
-
-### Tool versions
+## Tool versions
 
 - Ideally you should use the following versions to make this repository work.
 - node v14.17.\*
 - yarn 1.22.\*
 - NPM 6.14.\*
+
+## To set up App
+
+- Run `yarn install` in the root directory
+- Run `yarn run init` in the root directory (installs dependencies for `frontend` and `backend` directories)
+
+## To run App
+
+- Run `yarn run dev` in the root directory to start both `frontend` and `backend` environments
+
+# Alternative Way to Setup & Run
+
+## To set up App
+
+- Open two terminals
+- Change directory by running `cd frontend` and `cd backend` in each terminal
+- Run `yarn install` in the each terminal
+
+## To run App
+
+- Run `yarn start` in the each terminal
+
+# Test and Continuous Integration
+
+- Open terminal and `cd frontend` or `cd backend` depending on which folder you are testing
+- Run `yarn run test` to run unit tests;
+- Run `yarn run lint` to lint; Run `yarn run lint:fix` to fix linting;
+- Run `yarn run prettier` to test for prettier; Run `yarn run prettify` to fix prettier issues;
 
 # File Structure
 
