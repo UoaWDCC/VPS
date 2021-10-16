@@ -3,14 +3,16 @@
 
 ## Login
 
-On entering the default website url, users will be prompted to login using a google account.
+On entering the default [website url](https://vps-uoa.netlify.app), users will be prompted to login using a google account.
 
 ![Login Page](images/loginPage.png)
 <br>
 
 ## Scenario Dashboard Page
 
-Upon successfully logging in, Users will be greeted by their Scenario Dashboard Page. This page contains all scenarios created by the logged in user.
+Upon successfully logging in, users will be greeted by their Scenario Dashboard Page. This page contains all scenarios created by the logged in user.
+
+![Scenario Page](images/scenarioPage.png)
 
 (1) This button allows the user to create new scenario and will redirect them to the Scene Dashboard Page.
 
@@ -26,12 +28,13 @@ Upon successfully logging in, Users will be greeted by their Scenario Dashboard 
 
 (7) This button logs the user out and they are redirected to the login screen.
 
-![Scenario Page](images/scenarioPage.png)
 <br>
 
 ## Scene Dashboard Page
 
 The page contains all the scenes created within a scenario.
+
+![Scene Page](images/scenePage.png)
 
 (1) This button takes the user back to the Scenario Dashboard Page.
 
@@ -40,7 +43,6 @@ The page contains all the scenes created within a scenario.
 (3) This area contains all scenes within this scenario. Clicking on a scene card will select the scene.
 
 (4) Clicking on the scene name allows the user to edit and change the name of the scene. The name change is automatically saved when the text is unfocused.
-
 
 (5) This button deletes the selected scene.
 
@@ -52,16 +54,16 @@ The page contains all the scenes created within a scenario.
 
 (9) This button allows the user to share the current scenario. Clicking will present a share modal.
 
-![Scene Page](images/scenePage.png)
-<br>
-
-### Share Modal
 ![Share Modal](images/shareModal.png)
+*Share Modal*
+
 <br>
 
 ## Authoring Tool Page
 
 This page is used for editing the components within a scenario.
+
+![Canvas Page](images/canvasPage.png)
 
 (1) This button takes the user back to the Scene Dashboard Page.
 
@@ -83,36 +85,38 @@ This page is used for editing the components within a scenario.
 
 (10) This sections shows all of the properties assocaited with the selected component.
 
-![Canvas Page](images/canvasPage.png)
 <br>
 
 Leaving the page without saving will prompt the user to save their changes or discard them.
 
 ![Save Modal](images/saveModal.png)
+*Save Modal*
 <br>
 
 ### Image component
 
 Clicking on the image icon tool bar presents two options.
 
+![Image Tool Bar](images/imageToolBar.png)
+
 (1) The first option presents the image Modal where a user can select an image from an existing image bank of medical images.
 
 (2) The second option presents a file explorer, where users can upload their own images to the canvas.
 
-
-
-![Image Tool Bar](images/imageToolBar.png)
-
-#### Image Modal
-
 ![Image Modal](images/imageModal.png)
+*Image Modal*
 
-#### Image File Explorer
+<br>
 
 ![Image File Explorer](images/imageFileExplorer.png)
+*Image File Explorer*
+
+<br>
 
 ### Text Component
 This component is used to display text on the canvas.
+
+![Text Component](images/textComponent.png)
 
 (1) The specific text to be displayed can be entered here.
 
@@ -124,11 +128,12 @@ This component is used to display text on the canvas.
 
 (5) The border and background can be toggled on and off.
 
-![Text Component](images/textComponent.png)
 <br>
 
 ### Button Component
 This component is used to transition to different scenes.
+
+![Button Component](images/buttonComponent.png)
 
 (1) The text on the button can be edited.
 
@@ -138,18 +143,18 @@ This component is used to transition to different scenes.
 
 (4) The scene to transition to can be selected and changed.
 
-![Button Component](images/buttonComponent.png)
 <br>
 
 ### Audio Component
 This component is used to play sound on a scenes. Once the scene loads the audio component will start playing.
 
+![Audio Component](images/audioComponent.png)
+
 (1) This button can be used to test the audio being played.
 
 (2) This toggle can be used to loop the audio once playing.
 
-![Audio Component](images/audioComponent.png)
-
+<br>
 
 ## Resizing and Dragging Components
 All components can be dragged and resized. Clicking on an component will select that component. Selected components are outlined with a resizable box. Dragging on dots of the resizeable box will resize the component according to your new cursor position. Dragging the component will cause the component to change positions acccording to your new cursor position. 
@@ -157,7 +162,7 @@ All components can be dragged and resized. Clicking on an component will select 
 ![Component Select](images/componentSelect.png)
 
 ## Deleting Components
-Selected components can be deleted by pressing the "backspace" or "delete" key.
+Selected components can be deleted by pressing the "Backspace" or "Delete" key.
 
 
 
