@@ -1,3 +1,6 @@
+/* eslint-disable no-await-in-loop */
+/* eslint-disable guard-for-in */
+/* eslint-disable no-restricted-syntax */
 /* eslint-disable no-underscore-dangle */
 import { MongoMemoryServer } from "mongodb-memory-server";
 import express from "express";
@@ -72,12 +75,13 @@ describe("Image API tests", () => {
       "https://drive.google.com/uc?export=view&id=1IExv9SGZq_KFFGOxBzhz_OfO6UAWLL5z",
       "https://drive.google.com/uc?export=view&id=1uRyrBAvCZf2dPHXR0TjsPVncU_rz0vuZ",
     ];
-    urls.forEach((url) => {
+
+    for (const url of urls) {
       const dbImage = new Image({
         url,
       });
-      dbImage.save();
-    });
+      await dbImage.save();
+    }
 
     const response = await axios.get(`http://localhost:${port}/api/image/`);
     expect(response.status).toBe(HTTP_OK);
