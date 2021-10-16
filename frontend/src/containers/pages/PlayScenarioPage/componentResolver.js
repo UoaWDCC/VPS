@@ -10,6 +10,14 @@ import FirebaseImageComponent from "../AuthoringTool/Components/FirebaseImageCom
 // Components for playing only
 import AudioComponent from "./Components/AudioComponent";
 
+/**
+ * This function returns the appropriate React component for a scene component object when playing
+ *
+ * @example
+ * {currentScene?.components?.map((component, index) =>
+ *   componentResolver(component, index, selectElement)
+ * )}
+ */
 export default function componentResolver(component, index, onClick) {
   switch (component.type) {
     // ADD NEW COMPONENT TYPES HERE

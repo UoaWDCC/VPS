@@ -3,6 +3,11 @@ import { useGet } from "../../../hooks/crudHooks";
 import componentResolver from "./componentResolver";
 import PlayScenarioContext from "../../../context/PlayScenarioContext";
 
+/**
+ * This component displays the scene components on the screen when playing a scenario
+ *
+ * @component
+ */
 export default function PlayScenarioCanvas() {
   const [currentScene, setCurrentScene] = useState(null);
   // eslint-disable-next-line no-unused-vars

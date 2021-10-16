@@ -16,6 +16,10 @@ const CustomTextField = withStyles({
   },
 })(TextField);
 
+/**
+ * This component displays the settings of a scene, such as the scene name
+ * @component
+ */
 export default function SceneSettings() {
   const { currentScene, setCurrentScene } = useContext(SceneContext);
 

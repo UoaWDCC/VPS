@@ -6,6 +6,11 @@ import ToolbarContext from "../../../../../context/ToolbarContext";
 import styles from "../../../../../styling/ToolBar.module.scss";
 import { addFirebaseAudio } from "../ToolBarActions";
 
+/**
+ * This component is a dropdown item for the audio button in the ToolBar.
+ * It allows the user to upload mp3 files.
+ * @component
+ */
 function UploadAudio() {
   const { currentScene, setCurrentScene } = useContext(SceneContext);
   const { handleDropdownClose } = useContext(ToolbarContext);

@@ -6,6 +6,14 @@ import ImageComponent from "../Components/ImageComponent";
 import FirebaseImageComponent from "../Components/FirebaseImageComponent";
 import FirebaseAudioComponent from "../Components/FirebaseAudioComponent";
 
+/**
+ * This function returns the appropriate React component for a scene component object when editing
+ *
+ * @example
+ * {currentScene?.components?.map((component, index) =>
+ *   componentResolver(component, index, selectElement)
+ * )}
+ */
 export default function componentResolver(component, index, onClick) {
   switch (component.type) {
     // ADD NEW COMPONENT TYPES HERE

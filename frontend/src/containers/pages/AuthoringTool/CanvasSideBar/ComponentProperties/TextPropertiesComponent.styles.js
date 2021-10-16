@@ -1,5 +1,8 @@
 import { makeStyles } from "@material-ui/core";
 
+/**
+ * This function contains the styles for the TextPropertiesComponent
+ */
 export default function useStyles() {
   return makeStyles({
     textArea: {

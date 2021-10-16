@@ -63,6 +63,7 @@ function addText(currentScene, setCurrentScene) {
  * function to be put into ToolBarData when image is added
  * @param {object} currentScene
  * @param {function} setCurrentScene
+ * @param {object} image
  */
 function addImage(currentScene, setCurrentScene, image) {
   const newImage = {
@@ -85,6 +86,13 @@ function addImage(currentScene, setCurrentScene, image) {
   });
 }
 
+/**
+ * function to be put into ToolBarData when firebase image is added
+ * @param {object} currentScene
+ * @param {function} setCurrentScene
+ * @param {object} fileObject
+ * @param {string} url
+ */
 function addFirebaseImage(currentScene, setCurrentScene, fileObject, url) {
   const newImage = {
     type: "FIREBASEIMAGE",

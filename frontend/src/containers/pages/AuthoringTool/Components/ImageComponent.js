@@ -4,6 +4,16 @@ import Image from "material-ui-image";
 import { useGet } from "../../../../hooks/crudHooks";
 import { imageStyles, imageContainerStyles } from "./components.styles";
 
+/**
+ * This component represents an image scene component
+ * @component
+ * @example
+ * <ImageComponent
+ *    id={index}
+ *    onClick={onClick}
+ *    component={component}
+ * />
+ */
 export default function ImageComponent({ id, onClick, component }) {
   const [image, setImage] = useState();
   useGet(`/api/image/${component.imageId}`, setImage, false);

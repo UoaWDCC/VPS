@@ -7,6 +7,10 @@ import styles from "../../../../styling/ToolBar.module.scss";
 import AuthoringToolContext from "../../../../context/AuthoringToolContext";
 import ToolbarContext from "../../../../context/ToolbarContext";
 
+/**
+ * Toolbar with icons for adding scene components
+ * @component
+ */
 export default function ToolBar() {
   const { currentScene, setCurrentScene } = useContext(SceneContext);
   const { setSelect } = useContext(AuthoringToolContext);

@@ -18,6 +18,11 @@ import ShareModal from "../../components/ShareModal";
 import AuthoringToolContextProvider from "../../context/AuthoringToolContextProvider";
 import AuthenticationContext from "../../context/AuthenticationContext";
 
+/**
+ * Page that shows the scenes belonging to a scenario.
+ *
+ * @container
+ */
 export function SceneSelectionPage({ data = null }) {
   const [isShareModalOpen, setShareModalOpen] = useState(false);
   const { scenarioId } = useParams();
@@ -27,6 +32,7 @@ export function SceneSelectionPage({ data = null }) {
     useContext(SceneContext);
   const { getUserIdToken } = useContext(AuthenticationContext);
 
+  /** called when the Add card is clicked */
   async function createNewScene() {
     const newScene = await usePost(
       `/api/scenario/${scenarioId}/scene`,
@@ -42,6 +48,7 @@ export function SceneSelectionPage({ data = null }) {
     });
   }
 
+  /** called when Edit button is clicked */
   async function editScene() {
     if (currentScene != null) {
       history.push({
@@ -50,6 +57,7 @@ export function SceneSelectionPage({ data = null }) {
     }
   }
 
+  /** called when Delete button is clicked */
   async function deleteScene() {
     if (currentScene != null) {
       await useDelete(
@@ -61,6 +69,7 @@ export function SceneSelectionPage({ data = null }) {
     }
   }
 
+  /** called when Duplicate button is clicked */
   async function duplicateScene() {
     await usePost(
       `/api/scenario/${scenarioId}/scene/duplicate/${currentScene._id}`,
@@ -70,10 +79,12 @@ export function SceneSelectionPage({ data = null }) {
     reFetch();
   }
 
+  /** called when Play button is clicked */
   function playScenario() {
     window.open(`/play/${scenarioId}`, "_blank");
   }
 
+  /** called when user unfocuses from a scene name */
   async function changeSceneName({ target }) {
     await usePut(
       `/api/scenario/${scenarioId}/scene/${currentScene._id}`,

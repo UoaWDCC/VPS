@@ -2,6 +2,9 @@ import React, { useContext, useState } from "react";
 import PlayScenarioContext from "../../../../context/PlayScenarioContext";
 import { useGet } from "../../../../hooks/crudHooks";
 
+/**
+ * This component preloads firebase and google drive images of a scene
+ */
 function ImagePreloader({ scenarioId, scene }) {
   const [fullScene, setFullScene] = useState();
   useGet(
@@ -28,6 +31,9 @@ function ImagePreloader({ scenarioId, scene }) {
   );
 }
 
+/**
+ * This component preloads images from google drive
+ */
 function PreloadGoogleDriveImage({ component }) {
   const img = new Image();
   function setImage(image) {
@@ -37,12 +43,19 @@ function PreloadGoogleDriveImage({ component }) {
   return null;
 }
 
+/**
+ * This component preloads images from Firebase
+ */
 function PreloadFirebaseImage({ component }) {
   const img = new Image();
   img.src = component.url;
   return null;
 }
 
+/**
+ * This component preloads the images in all scenes of a for better performance when playing.
+ * @component
+ */
 function ScenarioPreloader() {
   const [scenes, setScenes] = useState(null);
   const { scenarioId } = useContext(PlayScenarioContext);

@@ -5,6 +5,11 @@ import PlayScenarioCanvas from "./PlayScenarioCanvas";
 import LoadingPage from "../LoadingPage";
 import ScenarioPreloader from "./Components/ScenarioPreloader";
 
+/**
+ * This page allows users to play a scenario.
+ *
+ * @container
+ */
 export default function PlayScenarioPage() {
   const styles = useStyles();
   const { currentSceneId } = useContext(PlayScenarioContext);

@@ -14,6 +14,10 @@ import ToolbarContextProvider from "../../../context/ToolbarContextProvider";
 import AuthenticationContext from "../../../context/AuthenticationContext";
 import { uploadFiles } from "../../../firebase/storage";
 
+/**
+ * This page allows the user to edit a scene.
+ * @container
+ */
 export default function AuthoringToolPage() {
   const { scenarioId, sceneId } = useParams();
   const {
@@ -46,6 +50,7 @@ export default function AuthoringToolPage() {
     }
   }, [currentScene]);
 
+  /** called when save button is clicked */
   async function saveScene() {
     setSelect(null);
     await uploadFiles(
