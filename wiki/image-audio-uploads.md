@@ -15,7 +15,7 @@ New image and audio files are uploaded to Firebase's Cloud Storage. An additiona
 The Firebase download urls are retrieved for each file and stored in the database alongside the file id. 
 
 ### Removed Images and Audios
-When images and audios that were deleted from a scene but were already uploaded to Firebase a check is done on the file's `count` value. If only one scene uses the file (metadata count of 1), the file is deleted from Firebase. Otherwise, the file remains and the metadata is decremented by 1.
+When images and audios are deleted from a scene but have already been uploaded to Firebase, a check is done on the file's `count` value. If only one scene uses the file (metadata count of 1), the file is deleted from Firebase. Otherwise, the file remains and the metadata is decremented by 1.
 
 ## Scene Duplication
 When a scene is duplicated all its firebase files have their `count` values incremented by one.
