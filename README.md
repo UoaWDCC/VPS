@@ -1,3 +1,9 @@
+# VPS
+
+This project is a bare clone of (the original project)[https://github.com/Collabs-uni/virtual-patient-system] and has been created using (these instructions)[https://docs.github.com/en/repositories/creating-and-managing-repositories/duplicating-a-repository#mirroring-a-repository=] to preserve past contributors and commits. 
+
+Changes in this project are not synced with the original project (and are not required to be synced since the original project is not worked on anymore) but if needed, it can be done by setting up a remote push location using the instructions above.
+
 # SOFTENG761 - Team1
 
 ![Faculty of Medicine and Health Science](https://i.ibb.co/HVLhJLC/1546995300879.png)
