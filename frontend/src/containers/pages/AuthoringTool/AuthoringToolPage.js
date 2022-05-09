@@ -82,7 +82,7 @@ export default function AuthoringToolPage() {
             variant="contained"
             onClick={saveAndClose}
           >
-            Save & Close
+            Save
           </Button>
         </TopBar>
         <ToolbarContextProvider>
