@@ -78,9 +78,9 @@ For each commit you make, follow this convention: __[VPS-{ISSUE NUMBER}] Your co
 
 ## Pull requests
 
-Once you've made all your commits, open a PR with the name __[VPS-{ISSUE NUMBER}] {ISSUE NAME}__
-  - e.g. __[VPS-007] Add labels in toolbar__
-![picture 4](images/58e8d81abb25f33bdfa45c68fbcd4e88e66c7a0b614837a918d1322aace0952a.png)
+Once you've made all your commits, open a PR with the name __VPS-{ISSUE NUMBER}/{ISSUE NAME}__ and fill in the details (the PR template can be found [here]( https://github.com/UoaWDCC/VPS/blob/master/.github/pull_request_template.md))
+  - e.g. __VPS-007/Add labels in toolbar__
+![picture 1](images/0eeffe2bfa8023951ea66309f2227a02f700d20f61516555641970dba3d37bd6.png)  
 
 # File Structure
 
