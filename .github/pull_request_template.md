@@ -10,7 +10,7 @@ A clear and concise description of what the solution is.
 
 Potential risks that this PR might brings
 
-## DoD
+## Definition of Done
 
 - [ ] Code peer-reviewed
 - [ ] Wiki Documentation is written and up to date
