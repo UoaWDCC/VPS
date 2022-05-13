@@ -6,6 +6,7 @@ import styles from "../styling/SideBar.module.scss";
 import { usePost, useDelete } from "../hooks/crudHooks";
 import DeleteButton from "./DeleteButton";
 import AuthenticationContext from "../context/AuthenticationContext";
+import HelpButton from "./HelpButton";
 
 /**
  * Component used for navigation and executing actions located at the left side of the screen.
@@ -120,6 +121,9 @@ export default function SideBar() {
             >
               Logout
             </Button>
+          </li>
+          <li>
+            <HelpButton />
           </li>
         </ul>
       </div>
