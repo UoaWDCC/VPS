@@ -7,7 +7,6 @@ import { usePost, useDelete } from "../hooks/crudHooks";
 import DeleteButton from "./DeleteButton";
 import AuthenticationContext from "../context/AuthenticationContext";
 import HelpButton from "./HelpButton";
-import HelpModal from "./helpModal";
 
 /**
  * Component used for navigation and executing actions located at the left side of the screen.
@@ -113,10 +112,6 @@ export default function SideBar() {
               Delete
             </DeleteButton>
           </li>
-          <li>
-            <HelpModal />
-          </li>
-
           <li>
             <Button
               className="btn side contained white"
