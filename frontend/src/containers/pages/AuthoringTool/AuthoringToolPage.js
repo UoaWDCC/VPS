@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import { Button } from "@material-ui/core";
 import TopBar from "../../../components/TopBar";
 import ToolBar from "./ToolBar/ToolBar";
@@ -70,6 +70,13 @@ export default function AuthoringToolPage() {
     reFetch();
   }
 
+  /** called when save and close button is clicked */
+  function savePlusClose() {
+    saveScene();
+    /* redirects user to the scenario page */
+    window.location.href = `/scenario/${currentScenario?._id}`;
+  }
+
   return (
     <>
       <ScreenContainer vertical>
@@ -81,6 +88,14 @@ export default function AuthoringToolPage() {
             onClick={saveScene}
           >
             Save
+          </Button>
+          <Button
+            className="btn top contained white"
+            color="default"
+            variant="contained"
+            onClick={savePlusClose}
+          >
+            Save & close
           </Button>
         </TopBar>
         <ToolbarContextProvider>
