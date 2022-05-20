@@ -1,5 +1,5 @@
 import React from "react";
-import HelpOutlineIcon from "@material-ui/icons/HelpOutline";
+import HelpIcon from "@material-ui/icons/Help";
 import Button from "@material-ui/core/Button";
 import Box from "@material-ui/core/Box";
 import Typography from "@material-ui/core/Typography";
@@ -38,7 +38,7 @@ const HelpButton = (props) => {
         variant="outlined"
         className={`btn outlined white ${isSidebar ? "side" : "top"}`}
         color="default"
-        startIcon={<HelpOutlineIcon />}
+        startIcon={<HelpIcon />}
         onClick={handleOpen}
       >
         Help
