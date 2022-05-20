@@ -1,6 +1,6 @@
 import React from "react";
 import HelpOutlineIcon from "@material-ui/icons/HelpOutline";
-import IconButton from "@material-ui/core/IconButton";
+import Button from "@material-ui/core/Button";
 import Box from "@material-ui/core/Box";
 import Typography from "@material-ui/core/Typography";
 import Modal from "@material-ui/core/Modal";
@@ -26,21 +26,23 @@ const style = {
  *   <HelpButton />
  * )
  */
-const HelpButton = () => {
+const HelpButton = (props) => {
   const [open, setOpen] = React.useState(false);
-
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
+  const { isSidebar } = props;
 
   return (
     <>
-      <IconButton
-        aria-label="help"
+      <Button
+        variant="outlined"
+        className={`btn outlined white ${isSidebar ? "side" : "top"}`}
+        color="default"
+        startIcon={<HelpOutlineIcon />}
         onClick={handleOpen}
-        style={{ color: "white" }}
       >
-        <HelpOutlineIcon />
-      </IconButton>
+        Help
+      </Button>
       <Modal
         open={open}
         onClose={handleClose}

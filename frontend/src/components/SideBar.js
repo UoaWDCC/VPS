@@ -123,7 +123,7 @@ export default function SideBar() {
             </Button>
           </li>
           <li>
-            <HelpButton />
+            <HelpButton isSidebar />
           </li>
         </ul>
       </div>
