@@ -1,19 +1,9 @@
 import React from "react";
-import HelpIcon from "@material-ui/icons/Help";
+import HelpOutlineIcon from "@material-ui/icons/HelpOutline";
 import IconButton from "@material-ui/core/IconButton";
 import Box from "@material-ui/core/Box";
 import Typography from "@material-ui/core/Typography";
 import Modal from "@material-ui/core/Modal";
-
-/**
- * Material UI IconButton for representing a help/info button.
- *
- * @component
- * @example
- * return (
- *   <HelpButton />
- * )
- */
 
 const style = {
   position: "absolute",
@@ -27,6 +17,15 @@ const style = {
   p: 4,
 };
 
+/**
+ * Material UI IconButton for representing a help/info button.
+ *
+ * @component
+ * @example
+ * return (
+ *   <HelpButton />
+ * )
+ */
 const HelpButton = () => {
   const [open, setOpen] = React.useState(false);
 
@@ -40,7 +39,7 @@ const HelpButton = () => {
         onClick={handleOpen}
         style={{ color: "white" }}
       >
-        <HelpIcon />
+        <HelpOutlineIcon />
       </IconButton>
       <Modal
         open={open}
