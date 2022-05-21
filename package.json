@@ -1,18 +1,21 @@
 {
-  "name": "mern-template",
-  "version": "0.1.0",
-  "private": true,
-  "devDependencies": {
-    "all-contributors-cli": "^6.20.0"
-  },
-  "scripts": {
-    "start": "yarn run dev",
-    "dev": "concurrently \"cd frontend && yarn run start\" \"cd backend && yarn run start\"",
-    "init": "concurrently \"cd frontend && yarn install\" \"cd backend && yarn install\"",
-    "contributors:add": "all-contributors add",
-    "contributors:generate": "all-contributors generate"
-  },
-  "dependencies": {
-    "concurrently": "^6.2.1"
-  }
+    "name": "mern-template",
+    "version": "0.1.0",
+    "private": true,
+    "devDependencies": {
+        "all-contributors-cli": "^6.20.0"
+    },
+    "scripts": {
+        "start": "yarn run dev",
+        "dev": "concurrently \"cd frontend && yarn run start\" \"cd backend && yarn run start\"",
+        "init": "concurrently \"cd frontend && yarn install\" \"cd backend && yarn install\"",
+        "contributors:add": "all-contributors add",
+        "contributors:generate": "all-contributors generate"
+    },
+    "dependencies": {
+        "concurrently": "^6.2.1",
+        "react": "^18.1.0",
+        "react-dom": "^18.1.0",
+        "react-modal": "^3.15.1"
+    }
 }
