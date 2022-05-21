@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useHistory, useParams } from "react-router-dom";
 import { Button } from "@material-ui/core";
 import TopBar from "../../../components/TopBar";
 import ToolBar from "./ToolBar/ToolBar";
@@ -32,6 +32,7 @@ export default function AuthoringToolPage() {
   const { setSelect } = useContext(AuthoringToolContext);
   const { getUserIdToken } = useContext(AuthenticationContext);
   const [firstTimeRender, setFirstTimeRender] = useState(true);
+  const history = useHistory();
 
   useGet(
     `/api/scenario/${currentScenario?._id}/scene/full/${currentScene?._id}`,
@@ -51,8 +52,8 @@ export default function AuthoringToolPage() {
     }
   }, [currentScene]);
 
-  /** called when save button is clicked */
-  async function saveScene() {
+  /** called when save and close button is clicked */
+  async function saveAndClose() {
     setSelect(null);
     await uploadFiles(
       currentScene?.components,
@@ -69,6 +70,7 @@ export default function AuthoringToolPage() {
     );
     setHasChange(false);
     reFetch();
+    history.push(`/scenario/${currentScenario._id}`);
   }
 
   return (
@@ -79,7 +81,7 @@ export default function AuthoringToolPage() {
             className="btn top contained white"
             color="default"
             variant="contained"
-            onClick={saveScene}
+            onClick={saveAndClose}
           >
             Save
           </Button>
