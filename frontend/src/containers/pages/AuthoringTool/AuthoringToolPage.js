@@ -51,6 +51,26 @@ export default function AuthoringToolPage() {
     }
   }, [currentScene]);
 
+  /** called when save button is clicked */
+  async function saveScene() {
+    setSelect(null);
+    await uploadFiles(
+      currentScene?.components,
+      currentScenario._id,
+      currentScene._id
+    );
+    await usePut(
+      `/api/scenario/${scenarioId}/scene/${sceneId}`,
+      {
+        name: currentScene.name,
+        components: currentScene?.components,
+      },
+      getUserIdToken
+    );
+    setHasChange(false);
+    reFetch();
+  }
+
   /** called when save and close button is clicked */
   async function saveAndClose() {
     setSelect(null);
@@ -87,7 +107,7 @@ export default function AuthoringToolPage() {
             className="btn top contained white"
             color="default"
             variant="contained"
-            onClick={saveAndClose}
+            onClick={saveScene}
           >
             Save
           </Button>
