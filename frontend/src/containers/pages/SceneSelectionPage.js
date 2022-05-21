@@ -17,6 +17,7 @@ import DeleteButton from "../../components/DeleteButton";
 import ShareModal from "../../components/ShareModal";
 import AuthoringToolContextProvider from "../../context/AuthoringToolContextProvider";
 import AuthenticationContext from "../../context/AuthenticationContext";
+import HelpButton from "../../components/HelpButton";
 
 /**
  * Page that shows the scenes belonging to a scenario.
@@ -153,6 +154,7 @@ export function SceneSelectionPage({ data = null }) {
         >
           Share
         </Button>
+        <HelpButton />
       </TopBar>
       <ListContainer
         data={data || scenes}
