@@ -6,13 +6,15 @@ labels:
 assignees: ""
 ---
 
-## Issue Description
+## Outcome
+
+**Describe the issue**
 
 A clear and concise description of what the issue is.
 
-## User Story
+### User Story
 
-User stories to help describe what the functionality is meant to be able to achieve.
+User stories to help describe what the functionality is meant to be able to achieve
 
 ## MVP
 
@@ -20,8 +22,7 @@ Describe the minimum viable product.
 
 ## Tasks
 
-Describe the tasks in this story.
-
+Describe the tasks in this story
 - [ ] Task 1
 - [ ] Task 2
 - [ ] Task 3
