@@ -2,6 +2,7 @@ import React, { useState, useContext } from "react";
 import { useGet } from "../../../hooks/crudHooks";
 import componentResolver from "./componentResolver";
 import PlayScenarioContext from "../../../context/PlayScenarioContext";
+import ProgressBar from "./progressBar";
 
 /**
  * This component displays the scene components on the screen when playing a scenario
@@ -31,6 +32,7 @@ export default function PlayScenarioCanvas() {
       {currentScene?.components?.map((component, index) =>
         componentResolver(component, index, () => componentOnClick(component))
       )}
+      <ProgressBar value={40} />
     </>
   );
 }
