@@ -22,9 +22,7 @@ Backend: https://virtual-patient-system.herokuapp.com/
 | Tests               |  [![Tests](https://github.com/SoftEng761-2021/project-project-team-1/actions/workflows/unit_tests.yml/badge.svg)](https://github.com/SoftEng761-2021/project-project-team-1/actions/workflows/unit_tests.yml) |
 | Contributors        | [![All Contributors](https://img.shields.io/badge/all_contributors-8-orange.svg?style=flat-square)](#contributors-) |
 
-# Setup, Run, and Test
-
-## Setup and Run
+# Setup and Run
 
 1. Download and use the following versions to make this repository work:
     - node v14.17.\*
@@ -40,25 +38,33 @@ Backend: https://virtual-patient-system.herokuapp.com/
 
 ⚠️ DO NOT share the .env file with anyone or upload it to GitHub or anywhere else - the file basically gives access to our databases which contain all the website assets and user information (including yours)
 
-### Method 1
+## Method 1
 
 - Run `yarn install` in the root directory
 - Run `yarn run init` in the root directory (installs dependencies for `frontend` and `backend` directories)
 - Run `yarn run dev` in the root directory to start both `frontend` and `backend` environments to run the app
 
-### Method 2
+## Method 2
 
 - Open two terminals
 - Change directory by running `cd frontend` and `cd backend` in each terminal
 - Run `yarn install` in each terminal
 - Run `yarn start` in each terminal to run the app
 
-## Test and Continuous Integration
+# Test and CI/CD
 
 1. Open terminal and `cd frontend` or `cd backend` depending on which folder you are testing
 2. Run `yarn run test` to run unit tests;
 3. Run `yarn run lint` to lint; Run `yarn run lint:fix` to fix linting;
 4. Run `yarn run prettier` to test for prettier; Run `yarn run prettify` to fix prettier issues;
+
+To update the Jest snapshots (e.g. when updating the UI) and pass all the frontend tests:
+1. In VPS/frontend, run `yarn run test` to run unit tests;
+2. Press `a` to run all tests - some may fail and if they do, press `w` to show more then `u` to update failing snapshots - all tests should pass now
+3. Press `w` then `q` to exit
+4. Commit the updated snapshots before opening a PR
+
+More information on Jest snapshot testing: https://jestjs.io/docs/snapshot-testing
 
 # Git conventions
 
