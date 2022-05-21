@@ -72,27 +72,6 @@ export default function AuthoringToolPage() {
   }
 
   /** called when save and close button is clicked */
-  async function saveAndClose() {
-    setSelect(null);
-    await uploadFiles(
-      currentScene?.components,
-      currentScenario._id,
-      currentScene._id
-    );
-    await usePut(
-      `/api/scenario/${scenarioId}/scene/${sceneId}`,
-      {
-        name: currentScene.name,
-        components: currentScene?.components,
-      },
-      getUserIdToken
-    );
-    setHasChange(false);
-    reFetch();
-    history.push(`/scenario/${currentScenario._id}`);
-  }
-
-  /** called when save and close button is clicked */
   function savePlusClose() {
     saveScene();
     /* redirects user to the scenario page */
