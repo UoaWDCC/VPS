@@ -13,6 +13,7 @@ import AuthoringToolContext from "../../../context/AuthoringToolContext";
 import ToolbarContextProvider from "../../../context/ToolbarContextProvider";
 import AuthenticationContext from "../../../context/AuthenticationContext";
 import { uploadFiles } from "../../../firebase/storage";
+import HelpButton from "../../../components/HelpButton";
 
 /**
  * This page allows the user to edit a scene.
