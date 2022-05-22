@@ -52,8 +52,8 @@ export default function AuthoringToolPage() {
     }
   }, [currentScene]);
 
-  /** called when save and close button is clicked */
-  async function saveAndClose() {
+  /** called when save button is clicked */
+  async function saveScene() {
     setSelect(null);
     await uploadFiles(
       currentScene?.components,
@@ -70,7 +70,13 @@ export default function AuthoringToolPage() {
     );
     setHasChange(false);
     reFetch();
-    history.push(`/scenario/${currentScenario._id}`);
+  }
+
+  /** called when save and close button is clicked */
+  function savePlusClose() {
+    saveScene();
+    /* redirects user to the scenario page */
+    window.location.href = `/scenario/${currentScenario?._id}`;
   }
 
   return (
@@ -81,11 +87,18 @@ export default function AuthoringToolPage() {
             className="btn top contained white"
             color="default"
             variant="contained"
-            onClick={saveAndClose}
+            onClick={saveScene}
           >
             Save
           </Button>
-          <HelpButton />
+          <Button
+            className="btn top contained white"
+            color="default"
+            variant="contained"
+            onClick={savePlusClose}
+          >
+            Save & close
+          </Button>
         </TopBar>
         <ToolbarContextProvider>
           <ToolBar />
