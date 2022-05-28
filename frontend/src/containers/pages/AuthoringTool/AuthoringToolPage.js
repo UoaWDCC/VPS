@@ -22,6 +22,7 @@ import HelpButton from "../../../components/HelpButton";
 export default function AuthoringToolPage() {
   const { scenarioId, sceneId } = useParams();
   const {
+    scenes,
     currentScene,
     setCurrentScene,
     setMonitorChange,
@@ -33,7 +34,7 @@ export default function AuthoringToolPage() {
   const { getUserIdToken } = useContext(AuthenticationContext);
   const [firstTimeRender, setFirstTimeRender] = useState(true);
   const history = useHistory();
-
+  console.log(scenes);
   useGet(
     `/api/scenario/${currentScenario?._id}/scene/full/${currentScene?._id}`,
     setCurrentScene,
@@ -50,6 +51,7 @@ export default function AuthoringToolPage() {
     } else {
       setMonitorChange(true);
     }
+    console.log("Thing changed");
   }, [currentScene]);
 
   /** called when save button is clicked */
@@ -79,6 +81,38 @@ export default function AuthoringToolPage() {
     window.location.href = `/scenario/${currentScenario?._id}`;
   }
 
+  async function next() {
+    const nextScene =
+      scenes[
+        scenes
+          .map((obj) => {
+            return obj._id;
+          })
+          .indexOf(currentScene._id) + 1
+      ];
+    console.log(currentScene);
+    console.log(currentScene._id);
+
+    if (nextScene == null) return;
+    setCurrentScene(nextScene);
+  }
+
+  function before() {
+    const previousScene =
+      scenes[
+        scenes
+          .map((obj) => {
+            return obj._id;
+          })
+          .indexOf(currentScene._id) - 1
+      ];
+    console.log(currentScene);
+    console.log(currentScene._id);
+
+    if (previousScene == null) return;
+    setCurrentScene(previousScene);
+  }
+
   return (
     <>
       <ScreenContainer vertical>
@@ -98,6 +132,23 @@ export default function AuthoringToolPage() {
             onClick={savePlusClose}
           >
             Save & close
+          </Button>
+
+          <Button
+            className="btn top contained white"
+            color="default"
+            variant="contained"
+            onClick={before}
+          >
+            Before
+          </Button>
+          <Button
+            className="btn top contained white"
+            color="default"
+            variant="contained"
+            onClick={next}
+          >
+            Next
           </Button>
         </TopBar>
         <ToolbarContextProvider>
