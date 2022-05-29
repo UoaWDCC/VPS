@@ -64,6 +64,7 @@ export default function AuthoringToolPage() {
       `/api/scenario/${scenarioId}/scene/${sceneId}`,
       {
         name: currentScene.name,
+        time: currentScene.time,
         components: currentScene?.components,
       },
       getUserIdToken

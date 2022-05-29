@@ -48,7 +48,14 @@ export default function SceneSettings() {
           <CustomTextField
             label="Scene Timer Duration"
             type="number"
+            value={currentScene?.time}
             fullWidth
+            onChange={(event) => {
+              setCurrentScene({
+                ...currentScene,
+                time: event.target.value,
+              });
+            }}
             InputProps={{
               endAdornment: (
                 <InputAdornment position="end">seconds</InputAdornment>

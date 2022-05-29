@@ -6,7 +6,7 @@ import { tryDeleteFile, updateFileMetadata } from "../../firebase/storage";
 /**
  * Creates a scene in the database, and updates its parent scenario to contain the scene
  * @param {String} scenarioId MongoDB ID of parent scenario
- * @param {{name: String, components: Object[]}} scene scene object
+ * @param {{name: String, components: Object[]}, time: Number} scene scene object
  * @returns the created database scene object
  */
 const createScene = async (scenarioId, scene) => {
@@ -30,7 +30,8 @@ const retrieveSceneList = async (scenarioId) => {
   const dbScenario = await Scenario.findById(scenarioId);
   const dbScenes = await Scene.find(
     { _id: { $in: dbScenario.scenes } },
-    "name"
+    "name",
+    "time"
   );
 
   return dbScenes;
@@ -50,7 +51,7 @@ const retrieveScene = async (sceneId) => {
 /**
  * Updates a scene in the database
  * @param {String} sceneId MongoDB ID of scene
- * @param {{name: String, components: Object[]}} updatedScene updated scene object
+ * @param {{name: String, components: Object[]}, time: Number} updatedScene updated scene object
  * @returns updated database scene object
  */
 const updateScene = async (sceneId, updatedScene) => {
@@ -79,6 +80,7 @@ const updateScene = async (sceneId, updatedScene) => {
   // if we are updating name only, components will be null
   const dbScene = await Scene.findById(sceneId);
   dbScene.name = updatedScene.name;
+  dbScene.time = updatedScene.time;
   await dbScene.save();
   return dbScene;
 };
@@ -118,6 +120,7 @@ const duplicateScene = async (scenarioId, sceneId) => {
   const newScene = {
     name: `${sceneToCopy.name} Copy`,
     components: sceneToCopy.components,
+    time: `${sceneToCopy.time} Copy`
   };
   const dbScene = new Scene(newScene);
   await dbScene.save();
