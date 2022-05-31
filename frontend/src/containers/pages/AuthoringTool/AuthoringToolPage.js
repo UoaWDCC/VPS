@@ -14,6 +14,7 @@ import ToolbarContextProvider from "../../../context/ToolbarContextProvider";
 import AuthenticationContext from "../../../context/AuthenticationContext";
 import { uploadFiles } from "../../../firebase/storage";
 import HelpButton from "../../../components/HelpButton";
+import SceneNavigator from "./SceneNavigator/SceneNavigator";
 
 /**
  * This page allows the user to edit a scene.
@@ -150,11 +151,13 @@ export default function AuthoringToolPage() {
           >
             Next
           </Button>
+          <HelpButton />
         </TopBar>
         <ToolbarContextProvider>
           <ToolBar />
         </ToolbarContextProvider>
         <div className="flex" style={{ height: "100%" }}>
+          <SceneNavigator />
           <Canvas />
           <CanvasSideBar />
         </div>
