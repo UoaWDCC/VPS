@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useContext } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useHistory, useRouteMatch } from "react-router-dom";
 import SceneContext from "../../../../context/SceneContext";
 import Thumbnail from "../../../../components/Thumbnail";
 
@@ -29,6 +29,7 @@ const SceneNavigator = () => {
   const [thumbnails, setThumbnails] = useState(null);
   const { scenes, setCurrentScene } = useContext(SceneContext);
   const { scenarioId } = useParams();
+  const history = useHistory();
 
   useEffect(() => {
     if (scenes.length !== 0) {
@@ -36,7 +37,12 @@ const SceneNavigator = () => {
         scenes.map((scene) => (
           <button
             type="button"
-            onClick={() => setCurrentScene(scene)}
+            onClick={() => {
+              setCurrentScene(scene);
+              history.push({
+                pathname: `/scenario/${scenarioId}/scene/${scene._id}`,
+              });
+            }}
             style={navigatorButtonStyle}
             key={scene._id}
           >
