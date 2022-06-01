@@ -1,0 +1,30 @@
+.sceneNavigator {
+  width: 10vw;
+  background-color: #f0f0f0;
+  filter: drop-shadow(2.5px 0 5px rgba(0, 0, 0, 0.1));
+  padding: 1rem 1rem 1rem 2rem;
+  display: flex;
+  flex-direction: column;
+  overflow-y: scroll;
+  gap: 1rem;
+
+  .sceneButton {
+    border: 3px solid transparent;
+    width: max-content;
+    background-color: transparent;
+    position: relative;
+    
+    .sceneText {
+      font-size: small;
+      z-index: 2;
+      position: absolute;
+      left: -20px;
+      top: -5px;
+      color: #727272
+    }
+  }
+
+  .sceneButton:hover {
+    border: 3px solid #cfcfcf;
+  }
+}
