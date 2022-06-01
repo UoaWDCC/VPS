@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useState } from "react";
-import { useHistory, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { Button } from "@material-ui/core";
 import TopBar from "../../../components/TopBar";
 import ToolBar from "./ToolBar/ToolBar";
@@ -34,8 +34,6 @@ export default function AuthoringToolPage() {
   const { setSelect } = useContext(AuthoringToolContext);
   const { getUserIdToken } = useContext(AuthenticationContext);
   const [firstTimeRender, setFirstTimeRender] = useState(true);
-  const history = useHistory();
-  console.log(scenes);
   useGet(
     `/api/scenario/${currentScenario?._id}/scene/full/${currentScene?._id}`,
     setCurrentScene,
@@ -52,7 +50,6 @@ export default function AuthoringToolPage() {
     } else {
       setMonitorChange(true);
     }
-    console.log("Thing changed");
   }, [currentScene]);
 
   /** called when save button is clicked */
@@ -91,8 +88,6 @@ export default function AuthoringToolPage() {
           })
           .indexOf(currentScene._id) + 1
       ];
-    console.log(currentScene);
-    console.log(currentScene._id);
 
     if (nextScene == null) return;
     setCurrentScene(nextScene);
@@ -107,8 +102,6 @@ export default function AuthoringToolPage() {
           })
           .indexOf(currentScene._id) - 1
       ];
-    console.log(currentScene);
-    console.log(currentScene._id);
 
     if (previousScene == null) return;
     setCurrentScene(previousScene);
@@ -157,7 +150,7 @@ export default function AuthoringToolPage() {
           <ToolBar />
         </ToolbarContextProvider>
         <div className="flex" style={{ height: "100%" }}>
-          <SceneNavigator />
+          <SceneNavigator saveScene={saveScene} />
           <Canvas />
           <CanvasSideBar />
         </div>

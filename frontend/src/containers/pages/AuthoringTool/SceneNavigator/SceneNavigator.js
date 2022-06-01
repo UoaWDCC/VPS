@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useContext } from "react";
-import { useParams, useHistory, useRouteMatch } from "react-router-dom";
+import { useParams, useHistory } from "react-router-dom";
 import SceneContext from "../../../../context/SceneContext";
 import Thumbnail from "../../../../components/Thumbnail";
 
@@ -12,7 +12,6 @@ const sceneNavigatorStyle = {
   display: "flex",
   flexDirection: "column",
   overflow: "scroll",
-  scrollbarWidth: "none",
   gap: "1rem",
 };
 
@@ -33,11 +32,12 @@ const navigatorTextStyle = {
   top: "-10px",
 };
 
-const SceneNavigator = () => {
+const SceneNavigator = (props) => {
   const [thumbnails, setThumbnails] = useState(null);
   const { scenes, setCurrentScene } = useContext(SceneContext);
   const { scenarioId } = useParams();
   const history = useHistory();
+  const { saveScene } = props;
 
   useEffect(() => {
     if (scenes.length !== 0) {
@@ -47,6 +47,7 @@ const SceneNavigator = () => {
             type="button"
             onClick={() => {
               setCurrentScene(scene);
+              saveScene();
               history.push({
                 pathname: `/scenario/${scenarioId}/scene/${scene._id}`,
               });
