@@ -8,7 +8,7 @@ const sceneNavigatorStyle = {
   height: "100%",
   backgroundColor: "#f0f0f0",
   filter: "drop-shadow(2.5px 0 5px rgba(0, 0, 0, 0.1))",
-  padding: "1rem",
+  padding: "1rem 1rem 1rem 2rem",
   display: "flex",
   flexDirection: "column",
   overflow: "scroll",
@@ -19,10 +19,18 @@ const sceneNavigatorStyle = {
 const navigatorButtonStyle = {
   padding: ".25rem",
   cursor: "pointer",
+  position: "relative",
 };
 
 const thumbnailStyle = {
   height: "auto",
+};
+
+const navigatorTextStyle = {
+  zIndex: "2",
+  position: "absolute",
+  left: "-20px",
+  top: "-10px",
 };
 
 const SceneNavigator = () => {
@@ -34,7 +42,7 @@ const SceneNavigator = () => {
   useEffect(() => {
     if (scenes.length !== 0) {
       setThumbnails(
-        scenes.map((scene) => (
+        scenes.map((scene, index) => (
           <button
             type="button"
             onClick={() => {
@@ -46,6 +54,7 @@ const SceneNavigator = () => {
             style={navigatorButtonStyle}
             key={scene._id}
           >
+            <p style={navigatorTextStyle}>{index + 1}</p>
             <Thumbnail
               url={`${process.env.PUBLIC_URL}/play/${scenarioId}/${scene._id}`}
               style={thumbnailStyle}
