@@ -31,7 +31,6 @@ const retrieveSceneList = async (scenarioId) => {
   const dbScenes = await Scene.find(
     { _id: { $in: dbScenario.scenes } },
     "name",
-    "time"
   );
 
   return dbScenes;
