@@ -7,7 +7,7 @@ import styles from "../../../../styling/SceneNavigator.module.scss";
 const SceneNavigator = (props) => {
   const [thumbnails, setThumbnails] = useState(null);
   const [sceneIndex, setSceneIndex] = useState(null);
-  const { scenes, setCurrentScene } = useContext(SceneContext);
+  const { scenes, currentSceneRef, setCurrentScene } = useContext(SceneContext);
   const { scenarioId } = useParams();
   const history = useHistory();
   const { saveScene } = props;
@@ -19,6 +19,7 @@ const SceneNavigator = (props) => {
           <button
             type="button"
             onClick={() => {
+              if (currentSceneRef.current._id === scene._id) return;
               setCurrentScene(scene);
               setSceneIndex(index);
               saveScene();
