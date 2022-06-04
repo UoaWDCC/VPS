@@ -61,6 +61,10 @@ export default function SceneSettings() {
                 <InputAdornment position="end">seconds</InputAdornment>
               ),
             }}
+            InputLabelProps={{
+              // label moves up whenever there is input
+              shrink: currentScene?.time || currentScene?.time === 0,
+            }}
           />
         </div>
       </div>
