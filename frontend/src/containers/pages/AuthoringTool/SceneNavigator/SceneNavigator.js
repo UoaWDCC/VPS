@@ -6,8 +6,8 @@ import styles from "../../../../styling/SceneNavigator.module.scss";
 
 const SceneNavigator = (props) => {
   const [thumbnails, setThumbnails] = useState(null);
-  const [sceneIndex, setSceneIndex] = useState(null);
-  const { scenes, currentSceneRef, setCurrentScene } = useContext(SceneContext);
+  const { scenes, currentScene, currentSceneRef, setCurrentScene } =
+    useContext(SceneContext);
   const { scenarioId } = useParams();
   const history = useHistory();
   const { saveScene } = props;
@@ -21,7 +21,6 @@ const SceneNavigator = (props) => {
             onClick={() => {
               if (currentSceneRef.current._id === scene._id) return;
               setCurrentScene(scene);
-              setSceneIndex(index);
               saveScene();
               history.push({
                 pathname: `/scenario/${scenarioId}/scene/${scene._id}`,
@@ -29,13 +28,19 @@ const SceneNavigator = (props) => {
             }}
             className={styles.sceneButton}
             style={
-              sceneIndex === index ? { border: "3px solid #008a7b" } : null
+              currentScene._id === scene._id
+                ? {
+                    border: "3px solid #008a7b",
+                  }
+                : null
             }
             key={scene._id}
           >
             <p
               className={styles.sceneText}
-              style={sceneIndex === index ? { color: "#008a7b" } : null}
+              style={
+                currentScene._id === scene._id ? { color: "#008a7b" } : null
+              }
             >
               {index + 1}
             </p>
@@ -48,7 +53,7 @@ const SceneNavigator = (props) => {
         ))
       );
     }
-  }, [scenes]);
+  }, [scenes, currentScene]);
 
   return <div className={styles.sceneNavigator}>{thumbnails}</div>;
 };

@@ -52,6 +52,7 @@ export function SceneSelectionPage({ data = null }) {
   /** called when Edit button is clicked */
   async function editScene() {
     if (currentScene != null) {
+      setCurrentScene(currentScene);
       history.push({
         pathname: `${url}/scene/${currentScene._id}`,
       });
