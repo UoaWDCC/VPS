@@ -149,7 +149,7 @@ export default function AuthoringToolPage() {
         <ToolbarContextProvider>
           <ToolBar />
         </ToolbarContextProvider>
-        <div className="flex" style={{ height: "100%" }}>
+        <div className="flex" style={{ height: "100%", overflow: "hidden" }}>
           <SceneNavigator saveScene={saveScene} />
           <Canvas />
           <CanvasSideBar />
