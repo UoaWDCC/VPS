@@ -51,9 +51,12 @@ export default function SceneSettings() {
             value={currentScene?.time}
             fullWidth
             onChange={(event) => {
+              // limiting scene timer duration
+              const timeInput = event.target.value < 0 ? 0 : event.target.value;
+
               setCurrentScene({
                 ...currentScene,
-                time: event.target.value,
+                time: timeInput,
               });
             }}
             InputProps={{
