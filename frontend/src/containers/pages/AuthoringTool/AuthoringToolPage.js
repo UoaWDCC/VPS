@@ -34,6 +34,7 @@ export default function AuthoringToolPage() {
   const { setSelect } = useContext(AuthoringToolContext);
   const { getUserIdToken } = useContext(AuthenticationContext);
   const [firstTimeRender, setFirstTimeRender] = useState(true);
+  const [saveButtonText, setSaveButtonText] = useState("Save");
   useGet(
     `/api/scenario/${currentScenario?._id}/scene/full/${currentScene?._id}`,
     setCurrentScene,
@@ -52,7 +53,7 @@ export default function AuthoringToolPage() {
     }
   }, [currentScene]);
 
-  /** called when save button is clicked */
+  /** used to save the scene, as a helper function */
   async function saveScene() {
     setSelect(null);
     await uploadFiles(
@@ -70,6 +71,15 @@ export default function AuthoringToolPage() {
     );
     setHasChange(false);
     reFetch();
+  }
+
+  /** called when save button is clicked */
+  async function save() {
+    saveScene();
+    setSaveButtonText("Saved!");
+    setTimeout(() => {
+      setSaveButtonText("Save");
+    }, 1800);
   }
 
   /** called when save and close button is clicked */
@@ -115,9 +125,9 @@ export default function AuthoringToolPage() {
             className="btn top contained white"
             color="default"
             variant="contained"
-            onClick={saveScene}
+            onClick={save}
           >
-            Save
+            {saveButtonText}
           </Button>
           <Button
             className="btn top contained white"
