@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useHistory, useParams } from "react-router-dom";
 import { Button } from "@material-ui/core";
 import TopBar from "../../../components/TopBar";
 import ToolBar from "./ToolBar/ToolBar";
@@ -35,13 +35,18 @@ export default function AuthoringToolPage() {
   const { getUserIdToken } = useContext(AuthenticationContext);
   const [firstTimeRender, setFirstTimeRender] = useState(true);
   const [saveButtonText, setSaveButtonText] = useState("Save");
+  const scenesIDs = scenes.map((obj) => obj._id);
+  const [sceneIndex, setSceneIndex] = useState(
+    scenesIDs.indexOf(currentScenario._id)
+  );
+  const history = useHistory();
   useGet(
     `/api/scenario/${currentScenario?._id}/scene/full/${currentScene?._id}`,
     setCurrentScene,
     false
   );
 
-  useEffect(() => {
+  useEffect(async () => {
     reFetch();
   }, []);
 
@@ -51,6 +56,7 @@ export default function AuthoringToolPage() {
     } else {
       setMonitorChange(true);
     }
+    setSceneIndex(scenesIDs.indexOf(currentScene._id));
   }, [currentScene]);
 
   /** used to save the scene, as a helper function */
@@ -89,34 +95,6 @@ export default function AuthoringToolPage() {
     window.location.href = `/scenario/${currentScenario?._id}`;
   }
 
-  async function next() {
-    const nextScene =
-      scenes[
-        scenes
-          .map((obj) => {
-            return obj._id;
-          })
-          .indexOf(currentScene._id) + 1
-      ];
-
-    if (nextScene == null) return;
-    setCurrentScene(nextScene);
-  }
-
-  function before() {
-    const previousScene =
-      scenes[
-        scenes
-          .map((obj) => {
-            return obj._id;
-          })
-          .indexOf(currentScene._id) - 1
-      ];
-
-    if (previousScene == null) return;
-    setCurrentScene(previousScene);
-  }
-
   return (
     <>
       <ScreenContainer vertical>
@@ -139,18 +117,42 @@ export default function AuthoringToolPage() {
           </Button>
 
           <Button
-            className="btn top contained white"
+            className={`btn top contained white ${
+              sceneIndex - 1 < 0 ? "disabled" : ""
+            }`}
             color="default"
             variant="contained"
-            onClick={before}
+            disabled={sceneIndex - 1 < 0}
+            onClick={() => {
+              if (sceneIndex - 1 < 0) return;
+              setCurrentScene(scenes[sceneIndex - 1]);
+              saveScene();
+              history.push({
+                pathname: `/scenario/${scenarioId}/scene/${
+                  scenes[sceneIndex - 1]._id
+                }`,
+              });
+            }}
           >
             Before
           </Button>
           <Button
-            className="btn top contained white"
+            className={`btn top contained white ${
+              sceneIndex + 1 >= scenes.length ? "disabled" : ""
+            }`}
             color="default"
             variant="contained"
-            onClick={next}
+            disabled={sceneIndex + 1 >= scenes.length}
+            onClick={() => {
+              if (sceneIndex + 1 >= scenes.length) return;
+              setCurrentScene(scenes[sceneIndex + 1]);
+              saveScene();
+              history.push({
+                pathname: `/scenario/${scenarioId}/scene/${
+                  scenes[sceneIndex + 1]._id
+                }`,
+              });
+            }}
           >
             Next
           </Button>
