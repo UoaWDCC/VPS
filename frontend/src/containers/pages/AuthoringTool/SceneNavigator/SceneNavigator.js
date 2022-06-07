@@ -13,7 +13,7 @@ const SceneNavigator = (props) => {
   const { saveScene } = props;
 
   useEffect(() => {
-    if (scenes.length !== 0) {
+    if (scenes !== undefined) {
       setThumbnails(
         scenes.map((scene, index) => (
           <button

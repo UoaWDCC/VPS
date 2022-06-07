@@ -51,6 +51,76 @@ exports[`Authoring Tool page snapshot test 1`] = `
                 class="MuiTouchRipple-root"
               />
             </button>
+            <button
+              class="MuiButtonBase-root MuiButton-root MuiButton-contained btn top contained white"
+              tabindex="0"
+              type="button"
+            >
+              <span
+                class="MuiButton-label"
+              >
+                Save & close
+              </span>
+              <span
+                class="MuiTouchRipple-root"
+              />
+            </button>
+            <button
+              class="MuiButtonBase-root MuiButton-root MuiButton-contained btn top contained white"
+              tabindex="0"
+              type="button"
+            >
+              <span
+                class="MuiButton-label"
+              >
+                Before
+              </span>
+              <span
+                class="MuiTouchRipple-root"
+              />
+            </button>
+            <button
+              class="MuiButtonBase-root MuiButton-root MuiButton-contained btn top contained white"
+              tabindex="0"
+              type="button"
+            >
+              <span
+                class="MuiButton-label"
+              >
+                Next
+              </span>
+              <span
+                class="MuiTouchRipple-root"
+              />
+            </button>
+            <button
+              class="MuiButtonBase-root MuiButton-root MuiButton-outlined btn outlined white top"
+              tabindex="0"
+              type="button"
+            >
+              <span
+                class="MuiButton-label"
+              >
+                <span
+                  class="MuiButton-startIcon MuiButton-iconSizeMedium"
+                >
+                  <svg
+                    aria-hidden="true"
+                    class="MuiSvgIcon-root"
+                    focusable="false"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17h-2v-2h2v2zm2.07-7.75l-.9.92C13.45 12.9 13 13.5 13 15h-2v-.5c0-1.1.45-2.1 1.17-2.83l1.24-1.26c.37-.36.59-.86.59-1.41 0-1.1-.9-2-2-2s-2 .9-2 2H8c0-2.21 1.79-4 4-4s4 1.79 4 4c0 .88-.36 1.68-.93 2.25z"
+                    />
+                  </svg>
+                </span>
+                Help
+              </span>
+              <span
+                class="MuiTouchRipple-root"
+              />
+            </button>
           </li>
         </ul>
       </div>
@@ -84,6 +154,11 @@ exports[`Authoring Tool page snapshot test 1`] = `
                     d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"
                   />
                 </svg>
+                 
+                <p>
+                  Add 
+                  Image
+                </p>
                 <svg
                   aria-hidden="true"
                   class="MuiSvgIcon-root MuiSvgIcon-fontSizeSmall"
@@ -120,6 +195,11 @@ exports[`Authoring Tool page snapshot test 1`] = `
                     d="M2.5 4v3h5v12h3V7h5V4h-13zm19 5h-9v3h3v7h3v-7h3V9z"
                   />
                 </svg>
+                 
+                <p>
+                  Add 
+                  Text
+                </p>
               </span>
               <span
                 class="MuiTouchRipple-root"
@@ -146,6 +226,11 @@ exports[`Authoring Tool page snapshot test 1`] = `
                     d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm5 11h-4v4h-2v-4H7v-2h4V7h2v4h4v2z"
                   />
                 </svg>
+                 
+                <p>
+                  Add 
+                  Button
+                </p>
               </span>
               <span
                 class="MuiTouchRipple-root"
@@ -172,6 +257,11 @@ exports[`Authoring Tool page snapshot test 1`] = `
                     d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"
                   />
                 </svg>
+                 
+                <p>
+                  Add 
+                  Audio
+                </p>
                 <svg
                   aria-hidden="true"
                   class="MuiSvgIcon-root MuiSvgIcon-fontSizeSmall"
@@ -192,8 +282,11 @@ exports[`Authoring Tool page snapshot test 1`] = `
       </ul>
       <div
         class="flex"
-        style="height: 100%;"
+        style="height: 100%; overflow: hidden;"
       >
+        <div
+          class="sceneNavigator"
+        />
         <div
           class="moveable-control-box    rCSuehiy8"
           data-able-draggable="true"
