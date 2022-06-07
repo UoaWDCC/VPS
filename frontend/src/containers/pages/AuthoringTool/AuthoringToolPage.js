@@ -35,10 +35,8 @@ export default function AuthoringToolPage() {
   const { getUserIdToken } = useContext(AuthenticationContext);
   const [firstTimeRender, setFirstTimeRender] = useState(true);
   const [saveButtonText, setSaveButtonText] = useState("Save");
-  const scenesIDs = scenes.map((obj) => obj._id);
-  const [sceneIndex, setSceneIndex] = useState(
-    scenesIDs.indexOf(currentScenario._id)
-  );
+  const [disableNext, setDisableNext] = useState(false);
+  const [disableBefore, setDisableBefore] = useState(false);
   const history = useHistory();
   useGet(
     `/api/scenario/${currentScenario?._id}/scene/full/${currentScene?._id}`,
@@ -56,7 +54,6 @@ export default function AuthoringToolPage() {
     } else {
       setMonitorChange(true);
     }
-    setSceneIndex(scenesIDs.indexOf(currentScene._id));
   }, [currentScene]);
 
   /** used to save the scene, as a helper function */
@@ -95,6 +92,30 @@ export default function AuthoringToolPage() {
     window.location.href = `/scenario/${currentScenario?._id}`;
   }
 
+  function updateScene(direction) {
+    const ids = scenes.map((scene) => scene._id);
+    const oldIndex = ids.indexOf(currentScene._id);
+    const newIndex = oldIndex + direction;
+
+    if (newIndex > -1 && newIndex < ids.length) {
+      saveScene();
+      setDisableBefore(false);
+      setDisableNext(false);
+      setCurrentScene(scenes[newIndex]);
+      history.push({
+        pathname: `/scenario/${scenarioId}/scene/${scenes[newIndex]._id}`,
+      });
+    }
+
+    if (newIndex === ids.length - 1) {
+      setDisableNext(true);
+    }
+
+    if (newIndex === 0) {
+      setDisableBefore(true);
+    }
+  }
+
   return (
     <>
       <ScreenContainer vertical>
@@ -115,44 +136,25 @@ export default function AuthoringToolPage() {
           >
             Save & close
           </Button>
-
           <Button
             className={`btn top contained white ${
-              sceneIndex - 1 < 0 ? "disabled" : ""
+              disableBefore ? "disabled" : ""
             }`}
             color="default"
             variant="contained"
-            disabled={sceneIndex - 1 < 0}
-            onClick={() => {
-              if (sceneIndex - 1 < 0) return;
-              setCurrentScene(scenes[sceneIndex - 1]);
-              saveScene();
-              history.push({
-                pathname: `/scenario/${scenarioId}/scene/${
-                  scenes[sceneIndex - 1]._id
-                }`,
-              });
-            }}
+            disabled={disableBefore}
+            onClick={() => updateScene(-1)}
           >
             Before
           </Button>
           <Button
             className={`btn top contained white ${
-              sceneIndex + 1 >= scenes.length ? "disabled" : ""
+              disableNext ? "disabled" : ""
             }`}
             color="default"
             variant="contained"
-            disabled={sceneIndex + 1 >= scenes.length}
-            onClick={() => {
-              if (sceneIndex + 1 >= scenes.length) return;
-              setCurrentScene(scenes[sceneIndex + 1]);
-              saveScene();
-              history.push({
-                pathname: `/scenario/${scenarioId}/scene/${
-                  scenes[sceneIndex + 1]._id
-                }`,
-              });
-            }}
+            disabled={disableNext}
+            onClick={() => updateScene(1)}
           >
             Next
           </Button>

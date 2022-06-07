@@ -66,7 +66,7 @@ exports[`Authoring Tool page snapshot test 1`] = `
               />
             </button>
             <button
-              class="MuiButtonBase-root MuiButton-root MuiButton-contained btn top contained white"
+              class="MuiButtonBase-root MuiButton-root MuiButton-contained btn top contained white "
               tabindex="0"
               type="button"
             >
@@ -80,7 +80,7 @@ exports[`Authoring Tool page snapshot test 1`] = `
               />
             </button>
             <button
-              class="MuiButtonBase-root MuiButton-root MuiButton-contained btn top contained white"
+              class="MuiButtonBase-root MuiButton-root MuiButton-contained btn top contained white "
               tabindex="0"
               type="button"
             >
