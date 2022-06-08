@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useState } from "react";
-import { useHistory, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { Button } from "@material-ui/core";
 import TopBar from "../../../components/TopBar";
 import ToolBar from "./ToolBar/ToolBar";
@@ -13,7 +13,6 @@ import AuthoringToolContext from "../../../context/AuthoringToolContext";
 import ToolbarContextProvider from "../../../context/ToolbarContextProvider";
 import AuthenticationContext from "../../../context/AuthenticationContext";
 import { uploadFiles } from "../../../firebase/storage";
-import HelpButton from "../../../components/HelpButton";
 
 /**
  * This page allows the user to edit a scene.
@@ -32,7 +31,7 @@ export default function AuthoringToolPage() {
   const { setSelect } = useContext(AuthoringToolContext);
   const { getUserIdToken } = useContext(AuthenticationContext);
   const [firstTimeRender, setFirstTimeRender] = useState(true);
-  const history = useHistory();
+  // const history = useHistory();
 
   useGet(
     `/api/scenario/${currentScenario?._id}/scene/full/${currentScene?._id}`,
