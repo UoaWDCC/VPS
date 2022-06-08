@@ -40,7 +40,11 @@ router.use(scenarioAuth);
 router.post("/", async (req, res) => {
   const { name, components, time } = req.body;
 
-  const scene = await createScene(req.params.scenarioId, { name, components, time });
+  const scene = await createScene(req.params.scenarioId, {
+    name,
+    components,
+    time,
+  });
 
   res.status(HTTP_OK).json(scene);
 });
@@ -49,7 +53,11 @@ router.post("/", async (req, res) => {
 router.put("/:sceneId", async (req, res) => {
   const { name, components, time } = req.body;
 
-  const scene = await updateScene(req.params.sceneId, { name, components, time });
+  const scene = await updateScene(req.params.sceneId, {
+    name,
+    components,
+    time,
+  });
 
   res.status(HTTP_OK).json(scene);
 });

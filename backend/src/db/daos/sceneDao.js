@@ -30,7 +30,7 @@ const retrieveSceneList = async (scenarioId) => {
   const dbScenario = await Scenario.findById(scenarioId);
   const dbScenes = await Scene.find(
     { _id: { $in: dbScenario.scenes } },
-    "name",
+    "name"
   );
 
   return dbScenes;
@@ -119,7 +119,7 @@ const duplicateScene = async (scenarioId, sceneId) => {
   const newScene = {
     name: `${sceneToCopy.name} Copy`,
     components: sceneToCopy.components,
-    time: `${sceneToCopy.time} Copy`
+    time: `${sceneToCopy.time} Copy`,
   };
   const dbScene = new Scene(newScene);
   await dbScene.save();
