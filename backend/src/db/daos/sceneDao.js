@@ -119,7 +119,6 @@ const duplicateScene = async (scenarioId, sceneId) => {
   const newScene = {
     name: `${sceneToCopy.name} Copy`,
     components: sceneToCopy.components,
-
   };
   const dbScene = new Scene(newScene);
   await dbScene.save();
