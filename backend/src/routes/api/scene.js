@@ -38,18 +38,26 @@ router.use(scenarioAuth);
 
 // Create a scene for a scenario
 router.post("/", async (req, res) => {
-  const { name, components } = req.body;
+  const { name, components, time } = req.body;
 
-  const scene = await createScene(req.params.scenarioId, { name, components });
+  const scene = await createScene(req.params.scenarioId, {
+    name,
+    components,
+    time,
+  });
 
   res.status(HTTP_OK).json(scene);
 });
 
 // Update a scene
 router.put("/:sceneId", async (req, res) => {
-  const { name, components } = req.body;
+  const { name, components, time } = req.body;
 
-  const scene = await updateScene(req.params.sceneId, { name, components });
+  const scene = await updateScene(req.params.sceneId, {
+    name,
+    components,
+    time,
+  });
 
   res.status(HTTP_OK).json(scene);
 });

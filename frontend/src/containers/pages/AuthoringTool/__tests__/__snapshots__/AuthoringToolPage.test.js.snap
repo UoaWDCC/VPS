@@ -51,6 +51,20 @@ exports[`Authoring Tool page snapshot test 1`] = `
                 class="MuiTouchRipple-root"
               />
             </button>
+            <button
+              class="MuiButtonBase-root MuiButton-root MuiButton-contained btn top contained white"
+              tabindex="0"
+              type="button"
+            >
+              <span
+                class="MuiButton-label"
+              >
+                Save & close
+              </span>
+              <span
+                class="MuiTouchRipple-root"
+              />
+            </button>
           </li>
         </ul>
       </div>
@@ -84,6 +98,11 @@ exports[`Authoring Tool page snapshot test 1`] = `
                     d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"
                   />
                 </svg>
+                 
+                <p>
+                  Add 
+                  Image
+                </p>
                 <svg
                   aria-hidden="true"
                   class="MuiSvgIcon-root MuiSvgIcon-fontSizeSmall"
@@ -120,6 +139,11 @@ exports[`Authoring Tool page snapshot test 1`] = `
                     d="M2.5 4v3h5v12h3V7h5V4h-13zm19 5h-9v3h3v7h3v-7h3V9z"
                   />
                 </svg>
+                 
+                <p>
+                  Add 
+                  Text
+                </p>
               </span>
               <span
                 class="MuiTouchRipple-root"
@@ -146,6 +170,11 @@ exports[`Authoring Tool page snapshot test 1`] = `
                     d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm5 11h-4v4h-2v-4H7v-2h4V7h2v4h4v2z"
                   />
                 </svg>
+                 
+                <p>
+                  Add 
+                  Button
+                </p>
               </span>
               <span
                 class="MuiTouchRipple-root"
@@ -172,6 +201,11 @@ exports[`Authoring Tool page snapshot test 1`] = `
                     d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"
                   />
                 </svg>
+                 
+                <p>
+                  Add 
+                  Audio
+                </p>
                 <svg
                   aria-hidden="true"
                   class="MuiSvgIcon-root MuiSvgIcon-fontSizeSmall"
@@ -325,6 +359,35 @@ exports[`Authoring Tool page snapshot test 1`] = `
                     type="text"
                     value=""
                   />
+                </div>
+              </div>
+              <div
+                class="MuiFormControl-root MuiTextField-root WithStyles(ForwardRef(TextField))-root-2 MuiFormControl-fullWidth"
+              >
+                <label
+                  class="MuiFormLabel-root MuiInputLabel-root MuiInputLabel-formControl MuiInputLabel-animated"
+                  data-shrink="false"
+                >
+                  Scene Timer Duration
+                </label>
+                <div
+                  class="MuiInputBase-root MuiInput-root MuiInput-underline MuiInputBase-fullWidth MuiInput-fullWidth MuiInputBase-formControl MuiInput-formControl MuiInputBase-adornedEnd"
+                >
+                  <input
+                    aria-invalid="false"
+                    class="MuiInputBase-input MuiInput-input MuiInputBase-inputAdornedEnd"
+                    type="number"
+                    value=""
+                  />
+                  <div
+                    class="MuiInputAdornment-root MuiInputAdornment-positionEnd"
+                  >
+                    <p
+                      class="MuiTypography-root MuiTypography-body1 MuiTypography-colorTextSecondary"
+                    >
+                      seconds
+                    </p>
+                  </div>
                 </div>
               </div>
             </div>

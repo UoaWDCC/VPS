@@ -42,6 +42,42 @@ exports[`Scenario Selection page snapshot test 1`] = `
           />
         </div>
       </div>
+      <div
+        className="MuiFormControl-root MuiTextField-root WithStyles(ForwardRef(TextField))-root-1 MuiFormControl-fullWidth"
+      >
+        <label
+          className="MuiFormLabel-root MuiInputLabel-root MuiInputLabel-formControl MuiInputLabel-animated"
+          data-shrink={false}
+        >
+          Scene Timer Duration
+        </label>
+        <div
+          className="MuiInputBase-root MuiInput-root MuiInput-underline MuiInputBase-fullWidth MuiInput-fullWidth MuiInputBase-formControl MuiInput-formControl MuiInputBase-adornedEnd"
+          onClick={[Function]}
+        >
+          <input
+            aria-invalid={false}
+            autoFocus={false}
+            className="MuiInputBase-input MuiInput-input MuiInputBase-inputAdornedEnd"
+            disabled={false}
+            onAnimationStart={[Function]}
+            onBlur={[Function]}
+            onChange={[Function]}
+            onFocus={[Function]}
+            required={false}
+            type="number"
+          />
+          <div
+            className="MuiInputAdornment-root MuiInputAdornment-positionEnd"
+          >
+            <p
+              className="MuiTypography-root MuiTypography-body1 MuiTypography-colorTextSecondary"
+            >
+              seconds
+            </p>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
   <div
