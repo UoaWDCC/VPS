@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useHistory } from "react-router-dom";
 import { Button } from "@material-ui/core";
 import TopBar from "../../../components/TopBar";
 import ToolBar from "./ToolBar/ToolBar";
@@ -13,6 +13,8 @@ import AuthoringToolContext from "../../../context/AuthoringToolContext";
 import ToolbarContextProvider from "../../../context/ToolbarContextProvider";
 import AuthenticationContext from "../../../context/AuthenticationContext";
 import { uploadFiles } from "../../../firebase/storage";
+import HelpButton from "../../../components/HelpButton";
+import SceneNavigator from "./SceneNavigator/SceneNavigator";
 
 /**
  * This page allows the user to edit a scene.
@@ -21,6 +23,7 @@ import { uploadFiles } from "../../../firebase/storage";
 export default function AuthoringToolPage() {
   const { scenarioId, sceneId } = useParams();
   const {
+    scenes,
     currentScene,
     setCurrentScene,
     setMonitorChange,
@@ -31,7 +34,10 @@ export default function AuthoringToolPage() {
   const { setSelect } = useContext(AuthoringToolContext);
   const { getUserIdToken } = useContext(AuthenticationContext);
   const [firstTimeRender, setFirstTimeRender] = useState(true);
-  // const history = useHistory();
+  const [saveButtonText, setSaveButtonText] = useState("Save");
+  const [disableNext, setDisableNext] = useState(false);
+  const [disableBefore, setDisableBefore] = useState(false);
+  const history = useHistory();
 
   useGet(
     `/api/scenario/${currentScenario?._id}/scene/full/${currentScene?._id}`,
@@ -39,7 +45,7 @@ export default function AuthoringToolPage() {
     false
   );
 
-  useEffect(() => {
+  useEffect(async () => {
     reFetch();
   }, []);
 
@@ -51,7 +57,7 @@ export default function AuthoringToolPage() {
     }
   }, [currentScene]);
 
-  /** called when save button is clicked */
+  /** used to save the scene, as a helper function */
   async function saveScene() {
     setSelect(null);
     await uploadFiles(
@@ -72,11 +78,44 @@ export default function AuthoringToolPage() {
     reFetch();
   }
 
+  /** called when save button is clicked */
+  async function save() {
+    saveScene();
+    setSaveButtonText("Saved!");
+    setTimeout(() => {
+      setSaveButtonText("Save");
+    }, 1800);
+  }
+
   /** called when save and close button is clicked */
   function savePlusClose() {
     saveScene();
     /* redirects user to the scenario page */
     window.location.href = `/scenario/${currentScenario?._id}`;
+  }
+
+  function updateScene(direction) {
+    const ids = scenes.map((scene) => scene._id);
+    const oldIndex = ids.indexOf(currentScene._id);
+    const newIndex = oldIndex + direction;
+
+    if (newIndex > -1 && newIndex < ids.length) {
+      saveScene();
+      setDisableBefore(false);
+      setDisableNext(false);
+      setCurrentScene(scenes[newIndex]);
+      history.push({
+        pathname: `/scenario/${scenarioId}/scene/${scenes[newIndex]._id}`,
+      });
+    }
+
+    if (newIndex === ids.length - 1) {
+      setDisableNext(true);
+    }
+
+    if (newIndex === 0) {
+      setDisableBefore(true);
+    }
   }
 
   return (
@@ -87,9 +126,9 @@ export default function AuthoringToolPage() {
             className="btn top contained white"
             color="default"
             variant="contained"
-            onClick={saveScene}
+            onClick={save}
           >
-            Save
+            {saveButtonText}
           </Button>
           <Button
             className="btn top contained white"
@@ -99,11 +138,35 @@ export default function AuthoringToolPage() {
           >
             Save & close
           </Button>
+          <Button
+            className={`btn top contained white ${
+              disableBefore ? "disabled" : ""
+            }`}
+            color="default"
+            variant="contained"
+            disabled={disableBefore}
+            onClick={() => updateScene(-1)}
+          >
+            Before
+          </Button>
+          <Button
+            className={`btn top contained white ${
+              disableNext ? "disabled" : ""
+            }`}
+            color="default"
+            variant="contained"
+            disabled={disableNext}
+            onClick={() => updateScene(1)}
+          >
+            Next
+          </Button>
+          <HelpButton />
         </TopBar>
         <ToolbarContextProvider>
           <ToolBar />
         </ToolbarContextProvider>
-        <div className="flex" style={{ height: "100%" }}>
+        <div className="flex" style={{ height: "100%", overflow: "hidden" }}>
+          <SceneNavigator saveScene={saveScene} />
           <Canvas />
           <CanvasSideBar />
         </div>

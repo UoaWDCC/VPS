@@ -51,10 +51,13 @@ const HelpButton = (props) => {
       >
         <Box sx={style}>
           <Typography id="modal-modal-title" variant="h6" component="h2">
-            Help Section
+            Help
           </Typography>
           <Typography id="modal-modal-description" sx={{ mt: 2 }}>
-            Duis mollis, est non commodo luctus, nisi erat porttitor ligula.
+            Welcome to the Virtual Patient Simulator! To create a new scenario,
+            click Create and start adding scenes. To play an existing scenario,
+            click Play. To edit an existing scenario or the scenes within it,
+            click Edit. To delete a scenario, click Delete.
           </Typography>
         </Box>
       </Modal>
