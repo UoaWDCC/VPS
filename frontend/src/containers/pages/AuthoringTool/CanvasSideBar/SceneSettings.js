@@ -1,12 +1,16 @@
 import React, { useContext } from "react";
 import TextField from "@material-ui/core/TextField";
 import { withStyles } from "@material-ui/core/styles";
+import { InputAdornment } from "@material-ui/core";
 import SceneContext from "../../../../context/SceneContext";
 
 import styles from "../../../../styling/CanvasSideBar.module.scss";
 
 const CustomTextField = withStyles({
   root: {
+    marginTop: "0.5em",
+    marginBottom: "1.5em",
+
     "& label.Mui-focused": {
       color: "#008a7b",
     },
@@ -28,6 +32,7 @@ export default function SceneSettings() {
       <div className={styles.sceneSettingsContainer}>
         <h1 className={styles.sideBarHeader}>Scene Settings</h1>
         <div className={styles.sideBarBody}>
+          {/* input for scene name */}
           <CustomTextField
             label="Scene Name"
             value={currentScene?.name}
@@ -37,6 +42,31 @@ export default function SceneSettings() {
                 ...currentScene,
                 name: event.target.value,
               });
+            }}
+          />
+          {/* input for scene timer duration */}
+          <CustomTextField
+            label="Scene Timer Duration"
+            type="number"
+            value={currentScene?.time}
+            fullWidth
+            onChange={(event) => {
+              // limiting scene timer duration
+              const timeInput = event.target.value < 0 ? 0 : event.target.value;
+
+              setCurrentScene({
+                ...currentScene,
+                time: timeInput,
+              });
+            }}
+            InputProps={{
+              endAdornment: (
+                <InputAdornment position="end">seconds</InputAdornment>
+              ),
+            }}
+            InputLabelProps={{
+              // label moves up whenever there is input
+              shrink: currentScene?.time || currentScene?.time === 0,
             }}
           />
         </div>

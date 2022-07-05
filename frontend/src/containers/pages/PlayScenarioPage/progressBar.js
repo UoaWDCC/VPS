@@ -10,14 +10,14 @@ const ProgressBar = ({ value }) => {
   };
 
   return (
-    <div>
+    <>
       <LinearProgress
         style={styles}
         variant="determinate"
         value={value}
         color="inherit"
       />
-    </div>
+    </>
   );
 };
 
