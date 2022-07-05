@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useHistory } from "react-router-dom";
 import { Button } from "@material-ui/core";
 import TopBar from "../../../components/TopBar";
 import ToolBar from "./ToolBar/ToolBar";
@@ -38,7 +38,7 @@ export default function AuthoringToolPage() {
   const [disableNext, setDisableNext] = useState(false);
   const [disableBefore, setDisableBefore] = useState(false);
   const history = useHistory();
-  
+
   useGet(
     `/api/scenario/${currentScenario?._id}/scene/full/${currentScene?._id}`,
     setCurrentScene,
