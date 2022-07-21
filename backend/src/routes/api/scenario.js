@@ -7,6 +7,7 @@ import {
   retrieveScenarioList,
   updateScenario,
   deleteScenario,
+  updateDurations,
 } from "../../db/daos/scenarioDao";
 
 import scene from "./scene";
@@ -43,10 +44,16 @@ router.use("/:scenarioId", scenarioAuth);
 
 // Update a scenario by a user
 router.put("/:scenarioId", async (req, res) => {
-  const { name } = req.body;
-  const scenario = await updateScenario(req.params.scenarioId, {
+  const { name, duration } = req.body;
+  let scenario = await updateScenario(req.params.scenarioId, {
     name,
   });
+
+  scenario = await updateDurations(req.params.scenarioId, {
+    duration,
+  });
+
+  debugger;
 
   res.status(HTTP_OK).json(scenario);
 });

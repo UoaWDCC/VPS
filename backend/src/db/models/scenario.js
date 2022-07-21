@@ -18,6 +18,10 @@ const scenarioSchema = new Schema({
       ref: "Scene",
     },
   ],
+  duration: {
+    type: Object,
+    required: false,
+  },
 });
 
 // before removal of a scenario from the database, first remove all its scenes
