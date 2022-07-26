@@ -23,11 +23,11 @@ export default function App() {
             <Switch>
               <Route exact path="/login" component={LoginPage} />
 
-              <Route path="/play/:scenarioId/:urlSceneId?">
+              <ProtectedRoute path="/play/:scenarioId/:urlSceneId?">
                 <PlayingScenarioContextProvider>
                   <PlayScenarioPage />
                 </PlayingScenarioContextProvider>
-              </Route>
+              </ProtectedRoute>
 
               <ProtectedRoute exact path="/">
                 <ScenarioContextProvider>
