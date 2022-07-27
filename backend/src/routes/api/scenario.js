@@ -53,8 +53,6 @@ router.put("/:scenarioId", async (req, res) => {
     duration,
   });
 
-  debugger;
-
   res.status(HTTP_OK).json(scenario);
 });
 
