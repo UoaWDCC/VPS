@@ -37,6 +37,12 @@ export default function SideBar() {
     history.push(`/scenario/${newScenario._id}`);
   }
 
+  /** Calls backend end point to switch to the lecturer's dashboard */
+  // END POINT NOT CREATED YET
+  function openDashboard() {
+    history.push("/dashboard");
+  }
+
   /** Calls backend end point to delete a scenario. */
   async function deleteScenario() {
     await useDelete(`/api/scenario/${currentScenario._id}`, getUserIdToken);
@@ -68,6 +74,17 @@ export default function SideBar() {
               }}
             >
               Create
+            </Button>
+          </li>
+          <li>
+            <Button
+              className="btn side contained white"
+              color="default"
+              variant="contained"
+              onClick={openDashboard}
+              // disabled={!authenticated}
+            >
+              Dashboard
             </Button>
           </li>
           <li>
