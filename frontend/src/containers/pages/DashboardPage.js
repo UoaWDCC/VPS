@@ -8,7 +8,6 @@ export default function DashboardPage() {
   return (
     <ScreenContainer vertical>
       <Button>TEST</Button>
-      <StaffAuth />
     </ScreenContainer>
   );
 }
