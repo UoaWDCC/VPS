@@ -11,6 +11,8 @@ import {
 import auth from "../../middleware/firebaseAuth";
 import scenarioAuth from "../../middleware/scenarioAuth";
 
+import ScenarioGraph from "../../models/ScenarioGraph";
+
 const router = Router({ mergeParams: true });
 
 const HTTP_OK = 200;
@@ -27,9 +29,24 @@ router.get("/full/:sceneId", async (req, res) => {
 // Retrieve all scenes of a scenario
 router.get("/", async (req, res) => {
   const scenes = await retrieveSceneList(req.params.scenarioId);
-
   res.json(scenes);
 });
+
+// Get graph
+router.get("/graph", async (req, res) => {
+  const scenes = await retrieveSceneList(req.params.scenarioId);
+  let fullScenes = [];
+  
+  // Get FULL scene data - should really change this to run in parallel for better runtime
+  for await (const scene of scenes) {
+    const fullScene = await retrieveScene(scene._id);
+    fullScenes.push(fullScene);
+  }
+
+  const scenarioGraph = new ScenarioGraph(fullScenes);
+  res.json(scenarioGraph.graph);
+
+})
 
 // Apply auth middleware to all routes below this point
 router.use(auth);

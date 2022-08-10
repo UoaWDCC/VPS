@@ -1,9 +1,10 @@
-import React, { useContext } from "react";
+import React, { useContext, useState, useEffect } from "react";
 import useStyles from "./playScenarioPage.styles";
 import PlayScenarioContext from "../../../context/PlayScenarioContext";
 import PlayScenarioCanvas from "./PlayScenarioCanvas";
 import LoadingPage from "../LoadingPage";
 import ScenarioPreloader from "./Components/ScenarioPreloader";
+import { useGet } from "../../../hooks/crudHooks";
 
 /**
  * This page allows users to play a scenario.
@@ -12,7 +13,14 @@ import ScenarioPreloader from "./Components/ScenarioPreloader";
  */
 export default function PlayScenarioPage() {
   const styles = useStyles();
-  const { currentSceneId } = useContext(PlayScenarioContext);
+  const { scenarioId, currentSceneId } = useContext(PlayScenarioContext);
+  const [graph, setGraph] = useState(null);
+
+  useGet(`api/scenario/${scenarioId}/scene/graph`, setGraph, true);
+
+  useEffect(() => {
+    console.log(graph);
+  }, [graph]);
 
   if (currentSceneId === null) {
     return <LoadingPage text="Loading contents..." />;
