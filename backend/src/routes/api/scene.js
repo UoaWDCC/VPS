@@ -44,6 +44,8 @@ router.get("/graph", async (req, res) => {
   }
 
   const scenarioGraph = new ScenarioGraph(fullScenes);
+  const distance = scenarioGraph.distanceBetween("6295a71dc02aa66b701339b2", "62f4805867e5e917c0ef095c");
+  console.log(distance);
   res.json(scenarioGraph.graph);
 
 })
