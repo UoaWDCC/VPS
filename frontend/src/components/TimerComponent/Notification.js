@@ -3,6 +3,7 @@ import Modal from "@material-ui/core/Modal";
 import Box from "@material-ui/core/Box";
 import Typography from "@material-ui/core/Typography";
 import Button from "@material-ui/core/Button";
+import ECGImage from "./main-qimg-b92fdee4f3ae26a2f63876ce676c2072.png";
 
 const style = {
   position: "absolute",
@@ -20,6 +21,9 @@ const Notifcation = () => {
   const [open, setOpen] = React.useState(true);
   const handleClose = () => setOpen(false);
   const closeTab = () => window.close();
+
+  /* function to restart the scenario upon timer completion */
+  function handleRestart() {}
 
   return (
     <Modal
@@ -46,6 +50,22 @@ const Notifcation = () => {
             style={{ "margin-left": "10%" }}
           >
             Continue
+          </Button>
+          <Button
+            variant="contained"
+            color="black"
+            onClick={handleRestart}
+            style={{ "margin-top": "5%" }}
+          >
+            Restart
+          </Button>
+          <Button
+            variant="contained"
+            color="black"
+            onClick={handleClose}
+            style={{ "margin-left": "10%", "margin-top": "5%" }}
+          >
+            PDF
           </Button>
         </div>
       </Box>
