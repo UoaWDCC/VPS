@@ -36,6 +36,7 @@ const Notifcation = () => {
         <Typography id="modal-modal-title" variant="h6" component="h2">
           Out of Time!
         </Typography>
+        <img src={ECGImage} width="80%" height="80%" alt="ecg" />
         <Typography id="modal-modal-description" sx={{ mt: 2 }}>
           Exit the scenario or continue:
         </Typography>
