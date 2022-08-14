@@ -23,7 +23,12 @@ const Notifcation = () => {
   const closeTab = () => window.close();
 
   /* function to restart the scenario upon timer completion */
-  function handleRestart() {}
+  function handleRestart() {
+    window.location.href = window.parent.location;
+  }
+
+  /* function to generate PDF */
+  function handlePDF() {}
 
   return (
     <Modal
@@ -63,7 +68,7 @@ const Notifcation = () => {
           <Button
             variant="contained"
             color="black"
-            onClick={handleClose}
+            onClick={handlePDF}
             style={{ "margin-left": "10%", "margin-top": "5%" }}
           >
             PDF
