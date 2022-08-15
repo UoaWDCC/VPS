@@ -3,7 +3,6 @@ import Modal from "@material-ui/core/Modal";
 import Box from "@material-ui/core/Box";
 import Typography from "@material-ui/core/Typography";
 import Button from "@material-ui/core/Button";
-import ECGImage from "./main-qimg-b92fdee4f3ae26a2f63876ce676c2072.png";
 
 const style = {
   position: "absolute",
@@ -27,9 +26,6 @@ const Notifcation = () => {
     window.location.href = window.parent.location;
   }
 
-  /* function to generate PDF */
-  function handlePDF() {}
-
   return (
     <Modal
       open={open}
@@ -41,7 +37,6 @@ const Notifcation = () => {
         <Typography id="modal-modal-title" variant="h6" component="h2">
           Out of Time!
         </Typography>
-        <img src={ECGImage} width="80%" height="80%" alt="ecg" />
         <Typography id="modal-modal-description" sx={{ mt: 2 }}>
           Exit the scenario or continue:
         </Typography>
@@ -64,14 +59,6 @@ const Notifcation = () => {
             style={{ "margin-top": "5%" }}
           >
             Restart
-          </Button>
-          <Button
-            variant="contained"
-            color="black"
-            onClick={handlePDF}
-            style={{ "margin-left": "10%", "margin-top": "5%" }}
-          >
-            PDF
           </Button>
         </div>
       </Box>
