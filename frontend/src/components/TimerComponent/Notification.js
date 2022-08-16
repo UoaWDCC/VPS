@@ -22,9 +22,12 @@ const Notifcation = () => {
   const closeTab = () => window.close();
 
   /* function to restart the scenario upon timer completion */
-  function handleRestart() {
+  function handleRestartScenario() {
     window.location.href = window.parent.location;
   }
+
+  /* function to restart the scene upon timer completion */
+  function handleRestartScene() {}
 
   return (
     <Modal
@@ -55,10 +58,18 @@ const Notifcation = () => {
           <Button
             variant="contained"
             color="black"
-            onClick={handleRestart}
+            onClick={handleRestartScenario}
             style={{ "margin-top": "5%" }}
           >
-            Restart
+            Restart Scenario
+          </Button>
+          <Button
+            variant="contained"
+            color="black"
+            onClick={handleRestartScene}
+            style={{ "margin-top": "5%" }}
+          >
+            Restart Scene
           </Button>
         </div>
       </Box>
