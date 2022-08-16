@@ -16,7 +16,7 @@ const style = {
   p: 4,
 };
 
-const Notifcation = () => {
+const Notification = ({ scene }) => {
   const [open, setOpen] = React.useState(true);
   const handleClose = () => setOpen(false);
   const closeTab = () => window.close();
@@ -77,4 +77,4 @@ const Notifcation = () => {
   );
 };
 
-export default Notifcation;
+export default Notification;
