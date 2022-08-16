@@ -1,4 +1,4 @@
-import React, { useContext } from "react";
+import React, { useContext, useState } from "react";
 import TextField from "@material-ui/core/TextField";
 import { withStyles } from "@material-ui/core/styles";
 import { InputAdornment } from "@material-ui/core";
@@ -67,6 +67,17 @@ export default function SceneSettings() {
             InputLabelProps={{
               // label moves up whenever there is input
               shrink: currentScene?.time || currentScene?.time === 0,
+            }}
+          />
+          <label className={styles.fileUploadLabel}>Upload Media</label>
+          <input
+            type="file"
+            name="mediaUpload"
+            onChange={(event) => {
+              setCurrentScene({
+                ...currentScene,
+                media: event.target.files[0],
+              });
             }}
           />
         </div>

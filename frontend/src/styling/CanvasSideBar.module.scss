@@ -1,6 +1,6 @@
 .sideBar {
   flex: 1 1 auto;
-  width: 15vw;
+  width: 18.5vw;
   background-color: #ffffff;
   filter: drop-shadow(-2.5px 0 5px rgba(0, 0, 0, 0.1));
   display: flex;
@@ -65,4 +65,9 @@
 
 .textArea {
   margin-top: 16px !important;
+}
+
+.fileUploadLabel {
+  font-size: 12px;
+  opacity: 0.6;
 }
