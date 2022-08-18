@@ -32,6 +32,27 @@ export default function AuthenticationContextProvider({ children }) {
     auth.signOut();
   }
 
+  /**
+   * This function determines the role of the current logged in user.
+   * ATM, the function is hard-coded. TODO: Check user details is in mongodb
+   * @returns the role of user
+   */
+  function getRole(userID) {
+    const testAdminList = ["lia"];
+
+    if (testAdminList.includes(userID)) {
+      return "admin";
+    }
+
+    return "user";
+  }
+
+  // creating user object with role property
+  const VpsUser = {
+    firebaseUserObj: user,
+    role: getRole("lia"),
+  };
+
   return (
     <AuthenticationContext.Provider
       value={{
@@ -41,6 +62,7 @@ export default function AuthenticationContextProvider({ children }) {
         error,
         signOut,
         signInUsingGoogle,
+        VpsUser,
       }}
     >
       {children}
