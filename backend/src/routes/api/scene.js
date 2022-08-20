@@ -32,22 +32,16 @@ router.get("/", async (req, res) => {
   res.json(scenes);
 });
 
-// Get graph
-router.get("/graph", async (req, res) => {
+// NOT FOR PRODUCTION: Tempory endpoint for testing graph features
+router.get("/progress/:sceneId", async (req, res) => {
   const scenes = await retrieveSceneList(req.params.scenarioId);
-  let fullScenes = [];
-  
-  // Get FULL scene data - should really change this to run in parallel for better runtime
-  for await (const scene of scenes) {
-    const fullScene = await retrieveScene(scene._id);
-    fullScenes.push(fullScene);
-  }
+  const fullScenes = await Promise.all(scenes.map((it) => retrieveScene(it._id)));
 
-  const scenarioGraph = new ScenarioGraph(fullScenes);
-  const distance = scenarioGraph.distanceBetween("6295a71dc02aa66b701339b2", "62f4805867e5e917c0ef095c");
-  console.log(distance);
-  res.json(scenarioGraph.graph);
+  // Will need a root id to initialize graph
+  const rootId = "6295a71dc02aa66b701339b2";
+  const scenarioGraph = new ScenarioGraph(rootId, fullScenes);
 
+  res.json(scenarioGraph.progress(req.params.sceneId))
 })
 
 // Apply auth middleware to all routes below this point

@@ -12,6 +12,7 @@ import CountdownTimer from "../../../components/TimerComponent";
  */
 export default function PlayScenarioCanvas() {
   const [currentScene, setCurrentScene] = useState(null);
+  const [progress, setProgress] = useState(0);
   // eslint-disable-next-line no-unused-vars
   const { scenarioId, currentSceneId, setCurrentSceneId } =
     useContext(PlayScenarioContext);
@@ -20,6 +21,12 @@ export default function PlayScenarioCanvas() {
     `/api/scenario/${scenarioId}/scene/full/${currentSceneId}`,
     setCurrentScene,
     false
+  );
+
+  useGet(
+    `api/scenario/${scenarioId}/scene/progress/${currentSceneId}`,
+    setProgress,
+    true
   );
 
   const componentOnClick = (component) => {
@@ -33,7 +40,7 @@ export default function PlayScenarioCanvas() {
       {currentScene?.components?.map((component, index) =>
         componentResolver(component, index, () => componentOnClick(component))
       )}
-      <ProgressBar value={80} />
+      <ProgressBar value={progress * 100} />
       {currentScene?.time ? (
         <CountdownTimer
           targetDate={new Date().setSeconds(

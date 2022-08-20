@@ -1,123 +1,93 @@
-/**
- * Creates a graph representation of a list of scenes.
- * @param scene - An array of scene objects
- */
 export default class ScenarioGraph {
 
-    // Store graph as a modified adjacency list for easy indexing
-    graph = {};
+    /**
+     * The rule variable maps an id to an index.
+     * 
+     * rule = {
+     *  ...
+     *  "6295a71dc02aa66b701339b2": 4,
+     *  ...
+     * }
+     * 
+     * There is probably a better data structure to represent
+     * the dist component when just using scene ids to index.
+     */
+    rule = {};
+    endScenes = [];
+    root;
+    dist;
 
-    constructor(scenes) {
+    constructor(root, scenes) {
 
-        // Iterate over each scene
-        scenes.forEach((scene) => {
+        this.root = root;
+        const dist = [];
 
-            let children = [];
-            let leaf = true;
+        scenes.forEach((scene, index) => {
 
-            // Iterate over each component of a scene
-            scene.components.forEach((component) => {
-                
-                // Check if the scene has any links to other scenes
-                if (component.type === 'BUTTON') {
-                    children.push(component.nextScene);
-                    leaf = false;    // Scene is not a leaf as it has a child.
-                }
-            })
+            // Generate rule map
+            this.rule[scene._id] = index;
 
-            // Add node to graph
-            this.graph[scene._id] = {
-                name: scene.name,
-                endScene: leaf,
-                linkedScenes: children
+            // Determine end scenes and store them for later
+            if (scene.components.filter((it) => it.type === 'BUTTON' && it.nextScene !== "").length === 0) {
+                this.endScenes.push(scene._id);
             }
         })
+
+        // Fill dist matrix with Inifinity
+        for (let i = 0; i < scenes.length; i++) {
+            dist.push(new Array(scenes.length).fill(Infinity));
+        }
+
+        // Update dist matrix to represent current graph
+        scenes.forEach((scene) => {
+
+            // Distance 0 from itself
+            dist[this.rule[scene._id]][this.rule[scene._id]] = 0;
+
+            scene.components.forEach((component) => {
+                if (component.type === 'BUTTON' && component.nextScene !== "") {
+
+                    // this is the weight of the edge, can adjust later for scoring feature
+                    dist[this.rule[scene._id]][this.rule[component.nextScene]] = 1 
+                }
+            })
+        })
+
+        // Run Floyd's algorithm to compute all pairs shortest path.
+        for (let k = 0; k < scenes.length; k++) {
+            for (let i = 0; i < scenes.length; i++) {
+                for (let j = 0; j < scenes.length; j++) {
+                    if (dist[i][k] + dist[k][j] < dist[i][j]) {
+                        dist[i][j] = dist[i][k] + dist[k][j];
+                    }
+                }
+            }
+        }
+
+        this.dist = dist;
     }
-
-    // Getters
-
-    get graph() { return this.graph }
-
-    // Methods
 
     /**
-     * Computes the distance between two scenes.
-     * @param startScene: string - the id of the starting scene
-     * @param endScene: string - the id of the end scene
-     * @returns depth: number - the distance from the startScene to the endScene.
-     *                          If endScene does not exist within the graph or 
-     *                          there is not directed path from startScene to
-     *                          endScene, return -1.
+     * 
+     * @param {*} startScene: string - the starting scene id. 
+     * @param {*} endScene : string - the ending scene id.
+     * @returns : number - distance from start scene to end scene.
      */
-    distanceBetween(startScene, endScene) {
+    distanceFrom(startScene, endScene) {
+        return this.dist[this.rule[startScene]][this.rule[endScene]];
+    }
 
-        if (startScene === endScene) {
-            return 0;
-        }
-
-        let depth = 0;
-        let queue = new Queue();
-        let seen = [];
-        let found = false;
-
-        queue.enqueue(startScene);
-
-        // Apply BFS
-        while (!(queue.isEmpty || found)) {
-
-            // Variable to count the number of scenes on this level
-            let levelSize = queue.length;
-
-            while (levelSize > 0) {
-
-                let scene = queue.dequeue();
-                this.graph[scene].linkedScenes.forEach((linkedScene) => {
-
-                    // Check if we have found the endScene
-                    if (linkedScene === endScene) {
-                        found = true;
-                    }
-
-                    // If we have not seen this scene before, enqueue and add 
-                    // to seen array
-                    if (!seen.includes(linkedScene)) {
-                        queue.enqueue(linkedScene);
-                        seen.push(linkedScene);
-                    }
-
-                })
-                levelSize--;
-            }
-            depth++;
-        }
-        return found ? depth : -1;
+    /**
+     * 
+     * @param {*} currentScene: string - the current scene id.
+     * @returns : number - returns number between 0 to 1 that represents the progress
+     *                     from the root to the furthest end scene.
+     */
+    progress(currentScene) {
+        return this.endScenes
+                .filter((endScene) => this.distanceFrom(currentScene, endScene) !== Infinity)                    
+                .map((endScene) => this.distanceFrom(this.root, currentScene) / (this.distanceFrom(this.root, currentScene) + this.distanceFrom(currentScene, endScene)))    
+                .reduce((prev, curr) => prev < curr ? prev : curr)                                              
     }
     
-}
-
-/**
- * Queue data structure for graph algorithms
- */
-export class Queue {
-
-    queue = [];
-
-    constructor() {}
-
-    // Getters
-
-    get length() { return this.queue.length }
-
-    get isEmpty() { return this.queue.length === 0 ? true : false}
-
-    get queue() { return this.queue }
-
-    // Methods 
-
-    enqueue(item) { this.queue.push(item) }
-
-    dequeue() { return this.queue.shift() }
-
-    peek() { return this.queue.length > 1 ? this.queue[0] : null }
-
 }
