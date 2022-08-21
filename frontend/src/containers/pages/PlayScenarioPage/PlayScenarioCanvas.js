@@ -13,6 +13,7 @@ import CountdownTimer from "../../../components/TimerComponent";
 export default function PlayScenarioCanvas() {
   const [currentScene, setCurrentScene] = useState(null);
   const [progress, setProgress] = useState(0);
+  const [maxProgress, setMaxProgress] = useState(0);
   // eslint-disable-next-line no-unused-vars
   const { scenarioId, currentSceneId, setCurrentSceneId } =
     useContext(PlayScenarioContext);
@@ -31,6 +32,7 @@ export default function PlayScenarioCanvas() {
 
   const componentOnClick = (component) => {
     if (component.type === "BUTTON" && component.nextScene !== "") {
+      setMaxProgress(Math.max(progress, maxProgress));
       setCurrentSceneId(component.nextScene);
     }
   };
@@ -40,7 +42,7 @@ export default function PlayScenarioCanvas() {
       {currentScene?.components?.map((component, index) =>
         componentResolver(component, index, () => componentOnClick(component))
       )}
-      <ProgressBar value={progress * 100} />
+      <ProgressBar value={Math.max(progress, maxProgress) * 100} />
       {currentScene?.time ? (
         <CountdownTimer
           targetDate={new Date().setSeconds(
