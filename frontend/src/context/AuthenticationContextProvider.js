@@ -37,20 +37,24 @@ export default function AuthenticationContextProvider({ children }) {
    * ATM, the function is hard-coded. TODO: Check user details is in mongodb
    * @returns the role of user
    */
-  function getRole(userID) {
-    const testAdminList = ["lia"];
+  function getRole() {
+    const testAdminList = ["marr341@aucklanduni.ac.nz"]; // TODO: change to mongodb db collection
 
-    if (testAdminList.includes(userID)) {
-      return "admin";
+    // TODO: check if user id or email is in the mongodb database
+    if (user && getUserIdToken() != null) {
+      if (testAdminList.includes(user.email)) {
+        return "admin";
+      }
+      return "user";
     }
 
-    return "user";
+    return "nonexistent";
   }
 
   // creating user object with role property
   const VpsUser = {
     firebaseUserObj: user,
-    role: getRole("lia"),
+    role: getRole(),
   };
 
   return (
