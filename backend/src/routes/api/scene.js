@@ -37,8 +37,8 @@ router.get("/progress/:sceneId", async (req, res) => {
   const scenes = await retrieveSceneList(req.params.scenarioId);
   const fullScenes = await Promise.all(scenes.map((it) => retrieveScene(it._id)));
 
-  // Will need a root id to initialize graph
-  const rootId = "6295a71dc02aa66b701339b2";
+  // Assume first scene is the root scene.
+  const rootId = fullScenes[0]._id;
   const scenarioGraph = new ScenarioGraph(rootId, fullScenes);
 
   res.json(scenarioGraph.progress(req.params.sceneId))
@@ -46,7 +46,7 @@ router.get("/progress/:sceneId", async (req, res) => {
 
 // Apply auth middleware to all routes below this point
 router.use(auth);
-// // Apply scenario auth middleware
+// Apply scenario auth middleware
 router.use(scenarioAuth);
 
 // Create a scene for a scenario
