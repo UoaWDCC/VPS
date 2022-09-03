@@ -10,18 +10,7 @@ function DashboardPage() {
     },
   ]);
 
-  useGet("/dashboard", setDashboardPage, false);
-  // useEffect(() => {
-  //   fetch("/dashboard")
-  //     .then((res) => {
-  //       if (res.ok) {
-  //         return res.json();
-  //       }
-  //       console.log("idioit");
-  //       return dashboardPage;
-  //     })
-  //     .then((jsonRes) => setDashboardPage(jsonRes));
-  // });
+  useGet("/api/dashboard", setDashboardPage, false);
 
   return (
     <ScreenContainer vertical>

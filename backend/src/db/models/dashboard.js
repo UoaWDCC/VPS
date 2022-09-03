@@ -3,9 +3,9 @@ import mongoose from "mongoose";
 const { Schema } = mongoose;
 
 const dashboardSchema = new Schema({
-    test_data: string
+    test_data: String
 });
 
-const Dashboard = mongoose.model("Dashboard", dashboardSchema);
+const Dashboard = mongoose.model("model", dashboardSchema, "dashboard");
 
 export default Dashboard;
