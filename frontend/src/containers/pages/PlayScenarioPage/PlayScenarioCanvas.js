@@ -39,6 +39,7 @@ export default function PlayScenarioCanvas() {
           targetDate={new Date().setSeconds(
             new Date().getSeconds() + currentScene?.time
           )}
+          sceneTime={currentScene?.time}
         />
       ) : null}
     </>

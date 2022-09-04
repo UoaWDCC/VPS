@@ -81,6 +81,12 @@ export default function SceneSettings() {
             }}
           />
         </div>
+        <button
+          type="button"
+          onClick={() => console.log(currentScene?.media.name)}
+        >
+          bhenchod
+        </button>
       </div>
     </>
   );

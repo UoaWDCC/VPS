@@ -23,11 +23,10 @@ const useCountdown = (targetDate) => {
     const interval = setInterval(() => {
       setCountDown(countDownDate - new Date().getTime());
     }, 1000);
-
     return () => clearInterval(interval);
   }, [countDownDate]);
 
   return getReturnValues(countDown);
 };
 
-export default useCountdown;
+export default getReturnValues;

@@ -3,6 +3,7 @@ import Modal from "@material-ui/core/Modal";
 import Box from "@material-ui/core/Box";
 import Typography from "@material-ui/core/Typography";
 import Button from "@material-ui/core/Button";
+import useCountdown from "./useCountdown";
 
 const style = {
   position: "absolute",
@@ -16,7 +17,7 @@ const style = {
   p: 4,
 };
 
-const Notification = ({ scene }) => {
+function Notification(props) {
   const [open, setOpen] = React.useState(true);
   const handleClose = () => setOpen(false);
   const closeTab = () => window.close();
@@ -27,7 +28,9 @@ const Notification = ({ scene }) => {
   }
 
   /* function to restart the scene upon timer completion */
-  function handleRestartScene() {}
+  function handleRestartScene() {
+    props.resetFunc();
+  }
 
   return (
     <Modal
@@ -75,6 +78,6 @@ const Notification = ({ scene }) => {
       </Box>
     </Modal>
   );
-};
+}
 
 export default Notification;
