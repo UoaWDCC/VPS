@@ -43,8 +43,10 @@ const CountdownTimer = ({ targetDate, sceneTime }) => {
   }
 
   if (getTimeLeft(countDown) <= 0) {
+    console.log(getTimeLeft(countDown));
     return <Notification resetFunc={resetCounter} />;
   }
+  console.log(getTimeLeft(countDown));
 
   return <ShowCounter minutes={getMinutes()} seconds={getSeconds()} />;
 };
