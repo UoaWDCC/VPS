@@ -9,7 +9,6 @@ const CountdownTimer = ({ targetDate, sceneTime }) => {
   let [days, hours, minutes, seconds] = [0, 0, 0, 0];
   let tempTargetDate = targetDate;
   let countDownDate = new Date(tempTargetDate).getTime();
-  const [timerTicking, setTimerTicking] = useState(true);
 
   const [countDown, setCountDown] = useState(
     countDownDate - new Date().getTime()
@@ -18,22 +17,18 @@ const CountdownTimer = ({ targetDate, sceneTime }) => {
   useEffect(() => {
     const interval = setInterval(() => {
       const currentDate = new Date().getTime();
-      if (timerTicking) {
+      console.log(countDownDate);
+      if (countDownDate > currentDate) {
         setCountDown(countDownDate - currentDate);
-        if (countDownDate < currentDate) {
-          tempTargetDate = new Date().setSeconds(
-            new Date().getSeconds() + sceneTime
-          );
-          countDownDate = new Date(tempTargetDate).getTime();
-          setTimerTicking(false);
-        }
       }
     }, 1000);
     return () => clearInterval(interval);
   }, [countDownDate]);
 
   function resetCounter() {
-    setTimerTicking(true);
+    tempTargetDate = new Date().setSeconds(new Date().getSeconds() + sceneTime);
+    countDownDate = new Date(tempTargetDate).getTime();
+    setCountDown(countDownDate - new Date().getTime());
   }
 
   function getTimeLeft() {
