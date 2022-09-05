@@ -17,7 +17,7 @@ const style = {
   p: 4,
 };
 
-function Notification(props) {
+function Notification({ setTime, sceneTime }) {
   const [open, setOpen] = React.useState(true);
   const handleClose = () => setOpen(false);
   const closeTab = () => window.close();
@@ -25,11 +25,6 @@ function Notification(props) {
   /* function to restart the scenario upon timer completion */
   function handleRestartScenario() {
     window.location.href = window.parent.location;
-  }
-
-  /* function to restart the scene upon timer completion */
-  function handleRestartScene() {
-    props.resetFunc();
   }
 
   return (
@@ -69,7 +64,11 @@ function Notification(props) {
           <Button
             variant="contained"
             color="black"
-            onClick={handleRestartScene}
+            onClick={() =>
+              setTime(
+                new Date().setSeconds(new Date().getSeconds() + sceneTime)
+              )
+            }
             style={{ "margin-top": "5%" }}
           >
             Restart Scene
