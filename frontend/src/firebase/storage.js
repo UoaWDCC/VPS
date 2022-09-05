@@ -52,7 +52,7 @@ const deleteFile = (fileUrl) => {
  * @param {string} scenarioId
  * @param {string} sceneId
  */
-const uploadFiles = async (components, scenarioId, sceneId) => {
+const uploadFiles = async (components, endImage, scenarioId, sceneId) => {
   for (let i = 0; i < components.length; i += 1) {
     if (
       (components[i].type === "FIREBASEIMAGE" ||

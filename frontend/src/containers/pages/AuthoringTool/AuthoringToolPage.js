@@ -62,6 +62,7 @@ export default function AuthoringToolPage() {
     setSelect(null);
     await uploadFiles(
       currentScene?.components,
+      currentScene?.endImage,
       currentScenario._id,
       currentScene._id
     );

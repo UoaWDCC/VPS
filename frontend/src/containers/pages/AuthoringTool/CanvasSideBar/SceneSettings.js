@@ -76,7 +76,10 @@ export default function SceneSettings() {
             type="file"
             name="mediaUpload"
             onChange={(event) => {
-              console.log("clicked");
+              setCurrentScene({
+                ...currentScene,
+                endImage: event.target.files[0],
+              });
             }}
           />
         </div>
