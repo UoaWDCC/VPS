@@ -13,7 +13,6 @@ const CountdownTimer = ({ targetDate, sceneTime }) => {
     setTime(targetDate);
   }, [targetDate]);
 
-  console.log("whattt", sceneTime, time);
   const [days, hours, minutes, seconds] = useCountdown(time);
 
   if (days + hours + minutes + seconds <= 0) {

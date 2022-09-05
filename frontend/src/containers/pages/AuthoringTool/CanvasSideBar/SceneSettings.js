@@ -69,24 +69,17 @@ export default function SceneSettings() {
               shrink: currentScene?.time || currentScene?.time === 0,
             }}
           />
-          <label className={styles.fileUploadLabel}>Upload Media</label>
+          <label className={styles.fileUploadLabel}>
+            Upload image to show when timer ends
+          </label>
           <input
             type="file"
             name="mediaUpload"
             onChange={(event) => {
-              setCurrentScene({
-                ...currentScene,
-                media: event.target.files[0],
-              });
+              console.log("clicked");
             }}
           />
         </div>
-        <button
-          type="button"
-          onClick={() => console.log(currentScene?.media.name)}
-        >
-          bhenchod
-        </button>
       </div>
     </>
   );

@@ -70,7 +70,6 @@ export default function AuthoringToolPage() {
       {
         name: currentScene.name,
         time: currentScene.time,
-        media: currentScene?.media,
         components: currentScene?.components,
       },
       getUserIdToken
