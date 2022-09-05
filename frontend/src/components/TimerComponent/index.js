@@ -9,6 +9,7 @@ const CountdownTimer = ({ targetDate, sceneTime }) => {
   let [days, hours, minutes, seconds] = [0, 0, 0, 0];
   let tempTargetDate = targetDate;
   let countDownDate = new Date(tempTargetDate).getTime();
+  const [timerTicking, setTimerTicking] = useState(true);
 
   const [countDown, setCountDown] = useState(
     countDownDate - new Date().getTime()
@@ -16,15 +17,23 @@ const CountdownTimer = ({ targetDate, sceneTime }) => {
 
   useEffect(() => {
     const interval = setInterval(() => {
-      setCountDown(countDownDate - new Date().getTime());
+      const currentDate = new Date().getTime();
+      if (timerTicking) {
+        setCountDown(countDownDate - currentDate);
+        if (countDownDate < currentDate) {
+          tempTargetDate = new Date().setSeconds(
+            new Date().getSeconds() + sceneTime
+          );
+          countDownDate = new Date(tempTargetDate).getTime();
+          setTimerTicking(false);
+        }
+      }
     }, 1000);
     return () => clearInterval(interval);
   }, [countDownDate]);
 
   function resetCounter() {
-    tempTargetDate = new Date().setSeconds(new Date().getSeconds() + sceneTime);
-    countDownDate = new Date(tempTargetDate).getTime();
-    setCountDown(countDownDate - new Date().getTime());
+    setTimerTicking(true);
   }
 
   function getTimeLeft() {
@@ -43,10 +52,8 @@ const CountdownTimer = ({ targetDate, sceneTime }) => {
   }
 
   if (getTimeLeft(countDown) <= 0) {
-    console.log(getTimeLeft(countDown));
     return <Notification resetFunc={resetCounter} />;
   }
-  console.log(getTimeLeft(countDown));
 
   return <ShowCounter minutes={getMinutes()} seconds={getSeconds()} />;
 };
