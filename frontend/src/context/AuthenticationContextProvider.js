@@ -1,8 +1,9 @@
-import React from "react";
+import React, { useState } from "react";
 import { signInWithRedirect } from "firebase/auth";
 import { useAuthState } from "react-firebase-hooks/auth";
 import AuthenticationContext from "./AuthenticationContext";
 import { auth, googleProvider } from "../firebase/firebase";
+import { useGetModified } from "../hooks/crudHooks";
 
 /**
  * This is a Context Provider made with the React Context API
@@ -34,15 +35,23 @@ export default function AuthenticationContextProvider({ children }) {
 
   /**
    * This function determines the role of the current logged in user.
-   * ATM, the function is hard-coded. TODO: Check user details is in mongodb
    * @returns the role of user
    */
   function getRole() {
-    const testAdminList = ["marr341@aucklanduni.ac.nz"]; // TODO: change to mongodb db collection
+    const [staffList, setStaffList] = useState();
+    useGetModified("/api/staff", setStaffList);
 
-    // TODO: check if user id or email is in the mongodb database
+    let onStaffList = false;
     if (user && getUserIdToken() != null) {
-      if (testAdminList.includes(user.email)) {
+      if (staffList !== undefined) {
+        for (let i = 0; i < staffList.length; i += 1) {
+          if (staffList[i].emailAddress === user.email) {
+            onStaffList = true;
+          }
+        }
+      }
+
+      if (onStaffList) {
         return "admin";
       }
       return "user";

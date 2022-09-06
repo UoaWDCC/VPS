@@ -61,6 +61,31 @@ export function useGet(url, setData, requireAuth = true) {
 }
 
 /**
+ * This function is a modified version of the above useGet function.
+ * A simpler version with no auth or loading checking.
+ * @param {*} url
+ * @param {*} setData
+ */
+export function useGetModified(url, setData) {
+  useEffect(() => {
+    async function fetchData() {
+      let hasError = false;
+
+      const response = await axios.get(url).catch((err) => {
+        if (err.response.status === 404 || err.response.status === 401) {
+          hasError = true;
+        }
+      });
+
+      if (!hasError) {
+        setData(response.data);
+      }
+    }
+    fetchData();
+  }, [url]);
+}
+
+/**
  * A custom hook which posts data to the given URL.
  * Code adapted from SOFTENG750 lab4 https://gitlab.com/cs732-s1c/cs732-labs/cs732-lab-04/-/blob/master/frontend/src/hooks/useGet.js
  */
