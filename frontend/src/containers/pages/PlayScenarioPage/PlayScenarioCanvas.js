@@ -10,9 +10,9 @@ import CountdownTimer from "../../../components/TimerComponent";
  *
  * @component
  */
-export default function PlayScenarioCanvas() {
+export default function PlayScenarioCanvas(props) {
+  const { progress } = props;
   const [currentScene, setCurrentScene] = useState(null);
-  const [progress, setProgress] = useState(0);
   const [maxProgress, setMaxProgress] = useState(0);
   // eslint-disable-next-line no-unused-vars
   const { scenarioId, currentSceneId, setCurrentSceneId } =
@@ -22,12 +22,6 @@ export default function PlayScenarioCanvas() {
     `/api/scenario/${scenarioId}/scene/full/${currentSceneId}`,
     setCurrentScene,
     false
-  );
-
-  useGet(
-    `api/scenario/${scenarioId}/scene/progress/${currentSceneId}`,
-    setProgress,
-    true
   );
 
   const componentOnClick = (component) => {

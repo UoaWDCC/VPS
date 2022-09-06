@@ -11,8 +11,6 @@ import {
 import auth from "../../middleware/firebaseAuth";
 import scenarioAuth from "../../middleware/scenarioAuth";
 
-import ScenarioGraph from "../../models/ScenarioGraph";
-
 const router = Router({ mergeParams: true });
 
 const HTTP_OK = 200;
@@ -32,17 +30,14 @@ router.get("/", async (req, res) => {
   res.json(scenes);
 });
 
-// NOT FOR PRODUCTION: Tempory endpoint for testing graph features
-router.get("/progress/:sceneId", async (req, res) => {
+// Retrieve all scenes with full scene data
+router.get("/all", async (req, res) => {
   const scenes = await retrieveSceneList(req.params.scenarioId);
-  const fullScenes = await Promise.all(scenes.map((it) => retrieveScene(it._id)));
-
-  // Assume first scene is the root scene.
-  const rootId = fullScenes[0]._id;
-  const scenarioGraph = new ScenarioGraph(rootId, fullScenes);
-
-  res.json(scenarioGraph.progress(req.params.sceneId))
-})
+  const fullScenes = await Promise.all(
+    scenes.map((it) => retrieveScene(it._id))
+  );
+  res.json(fullScenes);
+});
 
 // Apply auth middleware to all routes below this point
 router.use(auth);
