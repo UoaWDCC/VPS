@@ -66,7 +66,7 @@ export function useGet(url, setData, requireAuth = true) {
  * @param {*} url
  * @param {*} setData
  */
-export function useGetModified(url, setData) {
+export function useGetSimplified(url, setData) {
   useEffect(() => {
     async function fetchData() {
       let hasError = false;

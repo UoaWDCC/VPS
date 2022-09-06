@@ -3,7 +3,7 @@ import { signInWithRedirect } from "firebase/auth";
 import { useAuthState } from "react-firebase-hooks/auth";
 import AuthenticationContext from "./AuthenticationContext";
 import { auth, googleProvider } from "../firebase/firebase";
-import { useGetModified } from "../hooks/crudHooks";
+import { useGetSimplified } from "../hooks/crudHooks";
 
 /**
  * This is a Context Provider made with the React Context API
@@ -39,7 +39,7 @@ export default function AuthenticationContextProvider({ children }) {
    */
   function getRole() {
     const [staffList, setStaffList] = useState();
-    useGetModified("/api/staff", setStaffList);
+    useGetSimplified("/api/staff", setStaffList);
 
     let onStaffList = false;
     if (user && getUserIdToken() != null) {

@@ -20,7 +20,9 @@ import HelpButton from "./HelpButton";
 export default function SideBar() {
   const { currentScenario, setCurrentScenario, reFetch } =
     useContext(ScenarioContext);
-  const { signOut, getUserIdToken } = useContext(AuthenticationContext);
+  const { signOut, getUserIdToken, VpsUser } = useContext(
+    AuthenticationContext
+  );
   const history = useHistory();
 
   /** Calls backend end point to create a new empty scenario. */
@@ -76,17 +78,20 @@ export default function SideBar() {
               Create
             </Button>
           </li>
-          <li>
-            <Button
-              className="btn side contained white"
-              color="default"
-              variant="contained"
-              onClick={openDashboard}
-              // disabled={!authenticated}
-            >
-              Dashboard
-            </Button>
-          </li>
+          {VpsUser.role === "admin" ? (
+            <li>
+              <Button
+                className="btn side contained white"
+                color="default"
+                variant="contained"
+                onClick={openDashboard}
+              >
+                Dashboard
+              </Button>
+            </li>
+          ) : (
+            ""
+          )}
           <li>
             <Button
               className={`btn side contained white margin-top ${
