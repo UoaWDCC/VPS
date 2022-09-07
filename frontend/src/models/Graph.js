@@ -108,4 +108,8 @@ export default class Graph {
   getAdjList() {
     return this.adjList;
   }
+
+  getPath() {
+    return this.path;
+  }
 }
