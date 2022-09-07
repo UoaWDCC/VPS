@@ -7,22 +7,39 @@ export default class Graph {
 
   dist;
 
+  path = [];
+
+  scenes = [];
+
+  adjList = {};
+
   constructor(root, scenes) {
     this.root = root;
+    this.path.push(root);
     const dist = [];
 
     scenes.forEach((scene, index) => {
       // Generate rule map
       this.rule[scene._id] = index;
 
-      // Determine end scenes and store them for later
-      if (
-        scene.components.filter(
-          (it) => it.type === "BUTTON" && it.nextScene !== ""
-        ).length === 0
-      ) {
+      // Add to filtered scenes
+      this.scenes.push({
+        name: scene.name,
+        _id: scene._id,
+      });
+
+      // Get adjacent scenes
+      const adjScenes = scene.components
+        .filter((it) => it.type === "BUTTON" && it.nextScene !== "")
+        .map((it) => it.nextScene);
+
+      // No adjacent scenes, therefore end scene, store
+      if (adjScenes.length === 0) {
         this.endScenes.push(scene._id);
       }
+
+      // Update adjacency list
+      this.adjList[scene._id] = adjScenes;
     });
 
     // Fill dist matrix with Inifinity
@@ -54,6 +71,7 @@ export default class Graph {
       }
     }
 
+    // parse graph to use react-flow.
     this.dist = dist;
   }
 
@@ -73,5 +91,21 @@ export default class Graph {
             this.distanceFrom(currentScene, endScene))
       )
       .reduce((prev, curr) => (prev < curr ? prev : curr));
+  }
+
+  visit(currentScene) {
+    this.path.push(currentScene);
+  }
+
+  isEndScene(currentScene) {
+    return this.endScenes.includes(currentScene);
+  }
+
+  getScenes() {
+    return this.scenes;
+  }
+
+  getAdjList() {
+    return this.adjList;
   }
 }

@@ -25,7 +25,10 @@ export default function PlayScenarioPage() {
       {currentSceneId && (
         <div className={styles.canvasContainer}>
           <div className={styles.canvas}>
-            <PlayScenarioCanvas progress={graph.progress(currentSceneId)} />
+            <PlayScenarioCanvas
+              progress={graph.progress(currentSceneId)}
+              graph={graph}
+            />
           </div>
         </div>
       )}
