@@ -36,8 +36,8 @@ router.get("/all", async (req, res) => {
   const fullScenes = await Promise.all(
     // eslint-disable-next-line no-underscore-dangle
     scenes.map((it) => retrieveScene(it._id))
-  );
-  res.json(fullScenes);
+  ).catch((err) => console.error(err));
+  res.status(HTTP_OK).json(fullScenes);
 });
 
 // Apply auth middleware to all routes below this point
