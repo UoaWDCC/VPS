@@ -34,6 +34,7 @@ router.get("/", async (req, res) => {
 router.get("/all", async (req, res) => {
   const scenes = await retrieveSceneList(req.params.scenarioId);
   const fullScenes = await Promise.all(
+    // eslint-disable-next-line no-underscore-dangle
     scenes.map((it) => retrieveScene(it._id))
   );
   res.json(fullScenes);
