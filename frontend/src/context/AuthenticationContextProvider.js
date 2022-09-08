@@ -45,7 +45,7 @@ export default function AuthenticationContextProvider({ children }) {
     if (user && getUserIdToken() != null) {
       if (staffList !== undefined) {
         for (let i = 0; i < staffList.length; i += 1) {
-          if (staffList[i].emailAddress === user.email) {
+          if (staffList[i].firebaseID === user.uid) {
             onStaffList = true;
           }
         }
