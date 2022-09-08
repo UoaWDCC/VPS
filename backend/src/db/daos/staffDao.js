@@ -8,4 +8,4 @@ const retrieveAuthorisedStaffList = async () => {
   return Staff.find();
 };
 
-export default { retrieveAuthorisedStaffList };
+export default retrieveAuthorisedStaffList;
