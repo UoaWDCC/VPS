@@ -20,6 +20,7 @@
     "react-audio-player": "^0.17.0",
     "react-dom": "^17.0.2",
     "react-firebase-hooks": "^3.0.4",
+    "react-flow-renderer": "^10.3.16",
     "react-loading-skeleton": "^2.2.0",
     "react-moveable": "0.29.0",
     "react-router-dom": "^5.2.0",
