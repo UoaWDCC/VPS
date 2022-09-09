@@ -5,8 +5,8 @@ import Thumbnail from "../../../components/Thumbnail";
 const handleStyle = { left: 10 };
 
 function SceneNode({ data }) {
-  const { scenarioId, sceneId } = data;
-  console.log(scenarioId, sceneId);
+  const { scenarioId, sceneId, sceneTitle } = data;
+  console.log(scenarioId, sceneId, sceneTitle);
   return (
     <>
       <Handle type="target" position={Position.Top} />
@@ -16,6 +16,7 @@ function SceneNode({ data }) {
         height="90"
       />
       <Handle type="source" position={Position.Bottom} id="a" />
+      <h2 style={{ textAlign: "center" }}>{sceneTitle}</h2>
     </>
   );
 }

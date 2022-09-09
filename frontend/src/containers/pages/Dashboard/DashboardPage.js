@@ -37,6 +37,7 @@ const initialNodes = [
     data: {
       scenarioId: "631ad8c7860f66d328fb185e",
       sceneId: "631ad8c9860f66d328fb1865",
+      sceneTitle: "Hello",
     },
     position: { x: 350, y: 250 },
   },
@@ -53,19 +54,35 @@ const style = {
 };
 
 export default function DashboardPage({ data = null }) {
-  const { scenarios, currentScenario, setCurrentScenario } =
-    useContext(ScenarioContext);
-  console.log(currentScenario);
+  const { currentScenario } = useContext(ScenarioContext);
+
   const [nodes, setNodes] = useState(initialNodes);
   const [edges, setEdges] = useState(initialEdges);
 
   const { isLoading, graph } = useGraph(currentScenario._id);
+
   useEffect(() => {
     if (!isLoading) {
-      console.log(graph.adjList);
       console.log(graph);
+      const { scenes, adjList } = graph;
+      const sceneNodes = [];
+      scenes.forEach((scene, index) => {
+        const sceneNode = {
+          id: scene._id,
+          type: "sceneNode",
+          data: {
+            scenarioId: currentScenario._id,
+            sceneId: scene._id,
+            sceneTitle: scene.name,
+          },
+          position: { x: 350, y: 250 * index },
+        };
+        sceneNodes.push(sceneNode);
+      });
+      setNodes(sceneNodes);
     }
   }, [isLoading]);
+
   const nodeTypes = useMemo(() => ({ sceneNode: SceneNode }), []);
 
   return (
