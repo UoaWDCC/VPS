@@ -78,11 +78,13 @@ export default function SideBar() {
           </li>
           <li>
             <Button
-              className="btn side contained white"
+              className={`btn side contained white ${
+                currentScenario ? "" : "disabled"
+              }  `}
               color="default"
               variant="contained"
               onClick={openDashboard}
-              // disabled={!authenticated}
+              disabled={!currentScenario}
             >
               Dashboard
             </Button>

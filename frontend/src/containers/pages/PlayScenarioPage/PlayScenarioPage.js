@@ -4,6 +4,7 @@ import PlayScenarioContext from "../../../context/PlayScenarioContext";
 import PlayScenarioCanvas from "./PlayScenarioCanvas";
 import LoadingPage from "../LoadingPage";
 import ScenarioPreloader from "./Components/ScenarioPreloader";
+import useGraph from "../../../hooks/useGraph";
 
 /**
  * This page allows users to play a scenario.
@@ -12,9 +13,10 @@ import ScenarioPreloader from "./Components/ScenarioPreloader";
  */
 export default function PlayScenarioPage() {
   const styles = useStyles();
-  const { currentSceneId } = useContext(PlayScenarioContext);
+  const { currentSceneId, scenarioId } = useContext(PlayScenarioContext);
+  const { isLoading, graph } = useGraph(scenarioId);
 
-  if (currentSceneId === null) {
+  if (currentSceneId === null || isLoading) {
     return <LoadingPage text="Loading contents..." />;
   }
 
@@ -23,7 +25,10 @@ export default function PlayScenarioPage() {
       {currentSceneId && (
         <div className={styles.canvasContainer}>
           <div className={styles.canvas}>
-            <PlayScenarioCanvas />
+            <PlayScenarioCanvas
+              progress={graph.progress(currentSceneId)}
+              graph={graph}
+            />
           </div>
         </div>
       )}
