@@ -56,8 +56,8 @@ const style = {
 export default function DashboardPage({ data = null }) {
   const { currentScenario } = useContext(ScenarioContext);
 
-  const [nodes, setNodes] = useState(initialNodes);
-  const [edges, setEdges] = useState(initialEdges);
+  const [nodes, setNodes] = useState([]);
+  const [edges, setEdges] = useState([]);
 
   const { isLoading, graph } = useGraph(currentScenario._id);
 
