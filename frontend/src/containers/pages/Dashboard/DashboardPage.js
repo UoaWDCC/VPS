@@ -63,11 +63,11 @@ export default function DashboardPage({ data = null }) {
 
   useEffect(() => {
     if (!isLoading) {
-      console.log(graph);
       const { scenes, adjList } = graph;
-      const sceneNodes = [];
-      scenes.forEach((scene, index) => {
-        const sceneNode = {
+
+      // create nodes from scene data
+      const sceneNodes = scenes.map((scene, index) => {
+        return {
           id: scene._id,
           type: "sceneNode",
           data: {
@@ -75,11 +75,26 @@ export default function DashboardPage({ data = null }) {
             sceneId: scene._id,
             sceneTitle: scene.name,
           },
-          position: { x: 350, y: 250 * index },
+          position: { x: 350 * 0.5 * index, y: 250 * index },
         };
-        sceneNodes.push(sceneNode);
       });
+
+      // create edges from adjacency list
+      const sceneEdges = [];
+      Object.keys(adjList).forEach((sceneSourceNode) => {
+        const tempEdges = adjList[sceneSourceNode].map((sceneTargetNode) => {
+          return {
+            id: `${sceneSourceNode}-${sceneTargetNode}`,
+            type: "smoothstep",
+            source: sceneSourceNode,
+            target: sceneTargetNode,
+          };
+        });
+        sceneEdges.push(...tempEdges);
+      });
+
       setNodes(sceneNodes);
+      setEdges(sceneEdges);
     }
   }, [isLoading]);
 
