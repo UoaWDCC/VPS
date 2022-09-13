@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { retrieveAllUser, createUser, retrieveUser } from "../../db/daos/userDao";
+import { retrieveAllUser, createUser, retrieveUser,deleteUser } from "../../db/daos/userDao";
 
 const router = Router();
 
@@ -26,6 +26,15 @@ router.post("/", async (req, res) => {
   const scenario = await createUser(name, uid, email);
 
   res.status(HTTP_OK).json(scenario);
+});
+
+router.delete("/:userId", async (req, res) => {
+  const deleted = await deleteUser(req.params.userId);
+  if (deleted) {
+    res.sendStatus(HTTP_NO_CONTENT);
+  } else {
+    res.sendStatus(HTTP_NOT_FOUND);
+  }
 });
 
 export default router;

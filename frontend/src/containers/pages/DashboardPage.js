@@ -1,7 +1,7 @@
 import React, { useState, useContext } from "react";
 import { Button } from "@material-ui/core";
 import ScreenContainer from "../../components/ScreenContainer";
-import { usePost, useGet } from "../../hooks/crudHooks";
+import { usePost, useGet, useDelete } from "../../hooks/crudHooks";
 import AuthenticationContext from "../../context/AuthenticationContext";
 
 function DashboardPage() {
@@ -12,8 +12,8 @@ function DashboardPage() {
     },
   ]);
 
-  const userId = "632067145b4bef83c87f2a02";
-  useGet(`/api/user/${userId}`, setDashboardPage, false);
+  // const userId = "632067145b4bef83c87f2a02";
+  // useDelete(`/api/user/${userId}`, getUserIdToken);
 
   const test = {
     name: "aden",
@@ -21,17 +21,17 @@ function DashboardPage() {
     email: "yes",
   };
 
-  // usePost("/api/user", test, getUserIdToken);
+  usePost("/api/user", test, getUserIdToken);
 
   return (
     <ScreenContainer vertical>
       <Button>TEST</Button>
       <h1>test</h1>
-      {dashboardPage.map((page) => (
+      {/* {dashboardPage.map((page) => (
         <div>
           <h1>{page.test_data}</h1>
         </div>
-      ))}
+      ))} */}
     </ScreenContainer>
   );
 }

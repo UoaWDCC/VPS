@@ -22,4 +22,14 @@ const createUser = async (name, uid, email) => {
     return dbUser;
   };
 
-export {retrieveAllUser, createUser, retrieveUser};
+  const deleteUser = async (userId) => {
+    try {
+      const user = await User.findById(userId);
+      await user.remove();
+      return true;
+    } catch (e) {
+      return false;
+    }
+  };
+
+export {retrieveAllUser, createUser, retrieveUser, deleteUser};
