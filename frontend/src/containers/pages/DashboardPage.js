@@ -1,7 +1,7 @@
 import React, { useState, useContext } from "react";
 import { Button } from "@material-ui/core";
 import ScreenContainer from "../../components/ScreenContainer";
-import { usePost } from "../../hooks/crudHooks";
+import { usePost, useGet } from "../../hooks/crudHooks";
 import AuthenticationContext from "../../context/AuthenticationContext";
 
 function DashboardPage() {
@@ -12,7 +12,8 @@ function DashboardPage() {
     },
   ]);
 
-  // useGet("/api/dashboard", setDashboardPage, false);
+  const userId = "632067145b4bef83c87f2a02";
+  useGet(`/api/user/${userId}`, setDashboardPage, false);
 
   const test = {
     name: "aden",
@@ -20,7 +21,7 @@ function DashboardPage() {
     email: "yes",
   };
 
-  usePost("/api/user", test, getUserIdToken);
+  // usePost("/api/user", test, getUserIdToken);
 
   return (
     <ScreenContainer vertical>

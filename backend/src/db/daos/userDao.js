@@ -1,9 +1,14 @@
 import User from "../models/user";
 
-const retrieveDashboardInfo = async ()=>{
+const retrieveAllUser = async ()=>{
     return User.find();
 
 }
+
+const retrieveUser = async (userId) => {
+    const user = await User.findById(userId);
+    return user;
+  };
 
 
 const createUser = async (name, uid, email) => {
@@ -17,4 +22,4 @@ const createUser = async (name, uid, email) => {
     return dbUser;
   };
 
-export {retrieveDashboardInfo, createUser};
+export {retrieveAllUser, createUser, retrieveUser};
