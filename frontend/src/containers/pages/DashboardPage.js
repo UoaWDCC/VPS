@@ -1,16 +1,26 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import { Button } from "@material-ui/core";
 import ScreenContainer from "../../components/ScreenContainer";
-import { useGet } from "../../hooks/crudHooks";
+import { usePost } from "../../hooks/crudHooks";
+import AuthenticationContext from "../../context/AuthenticationContext";
 
 function DashboardPage() {
+  const { getUserIdToken } = useContext(AuthenticationContext);
   const [dashboardPage, setDashboardPage] = useState([
     {
       test_data: "workds",
     },
   ]);
 
-  useGet("/api/dashboard", setDashboardPage, false);
+  // useGet("/api/dashboard", setDashboardPage, false);
+
+  const test = {
+    name: "aden",
+    uid: "1234",
+    email: "yes",
+  };
+
+  usePost("/api/user", test, getUserIdToken);
 
   return (
     <ScreenContainer vertical>

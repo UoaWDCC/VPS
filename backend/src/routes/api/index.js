@@ -2,12 +2,12 @@ import { Router } from "express";
 
 import scenario from "./scenario";
 import image from "./image";
-import Dashboard from "./dashboard";
+import user from "./user";
 
 const router = Router();
 
 router.use("/scenario", scenario);
 router.use("/image", image);
-router.use("/dashboard", Dashboard);
+router.use("/user", user);
 
 export default router;
