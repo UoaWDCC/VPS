@@ -1,13 +1,8 @@
 import React, { useState, useContext, useEffect, useMemo } from "react";
 import ReactFlow, { Background, MarkerType } from "react-flow-renderer";
-import { Button } from "@material-ui/core";
 import dagre from "dagre";
 import ScreenContainer from "../../../components/ScreenContainer";
 import ScenarioContext from "../../../context/ScenarioContext";
-import { usePut } from "../../../hooks/crudHooks";
-import AuthenticationContext from "../../../context/AuthenticationContext";
-import ListContainer from "../../../components/ListContainer";
-import SideBar from "../../../components/SideBar";
 import TopBar from "./TopBar";
 import useGraph from "../../../hooks/useGraph";
 import SceneNode from "./SceneNode";
@@ -15,14 +10,12 @@ import SceneNode from "./SceneNode";
 const dagreGraph = new dagre.graphlib.Graph();
 dagreGraph.setDefaultEdgeLabel(() => ({}));
 
-const nodeWidth = 400;
-const nodeHeight = 300;
+const nodeWidth = 200;
+const nodeHeight = 150;
 
 const getLayoutedElements = (nodes, edges, direction = "TB") => {
   const isHorizontal = direction === "LR";
   dagreGraph.setGraph({ rankdir: direction });
-  console.log(nodes);
-  console.log(edges);
   nodes.forEach((node) => {
     dagreGraph.setNode(node.id, { width: nodeWidth, height: nodeHeight });
   });
@@ -57,7 +50,7 @@ const style = {
   height: "100vh",
 };
 
-export default function DashboardPage({ data = null }) {
+export default function DashboardPage() {
   const { currentScenario } = useContext(ScenarioContext);
 
   const [nodes, setNodes] = useState([]);
@@ -67,10 +60,11 @@ export default function DashboardPage({ data = null }) {
 
   useEffect(() => {
     if (!isLoading) {
+      console.log(graph);
       const { scenes, adjList } = graph;
 
       // create nodes from scene data
-      const sceneNodes = scenes.map((scene, index) => {
+      const sceneNodes = scenes.map((scene) => {
         return {
           id: scene._id,
           type: "sceneNode",
@@ -84,8 +78,17 @@ export default function DashboardPage({ data = null }) {
 
       // create edges from adjacency list
       const sceneEdges = [];
+      const path = [
+        "6320417cec05615b4acfa468",
+        "632041b8ec05615b4acfa4ac",
+        "632041bcec05615b4acfa4e3",
+      ];
+      console.log(path);
+
       Object.keys(adjList).forEach((sceneSourceNode) => {
         const tempEdges = adjList[sceneSourceNode].map((sceneTargetNode) => {
+          const isAnimated =
+            path.indexOf(sceneTargetNode) - path.indexOf(sceneSourceNode) === 1;
           return {
             id: `${sceneSourceNode}-${sceneTargetNode}`,
             type: "smoothstep",
@@ -94,16 +97,19 @@ export default function DashboardPage({ data = null }) {
             markerEnd: {
               type: MarkerType.ArrowClosed,
             },
+            animated: isAnimated,
+            style: {
+              stroke: isAnimated ? "red" : "",
+            },
+            zIndex: isAnimated ? 1 : 0,
           };
         });
         sceneEdges.push(...tempEdges);
       });
 
-      setNodes(sceneNodes);
-      setEdges(sceneEdges);
       const { nodes: layoutedNodes, edges: layoutedEdges } =
         getLayoutedElements(sceneNodes, sceneEdges);
-      console.log(layoutedNodes, layoutedEdges);
+
       setNodes(layoutedNodes);
       setEdges(layoutedEdges);
     }
