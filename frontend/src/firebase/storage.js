@@ -19,8 +19,8 @@ import { storage } from "./firebase";
  * @param {string} sceneId
  * @returns
  */
-const uploadFile = async (file, scenarioId, sceneId) => {
-  const fileUUID = v4();
+const uploadFile = async (file, scenarioId, sceneId, isEndImage) => {
+  const fileUUID = isEndImage ? "endImage" : v4();
   const storageRef = ref(storage, `${scenarioId}/${sceneId}/${fileUUID}`);
   const uploadTask = await uploadBytesResumable(storageRef, file);
   const url = await getDownloadURL(uploadTask.ref);
@@ -62,10 +62,15 @@ const uploadFiles = async (components, endImage, scenarioId, sceneId) => {
       components[i].url = await uploadFile(
         components[i].fileObject,
         scenarioId,
-        sceneId
+        sceneId,
+        false
       );
       delete components[i].fileObject;
     }
+  }
+
+  if (endImage) {
+    await uploadFile(endImage, scenarioId, sceneId, true);
   }
 };
 
