@@ -3,6 +3,7 @@ import { BrowserRouter, Switch, Route } from "react-router-dom";
 import { ThemeProvider } from "@material-ui/core";
 import ScenarioSelectionPage from "./pages/ScenarioSelectionPage";
 import PlayScenarioPage from "./pages/PlayScenarioPage/PlayScenarioPage";
+import DashboardPage from "./pages/DashboardPage";
 import { ScenePage } from "./pages/SceneSelectionPage";
 import ScenarioContextProvider from "../context/ScenarioContextProvider";
 import SceneContextProvider from "../context/SceneContextProvider";
@@ -23,11 +24,11 @@ export default function App() {
             <Switch>
               <Route exact path="/login" component={LoginPage} />
 
-              <Route path="/play/:scenarioId/:urlSceneId?">
+              <ProtectedRoute path="/play/:scenarioId/:urlSceneId?">
                 <PlayingScenarioContextProvider>
                   <PlayScenarioPage />
                 </PlayingScenarioContextProvider>
-              </Route>
+              </ProtectedRoute>
 
               <ProtectedRoute exact path="/">
                 <ScenarioContextProvider>
@@ -39,6 +40,14 @@ export default function App() {
                 <ScenarioContextProvider>
                   <SceneContextProvider>
                     <ScenePage />
+                  </SceneContextProvider>
+                </ScenarioContextProvider>
+              </ProtectedRoute>
+
+              <ProtectedRoute path="/dashboard">
+                <ScenarioContextProvider>
+                  <SceneContextProvider>
+                    <DashboardPage />
                   </SceneContextProvider>
                 </ScenarioContextProvider>
               </ProtectedRoute>
