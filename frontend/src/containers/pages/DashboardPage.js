@@ -1,7 +1,7 @@
-import React, { useState, useContext } from "react";
+import React, { useContext } from "react";
 import { Button } from "@material-ui/core";
 import ScreenContainer from "../../components/ScreenContainer";
-import { usePost,} from "../../hooks/crudHooks";
+import { usePost } from "../../hooks/crudHooks";
 import AuthenticationContext from "../../context/AuthenticationContext";
 
 function DashboardPage() {
