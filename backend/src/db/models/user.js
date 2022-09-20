@@ -15,6 +15,10 @@ const userSchema = new Schema({
     type: String,
     required: true,
   },
+  pictureURL: {
+    type: String,
+    required: true,
+  },
   played: [
     {
       type: Object,
