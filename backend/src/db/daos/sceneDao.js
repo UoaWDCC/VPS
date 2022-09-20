@@ -138,6 +138,14 @@ const duplicateScene = async (scenarioId, sceneId) => {
   return dbScene;
 };
 
+
+const incrementVisisted = async (sceneId) => {
+    const prevDbScene = await Scene.findById(sceneId);
+    let countVisisted = prevDbScene.visited;
+    await Scene.updateOne({_id: sceneId},{visited: countVisisted+1});
+
+    };
+
 // eslint-disable-next-line import/prefer-default-export
 export {
   createScene,
@@ -146,4 +154,5 @@ export {
   deleteScene,
   updateScene,
   duplicateScene,
+  incrementVisisted,
 };

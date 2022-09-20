@@ -7,6 +7,7 @@ import {
   updateScene,
   deleteScene,
   duplicateScene,
+  incrementVisisted,
 } from "../../db/daos/sceneDao";
 import auth from "../../middleware/firebaseAuth";
 import scenarioAuth from "../../middleware/scenarioAuth";
@@ -86,6 +87,12 @@ router.delete("/:sceneId", async (req, res) => {
 router.post("/duplicate/:sceneId", async (req, res) => {
   const scene = await duplicateScene(req.params.scenarioId, req.params.sceneId);
 
+  res.status(HTTP_OK).json(scene);
+});
+
+// Update a scene
+router.put("/visited/:sceneId", async (req, res) => {
+  const scene = await incrementVisisted(req.params.sceneId);
   res.status(HTTP_OK).json(scene);
 });
 
