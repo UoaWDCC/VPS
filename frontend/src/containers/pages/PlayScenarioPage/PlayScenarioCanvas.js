@@ -1,9 +1,10 @@
 import React, { useState, useContext } from "react";
-import { useGet } from "../../../hooks/crudHooks";
+import { useGet, usePost, usePut } from "../../../hooks/crudHooks";
 import componentResolver from "./componentResolver";
 import PlayScenarioContext from "../../../context/PlayScenarioContext";
 import ProgressBar from "./progressBar";
 import CountdownTimer from "../../../components/TimerComponent";
+import AuthenticationContext from "../../../context/AuthenticationContext";
 
 /**
  * This component displays the scene components on the screen when playing a scenario
@@ -18,6 +19,8 @@ export default function PlayScenarioCanvas(props) {
   const { scenarioId, currentSceneId, setCurrentSceneId } =
     useContext(PlayScenarioContext);
 
+  const { user } = useContext(AuthenticationContext);
+
   useGet(
     `/api/scenario/${scenarioId}/scene/full/${currentSceneId}`,
     setCurrentScene,
@@ -28,6 +31,17 @@ export default function PlayScenarioCanvas(props) {
     if (component.type === "BUTTON" && component.nextScene !== "") {
       setMaxProgress(Math.max(progress, maxProgress));
       graph.visit(component.nextScene);
+      if (graph.isEndScene(component.nextScene)) {
+        // update db
+
+        const userData = {
+          name: user.displayName,
+          uid: user.uid,
+          email: user.email,
+        };
+
+        usePost("/api/user", userData);
+      }
       setCurrentSceneId(component.nextScene);
     }
   };
