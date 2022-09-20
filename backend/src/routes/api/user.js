@@ -41,8 +41,8 @@ router.delete("/:userId", async (req, res) => {
 });
 
 router.put("/:userId", async (req, res) => {
-
-  const added = await addPlayed(req.params.userId, req.body);
+  const scenarioID = Object.values(req.body)[0];
+  const added = await addPlayed(req.params.userId, req.body, scenarioID);
   if(added){
     res.status(HTTP_OK).json(added);
   }else{

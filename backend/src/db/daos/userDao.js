@@ -1,4 +1,5 @@
 import User from "../models/user";
+import Scenario from "../models/scenario";
 
 const retrieveAllUser = async () => {
   return User.find();
@@ -31,14 +32,14 @@ const deleteUser = async (userId) => {
   }
 };
 
-const addPlayed = async (userId, newPlayed) => {
+const addPlayed = async (userId, newPlayed, scenarioId) => {
     try{
       await User.updateOne({_id: userId},{$push: {played: newPlayed}});
+      await Scenario.updateOne({ _id: scenarioId}, {$push: {users: userId}});
       return true;
     } catch(e){
       return false;
     }
-    
     
   };
 

@@ -18,6 +18,12 @@ const scenarioSchema = new Schema({
       ref: "Scene",
     },
   ],
+  users: [
+    {
+      type: Schema.Types.ObjectId,
+      ref: "User",
+    },
+  ],
 });
 
 // before removal of a scenario from the database, first remove all its scenes
