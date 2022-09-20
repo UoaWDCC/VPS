@@ -9,11 +9,12 @@ const retrieveUser = async (userId) => {
   return user;
 };
 
-const createUser = async (name, uid, email) => {
+const createUser = async (name, uid, email,pictureURL) => {
   const dbUser = new User({
     name,
     uid,
     email,
+    pictureURL,
   });
   await dbUser.save();
 

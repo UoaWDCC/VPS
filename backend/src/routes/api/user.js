@@ -24,9 +24,9 @@ router.get("/:userId", async (req, res) => {
 });
 
 router.post("/", async (req, res) => {
-  const { name, uid, email } = req.body;
+  const { name, uid, email, pictureURL } = req.body;
 
-  const scenario = await createUser(name, uid, email);
+  const scenario = await createUser(name, uid, email, pictureURL);
 
   res.status(HTTP_OK).json(scenario);
 });
