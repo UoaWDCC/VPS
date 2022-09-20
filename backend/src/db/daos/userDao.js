@@ -30,4 +30,15 @@ const deleteUser = async (userId) => {
   }
 };
 
-export { retrieveAllUser, createUser, retrieveUser, deleteUser };
+const addPlayed = async (userId, newPlayed) => {
+    try{
+      await User.updateOne({_id: userId},{$push: {played: newPlayed}});
+      return true;
+    } catch(e){
+      return false;
+    }
+    
+    
+  };
+
+export { retrieveAllUser, createUser, retrieveUser, deleteUser, addPlayed };

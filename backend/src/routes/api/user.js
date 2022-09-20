@@ -4,6 +4,7 @@ import {
   createUser,
   retrieveUser,
   deleteUser,
+  addPlayed,
 } from "../../db/daos/userDao";
 
 const router = Router();
@@ -37,6 +38,17 @@ router.delete("/:userId", async (req, res) => {
   } else {
     res.sendStatus(HTTP_NOT_FOUND);
   }
+});
+
+router.put("/:userId", async (req, res) => {
+
+  const added = await addPlayed(req.params.userId, req.body);
+  if(added){
+    res.status(HTTP_OK).json(added);
+  }else{
+    res.sendStatus(HTTP_NOT_FOUND);
+  }
+  
 });
 
 export default router;
