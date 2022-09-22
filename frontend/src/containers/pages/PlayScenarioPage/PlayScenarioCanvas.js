@@ -32,15 +32,25 @@ export default function PlayScenarioCanvas(props) {
       setMaxProgress(Math.max(progress, maxProgress));
       graph.visit(component.nextScene);
       if (graph.isEndScene(component.nextScene)) {
+        const path = graph.getPath();
         // update db
-
+        console.log(user);
         const userData = {
           name: user.displayName,
           uid: user.uid,
           email: user.email,
+          pictureURL: user.photoURL,
+          played: [
+            {
+              scenarioId,
+              path,
+            },
+          ],
         };
 
-        usePost("/api/user", userData);
+        usePost(`/api/user`, userData);
+
+        // update scenes visited
       }
       setCurrentSceneId(component.nextScene);
     }

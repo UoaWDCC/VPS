@@ -10,12 +10,13 @@ const retrieveUser = async (userId) => {
   return user;
 };
 
-const createUser = async (name, uid, email,pictureURL) => {
+const createUser = async (name, uid, email, pictureURL, played) => {
   const dbUser = new User({
     name,
     uid,
     email,
     pictureURL,
+    played,
   });
   await dbUser.save();
 
@@ -33,14 +34,13 @@ const deleteUser = async (userId) => {
 };
 
 const addPlayed = async (userId, newPlayed, scenarioId) => {
-    try{
-      await User.updateOne({_id: userId},{$push: {played: newPlayed}});
-      await Scenario.updateOne({ _id: scenarioId}, {$push: {users: userId}});
-      return true;
-    } catch(e){
-      return false;
-    }
-    
-  };
+  try {
+    await User.updateOne({ _id: userId }, { $push: { played: newPlayed } });
+    await Scenario.updateOne({ _id: scenarioId }, { $push: { users: userId } });
+    return true;
+  } catch (e) {
+    return false;
+  }
+};
 
 export { retrieveAllUser, createUser, retrieveUser, deleteUser, addPlayed };
