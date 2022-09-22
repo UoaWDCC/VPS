@@ -19,7 +19,7 @@ export default function PlayScenarioCanvas(props) {
   const { scenarioId, currentSceneId, setCurrentSceneId } =
     useContext(PlayScenarioContext);
 
-  const { user } = useContext(AuthenticationContext);
+  const { user, getUserIdToken } = useContext(AuthenticationContext);
 
   useGet(
     `/api/scenario/${scenarioId}/scene/full/${currentSceneId}`,
@@ -33,9 +33,8 @@ export default function PlayScenarioCanvas(props) {
       graph.visit(component.nextScene);
       if (graph.isEndScene(component.nextScene)) {
         const path = graph.getPath();
-        // update db
         console.log(user);
-        const userData = {
+        usePost(`/api/user`, {
           name: user.displayName,
           uid: user.uid,
           email: user.email,
@@ -46,11 +45,16 @@ export default function PlayScenarioCanvas(props) {
               path,
             },
           ],
-        };
+        });
+        path.forEach((id) => {
+          usePut(
+            `/api/scenario/${scenarioId}/scene/visited/${id}`,
+            {},
+            getUserIdToken
+          );
+        });
 
-        usePost(`/api/user`, userData);
-
-        // update scenes visited
+        console.log(path);
       }
       setCurrentSceneId(component.nextScene);
     }
