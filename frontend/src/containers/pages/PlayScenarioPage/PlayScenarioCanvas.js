@@ -1,4 +1,4 @@
-import React, { useState, useContext } from "react";
+import React, { useState, useContext, useEffect } from "react";
 import { useGet, usePost, usePut } from "../../../hooks/crudHooks";
 import componentResolver from "./componentResolver";
 import PlayScenarioContext from "../../../context/PlayScenarioContext";
@@ -33,19 +33,14 @@ export default function PlayScenarioCanvas(props) {
       graph.visit(component.nextScene);
       if (graph.isEndScene(component.nextScene)) {
         const path = graph.getPath();
-        console.log(user);
-        usePost(`/api/user`, {
-          name: user.displayName,
-          uid: user.uid,
-          email: user.email,
-          pictureURL: user.photoURL,
-          played: [
-            {
-              scenarioId,
-              path,
-            },
-          ],
-        });
+        usePut(
+          `/api/user/${user.uid}`,
+          {
+            scenarioId,
+            path,
+          },
+          getUserIdToken
+        );
         path.forEach((id) => {
           usePut(
             `/api/scenario/${scenarioId}/scene/visited/${id}`,
@@ -53,8 +48,6 @@ export default function PlayScenarioCanvas(props) {
             getUserIdToken
           );
         });
-
-        console.log(path);
       }
       setCurrentSceneId(component.nextScene);
     }

@@ -20,7 +20,7 @@ const scenarioSchema = new Schema({
   ],
   users: [
     {
-      type: Schema.Types.ObjectId,
+      type: String,
       ref: "User",
     },
   ],
