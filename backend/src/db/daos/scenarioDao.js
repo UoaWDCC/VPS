@@ -57,9 +57,13 @@ const updateScenario = async (scenarioId, updatedScenario) => {
 const updateDurations = async (scenarioId, updatedDurations) => {
   // if we are updating name only, components will be null
   const scenario = await Scenario.findById(scenarioId);
-  scenario.durations = scenario.durations.push(updatedDurations);
-  await scenario.save();
-  return scenario;
+  try {
+    scenario.durations = scenario.durations.push(updatedDurations);
+    await scenario.save();
+    return scenario;
+  } catch (e) {
+    return scenario;
+  }
 };
 
 /**
