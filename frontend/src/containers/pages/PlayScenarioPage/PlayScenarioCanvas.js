@@ -1,5 +1,5 @@
-import React, { useState, useContext, useEffect } from "react";
-import { useGet, usePost, usePut } from "../../../hooks/crudHooks";
+import React, { useState, useContext } from "react";
+import { useGet, usePut } from "../../../hooks/crudHooks";
 import componentResolver from "./componentResolver";
 import PlayScenarioContext from "../../../context/PlayScenarioContext";
 import ProgressBar from "./progressBar";
