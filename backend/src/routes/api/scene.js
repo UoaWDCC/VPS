@@ -37,7 +37,7 @@ router.get("/all", async (req, res) => {
   const fullScenes = await Promise.all(
     // eslint-disable-next-line no-underscore-dangle
     scenes.map((it) => retrieveScene(it._id))
-  ).catch((err) => console.error(err));
+  ).catch((err) => res.status(HTTP_NOT_FOUND).send(err));
   res.status(HTTP_OK).json(fullScenes);
 });
 

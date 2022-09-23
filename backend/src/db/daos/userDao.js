@@ -15,7 +15,7 @@ const retrieveAllUser = async () => {
  * @returns user object
  */
 const retrieveUser = async (uid) => {
-  const user = await User.find({ uid: uid });
+  const user = await User.find({ uid });
   return user;
 };
 
@@ -28,7 +28,7 @@ const retrieveUser = async (uid) => {
  * @returns the created database user object
  */
 const createUser = async (name, uid, email, pictureURL) => {
-  const user = await User.find({ uid: uid });
+  const user = await User.find({ uid });
   if (user.length === 0) {
     const dbUser = new User({
       name,
@@ -49,7 +49,7 @@ const createUser = async (name, uid, email, pictureURL) => {
  */
 const deleteUser = async (uid) => {
   try {
-    const user = await User.find({ uid: uid });
+    const user = await User.find({ uid });
     await user.remove();
     return true;
   } catch (e) {
@@ -66,10 +66,11 @@ const deleteUser = async (uid) => {
  */
 const addPlayed = async (uid, newPlayed, scenarioId) => {
   try {
-    //Updates User's Played array, by appending new one
-    await User.updateOne({ uid: uid }, { $push: { played: newPlayed } });
+    // Updates User's Played array, by appending new one
 
-    //Updates Scenario's User array, by appending new uer
+    await User.updateOne({ uid }, { $push: { played: newPlayed } });
+    // Updates Scenario's User array, by appending new uer
+
     await Scenario.updateOne({ _id: scenarioId }, { $push: { users: uid } });
     return true;
   } catch (e) {
