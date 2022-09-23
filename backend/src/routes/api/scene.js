@@ -90,7 +90,7 @@ router.post("/duplicate/:sceneId", async (req, res) => {
   res.status(HTTP_OK).json(scene);
 });
 
-// Update a scene
+// Update a scene's visited field by incrementing by 1
 router.put("/visited/:sceneId", async (req, res) => {
   const scene = await incrementVisisted(req.params.sceneId);
   res.status(HTTP_OK).json(scene);

@@ -138,13 +138,16 @@ const duplicateScene = async (scenarioId, sceneId) => {
   return dbScene;
 };
 
-
+/**
+ * Increments the scene's visted field
+ * @param {String} sceneId MongoDB ID of scenario
+ * @returns nothing
+ */
 const incrementVisisted = async (sceneId) => {
-    const prevDbScene = await Scene.findById(sceneId);
-    let countVisisted = prevDbScene.visited;
-    await Scene.updateOne({_id: sceneId},{visited: countVisisted+1});
-
-    };
+  const prevDbScene = await Scene.findById(sceneId);
+  let countVisisted = prevDbScene.visited;
+  await Scene.updateOne({ _id: sceneId }, { visited: countVisisted + 1 });
+};
 
 // eslint-disable-next-line import/prefer-default-export
 export {
