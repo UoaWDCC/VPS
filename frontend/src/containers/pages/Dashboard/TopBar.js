@@ -1,9 +1,8 @@
-import React, { useState, useContext } from "react";
+import React from "react";
 import { Link, useHistory } from "react-router-dom";
 import Button from "@material-ui/core/Button";
 
 import styles from "../../../styling/TopBar.module.scss";
-import ScenarioContext from "../../../context/ScenarioContext";
 
 /**
  * Component used for navigation and executing actions located at the top of the screen.
@@ -23,8 +22,6 @@ export default function TopBar({
   children = [],
   confirmModal = false,
 }) {
-  const { currentScenario } = useContext(ScenarioContext);
-
   const history = useHistory();
 
   /**

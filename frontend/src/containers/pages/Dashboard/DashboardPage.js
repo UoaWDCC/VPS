@@ -1,59 +1,56 @@
 import React, { useState, useContext, useEffect, useMemo } from "react";
-import ReactFlow, { Background } from "react-flow-renderer";
-import { Button } from "@material-ui/core";
+import ReactFlow, { Background, MarkerType } from "react-flow-renderer";
+import dagre from "dagre";
 import ScreenContainer from "../../../components/ScreenContainer";
 import ScenarioContext from "../../../context/ScenarioContext";
-import { usePut } from "../../../hooks/crudHooks";
-import AuthenticationContext from "../../../context/AuthenticationContext";
-import ListContainer from "../../../components/ListContainer";
-import SideBar from "../../../components/SideBar";
 import TopBar from "./TopBar";
 import useGraph from "../../../hooks/useGraph";
 import SceneNode from "./SceneNode";
 
-const initialNodes = [
-  {
-    id: "1",
-    type: "input",
-    data: { label: "Input Node" },
-    position: { x: 250, y: 25 },
-  },
+const dagreGraph = new dagre.graphlib.Graph();
+dagreGraph.setDefaultEdgeLabel(() => ({}));
 
-  {
-    id: "2",
-    // you can also pass a React component as a label
-    data: { label: <div>Default Node</div> },
-    position: { x: 100, y: 125 },
-  },
-  {
-    id: "3",
-    type: "output",
-    data: { label: "Output Node" },
-    position: { x: 250, y: 250 },
-  },
-  {
-    id: "4",
-    type: "sceneNode",
-    data: {
-      scenarioId: "631ad8c7860f66d328fb185e",
-      sceneId: "631ad8c9860f66d328fb1865",
-      sceneTitle: "Hello",
-    },
-    position: { x: 350, y: 250 },
-  },
-];
+const nodeWidth = 200;
+const nodeHeight = 150;
 
-const initialEdges = [
-  { id: "e1-2", source: "1", target: "2" },
-  { id: "e2-3", source: "2", target: "3", animated: true },
-];
+const getLayoutedElements = (nodes, edges, direction = "TB") => {
+  const isHorizontal = direction === "LR";
+  dagreGraph.setGraph({ rankdir: direction });
+  nodes.forEach((node) => {
+    dagreGraph.setNode(node.id, { width: nodeWidth, height: nodeHeight });
+  });
+
+  edges.forEach((edge) => {
+    dagreGraph.setEdge(edge.source, edge.target);
+  });
+
+  dagre.layout(dagreGraph);
+  /* eslint-disable no-param-reassign */
+  nodes.forEach((node) => {
+    const nodeWithPosition = dagreGraph.node(node.id);
+    node.targetPosition = isHorizontal ? "left" : "top";
+    node.sourcePosition = isHorizontal ? "right" : "bottom";
+
+    // We are shifting the dagre node position (anchor=center center) to the top left
+    // so it matches the React Flow node anchor point (top left).
+    node.position = {
+      x: nodeWithPosition.x,
+      y: nodeWithPosition.y,
+    };
+
+    return node;
+  });
+  /* eslint-enable no-param-reassign */
+
+  return { nodes, edges };
+};
 
 const style = {
   width: "100vw",
   height: "100vh",
 };
 
-export default function DashboardPage({ data = null }) {
+export default function DashboardPage() {
   const { currentScenario } = useContext(ScenarioContext);
 
   const [nodes, setNodes] = useState([]);
@@ -65,9 +62,10 @@ export default function DashboardPage({ data = null }) {
     if (!isLoading) {
       console.log(graph);
       const { scenes, adjList } = graph;
-      const sceneNodes = [];
-      scenes.forEach((scene, index) => {
-        const sceneNode = {
+
+      // create nodes from scene data
+      const sceneNodes = scenes.map((scene) => {
+        return {
           id: scene._id,
           type: "sceneNode",
           data: {
@@ -75,14 +73,47 @@ export default function DashboardPage({ data = null }) {
             sceneId: scene._id,
             sceneTitle: scene.name,
           },
-          position: { x: 350, y: 250 * index },
         };
-        sceneNodes.push(sceneNode);
       });
-      setNodes(sceneNodes);
+
+      // create edges from adjacency list
+      const sceneEdges = [];
+      const path = [
+        "6320417cec05615b4acfa468",
+        "632041b8ec05615b4acfa4ac",
+        "632041bcec05615b4acfa4e3",
+      ];
+      console.log(path);
+
+      Object.keys(adjList).forEach((sceneSourceNode) => {
+        const tempEdges = adjList[sceneSourceNode].map((sceneTargetNode) => {
+          const isAnimated =
+            path.indexOf(sceneTargetNode) - path.indexOf(sceneSourceNode) === 1;
+          return {
+            id: `${sceneSourceNode}-${sceneTargetNode}`,
+            type: "smoothstep",
+            source: sceneSourceNode,
+            target: sceneTargetNode,
+            markerEnd: {
+              type: MarkerType.ArrowClosed,
+            },
+            animated: isAnimated,
+            style: {
+              stroke: isAnimated ? "red" : "",
+            },
+            zIndex: isAnimated ? 1 : 0,
+          };
+        });
+        sceneEdges.push(...tempEdges);
+      });
+
+      const { nodes: layoutedNodes, edges: layoutedEdges } =
+        getLayoutedElements(sceneNodes, sceneEdges);
+
+      setNodes(layoutedNodes);
+      setEdges(layoutedEdges);
     }
   }, [isLoading]);
-
   const nodeTypes = useMemo(() => ({ sceneNode: SceneNode }), []);
 
   const [isHovering, setIsHovering] = useState(false);
