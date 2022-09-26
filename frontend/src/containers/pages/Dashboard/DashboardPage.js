@@ -85,6 +85,33 @@ export default function DashboardPage({ data = null }) {
 
   const nodeTypes = useMemo(() => ({ sceneNode: SceneNode }), []);
 
+  const [isHovering, setIsHovering] = useState(false);
+
+  const [scenarioID, setScenarioID] = React.useState("");
+  const [sceneID, setsceneID] = React.useState("");
+  const [sceneName, setsceneName] = React.useState("");
+  const [x, setX] = React.useState("");
+  const [y, setY] = React.useState("");
+
+  function handleMouseEnter(event, node) {
+    setScenarioID(node.data.scenarioId);
+    setsceneID(node.id);
+    setsceneName(node.data.sceneTitle);
+    setX(event.pageX);
+    setY(event.pageY);
+
+    setIsHovering(true);
+  }
+
+  React.useEffect(() => {
+    document.getElementById("tooltip").style.top = `${y - 100}px`;
+    document.getElementById("tooltip").style.left = `${x + 100}px`;
+  }, [x, y]);
+
+  function handleMouseLeave(node) {
+    setIsHovering(false);
+  }
+
   return (
     <ScreenContainer vertical>
       <TopBar />
@@ -94,7 +121,28 @@ export default function DashboardPage({ data = null }) {
         edges={edges}
         fitView
         nodeTypes={nodeTypes}
+        onNodeMouseEnter={(event, node) => {
+          handleMouseEnter(event, node);
+        }}
+        onNodeMouseLeave={(event, node) => handleMouseLeave(node)}
       >
+        {isHovering ? (
+          <div
+            id="tooltip"
+            style={{
+              color: "red",
+              position: "absolute",
+              "z-index": "-1",
+              backgroundColor: "black",
+            }}
+          >
+            <h2>{scenarioID}</h2>
+            <h2>{sceneID}</h2>
+            <h2>{sceneName}</h2>
+          </div>
+        ) : (
+          <div id="tooltip" />
+        )}
         <Background />
       </ReactFlow>
     </ScreenContainer>
