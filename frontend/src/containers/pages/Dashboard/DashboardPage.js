@@ -7,6 +7,7 @@ import ScenarioContext from "../../../context/ScenarioContext";
 import TopBar from "./TopBar";
 import useGraph from "../../../hooks/useGraph";
 import SceneNode from "./SceneNode";
+import { useGet } from "../../../hooks/crudHooks";
 
 const dagreGraph = new dagre.graphlib.Graph();
 dagreGraph.setDefaultEdgeLabel(() => ({}));
@@ -57,7 +58,15 @@ export default function DashboardPage() {
   const [nodes, setNodes] = useState([]);
   const [edges, setEdges] = useState([]);
   const [path, setPath] = useState([]);
+  const [users, setUsers] = useState([]);
+
   const { isLoading, graph } = useGraph(currentScenario._id);
+
+  useGet("/api/user", setUsers);
+
+  useEffect(() => {
+    console.log(users);
+  }, [users]);
 
   useEffect(() => {
     if (!isLoading) {
@@ -148,7 +157,7 @@ export default function DashboardPage() {
     document.getElementById("tooltip").style.left = `${x + 100}px`;
   }, [x, y]);
 
-  function handleMouseLeave(node) {
+  function handleMouseLeave() {
     setIsHovering(false);
   }
 
@@ -174,7 +183,7 @@ export default function DashboardPage() {
               style={{
                 color: "red",
                 position: "absolute",
-                "z-index": "-1",
+                zIndex: "1000",
                 backgroundColor: "black",
               }}
             >

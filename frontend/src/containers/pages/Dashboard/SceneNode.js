@@ -4,8 +4,7 @@ import { Box } from "@material-ui/core";
 import Thumbnail from "../../../components/Thumbnail";
 
 function SceneNode({ data }) {
-  const { scenarioId, sceneId, sceneTitle } = data;
-  console.log(scenarioId, sceneId, sceneTitle);
+  const { scenarioId, sceneId } = data;
 
   return (
     <Box>
