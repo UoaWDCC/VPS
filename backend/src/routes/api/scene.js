@@ -7,6 +7,7 @@ import {
   updateScene,
   deleteScene,
   duplicateScene,
+  incrementVisisted,
 } from "../../db/daos/sceneDao";
 import auth from "../../middleware/firebaseAuth";
 import scenarioAuth from "../../middleware/scenarioAuth";
@@ -36,7 +37,7 @@ router.get("/all", async (req, res) => {
   const fullScenes = await Promise.all(
     // eslint-disable-next-line no-underscore-dangle
     scenes.map((it) => retrieveScene(it._id))
-  ).catch((err) => console.error(err));
+  ).catch((err) => res.status(HTTP_NOT_FOUND).send(err));
   res.status(HTTP_OK).json(fullScenes);
 });
 
@@ -86,6 +87,12 @@ router.delete("/:sceneId", async (req, res) => {
 router.post("/duplicate/:sceneId", async (req, res) => {
   const scene = await duplicateScene(req.params.scenarioId, req.params.sceneId);
 
+  res.status(HTTP_OK).json(scene);
+});
+
+// Update a scene's visited field by incrementing by 1
+router.put("/visited/:sceneId", async (req, res) => {
+  const scene = await incrementVisisted(req.params.sceneId);
   res.status(HTTP_OK).json(scene);
 });
 
