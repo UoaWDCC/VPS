@@ -1,6 +1,7 @@
 import React, { useState, useContext, useEffect, useMemo } from "react";
 import ReactFlow, { Background, MarkerType } from "react-flow-renderer";
 import dagre from "dagre";
+import { Box } from "@material-ui/core";
 import ScreenContainer from "../../../components/ScreenContainer";
 import ScenarioContext from "../../../context/ScenarioContext";
 import TopBar from "./TopBar";
@@ -55,7 +56,7 @@ export default function DashboardPage() {
 
   const [nodes, setNodes] = useState([]);
   const [edges, setEdges] = useState([]);
-
+  const [path, setPath] = useState([]);
   const { isLoading, graph } = useGraph(currentScenario._id);
 
   useEffect(() => {
@@ -78,17 +79,13 @@ export default function DashboardPage() {
 
       // create edges from adjacency list
       const sceneEdges = [];
-      const path = [
+      setPath([
         "6320417cec05615b4acfa468",
         "632041b8ec05615b4acfa4ac",
         "632041bcec05615b4acfa4e3",
-      ];
-      console.log(path);
-
+      ]);
       Object.keys(adjList).forEach((sceneSourceNode) => {
         const tempEdges = adjList[sceneSourceNode].map((sceneTargetNode) => {
-          const isAnimated =
-            path.indexOf(sceneTargetNode) - path.indexOf(sceneSourceNode) === 1;
           return {
             id: `${sceneSourceNode}-${sceneTargetNode}`,
             type: "smoothstep",
@@ -97,11 +94,6 @@ export default function DashboardPage() {
             markerEnd: {
               type: MarkerType.ArrowClosed,
             },
-            animated: isAnimated,
-            style: {
-              stroke: isAnimated ? "red" : "",
-            },
-            zIndex: isAnimated ? 1 : 0,
           };
         });
         sceneEdges.push(...tempEdges);
@@ -114,6 +106,23 @@ export default function DashboardPage() {
       setEdges(layoutedEdges);
     }
   }, [isLoading]);
+
+  useEffect(() => {
+    const animatedEdges = edges.map((edge) => {
+      const isAnimated =
+        path.indexOf(edge.target) - path.indexOf(edge.source) === 1;
+      return {
+        ...edge,
+        animated: isAnimated,
+        style: {
+          stroke: isAnimated ? "red" : "",
+        },
+        zIndex: isAnimated ? 1 : 0,
+      };
+    });
+    setEdges(animatedEdges);
+  }, [path]);
+
   const nodeTypes = useMemo(() => ({ sceneNode: SceneNode }), []);
 
   const [isHovering, setIsHovering] = useState(false);
@@ -143,39 +152,45 @@ export default function DashboardPage() {
     setIsHovering(false);
   }
 
+  const studentTableStyles = { width: "30vw", backgroundColor: "#f3f7f2" };
   return (
     <ScreenContainer vertical>
       <TopBar />
-      <ReactFlow
-        style={style}
-        nodes={nodes}
-        edges={edges}
-        fitView
-        nodeTypes={nodeTypes}
-        onNodeMouseEnter={(event, node) => {
-          handleMouseEnter(event, node);
-        }}
-        onNodeMouseLeave={(event, node) => handleMouseLeave(node)}
-      >
-        {isHovering ? (
-          <div
-            id="tooltip"
-            style={{
-              color: "red",
-              position: "absolute",
-              "z-index": "-1",
-              backgroundColor: "black",
-            }}
-          >
-            <h2>{scenarioID}</h2>
-            <h2>{sceneID}</h2>
-            <h2>{sceneName}</h2>
-          </div>
-        ) : (
-          <div id="tooltip" />
-        )}
-        <Background />
-      </ReactFlow>
+      <ScreenContainer>
+        <ReactFlow
+          style={style}
+          nodes={nodes}
+          edges={edges}
+          fitView
+          nodeTypes={nodeTypes}
+          onNodeMouseEnter={(event, node) => {
+            handleMouseEnter(event, node);
+          }}
+          onNodeMouseLeave={(event, node) => handleMouseLeave(node)}
+        >
+          {isHovering ? (
+            <div
+              id="tooltip"
+              style={{
+                color: "red",
+                position: "absolute",
+                "z-index": "-1",
+                backgroundColor: "black",
+              }}
+            >
+              <h2>{scenarioID}</h2>
+              <h2>{sceneID}</h2>
+              <h2>{sceneName}</h2>
+            </div>
+          ) : (
+            <div id="tooltip" />
+          )}
+          <Background />
+        </ReactFlow>
+        <Box sx={studentTableStyles}>
+          <h1>Student List</h1>
+        </Box>
+      </ScreenContainer>
     </ScreenContainer>
   );
 }
