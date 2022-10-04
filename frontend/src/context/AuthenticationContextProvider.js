@@ -3,7 +3,7 @@ import { signInWithRedirect } from "firebase/auth";
 import { useAuthState } from "react-firebase-hooks/auth";
 import AuthenticationContext from "./AuthenticationContext";
 import { auth, googleProvider } from "../firebase/firebase";
-import { useGetSimplified } from "../hooks/crudHooks";
+import { useGetSimplified, useGet } from "../hooks/crudHooks";
 
 /**
  * This is a Context Provider made with the React Context API
@@ -38,26 +38,11 @@ export default function AuthenticationContextProvider({ children }) {
    * @returns the role of user
    */
   function getRole() {
-    const [staffList, setStaffList] = useState();
-    useGetSimplified("/api/staff", setStaffList);
+    const [role, setUserRole] = useState();
+    const userID = user == null ? "null" : user.uid; // this is to avoid null pointer exceptions while confining to hook rules
+    useGetSimplified(`/api/staff/${userID}`, setUserRole);
 
-    let onStaffList = false;
-    if (user && getUserIdToken() != null) {
-      if (staffList !== undefined) {
-        for (let i = 0; i < staffList.length; i += 1) {
-          if (staffList[i].firebaseID === user.uid) {
-            onStaffList = true;
-          }
-        }
-      }
-
-      if (onStaffList) {
-        return "admin";
-      }
-      return "user";
-    }
-
-    return "nonexistent";
+    return role;
   }
 
   // creating user object with role property

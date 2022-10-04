@@ -11,7 +11,7 @@ import LoadingPage from "../containers/pages/LoadingPage";
  * - if login status is loading then show loading page
  * - if logged in then show children components
  */
-function ProtectedRoute({ children, accessLevel = "user", ...rest }) {
+function ProtectedRoute({ children, accessLevelReq = "user", ...rest }) {
   const { loading, user, VpsUser } = useContext(AuthenticationContext);
 
   return (
@@ -22,7 +22,7 @@ function ProtectedRoute({ children, accessLevel = "user", ...rest }) {
           return <LoadingPage text="Loading contents..." />;
         }
         if (user) {
-          if (VpsUser.role === accessLevel || accessLevel === "user") {
+          if (VpsUser.role === accessLevelReq || accessLevelReq === "user") {
             return children;
           }
 

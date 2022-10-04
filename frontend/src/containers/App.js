@@ -44,7 +44,7 @@ export default function App() {
                 </ScenarioContextProvider>
               </ProtectedRoute>
 
-              <ProtectedRoute path="/dashboard" accessLevel="admin">
+              <ProtectedRoute path="/dashboard" accessLevelReq="staff">
                 <ScenarioContextProvider>
                   <SceneContextProvider>
                     <DashboardPage />
