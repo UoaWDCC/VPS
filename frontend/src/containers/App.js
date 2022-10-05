@@ -14,6 +14,7 @@ import theme from "./theme/App.theme";
 import ProtectedRoute from "../firebase/ProtectedRoute";
 import LoginPage from "./pages/LoginPage";
 import AuthenticationContextProvider from "../context/AuthenticationContextProvider";
+import AccessLevel from "../enums/route.access.level";
 
 export default function App() {
   return (
@@ -44,7 +45,10 @@ export default function App() {
                 </ScenarioContextProvider>
               </ProtectedRoute>
 
-              <ProtectedRoute path="/dashboard" accessLevelReq="staff">
+              <ProtectedRoute
+                path="/dashboard"
+                accessLevelReq={AccessLevel.STAFF}
+              >
                 <ScenarioContextProvider>
                   <SceneContextProvider>
                     <DashboardPage />
