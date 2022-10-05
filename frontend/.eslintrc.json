@@ -17,6 +17,7 @@
     "ecmaVersion": 12,
     "sourceType": "module"
   },
+  "ignorePatterns": ["Graph.js", "useGraph.js"],
   "rules": {
     "no-console": 0,
     "react/prop-types": "off",

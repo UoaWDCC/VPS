@@ -49,6 +49,24 @@ const updateScenario = async (scenarioId, updatedScenario) => {
 };
 
 /**
+ * Updates scenario durations for users
+ * @param {String} sceneId MongoDB ID of scene
+ * @param {updatedDuration: Object} updatedDurations updated duration for a user
+ * @returns updated database scene object
+ */
+const updateDurations = async (scenarioId, updatedDurations) => {
+  // if we are updating name only, components will be null
+  const scenario = await Scenario.findById(scenarioId);
+  try {
+    scenario.durations = scenario.durations.push(updatedDurations);
+    await scenario.save();
+    return scenario;
+  } catch (e) {
+    return scenario;
+  }
+};
+
+/**
  * Deletes a scenario from the database
  * @param {String} scenarioId MongoDB ID of scenario
  * @returns {Boolean} True if successfully deleted, False if error
@@ -69,4 +87,5 @@ export {
   retrieveScenario,
   updateScenario,
   deleteScenario,
+  updateDurations,
 };
