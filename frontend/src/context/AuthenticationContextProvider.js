@@ -33,22 +33,15 @@ export default function AuthenticationContextProvider({ children }) {
     auth.signOut();
   }
 
-  /**
-   * This function determines the role of the current logged in user.
-   * @returns the role of user
-   */
-  function getRole() {
-    const [role, setUserRole] = useState();
-    const userID = user == null ? "null" : user.uid; // this is to avoid null pointer exceptions while confining to hook rules
-    useGetSimplified(`/api/staff/${userID}`, setUserRole);
-
-    return role;
-  }
+  // getting role from backend
+  const [userRole, setUserRole] = useState();
+  const userID = user == null ? "null" : user.uid; // this is to avoid null pointer exceptions while confining to hook rules
+  useGetSimplified(`/api/staff/${userID}`, setUserRole);
 
   // creating user object with role property
   const VpsUser = {
     firebaseUserObj: user,
-    role: getRole(),
+    role: userRole,
   };
 
   return (
