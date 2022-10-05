@@ -7,6 +7,7 @@ import {
   updateScene,
   deleteScene,
   duplicateScene,
+  incrementVisisted,
 } from "../../db/daos/sceneDao";
 import auth from "../../middleware/firebaseAuth";
 import scenarioAuth from "../../middleware/scenarioAuth";
@@ -27,13 +28,22 @@ router.get("/full/:sceneId", async (req, res) => {
 // Retrieve all scenes of a scenario
 router.get("/", async (req, res) => {
   const scenes = await retrieveSceneList(req.params.scenarioId);
-
   res.json(scenes);
+});
+
+// Retrieve all scenes with full scene data
+router.get("/all", async (req, res) => {
+  const scenes = await retrieveSceneList(req.params.scenarioId);
+  const fullScenes = await Promise.all(
+    // eslint-disable-next-line no-underscore-dangle
+    scenes.map((it) => retrieveScene(it._id))
+  ).catch((err) => res.status(HTTP_NOT_FOUND).send(err));
+  res.status(HTTP_OK).json(fullScenes);
 });
 
 // Apply auth middleware to all routes below this point
 router.use(auth);
-// // Apply scenario auth middleware
+// Apply scenario auth middleware
 router.use(scenarioAuth);
 
 // Create a scene for a scenario
@@ -77,6 +87,12 @@ router.delete("/:sceneId", async (req, res) => {
 router.post("/duplicate/:sceneId", async (req, res) => {
   const scene = await duplicateScene(req.params.scenarioId, req.params.sceneId);
 
+  res.status(HTTP_OK).json(scene);
+});
+
+// Update a scene's visited field by incrementing by 1
+router.put("/visited/:sceneId", async (req, res) => {
+  const scene = await incrementVisisted(req.params.sceneId);
   res.status(HTTP_OK).json(scene);
 });
 
