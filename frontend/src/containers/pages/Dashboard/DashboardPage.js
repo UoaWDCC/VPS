@@ -2,6 +2,7 @@ import React, { useState, useContext, useEffect, useMemo } from "react";
 import ReactFlow, { Background, MarkerType } from "react-flow-renderer";
 import dagre from "dagre";
 import { Box } from "@material-ui/core";
+import { DataGrid } from "@mui/x-data-grid";
 import ScreenContainer from "../../../components/ScreenContainer";
 import ScenarioContext from "../../../context/ScenarioContext";
 import TopBar from "./TopBar";
@@ -52,6 +53,11 @@ const style = {
   height: "100vh",
 };
 
+const columns = [
+  { field: "id", headerName: "No.", flex: 1 },
+  { field: "user", headerName: "Users who have played", flex: 4 },
+];
+
 export default function DashboardPage() {
   const { currentScenario } = useContext(ScenarioContext);
 
@@ -59,18 +65,25 @@ export default function DashboardPage() {
   const [edges, setEdges] = useState([]);
   const [path, setPath] = useState([]);
   const [users, setUsers] = useState([]);
-
+  const [rows, setRows] = useState([]);
   const { isLoading, graph } = useGraph(currentScenario._id);
 
-  useGet("/api/user", setUsers);
+  useGet(`api/user/played/${currentScenario._id}`, setUsers);
 
   useEffect(() => {
-    console.log(users);
+    setRows(
+      users.map((user, index) => ({
+        id: index,
+        user: user.name,
+        path: user.played.filter(
+          (elmt) => elmt.scenarioId === currentScenario._id
+        )[0].path,
+      }))
+    );
   }, [users]);
 
   useEffect(() => {
     if (!isLoading) {
-      console.log(graph);
       const { scenes, adjList } = graph;
 
       // create nodes from scene data
@@ -88,11 +101,7 @@ export default function DashboardPage() {
 
       // create edges from adjacency list
       const sceneEdges = [];
-      setPath([
-        "6320417cec05615b4acfa468",
-        "632041b8ec05615b4acfa4ac",
-        "632041bcec05615b4acfa4e3",
-      ]);
+
       Object.keys(adjList).forEach((sceneSourceNode) => {
         const tempEdges = adjList[sceneSourceNode].map((sceneTargetNode) => {
           return {
@@ -141,6 +150,10 @@ export default function DashboardPage() {
   const [sceneName, setsceneName] = React.useState("");
   const [x, setX] = React.useState("");
   const [y, setY] = React.useState("");
+
+  const userClick = (param) => {
+    setPath(param.row.path);
+  };
 
   function handleMouseEnter(event, node) {
     setScenarioID(node.data.scenarioId);
@@ -197,7 +210,7 @@ export default function DashboardPage() {
           <Background />
         </ReactFlow>
         <Box sx={studentTableStyles}>
-          <h1>Student List</h1>
+          <DataGrid rows={rows} columns={columns} onCellClick={userClick} />
         </Box>
       </ScreenContainer>
     </ScreenContainer>
