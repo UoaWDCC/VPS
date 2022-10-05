@@ -6,7 +6,7 @@ import Staff from "../models/staff";
  * @returns list of database authorise staff objects
  */
 const retrieveAuthorisedStaffList = async (fid) => {
-  return Staff.find({firebaseID: fid});
+  return Staff.find({ firebaseID: fid });
 };
 
 export default retrieveAuthorisedStaffList;

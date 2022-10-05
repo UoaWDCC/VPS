@@ -3,7 +3,7 @@ import { signInWithRedirect } from "firebase/auth";
 import { useAuthState } from "react-firebase-hooks/auth";
 import AuthenticationContext from "./AuthenticationContext";
 import { auth, googleProvider } from "../firebase/firebase";
-import { useGetSimplified, useGet } from "../hooks/crudHooks";
+import { useGetSimplified } from "../hooks/crudHooks";
 
 /**
  * This is a Context Provider made with the React Context API
