@@ -31,12 +31,6 @@ router.get("/", async (req, res) => {
   res.status(HTTP_OK).json(scenarios);
 });
 
-router.get("/:scenarioId", async (req, res) => {
-  const scenario = await retrieveScenario(req.params.scenarioId);
-  
-  res.status(HTTP_OK).json(scenario);
-});
-
 // Create a scenario for a user
 router.post("/", async (req, res) => {
   const { name, uid } = req.body;
