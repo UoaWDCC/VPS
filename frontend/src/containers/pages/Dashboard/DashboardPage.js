@@ -2,6 +2,7 @@ import React, { useState, useContext, useEffect, useMemo } from "react";
 import ReactFlow, { Background, MarkerType } from "react-flow-renderer";
 import dagre from "dagre";
 import { Box } from "@material-ui/core";
+import { makeStyles } from "@material-ui/core/styles";
 import { DataGrid } from "@mui/x-data-grid";
 import ScreenContainer from "../../../components/ScreenContainer";
 import ScenarioContext from "../../../context/ScenarioContext";
@@ -37,8 +38,8 @@ const getLayoutedElements = (nodes, edges, direction = "TB") => {
     // We are shifting the dagre node position (anchor=center center) to the top left
     // so it matches the React Flow node anchor point (top left).
     node.position = {
-      x: nodeWithPosition.x,
-      y: nodeWithPosition.y,
+      x: nodeWithPosition.x - nodeWidth / 2,
+      y: nodeWithPosition.y - nodeHeight / 2,
     };
 
     return node;
@@ -58,8 +59,20 @@ const columns = [
   { field: "user", headerName: "Users who have played", flex: 4 },
 ];
 
+const useStyles = makeStyles({
+  root: {
+    "&.MuiDataGrid-root .MuiDataGrid-cell:focus": {
+      outline: "none",
+    },
+    ".MuiDataGrid-cell": {
+      cursor: "pointer",
+    },
+  },
+});
+
 export default function DashboardPage() {
   const { currentScenario } = useContext(ScenarioContext);
+  const classes = useStyles();
 
   const [nodes, setNodes] = useState([]);
   const [edges, setEdges] = useState([]);
@@ -174,7 +187,7 @@ export default function DashboardPage() {
     setIsHovering(false);
   }
 
-  const studentTableStyles = { width: "30vw", backgroundColor: "#f3f7f2" };
+  const studentTableStyles = { width: "30vw", backgroundColor: "#FFFFFF" };
   return (
     <ScreenContainer vertical>
       <TopBar />
@@ -210,7 +223,12 @@ export default function DashboardPage() {
           <Background />
         </ReactFlow>
         <Box sx={studentTableStyles}>
-          <DataGrid rows={rows} columns={columns} onCellClick={userClick} />
+          <DataGrid
+            rows={rows}
+            columns={columns}
+            onCellClick={userClick}
+            className={classes.root}
+          />
         </Box>
       </ScreenContainer>
     </ScreenContainer>
