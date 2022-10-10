@@ -1,8 +1,9 @@
-import React from "react";
+import React, { useState } from "react";
 import { signInWithRedirect } from "firebase/auth";
 import { useAuthState } from "react-firebase-hooks/auth";
 import AuthenticationContext from "./AuthenticationContext";
 import { auth, googleProvider } from "../firebase/firebase";
+import { useGetSimplified } from "../hooks/crudHooks";
 
 /**
  * This is a Context Provider made with the React Context API
@@ -32,6 +33,17 @@ export default function AuthenticationContextProvider({ children }) {
     auth.signOut();
   }
 
+  // getting role from backend
+  const [userRole, setUserRole] = useState();
+  const userID = user == null ? "null" : user.uid; // this is to avoid null pointer exceptions while confining to hook rules
+  useGetSimplified(`/api/staff/${userID}`, setUserRole);
+
+  // creating user object with role property
+  const VpsUser = {
+    firebaseUserObj: user,
+    role: userRole,
+  };
+
   return (
     <AuthenticationContext.Provider
       value={{
@@ -41,6 +53,7 @@ export default function AuthenticationContextProvider({ children }) {
         error,
         signOut,
         signInUsingGoogle,
+        VpsUser,
       }}
     >
       {children}
