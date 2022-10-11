@@ -21,6 +21,7 @@ const getLayoutedElements = (nodes, edges, direction = "TB") => {
   const isHorizontal = direction === "LR";
   dagreGraph.setGraph({ rankdir: direction });
   nodes.forEach((node) => {
+    console.log(node);
     dagreGraph.setNode(node.id, { width: nodeWidth, height: nodeHeight });
   });
 
@@ -207,15 +208,17 @@ export default function DashboardPage() {
             <div
               id="tooltip"
               style={{
-                color: "red",
+                color: "black",
                 position: "absolute",
                 zIndex: "1000",
-                backgroundColor: "black",
+                backgroundColor: "lightgrey",
+                padding: "16px",
+                borderRadius: "8px",
               }}
             >
-              <h2>{scenarioID}</h2>
-              <h2>{sceneID}</h2>
-              <h2>{sceneName}</h2>
+              <h3>{sceneName}</h3>
+              <h3>{scenarioID}</h3>
+              <h3>{sceneID}</h3>
             </div>
           ) : (
             <div id="tooltip" />
