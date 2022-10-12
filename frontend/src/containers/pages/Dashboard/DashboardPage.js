@@ -57,7 +57,8 @@ const style = {
 
 const columns = [
   { field: "id", headerName: "No.", flex: 1 },
-  { field: "user", headerName: "Users who have played", flex: 4 },
+  { field: "user", headerName: "Users", flex: 3 },
+  { field: "numAttempts", headerName: "Attempts", flex: 2 },
 ];
 
 const useStyles = makeStyles({
@@ -80,20 +81,26 @@ export default function DashboardPage() {
   const [path, setPath] = useState([]);
   const [users, setUsers] = useState([]);
   const [rows, setRows] = useState([]);
+
   const { isLoading, graph } = useGraph(currentScenario._id);
 
   useGet(`api/user/played/${currentScenario._id}`, setUsers);
 
   useEffect(() => {
     setRows(
-      users.map((user, index) => ({
-        id: index,
-        user: user.name,
-        path: user.played.filter(
+      users.map((user, index) => {
+        const playedPaths = user.played.filter(
           (elmt) => elmt.scenarioId === currentScenario._id
-        )[0].path,
-      }))
+        );
+        return {
+          id: index,
+          user: user.name,
+          path: playedPaths[playedPaths.length - 1].path,
+          numAttempts: playedPaths.length,
+        };
+      })
     );
+    console.log(users);
   }, [users]);
 
   useEffect(() => {
