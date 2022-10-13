@@ -30,7 +30,7 @@ const getLayoutedElements = (nodes, edges, direction = "TB") => {
   });
 
   dagre.layout(dagreGraph);
-  /* eslint-disable no-param-reassign */
+
   nodes.forEach((node) => {
     const nodeWithPosition = dagreGraph.node(node.id);
     node.targetPosition = isHorizontal ? "left" : "top";
@@ -45,7 +45,6 @@ const getLayoutedElements = (nodes, edges, direction = "TB") => {
 
     return node;
   });
-  /* eslint-enable no-param-reassign */
 
   return { nodes, edges };
 };

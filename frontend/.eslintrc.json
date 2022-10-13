@@ -19,6 +19,7 @@
   },
   "ignorePatterns": ["Graph.js", "useGraph.js"],
   "rules": {
+    "no-param-reassign": 0,
     "no-console": 0,
     "react/prop-types": "off",
     "react/jsx-props-no-spreading": "off",
