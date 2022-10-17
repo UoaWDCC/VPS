@@ -35,6 +35,13 @@ export default function SideBar() {
       },
       getUserIdToken
     );
+    await usePost(
+      `/api/scenario/${newScenario._id}/scene`,
+      {
+        name: `Scene 0`,
+      },
+      getUserIdToken
+    );
     setCurrentScenario(newScenario);
     // eslint-disable-next-line no-underscore-dangle
     history.push(`/scenario/${newScenario._id}`);
