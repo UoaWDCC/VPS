@@ -17,16 +17,17 @@ export default class Graph {
     this.root = root;
     this.path.push(root);
     const dist = [];
-    
+
     scenes.forEach((scene, index) => {
       // Generate rule map
       this.rule[scene._id] = index;
-      
+
       // Add to filtered scenes
       this.scenes.push({
         name: scene.name,
         _id: scene._id,
-        visited: scene.visited
+        visited: scene.visited,
+        components: scene.components,
       });
 
       // Get adjacent scenes
@@ -42,7 +43,7 @@ export default class Graph {
       // Update adjacency list
       this.adjList[scene._id] = adjScenes;
     });
-    
+
     // Fill dist matrix with Inifinity
     for (let i = 0; i < scenes.length; i += 1) {
       dist.push(new Array(scenes.length).fill(Infinity));
@@ -76,7 +77,6 @@ export default class Graph {
     this.dist = dist;
   }
 
-  
   distanceFrom(startScene, endScene) {
     return this.dist[this.rule[startScene]][this.rule[endScene]];
   }

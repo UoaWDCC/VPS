@@ -22,6 +22,9 @@ const getLayoutedElements = (nodes, edges, direction = "TB") => {
   dagreGraph.setGraph({ rankdir: direction });
   nodes.forEach((node) => {
     console.log(node);
+    console.log(node.visited);
+    console.log(node.id);
+    console.log(node.data);
     dagreGraph.setNode(node.id, { width: nodeWidth, height: nodeHeight });
   });
 
@@ -102,12 +105,18 @@ export default function DashboardPage() {
     console.log(users);
   }, [users]);
 
+  // const idVisitedMap = { id: "awdawdawdawdawd" };
+  const [idVisitedMap, setIdVisitedMap] = React.useState({});
+
   useEffect(() => {
     if (!isLoading) {
       const { scenes, adjList } = graph;
 
       // create nodes from scene data
       const sceneNodes = scenes.map((scene) => {
+        const temp = idVisitedMap;
+        temp[scene._id] = [scene.visited, scene.name];
+        setIdVisitedMap(temp);
         return {
           id: scene._id,
           type: "sceneNode",
@@ -115,6 +124,8 @@ export default function DashboardPage() {
             scenarioId: currentScenario._id,
             sceneId: scene._id,
             sceneTitle: scene.name,
+            visited: scene.visited,
+            components: scene.components,
           },
         };
       });
@@ -165,9 +176,9 @@ export default function DashboardPage() {
 
   const [isHovering, setIsHovering] = useState(false);
 
-  const [scenarioID, setScenarioID] = React.useState("");
-  const [sceneID, setsceneID] = React.useState("");
   const [sceneName, setsceneName] = React.useState("");
+  const [next, setNext] = React.useState("");
+  const [sceneVisited, setsceneVisited] = React.useState(0);
   const [x, setX] = React.useState("");
   const [y, setY] = React.useState("");
 
@@ -175,19 +186,44 @@ export default function DashboardPage() {
     setPath(param.row.path);
   };
 
+  const renderNodeInformation = (node) => {
+    const nextVisited = node.data.components
+      .filter(
+        (c) =>
+          c.type === "BUTTON" && c.nextScene !== "" && node.data.visited !== 0
+      )
+      .map((c) => {
+        const percent =
+          parseInt(idVisitedMap[c.nextScene][0], 10) /
+          parseInt(node.data.visited, 10);
+        return (
+          <p>
+            {idVisitedMap[c.nextScene][1]} {percent * 100}%
+          </p>
+        );
+      });
+
+    if (nextVisited.length === 0) {
+      return <p>No children scenes visited.</p>;
+    }
+
+    return nextVisited;
+  };
+
   function handleMouseEnter(event, node) {
-    setScenarioID(node.data.scenarioId);
-    setsceneID(node.id);
     setsceneName(node.data.sceneTitle);
+    setsceneVisited(node.data.visited);
     setX(event.pageX);
     setY(event.pageY);
 
     setIsHovering(true);
+
+    setNext(renderNodeInformation(node));
   }
 
   React.useEffect(() => {
-    document.getElementById("tooltip").style.top = `${y - 100}px`;
-    document.getElementById("tooltip").style.left = `${x + 100}px`;
+    document.getElementById("tooltip").style.top = `${y - 75}px`;
+    document.getElementById("tooltip").style.left = `${x + 25}px`;
   }, [x, y]);
 
   function handleMouseLeave() {
@@ -218,13 +254,18 @@ export default function DashboardPage() {
                 position: "absolute",
                 zIndex: "1000",
                 backgroundColor: "lightgrey",
-                padding: "16px",
-                borderRadius: "8px",
+                padding: "0px",
+                paddingLeft: "16px",
+                paddingRight: "16px",
+                borderRadius: "4px",
+                minWidth: "200px",
+                maxWidth: "fit-content",
               }}
             >
-              <h3>{sceneName}</h3>
-              <h3>{scenarioID}</h3>
-              <h3>{sceneID}</h3>
+              <h4>Scene Name: {sceneName}</h4>
+              <h4>Students Visited: {sceneVisited}</h4>
+              <h4>Next Scenes:</h4>
+              {next}
             </div>
           ) : (
             <div id="tooltip" />
