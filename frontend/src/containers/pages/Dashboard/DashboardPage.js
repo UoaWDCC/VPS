@@ -193,9 +193,14 @@ export default function DashboardPage() {
           c.type === "BUTTON" && c.nextScene !== "" && node.data.visited !== 0
       )
       .map((c) => {
-        const percent =
+        let percent =
           parseInt(idVisitedMap[c.nextScene][0], 10) /
           parseInt(node.data.visited, 10);
+
+        if (percent > 1) {
+          percent = 1;
+        }
+
         return (
           <p>
             {idVisitedMap[c.nextScene][1]} {percent * 100}%
