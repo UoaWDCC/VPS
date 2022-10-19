@@ -86,21 +86,6 @@ export default function SideBar() {
               Create
             </Button>
           </li>
-<<<<<<< HEAD
-          <li>
-            <Button
-              className={`btn side contained white ${
-                currentScenario ? "" : "disabled"
-              }  `}
-              color="default"
-              variant="contained"
-              onClick={openDashboard}
-              disabled={!currentScenario}
-            >
-              Dashboard
-            </Button>
-          </li>
-=======
           {VpsUser.role === AccessLevel.STAFF ? (
             <li>
               <Button
@@ -115,7 +100,6 @@ export default function SideBar() {
           ) : (
             ""
           )}
->>>>>>> 2781a27079ef86ab76ef430c55938388410b2a16
           <li>
             <Button
               className={`btn side contained white margin-top ${
