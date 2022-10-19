@@ -7,6 +7,7 @@ import { usePost, useDelete } from "../hooks/crudHooks";
 import DeleteButton from "./DeleteButton";
 import AuthenticationContext from "../context/AuthenticationContext";
 import HelpButton from "./HelpButton";
+import AccessLevel from "../enums/route.access.level";
 
 /**
  * Component used for navigation and executing actions located at the left side of the screen.
@@ -20,7 +21,9 @@ import HelpButton from "./HelpButton";
 export default function SideBar() {
   const { currentScenario, setCurrentScenario, reFetch } =
     useContext(ScenarioContext);
-  const { signOut, getUserIdToken } = useContext(AuthenticationContext);
+  const { signOut, getUserIdToken, VpsUser } = useContext(
+    AuthenticationContext
+  );
   const history = useHistory();
 
   /** Calls backend end point to create a new empty scenario. */
@@ -29,6 +32,13 @@ export default function SideBar() {
       `/api/scenario`,
       {
         name,
+      },
+      getUserIdToken
+    );
+    await usePost(
+      `/api/scenario/${newScenario._id}/scene`,
+      {
+        name: `Scene 0`,
       },
       getUserIdToken
     );
@@ -76,6 +86,7 @@ export default function SideBar() {
               Create
             </Button>
           </li>
+<<<<<<< HEAD
           <li>
             <Button
               className={`btn side contained white ${
@@ -89,6 +100,22 @@ export default function SideBar() {
               Dashboard
             </Button>
           </li>
+=======
+          {VpsUser.role === AccessLevel.STAFF ? (
+            <li>
+              <Button
+                className="btn side contained white"
+                color="default"
+                variant="contained"
+                onClick={openDashboard}
+              >
+                Dashboard
+              </Button>
+            </li>
+          ) : (
+            ""
+          )}
+>>>>>>> 2781a27079ef86ab76ef430c55938388410b2a16
           <li>
             <Button
               className={`btn side contained white margin-top ${
