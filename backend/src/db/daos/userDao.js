@@ -19,6 +19,14 @@ const retrieveUser = async (uid) => {
   return user;
 };
 
+const retrievePlayedUsers = async (scenarioId) => {
+  const {users: userIds} = await Scenario.findById(scenarioId);
+  const users = await User.find({
+    uid: { $in: userIds },
+  });
+  return users;
+};
+
 /**
  * Creates a user in the database,
  * @param {String} name user's name
@@ -78,4 +86,4 @@ const addPlayed = async (uid, newPlayed, scenarioId) => {
   }
 };
 
-export { retrieveAllUser, createUser, retrieveUser, deleteUser, addPlayed };
+export { retrieveAllUser, createUser, retrieveUser, deleteUser, addPlayed, retrievePlayedUsers };

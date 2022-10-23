@@ -26,6 +26,8 @@ export default class Graph {
       this.scenes.push({
         name: scene.name,
         _id: scene._id,
+        visited: scene.visited,
+        components: scene.components,
       });
 
       // Get adjacent scenes

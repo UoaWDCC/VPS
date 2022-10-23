@@ -5,6 +5,7 @@ import {
   retrieveUser,
   deleteUser,
   addPlayed,
+  retrievePlayedUsers,
 } from "../../db/daos/userDao";
 
 const router = Router();
@@ -23,6 +24,12 @@ router.get("/", async (req, res) => {
 router.get("/:uid", async (req, res) => {
   const user = await retrieveUser(req.params.uid);
   res.json(user);
+});
+
+// get users that played scenario
+router.get("/played/:scenarioId", async (req, res) => {
+  const users = await retrievePlayedUsers(req.params.scenarioId);
+  return res.json(users);
 });
 
 // creats new user

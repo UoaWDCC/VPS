@@ -1,0 +1,68 @@
+.table_content > thead > tr > th {
+    border-bottom: 1px solid grey;
+    text-align: left;
+    padding-bottom: 10px;
+    color: grey;
+}
+
+.table_content {
+    width: 800px;
+    height: 200px;
+    table-layout: fixed;
+    border-collapse: collapse;
+}
+
+.table_content > tbody > tr > td {
+    text-align: left;
+    border-bottom: 1px solid grey;
+    vertical-align: center;
+    padding-top: 15px;
+    padding-bottom: 15px;
+    word-wrap: break-word;
+}
+
+.completed_column {
+    border-bottom: 1px solid grey;
+    text-align: center !important;
+}
+
+.table_div {
+    border: 1px solid grey;
+    width: fit-content;
+    height: fit-content;
+    padding-top: 20px;
+    padding-bottom: 20px;
+    margin-top: 20px;
+    margin-left: 20px;
+}
+
+.user_icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 20px;
+    border-width: 1px solid grey;
+}
+
+.table_div_small {
+    display: flex;
+    align-items: center;
+}
+
+.table_div_small > td {
+    word-wrap: break-word;
+}
+
+h4 {
+    color: grey;
+    margin-bottom: 10px;
+    padding-left: 20px;
+}
+
+h2 {
+    margin-bottom: -20px;
+    padding-left: 20px;
+}
+
+.student_column {
+    padding-left: 20px;
+}
