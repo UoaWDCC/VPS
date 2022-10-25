@@ -69,19 +69,6 @@ export default function SceneSettings() {
               shrink: currentScene?.time || currentScene?.time === 0,
             }}
           />
-          <label className={styles.fileUploadLabel}>
-            Upload image to show when timer ends
-          </label>
-          <input
-            type="file"
-            name="mediaUpload"
-            onChange={(event) => {
-              setCurrentScene({
-                ...currentScene,
-                endImage: event.target.files[0],
-              });
-            }}
-          />
         </div>
       </div>
     </>
