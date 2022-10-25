@@ -42,6 +42,9 @@ export default function PlayScenarioCanvas() {
           sceneTime={currentScene?.time}
         />
       ) : null}
+      <button type="button" onClick={() => console.log(currentScene)}>
+        dummy
+      </button>
     </>
   );
 }
