@@ -240,7 +240,6 @@ export default function DashboardPage() {
   const studentTableStyles = { width: "30vw", backgroundColor: "#FFFFFF" };
   return (
     <ScreenContainer vertical>
-      <Button>{authContext.VpsUser.role}</Button>
       <TopBar />
       <ScreenContainer>
         <ReactFlow
