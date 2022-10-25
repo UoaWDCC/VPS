@@ -1,7 +1,7 @@
 import React, { useState, useContext, useEffect, useMemo } from "react";
 import ReactFlow, { Background, MarkerType } from "react-flow-renderer";
 import dagre from "dagre";
-import { Box, Button } from "@material-ui/core";
+import { Box } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import { DataGrid } from "@mui/x-data-grid";
 import ScreenContainer from "../../../components/ScreenContainer";
@@ -10,7 +10,6 @@ import TopBar from "./TopBar";
 import useGraph from "../../../hooks/useGraph";
 import SceneNode from "./SceneNode";
 import { useGet } from "../../../hooks/crudHooks";
-import AuthenticationContext from "../../../context/AuthenticationContext";
 
 const dagreGraph = new dagre.graphlib.Graph();
 dagreGraph.setDefaultEdgeLabel(() => ({}));
@@ -76,7 +75,6 @@ const useStyles = makeStyles({
 });
 
 export default function DashboardPage() {
-  const authContext = useContext(AuthenticationContext);
   const { currentScenario } = useContext(ScenarioContext);
   const classes = useStyles();
 
@@ -240,7 +238,6 @@ export default function DashboardPage() {
   const studentTableStyles = { width: "30vw", backgroundColor: "#FFFFFF" };
   return (
     <ScreenContainer vertical>
-      <Button>{authContext.VpsUser.role}</Button>
       <TopBar />
       <ScreenContainer>
         <ReactFlow

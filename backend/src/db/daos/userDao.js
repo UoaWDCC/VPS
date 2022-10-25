@@ -20,7 +20,7 @@ const retrieveUser = async (uid) => {
 };
 
 const retrievePlayedUsers = async (scenarioId) => {
-  const {users: userIds} = await Scenario.findById(scenarioId);
+  const { users: userIds } = await Scenario.findById(scenarioId);
   const users = await User.find({
     uid: { $in: userIds },
   });
@@ -86,4 +86,11 @@ const addPlayed = async (uid, newPlayed, scenarioId) => {
   }
 };
 
-export { retrieveAllUser, createUser, retrieveUser, deleteUser, addPlayed, retrievePlayedUsers };
+export {
+  retrieveAllUser,
+  createUser,
+  retrieveUser,
+  deleteUser,
+  addPlayed,
+  retrievePlayedUsers,
+};

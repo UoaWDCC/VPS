@@ -18,6 +18,7 @@ import ShareModal from "../../components/ShareModal";
 import AuthoringToolContextProvider from "../../context/AuthoringToolContextProvider";
 import AuthenticationContext from "../../context/AuthenticationContext";
 import HelpButton from "../../components/HelpButton";
+import AccessLevel from "../../enums/route.access.level";
 
 /**
  * Page that shows the scenes belonging to a scenario.
@@ -31,7 +32,7 @@ export function SceneSelectionPage({ data = null }) {
   const history = useHistory();
   const { scenes, currentScene, setCurrentScene, reFetch } =
     useContext(SceneContext);
-  const { getUserIdToken } = useContext(AuthenticationContext);
+  const { getUserIdToken, VpsUser } = useContext(AuthenticationContext);
 
   /** called when the Add card is clicked */
   async function createNewScene() {
@@ -79,6 +80,11 @@ export function SceneSelectionPage({ data = null }) {
       getUserIdToken
     );
     reFetch();
+  }
+
+  /** Calls backend end point to switch to the lecturer's dashboard */
+  function openDashboard() {
+    history.push("/dashboard");
   }
 
   /** called when Play button is clicked */
@@ -139,6 +145,18 @@ export function SceneSelectionPage({ data = null }) {
         >
           Duplicate
         </Button>
+        {VpsUser.role === AccessLevel.STAFF ? (
+          <Button
+            className="btn top contained white"
+            color="default"
+            variant="contained"
+            onClick={openDashboard}
+          >
+            Dashboard
+          </Button>
+        ) : (
+          ""
+        )}
         <Button
           className="btn top contained white"
           color="default"

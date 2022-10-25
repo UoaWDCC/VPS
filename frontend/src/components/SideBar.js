@@ -48,7 +48,6 @@ export default function SideBar() {
   }
 
   /** Calls backend end point to switch to the lecturer's dashboard */
-  // END POINT NOT CREATED YET
   function openDashboard() {
     history.push("/dashboard");
   }
@@ -89,10 +88,13 @@ export default function SideBar() {
           {VpsUser.role === AccessLevel.STAFF ? (
             <li>
               <Button
-                className="btn side contained white"
+                className={`btn side contained white ${
+                  currentScenario ? "" : "disabled"
+                }  `}
                 color="default"
                 variant="contained"
                 onClick={openDashboard}
+                disabled={!currentScenario}
               >
                 Dashboard
               </Button>
@@ -102,7 +104,7 @@ export default function SideBar() {
           )}
           <li>
             <Button
-              className={`btn side contained white margin-top ${
+              className={`btn side contained white ${
                 currentScenario ? "" : "disabled"
               }  `}
               color="default"
