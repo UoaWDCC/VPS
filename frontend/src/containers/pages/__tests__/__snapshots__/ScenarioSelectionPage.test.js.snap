@@ -36,7 +36,7 @@ exports[`Scenario Selection page snapshot test 1`] = `
           
           <li>
             <button
-              class="MuiButtonBase-root MuiButton-root MuiButton-contained btn side contained white margin-top   "
+              class="MuiButtonBase-root MuiButton-root MuiButton-contained btn side contained white   "
               tabindex="0"
               type="button"
             >
