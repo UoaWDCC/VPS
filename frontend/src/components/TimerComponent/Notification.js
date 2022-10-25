@@ -16,10 +16,15 @@ const style = {
   p: 4,
 };
 
-const Notifcation = () => {
+function Notification({ setTime, sceneTime }) {
   const [open, setOpen] = React.useState(true);
   const handleClose = () => setOpen(false);
   const closeTab = () => window.close();
+
+  /* function to restart the scenario upon timer completion */
+  function handleRestartScenario() {
+    window.location.href = window.parent.location;
+  }
 
   return (
     <Modal
@@ -47,10 +52,30 @@ const Notifcation = () => {
           >
             Continue
           </Button>
+          <Button
+            variant="contained"
+            color="black"
+            onClick={handleRestartScenario}
+            style={{ "margin-top": "5%" }}
+          >
+            Restart Scenario
+          </Button>
+          <Button
+            variant="contained"
+            color="black"
+            onClick={() =>
+              setTime(
+                new Date().setSeconds(new Date().getSeconds() + sceneTime)
+              )
+            }
+            style={{ "margin-top": "5%" }}
+          >
+            Restart Scene
+          </Button>
         </div>
       </Box>
     </Modal>
   );
-};
+}
 
-export default Notifcation;
+export default Notification;
