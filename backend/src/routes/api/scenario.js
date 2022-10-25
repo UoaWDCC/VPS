@@ -8,7 +8,6 @@ import {
   updateScenario,
   deleteScenario,
   updateDurations,
-  retrieveScenario,
 } from "../../db/daos/scenarioDao";
 
 import scene from "./scene";
