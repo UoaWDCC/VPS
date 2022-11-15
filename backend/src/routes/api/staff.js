@@ -1,9 +1,13 @@
 import { Router } from "express";
 import retrieveAuthorisedStaffList from "../../db/daos/staffDao";
-import AccessLevel from "../../../../frontend/src/enums/route.access.level";
 
 const router = Router();
 const HTTP_OK = 200;
+
+const AccessLevel = {
+  STAFF: "staff",
+  USER: "user"
+}
 
 // retrieve all authorised staff users
 router.get("/:firebaseID", async (req, res) => {
