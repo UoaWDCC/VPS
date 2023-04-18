@@ -7,7 +7,7 @@ export default function CustomCheckBoxStyles() {
   return withStyles({
     root: {
       "&.Mui-checked": {
-        color: "#008a7b",
+        color: "#0080a7",
       },
     },
   });
