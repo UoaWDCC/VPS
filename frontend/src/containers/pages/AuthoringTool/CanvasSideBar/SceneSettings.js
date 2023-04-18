@@ -12,10 +12,10 @@ const CustomTextField = withStyles({
     marginBottom: "1.5em",
 
     "& label.Mui-focused": {
-      color: "#008a7b",
+      color: "#0080a7 ",
     },
     "& .MuiInput-underline:after": {
-      borderBottomColor: "#008a7b",
+      borderBottomColor: "0080a7",
     },
   },
 })(TextField);
