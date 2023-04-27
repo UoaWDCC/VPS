@@ -56,6 +56,24 @@ function addText(currentScene, setCurrentScene) {
   addComponent(newText, currentScene, setCurrentScene);
 }
 
+function addSpeechText(currentScene, setCurrentScene) {
+  const newSpeechText = {
+    type: "SPEECHTEXT",
+    text: "default speech text",
+    border: true,
+    fontSize: 16, // pt
+    color: "black",
+    textAlign: "left",
+    left: 0, // as percentage
+    top: 0, // as percentage
+    height: 10, // as percentage
+    width: 20, // as percentage
+    id: v4(),
+  };
+
+  addComponent(newSpeechText, currentScene, setCurrentScene);
+}
+
 /**
  * function to be put into ToolBarData when image is added
  * @param {object} currentScene
@@ -115,4 +133,11 @@ function addFirebaseAudio(currentScene, setCurrentScene, fileObject, url) {
   addComponent(newAudio, currentScene, setCurrentScene);
 }
 
-export { addButton, addText, addImage, addFirebaseImage, addFirebaseAudio };
+export {
+  addButton,
+  addText,
+  addSpeechText,
+  addImage,
+  addFirebaseImage,
+  addFirebaseAudio,
+};
