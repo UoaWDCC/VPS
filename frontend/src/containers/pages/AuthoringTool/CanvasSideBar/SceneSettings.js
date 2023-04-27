@@ -48,7 +48,7 @@ export default function SceneSettings() {
           <CustomTextField
             label="Scene Timer Duration"
             type="number"
-            value={currentScene?.time}
+            value={currentScene?.time || ""}
             fullWidth
             onChange={(event) => {
               // limiting scene timer duration
