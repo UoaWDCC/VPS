@@ -36,7 +36,6 @@ export default function componentResolver(component, index, onClick) {
           component={component}
         />
       );
-
     case "IMAGE":
       return (
         <ImageComponent
