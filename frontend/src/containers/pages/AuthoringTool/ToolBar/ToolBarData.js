@@ -5,7 +5,7 @@ import ButtonIcon from "@material-ui/icons/AddCircle";
 import VolumeUpIcon from "@material-ui/icons/VolumeUp";
 import ChatBubbleIcon from "@material-ui/icons/ChatBubble";
 import ChooseBackgroundSubMenu from "./Background/ChooseBackgroundSubMenu";
-import { addButton, addText } from "./ToolBarActions";
+import { addButton, addText, addSpeechText } from "./ToolBarActions";
 import UploadImage from "./Background/UploadImage";
 import UploadAudio from "./Audio/UploadAudio";
 
@@ -47,7 +47,7 @@ const toolBarData = [
   {
     title: "Speechbox",
     icon: <ChatBubbleIcon fontSize="medium" />,
-    onClick: () => {},
+    onClick: addSpeechText,
   },
 ];
 
