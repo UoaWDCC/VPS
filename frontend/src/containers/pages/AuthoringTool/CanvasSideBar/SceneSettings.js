@@ -66,7 +66,7 @@ export default function SceneSettings() {
             }}
             InputLabelProps={{
               // label moves up whenever there is input
-              shrink: currentScene?.time || currentScene?.time === 0,
+              shrink: !!currentScene?.time || currentScene?.time === 0,
             }}
           />
         </div>
