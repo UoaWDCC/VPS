@@ -1,5 +1,16 @@
 import { v4 } from "uuid";
 
+function addComponent(component, currentScene, setCurrentScene) {
+  const updatedComponents = currentScene.components;
+
+  updatedComponents.push(component);
+
+  setCurrentScene({
+    ...currentScene,
+    components: updatedComponents,
+  });
+}
+
 /**
  * function to be put into ToolBarData when button is added
  * @param {object} currentScene
@@ -19,14 +30,7 @@ function addButton(currentScene, setCurrentScene) {
     id: v4(),
   };
 
-  const updatedComponents = currentScene.components;
-
-  updatedComponents.push(newButton);
-
-  setCurrentScene({
-    ...currentScene,
-    components: updatedComponents,
-  });
+  addComponent(newButton, currentScene, setCurrentScene);
 }
 
 /**
@@ -49,14 +53,7 @@ function addText(currentScene, setCurrentScene) {
     id: v4(),
   };
 
-  const updatedComponents = currentScene.components;
-
-  updatedComponents.push(newText);
-
-  setCurrentScene({
-    ...currentScene,
-    components: updatedComponents,
-  });
+  addComponent(newText, currentScene, setCurrentScene);
 }
 
 /**
@@ -76,14 +73,7 @@ function addImage(currentScene, setCurrentScene, image) {
     id: v4(),
   };
 
-  const updatedComponents = currentScene.components;
-
-  updatedComponents.push(newImage);
-
-  setCurrentScene({
-    ...currentScene,
-    components: updatedComponents,
-  });
+  addComponent(newImage, currentScene, setCurrentScene);
 }
 
 /**
@@ -105,14 +95,7 @@ function addFirebaseImage(currentScene, setCurrentScene, fileObject, url) {
     id: v4(),
   };
 
-  const updatedComponents = currentScene.components;
-
-  updatedComponents.push(newImage);
-
-  setCurrentScene({
-    ...currentScene,
-    components: updatedComponents,
-  });
+  addComponent(newImage, currentScene, setCurrentScene);
 }
 
 function addFirebaseAudio(currentScene, setCurrentScene, fileObject, url) {
@@ -129,14 +112,7 @@ function addFirebaseAudio(currentScene, setCurrentScene, fileObject, url) {
     id: v4(),
   };
 
-  const updatedComponents = currentScene.components;
-
-  updatedComponents.push(newAudio);
-
-  setCurrentScene({
-    ...currentScene,
-    components: updatedComponents,
-  });
+  addComponent(newAudio, currentScene, setCurrentScene);
 }
 
 export { addButton, addText, addImage, addFirebaseImage, addFirebaseAudio };
