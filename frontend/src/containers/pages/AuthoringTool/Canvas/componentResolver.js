@@ -26,6 +26,7 @@ export default function componentResolver(component, index, onClick) {
           component={component}
         />
       );
+    case "SPEECHTEXT":
     case "TEXT":
       return (
         <TextComponent
@@ -35,6 +36,7 @@ export default function componentResolver(component, index, onClick) {
           component={component}
         />
       );
+
     case "IMAGE":
       return (
         <ImageComponent

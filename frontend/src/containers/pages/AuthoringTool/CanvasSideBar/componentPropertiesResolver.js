@@ -18,6 +18,8 @@ export default function componentPropertiesResolver(component, componentIndex) {
           componentIndex={componentIndex}
         />
       );
+
+    case "SPEECHTEXT":
     case "TEXT":
       return (
         <TextPropertiesComponent
