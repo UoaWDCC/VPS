@@ -1,5 +1,9 @@
 import { v4 } from "uuid";
 
+/**
+ * @param {object} currentScene
+ * @param {function} setCurrentScene
+ */
 function addComponent(component, currentScene, setCurrentScene) {
   const updatedComponents = currentScene.components;
 
@@ -13,8 +17,6 @@ function addComponent(component, currentScene, setCurrentScene) {
 
 /**
  * function to be put into ToolBarData when button is added
- * @param {object} currentScene
- * @param {function} setCurrentScene
  */
 function addButton(currentScene, setCurrentScene) {
   const newButton = {
@@ -35,8 +37,6 @@ function addButton(currentScene, setCurrentScene) {
 
 /**
  * function to be put into ToolBarData when text is added
- * @param {object} currentScene
- * @param {function} setCurrentScene
  */
 function addText(currentScene, setCurrentScene) {
   const newText = {
@@ -76,8 +76,6 @@ function addSpeechText(currentScene, setCurrentScene) {
 
 /**
  * function to be put into ToolBarData when image is added
- * @param {object} currentScene
- * @param {function} setCurrentScene
  * @param {object} image
  */
 function addImage(currentScene, setCurrentScene, image) {
@@ -96,8 +94,6 @@ function addImage(currentScene, setCurrentScene, image) {
 
 /**
  * function to be put into ToolBarData when firebase image is added
- * @param {object} currentScene
- * @param {function} setCurrentScene
  * @param {object} fileObject
  * @param {string} url
  */
@@ -116,6 +112,12 @@ function addFirebaseImage(currentScene, setCurrentScene, fileObject, url) {
   addComponent(newImage, currentScene, setCurrentScene);
 }
 
+/**
+ * call this when user adds firebase audio
+ *
+ * @param {object} fileObject
+ * @param {string} url
+ */
 function addFirebaseAudio(currentScene, setCurrentScene, fileObject, url) {
   const newAudio = {
     type: "FIREBASEAUDIO",
