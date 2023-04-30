@@ -178,6 +178,7 @@ export function SceneSelectionPage({ data = null }) {
       <ListContainer
         data={data || scenes}
         onItemSelected={setCurrentScene}
+        onItemDoubleClick={editScene}
         addCard={createNewScene}
         wide
         onItemBlur={changeSceneName}
