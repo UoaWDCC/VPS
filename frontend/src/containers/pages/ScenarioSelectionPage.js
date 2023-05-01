@@ -31,9 +31,11 @@ export default function ScenarioSelectionPage({ data = null }) {
     reFetch();
   }
 
-  /** function is called when the user double clicks */
+  /** function is called when the user double clicks a scenario */
   async function editScenario() {
-    history.push(`/scenario/${currentScenario._id}`);
+    if (currentScenario != null) { // should be set on the first click, but check to be sure anyway
+      history.push(`/scenario/${currentScenario._id}`);
+    }
   }
 
   useEffect(() => {
