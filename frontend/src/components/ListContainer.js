@@ -93,7 +93,7 @@ export default function ListContainer({
                       border={5}
                       borderRadius={10}
                       borderColor={
-                        item._id === selected ? "#008a7b" : "#747474"
+                        item._id === selected ? "#035084" : "#747474"
                       }
                       overflow="hidden"
                       textAlign="center"

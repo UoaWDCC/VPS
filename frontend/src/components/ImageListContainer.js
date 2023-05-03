@@ -40,7 +40,7 @@ export default function ImageListContainer({ data, onItemSelected }) {
                 <Box
                   height={rowHeight}
                   border={item._id === selected ? 5 : 0}
-                  borderColor={item._id === selected ? "#008a7b" : "#747474"}
+                  borderColor={item._id === selected ? "#00b0e6" : "#747474"}
                   overflow="hidden"
                   sx={{
                     "&:hover": {
