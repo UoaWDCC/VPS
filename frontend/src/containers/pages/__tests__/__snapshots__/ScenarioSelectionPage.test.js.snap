@@ -10,9 +10,9 @@ exports[`Scenario Selection page snapshot test 1`] = `
         class="sideBar"
       >
         <img
-          alt="UoA Medical & Health Science Logo"
+          alt="University of Auckland Logo"
           class="logo"
-          src="uoa-med-and-health-sci-logo.png"
+          src="uoa-logo.png"
         />
         <ul
           class="sideBarList"
