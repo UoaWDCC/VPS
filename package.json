@@ -1,7 +1,7 @@
 {
-    "name": "q",
-    "version": "a",
-    "private": null,
+    "name": "mern-template",
+    "version": "0.1.0",
+    "private": true,
     "devDependencies": {
         "all-contributors-cli": "^6.20.0"
     },
@@ -18,10 +18,5 @@
         "react": "^18.1.0",
         "react-dom": "^18.1.0",
         "react-modal": "^3.15.1"
-    },
-    "description": "c",
-    "main": "q",
-    "repository": "q",
-    "author": "q",
-    "license": "q"
+    }
 }
