@@ -3,6 +3,20 @@ import axios from "axios";
 import AuthenticationContext from "../context/AuthenticationContext";
 
 /**
+ * this function filters network request errors (to the ones we care about)
+ *
+ * @param {object} error - contains error message + error response
+ * @returns {boolean}
+ */
+function isRealError(error) {
+  return (
+    !error.response ||
+    error.response.status === 404 ||
+    error.response.status === 401
+  );
+}
+
+/**
  * Code below handles the server URL for axios calls when .env file is missing
  * When .env file is missing, React will take the proxy route as server URL as defined in package.json
  */
@@ -43,9 +57,7 @@ export function useGet(url, setData, requireAuth = true) {
       }
 
       const response = await axios.get(url, config).catch((err) => {
-        if (err.response.status === 404 || err.response.status === 401) {
-          hasError = true;
-        }
+        hasError = isRealError(err);
       });
 
       if (!hasError) {
@@ -72,9 +84,7 @@ export function useGetSimplified(url, setData) {
       let hasError = false;
 
       const response = await axios.get(url).catch((err) => {
-        if (err.response.status === 404 || err.response.status === 401) {
-          hasError = true;
-        }
+        hasError = isRealError(err);
       });
 
       if (!hasError) {
@@ -105,10 +115,8 @@ export function usePost(url, requestBody = null, getUserIdToken = null) {
     }
 
     const response = await axios.post(url, requestBody, config).catch((err) => {
-      if (err.response.status === 404 || err.response.status === 401) {
-        errorData = err.response.data;
-        hasError = true;
-      }
+      hasError = isRealError(err);
+      errorData = hasError && err.response?.data;
     });
 
     return hasError ? errorData : response?.data;
@@ -137,10 +145,8 @@ export function usePut(url, requestBody = null, getUserIdToken = null) {
     }
 
     const response = await axios.put(url, requestBody, config).catch((err) => {
-      if (err.response.status === 404 || err.response.status === 401) {
-        errorData = err.response.data;
-        hasError = true;
-      }
+      hasError = isRealError(err);
+      errorData = hasError && err.response?.data;
     });
 
     return hasError ? errorData : response?.data;
@@ -169,10 +175,8 @@ export function useDelete(url, getUserIdToken = null) {
     }
 
     const response = await axios.delete(url, config).catch((err) => {
-      if (err.response.status === 404 || err.response.status === 401) {
-        errorData = err.response.data;
-        hasError = true;
-      }
+      hasError = isRealError(err);
+      errorData = hasError && err.response?.data;
     });
 
     return hasError ? errorData : response?.data;
