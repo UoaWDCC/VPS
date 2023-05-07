@@ -33,7 +33,8 @@ export default function ScenarioSelectionPage({ data = null }) {
 
   /** function is called when the user double clicks a scenario */
   async function editScenario() {
-    if (currentScenario != null) { // should be set on the first click, but check to be sure anyway
+    // should be set on the first click, but check to be sure anyway
+    if (currentScenario != null) {
       history.push(`/scenario/${currentScenario._id}`);
     }
   }
