@@ -45,7 +45,7 @@ const toolBarData = [
     ],
   },
   {
-    title: "Speechbox",
+    title: "Speech text",
     icon: <ChatBubbleIcon fontSize="medium" />,
     onClick: addSpeechText,
   },
