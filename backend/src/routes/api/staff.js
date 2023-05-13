@@ -6,8 +6,8 @@ const HTTP_OK = 200;
 
 const AccessLevel = {
   STAFF: "staff",
-  USER: "user"
-}
+  USER: "user",
+};
 
 // retrieve all authorised staff users
 router.get("/:firebaseID", async (req, res) => {
