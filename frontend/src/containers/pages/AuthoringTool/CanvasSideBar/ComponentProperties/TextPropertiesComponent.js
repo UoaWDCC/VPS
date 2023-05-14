@@ -23,6 +23,7 @@ import useStyles from "./TextPropertiesComponent.styles";
 const CustomInputLabel = CustomInputLabelStyles()(InputLabel);
 const CustomCheckBox = CustomCheckBoxStyles()(Checkbox);
 const sizes = [6, 8, 9, 10, 11, 12, 14, 16, 18, 20, 24, 30, 36, 42, 48, 60, 72];
+// export const reference = useRef(null);
 
 /**
  * This component displays the properties in the sidebar for a text scene component.
@@ -31,6 +32,7 @@ const sizes = [6, 8, 9, 10, 11, 12, 14, 16, 18, 20, 24, 30, 36, 42, 48, 60, 72];
 export default function TextPropertiesComponent({ component, componentIndex }) {
   const textComponentStyles = useStyles();
   const { updateComponentProperty } = useContext(SceneContext);
+  // const reference = React.createRef();
 
   return (
     <>
