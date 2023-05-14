@@ -7,10 +7,10 @@ export default function CustomTextFieldStyles() {
   return withStyles({
     root: {
       "& label.Mui-focused": {
-        color: "#008a7b",
+        color: "#0080a7",
       },
       "& .MuiInput-underline:after": {
-        borderBottomColor: "#008a7b",
+        borderBottomColor: "#0080a7",
       },
     },
   });

@@ -8,7 +8,7 @@ export default function CustomInputLabelStyles() {
     root: {
       whiteSpace: "nowrap",
       "&.Mui-focused": {
-        color: "#008a7b",
+        color: "#0080a7",
       },
     },
   });

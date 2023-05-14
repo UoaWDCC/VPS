@@ -69,8 +69,8 @@ export default function SideBar() {
       <div className={styles.sideBar}>
         <img
           className={styles.logo}
-          src="uoa-med-and-health-sci-logo.png"
-          alt="UoA Medical & Health Science Logo"
+          src="uoa-logo.png"
+          alt="University of Auckland Logo"
         />
         <ul className={styles.sideBarList}>
           <li>
