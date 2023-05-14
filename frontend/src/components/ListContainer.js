@@ -19,6 +19,9 @@ import useStyles from "./component.styles";
  * function onItemSelected() {
  *   console.log("Selected.")
  * }
+ * function onItemDoubleClick() {
+ *   console.log("Double clicked.")
+ * }
  * function addCard() {
  *   console.log("Card Added.")
  * }
@@ -32,6 +35,7 @@ import useStyles from "./component.styles";
  *     sceneSelectionPage={sceneSelectionPage}
  *     scenarioId={scenarioId}
  *     onItemSelected={onItemSelected}
+ *     onItemDoubleClick={onDoubleClick}
  *     addCard={addCard}
  *     onItemBlur={onItemBlur}
  *   />
@@ -40,6 +44,7 @@ import useStyles from "./component.styles";
 export default function ListContainer({
   data,
   onItemSelected,
+  onItemDoubleClick,
   wide,
   addCard,
   onItemBlur,
@@ -51,9 +56,13 @@ export default function ListContainer({
   const columns = wide ? 5 : 4;
 
   /** Function which executes when an image in the image list is clicked. */
-  const onItemClick = (item) => {
-    setSelected(item._id);
-    onItemSelected(item);
+  const onItemClick = (event, item) => {
+    if (event.detail === 2) {
+      onItemDoubleClick(item);
+    } else {
+      setSelected(item._id);
+      onItemSelected(item);
+    }
   };
 
   return (
@@ -81,7 +90,7 @@ export default function ListContainer({
                   key={item._id}
                   cols={1}
                   height={200}
-                  onClick={() => onItemClick(item)}
+                  onClick={(event) => onItemClick(event, item)}
                 >
                   <div
                     className={
