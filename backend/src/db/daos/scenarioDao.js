@@ -43,7 +43,17 @@ const retrieveScenario = async (scenarioId) => {
  */
 const updateScenario = async (scenarioId, updatedScenario) => {
   const scenario = await Scenario.findById(scenarioId);
+  
+  // define temperary variable to store old name incase new name is empty
+  let previousName = scenario.name;
   scenario.name = updatedScenario.name;
+
+  // if new name is empty, set name to old name
+  if (scenario.name == "" || scenario.name == null) { 
+    scenario.name = previousName;
+  }
+
+  
   await scenario.save();
   return scenario;
 };
