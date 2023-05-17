@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - master
-      - "VPS-081/fixing-tests"
     paths-ignore:
       - "docs/**"
   pull_request:
