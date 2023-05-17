@@ -2,6 +2,7 @@ import React from "react";
 import ButtonPropertiesComponent from "./ComponentProperties/ButtonPropertiesComponent";
 import FirebaseAudioPropertiesComponent from "./ComponentProperties/FirebaseAudioPropertiesComponent";
 import TextPropertiesComponent from "./ComponentProperties/TextPropertiesComponent";
+import SpeechTextPropertiesComponent from "./ComponentProperties/SpeechTextPropertiesComponent";
 /**
  * This function returns the appropriate properties component for a scene component object
  *
@@ -20,6 +21,12 @@ export default function componentPropertiesResolver(component, componentIndex) {
       );
 
     case "SPEECHTEXT":
+      return (
+        <SpeechTextPropertiesComponent
+          component={component}
+          componentIndex={componentIndex}
+        />
+      );
     case "TEXT":
       return (
         <TextPropertiesComponent
