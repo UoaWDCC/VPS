@@ -49,7 +49,7 @@ const updateScenario = async (scenarioId, updatedScenario) => {
   scenario.name = updatedScenario.name;
 
   // if new name is empty, set name to old name
-  if (scenario.name == "" || scenario.name == null) { 
+  if (scenario.name == "" || scenario.name == null || scenario.name.trim() === '') { 
     scenario.name = previousName;
   }
 
