@@ -24,6 +24,17 @@ export default function useStyles(component) {
       textAlign: component.textAlign,
       whiteSpace: "pre-wrap",
     },
+    speechTextComponentStyles: {
+      borderStyle: "solid",
+      borderColor: "black",
+      backgroundColor: "white",
+      fontSize: component.fontSize,
+      paddingInline: "5px",
+      overflow: "hidden",
+      color: component.color, // text colour
+      textAlign: component.textAlign,
+      whiteSpace: "pre-wrap",
+    },
     audioComponentStyles: {
       color: "#999999",
       width: "100%",
