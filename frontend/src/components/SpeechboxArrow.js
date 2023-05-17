@@ -1,7 +1,7 @@
 import React from "react";
 import Triangle from "components/Triangle";
 
-const SpeechTextboxArrow = React.memo(({ borderWidth, setArrowWidth }) => {
+const SpeechTextboxArrow = React.memo(({ borderWidth }) => {
   const arrowHeight = 25; // px
   const arrowWidth = 25; // px
 
@@ -43,7 +43,6 @@ const SpeechTextboxArrow = React.memo(({ borderWidth, setArrowWidth }) => {
 
   const borderTriangleWidth = calculateBorderTriangleWidth();
   const borderTriangleHeight = calculateBorderTriangleHeight();
-  setArrowWidth(borderTriangleWidth);
 
   return (
     <div
