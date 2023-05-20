@@ -20,14 +20,8 @@ export default function SpeechTextComponent({ id, onClick, component }) {
     useStyles(component);
 
   return (
-    // eslint-disable-next-line jsx-a11y/click-events-have-key-events
-    <div
-      className={defaultComponentStyling}
-      onClick={onClick}
-      id={id}
-      role="textbox"
-      tabIndex={0}
-    >
+    // eslint-disable-next-line jsx-a11y/no-static-element-interactions, jsx-a11y/click-events-have-key-events
+    <div className={defaultComponentStyling} onClick={onClick} id={id}>
       <SpeechTextboxArrow borderWidth={borderWidth} />
 
       <Typography style={{ borderWidth }} className={speechTextComponentStyles}>
