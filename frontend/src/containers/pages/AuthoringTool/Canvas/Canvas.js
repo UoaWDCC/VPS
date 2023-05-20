@@ -45,7 +45,7 @@ export default function Canvas() {
       }
     };
 
-    document.addEventListener("keydown", keyDown, true);
+    document.addEventListener("keydown", keyDown);
     document.addEventListener("keyup", keyUp);
   }, []);
 
