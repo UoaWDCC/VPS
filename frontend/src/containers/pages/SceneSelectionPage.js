@@ -19,6 +19,7 @@ import ShareModal from "../../components/ShareModal";
 import AuthoringToolContextProvider from "../../context/AuthoringToolContextProvider";
 import AuthenticationContext from "../../context/AuthenticationContext";
 import HelpButton from "../../components/HelpButton";
+import ContextMenu from "../../components/ContextMenu";
 import AccessLevel from "../../enums/route.access.level";
 
 /**
@@ -51,6 +52,16 @@ export function SceneSelectionPage({ data = null }) {
 
   // invalid name state stores the last item that had a null name, will display error message
   const [invalidNameId, setInvalidNameId] = useState("");
+
+  const [contextMenuPosition, setContextMenuPosition] = useState(null);
+  function handleContextMenu(event) {
+    event.preventDefault();
+    if (contextMenuPosition == null) {
+      setContextMenuPosition({ x: event.clientX, y: event.clientY });
+    } else {
+      setContextMenuPosition(null);
+    }
+  }
 
   /** called when the Add card is clicked */
   async function createNewScene() {
