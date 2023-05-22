@@ -6,7 +6,7 @@ import {
   Switch,
   useHistory,
 } from "react-router-dom";
-import { Button } from "@material-ui/core";
+import { Button, MenuItem } from "@material-ui/core";
 import TopBar from "../../components/TopBar";
 import ListContainer from "../../components/ListContainer";
 import ScreenContainer from "../../components/ScreenContainer";
@@ -18,6 +18,7 @@ import ShareModal from "../../components/ShareModal";
 import AuthoringToolContextProvider from "../../context/AuthoringToolContextProvider";
 import AuthenticationContext from "../../context/AuthenticationContext";
 import HelpButton from "../../components/HelpButton";
+import ContextMenu from "../../components/ContextMenu";
 import AccessLevel from "../../enums/route.access.level";
 
 /**
@@ -33,6 +34,16 @@ export function SceneSelectionPage({ data = null }) {
   const { scenes, currentScene, setCurrentScene, reFetch } =
     useContext(SceneContext);
   const { getUserIdToken, VpsUser } = useContext(AuthenticationContext);
+
+  const [contextMenuPosition, setContextMenuPosition] = useState(null);
+  function handleContextMenu(event) {
+    event.preventDefault();
+    if (contextMenuPosition == null) {
+      setContextMenuPosition({ x: event.clientX, y: event.clientY });
+    } else {
+      setContextMenuPosition(null);
+    }
+  }
 
   /** called when the Add card is clicked */
   async function createNewScene() {
@@ -175,16 +186,27 @@ export function SceneSelectionPage({ data = null }) {
         </Button>
         <HelpButton />
       </TopBar>
-      <ListContainer
-        data={data || scenes}
-        onItemSelected={setCurrentScene}
-        onItemDoubleClick={editScene}
-        addCard={createNewScene}
-        wide
-        onItemBlur={changeSceneName}
-        sceneSelectionPage
-        scenarioId={scenarioId}
-      />
+      <div onContextMenu={handleContextMenu}>
+        <ContextMenu
+          items={[
+            <MenuItem onClick={() => alert("Edit")} key="1">
+              Edit
+            </MenuItem>,
+          ]}
+          position={contextMenuPosition}
+          setPosition={setContextMenuPosition}
+        />
+        <ListContainer
+          data={data || scenes}
+          onItemSelected={setCurrentScene}
+          onItemDoubleClick={editScene}
+          addCard={createNewScene}
+          wide
+          onItemBlur={changeSceneName}
+          sceneSelectionPage
+          scenarioId={scenarioId}
+        />
+      </div>
       <ShareModal
         isOpen={isShareModalOpen}
         handleClose={() => setShareModalOpen(false)}
