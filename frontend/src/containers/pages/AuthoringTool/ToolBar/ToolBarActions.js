@@ -1,9 +1,22 @@
 import { v4 } from "uuid";
 
 /**
- * function to be put into ToolBarData when button is added
  * @param {object} currentScene
  * @param {function} setCurrentScene
+ */
+function addComponent(component, currentScene, setCurrentScene) {
+  const updatedComponents = currentScene.components;
+
+  updatedComponents.push(component);
+
+  setCurrentScene({
+    ...currentScene,
+    components: updatedComponents,
+  });
+}
+
+/**
+ * function to be put into ToolBarData when button is added
  */
 function addButton(currentScene, setCurrentScene) {
   const newButton = {
@@ -19,20 +32,11 @@ function addButton(currentScene, setCurrentScene) {
     id: v4(),
   };
 
-  const updatedComponents = currentScene.components;
-
-  updatedComponents.push(newButton);
-
-  setCurrentScene({
-    ...currentScene,
-    components: updatedComponents,
-  });
+  addComponent(newButton, currentScene, setCurrentScene);
 }
 
 /**
  * function to be put into ToolBarData when text is added
- * @param {object} currentScene
- * @param {function} setCurrentScene
  */
 function addText(currentScene, setCurrentScene) {
   const newText = {
@@ -49,20 +53,29 @@ function addText(currentScene, setCurrentScene) {
     id: v4(),
   };
 
-  const updatedComponents = currentScene.components;
+  addComponent(newText, currentScene, setCurrentScene);
+}
 
-  updatedComponents.push(newText);
+function addSpeechText(currentScene, setCurrentScene) {
+  const newSpeechText = {
+    type: "SPEECHTEXT",
+    text: "default speech text",
+    border: true,
+    fontSize: 16, // pt
+    color: "black",
+    textAlign: "left",
+    left: 0, // as percentage
+    top: 0, // as percentage
+    height: 10, // as percentage
+    width: 20, // as percentage
+    id: v4(),
+  };
 
-  setCurrentScene({
-    ...currentScene,
-    components: updatedComponents,
-  });
+  addComponent(newSpeechText, currentScene, setCurrentScene);
 }
 
 /**
  * function to be put into ToolBarData when image is added
- * @param {object} currentScene
- * @param {function} setCurrentScene
  * @param {object} image
  */
 function addImage(currentScene, setCurrentScene, image) {
@@ -76,20 +89,11 @@ function addImage(currentScene, setCurrentScene, image) {
     id: v4(),
   };
 
-  const updatedComponents = currentScene.components;
-
-  updatedComponents.push(newImage);
-
-  setCurrentScene({
-    ...currentScene,
-    components: updatedComponents,
-  });
+  addComponent(newImage, currentScene, setCurrentScene);
 }
 
 /**
  * function to be put into ToolBarData when firebase image is added
- * @param {object} currentScene
- * @param {function} setCurrentScene
  * @param {object} fileObject
  * @param {string} url
  */
@@ -105,16 +109,15 @@ function addFirebaseImage(currentScene, setCurrentScene, fileObject, url) {
     id: v4(),
   };
 
-  const updatedComponents = currentScene.components;
-
-  updatedComponents.push(newImage);
-
-  setCurrentScene({
-    ...currentScene,
-    components: updatedComponents,
-  });
+  addComponent(newImage, currentScene, setCurrentScene);
 }
 
+/**
+ * call this when user adds firebase audio
+ *
+ * @param {object} fileObject
+ * @param {string} url
+ */
 function addFirebaseAudio(currentScene, setCurrentScene, fileObject, url) {
   const newAudio = {
     type: "FIREBASEAUDIO",
@@ -129,14 +132,14 @@ function addFirebaseAudio(currentScene, setCurrentScene, fileObject, url) {
     id: v4(),
   };
 
-  const updatedComponents = currentScene.components;
-
-  updatedComponents.push(newAudio);
-
-  setCurrentScene({
-    ...currentScene,
-    components: updatedComponents,
-  });
+  addComponent(newAudio, currentScene, setCurrentScene);
 }
 
-export { addButton, addText, addImage, addFirebaseImage, addFirebaseAudio };
+export {
+  addButton,
+  addText,
+  addSpeechText,
+  addImage,
+  addFirebaseImage,
+  addFirebaseAudio,
+};
