@@ -21,10 +21,18 @@ export default function SpeechTextComponent({ id, onClick, component }) {
 
   return (
     // eslint-disable-next-line jsx-a11y/no-static-element-interactions, jsx-a11y/click-events-have-key-events
-    <div className={defaultComponentStyling} onClick={onClick} id={id}>
+    <div
+      className={defaultComponentStyling}
+      style={{ display: "flex", flexDirection: "column" }}
+      onClick={onClick}
+      id={id}
+    >
       <SpeechTextboxArrow borderWidth={borderWidth} />
 
-      <Typography style={{ borderWidth }} className={speechTextComponentStyles}>
+      <Typography
+        style={{ borderWidth, flex: 1 }}
+        className={speechTextComponentStyles}
+      >
         {component.text}
       </Typography>
     </div>
