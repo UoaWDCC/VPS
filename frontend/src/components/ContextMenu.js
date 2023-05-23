@@ -24,7 +24,7 @@ import Menu from "@material-ui/core/Menu";
  * );
  */
 
-export default function ContextMenu({ items, position, setPosition }) {
+export default function ContextMenu({ children, position, setPosition }) {
   const handleClose = () => setPosition(null);
 
   return (
@@ -35,16 +35,9 @@ export default function ContextMenu({ items, position, setPosition }) {
         position !== null ? { left: position.x, top: position.y } : undefined
       }
       onClose={handleClose}
+      onClick={handleClose}
     >
-      {items.map((item) =>
-        // on click, also close contextmenu
-        React.cloneElement(item, {
-          onClick: (event) => {
-            if (item.props.onClick != null) item.props.onClick(event);
-            handleClose();
-          },
-        })
-      )}
+      {children}
     </Menu>
   );
 }

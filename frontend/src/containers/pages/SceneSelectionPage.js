@@ -188,42 +188,27 @@ export function SceneSelectionPage({ data = null }) {
       </TopBar>
       <div onContextMenu={handleContextMenu}>
         <ContextMenu
-          items={[
-            <MenuItem disabled={!currentScene} onClick={editScene} key="edit">
-              Edit
-            </MenuItem>,
-            <MenuItem
-              disabled={!currentScene}
-              onClick={duplicateScene}
-              key="duplicate"
-            >
-              Duplicate
-            </MenuItem>,
-            <MenuItem
-              disabled={!currentScene}
-              onClick={deleteScene}
-              key="delete"
-            >
-              Delete
-            </MenuItem>,
-            <Divider />,
-            VpsUser.role === AccessLevel.STAFF ? (
-              <MenuItem onClick={openDashboard} key="dashboard">
-                Dashboard
-              </MenuItem>
-            ) : (
-              <div />
-            ),
-            <MenuItem onClick={playScenario} key="play">
-              Play
-            </MenuItem>,
-            <MenuItem onClick={() => setShareModalOpen(true)} key="share">
-              Share
-            </MenuItem>,
-          ]}
           position={contextMenuPosition}
           setPosition={setContextMenuPosition}
-        />
+        >
+          <MenuItem disabled={!currentScene} onClick={editScene}>
+            Edit
+          </MenuItem>
+          <MenuItem disabled={!currentScene} onClick={duplicateScene}>
+            Duplicate
+          </MenuItem>
+          <MenuItem disabled={!currentScene} onClick={deleteScene}>
+            Delete
+          </MenuItem>
+          <Divider />
+          {VpsUser.role === AccessLevel.STAFF ? (
+            <MenuItem onClick={openDashboard}>Dashboard</MenuItem>
+          ) : (
+            ""
+          )}
+          <MenuItem onClick={playScenario}>Play</MenuItem>
+          <MenuItem onClick={() => setShareModalOpen(true)}>Share</MenuItem>
+        </ContextMenu>
         <ListContainer
           data={data || scenes}
           onItemSelected={setCurrentScene}
