@@ -66,7 +66,6 @@ const SpeechTextboxArrow = React.memo(({ borderWidth }) => {
         colour="white"
         additionalStyles={{ marginRight: borderWidth }}
       />
-
     </div>
   );
 });
