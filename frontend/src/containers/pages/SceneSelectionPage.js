@@ -263,6 +263,55 @@ export function SceneSelectionPage({ data = null }) {
         scenarioId={scenarioId}
         invalidNameId={invalidNameId}
       />
+      <div onContextMenu={handleContextMenu}>
+        <ContextMenu
+          items={[
+            <MenuItem disabled={!currentScene} onClick={editScene} key="edit">
+              Edit
+            </MenuItem>,
+            <MenuItem
+              disabled={!currentScene}
+              onClick={duplicateScene}
+              key="duplicate"
+            >
+              Duplicate
+            </MenuItem>,
+            <MenuItem
+              disabled={!currentScene}
+              onClick={deleteScene}
+              key="delete"
+            >
+              Delete
+            </MenuItem>,
+            <Divider />,
+            VpsUser.role === AccessLevel.STAFF ? (
+              <MenuItem onClick={openDashboard} key="dashboard">
+                Dashboard
+              </MenuItem>
+            ) : (
+              <div />
+            ),
+            <MenuItem onClick={playScenario} key="play">
+              Play
+            </MenuItem>,
+            <MenuItem onClick={() => setShareModalOpen(true)} key="share">
+              Share
+            </MenuItem>,
+          ]}
+          position={contextMenuPosition}
+          setPosition={setContextMenuPosition}
+        />
+        <ListContainer
+          data={data || scenes}
+          onItemSelected={setCurrentScene}
+          onItemDoubleClick={editScene}
+          addCard={createNewScene}
+          wide
+          onItemBlur={changeSceneName}
+          sceneSelectionPage
+          scenarioId={scenarioId}
+        />
+      </div>
       <ShareModal
         isOpen={isShareModalOpen}
         handleClose={() => setShareModalOpen(false)}
