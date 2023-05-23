@@ -6,7 +6,7 @@ import {
   Switch,
   useHistory,
 } from "react-router-dom";
-import { Button, MenuItem } from "@material-ui/core";
+import { Button, MenuItem, Divider } from "@material-ui/core";
 import TopBar from "../../components/TopBar";
 import ListContainer from "../../components/ListContainer";
 import ScreenContainer from "../../components/ScreenContainer";
@@ -189,8 +189,36 @@ export function SceneSelectionPage({ data = null }) {
       <div onContextMenu={handleContextMenu}>
         <ContextMenu
           items={[
-            <MenuItem onClick={() => alert("Edit")} key="1">
+            <MenuItem disabled={!currentScene} onClick={editScene} key="edit">
               Edit
+            </MenuItem>,
+            <MenuItem
+              disabled={!currentScene}
+              onClick={duplicateScene}
+              key="duplicate"
+            >
+              Duplicate
+            </MenuItem>,
+            <MenuItem
+              disabled={!currentScene}
+              onClick={deleteScene}
+              key="delete"
+            >
+              Delete
+            </MenuItem>,
+            <Divider />,
+            VpsUser.role === AccessLevel.STAFF ? (
+              <MenuItem onClick={openDashboard} key="dashboard">
+                Dashboard
+              </MenuItem>
+            ) : (
+              <div />
+            ),
+            <MenuItem onClick={playScenario} key="play">
+              Play
+            </MenuItem>,
+            <MenuItem onClick={() => setShareModalOpen(true)} key="share">
+              Share
             </MenuItem>,
           ]}
           position={contextMenuPosition}
