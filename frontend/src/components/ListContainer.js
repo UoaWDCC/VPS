@@ -26,7 +26,7 @@ import useStyles from "./component.styles";
  *   console.log("Card Added.")
  * }
  * function onItemBlur() {
- *   console.log("Item Blurred."")
+ *   console.log("Item Blurred.")
  * }
  * return (
  *   <ListContainer
@@ -65,6 +65,11 @@ export default function ListContainer({
     }
   };
 
+  /** Function which executes when an image in the image list is right-clicked. Select item. */
+  const onItemRightClick = (item) => {
+    setSelected(item._id);
+    onItemSelected(item);
+  };
   return (
     <>
       <div
@@ -91,6 +96,7 @@ export default function ListContainer({
                   cols={1}
                   height={200}
                   onClick={(event) => onItemClick(event, item)}
+                  onContextMenu={() => onItemRightClick(item)}
                 >
                   <div
                     className={
