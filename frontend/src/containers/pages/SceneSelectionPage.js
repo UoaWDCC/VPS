@@ -200,6 +200,7 @@ export function SceneSelectionPage({ data = null }) {
           <MenuItem disabled={!currentScene} onClick={deleteScene}>
             Delete
           </MenuItem>
+          <MenuItem onClick={createNewScene}>Create New Scene</MenuItem>
           <Divider />
           {VpsUser.role === AccessLevel.STAFF ? (
             <MenuItem onClick={openDashboard}>Dashboard</MenuItem>
