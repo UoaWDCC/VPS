@@ -38,7 +38,12 @@ export default function SpeechTextComponent({ id, onClick, component }) {
       />
 
       <Typography
-        style={{ borderWidth, flex: 1 }}
+        style={{
+          borderWidth,
+          flex: 1,
+          borderRadius: "10px",
+          borderTopRightRadius: 0,
+        }}
         className={speechTextComponentStyles}
       >
         {component.text}
