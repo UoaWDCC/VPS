@@ -20,7 +20,11 @@ const CountdownTimer = ({ targetDate, sceneTime }) => {
   }
   return (
     <div>
-      {days + hours + minutes + seconds <= 30 && <PopUp />}
+      {days + hours + minutes + seconds > 25 &&
+        days + hours + minutes + seconds <= 30 && <PopUp seconds={seconds} />}
+
+      {days + hours + minutes + seconds > 10 &&
+        days + hours + minutes + seconds <= 15 && <PopUp seconds={seconds} />}
 
       <ShowCounter minutes={minutes} seconds={seconds} />
     </div>
