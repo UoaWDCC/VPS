@@ -14,7 +14,7 @@ const style = {
 
 function PopUp({ seconds }) {
   return (
-    <div>
+    <>
       {seconds > 15 && (
         <Box sx={style}>
           <p>You have less than 30 seconds left!</p>
@@ -26,7 +26,7 @@ function PopUp({ seconds }) {
           <p>You have less than 15 seconds left!</p>
         </Box>
       )}
-    </div>
+    </>
   );
 }
 

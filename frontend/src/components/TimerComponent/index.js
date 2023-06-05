@@ -15,16 +15,16 @@ const CountdownTimer = ({ targetDate, sceneTime }) => {
   }, [targetDate]);
 
   const [days, hours, minutes, seconds] = useCountdown(time);
-  if (days + hours + minutes + seconds <= 0) {
+  const totalTime = days + hours + minutes + seconds;
+
+  if (totalTime <= 0) {
     return <Notification setTime={setTime} sceneTime={sceneTime} />;
   }
   return (
     <div>
-      {days + hours + minutes + seconds > 25 &&
-        days + hours + minutes + seconds <= 30 && <PopUp seconds={seconds} />}
+      {totalTime > 25 && totalTime <= 30 && <PopUp seconds={seconds} />}
 
-      {days + hours + minutes + seconds > 10 &&
-        days + hours + minutes + seconds <= 15 && <PopUp seconds={seconds} />}
+      {totalTime > 10 && totalTime <= 15 && <PopUp seconds={seconds} />}
 
       <ShowCounter minutes={minutes} seconds={seconds} />
     </div>
