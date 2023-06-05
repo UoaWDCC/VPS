@@ -1,31 +1,21 @@
 import * as React from "react";
-import Box from "@material-ui/core/Box";
 
 const style = {
   position: "absolute",
-  bottom: "0%",
+  bottom: "-2%",
   right: "0%",
   width: "20%",
-  bgcolor: "red",
+  backgroundColor: "red",
   border: "2px solid #000",
-  boxShadow: 24,
-  p: 4,
+  padding: "40px",
 };
 
 function PopUp({ seconds }) {
   return (
     <>
-      {seconds > 15 && (
-        <Box sx={style}>
-          <p>You have less than 30 seconds left!</p>
-        </Box>
-      )}
+      {seconds > 15 && <p style={style}>You have less than 30 seconds left!</p>}
 
-      {seconds <= 15 && (
-        <Box sx={style}>
-          <p>You have less than 15 seconds left!</p>
-        </Box>
-      )}
+      {seconds < 16 && <p style={style}>You have less than 15 seconds left!</p>}
     </>
   );
 }
