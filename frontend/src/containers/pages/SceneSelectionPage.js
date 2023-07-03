@@ -95,8 +95,12 @@ export function SceneSelectionPage({ data = null }) {
   /** called when user unfocuses from a scene name */
   async function changeSceneName({ target }) {
     // Prevents user from changing scene name to empty string or one of only spaces
-    if (target.value.trim() === "") {
-      return;
+    if (
+      target.value === "" ||
+      target.value === null ||
+      target.value.trim() === ""
+    ) {
+      target.value = currentScene.name;
     }
     await usePut(
       `/api/scenario/${scenarioId}/scene/${currentScene._id}`,
