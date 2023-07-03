@@ -68,6 +68,7 @@ export default function SideBar() {
     <>
       <div className={styles.sideBar}>
         <img
+          draggable="false"
           className={styles.logo}
           src="uoa-logo.png"
           alt="University of Auckland Logo"
