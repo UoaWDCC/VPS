@@ -45,7 +45,7 @@ export default function ListContainer({
   onItemBlur,
   sceneSelectionPage,
   scenarioId,
-  invalidName,
+  invalidNameId,
 }) {
   const classes = useStyles();
   const [selected, setSelected] = useState();
@@ -122,7 +122,7 @@ export default function ListContainer({
                       key={item._id}
                     />
                   </div>
-                  {invalidName && (
+                  {invalidNameId === item._id && (
                     <p1 className="nullNameWarning">invalid null name</p1>
                   )}
                 </ImageListItem>
