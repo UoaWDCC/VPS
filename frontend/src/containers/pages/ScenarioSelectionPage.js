@@ -18,6 +18,17 @@ export default function ScenarioSelectionPage({ data = null }) {
 
   /** function is called when the user unfocuses from a scenario name */
   async function changeScenarioName({ target }) {
+    /**
+     * if target value of name entered is empty, of of just spaces, instantly revert to the previous name
+     */
+    if (
+      target.value === "" ||
+      target.value === null ||
+      target.value.trim() === ""
+    ) {
+      target.value = currentScenario.name;
+    }
+
     await usePut(
       `/api/scenario/${currentScenario._id}`,
       {
