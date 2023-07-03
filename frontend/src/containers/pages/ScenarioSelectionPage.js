@@ -1,4 +1,4 @@
-import React, { useContext, useEffect } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import SideBar from "../../components/SideBar";
 import ListContainer from "../../components/ListContainer";
 import ScreenContainer from "../../components/ScreenContainer";
@@ -16,6 +16,9 @@ export default function ScenarioSelectionPage({ data = null }) {
     useContext(ScenarioContext);
   const { getUserIdToken } = useContext(AuthenticationContext);
 
+  // invalid name state stores the last item that had a null name, will display error message
+  const [invalidName, setInvalidName] = useState(false);
+
   /** function is called when the user unfocuses from a scenario name */
   async function changeScenarioName({ target }) {
     /**
@@ -27,6 +30,7 @@ export default function ScenarioSelectionPage({ data = null }) {
       target.value.trim() === ""
     ) {
       target.value = currentScenario.name;
+      setInvalidName(true);
     }
 
     await usePut(
@@ -52,6 +56,7 @@ export default function ScenarioSelectionPage({ data = null }) {
         data={data || scenarios}
         onItemSelected={setCurrentScenario}
         onItemBlur={changeScenarioName}
+        invalidName={invalidName}
       />
     </ScreenContainer>
   );
