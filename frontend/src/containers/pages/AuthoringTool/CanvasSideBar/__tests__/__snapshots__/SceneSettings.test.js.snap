@@ -63,6 +63,7 @@ exports[`Scenario Selection page snapshot test 1`] = `
           onFocus={[Function]}
           required={false}
           type="number"
+          value=""
         />
         <div
           className="MuiInputAdornment-root MuiInputAdornment-positionEnd"
