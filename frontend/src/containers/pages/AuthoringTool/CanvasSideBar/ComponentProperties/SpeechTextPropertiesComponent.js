@@ -119,6 +119,26 @@ export default function SpeechTextPropertiesComponent({
           <MenuItem value="white">White</MenuItem>
         </Select>
       </FormControl>
+
+      <FormControl fullWidth className={styles.componentProperty}>
+        <CustomInputLabel shrink>Arrow Location</CustomInputLabel>
+        <Select
+          className={styles.selectInput}
+          value={component.arrowLocation}
+          onChange={(event) =>
+            updateComponentProperty(
+              componentIndex,
+              "arrowLocation",
+              event.target.value
+            )
+          }
+        >
+          <MenuItem value="top">Top</MenuItem>
+          <MenuItem value="left">Left</MenuItem>
+          <MenuItem value="right">Right</MenuItem>
+          <MenuItem value="bottom">Bottom</MenuItem>
+        </Select>
+      </FormControl>
     </>
   );
 }
