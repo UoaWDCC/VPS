@@ -1,4 +1,4 @@
-import React, { useContext } from "react";
+import React, { useContext, useEffect, useRef } from "react";
 import {
   FormControl,
   InputLabel,
@@ -11,10 +11,11 @@ import FormatAlignLeftIcon from "@material-ui/icons/FormatAlignLeft";
 import FormatAlignCenterIcon from "@material-ui/icons/FormatAlignCenter";
 import FormatAlignRightIcon from "@material-ui/icons/FormatAlignRight";
 import FormatAlignJustifyIcon from "@material-ui/icons/FormatAlignJustify";
-import SceneContext from "../../../../../context/SceneContext";
-import CustomInputLabelStyles from "../CustomPropertyInputStyles/CustomInputLabelStyles";
+import SceneContext from "context/SceneContext";
+import AuthoringToolContext from "context/AuthoringToolContext";
 
-import styles from "../../../../../styling/CanvasSideBar.module.scss";
+import styles from "styling/CanvasSideBar.module.scss";
+import CustomInputLabelStyles from "../CustomPropertyInputStyles/CustomInputLabelStyles";
 import useStyles from "./TextPropertiesComponent.styles";
 
 const CustomInputLabel = CustomInputLabelStyles()(InputLabel);
@@ -31,7 +32,13 @@ export default function SpeechTextPropertiesComponent({
 }) {
   const textComponentStyles = useStyles();
   const { updateComponentProperty } = useContext(SceneContext);
-  // const reference = React.createRef();
+
+  const { addPropertyRef } = useContext(AuthoringToolContext);
+  const textRef = useRef(null);
+
+  useEffect(() => {
+    addPropertyRef("text", textRef);
+  }, []);
 
   return (
     <>
@@ -40,6 +47,7 @@ export default function SpeechTextPropertiesComponent({
         <OutlinedInput
           className={textComponentStyles.textArea}
           value={component.text}
+          inputRef={textRef}
           fullWidth
           multiline
           rows={5}
