@@ -35,11 +35,13 @@ export default function TextPropertiesComponent({ component, componentIndex }) {
   const textComponentStyles = useStyles();
   const { updateComponentProperty } = useContext(SceneContext);
 
-  const { addPropertyRef } = useContext(AuthoringToolContext);
+  const addPropertyRef = useContext(AuthoringToolContext)?.addPropertyRef;
   const textRef = useRef(null);
 
   useEffect(() => {
-    addPropertyRef("text", textRef);
+    if (addPropertyRef) {
+      addPropertyRef("text", textRef);
+    }
   }, []);
 
   return (
