@@ -49,10 +49,10 @@ const SpeechTextboxArrow = React.memo(
     }, []);
 
     const diffStyles = {
-      top: { margin: "margin-bottom", rotation: 0, align: "flex-end" },
-      bottom: { margin: "margin-top", rotation: 180, align: "flex-start" },
-      left: { margin: "margin-right", rotation: 270, align: "flex-start" },
-      right: { margin: "margin-left", rotation: 90, align: "flex-end" },
+      top: { margin: "marginBottom", rotation: 0, align: "flex-end" },
+      bottom: { margin: "marginTop", rotation: 180, align: "flex-start" },
+      left: { margin: "marginRight", rotation: 270, align: "flex-start" },
+      right: { margin: "marginLeft", rotation: 90, align: "flex-end" },
     }[arrowLocation];
 
     return (
