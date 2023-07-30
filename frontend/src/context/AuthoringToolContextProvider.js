@@ -15,6 +15,7 @@ export default function AuthoringToolContextProvider({ children }) {
   const [shiftPressed, setShiftPressed] = useState(false);
 
   const selectRef = useRef(select);
+  const [propertiesRefs, setPropertiesRefs] = useState({}); // stores refs of property inputs
 
   function selectElement({ currentTarget }) {
     const image = currentTarget.firstElementChild?.nodeName === "IMG";
@@ -45,6 +46,12 @@ export default function AuthoringToolContextProvider({ children }) {
     }
   }
 
+  function addPropertyRef(propertyName, propertyRef) {
+    setPropertiesRefs((current) => {
+      return { ...current, [propertyName]: propertyRef };
+    });
+  }
+
   return (
     <AuthoringToolContext.Provider
       value={{
@@ -57,6 +64,8 @@ export default function AuthoringToolContextProvider({ children }) {
         shiftPressed,
         setShiftPressed,
         deleteElement,
+        propertiesRefs,
+        addPropertyRef,
       }}
     >
       {children}

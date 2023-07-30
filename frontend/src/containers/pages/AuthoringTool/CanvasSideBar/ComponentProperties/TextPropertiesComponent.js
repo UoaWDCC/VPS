@@ -1,4 +1,4 @@
-import React, { useContext } from "react";
+import React, { useContext, useEffect, useRef } from "react";
 import {
   FormControl,
   InputLabel,
@@ -13,11 +13,13 @@ import FormatAlignLeftIcon from "@material-ui/icons/FormatAlignLeft";
 import FormatAlignCenterIcon from "@material-ui/icons/FormatAlignCenter";
 import FormatAlignRightIcon from "@material-ui/icons/FormatAlignRight";
 import FormatAlignJustifyIcon from "@material-ui/icons/FormatAlignJustify";
-import SceneContext from "../../../../../context/SceneContext";
+
+import AuthoringToolContext from "context/AuthoringToolContext";
+import SceneContext from "context/SceneContext";
+
+import styles from "styling/CanvasSideBar.module.scss";
 import CustomInputLabelStyles from "../CustomPropertyInputStyles/CustomInputLabelStyles";
 import CustomCheckBoxStyles from "../CustomPropertyInputStyles/CustomCheckBoxStyles";
-
-import styles from "../../../../../styling/CanvasSideBar.module.scss";
 import useStyles from "./TextPropertiesComponent.styles";
 
 const CustomInputLabel = CustomInputLabelStyles()(InputLabel);
@@ -32,7 +34,13 @@ const sizes = [6, 8, 9, 10, 11, 12, 14, 16, 18, 20, 24, 30, 36, 42, 48, 60, 72];
 export default function TextPropertiesComponent({ component, componentIndex }) {
   const textComponentStyles = useStyles();
   const { updateComponentProperty } = useContext(SceneContext);
-  // const reference = React.createRef();
+
+  const { addPropertyRef } = useContext(AuthoringToolContext);
+  const textRef = useRef(null);
+
+  useEffect(() => {
+    addPropertyRef("text", textRef);
+  }, []);
 
   return (
     <>
@@ -41,6 +49,7 @@ export default function TextPropertiesComponent({ component, componentIndex }) {
         <OutlinedInput
           className={textComponentStyles.textArea}
           value={component.text}
+          inputRef={textRef}
           fullWidth
           multiline
           rows={5}
