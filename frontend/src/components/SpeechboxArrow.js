@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import Triangle from "components/Triangle";
 
 const SpeechTextboxArrow = React.memo(({ borderWidth, setArrowWidth }) => {
@@ -43,7 +43,9 @@ const SpeechTextboxArrow = React.memo(({ borderWidth, setArrowWidth }) => {
 
   const borderTriangleWidth = calculateBorderTriangleWidth();
   const borderTriangleHeight = calculateBorderTriangleHeight();
-  setArrowWidth(borderTriangleWidth);
+  useEffect(() => {
+    setArrowWidth(borderTriangleWidth);
+  }, []);
 
   return (
     <div
