@@ -6,19 +6,20 @@ import Menu from "@material-ui/core/Menu";
  *
  * @component
  * @example
- * const items = [ <MenuItem onClick={()=>console.log("Edit")} key="1">Edit</MenuItem> ];
  * const [position, setPosition] = useState(null);
  *
  * function handleContextMenu(event) {
  *   if (position == null)
  *    setPosition({x: event.clientX, y: event.clientY});
  *   else
- *    setPosition(null)'
+ *    setPosition(null);
  * }
  *
  * return (
  *   <div onContextMenu={handleContextMenu}>
- *    <ContextMenu items={items} position={position} setPosition={setPosition} />
+ *    <ContextMenu position={position} setPosition={setPosition}>
+ *      <MenuItem onClick={()=>console.log("Edit")}>Edit</MenuItem>
+ *    </ContextMenu>
  *    Right click me!
  *   </div>
  * );
