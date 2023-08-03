@@ -16,6 +16,7 @@ exports[`ListContainer component snapshot test 1`] = `
       className="MuiImageListItem-root makeStyles-listContainerItem-1"
       height={200}
       onClick={[Function]}
+      onContextMenu={[Function]}
       style={
         Object {
           "height": 240,

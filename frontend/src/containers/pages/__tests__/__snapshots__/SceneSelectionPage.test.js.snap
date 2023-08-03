@@ -142,142 +142,144 @@ exports[`Scene Selection page snapshot test 1`] = `
         </ul>
       </div>
       <div />
-      <div
-        class="scenarioListContainerWide"
-      >
-        <ul
-          class="MuiImageList-root"
-          style="margin: -15px;"
+      <div>
+        <div
+          class="scenarioListContainerWide"
         >
-          <li
-            class="MuiImageListItem-root makeStyles-listContainerItem-2"
-            height="200"
-            style="width: 20%; height: 240px; padding: 15px;"
+          <ul
+            class="MuiImageList-root"
+            style="margin: -15px;"
           >
-            <div
-              class="MuiImageListItem-item"
+            <li
+              class="MuiImageListItem-root makeStyles-listContainerItem-2"
+              height="200"
+              style="width: 20%; height: 240px; padding: 15px;"
             >
               <div
-                class="imageListItemWide"
+                class="MuiImageListItem-item"
               >
                 <div
-                  class="MuiBox-root MuiBox-root-3"
-                />
-                <p
-                  class="text"
-                >
-                  Create New Scene
-                </p>
-              </div>
-            </div>
-          </li>
-          <li
-            class="MuiImageListItem-root makeStyles-listContainerItem-2"
-            height="200"
-            style="width: 20%; height: 240px; padding: 15px;"
-          >
-            <div
-              class="MuiImageListItem-item"
-            >
-              <div
-                class="imageListItemWide"
-              >
-                <div
-                  class="MuiBox-root MuiBox-root-4"
+                  class="imageListItemWide"
                 >
                   <div
-                    data-testid="div-outer-wrapper"
-                    style="display: flex; align-items: center; justify-content: center; width: 100%; height: 100%;"
+                    class="MuiBox-root MuiBox-root-3"
+                  />
+                  <p
+                    class="text"
                   >
-                    <div
-                      data-testid="div-iframe-wrapper"
-                      style="max-width: 266px; max-height: 150px; background-color: white; filter: drop-shadow(1px 1px 2px grey);"
-                    >
-                      <div
-                        style="position: absolute; width: 100%; height: 150px; max-width: 266px; z-index: 10;"
-                      >
-                         
-                      </div>
-                      <span>
-                        <span
-                          class="react-loading-skeleton css-bvijti-skeletonStyles-Skeleton"
-                          style="position: absolute; z-index: 15; width: 266px; height: 150px;"
-                        >
-                          ‌
-                        </span>
-                      </span>
-                      <iframe
-                        sandbox="allow-scripts allow-same-origin"
-                        scrolling="no"
-                        src="/play/undefined/1"
-                        style="transform: scaleX(0.13854166666666667) scaleY(0.1388888888888889); transform-origin: 0 0; width: 1920px; height: 1080px; border: 0px;"
-                        tabindex="-1"
-                        title="webpage-thumbnail"
-                      />
-                    </div>
-                  </div>
+                    Create New Scene
+                  </p>
                 </div>
-                <input
-                  class="text"
-                  value="test1"
-                />
               </div>
-            </div>
-          </li>
-          <li
-            class="MuiImageListItem-root makeStyles-listContainerItem-2"
-            height="200"
-            style="width: 20%; height: 240px; padding: 15px;"
-          >
-            <div
-              class="MuiImageListItem-item"
+            </li>
+            <li
+              class="MuiImageListItem-root makeStyles-listContainerItem-2"
+              height="200"
+              style="width: 20%; height: 240px; padding: 15px;"
             >
               <div
-                class="imageListItemWide"
+                class="MuiImageListItem-item"
               >
                 <div
-                  class="MuiBox-root MuiBox-root-5"
+                  class="imageListItemWide"
                 >
                   <div
-                    data-testid="div-outer-wrapper"
-                    style="display: flex; align-items: center; justify-content: center; width: 100%; height: 100%;"
+                    class="MuiBox-root MuiBox-root-4"
                   >
                     <div
-                      data-testid="div-iframe-wrapper"
-                      style="max-width: 266px; max-height: 150px; background-color: white; filter: drop-shadow(1px 1px 2px grey);"
+                      data-testid="div-outer-wrapper"
+                      style="display: flex; align-items: center; justify-content: center; width: 100%; height: 100%;"
                     >
                       <div
-                        style="position: absolute; width: 100%; height: 150px; max-width: 266px; z-index: 10;"
+                        data-testid="div-iframe-wrapper"
+                        style="max-width: 266px; max-height: 150px; background-color: white; filter: drop-shadow(1px 1px 2px grey);"
                       >
-                         
-                      </div>
-                      <span>
-                        <span
-                          class="react-loading-skeleton css-bvijti-skeletonStyles-Skeleton"
-                          style="position: absolute; z-index: 15; width: 266px; height: 150px;"
+                        <div
+                          style="position: absolute; width: 100%; height: 150px; max-width: 266px; z-index: 10;"
                         >
-                          ‌
+                           
+                        </div>
+                        <span>
+                          <span
+                            class="react-loading-skeleton css-bvijti-skeletonStyles-Skeleton"
+                            style="position: absolute; z-index: 15; width: 266px; height: 150px;"
+                          >
+                            ‌
+                          </span>
                         </span>
-                      </span>
-                      <iframe
-                        sandbox="allow-scripts allow-same-origin"
-                        scrolling="no"
-                        src="/play/undefined/2"
-                        style="transform: scaleX(0.13854166666666667) scaleY(0.1388888888888889); transform-origin: 0 0; width: 1920px; height: 1080px; border: 0px;"
-                        tabindex="-1"
-                        title="webpage-thumbnail"
-                      />
+                        <iframe
+                          sandbox="allow-scripts allow-same-origin"
+                          scrolling="no"
+                          src="/play/undefined/1"
+                          style="transform: scaleX(0.13854166666666667) scaleY(0.1388888888888889); transform-origin: 0 0; width: 1920px; height: 1080px; border: 0px;"
+                          tabindex="-1"
+                          title="webpage-thumbnail"
+                        />
+                      </div>
                     </div>
                   </div>
+                  <input
+                    class="text"
+                    value="test1"
+                  />
                 </div>
-                <input
-                  class="text"
-                  value="test2"
-                />
               </div>
-            </div>
-          </li>
-        </ul>
+            </li>
+            <li
+              class="MuiImageListItem-root makeStyles-listContainerItem-2"
+              height="200"
+              style="width: 20%; height: 240px; padding: 15px;"
+            >
+              <div
+                class="MuiImageListItem-item"
+              >
+                <div
+                  class="imageListItemWide"
+                >
+                  <div
+                    class="MuiBox-root MuiBox-root-5"
+                  >
+                    <div
+                      data-testid="div-outer-wrapper"
+                      style="display: flex; align-items: center; justify-content: center; width: 100%; height: 100%;"
+                    >
+                      <div
+                        data-testid="div-iframe-wrapper"
+                        style="max-width: 266px; max-height: 150px; background-color: white; filter: drop-shadow(1px 1px 2px grey);"
+                      >
+                        <div
+                          style="position: absolute; width: 100%; height: 150px; max-width: 266px; z-index: 10;"
+                        >
+                           
+                        </div>
+                        <span>
+                          <span
+                            class="react-loading-skeleton css-bvijti-skeletonStyles-Skeleton"
+                            style="position: absolute; z-index: 15; width: 266px; height: 150px;"
+                          >
+                            ‌
+                          </span>
+                        </span>
+                        <iframe
+                          sandbox="allow-scripts allow-same-origin"
+                          scrolling="no"
+                          src="/play/undefined/2"
+                          style="transform: scaleX(0.13854166666666667) scaleY(0.1388888888888889); transform-origin: 0 0; width: 1920px; height: 1080px; border: 0px;"
+                          tabindex="-1"
+                          title="webpage-thumbnail"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                  <input
+                    class="text"
+                    value="test2"
+                  />
+                </div>
+              </div>
+            </li>
+          </ul>
+        </div>
       </div>
       <div />
     </div>
