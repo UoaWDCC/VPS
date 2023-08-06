@@ -4,11 +4,11 @@ exports[`Add firebase audio component snapshot test 1`] = `
 <body>
   <div>
     <div
-      class="MuiBox-root MuiBox-root-4 makeStyles-defaultComponentStyling-1"
+      class="MuiBox-root MuiBox-root-5 makeStyles-defaultComponentStyling-1"
     >
       <svg
         aria-hidden="true"
-        class="MuiSvgIcon-root makeStyles-audioComponentStyles-3 MuiSvgIcon-fontSizeInherit"
+        class="MuiSvgIcon-root makeStyles-audioComponentStyles-4 MuiSvgIcon-fontSizeInherit"
         focusable="false"
         viewBox="0 0 24 24"
       >
