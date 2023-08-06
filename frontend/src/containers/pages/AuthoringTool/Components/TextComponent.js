@@ -1,5 +1,6 @@
 import { Typography } from "@material-ui/core";
-import React from "react";
+import React, { useContext } from "react";
+import AuthoringToolContext from "context/AuthoringToolContext";
 import useStyles from "./components.styles";
 // import TextPropertiesComponent from "../CanvasSideBar/ComponentProperties/TextPropertiesComponent";
 
@@ -15,20 +16,17 @@ import useStyles from "./components.styles";
  * />
  */
 export default function TextComponent({ id, onClick, component }) {
-  const handleDoubleClick = () => {
-    const reference = document.querySelector("textarea");
-    reference.focus();
-  };
-
   const styles = useStyles(component);
-  // const { updateComponentProperty } = useContext(SceneContext);
+
+  const context = useContext(AuthoringToolContext);
+  const textRef = context?.propertiesRefs?.text;
 
   return (
     <Typography
       className={`${styles.defaultComponentStyling} ${styles.textComponentStyles}`}
       id={id}
       onClick={onClick}
-      onDoubleClick={handleDoubleClick}
+      onDoubleClick={() => textRef?.current?.focus()}
     >
       {component.text}
     </Typography>
