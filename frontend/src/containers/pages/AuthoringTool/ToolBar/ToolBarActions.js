@@ -68,6 +68,7 @@ function addSpeechText(currentScene, setCurrentScene) {
     top: 0, // as percentage
     height: 10, // as percentage
     width: 20, // as percentage
+    arrowLocation: "top",
     id: v4(),
   };
 
