@@ -37,5 +37,13 @@
     "prettier/prettier": ["error", { "endOfLine": "auto" }],
     "no-unused-vars": "warn",
     "no-underscore-dangle": "off"
+  },
+  "settings": {
+    "import/resolver": {
+      "node": {
+        "paths": ["src"],
+        "extensions": [".js", ".jsx", ".ts", ".tsx"]
+      }
+    }
   }
 }

@@ -1,0 +1,29 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Add speech text component snapshot test 1`] = `
+<body>
+  <div>
+    <div
+      class="makeStyles-defaultComponentStyling-5"
+      style="display: flex; flex-direction: row-reverse; min-width: 43.27833830537734px;"
+    >
+      <div
+        style="position: relative; height: 33.278338305377346px; width: 33.27833830537734px; margin-left: -3.429px; align-self: flex-end; transform: rotate(90deg);"
+      >
+        <div
+          style="box-sizing: border-box; border-left: 33.27833830537734px solid transparent; border-bottom: 33.278338305377346px solid black; position: absolute; bottom: 0px; right: 0px;"
+        />
+        <div
+          style="margin-right: 3.429px; box-sizing: border-box; border-left: 25px solid transparent; border-bottom: 25px solid white; position: absolute; bottom: 0px; right: 0px;"
+        />
+      </div>
+      <p
+        class="MuiTypography-root makeStyles-speechTextComponentStyles-7 MuiTypography-body1"
+        style="border-width: 3.429px; flex: 1; border-radius: 10px 10px 0 10px;"
+      >
+        default speech text
+      </p>
+    </div>
+  </div>
+</body>
+`;

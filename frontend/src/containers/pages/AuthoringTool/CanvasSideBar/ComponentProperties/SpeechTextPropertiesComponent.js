@@ -4,8 +4,6 @@ import {
   InputLabel,
   Select,
   MenuItem,
-  FormControlLabel,
-  Checkbox,
   OutlinedInput,
 } from "@material-ui/core";
 import { ToggleButton, ToggleButtonGroup } from "@mui/material";
@@ -13,17 +11,14 @@ import FormatAlignLeftIcon from "@material-ui/icons/FormatAlignLeft";
 import FormatAlignCenterIcon from "@material-ui/icons/FormatAlignCenter";
 import FormatAlignRightIcon from "@material-ui/icons/FormatAlignRight";
 import FormatAlignJustifyIcon from "@material-ui/icons/FormatAlignJustify";
-
-import AuthoringToolContext from "context/AuthoringToolContext";
 import SceneContext from "context/SceneContext";
+import AuthoringToolContext from "context/AuthoringToolContext";
 
 import styles from "styling/CanvasSideBar.module.scss";
 import CustomInputLabelStyles from "../CustomPropertyInputStyles/CustomInputLabelStyles";
-import CustomCheckBoxStyles from "../CustomPropertyInputStyles/CustomCheckBoxStyles";
 import useStyles from "./TextPropertiesComponent.styles";
 
 const CustomInputLabel = CustomInputLabelStyles()(InputLabel);
-const CustomCheckBox = CustomCheckBoxStyles()(Checkbox);
 const sizes = [6, 8, 9, 10, 11, 12, 14, 16, 18, 20, 24, 30, 36, 42, 48, 60, 72];
 // export const reference = useRef(null);
 
@@ -31,17 +26,18 @@ const sizes = [6, 8, 9, 10, 11, 12, 14, 16, 18, 20, 24, 30, 36, 42, 48, 60, 72];
  * This component displays the properties in the sidebar for a text scene component.
  * @component
  */
-export default function TextPropertiesComponent({ component, componentIndex }) {
+export default function SpeechTextPropertiesComponent({
+  component,
+  componentIndex,
+}) {
   const textComponentStyles = useStyles();
   const { updateComponentProperty } = useContext(SceneContext);
 
-  const addPropertyRef = useContext(AuthoringToolContext)?.addPropertyRef;
+  const { addPropertyRef } = useContext(AuthoringToolContext);
   const textRef = useRef(null);
 
   useEffect(() => {
-    if (addPropertyRef) {
-      addPropertyRef("text", textRef);
-    }
+    addPropertyRef("text", textRef);
   }, []);
 
   return (
@@ -123,23 +119,25 @@ export default function TextPropertiesComponent({ component, componentIndex }) {
           <MenuItem value="white">White</MenuItem>
         </Select>
       </FormControl>
+
       <FormControl fullWidth className={styles.componentProperty}>
-        <FormControlLabel
-          control={
-            <CustomCheckBox
-              checked={component.border}
-              color="default"
-              onChange={(event) =>
-                updateComponentProperty(
-                  componentIndex,
-                  "border",
-                  event.target.checked
-                )
-              }
-            />
+        <CustomInputLabel shrink>Arrow Location</CustomInputLabel>
+        <Select
+          className={styles.selectInput}
+          value={component.arrowLocation}
+          onChange={(event) =>
+            updateComponentProperty(
+              componentIndex,
+              "arrowLocation",
+              event.target.value
+            )
           }
-          label="Include border"
-        />
+        >
+          <MenuItem value="top">Top</MenuItem>
+          <MenuItem value="left">Left</MenuItem>
+          <MenuItem value="right">Right</MenuItem>
+          <MenuItem value="bottom">Bottom</MenuItem>
+        </Select>
       </FormControl>
     </>
   );
