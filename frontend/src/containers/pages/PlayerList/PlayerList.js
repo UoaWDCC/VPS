@@ -4,6 +4,11 @@ import { useGet } from "../../../hooks/crudHooks";
 import PlayerListContainer from "./PlayerListContainer";
 
 // CRITICAL NOTE:  MUST ADD ACESSLEVEL RQUIRED STAFF TO app.js
+
+/**
+ *  page for displaying the player list
+ *
+ */
 export default function PlayerList() {
   const [users, setUsers] = useState([]);
   const { reFetch } = useGet("/api/user", setUsers);
@@ -18,6 +23,7 @@ export default function PlayerList() {
         </button>
         <div className={styles.container}>
           {users.map((user) => {
+            console.log(user);
             return <PlayerListContainer key={user._id} user={user} />;
           })}
         </div>
