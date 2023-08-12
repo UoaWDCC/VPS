@@ -78,7 +78,18 @@ const updateScene = async (sceneId, updatedScene) => {
 
   // if we are updating name only, components will be null
   const dbScene = await Scene.findById(sceneId);
+
+
+  // store temp variable incase new name is invalid
+  let previousName = dbScene.name;
   dbScene.name = updatedScene.name;
+
+  // is new name empty or null?
+  if (dbScene.name === "" || dbScene.name === null) {
+    dbScene.name = previousName;
+  }
+
+
   dbScene.time = updatedScene.time;
   await dbScene.save();
   return dbScene;

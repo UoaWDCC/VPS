@@ -49,6 +49,9 @@ export function SceneSelectionPage({ data = null }) {
     });
   };
 
+  // invalid name state stores the last item that had a null name, will display error message
+  const [invalidNameId, setInvalidNameId] = useState("");
+
   /** called when the Add card is clicked */
   async function createNewScene() {
     const newScene = await usePost(
@@ -109,6 +112,17 @@ export function SceneSelectionPage({ data = null }) {
 
   /** called when user unfocuses from a scene name */
   async function changeSceneName({ target }) {
+    // Prevents user from changing scene name to empty string or one of only spaces
+    if (
+      target.value === "" ||
+      target.value === null ||
+      target.value.trim() === ""
+    ) {
+      target.value = currentScene.name;
+      setInvalidNameId(currentScene._id);
+    } else {
+      setInvalidNameId("");
+    }
     await usePut(
       `/api/scenario/${scenarioId}/scene/${currentScene._id}`,
       {
@@ -215,6 +229,7 @@ export function SceneSelectionPage({ data = null }) {
         onItemBlur={changeSceneName}
         sceneSelectionPage
         scenarioId={scenarioId}
+        invalidNameId={invalidNameId}
       />
       <ShareModal
         isOpen={isShareModalOpen}
