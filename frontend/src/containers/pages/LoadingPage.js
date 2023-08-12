@@ -27,7 +27,7 @@ function LoadingPage({ text }) {
         justifyContent="center"
       >
         <Grid item>
-          <CircularProgress style={{ color: "#008a7b" }} />
+          <CircularProgress style={{ color: "#0080a7" }} />
         </Grid>
         <Grid item>
           <Typography>{text}</Typography>

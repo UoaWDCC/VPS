@@ -30,7 +30,7 @@ const SceneNavigator = (props) => {
             style={
               currentScene._id === scene._id
                 ? {
-                    border: "3px solid #008a7b",
+                    border: "3px solid #035084",
                   }
                 : null
             }
@@ -39,7 +39,7 @@ const SceneNavigator = (props) => {
             <p
               className={styles.sceneText}
               style={
-                currentScene._id === scene._id ? { color: "#008a7b" } : null
+                currentScene._id === scene._id ? { color: "#035084" } : null
               }
             >
               {index + 1}

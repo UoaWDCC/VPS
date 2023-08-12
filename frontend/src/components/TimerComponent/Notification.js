@@ -48,7 +48,7 @@ function Notification({ setTime, sceneTime }) {
             variant="contained"
             color="black"
             onClick={handleClose}
-            style={{ "margin-left": "10%" }}
+            style={{ marginLeft: "10%" }}
           >
             Continue
           </Button>

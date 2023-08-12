@@ -8,11 +8,7 @@ Changes in this repo are not synced with the original repo (and are not required
 
 # Live deployments
 
-Frontend: https://vps-uoa.netlify.app
-
-Wiki: https://vps-uoa-wiki.netlify.app (Note: links to some images are broken due to CORS issues)
-
-Backend: https://virtual-patient-system.herokuapp.com/
+DEV: https://vps-dev.wdcc.co.nz/
 
 <!-- prettier-ignore -->
 | CI                  | Status   |

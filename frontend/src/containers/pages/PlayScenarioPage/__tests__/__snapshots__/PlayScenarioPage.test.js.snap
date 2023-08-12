@@ -16,7 +16,7 @@ exports[`PlayScenario page snapshot test 1`] = `
           <div
             class="MuiCircularProgress-root MuiCircularProgress-colorPrimary MuiCircularProgress-indeterminate"
             role="progressbar"
-            style="width: 40px; height: 40px; color: rgb(0, 138, 123);"
+            style="width: 40px; height: 40px; color: rgb(0, 128, 167);"
           >
             <svg
               class="MuiCircularProgress-svg"
@@ -64,7 +64,7 @@ exports[`PlayScenario page when no current SceneID snapshot test 1`] = `
           <div
             class="MuiCircularProgress-root MuiCircularProgress-colorPrimary MuiCircularProgress-indeterminate"
             role="progressbar"
-            style="width: 40px; height: 40px; color: rgb(0, 138, 123);"
+            style="width: 40px; height: 40px; color: rgb(0, 128, 167);"
           >
             <svg
               class="MuiCircularProgress-svg"

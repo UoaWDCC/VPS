@@ -1,4 +1,5 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useEffect } from "react";
+import { useHistory } from "react-router-dom";
 import SideBar from "../../components/SideBar";
 import ListContainer from "../../components/ListContainer";
 import ScreenContainer from "../../components/ScreenContainer";
@@ -15,6 +16,7 @@ export default function ScenarioSelectionPage({ data = null }) {
   const { scenarios, currentScenario, setCurrentScenario, reFetch } =
     useContext(ScenarioContext);
   const { getUserIdToken } = useContext(AuthenticationContext);
+  const history = useHistory();
 
   // invalid name state stores the last item that had a null name, will display error message
   const [invalidNameId, setInvalidNameId] = useState("");
@@ -45,6 +47,14 @@ export default function ScenarioSelectionPage({ data = null }) {
     reFetch();
   }
 
+  /** function is called when the user double clicks a scenario */
+  async function editScenario() {
+    // should be set on the first click, but check to be sure anyway
+    if (currentScenario != null) {
+      history.push(`/scenario/${currentScenario._id}`);
+    }
+  }
+
   useEffect(() => {
     setCurrentScenario(null);
     reFetch();
@@ -56,6 +66,7 @@ export default function ScenarioSelectionPage({ data = null }) {
       <ListContainer
         data={data || scenarios}
         onItemSelected={setCurrentScenario}
+        onItemDoubleClick={editScenario}
         onItemBlur={changeScenarioName}
         invalidNameId={invalidNameId}
       />

@@ -9,7 +9,7 @@ exports[`PlayScenarioCanvas component snapshot test 1`] = `
       aria-valuenow="NaN"
       class="MuiLinearProgress-root MuiLinearProgress-colorInherit MuiLinearProgress-determinate css-futumu-MuiLinearProgress-root"
       role="progressbar"
-      style="height: 10px; width: 100%; position: relative; color: rgb(0, 189, 167);"
+      style="height: 10px; width: 100%; position: relative; color: rgb(0, 176, 230);"
     >
       <span
         class="MuiLinearProgress-bar MuiLinearProgress-barColorInherit MuiLinearProgress-bar1Determinate css-1wqgwi1-MuiLinearProgress-bar1"

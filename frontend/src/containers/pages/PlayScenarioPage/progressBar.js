@@ -6,7 +6,7 @@ const ProgressBar = ({ value }) => {
     height: 10,
     width: "100%",
     position: "relative",
-    color: "#00bda7",
+    color: "#00b0e6",
   };
 
   return (
