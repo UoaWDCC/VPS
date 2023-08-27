@@ -50,6 +50,7 @@ export default function ListContainer({
   onItemBlur,
   sceneSelectionPage,
   scenarioId,
+  invalidNameId,
 }) {
   const classes = useStyles();
   const [selected, setSelected] = useState();
@@ -108,7 +109,7 @@ export default function ListContainer({
                       border={5}
                       borderRadius={10}
                       borderColor={
-                        item._id === selected ? "#008a7b" : "#747474"
+                        item._id === selected ? "#035084" : "#747474"
                       }
                       overflow="hidden"
                       textAlign="center"
@@ -136,6 +137,9 @@ export default function ListContainer({
                       key={item._id}
                     />
                   </div>
+                  {invalidNameId === item._id && (
+                    <p1 className="nullNameWarning">invalid null name</p1>
+                  )}
                 </ImageListItem>
               ))
             : null}

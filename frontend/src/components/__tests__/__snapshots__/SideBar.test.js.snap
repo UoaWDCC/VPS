@@ -5,9 +5,10 @@ exports[`Side Bar component snapshot test 1`] = `
   className="sideBar"
 >
   <img
-    alt="UoA Medical & Health Science Logo"
+    alt="University of Auckland Logo"
     className="logo"
-    src="uoa-med-and-health-sci-logo.png"
+    draggable="false"
+    src="uoa-logo.png"
   />
   <ul
     className="sideBarList"

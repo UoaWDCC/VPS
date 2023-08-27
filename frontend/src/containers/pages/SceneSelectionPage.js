@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useEffect, useState, useRef } from "react";
 import {
   useParams,
   Route,
@@ -6,6 +6,7 @@ import {
   Switch,
   useHistory,
 } from "react-router-dom";
+import Papa from "papaparse";
 import { Button, MenuItem, Divider } from "@material-ui/core";
 import TopBar from "../../components/TopBar";
 import ListContainer from "../../components/ListContainer";
@@ -34,6 +35,23 @@ export function SceneSelectionPage({ data = null }) {
   const { scenes, currentScene, setCurrentScene, reFetch } =
     useContext(SceneContext);
   const { getUserIdToken, VpsUser } = useContext(AuthenticationContext);
+  const fileInputRef = useRef(null);
+  const handCSVClick = () => {
+    fileInputRef.current.click();
+  };
+  const handleFileChange = (e) => {
+    const selectedFile = e.target.files[0];
+    Papa.parse(selectedFile, {
+      header: true,
+      skipEmptyLines: true,
+      complete(results) {
+        console.log(results.data);
+      },
+    });
+  };
+
+  // invalid name state stores the last item that had a null name, will display error message
+  const [invalidNameId, setInvalidNameId] = useState("");
 
   const [contextMenuPosition, setContextMenuPosition] = useState(null);
   function handleContextMenu(event) {
@@ -105,6 +123,17 @@ export function SceneSelectionPage({ data = null }) {
 
   /** called when user unfocuses from a scene name */
   async function changeSceneName({ target }) {
+    // Prevents user from changing scene name to empty string or one of only spaces
+    if (
+      target.value === "" ||
+      target.value === null ||
+      target.value.trim() === ""
+    ) {
+      target.value = currentScene.name;
+      setInvalidNameId(currentScene._id);
+    } else {
+      setInvalidNameId("");
+    }
     await usePut(
       `/api/scenario/${scenarioId}/scene/${currentScene._id}`,
       {
@@ -184,6 +213,22 @@ export function SceneSelectionPage({ data = null }) {
         >
           Share
         </Button>
+        <Button
+          className="btn top contained white"
+          color="default"
+          variant="outlined"
+          onClick={() => handCSVClick(true)}
+        >
+          Upload CSV
+        </Button>
+        <input
+          type="file"
+          ref={fileInputRef}
+          accept=".csv"
+          style={{ display: "none" }}
+          onChange={handleFileChange}
+        />
+
         <HelpButton />
       </TopBar>
       <div onContextMenu={handleContextMenu}>
@@ -219,6 +264,7 @@ export function SceneSelectionPage({ data = null }) {
           onItemBlur={changeSceneName}
           sceneSelectionPage
           scenarioId={scenarioId}
+          invalidNameId={invalidNameId}
         />
       </div>
       <ShareModal

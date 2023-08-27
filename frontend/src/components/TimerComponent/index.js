@@ -1,6 +1,7 @@
 import React from "react";
 import useCountdown from "./useCountdown";
-import Notifcation from "./Notification";
+import Notification from "./Notification";
+import PopUp from "./PopUp";
 import ShowCounter from "./ShowCounter";
 import "./styles.css";
 
@@ -14,12 +15,20 @@ const CountdownTimer = ({ targetDate, sceneTime }) => {
   }, [targetDate]);
 
   const [days, hours, minutes, seconds] = useCountdown(time);
+  const totalTime = days + hours + minutes + seconds;
 
-  if (days + hours + minutes + seconds <= 0) {
-    return <Notifcation setTime={setTime} sceneTime={sceneTime} />;
+  if (totalTime <= 0) {
+    return <Notification setTime={setTime} sceneTime={sceneTime} />;
   }
+  return (
+    <div>
+      {totalTime > 25 && totalTime <= 30 && <PopUp seconds={seconds} />}
 
-  return <ShowCounter minutes={minutes} seconds={seconds} />;
+      {totalTime > 10 && totalTime <= 15 && <PopUp seconds={seconds} />}
+
+      <ShowCounter minutes={minutes} seconds={seconds} />
+    </div>
+  );
 };
 
 export default CountdownTimer;

@@ -12,10 +12,10 @@ const CustomTextField = withStyles({
     marginBottom: "1.5em",
 
     "& label.Mui-focused": {
-      color: "#008a7b",
+      color: "#0080a7 ",
     },
     "& .MuiInput-underline:after": {
-      borderBottomColor: "#008a7b",
+      borderBottomColor: "0080a7",
     },
   },
 })(TextField);
@@ -48,7 +48,7 @@ export default function SceneSettings() {
           <CustomTextField
             label="Scene Timer Duration"
             type="number"
-            value={currentScene?.time}
+            value={currentScene?.time || ""}
             fullWidth
             onChange={(event) => {
               // limiting scene timer duration
@@ -66,7 +66,7 @@ export default function SceneSettings() {
             }}
             InputLabelProps={{
               // label moves up whenever there is input
-              shrink: currentScene?.time || currentScene?.time === 0,
+              shrink: !!currentScene?.time || currentScene?.time === 0,
             }}
           />
         </div>

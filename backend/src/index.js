@@ -11,6 +11,7 @@ const app = express();
 const port = process.env.PORT || 3000;
 
 // Setup body-parser
+app.options("*", cors()); // include before all routes
 app.use(cors());
 app.use(express.json());
 app.use("/", routes);
