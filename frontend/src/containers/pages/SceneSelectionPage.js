@@ -105,6 +105,11 @@ export function SceneSelectionPage({ data = null }) {
     history.push("/dashboard");
   }
 
+  /** Calls back end point to swtich to the list of players */
+  function openPlayerList() {
+    history.push("/playerList");
+  }
+
   /** called when Play button is clicked */
   function playScenario() {
     window.open(`/play/${scenarioId}`, "_blank");
@@ -174,7 +179,7 @@ export function SceneSelectionPage({ data = null }) {
         >
           Duplicate
         </Button>
-        {VpsUser.role === AccessLevel.STAFF ? (
+        {VpsUser.role === AccessLevel.USER ? (
           <Button
             className="btn top contained white"
             color="default"
@@ -182,6 +187,19 @@ export function SceneSelectionPage({ data = null }) {
             onClick={openDashboard}
           >
             Dashboard
+          </Button>
+        ) : (
+          ""
+        )}
+
+        {VpsUser.role === AccessLevel.USER ? (
+          <Button
+            className="btn top contained white"
+            color="default"
+            variant="contained"
+            onClick={openPlayerList}
+          >
+            PlayerList
           </Button>
         ) : (
           ""

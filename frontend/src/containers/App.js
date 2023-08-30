@@ -55,7 +55,10 @@ export default function App() {
                 </ScenarioContextProvider>
               </ProtectedRoute>
 
-              <ProtectedRoute path="/playerList">
+              <ProtectedRoute
+                path="/playerList"
+                accessLevelReq={AccessLevel.USER}
+              >
                 <ScenarioContextProvider>
                   <PlayerList />
                 </ScenarioContextProvider>
