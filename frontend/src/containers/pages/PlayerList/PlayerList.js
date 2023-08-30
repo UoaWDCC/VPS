@@ -17,6 +17,7 @@ export default function PlayerList() {
 
   const [users, setUsers] = useState([]);
   const { reFetch } = useGet("/api/user", setUsers);
+  const [playerCount, setPlayerCount] = useState(0);
 
   return (
     <div className={styles.wrapper}>
@@ -30,10 +31,12 @@ export default function PlayerList() {
           {users.map((user) => {
             // console.log(user);
             if (user.scenarioId && user.scenarioId.includes(scenarioId)) {
+              setPlayerCount(playerCount + 1);
               return <PlayerListContainer key={user._id} user={user} />;
             }
             return null;
           })}
+          {playerCount === 0 && <h1>This Scenario Has No Players</h1>}
         </div>
       </div>
     </div>
