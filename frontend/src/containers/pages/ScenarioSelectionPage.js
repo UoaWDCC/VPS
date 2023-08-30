@@ -18,8 +18,24 @@ export default function ScenarioSelectionPage({ data = null }) {
   const { getUserIdToken } = useContext(AuthenticationContext);
   const history = useHistory();
 
+  // invalid name state stores the last item that had a null name, will display error message
+  const [invalidNameId, setInvalidNameId] = useState("");
   /** function is called when the user unfocuses from a scenario name */
   async function changeScenarioName({ target }) {
+    /**
+     * if target value of name entered is empty, of of just spaces, instantly revert to the previous name
+     */
+    if (
+      target.value === "" ||
+      target.value === null ||
+      target.value.trim() === ""
+    ) {
+      target.value = currentScenario.name;
+      setInvalidNameId(currentScenario._id);
+    } else {
+      setInvalidNameId("");
+    }
+
     await usePut(
       `/api/scenario/${currentScenario._id}`,
       {
@@ -52,6 +68,7 @@ export default function ScenarioSelectionPage({ data = null }) {
         onItemSelected={setCurrentScenario}
         onItemDoubleClick={editScenario}
         onItemBlur={changeScenarioName}
+        invalidNameId={invalidNameId}
       />
     </ScreenContainer>
   );

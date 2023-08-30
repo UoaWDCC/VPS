@@ -1,5 +1,6 @@
 /* eslint-disable no-param-reassign */
 import React from "react";
+import SpeechTextComponent from "../Components/SpeechTextComponent";
 import ButtonComponent from "../Components/ButtonComponent";
 import TextComponent from "../Components/TextComponent";
 import ImageComponent from "../Components/ImageComponent";
@@ -27,6 +28,14 @@ export default function componentResolver(component, index, onClick) {
         />
       );
     case "SPEECHTEXT":
+      return (
+        <SpeechTextComponent
+          key={component.id}
+          id={index}
+          onClick={onClick}
+          component={component}
+        />
+      );
     case "TEXT":
       return (
         <TextComponent
@@ -36,7 +45,6 @@ export default function componentResolver(component, index, onClick) {
           component={component}
         />
       );
-
     case "IMAGE":
       return (
         <ImageComponent

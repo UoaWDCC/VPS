@@ -7,6 +7,7 @@ exports[`Side Bar component snapshot test 1`] = `
   <img
     alt="University of Auckland Logo"
     className="logo"
+    draggable="false"
     src="uoa-logo.png"
   />
   <ul
