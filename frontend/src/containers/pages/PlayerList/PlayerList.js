@@ -12,6 +12,7 @@ import styles from "../../../styling/PlayerList.module.scss";
  */
 export default function PlayerList() {
   const { scenarioId } = useParams();
+
   console.log("scenarioId: ", scenarioId);
 
   const [users, setUsers] = useState([]);
@@ -28,7 +29,10 @@ export default function PlayerList() {
         <div className={styles.container}>
           {users.map((user) => {
             // console.log(user);
-            return <PlayerListContainer key={user._id} user={user} />;
+            if (user.scenarioId && user.scenarioId.includes(scenarioId)) {
+              return <PlayerListContainer key={user._id} user={user} />;
+            }
+            return null;
           })}
         </div>
       </div>
