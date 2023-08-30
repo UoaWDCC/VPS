@@ -44,7 +44,7 @@ export function SceneSelectionPage({ data = null }) {
       header: true,
       skipEmptyLines: true,
       complete(results) {
-        console.log(results.data);
+        // console.log(results.data);
       },
     });
   };
@@ -107,7 +107,10 @@ export function SceneSelectionPage({ data = null }) {
 
   /** Calls back end point to swtich to the list of players */
   function openPlayerList() {
-    history.push("/playerList");
+    // console.log(scenarioId);
+    history.push({
+      pathname: `/playerList/${scenarioId}`,
+    });
   }
 
   /** called when Play button is clicked */

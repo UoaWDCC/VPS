@@ -1,7 +1,8 @@
-import React, { useState } from "react";
-import styles from "../../../styling/PlayerList.module.scss";
+import React, { useState, useEffect } from "react";
+import { useParams } from "react-router-dom";
 import { useGet } from "../../../hooks/crudHooks";
 import PlayerListContainer from "./PlayerListContainer";
+import styles from "../../../styling/PlayerList.module.scss";
 
 // CRITICAL NOTE:  MUST ADD ACESSLEVEL RQUIRED STAFF TO app.js
 
@@ -10,6 +11,9 @@ import PlayerListContainer from "./PlayerListContainer";
  *
  */
 export default function PlayerList() {
+  const { scenarioId } = useParams();
+  console.log("scenarioId: ", scenarioId);
+
   const [users, setUsers] = useState([]);
   const { reFetch } = useGet("/api/user", setUsers);
 
@@ -23,7 +27,7 @@ export default function PlayerList() {
         </button>
         <div className={styles.container}>
           {users.map((user) => {
-            console.log(user);
+            // console.log(user);
             return <PlayerListContainer key={user._id} user={user} />;
           })}
         </div>
