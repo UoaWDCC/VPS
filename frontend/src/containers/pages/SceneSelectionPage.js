@@ -20,6 +20,7 @@ import AuthoringToolContextProvider from "../../context/AuthoringToolContextProv
 import AuthenticationContext from "../../context/AuthenticationContext";
 import HelpButton from "../../components/HelpButton";
 import AccessLevel from "../../enums/route.access.level";
+import generateUID from "../../components/newUID";
 
 /**
  * Page that shows the scenes belonging to a scenario.
@@ -43,8 +44,25 @@ export function SceneSelectionPage({ data = null }) {
     Papa.parse(selectedFile, {
       header: true,
       skipEmptyLines: true,
-      complete(results) {
-        console.log(results.data);
+      complete: async (results) => {
+        const usersData = results.data;
+        usersData.forEach(async (userData) => {
+          const { name, email } = userData;
+          const uid = generateUID(); // Implement your UID generation logic
+          const pictureURL = "null"; // Set the picture URL if available
+          const newUser = await usePost(
+            `/api/user/`,
+            {
+              name,
+              uid,
+              email,
+              pictureURL,
+            },
+            getUserIdToken
+          );
+          console.log(`User ${name} uploaded to MongoDB.`);
+        });
+        console.log("CSV data uploaded to MongoDB.");
       },
     });
   };
@@ -202,14 +220,18 @@ export function SceneSelectionPage({ data = null }) {
         >
           Share
         </Button>
-        <Button
-          className="btn top contained white"
-          color="default"
-          variant="outlined"
-          onClick={() => handCSVClick(true)}
-        >
-          Upload CSV
-        </Button>
+        {VpsUser.role === AccessLevel.USER ? (
+          <Button
+            className="btn top contained white"
+            color="default"
+            variant="outlined"
+            onClick={() => handCSVClick(true)}
+          >
+            Upload CSV
+          </Button>
+        ) : (
+          ""
+        )}
         <input
           type="file"
           ref={fileInputRef}
