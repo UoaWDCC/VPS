@@ -7,7 +7,7 @@ import {
   useHistory,
 } from "react-router-dom";
 import Papa from "papaparse";
-import { Button } from "@material-ui/core";
+import { Button, MenuItem, Divider } from "@material-ui/core";
 import TopBar from "../../components/TopBar";
 import ListContainer from "../../components/ListContainer";
 import ScreenContainer from "../../components/ScreenContainer";
@@ -19,6 +19,7 @@ import ShareModal from "../../components/ShareModal";
 import AuthoringToolContextProvider from "../../context/AuthoringToolContextProvider";
 import AuthenticationContext from "../../context/AuthenticationContext";
 import HelpButton from "../../components/HelpButton";
+import ContextMenu from "../../components/ContextMenu";
 import AccessLevel from "../../enums/route.access.level";
 
 /**
@@ -51,6 +52,16 @@ export function SceneSelectionPage({ data = null }) {
 
   // invalid name state stores the last item that had a null name, will display error message
   const [invalidNameId, setInvalidNameId] = useState("");
+
+  const [contextMenuPosition, setContextMenuPosition] = useState(null);
+  function handleContextMenu(event) {
+    event.preventDefault();
+    if (contextMenuPosition == null) {
+      setContextMenuPosition({ x: event.clientX, y: event.clientY });
+    } else {
+      setContextMenuPosition(null);
+    }
+  }
 
   /** called when the Add card is clicked */
   async function createNewScene() {
@@ -220,17 +231,42 @@ export function SceneSelectionPage({ data = null }) {
 
         <HelpButton />
       </TopBar>
-      <ListContainer
-        data={data || scenes}
-        onItemSelected={setCurrentScene}
-        onItemDoubleClick={editScene}
-        addCard={createNewScene}
-        wide
-        onItemBlur={changeSceneName}
-        sceneSelectionPage
-        scenarioId={scenarioId}
-        invalidNameId={invalidNameId}
-      />
+      <div onContextMenu={handleContextMenu}>
+        <ContextMenu
+          position={contextMenuPosition}
+          setPosition={setContextMenuPosition}
+        >
+          <MenuItem disabled={!currentScene} onClick={editScene}>
+            Edit
+          </MenuItem>
+          <MenuItem disabled={!currentScene} onClick={duplicateScene}>
+            Duplicate
+          </MenuItem>
+          <MenuItem disabled={!currentScene} onClick={deleteScene}>
+            Delete
+          </MenuItem>
+          <MenuItem onClick={createNewScene}>Create New Scene</MenuItem>
+          <Divider />
+          {VpsUser.role === AccessLevel.STAFF ? (
+            <MenuItem onClick={openDashboard}>Dashboard</MenuItem>
+          ) : (
+            ""
+          )}
+          <MenuItem onClick={playScenario}>Play</MenuItem>
+          <MenuItem onClick={() => setShareModalOpen(true)}>Share</MenuItem>
+        </ContextMenu>
+        <ListContainer
+          data={data || scenes}
+          onItemSelected={setCurrentScene}
+          onItemDoubleClick={editScene}
+          addCard={createNewScene}
+          wide
+          onItemBlur={changeSceneName}
+          sceneSelectionPage
+          scenarioId={scenarioId}
+          invalidNameId={invalidNameId}
+        />
+      </div>
       <ShareModal
         isOpen={isShareModalOpen}
         handleClose={() => setShareModalOpen(false)}
