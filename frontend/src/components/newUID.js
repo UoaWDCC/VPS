@@ -1,5 +1,3 @@
-import React from "react";
-
 export default function generateUID() {
   const charset =
     "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
