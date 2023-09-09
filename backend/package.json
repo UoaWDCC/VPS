@@ -5,6 +5,7 @@
   "main": "./src/index.js",
   "scripts": {
     "start": "node -r esm ./src/index.js",
+    "dev": "nodemon -r esm ./src/index.js",
     "server": "npm run start",
     "test": "jest",
     "lint": "eslint --ext .js,.jsx .",
@@ -21,7 +22,8 @@
     "firebase": "^9.1.1",
     "firebase-admin": "^9.11.1",
     "mongodb-memory-server": "^7.3.6",
-    "mongoose": "^5.12.3"
+    "mongoose": "^5.12.3",
+    "nodemon": "^3.0.1"
   },
   "devDependencies": {
     "@babel/core": "^7.13.14",
