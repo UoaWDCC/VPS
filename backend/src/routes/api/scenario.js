@@ -10,6 +10,8 @@ import {
   updateDurations,
 } from "../../db/daos/scenarioDao";
 
+import { retrieveAssignedScenarioList } from "../../db/daos/userDao";
+
 import scene from "./scene";
 
 const router = Router();
@@ -28,6 +30,13 @@ router.get("/", async (req, res) => {
   const scenarios = await retrieveScenarioList(req.body.uid);
 
   res.status(HTTP_OK).json(scenarios);
+});
+
+// get assigned scenarios for an user
+router.get("/assigned", async (req, res) => {
+  const userId = req.body.uid;
+  const assignedScenarios = await retrieveAssignedScenarioList(userId);
+  res.status(HTTP_OK).json(assignedScenarios);
 });
 
 // Create a scenario for a user

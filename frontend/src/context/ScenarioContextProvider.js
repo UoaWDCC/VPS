@@ -13,7 +13,13 @@ export default function ScenarioContextProvider({ children }) {
     null
   );
   const [scenarios, setScenarios] = useState();
+  const [assignedScenarios, setAssignedScenarios] = useState();
+
   const { reFetch } = useGet(`api/scenario`, setScenarios);
+  const { reFetch: reFetch2 } = useGet(
+    `api/scenario/assigned`,
+    setAssignedScenarios
+  );
 
   return (
     <ScenarioContext.Provider
@@ -21,6 +27,9 @@ export default function ScenarioContextProvider({ children }) {
         scenarios,
         setScenarios,
         reFetch,
+        assignedScenarios,
+        setAssignedScenarios,
+        reFetch2,
         currentScenario,
         setCurrentScenario,
       }}

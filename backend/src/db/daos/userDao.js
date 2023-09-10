@@ -1,5 +1,6 @@
 import User from "../models/user";
 import Scenario from "../models/scenario";
+import { retrieveScenarios } from "./scenarioDao";
 
 /**
  * Retrieves all users
@@ -127,6 +128,18 @@ const assignScenarioToUsers = async (scenarioId, newAssignees) => {
   return true;
 };
 
+/**
+ * Finds all assigned scenarios for a user
+ * @param {String} userId
+ * @returns all assigned scenarios for the user
+ */
+const retrieveAssignedScenarioList = async (userId) => {
+  const user = await User.findOne({ uid: userId });
+  if (!user.assigned || !user.assigned.length) return [];
+
+  return retrieveScenarios(user.assigned);
+};
+
 export {
   retrieveAllUser,
   createUser,
@@ -136,4 +149,5 @@ export {
   addPlayed,
   retrievePlayedUsers,
   assignScenarioToUsers,
+  retrieveAssignedScenarioList,
 };
