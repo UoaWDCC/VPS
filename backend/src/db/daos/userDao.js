@@ -19,6 +19,15 @@ const retrieveUser = async (uid) => {
   return user;
 };
 
+/**
+ * Retrieves user based on given uid
+ * @param {String} email unique email of user
+ * @returns user object
+ */
+const retrieveUserByEmail = async (email) => {
+  return User.findOne({ email });
+};
+
 const retrievePlayedUsers = async (scenarioId) => {
   const { users: userIds } = await Scenario.findById(scenarioId);
   const users = await User.find({
@@ -86,11 +95,45 @@ const addPlayed = async (uid, newPlayed, scenarioId) => {
   }
 };
 
+/**
+ * Adds assignees to the scenario
+ * @param {String} scenarioId
+ * @param {Array} newAssignees
+ * @returns all assignees
+ */
+const assignScenarioToUsers = async (scenarioId, newAssignees) => {
+  try {
+    await User.updateMany(
+      { _id: { $in: newAssignees }, assigned: { $exists: true } },
+      {
+        $addToSet: { assigned: scenarioId },
+      }
+    );
+
+    await User.updateMany(
+      { _id: { $in: newAssignees }, assigned: { $exists: false } },
+      {
+        $set: { assigned: [scenarioId] },
+      }
+    );
+  } catch (e) {
+    // eslint-disable-next-line no-console
+    console.error(
+      "Something went wrong while assigning a user to a scenario:",
+      e
+    );
+    return false;
+  }
+  return true;
+};
+
 export {
   retrieveAllUser,
   createUser,
   retrieveUser,
+  retrieveUserByEmail,
   deleteUser,
   addPlayed,
   retrievePlayedUsers,
+  assignScenarioToUsers,
 };

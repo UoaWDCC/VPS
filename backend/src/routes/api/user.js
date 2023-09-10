@@ -1,18 +1,22 @@
 import { Router } from "express";
 import {
   retrieveAllUser,
+  retrieveUserByEmail,
   createUser,
   retrieveUser,
   deleteUser,
   addPlayed,
   retrievePlayedUsers,
+  assignScenarioToUsers,
 } from "../../db/daos/userDao";
+import User from "../../db/models/user";
 
 const router = Router();
 
 const HTTP_OK = 200;
 const HTTP_NO_CONTENT = 204;
 const HTTP_NOT_FOUND = 404;
+const HTTP_CONFLICT = 409;
 
 // gets all users
 router.get("/", async (req, res) => {
@@ -32,9 +36,28 @@ router.get("/played/:scenarioId", async (req, res) => {
   return res.json(users);
 });
 
+// assign scenario to users
+router.patch("/assigned/:scenarioId", async (req, res) => {
+  const { userEmails } = req.body;
+  const newAssigneeIds = Object.entries(
+    await User.find({ email: { $in: userEmails } }, "_id")
+    // eslint-disable-next-line no-unused-vars
+  ).map(([_, userId]) => userId);
+
+  await assignScenarioToUsers(req.params.scenarioId, newAssigneeIds);
+
+  res.status(HTTP_OK);
+});
+
 // creats new user
 router.post("/", async (req, res) => {
   const { name, uid, email, pictureURL } = req.body;
+
+  const existingUser = await retrieveUserByEmail(email);
+  if (existingUser) {
+    res.status(HTTP_CONFLICT).json(existingUser);
+    return;
+  }
 
   const user = await createUser(name, uid, email, pictureURL);
 
