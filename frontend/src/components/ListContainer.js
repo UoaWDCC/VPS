@@ -42,7 +42,7 @@ import useStyles from "./component.styles";
  * )
  */
 export default function ListContainer({
-  data,
+  data, // could be scenarios or scenes data
   assignedScenarios,
   onItemSelected,
   onItemDoubleClick,
@@ -72,6 +72,7 @@ export default function ListContainer({
     setSelected(item._id);
     onItemSelected(item);
   };
+
   return (
     <>
       <div
@@ -79,7 +80,7 @@ export default function ListContainer({
           wide ? styles.scenarioListContainerWide : styles.scenarioListContainer
         }
       >
-        <h1>Own scenarios</h1>
+        {!sceneSelectionPage && <h1>Created scenarios</h1>}
 
         <ImageList rowHeight={210} cols={columns} gap={30}>
           {addCard ? (
@@ -150,7 +151,7 @@ export default function ListContainer({
 
         {assignedScenarios ? (
           <>
-            <h1>Assigned scenarios</h1>
+            {!sceneSelectionPage && <h1>Assigned scenarios</h1>}
 
             <ImageList rowHeight={210} cols={columns} gap={30}>
               {addCard ? (
