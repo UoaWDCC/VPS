@@ -16,6 +16,7 @@ const context = {
   scenarios: dummyScenarios,
   setCurrentScenario: () => {},
   reFetch: () => {},
+  reFetch2: () => {},
 };
 
 test("Scenario Selection page snapshot test", () => {

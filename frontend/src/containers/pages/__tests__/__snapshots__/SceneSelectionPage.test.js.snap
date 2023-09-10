@@ -110,6 +110,12 @@ exports[`Scene Selection page snapshot test 1`] = `
                 class="MuiTouchRipple-root"
               />
             </button>
+            
+            <input
+              accept=".csv"
+              style="display: none;"
+              type="file"
+            />
             <button
               class="MuiButtonBase-root MuiButton-root MuiButton-outlined btn outlined white top"
               tabindex="0"
