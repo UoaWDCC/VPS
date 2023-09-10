@@ -43,6 +43,7 @@ import useStyles from "./component.styles";
  */
 export default function ListContainer({
   data,
+  assignedScenarios,
   onItemSelected,
   onItemDoubleClick,
   wide,
@@ -78,6 +79,8 @@ export default function ListContainer({
           wide ? styles.scenarioListContainerWide : styles.scenarioListContainer
         }
       >
+        <h1>Own scenarios</h1>
+
         <ImageList rowHeight={210} cols={columns} gap={30}>
           {addCard ? (
             <ImageListItem
@@ -144,6 +147,77 @@ export default function ListContainer({
               ))
             : null}
         </ImageList>
+
+        {assignedScenarios ? (
+          <>
+            <h1>Assigned scenarios</h1>
+
+            <ImageList rowHeight={210} cols={columns} gap={30}>
+              {addCard ? (
+                <ImageListItem
+                  className={classes.listContainerItem}
+                  key={-1}
+                  cols={1}
+                  height={200}
+                >
+                  <DashedCard onClick={addCard} />
+                </ImageListItem>
+              ) : null}
+              {assignedScenarios && assignedScenarios.length > 0
+                ? assignedScenarios.map(({ _id, name }) => (
+                    <ImageListItem
+                      className={classes.listContainerItem}
+                      key={_id}
+                      cols={1}
+                      height={200}
+                      onClick={(event) => onItemClick(event, { _id })}
+                      onContextMenu={() => onItemRightClick({ _id })}
+                    >
+                      <div
+                        className={
+                          wide ? styles.imageListItemWide : styles.imageListItem
+                        }
+                      >
+                        <Box
+                          height={160}
+                          border={5}
+                          borderRadius={10}
+                          borderColor={_id === selected ? "#035084" : "#747474"}
+                          overflow="hidden"
+                          textAlign="center"
+                          sx={{
+                            background: "#f1f1f1",
+                            "&:hover": {
+                              background: "#cccccc",
+                            },
+                          }}
+                        >
+                          {sceneSelectionPage ? (
+                            <Thumbnail
+                              url={`${process.env.PUBLIC_URL}/play/${scenarioId}/${_id}`}
+                            />
+                          ) : (
+                            <Thumbnail
+                              url={`${process.env.PUBLIC_URL}/play/${_id}`}
+                            />
+                          )}
+                        </Box>
+                        <input
+                          className={styles.text}
+                          defaultValue={name}
+                          onBlur={onItemBlur}
+                          key={_id}
+                        />
+                      </div>
+                      {invalidNameId === _id && (
+                        <p1 className="nullNameWarning">invalid null name</p1>
+                      )}
+                    </ImageListItem>
+                  ))
+                : null}
+            </ImageList>
+          </>
+        ) : null}
       </div>
     </>
   );

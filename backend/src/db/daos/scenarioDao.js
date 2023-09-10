@@ -36,6 +36,16 @@ const retrieveScenario = async (scenarioId) => {
 };
 
 /**
+ * Retrieves scenarios from database
+ * @param {String[]} scenarioIds MongoDB ID of scenarios
+ * @returns database scenario objects
+ */
+const retrieveScenarios = async (scenarioIds) => {
+  const scenarios = await Scenario.find({ _id: { $in: scenarioIds } }, "name");
+  return scenarios;
+};
+
+/**
  * Updates the name of a scenario in the database
  * @param {String} scenarioId MongoDB ID of scenario
  * @param {{name: String}} updatedScenario updated scenario object
@@ -95,6 +105,7 @@ export {
   createScenario,
   retrieveScenarioList,
   retrieveScenario,
+  retrieveScenarios,
   updateScenario,
   deleteScenario,
   updateDurations,
