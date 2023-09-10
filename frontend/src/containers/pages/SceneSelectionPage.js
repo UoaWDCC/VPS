@@ -261,7 +261,7 @@ export function SceneSelectionPage({ data = null }) {
         >
           Share
         </Button>
-        {VpsUser.role === AccessLevel.USER ? (
+        {VpsUser.role === AccessLevel.STAFF ? (
           <Button
             className="btn top contained white"
             color="default"
