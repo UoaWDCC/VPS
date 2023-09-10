@@ -52,7 +52,7 @@ export function SceneSelectionPage({ data = null }) {
           const uid = generateUID(); // Implement your UID generation logic
           const pictureURL = "null"; // Set the picture URL if available
 
-          const newUser = await usePost(
+          await usePost(
             `/api/user/`,
             {
               name,
