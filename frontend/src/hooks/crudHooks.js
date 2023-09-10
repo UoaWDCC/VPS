@@ -12,6 +12,7 @@ function isRealError(error) {
   return (
     !error.response ||
     error.response.status === 404 ||
+    error.response.status === 409 ||
     error.response.status === 401
   );
 }
@@ -153,6 +154,34 @@ export function usePut(url, requestBody = null, getUserIdToken = null) {
   }
 
   return putData();
+}
+
+export function usePatch(url, requestBody = null, getUserIdToken = null) {
+  async function patchData() {
+    let errorData;
+    let hasError = false;
+
+    let config = {};
+    if (getUserIdToken) {
+      const token = await getUserIdToken();
+      config = {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      };
+    }
+
+    const response = await axios
+      .patch(url, requestBody, config)
+      .catch((err) => {
+        hasError = isRealError(err);
+        errorData = hasError && err.response?.data;
+      });
+
+    return hasError ? errorData : response?.data;
+  }
+
+  return patchData();
 }
 
 /**
