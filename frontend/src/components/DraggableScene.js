@@ -2,7 +2,7 @@
 import React from "react";
 import { useDrag } from "react-dnd";
 
-const DraggableScene = ({ scene, index, onDragStart }) => {
+const DraggableScene = ({ index, onDragStart }) => {
   const [{ isDragging }, drag] = useDrag({
     type: "SCENE",
     item: { index },

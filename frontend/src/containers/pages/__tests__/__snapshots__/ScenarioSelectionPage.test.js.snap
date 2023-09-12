@@ -137,6 +137,9 @@ exports[`Scenario Selection page snapshot test 1`] = `
         <div
           class="scenarioListContainer"
         >
+          <h1>
+            Created scenarios
+          </h1>
           <ul
             class="MuiImageList-root"
             style="margin: -15px;"
@@ -248,6 +251,13 @@ exports[`Scenario Selection page snapshot test 1`] = `
               </div>
             </li>
           </ul>
+          <h1>
+            Assigned scenarios
+          </h1>
+          <ul
+            class="MuiImageList-root"
+            style="margin: -15px;"
+          />
         </div>
       </div>
     </div>

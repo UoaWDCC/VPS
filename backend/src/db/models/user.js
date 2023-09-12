@@ -24,6 +24,11 @@ const userSchema = new Schema({
       type: Object,
     },
   ],
+  assigned: [
+    {
+      type: String,
+    },
+  ],
 });
 
 const User = mongoose.model("model", userSchema, "users");

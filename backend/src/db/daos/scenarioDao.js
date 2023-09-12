@@ -36,6 +36,16 @@ const retrieveScenario = async (scenarioId) => {
 };
 
 /**
+ * Retrieves scenarios from database
+ * @param {String[]} scenarioIds MongoDB ID of scenarios
+ * @returns database scenario objects
+ */
+const retrieveScenarios = async (scenarioIds) => {
+  const scenarios = await Scenario.find({ _id: { $in: scenarioIds } }, "name");
+  return scenarios;
+};
+
+/**
  * Updates the name of a scenario in the database
  * @param {String} scenarioId MongoDB ID of scenario
  * @param {{name: String}} updatedScenario updated scenario object
@@ -43,17 +53,20 @@ const retrieveScenario = async (scenarioId) => {
  */
 const updateScenario = async (scenarioId, updatedScenario) => {
   const scenario = await Scenario.findById(scenarioId);
-  
+
   // define temperary variable to store old name incase new name is empty
-  let previousName = scenario.name;
+  const previousName = scenario.name;
   scenario.name = updatedScenario.name;
 
   // if new name is empty, set name to old name
-  if (scenario.name == "" || scenario.name == null || scenario.name.trim() === '') { 
+  if (
+    scenario.name === "" ||
+    scenario.name == null ||
+    scenario.name.trim() === ""
+  ) {
     scenario.name = previousName;
   }
 
-  
   await scenario.save();
   return scenario;
 };
@@ -95,6 +108,7 @@ export {
   createScenario,
   retrieveScenarioList,
   retrieveScenario,
+  retrieveScenarios,
   updateScenario,
   deleteScenario,
   updateDurations,

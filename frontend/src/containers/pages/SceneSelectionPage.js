@@ -13,7 +13,7 @@ import ListContainer from "../../components/ListContainer";
 import ScreenContainer from "../../components/ScreenContainer";
 import SceneContext from "../../context/SceneContext";
 import AuthoringToolPage from "./AuthoringTool/AuthoringToolPage";
-import { usePost, usePut, useDelete } from "../../hooks/crudHooks";
+import { usePost, usePut, useDelete, usePatch } from "../../hooks/crudHooks";
 import DeleteButton from "../../components/DeleteButton";
 import ShareModal from "../../components/ShareModal";
 import AuthoringToolContextProvider from "../../context/AuthoringToolContextProvider";
@@ -51,7 +51,8 @@ export function SceneSelectionPage({ data = null }) {
           const { name, email } = userData;
           const uid = generateUID(); // Implement your UID generation logic
           const pictureURL = "null"; // Set the picture URL if available
-          const newUser = await usePost(
+
+          await usePost(
             `/api/user/`,
             {
               name,
@@ -63,6 +64,14 @@ export function SceneSelectionPage({ data = null }) {
           );
           console.log(`User ${name} uploaded to MongoDB.`);
         });
+
+        // add users to the scenario
+        const userEmails = usersData.map((user) => user.email);
+        await usePatch(
+          `/api/user/assigned/${scenarioId}`,
+          { userEmails },
+          getUserIdToken
+        );
         console.log("CSV data uploaded to MongoDB.");
       },
     });
@@ -231,7 +240,7 @@ export function SceneSelectionPage({ data = null }) {
         >
           Share
         </Button>
-        {VpsUser.role === AccessLevel.USER ? (
+        {VpsUser.role === AccessLevel.STAFF ? (
           <Button
             className="btn top contained white"
             color="default"

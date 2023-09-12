@@ -1,5 +1,6 @@
 import User from "../models/user";
 import Scenario from "../models/scenario";
+import { retrieveScenarios } from "./scenarioDao";
 
 /**
  * Retrieves all users
@@ -17,6 +18,15 @@ const retrieveAllUser = async () => {
 const retrieveUser = async (uid) => {
   const user = await User.find({ uid });
   return user;
+};
+
+/**
+ * Retrieves user based on given uid
+ * @param {String} email unique email of user
+ * @returns user object
+ */
+const retrieveUserByEmail = async (email) => {
+  return User.findOne({ email });
 };
 
 const retrievePlayedUsers = async (scenarioId) => {
@@ -86,11 +96,58 @@ const addPlayed = async (uid, newPlayed, scenarioId) => {
   }
 };
 
+/**
+ * Adds assignees to the scenario
+ * @param {String} scenarioId
+ * @param {Array} newAssignees
+ * @returns all assignees
+ */
+const assignScenarioToUsers = async (scenarioId, newAssignees) => {
+  try {
+    await User.updateMany(
+      { _id: { $in: newAssignees }, assigned: { $exists: true } },
+      {
+        $addToSet: { assigned: scenarioId },
+      }
+    );
+
+    await User.updateMany(
+      { _id: { $in: newAssignees }, assigned: { $exists: false } },
+      {
+        $set: { assigned: [scenarioId] },
+      }
+    );
+  } catch (e) {
+    // eslint-disable-next-line no-console
+    console.error(
+      "Something went wrong while assigning a user to a scenario:",
+      e
+    );
+    return false;
+  }
+  return true;
+};
+
+/**
+ * Finds all assigned scenarios for a user
+ * @param {String} userId
+ * @returns all assigned scenarios for the user
+ */
+const retrieveAssignedScenarioList = async (userId) => {
+  const user = await User.findOne({ uid: userId });
+  if (!user.assigned || !user.assigned.length) return [];
+
+  return retrieveScenarios(user.assigned);
+};
+
 export {
   retrieveAllUser,
   createUser,
   retrieveUser,
+  retrieveUserByEmail,
   deleteUser,
   addPlayed,
   retrievePlayedUsers,
+  assignScenarioToUsers,
+  retrieveAssignedScenarioList,
 };

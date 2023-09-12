@@ -16,8 +16,15 @@ import AccessLevel from "../../enums/route.access.level";
  * @container
  */
 export default function ScenarioSelectionPage({ data = null }) {
-  const { scenarios, currentScenario, setCurrentScenario, reFetch } =
-    useContext(ScenarioContext);
+  const {
+    scenarios,
+    reFetch,
+    assignedScenarios,
+    reFetch2,
+    currentScenario,
+    setCurrentScenario,
+  } = useContext(ScenarioContext);
+  console.log(assignedScenarios);
   const { getUserIdToken, VpsUser } = useContext(AuthenticationContext);
   const history = useHistory();
 
@@ -90,6 +97,8 @@ export default function ScenarioSelectionPage({ data = null }) {
   useEffect(() => {
     setCurrentScenario(null);
     reFetch();
+
+    reFetch2();
   }, []);
 
   return (
@@ -119,6 +128,7 @@ export default function ScenarioSelectionPage({ data = null }) {
         </ContextMenu>
         <ListContainer
           data={data || scenarios}
+          assignedScenarios={assignedScenarios || []}
           onItemSelected={setCurrentScenario}
           onItemDoubleClick={editScenario}
           onItemBlur={changeScenarioName}
