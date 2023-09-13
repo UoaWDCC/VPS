@@ -164,6 +164,7 @@ export default function ListContainer({
                   <DashedCard onClick={addCard} />
                 </ImageListItem>
               ) : null}
+
               {assignedScenarios && assignedScenarios.length > 0
                 ? assignedScenarios.map(({ _id, name }) => (
                     <ImageListItem
@@ -171,8 +172,12 @@ export default function ListContainer({
                       key={_id}
                       cols={1}
                       height={200}
-                      onClick={(event) => onItemClick(event, { _id })}
-                      onContextMenu={() => onItemRightClick({ _id })}
+                      onClick={(event) =>
+                        onItemClick(event, { _id, isAssigned: true })
+                      }
+                      onContextMenu={() =>
+                        onItemRightClick({ _id, isAssigned: true })
+                      }
                     >
                       <div
                         className={
@@ -210,6 +215,7 @@ export default function ListContainer({
                           key={_id}
                         />
                       </div>
+
                       {invalidNameId === _id && (
                         <p1 className="nullNameWarning">invalid null name</p1>
                       )}

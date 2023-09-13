@@ -26,6 +26,8 @@ export default function SideBar() {
   );
   const history = useHistory();
 
+  const isAssigned = currentScenario?.isAssigned || false;
+
   /** Calls backend end point to create a new empty scenario. */
   async function createScenario(name = "no name") {
     const newScenario = await usePost(
@@ -119,7 +121,7 @@ export default function SideBar() {
           <li>
             <Button
               className={`btn side contained white ${
-                currentScenario ? "" : "disabled"
+                currentScenario && !isAssigned ? "" : "disabled"
               }  `}
               color="default"
               variant="contained"
@@ -129,7 +131,7 @@ export default function SideBar() {
                   ? `/scenario/${currentScenario._id}`
                   : "/scenario/null"
               }
-              disabled={!currentScenario}
+              disabled={!currentScenario || isAssigned}
             >
               Edit
             </Button>
@@ -139,7 +141,7 @@ export default function SideBar() {
               className="btn side contained"
               color="default"
               variant="contained"
-              disabled={!currentScenario}
+              disabled={!currentScenario || isAssigned}
               onClick={deleteScenario}
             >
               Delete

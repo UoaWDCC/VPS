@@ -24,7 +24,6 @@ export default function ScenarioSelectionPage({ data = null }) {
     currentScenario,
     setCurrentScenario,
   } = useContext(ScenarioContext);
-  console.log(assignedScenarios);
   const { getUserIdToken, VpsUser } = useContext(AuthenticationContext);
   const history = useHistory();
 
@@ -112,12 +111,19 @@ export default function ScenarioSelectionPage({ data = null }) {
           <MenuItem onClick={playScenario} disabled={!currentScenario}>
             Play
           </MenuItem>
-          <MenuItem onClick={editScenario} disabled={!currentScenario}>
-            Edit
-          </MenuItem>
-          <MenuItem onClick={deleteScenario} disabled={!currentScenario}>
-            Delete
-          </MenuItem>
+
+          {(!currentScenario || !currentScenario?.isAssigned) && (
+            <MenuItem onClick={editScenario} disabled={!currentScenario}>
+              Edit
+            </MenuItem>
+          )}
+
+          {(!currentScenario || !currentScenario?.isAssigned) && (
+            <MenuItem onClick={deleteScenario} disabled={!currentScenario}>
+              Delete
+            </MenuItem>
+          )}
+
           {VpsUser.role === AccessLevel.STAFF ? (
             <MenuItem onClick={openDashboard} disabled={!currentScenario}>
               Dashboard
