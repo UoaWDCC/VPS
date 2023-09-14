@@ -60,7 +60,7 @@ export default function ListContainer({
   /** Function which executes when an image in the image list is clicked. */
   const onItemClick = (event, item) => {
     if (event.detail === 2) {
-      onItemDoubleClick(item);
+      if (!item.isAssigned) onItemDoubleClick(item);
     } else {
       setSelected(item._id);
       onItemSelected(item);
