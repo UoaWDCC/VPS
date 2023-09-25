@@ -43,7 +43,6 @@ import useStyles from "./component.styles";
  */
 export default function ListContainer({
   data, // could be scenarios or scenes data
-  assignedScenarios,
   onItemSelected,
   onItemDoubleClick,
   wide,
@@ -52,10 +51,17 @@ export default function ListContainer({
   sceneSelectionPage,
   scenarioId,
   invalidNameId,
+  readOnly, // for scenes/scenarios that can't be edited/deleted by user
 }) {
   const classes = useStyles();
   const [selected, setSelected] = useState();
   const columns = wide ? 5 : 4;
+
+  if (readOnly) {
+    data = data.map((item) => {
+      return { ...item, isAssigned: true };
+    });
+  }
 
   /** Function which executes when an image in the image list is clicked. */
   const onItemClick = (event, item) => {
@@ -80,8 +86,6 @@ export default function ListContainer({
           wide ? styles.scenarioListContainerWide : styles.scenarioListContainer
         }
       >
-        {!sceneSelectionPage && <h1>Created scenarios</h1>}
-
         <ImageList rowHeight={210} cols={columns} gap={30}>
           {addCard ? (
             <ImageListItem
@@ -93,6 +97,7 @@ export default function ListContainer({
               <DashedCard onClick={addCard} />
             </ImageListItem>
           ) : null}
+
           {data && data.length > 0
             ? data.map((item) => (
                 <ImageListItem
@@ -148,83 +153,6 @@ export default function ListContainer({
               ))
             : null}
         </ImageList>
-
-        {assignedScenarios ? (
-          <>
-            {!sceneSelectionPage && <h1>Assigned scenarios</h1>}
-
-            <ImageList rowHeight={210} cols={columns} gap={30}>
-              {addCard ? (
-                <ImageListItem
-                  className={classes.listContainerItem}
-                  key={-1}
-                  cols={1}
-                  height={200}
-                >
-                  <DashedCard onClick={addCard} />
-                </ImageListItem>
-              ) : null}
-
-              {assignedScenarios && assignedScenarios.length > 0
-                ? assignedScenarios.map(({ _id, name }) => (
-                    <ImageListItem
-                      className={classes.listContainerItem}
-                      key={_id}
-                      cols={1}
-                      height={200}
-                      onClick={(event) =>
-                        onItemClick(event, { _id, isAssigned: true })
-                      }
-                      onContextMenu={() =>
-                        onItemRightClick({ _id, isAssigned: true })
-                      }
-                    >
-                      <div
-                        className={
-                          wide ? styles.imageListItemWide : styles.imageListItem
-                        }
-                      >
-                        <Box
-                          height={160}
-                          border={5}
-                          borderRadius={10}
-                          borderColor={_id === selected ? "#035084" : "#747474"}
-                          overflow="hidden"
-                          textAlign="center"
-                          sx={{
-                            background: "#f1f1f1",
-                            "&:hover": {
-                              background: "#cccccc",
-                            },
-                          }}
-                        >
-                          {sceneSelectionPage ? (
-                            <Thumbnail
-                              url={`${process.env.PUBLIC_URL}/play/${scenarioId}/${_id}`}
-                            />
-                          ) : (
-                            <Thumbnail
-                              url={`${process.env.PUBLIC_URL}/play/${_id}`}
-                            />
-                          )}
-                        </Box>
-                        <input
-                          className={styles.text}
-                          defaultValue={name}
-                          onBlur={onItemBlur}
-                          key={_id}
-                        />
-                      </div>
-
-                      {invalidNameId === _id && (
-                        <p1 className="nullNameWarning">invalid null name</p1>
-                      )}
-                    </ImageListItem>
-                  ))
-                : null}
-            </ImageList>
-          </>
-        ) : null}
       </div>
     </>
   );

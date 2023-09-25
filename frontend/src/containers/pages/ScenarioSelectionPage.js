@@ -1,13 +1,15 @@
 import React, { useContext, useEffect, useState } from "react";
 import { useHistory } from "react-router-dom";
+import "styling/ScenarioSelectionPage.module.scss";
+
 import MenuItem from "@material-ui/core/MenuItem";
-import ContextMenu from "../../components/ContextMenu";
-import SideBar from "../../components/SideBar";
-import ListContainer from "../../components/ListContainer";
-import ScreenContainer from "../../components/ScreenContainer";
-import ScenarioContext from "../../context/ScenarioContext";
-import { usePut, useDelete } from "../../hooks/crudHooks";
-import AuthenticationContext from "../../context/AuthenticationContext";
+import ContextMenu from "components/ContextMenu";
+import SideBar from "components/SideBar";
+import ListContainer from "components/ListContainer";
+import ScreenContainer from "components/ScreenContainer";
+import ScenarioContext from "context/ScenarioContext";
+import { usePut, useDelete } from "hooks/crudHooks";
+import AuthenticationContext from "context/AuthenticationContext";
 import AccessLevel from "../../enums/route.access.level";
 
 /**
@@ -132,14 +134,29 @@ export default function ScenarioSelectionPage({ data = null }) {
             ""
           )}
         </ContextMenu>
+
+        <h1>Created scenarios</h1>
         <ListContainer
           data={data || scenarios}
-          assignedScenarios={assignedScenarios || []}
           onItemSelected={setCurrentScenario}
           onItemDoubleClick={editScenario}
           onItemBlur={changeScenarioName}
           invalidNameId={invalidNameId}
         />
+
+        <h1>Assigned scenarios</h1>
+        {assignedScenarios && assignedScenarios.length ? (
+          <ListContainer
+            data={assignedScenarios || []}
+            onItemSelected={setCurrentScenario}
+            onItemDoubleClick={() => {}}
+            onItemBlur={() => {}}
+            invalidNameId={invalidNameId}
+            readOnly
+          />
+        ) : (
+          <p>You have no assigned scenarios</p>
+        )}
       </div>
     </ScreenContainer>
   );
