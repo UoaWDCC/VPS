@@ -14,3 +14,30 @@
     margin: auto 6px;
   }
 }
+
+.playerContainer {
+  margin-top: 10px; 
+  margin-bottom: 10px; 
+  border-top: 1px solid #ccc; 
+  border-bottom: 1px solid #ccc; 
+  padding: 10px; 
+}
+.tagContainer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+
+.tag {
+  border: none;
+  border-radius: 100%; 
+  padding: 10px;
+  cursor: pointer;
+  outline: none;
+  transition: background-color 0.3s ease; 
+}
+
+.selectedTag {
+  background-color: #0080a7; 
+  color: #fff; 
+}

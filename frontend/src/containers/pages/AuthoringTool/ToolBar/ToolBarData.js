@@ -1,5 +1,6 @@
 import React from "react";
 import ImageIcon from "@material-ui/icons/Image";
+import GroupIcon from "@mui/icons-material/Group";
 import TextFieldsIcon from "@material-ui/icons/TextFields";
 import ButtonIcon from "@material-ui/icons/AddCircle";
 import VolumeUpIcon from "@material-ui/icons/VolumeUp";
@@ -52,7 +53,7 @@ const toolBarData = [
   },
   {
     title: "Apply Tags",
-    icon: <ImageIcon fontSize="medium" />,
+    // icon: <GroupIcon fontSize="medium" />,
     dropdown: [
       {
         component: <PlayersListSubMenu />,

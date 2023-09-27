@@ -1,10 +1,9 @@
 import React, { useState } from "react";
 import { useParams } from "react-router-dom";
-import { MenuItem } from "@material-ui/core";
 import styles from "../../../../../styling/ToolBar.module.scss";
 import { useGet } from "../../../../../hooks/crudHooks";
-import useChooseBackgroundModal from "./useChooseBackgroundModal";
 import ChooseBackgroundModal from "./ChooseBackgroundModal";
+import PlayerListSubContainer from "./PlayerListSubContainer";
 
 /**
  * This component is the submenu for for background component
@@ -12,8 +11,6 @@ import ChooseBackgroundModal from "./ChooseBackgroundModal";
  * @component
  */
 function PlayersListSubMenu() {
-  const { isShowing, hide, show } = useChooseBackgroundModal();
-
   const { scenarioId } = useParams();
 
   const [users, setUsers] = useState([]);
@@ -23,30 +20,11 @@ function PlayersListSubMenu() {
   // should be changed to only post users in the scenario
   return (
     <>
-      <MenuItem className={styles.menuItem} onClick={show}>
-        <h2>Players List</h2>
-      </MenuItem>
+      <h2>Players List</h2>
 
       {users.map((user) => {
-        console.log(user);
-
-        const { name } = user;
-
-        return (
-          <div>
-            <div className={styles.Header}>{name}</div>
-            <div className={styles.Body}>
-              <div className={styles.Text}>
-                <ul>
-                  <b>User Name:</b> {name}
-                </ul>
-              </div>
-            </div>
-          </div>
-        );
+        return <PlayerListSubContainer user={user} key={user._id} />;
       })}
-
-      <ChooseBackgroundModal isShowing={isShowing} hide={hide} />
     </>
   );
 }
