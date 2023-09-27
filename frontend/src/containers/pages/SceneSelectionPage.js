@@ -44,7 +44,7 @@ export function SceneSelectionPage({ data = null }) {
       header: true,
       skipEmptyLines: true,
       complete(results) {
-        // console.log(results.data);
+        console.log(results.data);
       },
     });
   };

@@ -8,6 +8,7 @@ import ChooseBackgroundSubMenu from "./Background/ChooseBackgroundSubMenu";
 import { addButton, addText, addSpeechText } from "./ToolBarActions";
 import UploadImage from "./Background/UploadImage";
 import UploadAudio from "./Audio/UploadAudio";
+import PlayersListSubMenu from "./Background/PlayersListSubMenu";
 
 /**
  * This file contains the data for the add component icons to be added into the ToolBar
@@ -48,6 +49,15 @@ const toolBarData = [
     title: "Speech text",
     icon: <ChatBubbleIcon fontSize="medium" />,
     onClick: addSpeechText,
+  },
+  {
+    title: "Apply Tags",
+    icon: <ImageIcon fontSize="medium" />,
+    dropdown: [
+      {
+        component: <PlayersListSubMenu />,
+      },
+    ],
   },
 ];
 

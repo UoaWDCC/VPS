@@ -29,8 +29,8 @@ export default function PlayerList() {
         </button>
         <div className={styles.container}>
           {users.map((user) => {
-            // console.log(user);
-            if (user.scenarioId && user.scenarioId.includes(scenarioId)) {
+            console.log(user);
+            if (user.scenarioId && user.assigned.includes(scenarioId)) {
               setPlayerCount(playerCount + 1);
               return <PlayerListContainer key={user._id} user={user} />;
             }

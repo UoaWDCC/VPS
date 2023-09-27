@@ -75,6 +75,10 @@ function addSpeechText(currentScene, setCurrentScene) {
   addComponent(newSpeechText, currentScene, setCurrentScene);
 }
 
+function applyTags() {
+  //
+}
+
 /**
  * function to be put into ToolBarData when image is added
  * @param {object} image
