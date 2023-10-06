@@ -66,6 +66,7 @@ jobs:
       - id: 'app-engine-deploy'
         uses: 'google-github-actions/deploy-appengine@v0'
         with:
+          flags: --no-cache
           project_id: wdcc-vps-dev
           working_directory: ./backend
       
