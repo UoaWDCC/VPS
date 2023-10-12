@@ -21,6 +21,9 @@ const sceneSchema = new Schema({
     type: Number,
     default: 0,
   },
+  tag: {
+    type: String,
+  },
 });
 
 // before removal of scene from the database, first attempt to delete all user-uploaded images from firebase

@@ -79,9 +79,23 @@ export default function AuthoringToolPage() {
     reFetch();
   }
 
+  async function saveTags() {
+    const updatedScenes = scenes.map(({ tag, _id, name }) => ({
+      tag,
+      _id,
+      name,
+    }));
+    await usePut(
+      `/api/scenario/${scenarioId}/scene/tags`,
+      updatedScenes,
+      getUserIdToken
+    );
+  }
+
   /** called when save button is clicked */
   async function save() {
     saveScene();
+    saveTags();
     setSaveButtonText("Saved!");
     setTimeout(() => {
       setSaveButtonText("Save");
@@ -91,6 +105,7 @@ export default function AuthoringToolPage() {
   /** called when save and close button is clicked */
   function savePlusClose() {
     saveScene();
+    saveTags();
     /* redirects user to the scenario page */
     window.location.href = `/scenario/${currentScenario?._id}`;
   }
