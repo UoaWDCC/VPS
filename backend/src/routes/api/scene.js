@@ -43,12 +43,13 @@ router.get("/all", async (req, res) => {
 });
 
 // Retrieve all scenes of a scenario
+const symbolForNoTag = "-";
 router.get("/tags", async (req, res) => {
   const sceneTags = await retrieveSceneTags(req.params.scenarioId);
 
   sceneTags.map((tagObj) => {
     // eslint-disable-next-line no-underscore-dangle, no-param-reassign
-    tagObj._doc.tag = tagObj._doc.tag || "No tag";
+    tagObj._doc.tag = tagObj._doc.tag || symbolForNoTag;
     return tagObj;
   });
 

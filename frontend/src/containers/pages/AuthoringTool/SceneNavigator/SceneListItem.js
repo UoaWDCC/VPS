@@ -4,7 +4,7 @@
 
 import React, { useRef } from "react";
 import styles from "styling/SceneNavigator.module.scss";
-import { tagColours, tagOptions } from "./SceneTagCustomization";
+import { noTagSymbol, tagColours, tagOptions } from "./SceneTagCustomization";
 
 const SceneListItem = ({
   sceneId,
@@ -30,11 +30,13 @@ const SceneListItem = ({
     selectTagEl(showingTagInputFor === sceneId ? null : tagRef.current);
   }
 
+  const noTagClassName = tag === noTagSymbol ? styles.noTag : "";
+
   return (
     <li key={sceneId}>
       {thumbnail}
       <p
-        className={styles.playersTag}
+        className={`${noTagClassName} ${styles.playersTag}`}
         style={{ borderColor: tagColours[tag] || "black" }}
         onMouseEnter={() => toggleTagOnHover(sceneId)}
         onClick={() => toggleInputBox(sceneId)}
@@ -44,7 +46,7 @@ const SceneListItem = ({
       </p>
 
       <p
-        className={styles.playersTagFull}
+        className={`${noTagClassName} ${styles.playersTagFull}`}
         style={{ borderColor: tagColours[tag] || "black" }}
         onMouseLeave={() => toggleTagOnHover(sceneId)}
         onClick={() => toggleInputBox(sceneId)}
