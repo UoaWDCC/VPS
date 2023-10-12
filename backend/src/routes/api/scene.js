@@ -64,6 +64,19 @@ router.post("/", async (req, res) => {
 
   res.status(HTTP_OK).json(scene);
 });
+// update the tags
+router.put("/tags", async (req, res) => {
+  const updatedTags = req.body;
+
+  await Promise.all(
+    updatedTags.map(async (scene) => {
+      // eslint-disable-next-line no-underscore-dangle
+      await updateScene(scene._id, scene);
+    })
+  );
+
+  res.status(HTTP_OK).json(updatedTags);
+});
 
 // Update a scene
 router.put("/:sceneId", async (req, res) => {
