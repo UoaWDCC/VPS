@@ -1,6 +1,6 @@
 import React from "react";
 import styles from "styling/SceneNavigator.module.scss";
-import { tagOptions } from "./SceneTagCustomization";
+import { noTagSymbol, tagOptions } from "./SceneTagCustomization";
 
 const SceneTagInput = ({
   selectedTagEl,
@@ -8,7 +8,9 @@ const SceneTagInput = ({
   showingTagInputFor,
   showTagInputFor,
 }) => {
-  const selectedValue = tagOptions[selectedTagEl?.innerHTML] || "";
+  let selectedValue = selectedTagEl?.innerHTML || "";
+  selectedValue =
+    selectedValue === tagOptions[noTagSymbol] ? noTagSymbol : selectedValue;
 
   const verticalPos = selectedTagEl
     ? `${selectedTagEl.getBoundingClientRect().top.toString()}px`

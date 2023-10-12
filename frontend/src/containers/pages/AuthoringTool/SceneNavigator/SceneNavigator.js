@@ -25,7 +25,6 @@ const SceneNavigator = ({ saveScene }) => {
   function changeTag(sceneId, newTag) {
     const sceneIndex = getIndexOfSceneId(sceneId);
 
-    // console.table({ sceneIndex, newTag });
     setThumbnails((currentThumbnails) => {
       currentThumbnails[sceneIndex].tag = newTag;
       return [...currentThumbnails];
@@ -37,10 +36,7 @@ const SceneNavigator = ({ saveScene }) => {
       setThumbnails(
         scenes.map((scene, index) => ({
           sceneId: scene._id,
-          tag: sceneTags.find((sceneTag) => {
-            console.log(sceneTag);
-            return sceneTag._id === scene._id;
-          })?.tag,
+          tag: sceneTags.find((sceneTag) => sceneTag._id === scene._id)?.tag,
           sceneListItem: (
             <>
               <p
