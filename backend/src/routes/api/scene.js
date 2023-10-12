@@ -4,6 +4,7 @@ import {
   createScene,
   retrieveSceneList,
   retrieveScene,
+  retrieveSceneTags,
   updateScene,
   deleteScene,
   duplicateScene,
@@ -39,6 +40,19 @@ router.get("/all", async (req, res) => {
     scenes.map((it) => retrieveScene(it._id))
   ).catch((err) => res.status(HTTP_NOT_FOUND).send(err));
   res.status(HTTP_OK).json(fullScenes);
+});
+
+// Retrieve all scenes of a scenario
+router.get("/tags", async (req, res) => {
+  const sceneTags = await retrieveSceneTags(req.params.scenarioId);
+
+  sceneTags.map((tagObj) => {
+    // eslint-disable-next-line no-underscore-dangle, no-param-reassign
+    tagObj._doc.tag = tagObj._doc.tag || "No tag";
+    return tagObj;
+  });
+
+  res.json(sceneTags);
 });
 
 // Apply auth middleware to all routes below this point
