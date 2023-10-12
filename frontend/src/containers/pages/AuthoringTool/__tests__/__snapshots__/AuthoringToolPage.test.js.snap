@@ -316,9 +316,6 @@ exports[`Authoring Tool page snapshot test 1`] = `
         style="height: 100%; overflow: hidden;"
       >
         <div
-          class="sceneNavigator"
-        />
-        <div
           class="moveable-control-box    rCSuehiy8"
           data-able-draggable="true"
           data-able-origin="true"
