@@ -4,7 +4,6 @@ import {
   createScene,
   retrieveSceneList,
   retrieveScene,
-  retrieveSceneTags,
   updateScene,
   deleteScene,
   duplicateScene,
@@ -27,8 +26,14 @@ router.get("/full/:sceneId", async (req, res) => {
 });
 
 // Retrieve all scenes of a scenario
+const symbolForNoTag = "-";
 router.get("/", async (req, res) => {
   const scenes = await retrieveSceneList(req.params.scenarioId);
+  scenes.map((scene) => {
+    // eslint-disable-next-line no-underscore-dangle, no-param-reassign
+    scene._doc.tag = scene._doc.tag || symbolForNoTag;
+    return scene;
+  });
   res.json(scenes);
 });
 
@@ -40,20 +45,6 @@ router.get("/all", async (req, res) => {
     scenes.map((it) => retrieveScene(it._id))
   ).catch((err) => res.status(HTTP_NOT_FOUND).send(err));
   res.status(HTTP_OK).json(fullScenes);
-});
-
-// Retrieve all scenes of a scenario
-const symbolForNoTag = "-";
-router.get("/tags", async (req, res) => {
-  const sceneTags = await retrieveSceneTags(req.params.scenarioId);
-
-  sceneTags.map((tagObj) => {
-    // eslint-disable-next-line no-underscore-dangle, no-param-reassign
-    tagObj._doc.tag = tagObj._doc.tag || symbolForNoTag;
-    return tagObj;
-  });
-
-  res.json(sceneTags);
 });
 
 // Apply auth middleware to all routes below this point

@@ -11,7 +11,6 @@ import SceneContext from "./SceneContext";
 export default function SceneContextProvider({ children }) {
   const { currentScenario } = useContext(ScenarioContext);
   const [scenes, setScenes] = useState([]);
-  const [sceneTags, setSceneTags] = useState([]);
   const [currentScene, setCurrentScene] = useLocalStorage("currentScene", null);
   const [monitorChange, setMonitorChange] = useState(false);
   const [hasChange, setHasChange] = useState(false);
@@ -19,18 +18,11 @@ export default function SceneContextProvider({ children }) {
   const currentSceneRef = useRef(currentScene);
 
   let getScenes = null;
-  let getSceneTags = null;
 
   if (currentScenario) {
     getScenes = useGet(
       `api/scenario/${currentScenario._id}/scene`,
       setScenes,
-      false
-    );
-
-    getSceneTags = useGet(
-      `api/scenario/${currentScenario._id}/scene/tags`,
-      setSceneTags,
       false
     );
   }
@@ -76,8 +68,6 @@ export default function SceneContextProvider({ children }) {
         scenes,
         setScenes,
         reFetch: getScenes?.reFetch,
-        sceneTags,
-        reFetchTags: getSceneTags?.reFetch,
         currentScene,
         setCurrentScene,
         hasChange,

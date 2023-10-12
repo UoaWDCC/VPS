@@ -28,27 +28,12 @@ const createScene = async (scenarioId, scene) => {
  */
 const retrieveSceneList = async (scenarioId) => {
   const dbScenario = await Scenario.findById(scenarioId);
-  const dbScenes = await Scene.find(
-    { _id: { $in: dbScenario.scenes } },
-    "name"
-  );
+  const dbScenes = await Scene.find({ _id: { $in: dbScenario.scenes } }, [
+    "name",
+    "tag",
+  ]);
 
   return dbScenes;
-};
-
-/**
- * Retrieves all scenes of a scenario
- * @param {String} scenarioId MongoDB ID of scenario
- * @returns list of database scene objects
- */
-const retrieveSceneTags = async (scenarioId) => {
-  const dbScenario = await Scenario.findById(scenarioId);
-  const dbSceneTags = await Scene.find(
-    { _id: { $in: dbScenario.scenes } },
-    "tag"
-  );
-
-  return dbSceneTags;
 };
 
 /**
@@ -177,7 +162,6 @@ const incrementVisisted = async (sceneId) => {
 export {
   createScene,
   retrieveSceneList,
-  retrieveSceneTags,
   retrieveScene,
   deleteScene,
   updateScene,

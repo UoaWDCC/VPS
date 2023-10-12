@@ -8,7 +8,7 @@ import SceneTagInput from "./SceneTagInput";
 
 const SceneNavigator = ({ saveScene }) => {
   const [thumbnails, setThumbnails] = useState(null);
-  const { scenes, sceneTags, currentScene, currentSceneRef, setCurrentScene } =
+  const { scenes, setScenes, currentScene, currentSceneRef, setCurrentScene } =
     useContext(SceneContext);
   const { scenarioId } = useParams();
   const history = useHistory();
@@ -29,6 +29,12 @@ const SceneNavigator = ({ saveScene }) => {
       currentThumbnails[sceneIndex].tag = newTag;
       return [...currentThumbnails];
     });
+
+    setScenes((currScenes) => {
+      const index = currScenes.findIndex((scene) => scene._id === sceneId);
+      currScenes[index].tag = newTag;
+      return currScenes;
+    });
   }
 
   useEffect(() => {
@@ -36,7 +42,7 @@ const SceneNavigator = ({ saveScene }) => {
       setThumbnails(
         scenes.map((scene, index) => ({
           sceneId: scene._id,
-          tag: sceneTags.find((sceneTag) => sceneTag._id === scene._id)?.tag,
+          tag: scene.tag,
           sceneListItem: (
             <>
               <p
@@ -78,7 +84,7 @@ const SceneNavigator = ({ saveScene }) => {
         }))
       );
     }
-  }, [scenes, sceneTags, currentScene]);
+  }, [scenes, currentScene]);
 
   // for the scene/tag inputs
   const [selectedTagEl, selectTagEl] = useState(null);
