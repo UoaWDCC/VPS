@@ -26,8 +26,14 @@ router.get("/full/:sceneId", async (req, res) => {
 });
 
 // Retrieve all scenes of a scenario
+const symbolForNoTag = "-";
 router.get("/", async (req, res) => {
   const scenes = await retrieveSceneList(req.params.scenarioId);
+  scenes.map((scene) => {
+    // eslint-disable-next-line no-underscore-dangle, no-param-reassign
+    scene._doc.tag = scene._doc.tag || symbolForNoTag;
+    return scene;
+  });
   res.json(scenes);
 });
 
@@ -57,6 +63,19 @@ router.post("/", async (req, res) => {
   });
 
   res.status(HTTP_OK).json(scene);
+});
+// update the tags
+router.put("/tags", async (req, res) => {
+  const updatedTags = req.body;
+
+  await Promise.all(
+    updatedTags.map(async (scene) => {
+      // eslint-disable-next-line no-underscore-dangle
+      await updateScene(scene._id, scene);
+    })
+  );
+
+  res.status(HTTP_OK).json(updatedTags);
 });
 
 // Update a scene

@@ -4,14 +4,56 @@
   padding: 1rem 1rem 1rem 2rem;
   display: flex;
   flex-direction: column;
-  overflow-y: scroll;
+
+  position: relative;
+  z-index: 10;
+
+  overflow-y: auto;
+  overflow-x: hidden;
   gap: 1rem;
+  align-items: flex-start;
+  justify-content: stretch;
+
+  li {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .playersTag,
+  .playersTagFull {
+    border: 1.8px solid magenta;
+    background-color: rgb(218, 209, 209);
+    border-radius: 15px;
+    padding: 5px 10px;
+    cursor: pointer;
+    height: 20px;
+
+    &.hidden {
+      visibility: hidden;
+    }
+
+    &.showing {
+      display: initial;
+    }
+  }
+
+  .playersTagFull {
+    display: none;
+    position: absolute;
+    right: 16px;
+  }
+
+  .playersTag.noTag {
+    background: none;
+  }
 
   .sceneButton {
     border: 3px solid transparent;
     width: max-content;
     background-color: transparent;
     position: relative;
+    overflow: hidden;
 
     .sceneText {
       font-size: small;
@@ -25,5 +67,39 @@
 
   .sceneButton:hover {
     border: 3px solid #cfcfcf;
+  }
+}
+
+.popupForSceneTagInput {
+  z-index: 2;
+
+  position: absolute;
+  left: calc(100% + 10px);
+  --vertical-pos: 50%;
+  top: calc(var(--vertical-pos) + 100% - 100vh - 10px);
+
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+
+  background-color: white;
+  border: 2px solid black;
+  padding: 10px 20px;
+  border-radius: 10px;
+
+  label {
+    display: flex;
+    flex: 1;
+    gap: 10px;
+    text-wrap: nowrap;
+  }
+
+  button {
+    outline: none;
+    border: none;
+    cursor: pointer;
+    align-self: flex-end;
+    background: none;
+    text-decoration: underline;
   }
 }

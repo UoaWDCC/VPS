@@ -18,6 +18,7 @@ export default function SceneContextProvider({ children }) {
   const currentSceneRef = useRef(currentScene);
 
   let getScenes = null;
+
   if (currentScenario) {
     getScenes = useGet(
       `api/scenario/${currentScenario._id}/scene`,
