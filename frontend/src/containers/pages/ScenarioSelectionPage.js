@@ -23,6 +23,7 @@ export default function ScenarioSelectionPage({ data = null }) {
     reFetch2,
     currentScenario,
     setCurrentScenario,
+    setInvalidNameId,
   } = useContext(ScenarioContext);
   console.log(assignedScenarios);
   const { getUserIdToken, VpsUser } = useContext(AuthenticationContext);

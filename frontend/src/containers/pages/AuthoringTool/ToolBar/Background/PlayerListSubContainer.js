@@ -4,7 +4,7 @@ import styles from "../../../../../styling/ToolBar.module.scss";
 function PlayerListSubContainer({ user = {} }) {
   const { name } = user;
   const [selectedTags, setSelectedTags] = useState([]);
-  const availableTags = ["Doctor", "Pharmacist", "Radiologist"]; // temp tags
+  const availableTags = ["Doctor", "Pharmacist", "Nurse"]; // temp tags
 
   const toggleTag = (tag) => {
     if (selectedTags.includes(tag)) {

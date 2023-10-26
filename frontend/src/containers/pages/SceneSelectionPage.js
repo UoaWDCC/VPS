@@ -7,7 +7,7 @@ import {
   useHistory,
 } from "react-router-dom";
 import Papa from "papaparse";
-import { Button } from "@material-ui/core";
+import { Button, MenuItem, Divider } from "@material-ui/core";
 import TopBar from "../../components/TopBar";
 import ListContainer from "../../components/ListContainer";
 import ScreenContainer from "../../components/ScreenContainer";
@@ -318,16 +318,6 @@ export function SceneSelectionPage({ data = null }) {
           <MenuItem onClick={playScenario}>Play</MenuItem>
           <MenuItem onClick={() => setShareModalOpen(true)}>Share</MenuItem>
         </ContextMenu>
-        <ListContainer
-          data={data || scenes}
-          onItemSelected={setCurrentScene}
-          onItemDoubleClick={editScene}
-          addCard={createNewScene}
-          wide
-          onItemBlur={changeSceneName}
-          sceneSelectionPage
-          scenarioId={scenarioId}
-        />
       </div>
       <ShareModal
         isOpen={isShareModalOpen}
