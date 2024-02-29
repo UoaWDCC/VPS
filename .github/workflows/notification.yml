@@ -1,0 +1,26 @@
+name: Pull Request Notifications
+
+on:
+  pull_request:
+    types: [opened, reopened, closed]
+
+jobs:
+  pull_request_created:
+    if: github.event_name == 'pull_request' && github.event.action == 'opened' || github.event.action == 'reopened'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Discord Webhook Action
+        uses: tsickert/discord-webhook@v5.3.0
+        with:
+          webhook-url: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          content: "Pull request opened: ${{ github.event.pull_request.title }} | Link: [View Pull Request](${{ github.event.pull_request.html_url }})"
+
+  pull_request_merged:
+    if: github.event_name == 'pull_request' && github.event.action == 'closed' && github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    steps:
+      - name: Discord Webhook Action
+        uses: tsickert/discord-webhook@v5.3.0
+        with:
+          webhook-url: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          content: "Pull request merged: ${{ github.event.pull_request.title }}"
