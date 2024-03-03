@@ -21,7 +21,7 @@ DEV: https://vps-dev.wdcc.co.nz/
 # Setup and Run
 
 1. Download and use the following versions to make this repository work:
-    - node v14.17.\*
+    - node v14.17.\* - node 1.16+ does not work due to dependency issues
     - yarn 1.22.\*
     - NPM 6.14.\*
 2. Download the repo onto your machine
