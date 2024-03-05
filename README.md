@@ -20,7 +20,7 @@ DEV: https://vps-dev.wdcc.co.nz/
   
   It is recommended to install nvm (Node Version Manager) which allows you to have multiple versions of Node on your machine simultaneously. This can be found:
   Windows: [https://github.com/coreybutler/nvm-windows](https://github.com/coreybutler/nvm-windows)
-  Mac/Linux/WSL: [https://github.com/nvm-sh/nvm](https://github.com/nvm-sh/nvm) or by running `curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.1/install.sh' in the terminal
+  Mac/Linux/WSL: [https://github.com/nvm-sh/nvm](https://github.com/nvm-sh/nvm) or by running `curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.1/install.sh` in the terminal
   For extra info on nvm installation, see [this link](https://www.freecodecamp.org/news/node-version-manager-nvm-install-guide/)
   To check nvm installed correctly, run the command `nvm --version` in the terminal.
 
