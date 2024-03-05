@@ -2,32 +2,50 @@
 
 This project aims to provide Medical and Health Science students at the University of Auckland with a tool that supports interactive and immersive education through virtual patient scenarios.
 
-This project was associated with The University of Auckland SOFTENG 761 but since 2022, is being developed by WDCC project teams. The repo located here for this project is a bare clone of [the original repo](https://github.com/Collabs-uni/virtual-patient-system) and has been created using [these instructions](https://docs.github.com/en/repositories/creating-and-managing-repositories/duplicating-a-repository#mirroring-a-repository=) to preserve past contributors and commits. 
-
-Changes in this repo are not synced with the original repo (and are not required to be synced since the original repo is not worked on anymore) but if needed, it can be done by setting up a remote push location using the instructions above.
+This project was associated with The University of Auckland SOFTENG 761 but since 2022, is being developed by WDCC project teams. The repo located here for this project is a bare clone of the original repo, which no longer exists.
 
 # Live deployments
 
 DEV: https://vps-dev.wdcc.co.nz/
 
 <!-- prettier-ignore -->
-| CI                  | Status   |
-| ------------------- | -------- |
-| ESLint              | [![ESLint](https://github.com/SoftEng761-2021/project-project-team-1/actions/workflows/eslint.yml/badge.svg)](https://github.com/SoftEng761-2021/project-project-team-1/actions/workflows/eslint.yml) |
-| Prettier            | [![Prettier](https://github.com/SoftEng761-2021/project-project-team-1/actions/workflows/prettier.yml/badge.svg)](https://github.com/SoftEng761-2021/project-project-team-1/actions/workflows/prettier.yml) |
-| Tests               |  [![Tests](https://github.com/SoftEng761-2021/project-project-team-1/actions/workflows/unit_tests.yml/badge.svg)](https://github.com/SoftEng761-2021/project-project-team-1/actions/workflows/unit_tests.yml) |
 | Contributors        | [![All Contributors](https://img.shields.io/badge/all_contributors-8-orange.svg?style=flat-square)](#contributors-) |
 
 # Setup and Run
 
 1. Download and use the following versions to make this repository work:
-    - node v14.17.\* - node 1.16+ does not work due to dependency issues
-    - yarn 1.22.\*
-    - NPM 6.14.\*
+    - node v14.17. (e.g. 14.17.4) \* 
+    - yarn 1.22. (e.g. 1.22.21) \*
+    - NPM 6.14. (e.g. 6.14.14) \*
+  
+  It is recommended to install nvm (Node Version Manager) which allows you to have multiple versions of Node on your machine simultaneously. This can be found:
+  Windows: [https://github.com/coreybutler/nvm-windows](https://github.com/coreybutler/nvm-windows)
+  Mac/Linux/WSL: [https://github.com/nvm-sh/nvm](https://github.com/nvm-sh/nvm) or by running `curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.1/install.sh' in the terminal
+  For extra info on nvm installation, see [this link](https://www.freecodecamp.org/news/node-version-manager-nvm-install-guide/)
+  To check nvm installed correctly, run the command `nvm --version` in the terminal.
+
+**Installing Node, Yarn and NPM:**
+
+Node is an open-source, cross-platform JavaScript runtime environment that allows developers to execute JavaScript code server-side.
+If using nvm (as above), it can be installed by running `nvm install 14.17.4` or it can be downloaded [from the node website](https://nodejs.org/en) (note that clicking 'download' on this website installs Node 18 (current) instead of Node 14, so go to previous releases). To verify it installed successfully, run `node --version` in the terminal.
+
+NPM, which stands for Node Package Manager, is the default package manager for Node.js. It is a command-line tool that allows developers to install, share, and manage dependencies for their Node.js projects. Note that this is different to NVM (Node Version Manager, mentioned above).
+NPM should install automatically when you install Node, and this can be checked by running the terminal command: `npm --version`.
+
+Yarn is a package manager for JavaScript that serves as an alternative to npm (basically it is a better version of NPM which we use to manage our repo).
+Yarn can be installed by running the following terminal command: `npm install -g yarn`.
+To check it installed successfully, run the command `yarn --version`.
+
+If you have any problems with this, consult your Tech Lead or Project Manager.
+
+
 2. Download the repo onto your machine
+
+This is done by navigating to the directory you want to place the project folder in, then running the terminal command:
+`git clone https://github.com/UoaWDCC/VPS.git`. 
+
 3. Set up your .env files 
-    1. Create 2 copies of https://github.com/UoaWDCC/VPS/blob/master/backend/.env.example and place them at the same level as the .env.example file in __frontend/__ and __backend/__
-    2. Rename them to __.env__ (make sure they are named exactly that and not .env.txt and that they aren't TXT files)
+    1. Create a copy of the frontend and backend .env files (stored [here]()) and place them at the same level as the .env.example file in __frontend/__ and __backend/__
     3. Get the values for each key in the .env files using the links provided in them + any login details provided by the PM/APM
     4. In the frontend .env file, add `REACT_APP_SERVER_URL = "http://localhost:[BACKEND_PORT_NUMBER]/"` and replace `[BACKEND_PORT_NUMBER]` with the value of `PORT` in the backend .env file e.g. 5001
 4. To continue setting up the app, follow Method 1 below (if that doesn't work, try Method 2)
@@ -36,7 +54,7 @@ DEV: https://vps-dev.wdcc.co.nz/
 
 ## Method 1
 
-- Run `yarn install` in the root directory
+- Run `yarn install` in the root directory (of the project)
 - Run `yarn run init` in the root directory (installs dependencies for `frontend` and `backend` directories)
 - Run `yarn run dev` in the root directory to start both `frontend` and `backend` environments to run the app
 
