@@ -2,8 +2,9 @@
 name: Issue Template
 about: Create an issue to help us with identifing and resolving the issue
 title: "[New Issue] "
-labels:
-assignees: ""
+labels: ''
+assignees: ''
+
 ---
 
 ## Issue Description
