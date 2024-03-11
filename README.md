@@ -45,7 +45,7 @@ This is done by navigating to the directory you want to place the project folder
 `git clone https://github.com/UoaWDCC/VPS.git`. 
 
 3. Set up your .env files 
-    1. Create a copy of the frontend and backend .env files (stored [here]()) and place them at the same level as the .env.example file in __frontend/__ and __backend/__
+    1. Create a copy of the frontend and backend .env files [here](https://drive.google.com/drive/folders/19uZHA0lMrvc7QaM2dtE-DkS7veVriYZ_) (ask the TL or PM for access) and place them at the same level as the .env.example file in __frontend/__ and __backend/__. Make sure you rename these files to `.env` and that they are saved as env files, not text files.
     3. Get the values for each key in the .env files using the links provided in them + any login details provided by the PM/APM
     4. In the frontend .env file, add `REACT_APP_SERVER_URL = "http://localhost:[BACKEND_PORT_NUMBER]/"` and replace `[BACKEND_PORT_NUMBER]` with the value of `PORT` in the backend .env file e.g. 5001
 4. To continue setting up the app, follow Method 1 below (if that doesn't work, try Method 2)
