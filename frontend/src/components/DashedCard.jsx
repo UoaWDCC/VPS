@@ -1,4 +1,3 @@
-import React from "react";
 import { Box } from "@material-ui/core";
 import styles from "../styling/ListContainer.module.scss";
 

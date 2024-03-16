@@ -1,6 +1,6 @@
 import Button from "@material-ui/core/Button";
-import { withStyles } from "@material-ui/core/styles";
 import { red } from "@material-ui/core/colors";
+import { withStyles } from "@material-ui/core/styles";
 
 /**
  * Material-UI button component with custom styling used as a delete button.

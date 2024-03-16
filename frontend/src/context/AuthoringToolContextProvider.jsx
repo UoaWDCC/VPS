@@ -1,4 +1,4 @@
-import React, { useState, useContext, useRef } from "react";
+import { useContext, useRef, useState } from "react";
 import AuthoringToolContext from "./AuthoringToolContext";
 import SceneContext from "./SceneContext";
 

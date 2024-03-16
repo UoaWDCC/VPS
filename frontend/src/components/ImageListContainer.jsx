@@ -1,7 +1,7 @@
-import React, { useState } from "react";
+import { Box } from "@material-ui/core";
 import ImageList from "@material-ui/core/ImageList";
 import ImageListItem from "@material-ui/core/ImageListItem";
-import { Box } from "@material-ui/core";
+import { useState } from "react";
 
 /**
  * Component used to display images in a list format.

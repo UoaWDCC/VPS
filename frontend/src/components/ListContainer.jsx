@@ -1,10 +1,10 @@
-import React, { useState } from "react";
+import { Box } from "@material-ui/core";
 import ImageList from "@material-ui/core/ImageList";
 import ImageListItem from "@material-ui/core/ImageListItem";
-import { Box } from "@material-ui/core";
-import Thumbnail from "./Thumbnail";
+import { useState } from "react";
 import styles from "../styling/ListContainer.module.scss";
 import DashedCard from "./DashedCard";
+import Thumbnail from "./Thumbnail";
 import useStyles from "./component.styles";
 
 /**

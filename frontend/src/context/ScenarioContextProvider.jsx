@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { useGet } from "../hooks/crudHooks";
 import useLocalStorage from "../hooks/useLocalStorage";
 import ScenarioContext from "./ScenarioContext";

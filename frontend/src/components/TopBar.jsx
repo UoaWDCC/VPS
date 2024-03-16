@@ -1,12 +1,12 @@
-import React, { useState, useContext } from "react";
-import { Link, useHistory } from "react-router-dom";
 import Button from "@material-ui/core/Button";
+import { useContext, useState } from "react";
+import { Link, useHistory } from "react-router-dom";
 
-import styles from "../styling/TopBar.module.scss";
 import BackModal from "../containers/pages/AuthoringTool/BackModal";
-import SceneContext from "../context/SceneContext";
-import ScenarioContext from "../context/ScenarioContext";
 import AuthoringToolContext from "../context/AuthoringToolContext";
+import ScenarioContext from "../context/ScenarioContext";
+import SceneContext from "../context/SceneContext";
+import styles from "../styling/TopBar.module.scss";
 
 /**
  * Component used for navigation and executing actions located at the top of the screen.

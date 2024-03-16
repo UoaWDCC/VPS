@@ -1,14 +1,14 @@
-import React, { useContext, useEffect, useState } from "react";
-import { useHistory } from "react-router-dom";
 import MenuItem from "@material-ui/core/MenuItem";
+import { useContext, useEffect, useState } from "react";
+import { useHistory } from "react-router-dom";
 import ContextMenu from "../../components/ContextMenu";
-import SideBar from "../../components/SideBar";
 import ListContainer from "../../components/ListContainer";
 import ScreenContainer from "../../components/ScreenContainer";
-import ScenarioContext from "../../context/ScenarioContext";
-import { usePut, useDelete } from "../../hooks/crudHooks";
+import SideBar from "../../components/SideBar";
 import AuthenticationContext from "../../context/AuthenticationContext";
+import ScenarioContext from "../../context/ScenarioContext";
 import AccessLevel from "../../enums/route.access.level";
+import { useDelete, usePut } from "../../hooks/crudHooks";
 
 /**
  * Page that shows the user's existing scenarios.

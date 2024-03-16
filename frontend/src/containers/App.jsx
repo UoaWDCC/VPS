@@ -1,20 +1,19 @@
-import React from "react";
-import { BrowserRouter, Switch, Route } from "react-router-dom";
 import { ThemeProvider } from "@material-ui/core";
-import ScenarioSelectionPage from "./pages/ScenarioSelectionPage";
-import PlayScenarioPage from "./pages/PlayScenarioPage/PlayScenarioPage";
-import DashboardPage from "./pages/Dashboard/DashboardPage";
-import { ScenePage } from "./pages/SceneSelectionPage";
+import "normalize.css";
+import { BrowserRouter, Route, Switch } from "react-router-dom";
+import AuthenticationContextProvider from "../context/AuthenticationContextProvider";
+import PlayingScenarioContextProvider from "../context/PlayScenarioContextProvider";
 import ScenarioContextProvider from "../context/ScenarioContextProvider";
 import SceneContextProvider from "../context/SceneContextProvider";
-import PlayingScenarioContextProvider from "../context/PlayScenarioContextProvider";
-import "normalize.css";
-import "../styling/style.scss";
-import theme from "./theme/App.theme";
-import ProtectedRoute from "../firebase/ProtectedRoute";
-import LoginPage from "./pages/LoginPage";
-import AuthenticationContextProvider from "../context/AuthenticationContextProvider";
 import AccessLevel from "../enums/route.access.level";
+import ProtectedRoute from "../firebase/ProtectedRoute";
+import "../styling/style.scss";
+import DashboardPage from "./pages/Dashboard/DashboardPage";
+import LoginPage from "./pages/LoginPage";
+import PlayScenarioPage from "./pages/PlayScenarioPage/PlayScenarioPage";
+import ScenarioSelectionPage from "./pages/ScenarioSelectionPage";
+import { ScenePage } from "./pages/SceneSelectionPage";
+import theme from "./theme/App.theme";
 
 export default function App() {
   return (

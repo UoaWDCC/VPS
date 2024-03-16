@@ -1,27 +1,27 @@
-import React, { useContext, useEffect, useState, useRef } from "react";
+import { Button, Divider, MenuItem } from "@material-ui/core";
+import ListContainer from "components/ListContainer";
+import Papa from "papaparse";
+import { useContext, useEffect, useRef, useState } from "react";
 import {
-  useParams,
   Route,
-  useRouteMatch,
   Switch,
   useHistory,
+  useParams,
+  useRouteMatch,
 } from "react-router-dom";
-import Papa from "papaparse";
-import { Button, MenuItem, Divider } from "@material-ui/core";
-import TopBar from "../../components/TopBar";
-import ListContainer from "../../components/ListContainer";
-import ScreenContainer from "../../components/ScreenContainer";
-import SceneContext from "../../context/SceneContext";
-import AuthoringToolPage from "./AuthoringTool/AuthoringToolPage";
-import { usePost, usePut, useDelete, usePatch } from "../../hooks/crudHooks";
-import DeleteButton from "../../components/DeleteButton";
-import ShareModal from "../../components/ShareModal";
-import AuthoringToolContextProvider from "../../context/AuthoringToolContextProvider";
-import AuthenticationContext from "../../context/AuthenticationContext";
-import HelpButton from "../../components/HelpButton";
 import ContextMenu from "../../components/ContextMenu";
-import AccessLevel from "../../enums/route.access.level";
+import DeleteButton from "../../components/DeleteButton";
+import HelpButton from "../../components/HelpButton";
+import ScreenContainer from "../../components/ScreenContainer";
+import ShareModal from "../../components/ShareModal";
+import TopBar from "../../components/TopBar";
 import generateUID from "../../components/newUID";
+import AuthenticationContext from "../../context/AuthenticationContext";
+import AuthoringToolContextProvider from "../../context/AuthoringToolContextProvider";
+import SceneContext from "../../context/SceneContext";
+import AccessLevel from "../../enums/route.access.level";
+import { useDelete, usePatch, usePost, usePut } from "../../hooks/crudHooks";
+import AuthoringToolPage from "./AuthoringTool/AuthoringToolPage";
 
 /**
  * Page that shows the scenes belonging to a scenario.
@@ -78,7 +78,7 @@ export function SceneSelectionPage({ data = null }) {
   };
 
   // invalid name state stores the last item that had a null name, will display error message
-  const [invalidNameId, setInvalidNameId] = useState("");
+  const [invalidNameId, setInvalidNameId] = useState(""); // invalidNameId is not used?
 
   const [contextMenuPosition, setContextMenuPosition] = useState(null);
   function handleContextMenu(event) {
@@ -295,7 +295,6 @@ export function SceneSelectionPage({ data = null }) {
           onItemBlur={changeSceneName}
           sceneSelectionPage
           scenarioId={scenarioId}
-          invalidNameId={invalidNameId}
         />
       </div>
       <ShareModal

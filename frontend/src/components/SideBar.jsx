@@ -1,13 +1,13 @@
-import React, { useContext } from "react";
-import { Link, useHistory } from "react-router-dom";
 import Button from "@material-ui/core/Button";
-import ScenarioContext from "../context/ScenarioContext";
-import styles from "../styling/SideBar.module.scss";
-import { usePost, useDelete } from "../hooks/crudHooks";
-import DeleteButton from "./DeleteButton";
+import { useContext } from "react";
+import { Link, useHistory } from "react-router-dom";
 import AuthenticationContext from "../context/AuthenticationContext";
-import HelpButton from "./HelpButton";
+import ScenarioContext from "../context/ScenarioContext";
 import AccessLevel from "../enums/route.access.level";
+import { useDelete, usePost } from "../hooks/crudHooks";
+import styles from "../styling/SideBar.module.scss";
+import DeleteButton from "./DeleteButton";
+import HelpButton from "./HelpButton";
 
 /**
  * Component used for navigation and executing actions located at the left side of the screen.

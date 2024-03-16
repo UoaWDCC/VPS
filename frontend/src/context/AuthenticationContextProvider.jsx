@@ -1,9 +1,9 @@
-import React, { useState } from "react";
 import { signInWithRedirect } from "firebase/auth";
+import { useState } from "react";
 import { useAuthState } from "react-firebase-hooks/auth";
-import AuthenticationContext from "./AuthenticationContext";
 import { auth, googleProvider } from "../firebase/firebase";
 import { useGetSimplified } from "../hooks/crudHooks";
+import AuthenticationContext from "./AuthenticationContext";
 
 /**
  * This is a Context Provider made with the React Context API

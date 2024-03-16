@@ -1,8 +1,8 @@
+import { DialogContent, DialogTitle, TextField } from "@material-ui/core";
 import Button from "@material-ui/core/Button";
 import Dialog from "@material-ui/core/Dialog";
 import Typography from "@material-ui/core/Typography";
-import React, { useContext, useState } from "react";
-import { DialogContent, DialogTitle, TextField } from "@material-ui/core";
+import { useContext, useState } from "react";
 import ScenarioContext from "../context/ScenarioContext";
 import styles from "../styling/ShareModal.module.scss";
 

@@ -1,5 +1,5 @@
-import React, { useEffect } from "react";
 import Triangle from "components/Triangle";
+import React, { useEffect } from "react";
 
 const SpeechTextboxArrow = React.memo(
   ({ borderWidth, setArrowWidth, arrowLocation }) => {

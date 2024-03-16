@@ -1,5 +1,4 @@
 // DraggableScene.js
-import React from "react";
 import { useDrag } from "react-dnd";
 
 const DraggableScene = ({ index, onDragStart }) => {
