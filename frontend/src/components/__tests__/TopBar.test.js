@@ -1,10 +1,9 @@
-import React from "react";
-import renderer from "react-test-renderer";
 import { BrowserRouter } from "react-router-dom";
-import TopBar from "../TopBar";
+import renderer from "react-test-renderer";
+import AuthenticationContextProvider from "../../context/AuthenticationContextProvider";
 import ScenarioContext from "../../context/ScenarioContext";
 import SceneContextProvider from "../../context/SceneContextProvider";
-import AuthenticationContextProvider from "../../context/AuthenticationContextProvider";
+import TopBar from "../TopBar";
 
 test("Top Bar component snapshot test", () => {
   const context = {

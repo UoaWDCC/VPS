@@ -1,5 +1,7 @@
+// ESLint gets confused due to .js class import
+// eslint-disable-next-line import/no-named-as-default, import/no-named-as-default-member
+import Graph from "models/Graph";
 import { useEffect, useState } from "react";
-import Graph from "../models/Graph";
 import { useGet } from "./crudHooks";
 
 /**

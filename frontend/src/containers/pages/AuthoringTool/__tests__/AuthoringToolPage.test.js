@@ -1,11 +1,10 @@
-import React from "react";
 import { render } from "@testing-library/react";
 import { BrowserRouter } from "react-router-dom";
-import AuthoringToolPage from "../AuthoringToolPage";
-import SceneContext from "../../../../context/SceneContext";
-import ScenarioContext from "../../../../context/ScenarioContext";
-import AuthoringToolContextProvider from "../../../../context/AuthoringToolContextProvider";
 import AuthenticationContextProvider from "../../../../context/AuthenticationContextProvider";
+import AuthoringToolContextProvider from "../../../../context/AuthoringToolContextProvider";
+import ScenarioContext from "../../../../context/ScenarioContext";
+import SceneContext from "../../../../context/SceneContext";
+import AuthoringToolPage from "../AuthoringToolPage";
 
 test("Authoring Tool page snapshot test", () => {
   const context = {

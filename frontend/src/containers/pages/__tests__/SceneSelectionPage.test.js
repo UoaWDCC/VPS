@@ -1,10 +1,9 @@
-import React from "react";
 import { render } from "@testing-library/react";
 import { BrowserRouter } from "react-router-dom";
-import { SceneSelectionPage } from "../SceneSelectionPage";
-import SceneContext from "../../../context/SceneContext";
-import ScenarioContext from "../../../context/ScenarioContext";
 import AuthenticationContextProvider from "../../../context/AuthenticationContextProvider";
+import ScenarioContext from "../../../context/ScenarioContext";
+import SceneContext from "../../../context/SceneContext";
+import { SceneSelectionPage } from "../SceneSelectionPage";
 
 const dummyScenes = [
   { _id: 1, name: "test1" },

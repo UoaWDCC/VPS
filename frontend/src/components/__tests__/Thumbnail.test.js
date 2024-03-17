@@ -1,6 +1,5 @@
-import React from "react";
-import renderer from "react-test-renderer";
 import { BrowserRouter } from "react-router-dom";
+import renderer from "react-test-renderer";
 import Thumbnail from "../Thumbnail";
 
 test("Thumbnail component snapshot test", () => {

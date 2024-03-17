@@ -1,9 +1,8 @@
-import React from "react";
-import renderer from "react-test-renderer";
 import { BrowserRouter } from "react-router-dom";
-import SideBar from "../SideBar";
-import ScenarioContextProvider from "../../context/ScenarioContextProvider";
+import renderer from "react-test-renderer";
 import AuthenticationContextProvider from "../../context/AuthenticationContextProvider";
+import ScenarioContextProvider from "../../context/ScenarioContextProvider";
+import SideBar from "../SideBar";
 
 test("Side Bar component snapshot test", () => {
   const component = renderer.create(

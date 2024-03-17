@@ -1,11 +1,10 @@
-import React from "react";
-import renderer from "react-test-renderer";
 import { BrowserRouter } from "react-router-dom";
-import ComponentProperties from "../ComponentProperties";
+import renderer from "react-test-renderer";
+import AuthenticationContextProvider from "../../../../../context/AuthenticationContextProvider";
+import AuthoringToolContextProvider from "../../../../../context/AuthoringToolContextProvider";
 import ScenarioContextProvider from "../../../../../context/ScenarioContextProvider";
 import SceneContextProvider from "../../../../../context/SceneContextProvider";
-import AuthoringToolContextProvider from "../../../../../context/AuthoringToolContextProvider";
-import AuthenticationContextProvider from "../../../../../context/AuthenticationContextProvider";
+import ComponentProperties from "../ComponentProperties";
 
 test("Scenario Selection page snapshot test", () => {
   const component = renderer.create(

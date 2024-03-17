@@ -1,10 +1,9 @@
-import React from "react";
-import renderer from "react-test-renderer";
 import { BrowserRouter } from "react-router-dom";
-import SceneSettings from "../SceneSettings";
+import renderer from "react-test-renderer";
+import AuthenticationContextProvider from "../../../../../context/AuthenticationContextProvider";
 import ScenarioContextProvider from "../../../../../context/ScenarioContextProvider";
 import SceneContextProvider from "../../../../../context/SceneContextProvider";
-import AuthenticationContextProvider from "../../../../../context/AuthenticationContextProvider";
+import SceneSettings from "../SceneSettings";
 
 test("Scenario Selection page snapshot test", () => {
   const component = renderer.create(
