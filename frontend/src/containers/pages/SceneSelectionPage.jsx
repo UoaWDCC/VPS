@@ -36,6 +36,9 @@ export function SceneSelectionPage({ data = null }) {
   const { scenes, currentScene, setCurrentScene, reFetch } =
     useContext(SceneContext);
   const { getUserIdToken, VpsUser } = useContext(AuthenticationContext);
+
+  // File input is a hidden input element that is activated via a click handler
+  // This allows us to have an UI button that acts like a file <input> element.
   const fileInputRef = useRef(null);
   const handCSVClick = () => {
     fileInputRef.current.click();
@@ -262,7 +265,23 @@ export function SceneSelectionPage({ data = null }) {
 
         <HelpButton />
       </TopBar>
+
+      {/* On top of the action button available in the top menu bar, we also override user's rightclick context menu to offer the same functionality. */}
       <div onContextMenu={handleContextMenu}>
+        {/* Scene list */}
+        <ListContainer
+          data={data || scenes}
+          onItemSelected={setCurrentScene}
+          onItemDoubleClick={editScene}
+          addCard={createNewScene}
+          wide
+          onItemBlur={changeSceneName}
+          sceneSelectionPage
+          scenarioId={scenarioId}
+          invalidNameId={invalidNameId}
+        />
+
+        {/* Custom context menu */}
         <ContextMenu
           position={contextMenuPosition}
           setPosition={setContextMenuPosition}
@@ -286,16 +305,6 @@ export function SceneSelectionPage({ data = null }) {
           <MenuItem onClick={playScenario}>Play</MenuItem>
           <MenuItem onClick={() => setShareModalOpen(true)}>Share</MenuItem>
         </ContextMenu>
-        <ListContainer
-          data={data || scenes}
-          onItemSelected={setCurrentScene}
-          onItemDoubleClick={editScene}
-          addCard={createNewScene}
-          wide
-          onItemBlur={changeSceneName}
-          sceneSelectionPage
-          scenarioId={scenarioId}
-        />
       </div>
       <ShareModal
         isOpen={isShareModalOpen}
