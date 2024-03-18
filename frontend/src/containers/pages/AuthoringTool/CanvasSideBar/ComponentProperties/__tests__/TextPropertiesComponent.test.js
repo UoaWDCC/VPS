@@ -1,9 +1,8 @@
-import React from "react";
 import { render } from "@testing-library/react";
+import AuthenticationContextProvider from "../../../../../../context/AuthenticationContextProvider";
 import ScenarioContextProvider from "../../../../../../context/ScenarioContextProvider";
 import SceneContextProvider from "../../../../../../context/SceneContextProvider";
 import TextPropertiesComponent from "../TextPropertiesComponent";
-import AuthenticationContextProvider from "../../../../../../context/AuthenticationContextProvider";
 
 test("Button properties component snapshot test", () => {
   const { baseElement } = render(

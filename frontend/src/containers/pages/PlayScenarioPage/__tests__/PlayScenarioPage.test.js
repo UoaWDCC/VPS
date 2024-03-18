@@ -1,9 +1,8 @@
-import React from "react";
 import { render } from "@testing-library/react";
 import { BrowserRouter } from "react-router-dom";
-import PlayScenarioPage from "../PlayScenarioPage";
-import PlayScenarioContext from "../../../../context/PlayScenarioContext";
 import AuthenticationContextProvider from "../../../../context/AuthenticationContextProvider";
+import PlayScenarioContext from "../../../../context/PlayScenarioContext";
+import PlayScenarioPage from "../PlayScenarioPage";
 
 test("PlayScenario page snapshot test", () => {
   const context = {

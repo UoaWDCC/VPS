@@ -1,10 +1,9 @@
-import React from "react";
-import { BrowserRouter } from "react-router-dom";
 import { render } from "@testing-library/react";
-import BackModal from "../BackModal";
+import { BrowserRouter } from "react-router-dom";
+import AuthenticationContextProvider from "../../../../context/AuthenticationContextProvider";
 import ScenarioContext from "../../../../context/ScenarioContext";
 import SceneContextProvider from "../../../../context/SceneContextProvider";
-import AuthenticationContextProvider from "../../../../context/AuthenticationContextProvider";
+import BackModal from "../BackModal";
 
 test("BackModal component snapshot test", () => {
   const context = {

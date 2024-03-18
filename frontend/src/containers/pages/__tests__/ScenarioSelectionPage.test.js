@@ -1,9 +1,8 @@
-import React from "react";
 import { render } from "@testing-library/react";
 import { BrowserRouter } from "react-router-dom";
-import ScenarioSelectionPage from "../ScenarioSelectionPage";
-import ScenarioContext from "../../../context/ScenarioContext";
 import AuthenticationContextProvider from "../../../context/AuthenticationContextProvider";
+import ScenarioContext from "../../../context/ScenarioContext";
+import ScenarioSelectionPage from "../ScenarioSelectionPage";
 
 const dummyScenarios = [
   { _id: 1, name: "test1" },
