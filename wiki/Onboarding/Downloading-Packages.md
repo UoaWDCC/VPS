@@ -11,7 +11,7 @@ If using nvm (see below), it can be installed by running `nvm install 14.17.4` o
 
 ### Versions of Node/NVM
 
-However, Node has many different versions available, with the most current version being Node 18. Due to dependency issues, this codebase only runs on Node versions below Node 16, with Node 14.17.4 recommended (this version is confirmed to work). 
+However, Node has many different versions available, with the most current version being Node 18. Due to dependency issues, this codebase runs on Node versions of 14.17.*, with Node 14.17.4 recommended (this version is confirmed to work). 
 
 In order to easily switch between Node versions (especially recommended if you are using Node for other projects as well), it is recommended to install nvm (Node Version Manager) which allows you to have multiple versions of Node on your machine simultaneously. This can be downloaded:
 Windows: [https://github.com/coreybutler/nvm-windows](https://github.com/coreybutler/nvm-windows)
