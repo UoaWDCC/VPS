@@ -9,7 +9,7 @@ This project was associated with The University of Auckland SOFTENG 761 but sinc
 DEV: https://vps-dev.wdcc.co.nz/
 
 # Onboarding
-Onboarding documentation can be found in the Github Wiki under `Wiki/Onboarding`
+Onboarding documentation can be found in the Github Wiki under [Wiki/Onboarding](https://github.com/UoaWDCC/VPS/tree/master/wiki/Onboarding)
 
 
 # Contributors ✨
