@@ -38,6 +38,7 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
   </tr>
   <tr>
     <td align="center"><a href="https://github.com/wjin-lee"><img src="https://avatars.githubusercontent.com/u/100455176?v=4?s=140" width="140px;" alt=""/><br /><sub><b>Woo Jin Lee</b></sub></a><br /><a href="https://github.com/lucas2005gao/REACT Template/commits?author=wjin-lee" title="Tech Lead 2024">💻</a></td>
+    <td align="center"><a href="https://github.com/xche529"><img src="https://avatars.githubusercontent.com/u/126313171?s=400&v=4" width="140px;" alt=""/><br /><sub><b>Tommy Chen</b></sub></a><br /><a href="https://github.com/lucas2005gao/REACT Template/commits?author=xche529" title="Code">💻</a></td>
   <tr/>
 </table>
 
