@@ -5,6 +5,10 @@ gae_env.yaml
 */node_modules
 /node_modules
 
+# files generated/altered from yarn init
+yarn.lock
+package*.json
+
 # testing
 /coverage
 
