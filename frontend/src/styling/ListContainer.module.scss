@@ -29,6 +29,31 @@
   cursor: pointer;
 }
 
+.crossHorizontalLine {
+  position: absolute;
+  top: calc(50% - 5px);
+  left: 0;
+  right: 0;
+  height: 10px;
+  background: #adadad;
+  width: 80px; 
+  margin: 0 auto; 
+  border-radius: 4px;
+}
+
+.crossVerticalLine {
+  position: absolute;
+  left: calc(50% - 5px);
+  top: 0;
+  bottom: 0;
+  width: 10px;
+  background: #adadad;
+  height: 80px; 
+  margin: auto 0;
+  border-radius: 4px;
+}
+
+
 .text {
   display: inline-block;
   font-family: "Lucida Sans", "Lucida Sans Regular", "Lucida Grande",
