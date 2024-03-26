@@ -5,8 +5,22 @@ exports[`Dashed Card component snapshot test 1`] = `
   className="imageListItemWide"
 >
   <div
-    className="MuiBox-root MuiBox-root-1"
-  />
+    style={
+      Object {
+        "position": "relative",
+      }
+    }
+  >
+    <div
+      className="MuiBox-root MuiBox-root-1"
+    />
+    <div
+      className="crossHorizontalLine"
+    />
+    <div
+      className="crossVerticalLine"
+    />
+  </div>
   <p
     className="text"
   >
