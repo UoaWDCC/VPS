@@ -45,6 +45,8 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
     <td align="center"><a href="https://github.com/xche529"><img src="https://avatars.githubusercontent.com/u/126313171?s=400&v=4" width="140px;" alt=""/><br /><sub><b>Tommy Chen</b></sub></a><br /><a href="https://github.com/lucas2005gao/REACT Template/commits?author=xche529" title="Code">💻</a></td>
     <td align="center"><a href="https://github.com/codecreator127"><img src="https://avatars.githubusercontent.com/u/120153300?s=400&v=4" width="140px;" alt=""/><br /><sub><b>John Lin</b></sub></a><br /><a href="https://github.com/lucas2005gao/REACT Template/commits?author=djos192" title="Code">💻</a></td>
     <td align="center"><a href="https://github.com/jacobmathew105"><img src="https://avatars.githubusercontent.com/u/136278107?s=400&v=4" width="140px;" alt=""/><br /><sub><b>Jacob Mathew</b></sub></a><br /><a href="https://github.com/lucas2005gao/REACT Template/commits?author=jacobmathew105" title="Code">💻</a></td>
+  </tr>
+  <tr>
     <td align="center"><a href="https://github.com/sbeen56"><img src="https://avatars.githubusercontent.com/u/161543207?s=400&v=4" width="140px;" alt=""/><br /><sub><b>Subeen Ban</b></sub></a><br /><a href="https://github.com/lucas2005gao/REACT Template/commits?author=sbeen56" title="Code">💻</a></td>
   </tr>
 </table>
