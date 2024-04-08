@@ -18,7 +18,7 @@ import HelpButton from "./HelpButton";
  *   <SideBar/ >
  * )
  */
-export default function SideBar() {
+export default function SideBar({ toggleCreateCardVisibility }) {
   const { currentScenario, setCurrentScenario, reFetch } =
     useContext(ScenarioContext);
   const { signOut, getUserIdToken, VpsUser } = useContext(
