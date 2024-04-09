@@ -19,7 +19,7 @@ import CreateScenerioCard from "./CreateScenarioCard";
  *   <SideBar/ >
  * )
  */
-export default function SideBar({ toggleCreateCardVisibility }) {
+export default function SideBar() {
   const { currentScenario, setCurrentScenario, reFetch } =
     useContext(ScenarioContext);
   const { signOut, getUserIdToken, VpsUser } = useContext(
@@ -70,12 +70,16 @@ export default function SideBar({ toggleCreateCardVisibility }) {
   function handleCloseCard() {
     setIsCardVisible(false);
   }
+  function handleOpenCard() {
+    setIsCardVisible(true);
+  }
 
   return (
     <>
       {isCardVisible && (
         <CreateScenerioCard
           className="create-scenario-card"
+          onCreate={createScenario}
           onClose={handleCloseCard}
         />
       )}
@@ -93,7 +97,7 @@ export default function SideBar({ toggleCreateCardVisibility }) {
               color="default"
               variant="contained"
               onClick={() => {
-                createScenario("default name");
+                handleOpenCard();
               }}
             >
               Create

@@ -1,11 +1,12 @@
 import React, { useState } from "react";
 import styles from "../styling/CreateScenarioCard.module.scss";
 
-export default function CreateScenarioCard({ isVisible, onClose }) {
+export default function CreateScenarioCard({ onCreate, onClose }) {
   const [name, setName] = useState("default name");
 
   const handleCreate = async () => {
     console.log(`Creating scenario with name: ${name}`);
+    onCreate(name);
     onClose();
   };
 
