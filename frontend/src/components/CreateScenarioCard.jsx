@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import Button from "@material-ui/core/Button";
 import styles from "../styling/CreateScenarioCard.module.scss";
 
 export default function CreateScenarioCard({ onCreate, onClose }) {
@@ -33,16 +34,21 @@ export default function CreateScenarioCard({ onCreate, onClose }) {
       />
       <div className={styles.createScenarioCard}>
         {" "}
-        <h2>Create New Scenario</h2>
+        <h1>Create New Scenario</h1>
+        <h3>Scenario name:</h3>
         <input
           type="text"
           placeholder="Scenario name"
           value={name}
           onChange={(e) => setName(e.target.value)}
         />
-        <button type="button" onClick={handleCreate}>
+        <Button
+          className="btn side contained blue"
+          type="button"
+          onClick={handleCreate}
+        >
           Create
-        </button>
+        </Button>
       </div>
     </div>
   );

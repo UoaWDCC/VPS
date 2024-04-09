@@ -3,8 +3,8 @@
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  background-color: rgb(253, 253, 253);
-  border: 1px solid #ccc;
+  background-color: rgb(255, 255, 255);
+  border: 5px solid #515151;
   padding: 20px;
   border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
@@ -12,6 +12,10 @@
   opacity: 1;
   transition: visibility 0s, opacity 0.5s linear;
   z-index: 2;
+  display: flex;
+  width: 30%;
+  flex-direction: column;
+  align-items: center;
 }
 
 .overlay {

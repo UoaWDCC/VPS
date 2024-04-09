@@ -66,7 +66,7 @@ export default function SideBar() {
   }
 
   /** Handle creat scenrio card visibility */
-  const [isCardVisible, setIsCardVisible] = useState(true);
+  const [isCardVisible, setIsCardVisible] = useState(false);
   function handleCloseCard() {
     setIsCardVisible(false);
   }
