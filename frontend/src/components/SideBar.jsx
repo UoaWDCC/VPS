@@ -1,5 +1,5 @@
 import Button from "@material-ui/core/Button";
-import { useContext } from "react";
+import { useContext, useState } from "react";
 import { Link, useHistory } from "react-router-dom";
 import AuthenticationContext from "../context/AuthenticationContext";
 import ScenarioContext from "../context/ScenarioContext";
@@ -8,6 +8,7 @@ import { useDelete, usePost } from "../hooks/crudHooks";
 import styles from "../styling/SideBar.module.scss";
 import DeleteButton from "./DeleteButton";
 import HelpButton from "./HelpButton";
+import CreateScenerioCard from "./CreateScenarioCard";
 
 /**
  * Component used for navigation and executing actions located at the left side of the screen.
@@ -64,8 +65,20 @@ export default function SideBar({ toggleCreateCardVisibility }) {
     window.open(`/play/${currentScenario._id}`, "_blank");
   }
 
+  /** Handle creat scenrio card visibility */
+  const [isCardVisible, setIsCardVisible] = useState(true);
+  function handleCloseCard() {
+    setIsCardVisible(false);
+  }
+
   return (
     <>
+      {isCardVisible && (
+        <CreateScenerioCard
+          className="create-scenario-card"
+          onClose={handleCloseCard}
+        />
+      )}
       <div className={styles.sideBar}>
         <img
           draggable="false"

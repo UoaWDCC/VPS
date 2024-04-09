@@ -5,11 +5,9 @@ import ContextMenu from "../../components/ContextMenu";
 import ListContainer from "../../components/ListContainer";
 import ScreenContainer from "../../components/ScreenContainer";
 import SideBar from "../../components/SideBar";
-import CreateScenerioCard from "../../components/CreateScenarioCard";
 import AuthenticationContext from "../../context/AuthenticationContext";
 import ScenarioContext from "../../context/ScenarioContext";
 import AccessLevel from "../../enums/route.access.level";
-import style from "../../styling/CreateScenarioCard.module.scss";
 import { useDelete, usePut } from "../../hooks/crudHooks";
 
 /**
@@ -106,7 +104,6 @@ export default function ScenarioSelectionPage({ data = null }) {
   return (
     <ScreenContainer>
       <SideBar />
-      <CreateScenerioCard className="create-scenario-card" />
       <div onContextMenu={handleContextMenu}>
         <ContextMenu
           position={contextMenuPosition}

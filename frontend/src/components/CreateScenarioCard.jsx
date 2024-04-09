@@ -6,11 +6,32 @@ export default function CreateScenarioCard({ isVisible, onClose }) {
 
   const handleCreate = async () => {
     console.log(`Creating scenario with name: ${name}`);
+    onClose();
+  };
+
+  const handleOverlayClick = (event) => {
+    event.stopPropagation();
+    onClose();
+  };
+
+  const handleKeyPress = (e) => {
+    if (e.key === "Escape") {
+      onClose();
+    }
   };
 
   return (
-    <div className={styles.overlay}>
+    <div>
+      <div
+        className={styles.overlay}
+        role="button"
+        onClick={handleOverlayClick}
+        onKeyDown={handleKeyPress}
+        tabIndex={0}
+        aria-label="Close Create Scenario Card"
+      />
       <div className={styles.createScenarioCard}>
+        {" "}
         <h2>Create New Scenario</h2>
         <input
           type="text"
