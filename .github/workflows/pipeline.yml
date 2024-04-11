@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - master
-      - VPS-149/refactoring-github-actions-workflow
     paths-ignore:
       - "docs/**"
   pull_request:
