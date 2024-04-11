@@ -1,0 +1,203 @@
+name: CICD Pipeline
+
+on:
+  push:
+    branches:
+      - master
+      - VPS-149/refactoring-github-actions-workflow
+    paths-ignore:
+      - "docs/**"
+  pull_request:
+    paths-ignore:
+      - "docs/**"
+
+jobs:
+  run-prettier-frontend:
+    name: Run prettier frontend
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./frontend
+    steps:
+      - name: Check out Git repository
+        uses: actions/checkout@v2
+
+      - uses: actions/cache@v2
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v1
+        with:
+          node-version: 14
+
+      # Installs dev dependencies
+      - name: Install dev dependencies
+        run: yarn install
+
+      # Runs prettier
+      - name: Run code style check
+        run: yarn run prettier
+
+  run-prettier-backend:
+    name: Run prettier backend
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./backend
+
+    steps:
+      - name: Check out Git repository
+        uses: actions/checkout@v2
+
+      - uses: actions/cache@v2
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v1
+        with:
+          node-version: 14
+
+      # Installs dev dependencies
+      - name: Install dev dependencies
+        run: yarn install
+
+      # Runs prettier
+      - name: Run code style check
+        run: yarn run prettier
+    
+  run-linters-frontend:
+    needs: [run-prettier-frontend, run-prettier-backend]
+    name: Run linters frontend
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./frontend
+
+    steps:
+    - name: Check out Git repository
+      uses: actions/checkout@v2
+
+    - uses: actions/cache@v2
+      with:
+        path: ~/.npm
+        key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+        restore-keys: |
+            ${{ runner.os }}-node-
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v1
+      with:
+        node-version: 14
+
+    # Installs dev dependencies
+    - name: Install dev dependencies
+      run: yarn install
+
+    # Runs ESLint
+    - name: Run code style check
+      run: yarn run lint
+    
+  run-linters-backend:
+    needs: [run-prettier-frontend, run-prettier-backend]
+    name: Run linters backend
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+          working-directory: ./backend
+
+    steps:
+    - name: Check out Git repository
+      uses: actions/checkout@v2
+
+    - uses: actions/cache@v2
+      with:
+        path: ~/.npm
+        key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+        restore-keys: |
+            ${{ runner.os }}-node-
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v1
+      with:
+        node-version: 14
+
+    # Installs dev dependencies
+    - name: Install dev dependencies
+      run: yarn install
+
+    # Runs ESLint
+    - name: Run code style check
+      run: yarn run lint
+
+  unit-tests-frontend:
+    needs: [run-linters-frontend, run-linters-backend]
+    name: Run unit tests frontend
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./frontend
+      
+    steps:
+        - name: Check out Git repository
+          uses: actions/checkout@v2
+    
+        - uses: actions/cache@v2
+          with:
+            path: ~/.npm
+            key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+            restore-keys: |
+                ${{ runner.os }}-node-
+    
+        - name: Set up Node.js
+          uses: actions/setup-node@v1
+          with:
+            node-version: 14
+
+        # Installs dev dependencies
+        - name: Install dev dependencies
+          run: yarn install
+    
+        - name: Run build
+          run: yarn run build --if-present
+    
+        - name: Run tests
+          run: yarn test
+    
+  unit-tests-backend:
+    needs: [run-linters-frontend, run-linters-backend]
+    name: Run unit tests backend
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./backend
+
+    steps:
+    - name: Check out Git repository
+      uses: actions/checkout@v2
+
+    - uses: actions/cache@v2
+      with:
+        path: ~/.npm
+        key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+        restore-keys: |
+            ${{ runner.os }}-node-
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v1
+      with:
+        node-version: 14
+
+    # Installs dev dependencies
+    - name: Install dev dependencies
+      run: yarn install
+
+    - name: Run tests
+      run: yarn test
