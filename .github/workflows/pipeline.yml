@@ -74,7 +74,7 @@ jobs:
         run: yarn run prettier
     
   run-linters-frontend:
-    needs: [run-prettier-frontend, run-prettier-backend]
+    needs: [run-prettier-frontend]
     name: Run linters frontend
     runs-on: ubuntu-latest
     defaults:
@@ -106,7 +106,7 @@ jobs:
       run: yarn run lint
     
   run-linters-backend:
-    needs: [run-prettier-frontend, run-prettier-backend]
+    needs: [run-prettier-backend]
     name: Run linters backend
     runs-on: ubuntu-latest
     defaults:
@@ -138,7 +138,7 @@ jobs:
       run: yarn run lint
 
   unit-tests-frontend:
-    needs: [run-linters-frontend, run-linters-backend]
+    needs: [run-linters-frontend]
     name: Run unit tests frontend
     runs-on: ubuntu-latest
     defaults:
@@ -172,7 +172,7 @@ jobs:
           run: yarn test
     
   unit-tests-backend:
-    needs: [run-linters-frontend, run-linters-backend]
+    needs: [run-linters-backend]
     name: Run unit tests backend
     runs-on: ubuntu-latest
     defaults:
