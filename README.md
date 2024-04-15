@@ -37,6 +37,7 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
     <td align="center"><a href="https://github.com/JordanBlenn"><img src="https://avatars.githubusercontent.com/u/127293604?v=4?s=140" width="140px;" alt=""/><br /><sub><b>Jordan Blennerhassett</b></sub></a><br /><a href="https://github.com/lucas2005gao/REACT Template/commits?author=JordanBlenn" title="Project Manager 2024">💻</a></td>
     <td align="center"><a href="https://github.com/harbassan"><img src="https://avatars.githubusercontent.com/u/84175605?v=4?s=140" width="140px;" alt=""/><br /><sub><b>Hartej Bassan</b></sub></a><br /><a href="https://github.com/UoaWDCC/VPS/commits?author=harbassan" title="Code">💻</a></td>
     <td align="center"><a href="https://github.com/itsatulbox"><img src="https://avatars.githubusercontent.com/u/161205868?s=400&v=4" width="140px;" alt=""/><br /><sub><b>Atul Kodla</b></sub></a><br /><a href="https://github.com/lucas2005gao/REACT Template/commits?author=itsatulbox" title="Code">💻</a></td>
+    <td align="center"><a href="https://github.com/laibatool792"><img src="https://avatars.githubusercontent.com/u/133545972?v=4" width="140px;" alt=""/><br /><sub><b>Laiba Batool</b></sub></a><br /><a href="https://github.com/lucas2005gao/REACT Template/commits?author=laibatool792" title="Code">💻</a></td>
   </tr>
   <tr>
     <td align="center"><a href="https://github.com/wjin-lee"><img src="https://avatars.githubusercontent.com/u/100455176?v=4?s=140" width="140px;" alt=""/><br /><sub><b>Woo Jin Lee</b></sub></a><br /><a href="https://github.com/lucas2005gao/REACT Template/commits?author=wjin-lee" title="Tech Lead 2024">💻</a></td>
@@ -44,7 +45,7 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
     <td align="center"><a href="https://github.com/xche529"><img src="https://avatars.githubusercontent.com/u/126313171?s=400&v=4" width="140px;" alt=""/><br /><sub><b>Tommy Chen</b></sub></a><br /><a href="https://github.com/lucas2005gao/REACT Template/commits?author=xche529" title="Code">💻</a></td>
     <td align="center"><a href="https://github.com/codecreator127"><img src="https://avatars.githubusercontent.com/u/120153300?s=400&v=4" width="140px;" alt=""/><br /><sub><b>John Lin</b></sub></a><br /><a href="https://github.com/lucas2005gao/REACT Template/commits?author=djos192" title="Code">💻</a></td>
     <td align="center"><a href="https://github.com/jacobmathew105"><img src="https://avatars.githubusercontent.com/u/136278107?s=400&v=4" width="140px;" alt=""/><br /><sub><b>Jacob Mathew</b></sub></a><br /><a href="https://github.com/lucas2005gao/REACT Template/commits?author=jacobmathew105" title="Code">💻</a></td>
-  <tr/>
+  </tr>
 </table>
 
 <!-- markdownlint-restore -->
