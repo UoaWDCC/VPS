@@ -10,7 +10,6 @@ import {
   useRouteMatch,
 } from "react-router-dom";
 import ContextMenu from "../../components/ContextMenu";
-import DeleteButton from "../../components/DeleteButton";
 import HelpButton from "../../components/HelpButton";
 import ScreenContainer from "../../components/ScreenContainer";
 import ShareModal from "../../components/ShareModal";
@@ -150,6 +149,15 @@ export function SceneSelectionPage({ data = null }) {
   function playScenario() {
     window.open(`/play/${scenarioId}`, "_blank");
   }
+  
+  /** called when Groups button is clicked */
+  function manageGroups() {
+    console.log(url, scenarioId);
+    history.push({
+      pathname: `${url}/manage-groups`,
+    });
+
+  }
 
   /** called when user unfocuses from a scene name */
   async function changeSceneName({ target }) {
@@ -184,37 +192,6 @@ export function SceneSelectionPage({ data = null }) {
   return (
     <ScreenContainer vertical>
       <TopBar>
-        <DeleteButton
-          className={`btn top contained ${currentScene ? "" : "disabled"}  `}
-          color="default"
-          variant="contained"
-          disabled={!currentScene}
-          onClick={deleteScene}
-        >
-          Delete
-        </DeleteButton>
-        <Button
-          className={`btn top contained white ${
-            currentScene ? "" : "disabled"
-          }  `}
-          color="default"
-          variant="contained"
-          disabled={!currentScene}
-          onClick={editScene}
-        >
-          Edit
-        </Button>
-        <Button
-          className={`btn top contained white ${
-            currentScene ? "" : "disabled"
-          }  `}
-          color="default"
-          variant="contained"
-          disabled={!currentScene}
-          onClick={duplicateScene}
-        >
-          Duplicate
-        </Button>
         {VpsUser.role === AccessLevel.STAFF ? (
           <Button
             className="btn top contained white"
@@ -227,6 +204,14 @@ export function SceneSelectionPage({ data = null }) {
         ) : (
           ""
         )}
+        <Button
+          className="btn top contained white"
+          color="default"
+          variant="contained"
+          onClick={manageGroups}
+        >
+          Groups
+        </Button>
         <Button
           className="btn top contained white"
           color="default"
