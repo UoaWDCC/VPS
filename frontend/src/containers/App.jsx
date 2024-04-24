@@ -37,20 +37,18 @@ export default function App() {
                 </ScenarioContextProvider>
               </ProtectedRoute>
 
-              <ProtectedRoute path="/scenario/:scenarioId">
-                <ScenarioContextProvider>
-                  <Switch>
-                    <ProtectedRoute exact path="/scenario/:scenarioId">
-                      <SceneContextProvider>
-                        <ScenePage />
-                      </SceneContextProvider>
-                    </ProtectedRoute>
+              <ScenarioContextProvider>
+                <Switch>
+                  <ProtectedRoute index path="/scenario/:scenarioId">
+                    <SceneContextProvider>
+                      <ScenePage />
+                    </SceneContextProvider>
                     <ProtectedRoute path="/scenario/:scenarioId/manage-groups">
                       <ManageGroupsPage />
                     </ProtectedRoute>
-                  </Switch>
-                </ScenarioContextProvider>
-              </ProtectedRoute>
+                  </ProtectedRoute>
+                </Switch>
+              </ScenarioContextProvider>
 
               <ProtectedRoute
                 path="/dashboard"
