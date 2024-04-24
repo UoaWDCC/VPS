@@ -18,17 +18,34 @@ import TopBar from "./TopBar";
 
 export default function ManageGroupsPage() {
   const { scenarioId } = useParams();
+
+  // File input is a hidden input element that is activated via a click handler
+  // This allows us to have an UI button that acts like a file <input> element.
+  const fileInputRef = useRef(null);
+  const upload = () => {
+    fileInputRef.current.click();
+  };
+
+  const handleFileUpload = (event) => {
+    // Handle file upload logic here
+    console.log("File uploaded:", event.target.files[0]);
+  };
+
   function download() {
     console.log("downloading current group config as .CSV");
   }
 
-  function upload() {
-    console.log("csv upload pressed");
-  }
 
   return (
     <ScreenContainer vertical>
       <TopBar back = {`/scenario/${scenarioId}`}>
+        <input
+            type="file"
+            ref={fileInputRef}
+            accept=".csv"
+            style={{ display: "none" }}
+            onChange={handleFileUpload}
+        />
         <Button
           className="btn top contained white"
           color="default"
