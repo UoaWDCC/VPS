@@ -24,7 +24,13 @@ router.post("/path/:groupId", async (req, res) => {
 
 // get the current scene of the group
 router.get("/path/:groupId", async (req, res) => {
-    //
+    try {
+      const groupId = req.params.groupId;
+      const currentScene = await getCurrentScene(groupId);
+      return res.status(HTTP_OK).json(currentScene);
+    } catch(error) {
+      return res.status(HTTP_CONFLICT).json({ error: 'Error getting current scene' });
+    }
 });
 
 export default router;
