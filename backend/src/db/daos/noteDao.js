@@ -1,14 +1,16 @@
 import Note from "../models/note";
+import Group from "../models/group";
 
-const createNote = async (groupId, name) => {
-  const dbScene = new Note(scene);
-  await dbScene.save();
+const createNote = async (groupId, title, role) => {
+  const dbNote = new Note(title);
+  await dbNote.save();
 
-  await Scenario.updateOne(
-    { _id: scenarioId },
-    { $push: { scenes: dbScene._id } }
-  );
+  const updateQuery = {};
+  updateQuery[`notes.${role}`] = dbNote._id;
 
-  return dbScene;
+  await Group.updateOne({ _id: groupId }, { $push: updateQuery });
+
+  return dbNote;
 };
 
+export { createNote };
