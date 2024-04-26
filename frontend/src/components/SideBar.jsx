@@ -27,6 +27,18 @@ export default function SideBar() {
   );
   const history = useHistory();
 
+  async function createNote() {
+    await usePost(
+      `/api/note`,
+      {
+        groupId: "661b848e95646e6a7c0ec2f6",
+        title: "New Note",
+        role: VpsUser.role,
+      },
+      getUserIdToken
+    );
+  }
+
   /** Calls backend end point to create a new empty scenario. */
   async function createScenario(name = "no name") {
     const newScenario = await usePost(
@@ -101,6 +113,18 @@ export default function SideBar() {
               }}
             >
               Create
+            </Button>
+          </li>
+          <li>
+            <Button
+              className="btn side contained white"
+              color="default"
+              variant="contained"
+              onClick={() => {
+                createNote();
+              }}
+            >
+              Create note
             </Button>
           </li>
           {VpsUser.role === AccessLevel.STAFF ? (

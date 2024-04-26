@@ -12,6 +12,6 @@ router.use("/scenario", scenario);
 router.use("/image", image);
 router.use("/staff", staff);
 router.use("/user", user);
-router.use("/mote", note);
+router.use("/note", note);
 
 export default router;
