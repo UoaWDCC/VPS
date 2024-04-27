@@ -33,7 +33,7 @@ export default function SideBar() {
       {
         groupId: "661b848e95646e6a7c0ec2f6",
         title: "New Note",
-        role: VpsUser.role,
+        role: "Doctor",
       },
       getUserIdToken
     );
