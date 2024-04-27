@@ -12,7 +12,6 @@ import Group from "../models/group";
 const createNote = async (groupId, title, role) => {
   const dbNote = new Note({ title: title, role: role });
   await dbNote.save();
-
   const updateQuery = {};
   updateQuery[`notes.${role}`] = dbNote._id;
 
@@ -39,10 +38,43 @@ const updateNote = async (noteId, updatedNote) => {
   note.title = updatedNote.title;
   note.text = updatedNote.text;
   note.date = updatedNote.date;
+  console.log(note);
 
   await note.save();
 
   return note;
 };
 
-export { createNote };
+/**
+ * Retrieves one note
+ * @param {String} noteId note ID
+ * @returns database note object
+ */
+
+const retrieveNote = async (noteId) => {
+  const dbNote = await Note.findById(noteId);
+
+  return dbNote;
+};
+
+/**
+ * Retrieves all notes of a given role of a group
+ * @param {String} groupId group ID
+ * @param {String} role role of the note
+ * @returns list of database note objects
+ */
+
+const retrieveNoteList = async (groupId, role) => {
+  const dbGroup = await Group.findById(groupId);
+
+  const dbNotes = await Note.find({ _id: { $in: dbGroup.notes[role] } }, [
+    "title",
+    "role",
+  ]);
+
+  console.log(dbNotes);
+
+  return dbNotes;
+};
+
+export { createNote, updateNote };

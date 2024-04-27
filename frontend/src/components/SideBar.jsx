@@ -39,6 +39,17 @@ export default function SideBar() {
     );
   }
 
+  async function updateNote() {
+    await usePost(
+      `/api/note/update`,
+      {
+        noteId: "662b08ee2086be5494ad220d",
+        text: "Updated Note",
+        title: "Updated Note",
+      },
+      getUserIdToken
+    );
+  }
   /** Calls backend end point to create a new empty scenario. */
   async function createScenario(name = "no name") {
     const newScenario = await usePost(
@@ -127,6 +138,19 @@ export default function SideBar() {
               Create note
             </Button>
           </li>
+          <li>
+            <Button
+              className="btn side contained white"
+              color="default"
+              variant="contained"
+              onClick={() => {
+                updateNote();
+              }}
+            >
+              Update note
+            </Button>
+          </li>
+
           {VpsUser.role === AccessLevel.STAFF ? (
             <li>
               <Button
