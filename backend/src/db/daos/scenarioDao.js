@@ -46,6 +46,16 @@ const retrieveScenarios = async (scenarioIds) => {
 };
 
 /**
+ * Retrieves the role list from the scenario
+ * @param {String} scenarioId MongoDB ID of scenario
+ * @returns an array of strings representing the roles in that scenario
+ */
+const retrieveRoleList = async (scenarioId) => {
+  const scenario = await Scenario.findById(scenarioId);
+  return scenario.roleList;
+};
+
+/**
  * Updates the name of a scenario in the database
  * @param {String} scenarioId MongoDB ID of scenario
  * @param {{name: String}} updatedScenario updated scenario object
@@ -90,6 +100,24 @@ const updateDurations = async (scenarioId, updatedDurations) => {
 };
 
 /**
+ * Updates scenario durations for users
+ * @param {String} sceneId MongoDB ID of scene
+ * @param {updatedRoleList: Array} updatedRoleList updated role list for the scenario
+ * @returns updated database scenario object
+ */
+const updateRoleList = async (scenarioId, updatedRoleList) => {
+  // if we are updating name only, components will be null
+  const scenario = await Scenario.findById(scenarioId);
+  try {
+    scenario.roleList = updatedRoleList;
+    await scenario.save();
+    return scenario;
+  } catch (e) {
+    return scenario;
+  }
+};
+
+/**
  * Deletes a scenario from the database
  * @param {String} scenarioId MongoDB ID of scenario
  * @returns {Boolean} True if successfully deleted, False if error
@@ -109,7 +137,9 @@ export {
   retrieveScenarioList,
   retrieveScenario,
   retrieveScenarios,
+  retrieveRoleList,
   updateScenario,
   deleteScenario,
   updateDurations,
+  updateRoleList,
 };
