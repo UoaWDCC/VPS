@@ -28,7 +28,7 @@ export default function ManageGroupsPage() {
   };
 
   const handleFileUpload = (event) => {
-    // Handle file upload logic here
+    // TODO: add csv file upload handling here!
     console.log("File uploaded:", event.target.files[0]);
   };
 
