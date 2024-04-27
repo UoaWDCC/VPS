@@ -6,19 +6,24 @@ const getGroup = async (groupId) => {
 }
 
 const getCurrentScene = async (groupId) => {
+  try {
     const group = await Group.findById(groupId);
-    if(!group) {
-      throw new Error('Group not Found');
+    if (!group) {
+      throw new Error('Group not found');
     }
-    const currentSceneId = group.currentScene;
-    if(!currentSceneId) {
-      throw new Error('Current Scene not set for this group');
+    const path = group.path;
+    if (!path || path.length === 0) {
+      throw new Error('Path not set for this group');
     }
+    const currentSceneId = path[path.length - 1];
     const currentScene = await Scene.findById(currentSceneId);
-    if(!currentScene) {
+    if (!currentScene) {
       throw new Error('Current scene not found');
     }
     return currentScene;
+  } catch(error) {
+    throw error;
+  }
 };
 
 const addSceneToPath = async (groupId, sceneId) => {
