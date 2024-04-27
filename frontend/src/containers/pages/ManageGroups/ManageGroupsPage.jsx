@@ -9,6 +9,7 @@ import {
 } from "react-router-dom";
 import ScreenContainer from "components/ScreenContainer";
 import TopBar from "./TopBar";
+import GroupsTable from "./GroupTable";
 
 /**
  * Page that shows the groups that the admin can manipulate
@@ -35,16 +36,15 @@ export default function ManageGroupsPage() {
     console.log("downloading current group config as .CSV");
   }
 
-
   return (
     <ScreenContainer vertical>
-      <TopBar back = {`/scenario/${scenarioId}`}>
+      <TopBar back={`/scenario/${scenarioId}`}>
         <input
-            type="file"
-            ref={fileInputRef}
-            accept=".csv"
-            style={{ display: "none" }}
-            onChange={handleFileUpload}
+          type="file"
+          ref={fileInputRef}
+          accept=".csv"
+          style={{ display: "none" }}
+          onChange={handleFileUpload}
         />
         <Button
           className="btn top contained white"
@@ -63,6 +63,8 @@ export default function ManageGroupsPage() {
           Download
         </Button>
       </TopBar>
+
+      <GroupsTable />
 
       {/* On top of the action button available in the top menu bar, we also override user's rightclick context menu to offer the same functionality. */}
       {/* <div onContextMenu={handleContextMenu}>

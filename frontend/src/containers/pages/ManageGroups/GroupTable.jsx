@@ -10,11 +10,36 @@
  */
 
 export default function GroupsTable({
-  data = [],
+  data = [
+    { groupNumber: 1, nurse: "Alice", doctor: "Bob", pharmacist: "Charlie" },
+    { groupNumber: 2, nurse: "David", doctor: "Eve", pharmacist: "Frank" },
+    { groupNumber: 3, nurse: "Grace", doctor: "Henry", pharmacist: "Ivy" },
+    { groupNumber: 4, nurse: "Jack", doctor: "Kelly", pharmacist: "Liam" },
+  ],
 }) {
   return (
-      <div>
-        <h1>Put group table here, just place it with some mock data for now, do according to figma design</h1>
-      </div>
-    );
-  }
+    <div className="relative overflow-x-auto justify-center">
+      <h1 className="text-2xl font-bold mb-4 text-center">Group Table</h1>
+      <table>
+        <thead>
+          <tr>
+            <th>Group Number</th>
+            <th>Nurse</th>
+            <th>Doctor</th>
+            <th>Pharmacist</th>
+          </tr>
+        </thead>
+        <tbody>
+          {data.map((group) => (
+            <tr key={group.groupNumber}>
+              <td>{group.groupNumber}</td>
+              <td>{group.nurse}</td>
+              <td>{group.doctor}</td>
+              <td>{group.pharmacist}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}

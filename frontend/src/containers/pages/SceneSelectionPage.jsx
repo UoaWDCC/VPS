@@ -149,14 +149,13 @@ export function SceneSelectionPage({ data = null }) {
   function playScenario() {
     window.open(`/play/${scenarioId}`, "_blank");
   }
-  
+
   /** called when Groups button is clicked */
   function manageGroups() {
     console.log(url, scenarioId);
     history.push({
       pathname: `${url}/manage-groups`,
     });
-
   }
 
   /** called when user unfocuses from a scene name */
