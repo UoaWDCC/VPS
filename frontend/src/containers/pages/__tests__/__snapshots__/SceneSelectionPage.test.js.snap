@@ -39,49 +39,21 @@ exports[`Scene Selection page snapshot test 1`] = `
           <li
             class="listItem"
           >
-            <button
-              class="MuiButtonBase-root MuiButton-root WithStyles(ForwardRef(Button))-root-1 MuiButton-contained btn top contained   "
-              tabindex="0"
-              type="button"
-            >
-              <span
-                class="MuiButton-label"
-              >
-                Delete
-              </span>
-              <span
-                class="MuiTouchRipple-root"
-              />
-            </button>
-            <button
-              class="MuiButtonBase-root MuiButton-root MuiButton-contained btn top contained white   "
-              tabindex="0"
-              type="button"
-            >
-              <span
-                class="MuiButton-label"
-              >
-                Edit
-              </span>
-              <span
-                class="MuiTouchRipple-root"
-              />
-            </button>
-            <button
-              class="MuiButtonBase-root MuiButton-root MuiButton-contained btn top contained white   "
-              tabindex="0"
-              type="button"
-            >
-              <span
-                class="MuiButton-label"
-              >
-                Duplicate
-              </span>
-              <span
-                class="MuiTouchRipple-root"
-              />
-            </button>
             
+            <button
+              class="MuiButtonBase-root MuiButton-root MuiButton-contained btn top contained white"
+              tabindex="0"
+              type="button"
+            >
+              <span
+                class="MuiButton-label"
+              >
+                Groups
+              </span>
+              <span
+                class="MuiTouchRipple-root"
+              />
+            </button>
             <button
               class="MuiButtonBase-root MuiButton-root MuiButton-contained btn top contained white"
               tabindex="0"
@@ -157,7 +129,7 @@ exports[`Scene Selection page snapshot test 1`] = `
             style="margin: -15px;"
           >
             <li
-              class="MuiImageListItem-root makeStyles-listContainerItem-2"
+              class="MuiImageListItem-root makeStyles-listContainerItem-1"
               height="200"
               style="width: 20%; height: 240px; padding: 15px;"
             >
@@ -171,7 +143,7 @@ exports[`Scene Selection page snapshot test 1`] = `
                     style="position: relative;"
                   >
                     <div
-                      class="MuiBox-root MuiBox-root-3"
+                      class="MuiBox-root MuiBox-root-2"
                     />
                     <div
                       class="crossHorizontalLine"
@@ -189,7 +161,7 @@ exports[`Scene Selection page snapshot test 1`] = `
               </div>
             </li>
             <li
-              class="MuiImageListItem-root makeStyles-listContainerItem-2"
+              class="MuiImageListItem-root makeStyles-listContainerItem-1"
               height="200"
               style="width: 20%; height: 240px; padding: 15px;"
             >
@@ -200,7 +172,7 @@ exports[`Scene Selection page snapshot test 1`] = `
                   class="imageListItemWide"
                 >
                   <div
-                    class="MuiBox-root MuiBox-root-4"
+                    class="MuiBox-root MuiBox-root-3"
                   >
                     <div
                       data-testid="div-outer-wrapper"
@@ -242,7 +214,7 @@ exports[`Scene Selection page snapshot test 1`] = `
               </div>
             </li>
             <li
-              class="MuiImageListItem-root makeStyles-listContainerItem-2"
+              class="MuiImageListItem-root makeStyles-listContainerItem-1"
               height="200"
               style="width: 20%; height: 240px; padding: 15px;"
             >
@@ -253,7 +225,7 @@ exports[`Scene Selection page snapshot test 1`] = `
                   class="imageListItemWide"
                 >
                   <div
-                    class="MuiBox-root MuiBox-root-5"
+                    class="MuiBox-root MuiBox-root-4"
                   >
                     <div
                       data-testid="div-outer-wrapper"
