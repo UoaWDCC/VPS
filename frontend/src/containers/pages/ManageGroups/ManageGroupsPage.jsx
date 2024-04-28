@@ -19,6 +19,36 @@ import GroupsTable from "./GroupTable";
 
 export default function ManageGroupsPage() {
   const { scenarioId } = useParams();
+  const tableData = [
+    {
+      groupNumber: 1,
+      nurse: "Alice Cheng",
+      doctor: "Bob Marley",
+      pharmacist: "Charlie Puth",
+      progress: "50%",
+    },
+    {
+      groupNumber: 2,
+      nurse: "Alice Cheng",
+      doctor: "Bob Marley",
+      pharmacist: "Charlie Puth",
+      progress: "20%",
+    },
+    {
+      groupNumber: 3,
+      nurse: "Alice Cheng",
+      doctor: "Bob Marley",
+      pharmacist: "Charlie Puth",
+      progress: "0%",
+    },
+    {
+      groupNumber: 4,
+      nurse: "Alice Cheng",
+      doctor: "Bob Marley",
+      pharmacist: "Charlie Puth",
+      progress: "300%",
+    },
+  ];
 
   // File input is a hidden input element that is activated via a click handler
   // This allows us to have an UI button that acts like a file <input> element.
@@ -64,11 +94,8 @@ export default function ManageGroupsPage() {
         </Button>
       </TopBar>
 
-      <GroupsTable />
-
-      {/* On top of the action button available in the top menu bar, we also override user's rightclick context menu to offer the same functionality. */}
-      {/* <div onContextMenu={handleContextMenu}>
-      </div> */}
+      <GroupsTable data={tableData} />
+      
     </ScreenContainer>
   );
 }
