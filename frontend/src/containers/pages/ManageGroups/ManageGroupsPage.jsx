@@ -95,7 +95,6 @@ export default function ManageGroupsPage() {
       </TopBar>
 
       <GroupsTable data={tableData} />
-      
     </ScreenContainer>
   );
 }
