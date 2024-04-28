@@ -1,12 +1,6 @@
 import { Button } from "@material-ui/core";
-import { useContext, useEffect, useRef, useState } from "react";
-import {
-  Route,
-  Switch,
-  useHistory,
-  useParams,
-  useRouteMatch,
-} from "react-router-dom";
+import { useRef } from "react";
+import { useParams } from "react-router-dom";
 import ScreenContainer from "components/ScreenContainer";
 import TopBar from "./TopBar";
 import GroupsTable from "./GroupTable";
