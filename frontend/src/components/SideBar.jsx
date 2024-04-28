@@ -43,8 +43,8 @@ export default function SideBar() {
     await usePost(
       `/api/note/update`,
       {
-        noteId: "662b08ee2086be5494ad220d",
-        text: "Updated Note",
+        noteId: "662e5ee09a9ce31d1034db9d",
+        text: "Updated Note text",
         title: "Updated Note",
       },
       getUserIdToken
@@ -61,6 +61,17 @@ export default function SideBar() {
     );
     console.log(res);
     console.log("Note list retrieved");
+  }
+
+  async function deleteNote() {
+    await usePost(
+      `/api/note/delete`,
+      {
+        noteId: "662e5ee09a9ce31d1034db9d",
+        groupId: "661b848e95646e6a7c0ec2f6",
+      },
+      getUserIdToken
+    );
   }
 
   /** Calls backend end point to create a new empty scenario. */
@@ -173,6 +184,18 @@ export default function SideBar() {
               }}
             >
               Retrieve Note List
+            </Button>
+          </li>
+          <li>
+            <Button
+              className="btn side contained white"
+              color="default"
+              variant="contained"
+              onClick={() => {
+                deleteNote();
+              }}
+            >
+              delete note
             </Button>
           </li>
 

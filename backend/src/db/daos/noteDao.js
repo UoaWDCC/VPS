@@ -8,20 +8,28 @@ import Group from "../models/group";
  * @param {String} role role of the note
  * @returns
  */
-
 const createNote = async (groupId, title, role) => {
   const dbNote = new Note({ title: title, role: role });
   await dbNote.save();
   const updateQuery = {};
   updateQuery[`notes.${role}`] = dbNote._id;
-
   await Group.updateOne({ _id: groupId }, { $push: updateQuery });
-
   return dbNote;
 };
 
-const deleteNote = async (noteId) => {
+/**
+ * Deletes a note from the database
+ *  @param {String} noteId note ID
+ *  @param {String} groupId group ID
+ * @returns
+ */
+const deleteNote = async (noteId, groupId) => {
   const note = await Note.findById(noteId);
+  const updateQuery = {};
+  updateQuery[`notes.${note.role}`] = noteId;
+  //delete note from group
+  await Group.updateOne({ _id: groupId }, { $pull: updateQuery });
+  //delete note from note collection
   await note.delete();
 };
 
@@ -31,15 +39,12 @@ const deleteNote = async (noteId) => {
  * @param {{title: String, text: String, role: String}} updatedNote updated note object
  * @returns
  */
-
 const updateNote = async (noteId, updatedNote) => {
   const note = await Note.findById(noteId);
 
   note.title = updatedNote.title;
   note.text = updatedNote.text;
   note.date = updatedNote.date;
-  console.log(note);
-
   await note.save();
 
   return note;
@@ -50,7 +55,6 @@ const updateNote = async (noteId, updatedNote) => {
  * @param {String} noteId note ID
  * @returns database note object
  */
-
 const retrieveNote = async (noteId) => {
   const dbNote = await Note.findById(noteId);
 
@@ -58,18 +62,21 @@ const retrieveNote = async (noteId) => {
 };
 
 /**
- * Retrieves all notes of a given role of a group
+ * Retrieves all notes of a  group
  * @param {String} groupId group ID
- * @param {String} role role of the note
  * @returns list of database note objects
  */
-
 const retrieveNoteList = async (groupId) => {
   console.log(groupId);
   const dbGroup = await Group.findById(groupId);
   const allNotes = [];
   for (const noteIds of dbGroup.notes.values()) {
-    const dbNotes = await Note.find({ _id: { $in: noteIds } }, ["title"]);
+    const dbNotes = await Note.find({ _id: { $in: noteIds } }, [
+      "title",
+      "role",
+      "date",
+      "text",
+    ]);
 
     allNotes.push(...dbNotes);
   }
@@ -78,4 +85,4 @@ const retrieveNoteList = async (groupId) => {
   return allNotes;
 };
 
-export { createNote, updateNote, retrieveNoteList };
+export { createNote, updateNote, retrieveNoteList, deleteNote };

@@ -15,6 +15,10 @@ const noteSchema = new Schema({
     type: Date,
     required: false,
   },
+  role: {
+    type: String,
+    required: true,
+  },
 });
 
 const Note = mongoose.model("Note", noteSchema);

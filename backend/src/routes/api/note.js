@@ -3,6 +3,7 @@ import {
   createNote,
   updateNote,
   retrieveNoteList,
+  deleteNote,
 } from "../../db/daos/noteDao";
 
 const router = Router();
@@ -33,11 +34,10 @@ router.post("/update", async (req, res) => {
   res.status(HTTP_OK).json("note updated");
 });
 
-// Retrieve a note
-router.get("/:noteId", async (req, res) => {
-  const { noteId } = req.params;
-  const note = retrieveNote(noteId);
-  res.status(HTTP_OK).json(note);
+// Delete a note
+router.post("/delete", async (req, res) => {
+  const { noteId, groupId } = req.body;
+  deleteNote(noteId, groupId);
+  res.status(HTTP_OK).json("note deleted");
 });
-
 export default router;
