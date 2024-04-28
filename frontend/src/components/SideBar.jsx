@@ -50,6 +50,19 @@ export default function SideBar() {
       getUserIdToken
     );
   }
+
+  async function retrieveNoteList() {
+    const res = await usePost(
+      `/api/note/retrieveList`,
+      {
+        groupId: "661b848e95646e6a7c0ec2f6",
+      },
+      getUserIdToken
+    );
+    console.log(res);
+    console.log("Note list retrieved");
+  }
+
   /** Calls backend end point to create a new empty scenario. */
   async function createScenario(name = "no name") {
     const newScenario = await usePost(
@@ -148,6 +161,18 @@ export default function SideBar() {
               }}
             >
               Update note
+            </Button>
+          </li>
+          <li>
+            <Button
+              className="btn side contained white"
+              color="default"
+              variant="contained"
+              onClick={() => {
+                retrieveNoteList();
+              }}
+            >
+              Retrieve Note List
             </Button>
           </li>
 

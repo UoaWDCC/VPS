@@ -64,17 +64,18 @@ const retrieveNote = async (noteId) => {
  * @returns list of database note objects
  */
 
-const retrieveNoteList = async (groupId, role) => {
+const retrieveNoteList = async (groupId) => {
+  console.log(groupId);
   const dbGroup = await Group.findById(groupId);
+  const allNotes = [];
+  for (const noteIds of dbGroup.notes.values()) {
+    const dbNotes = await Note.find({ _id: { $in: noteIds } }, ["title"]);
 
-  const dbNotes = await Note.find({ _id: { $in: dbGroup.notes[role] } }, [
-    "title",
-    "role",
-  ]);
+    allNotes.push(...dbNotes);
+  }
 
-  console.log(dbNotes);
-
-  return dbNotes;
+  console.log(allNotes);
+  return allNotes;
 };
 
-export { createNote, updateNote };
+export { createNote, updateNote, retrieveNoteList };
