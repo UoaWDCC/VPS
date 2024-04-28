@@ -6,16 +6,20 @@ const router = Router();
 
 const HTTP_OK = 200;
 const HTTP_CONFLICT = 409
+const HTTP_NOT_FOUND = 404;
 
 // add a scene to the group's shared path
 router.post("/path/:groupId", async (req, res) => {
   const { currentSceneId, nextSceneId } = req.body;
+  const groupId = req.params.groupId;
+
   // in case someone's still behind the current scene
-  if (!currentSceneId === getCurrentScene()._id) {
+  const storedCurrScene = await getCurrentScene(groupId);
+  if (storedCurrScene !== null && currentSceneId !== storedCurrScene._id.toString()) {
     return res.status(HTTP_CONFLICT).json({ error: 'Scene mismatch b/w client and server' });
   }
   try {
-    await addSceneToPath(req.params.groupId, nextSceneId);
+    await addSceneToPath(groupId, nextSceneId);
     return res.status(HTTP_OK).json("Scene added to path");
   } catch (error) {
     return res.status(HTTP_CONFLICT).json({ error: 'Scene mismatch b/w client and server' });
@@ -29,7 +33,7 @@ router.get("/path/:groupId", async (req, res) => {
       const currentScene = await getCurrentScene(groupId);
       return res.status(HTTP_OK).json(currentScene);
     } catch(error) {
-      return res.status(HTTP_CONFLICT).json({ error: 'Error getting current scene' });
+      return res.status(HTTP_NOT_FOUND).json({ error: error.message });
     }
 });
 
