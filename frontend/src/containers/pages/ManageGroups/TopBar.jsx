@@ -1,5 +1,5 @@
 import Button from "@material-ui/core/Button";
-import { Link, useHistory } from "react-router-dom";
+import { Link } from "react-router-dom";
 
 import styles from "../../../styling/TopBar.module.scss";
 
@@ -16,8 +16,6 @@ import styles from "../../../styling/TopBar.module.scss";
  * )
  */
 export default function TopBar({ back = "/", children = [] }) {
-  const history = useHistory();
-
   return (
     <>
       <div className={styles.topBar}>

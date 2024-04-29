@@ -39,9 +39,6 @@ export function SceneSelectionPage({ data = null }) {
   // File input is a hidden input element that is activated via a click handler
   // This allows us to have an UI button that acts like a file <input> element.
   const fileInputRef = useRef(null);
-  const handCSVClick = () => {
-    fileInputRef.current.click();
-  };
   const handleFileChange = (e) => {
     const selectedFile = e.target.files[0];
     Papa.parse(selectedFile, {
@@ -227,18 +224,6 @@ export function SceneSelectionPage({ data = null }) {
         >
           Share
         </Button>
-        {VpsUser.role === AccessLevel.STAFF ? (
-          <Button
-            className="btn top contained white"
-            color="default"
-            variant="outlined"
-            onClick={() => handCSVClick(true)}
-          >
-            Upload CSV
-          </Button>
-        ) : (
-          ""
-        )}
         <input
           type="file"
           ref={fileInputRef}
