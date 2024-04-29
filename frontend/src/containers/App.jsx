@@ -12,6 +12,7 @@ import DashboardPage from "./pages/Dashboard/DashboardPage";
 import LoginPage from "./pages/LoginPage";
 import PlayScenarioPage from "./pages/PlayScenarioPage/PlayScenarioPage";
 import ScenarioSelectionPage from "./pages/ScenarioSelectionPage";
+import ManageGroupsPage from "./pages/ManageGroups/ManageGroupsPage";
 import { ScenePage } from "./pages/SceneSelectionPage";
 import theme from "./theme/App.theme";
 
@@ -36,13 +37,18 @@ export default function App() {
                 </ScenarioContextProvider>
               </ProtectedRoute>
 
-              <ProtectedRoute path="/scenario/:scenarioId">
-                <ScenarioContextProvider>
-                  <SceneContextProvider>
-                    <ScenePage />
-                  </SceneContextProvider>
-                </ScenarioContextProvider>
-              </ProtectedRoute>
+              <ScenarioContextProvider>
+                <Switch>
+                  <ProtectedRoute index path="/scenario/:scenarioId">
+                    <SceneContextProvider>
+                      <ScenePage />
+                    </SceneContextProvider>
+                    <ProtectedRoute path="/scenario/:scenarioId/manage-groups">
+                      <ManageGroupsPage />
+                    </ProtectedRoute>
+                  </ProtectedRoute>
+                </Switch>
+              </ScenarioContextProvider>
 
               <ProtectedRoute
                 path="/dashboard"
