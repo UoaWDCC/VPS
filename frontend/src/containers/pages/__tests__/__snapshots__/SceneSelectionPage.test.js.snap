@@ -82,7 +82,6 @@ exports[`Scene Selection page snapshot test 1`] = `
                 class="MuiTouchRipple-root"
               />
             </button>
-            
             <input
               accept=".csv"
               style="display: none;"
