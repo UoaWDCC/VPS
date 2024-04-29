@@ -9,52 +9,29 @@ import styles from "../../../styling/TopBar.module.scss";
  * @component
  * @example
  * const back = "/"
- * const confirmModel = true
  * return (
- *   <TopBar back={back} confirmModel={confirmModel}>
+ *   <TopBar back={back} >
  *     { ... }
  *   </TopBar>
  * )
  */
-export default function TopBar({
-  back = "/",
-  children = [],
-  confirmModal = false,
-}) {
+export default function TopBar({ back = "/", children = [] }) {
   const history = useHistory();
-
-  /**
-   * Function for changing variables to their appropriate states when the back button is pressed.
-   */
-  function handleLeaveAuthoringTool() {
-    history.push("/");
-  }
 
   return (
     <>
       <div className={styles.topBar}>
         <ul className={styles.leftTopBarList}>
           <li className={styles.listItem}>
-            {confirmModal ? (
-              <Button
-                className="btn top outlined white"
-                color="default"
-                variant="outlined"
-                onClick={handleLeaveAuthoringTool}
-              >
-                Back
-              </Button>
-            ) : (
-              <Button
-                className="btn top outlined white"
-                color="default"
-                variant="outlined"
-                component={Link}
-                to={back}
-              >
-                Back
-              </Button>
-            )}
+            <Button
+              className="btn top outlined white"
+              color="default"
+              variant="outlined"
+              component={Link}
+              to={back}
+            >
+              Back
+            </Button>
           </li>
         </ul>
         <ul className={styles.rightTopBarList}>
