@@ -9,7 +9,7 @@ import styles from "../../../../styling/CanvasSideBar.module.scss";
 const CustomTextField = withStyles({
   root: {
     marginTop: "0.5em",
-    marginBottom: "1.5em",
+    marginBottom: "1em",
 
     "& label.Mui-focused": {
       color: "#0080a7 ",
@@ -46,7 +46,7 @@ export default function SceneSettings() {
           />
           {/* input for scene timer duration */}
           <CustomTextField
-            label="Scene Timer Duration"
+            label="Scene Timer"
             type="number"
             value={currentScene?.time || ""}
             fullWidth

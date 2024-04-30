@@ -16,7 +16,7 @@ export default function ComponentProperties() {
   return (
     <>
       <div className={styles.componentPropertiesContainer}>
-        <h1 className={styles.sideBarHeader}>Component Properties</h1>
+        <h1 className={styles.sideBarHeader}>Properties</h1>
         <div
           className={`${styles.sideBarBody} ${
             select === null ? styles.empty : ""
