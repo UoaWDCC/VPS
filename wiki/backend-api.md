@@ -200,10 +200,112 @@ Returns:
 ```
 
 ## Notes
+
 \* Requires authorisation header
 
 ```
 headers: {
       Authorization: `Bearer ${firebase-token}`,
     }
+```
+
+**Create note in a group with given groupId, title and a role**
+
+`POST /api/note`
+
+Body:
+
+```
+
+{
+    "groupId":  "f38u8d09j012",
+    "title":    "Doctor's note",
+    "role":     "Doctor"
+}
+
+```
+
+Returns:
+
+```
+{
+    "note created"
+}
+```
+
+**Update a note with given noteId, text and title**
+
+`POST /api/note/update`
+
+Body:
+
+```
+
+{
+    "noteId":  "f38u8d09j012",
+    "title":    "Doctor's note",
+    "text":     "Give him water"
+}
+
+```
+
+Returns:
+
+```
+{
+    "note updated"
+}
+```
+
+**Retrieve all notes in a group with given groupId**
+
+`POST /api/note/retrieveList`
+
+Body:
+
+```
+
+{
+    "groupId":  "f38u8d09j012",
+}
+
+```
+
+Returns:
+
+```
+{
+    "note updated"
+}
+```
+
+**Delete a notes in a group with given noteId and groupId**
+
+`POST /api/note/delete`
+
+Body:
+
+```
+
+{
+    "noteId":   "f38u8d09j012",
+    "groupId":  "f38u8d09j012",
+}
+
+```
+
+Returns:
+
+```
+{
+    {
+        "title":    "Doctor's note",
+        "role":     "Doctor",
+        "date":     "date object",
+        "text":     "note content"
+    },
+    {
+        more notes
+    }
+}
 ```
