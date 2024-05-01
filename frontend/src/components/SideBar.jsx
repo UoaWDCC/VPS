@@ -106,8 +106,9 @@ export default function SideBar() {
           {VpsUser.role === AccessLevel.STAFF ? (
             <li>
               <Button
-                className={`btn side contained white ${currentScenario ? "" : "disabled"
-                  }  `}
+                className={`btn side contained white ${
+                  currentScenario ? "" : "disabled"
+                }  `}
                 color="default"
                 variant="contained"
                 onClick={openDashboard}
@@ -121,8 +122,9 @@ export default function SideBar() {
           )}
           <li>
             <Button
-              className={`btn side contained white ${currentScenario ? "" : "disabled"
-                }  `}
+              className={`btn side contained white ${
+                currentScenario ? "" : "disabled"
+              }  `}
               color="default"
               variant="contained"
               onClick={playScenario}
@@ -133,8 +135,9 @@ export default function SideBar() {
           </li>
           <li>
             <Button
-              className={`btn side contained white ${currentScenario ? "" : "disabled"
-                }  `}
+              className={`btn side contained white ${
+                currentScenario ? "" : "disabled"
+              }  `}
               color="default"
               variant="contained"
               component={Link}
