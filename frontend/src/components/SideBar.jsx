@@ -27,53 +27,6 @@ export default function SideBar() {
   );
   const history = useHistory();
 
-  async function createNote() {
-    await usePost(
-      `/api/note`,
-      {
-        groupId: "661b848e95646e6a7c0ec2f6",
-        title: "New Note",
-        role: "Doctor",
-      },
-      getUserIdToken
-    );
-  }
-
-  async function updateNote() {
-    await usePost(
-      `/api/note/update`,
-      {
-        noteId: "662e5ee09a9ce31d1034db9d",
-        text: "Updated Note text",
-        title: "Updated Note",
-      },
-      getUserIdToken
-    );
-  }
-
-  async function retrieveNoteList() {
-    const res = await usePost(
-      `/api/note/retrieveList`,
-      {
-        groupId: "661b848e95646e6a7c0ec2f6",
-      },
-      getUserIdToken
-    );
-    console.log(res);
-    console.log("Note list retrieved");
-  }
-
-  async function deleteNote() {
-    await usePost(
-      `/api/note/delete`,
-      {
-        noteId: "662e5ee09a9ce31d1034db9d",
-        groupId: "661b848e95646e6a7c0ec2f6",
-      },
-      getUserIdToken
-    );
-  }
-
   /** Calls backend end point to create a new empty scenario. */
   async function createScenario(name = "no name") {
     const newScenario = await usePost(
@@ -150,61 +103,11 @@ export default function SideBar() {
               Create
             </Button>
           </li>
-          <li>
-            <Button
-              className="btn side contained white"
-              color="default"
-              variant="contained"
-              onClick={() => {
-                createNote();
-              }}
-            >
-              Create note
-            </Button>
-          </li>
-          <li>
-            <Button
-              className="btn side contained white"
-              color="default"
-              variant="contained"
-              onClick={() => {
-                updateNote();
-              }}
-            >
-              Update note
-            </Button>
-          </li>
-          <li>
-            <Button
-              className="btn side contained white"
-              color="default"
-              variant="contained"
-              onClick={() => {
-                retrieveNoteList();
-              }}
-            >
-              Retrieve Note List
-            </Button>
-          </li>
-          <li>
-            <Button
-              className="btn side contained white"
-              color="default"
-              variant="contained"
-              onClick={() => {
-                deleteNote();
-              }}
-            >
-              delete note
-            </Button>
-          </li>
-
           {VpsUser.role === AccessLevel.STAFF ? (
             <li>
               <Button
-                className={`btn side contained white ${
-                  currentScenario ? "" : "disabled"
-                }  `}
+                className={`btn side contained white ${currentScenario ? "" : "disabled"
+                  }  `}
                 color="default"
                 variant="contained"
                 onClick={openDashboard}
@@ -218,9 +121,8 @@ export default function SideBar() {
           )}
           <li>
             <Button
-              className={`btn side contained white ${
-                currentScenario ? "" : "disabled"
-              }  `}
+              className={`btn side contained white ${currentScenario ? "" : "disabled"
+                }  `}
               color="default"
               variant="contained"
               onClick={playScenario}
@@ -231,9 +133,8 @@ export default function SideBar() {
           </li>
           <li>
             <Button
-              className={`btn side contained white ${
-                currentScenario ? "" : "disabled"
-              }  `}
+              className={`btn side contained white ${currentScenario ? "" : "disabled"
+                }  `}
               color="default"
               variant="contained"
               component={Link}
