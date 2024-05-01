@@ -275,7 +275,16 @@ Returns:
 
 ```
 {
-    "note updated"
+    {
+        "_id":      "a8j3ih8f303",
+        "title":    "Doctor's note",
+        "role":     "Doctor",
+        "date":     "date object",
+        "text":     "note content"
+    },
+    {
+        more notes
+    }
 }
 ```
 
@@ -298,14 +307,6 @@ Returns:
 
 ```
 {
-    {
-        "title":    "Doctor's note",
-        "role":     "Doctor",
-        "date":     "date object",
-        "text":     "note content"
-    },
-    {
-        more notes
-    }
+    "note deleted"
 }
 ```
