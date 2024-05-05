@@ -10,7 +10,6 @@ import {
   useRouteMatch,
 } from "react-router-dom";
 import ContextMenu from "../../components/ContextMenu";
-import DeleteButton from "../../components/DeleteButton";
 import HelpButton from "../../components/HelpButton";
 import ScreenContainer from "../../components/ScreenContainer";
 import ShareModal from "../../components/ShareModal";
@@ -40,9 +39,6 @@ export function SceneSelectionPage({ data = null }) {
   // File input is a hidden input element that is activated via a click handler
   // This allows us to have an UI button that acts like a file <input> element.
   const fileInputRef = useRef(null);
-  const handCSVClick = () => {
-    fileInputRef.current.click();
-  };
   const handleFileChange = (e) => {
     const selectedFile = e.target.files[0];
     Papa.parse(selectedFile, {
@@ -151,6 +147,14 @@ export function SceneSelectionPage({ data = null }) {
     window.open(`/play/${scenarioId}`, "_blank");
   }
 
+  /** called when Groups button is clicked */
+  function manageGroups() {
+    console.log(url, scenarioId);
+    history.push({
+      pathname: `${url}/manage-groups`,
+    });
+  }
+
   /** called when user unfocuses from a scene name */
   async function changeSceneName({ target }) {
     // Prevents user from changing scene name to empty string or one of only spaces
@@ -184,37 +188,6 @@ export function SceneSelectionPage({ data = null }) {
   return (
     <ScreenContainer vertical>
       <TopBar>
-        <DeleteButton
-          className={`btn top contained ${currentScene ? "" : "disabled"}  `}
-          color="default"
-          variant="contained"
-          disabled={!currentScene}
-          onClick={deleteScene}
-        >
-          Delete
-        </DeleteButton>
-        <Button
-          className={`btn top contained white ${
-            currentScene ? "" : "disabled"
-          }  `}
-          color="default"
-          variant="contained"
-          disabled={!currentScene}
-          onClick={editScene}
-        >
-          Edit
-        </Button>
-        <Button
-          className={`btn top contained white ${
-            currentScene ? "" : "disabled"
-          }  `}
-          color="default"
-          variant="contained"
-          disabled={!currentScene}
-          onClick={duplicateScene}
-        >
-          Duplicate
-        </Button>
         {VpsUser.role === AccessLevel.STAFF ? (
           <Button
             className="btn top contained white"
@@ -231,6 +204,14 @@ export function SceneSelectionPage({ data = null }) {
           className="btn top contained white"
           color="default"
           variant="contained"
+          onClick={manageGroups}
+        >
+          Groups
+        </Button>
+        <Button
+          className="btn top contained white"
+          color="default"
+          variant="contained"
           onClick={playScenario}
         >
           Play
@@ -243,18 +224,6 @@ export function SceneSelectionPage({ data = null }) {
         >
           Share
         </Button>
-        {VpsUser.role === AccessLevel.STAFF ? (
-          <Button
-            className="btn top contained white"
-            color="default"
-            variant="outlined"
-            onClick={() => handCSVClick(true)}
-          >
-            Upload CSV
-          </Button>
-        ) : (
-          ""
-        )}
         <input
           type="file"
           ref={fileInputRef}
