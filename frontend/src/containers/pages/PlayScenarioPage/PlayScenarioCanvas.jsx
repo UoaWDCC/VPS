@@ -1,4 +1,8 @@
 import CountdownTimer from "../../../components/TimerComponent";
+import NotesDisplayCard from "../../../components/NotesDisplayCard";
+import AuthenticationContext from "../../../context/AuthenticationContext";
+import PlayScenarioContext from "../../../context/PlayScenarioContext";
+import { useGet, usePut } from "../../../hooks/crudHooks";
 import componentResolver from "./componentResolver";
 import ProgressBar from "./progressBar";
 
@@ -26,6 +30,7 @@ export default function PlayScenarioCanvas({ progress, scene, incrementor }) {
           sceneTime={scene.time}
         />
       )}
+      <NotesDisplayCard />
     </>
   );
 }
