@@ -29,7 +29,7 @@ export default function PlayScenarioCanvas({ progress, scene, incrementor }) {
           )}
           sceneTime={scene.time}
         />
-      )}
+      ) : null}
       <NotesDisplayCard />
     </>
   );
