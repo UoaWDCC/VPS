@@ -17,30 +17,26 @@ export default function ManageGroupsPage() {
     {
       groupNumber: 1,
       nurse: "Alice Cheng",
-      doctor: "Bob Marley",
+      doctor: "Johnathon Stone",
       pharmacist: "Charlie Puth",
-      progress: "50%",
     },
     {
       groupNumber: 2,
       nurse: "Alice Cheng",
       doctor: "Bob Marley",
       pharmacist: "Charlie Puth",
-      progress: "20%",
     },
     {
       groupNumber: 3,
       nurse: "Alice Cheng",
-      doctor: "Bob Marley",
-      pharmacist: "Charlie Puth",
-      progress: "0%",
+      doctor: "Tony Stark",
+      pharmacist: "Victoria Secret",
     },
     {
       groupNumber: 4,
-      nurse: "Alice Cheng",
-      doctor: "Bob Marley",
-      pharmacist: "Charlie Puth",
-      progress: "300%",
+      nurse: "Mister Run Fast",
+      doctor: "Tester no24",
+      pharmacist: "Radioactive Waste",
     },
   ];
 
@@ -56,10 +52,47 @@ export default function ManageGroupsPage() {
     console.log("File uploaded:", event.target.files[0]);
   };
 
-  function download() {
-    console.log("downloading current group config as .CSV");
-  }
 
+  const convertToCSV = (tableData) => {
+    const headers = "email,first name,last name,playable link\n";
+    let csv = headers;
+  
+    tableData.forEach((row) => {
+      const { nurse, doctor, pharmacist, groupNumber } = row;
+      const emails = [nurse, doctor, pharmacist]
+        .filter(Boolean) // Filter out falsy values (e.g., undefined, null)
+        .map((role) => `${role.replace(/\s/g, '')}@example.com`);
+      const names = [nurse, doctor, pharmacist]
+        .filter(Boolean)
+        .map((role) => {
+          const split_name = role.split(' ');
+          const firstName = split_name[0];
+          const lastName = split_name[split_name.length - 1];
+          return `${firstName},${lastName}`;
+        });
+      const playableLinks = [nurse, doctor, pharmacist]
+        .filter(Boolean)
+        .map(() => `https://vps-dev.wdcc.co.nz/play/${scenarioId}/${row.groupNumber}`);
+  
+      emails.forEach((email, index) => {
+        csv += `${email},${names[index]},${playableLinks[index]}\n`;
+      });
+    });
+  
+    return csv;
+  };
+
+  const download = (csv) => {
+    const url = window.URL.createObjectURL(new Blob([csv], { type: 'text/csv' }));
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'groups_data.csv';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    window.URL.revokeObjectURL(url);
+  };
+  
   return (
     <ScreenContainer vertical>
       <TopBar back={`/scenario/${scenarioId}`}>
