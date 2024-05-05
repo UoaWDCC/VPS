@@ -17,26 +17,30 @@ export default function ManageGroupsPage() {
     {
       groupNumber: 1,
       nurse: "Alice Cheng",
-      doctor: "Johnathon Stone",
+      doctor: "Bob Marley",
       pharmacist: "Charlie Puth",
+      progress: "50%",
     },
     {
       groupNumber: 2,
       nurse: "Alice Cheng",
       doctor: "Bob Marley",
       pharmacist: "Charlie Puth",
+      progress: "20%",
     },
     {
       groupNumber: 3,
       nurse: "Alice Cheng",
-      doctor: "Tony Stark",
-      pharmacist: "Victoria Secret",
+      doctor: "Bob Marley",
+      pharmacist: "Charlie Puth",
+      progress: "0%",
     },
     {
       groupNumber: 4,
-      nurse: "Mister Run Fast",
-      doctor: "Tester no24",
-      pharmacist: "Radioactive Waste",
+      nurse: "Alice Cheng",
+      doctor: "Bob Marley",
+      pharmacist: "Charlie Puth",
+      progress: "300%",
     },
   ];
 
@@ -52,38 +56,29 @@ export default function ManageGroupsPage() {
     console.log("File uploaded:", event.target.files[0]);
   };
 
-
   const convertToCSV = (tableData) => {
-    const headers = "email,first name,last name,playable link\n";
+    const headers = "email,first name,last name,group number,playable link\n";
     let csv = headers;
-  
+
     tableData.forEach((row) => {
-      const { nurse, doctor, pharmacist, groupNumber } = row;
-      const emails = [nurse, doctor, pharmacist]
-        .filter(Boolean) // Filter out falsy values (e.g., undefined, null)
-        .map((role) => `${role.replace(/\s/g, '')}@example.com`);
-      const names = [nurse, doctor, pharmacist]
-        .filter(Boolean)
-        .map((role) => {
-          const split_name = role.split(' ');
+      for (const prop in row) {
+        if (typeof row[prop] == 'string') {
+          const email = `${row[prop].replace(/\s/g, '')}@aucklanduni.ac.nz`; // Assuming email pattern
+          const split_name = row[prop].split(' ')
           const firstName = split_name[0];
           const lastName = split_name[split_name.length - 1];
-          return `${firstName},${lastName}`;
-        });
-      const playableLinks = [nurse, doctor, pharmacist]
-        .filter(Boolean)
-        .map(() => `https://vps-dev.wdcc.co.nz/play/${scenarioId}/${row.groupNumber}`);
-  
-      emails.forEach((email, index) => {
-        csv += `${email},${names[index]},${playableLinks[index]}\n`;
-      });
+          const playableLink = `https://vps-dev.wdcc.co.nz/play/${scenarioId}/${row.groupNumber}`;
+          csv += `${email},${firstName},${lastName},${playableLink}\n`;
+        }
+      }
     });
-  
     return csv;
   };
 
-  const download = (csv) => {
-    const url = window.URL.createObjectURL(new Blob([csv], { type: 'text/csv' }));
+  const download = () => {
+    const csv = convertToCSV(tableData);
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
     a.download = 'groups_data.csv';
@@ -92,7 +87,7 @@ export default function ManageGroupsPage() {
     document.body.removeChild(a);
     window.URL.revokeObjectURL(url);
   };
-  
+
   return (
     <ScreenContainer vertical>
       <TopBar back={`/scenario/${scenarioId}`}>
