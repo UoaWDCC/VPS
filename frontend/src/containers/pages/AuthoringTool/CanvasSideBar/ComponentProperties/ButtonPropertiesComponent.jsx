@@ -31,6 +31,7 @@ export default function ButtonPropertiesComponent({
         <CustomInputLabel shrink>Z Position</CustomInputLabel>
         <CustomTextField
           type="number"
+          value={component?.zIndex || 0}
           onChange={(event) => {
             if (event.target.value) {
               console.log(event.target.value);
