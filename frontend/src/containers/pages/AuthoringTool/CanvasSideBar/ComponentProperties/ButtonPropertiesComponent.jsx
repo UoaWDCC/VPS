@@ -29,20 +29,19 @@ export default function ButtonPropertiesComponent({
     <>
       <FormControl fullWidth className={styles.componentProperty}>
         <CustomInputLabel shrink>Z Position</CustomInputLabel>
-        <Select
-          className={styles.selectInput}
-          value={component.zPosition}
-          onChange={(event) =>
-            updateComponentProperty(
-              componentIndex,
-              "zIndex",
-              event.target.value
-            )
-          }
-        >
-          <MenuItem value={0}>0</MenuItem>
-          <MenuItem value={100}>100</MenuItem>
-        </Select>
+        <CustomTextField
+          type="number"
+          onChange={(event) => {
+            if (event.target.value) {
+              console.log(event.target.value);
+              updateComponentProperty(
+                componentIndex,
+                "zIndex",
+                event.target.value
+              );
+            }
+          }}
+        />
       </FormControl>
       <CustomTextField
         label="Text"
