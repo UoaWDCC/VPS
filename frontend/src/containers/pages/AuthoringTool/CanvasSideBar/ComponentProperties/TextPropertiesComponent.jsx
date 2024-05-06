@@ -47,6 +47,23 @@ export default function TextPropertiesComponent({ component, componentIndex }) {
   return (
     <>
       <FormControl fullWidth className={styles.componentProperty}>
+        <CustomInputLabel shrink>Z Position</CustomInputLabel>
+        <Select
+          className={styles.selectInput}
+          value={component.zPosition}
+          onChange={(event) =>
+            updateComponentProperty(
+              componentIndex,
+              "zIndex",
+              event.target.value
+            )
+          }
+        >
+          <MenuItem value={0}>0</MenuItem>
+          <MenuItem value={100}>100</MenuItem>
+        </Select>
+      </FormControl>
+      <FormControl fullWidth className={styles.componentProperty}>
         <CustomInputLabel shrink>Text</CustomInputLabel>
         <OutlinedInput
           className={textComponentStyles.textArea}

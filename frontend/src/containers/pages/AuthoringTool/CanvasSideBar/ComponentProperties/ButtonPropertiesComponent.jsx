@@ -27,6 +27,23 @@ export default function ButtonPropertiesComponent({
 
   return (
     <>
+      <FormControl fullWidth className={styles.componentProperty}>
+        <CustomInputLabel shrink>Z Position</CustomInputLabel>
+        <Select
+          className={styles.selectInput}
+          value={component.zPosition}
+          onChange={(event) =>
+            updateComponentProperty(
+              componentIndex,
+              "zIndex",
+              event.target.value
+            )
+          }
+        >
+          <MenuItem value={0}>0</MenuItem>
+          <MenuItem value={100}>100</MenuItem>
+        </Select>
+      </FormControl>
       <CustomTextField
         label="Text"
         value={component.text}
