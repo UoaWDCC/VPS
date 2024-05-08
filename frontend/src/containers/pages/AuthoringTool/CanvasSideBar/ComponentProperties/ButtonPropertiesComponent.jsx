@@ -71,7 +71,7 @@ export default function ButtonPropertiesComponent({
         </Select>
       </FormControl>
       <FormControl fullWidth className={styles.componentProperty}>
-        <CustomInputLabel shrink>Next Scene</CustomInputLabel>
+        <CustomInputLabel shrink>Linked Scene</CustomInputLabel>
         <Select
           className={styles.selectInput}
           value={component.nextScene}
