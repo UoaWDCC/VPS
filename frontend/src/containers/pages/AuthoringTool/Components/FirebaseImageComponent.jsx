@@ -28,7 +28,10 @@ export default function FirebaseImageComponent({ id, onClick, component }) {
       id={id}
       src={component.url}
       imageStyle={imageStyles(component)}
-      style={imageContainerStyles()}
+      style={{
+        ...imageContainerStyles(),
+        zIndex: component?.zPosition || 0,
+      }}
       onClick={onClick}
       onLoad={setSize}
     />

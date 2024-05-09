@@ -33,7 +33,10 @@ export default function ImageComponent({ id, onClick, component }) {
       id={id}
       src={image ? image.url : ""}
       imageStyle={imageStyles(component)}
-      style={imageContainerStyles()}
+      style={{
+        ...imageContainerStyles(),
+        zIndex: component?.zPosition || 0,
+      }}
       onClick={onClick}
     />
   );

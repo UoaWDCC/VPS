@@ -68,6 +68,7 @@ export default function SpeechTextComponent({ id, onClick, component }) {
         display: "flex",
         flexDirection: arrowLocationStyles.flexDirection,
         minWidth: speechTextboxArrowWidth + speechboxWidthOffset, // speechbox slightly wider than arrow
+        zIndex: component?.zPosition || 0,
       }}
       onClick={onClick}
       onDoubleClick={() => textRef?.current?.focus()}

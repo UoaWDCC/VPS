@@ -16,7 +16,12 @@ export default function FirebaseAudioComponent({ id, onClick, component }) {
   const styles = useStyles(component);
 
   return (
-    <Box className={styles.defaultComponentStyling} id={id} onClick={onClick}>
+    <Box
+      style={{ zIndex: component?.zPosition || 0 }}
+      className={styles.defaultComponentStyling}
+      id={id}
+      onClick={onClick}
+    >
       <VolumeUpIcon
         className={styles.audioComponentStyles}
         fontSize="inherit"

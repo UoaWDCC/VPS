@@ -96,6 +96,25 @@ export default function ButtonPropertiesComponent({
           })}
         </Select>
       </FormControl>
+      <FormControl fullWidth className={styles.componentProperty}>
+        <CustomTextField
+          label="Z Axis Position"
+          type="number"
+          value={component?.zPosition}
+          fullWidth
+          onChange={(event) =>
+            updateComponentProperty(
+              componentIndex,
+              "zPosition",
+              event.target.value
+            )
+          }
+          InputLabelProps={{
+            // label moves up whenever there is input
+            shrink: !!component.zPosition,
+          }}
+        />
+      </FormControl>
     </>
   );
 }

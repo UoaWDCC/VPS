@@ -10,10 +10,12 @@ import PlayArrowIcon from "@material-ui/icons/PlayArrowRounded";
 import { useContext, useEffect, useState } from "react";
 import SceneContext from "../../../../../context/SceneContext";
 import CustomCheckBoxStyles from "../CustomPropertyInputStyles/CustomCheckBoxStyles";
+import CustomTextFieldStyles from "../CustomPropertyInputStyles/CustomTextFieldStyles";
 
 import styles from "../../../../../styling/CanvasSideBar.module.scss";
 import useStyles from "./FirebaseAudioPropertiesComponent.styles";
 
+const CustomTextField = CustomTextFieldStyles()(TextField);
 const CustomCheckBox = CustomCheckBoxStyles()(Checkbox);
 
 /**
@@ -100,6 +102,25 @@ export default function FirebaseAudioPropertiesComponent({
             />
           }
           label="Loop"
+        />
+      </FormControl>
+      <FormControl fullWidth className={styles.componentProperty}>
+        <CustomTextField
+          label="Z Axis Position"
+          type="number"
+          value={component?.zPosition}
+          fullWidth
+          onChange={(event) =>
+            updateComponentProperty(
+              componentIndex,
+              "zPosition",
+              event.target.value
+            )
+          }
+          InputLabelProps={{
+            // label moves up whenever there is input
+            shrink: !!component.zPosition,
+          }}
         />
       </FormControl>
     </div>
