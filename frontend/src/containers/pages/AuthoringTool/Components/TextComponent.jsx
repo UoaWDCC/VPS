@@ -27,6 +27,7 @@ export default function TextComponent({ id, onClick, component }) {
       id={id}
       onClick={onClick}
       onDoubleClick={() => textRef?.current?.focus()}
+      style={{ zIndex: component?.zPosition || "0" }}
     >
       {component.text}
     </Typography>
