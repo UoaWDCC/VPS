@@ -1,5 +1,6 @@
 import { React, useState } from "react";
 import styles from "../styling/NotesDisplayCard.module.scss";
+import Note from "./Note";
 
 export default function NotesDisplayCard() {
   const [name, setName] = useState("default name");
@@ -44,6 +45,10 @@ export default function NotesDisplayCard() {
           <div className={styles.noteCard}>
             {" "}
             <h1>Display notes here</h1>
+            <Note />
+            <Note />
+            <Note />
+            <Note />
           </div>
         </div>
       )}
