@@ -23,6 +23,7 @@
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
+  display: flex;
   background-color: rgb(255, 255, 255);
   border: 5px solid #515151;
   padding: 20px;
@@ -32,10 +33,9 @@
   opacity: 1;
   transition: visibility 0s, opacity 0.5s linear;
   z-index: 2;
-  display: flex;
   width: 70%;
   height: 70%;
-  flex-direction: column;
+  flex-direction: row;
   align-items: center;
 }
 

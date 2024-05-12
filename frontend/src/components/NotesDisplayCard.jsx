@@ -43,8 +43,6 @@ export default function NotesDisplayCard() {
           />
 
           <div className={styles.noteCard}>
-            {" "}
-            <h1>Display notes here</h1>
             <Note />
             <Note />
             <Note />
