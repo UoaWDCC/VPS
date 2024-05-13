@@ -1,7 +1,7 @@
 import { React, useState } from "react";
 import styles from "../styling/Note.module.scss";
 
-export default function NotesDisplayCard() {
+export default function Note({ title, content, date, role }) {
   const [name, setName] = useState("default name");
   const [open, setOpen] = useState(false);
 
@@ -22,7 +22,10 @@ export default function NotesDisplayCard() {
   return (
     <>
       <button type="button" onClick={handleOpen} className={styles.note}>
-        Notes
+        {title ? <p>{title}</p> : "Untitled Note"}
+        {role ? <p>{role}</p> : ""}
+        <p>{content}</p>
+        <p>{date}</p>
       </button>
     </>
   );
