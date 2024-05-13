@@ -21,12 +21,33 @@ export default function Note({ title, content, date, role }) {
 
   return (
     <>
-      <button type="button" onClick={handleOpen} className={styles.note}>
-        {title ? <p>{title}</p> : "Untitled Note"}
+      <div
+        role="button"
+        onClick={handleOpen}
+        onKeyDown={handleKeyPress}
+        tabIndex={0}
+        className={styles.note}
+      >
+        {title ? <h2>{title}</h2> : "Untitled Note"}
         {role ? <p>{role}</p> : ""}
-        <p>{content}</p>
+        <p>Last edit:</p>
         <p>{date}</p>
-      </button>
+      </div>
+      {open && (
+        <div>
+          <div className={styles.noteContent}>
+            <h1>{title}</h1>
+            <p>{content}</p>
+            <button
+              type="button"
+              onClick={handleClose}
+              className={styles.closeButton}
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      )}
     </>
   );
 }
