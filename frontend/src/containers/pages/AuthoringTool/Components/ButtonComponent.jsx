@@ -16,6 +16,7 @@ export default function ButtonComponent({ id, onClick, component }) {
 
   return (
     <Button
+      style={{ zIndex: component?.zPosition || 0 }}
       className={`btn ${component.variant} ${component.colour} ${styles.defaultComponentStyling}`}
       color="default"
       id={id}

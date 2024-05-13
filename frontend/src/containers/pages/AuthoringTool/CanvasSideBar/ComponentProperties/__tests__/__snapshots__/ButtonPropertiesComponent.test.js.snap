@@ -106,7 +106,7 @@ exports[`Button properties component snapshot test 1`] = `
         class="MuiFormLabel-root MuiInputLabel-root WithStyles(ForwardRef(InputLabel))-root-2 MuiInputLabel-formControl MuiInputLabel-animated MuiInputLabel-shrink"
         data-shrink="true"
       >
-        Next Scene
+        Linked Scene
       </label>
       <div
         class="MuiInputBase-root MuiInput-root MuiInput-underline selectInput MuiInputBase-formControl MuiInput-formControl"
@@ -137,6 +137,30 @@ exports[`Button properties component snapshot test 1`] = `
             d="M7 10l5 5 5-5z"
           />
         </svg>
+      </div>
+    </div>
+    <div
+      class="MuiFormControl-root componentProperty MuiFormControl-fullWidth"
+    >
+      <div
+        class="MuiFormControl-root MuiTextField-root WithStyles(ForwardRef(TextField))-root-1 MuiFormControl-fullWidth"
+      >
+        <label
+          class="MuiFormLabel-root MuiInputLabel-root MuiInputLabel-formControl MuiInputLabel-animated"
+          data-shrink="false"
+        >
+          Z Axis Position
+        </label>
+        <div
+          class="MuiInputBase-root MuiInput-root MuiInput-underline MuiInputBase-fullWidth MuiInput-fullWidth MuiInputBase-formControl MuiInput-formControl"
+        >
+          <input
+            aria-invalid="false"
+            class="MuiInputBase-input MuiInput-input"
+            type="number"
+            value=""
+          />
+        </div>
       </div>
     </div>
   </div>

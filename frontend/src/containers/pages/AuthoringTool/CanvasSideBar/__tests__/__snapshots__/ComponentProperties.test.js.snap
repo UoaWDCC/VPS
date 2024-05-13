@@ -7,7 +7,7 @@ exports[`Scenario Selection page snapshot test 1`] = `
   <h1
     className="sideBarHeader"
   >
-    Component Properties
+    Properties
   </h1>
   <div
     className="sideBarBody empty"

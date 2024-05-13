@@ -4,6 +4,7 @@ import {
   MenuItem,
   OutlinedInput,
   Select,
+  TextField,
 } from "@material-ui/core";
 import FormatAlignCenterIcon from "@material-ui/icons/FormatAlignCenter";
 import FormatAlignJustifyIcon from "@material-ui/icons/FormatAlignJustify";
@@ -15,9 +16,11 @@ import SceneContext from "context/SceneContext";
 import { useContext, useEffect, useRef } from "react";
 
 import styles from "styling/CanvasSideBar.module.scss";
+import CustomTextFieldStyles from "../CustomPropertyInputStyles/CustomTextFieldStyles";
 import CustomInputLabelStyles from "../CustomPropertyInputStyles/CustomInputLabelStyles";
 import useStyles from "./TextPropertiesComponent.styles";
 
+const CustomTextField = CustomTextFieldStyles()(TextField);
 const CustomInputLabel = CustomInputLabelStyles()(InputLabel);
 const sizes = [6, 8, 9, 10, 11, 12, 14, 16, 18, 20, 24, 30, 36, 42, 48, 60, 72];
 // export const reference = useRef(null);
@@ -138,6 +141,25 @@ export default function SpeechTextPropertiesComponent({
           <MenuItem value="right">Right</MenuItem>
           <MenuItem value="bottom">Bottom</MenuItem>
         </Select>
+      </FormControl>
+      <FormControl fullWidth className={styles.componentProperty}>
+        <CustomTextField
+          label="Z Axis Position"
+          type="number"
+          value={component?.zPosition || ""}
+          fullWidth
+          onChange={(event) =>
+            updateComponentProperty(
+              componentIndex,
+              "zPosition",
+              event.target.value
+            )
+          }
+          InputLabelProps={{
+            // label moves up whenever there is input
+            shrink: !!component.zPosition,
+          }}
+        />
       </FormControl>
     </>
   );

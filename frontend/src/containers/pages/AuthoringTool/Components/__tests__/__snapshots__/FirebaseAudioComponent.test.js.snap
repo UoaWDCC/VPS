@@ -5,6 +5,7 @@ exports[`Add firebase audio component snapshot test 1`] = `
   <div>
     <div
       class="MuiBox-root MuiBox-root-5 makeStyles-defaultComponentStyling-1"
+      style="z-index: 0;"
     >
       <svg
         aria-hidden="true"
