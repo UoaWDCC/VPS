@@ -7,24 +7,24 @@ export default function NotesDisplayCard() {
   const [open, setOpen] = useState(false);
   const mockNotes = [
     {
-      title: "Note 1",
+      title: "Note Title",
       content:
         "The patient has a headache. Which is likely due to stress. I have prescribed paracetamol.",
-      date: "2021-08-01",
+      date: "2023-08-01",
       role: "Doctor",
       id: "eo3j932j334",
     },
     {
-      title: "Note 2",
+      title: "",
       content: "The patient came in at 3pm. He have a headache.",
-      date: "2021-08-02",
-      role: "Nurse",
+      date: "2024-03-04",
+      role: "Nurse with out a title",
       id: "eo3j932j334",
     },
     {
       title: "Note 3",
       content: "The patient has a headache. I have prescribed paracetamol.",
-      date: "2021-08-03",
+      date: "2024-05-03",
       role: "Pharmacist",
       id: "eo3j932j334",
     },
