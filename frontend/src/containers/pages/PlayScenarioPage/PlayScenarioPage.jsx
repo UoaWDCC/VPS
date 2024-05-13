@@ -1,6 +1,7 @@
 import { useContext } from "react";
-import PlayScenarioContext from "../../../context/PlayScenarioContext";
-import useGraph from "../../../hooks/useGraph";
+import { useParams, useHistory } from "react-router-dom";
+import AuthenticationContext from "context/AuthenticationContext";
+import { usePut } from "hooks/crudHooks";
 import LoadingPage from "../LoadingPage";
 import ScenarioPreloader from "./Components/ScenarioPreloader";
 import PlayScenarioCanvas from "./PlayScenarioCanvas";
@@ -11,30 +12,42 @@ import useStyles from "./playScenarioPage.styles";
  *
  * @container
  */
-export default function PlayScenarioPage() {
+export default function PlayScenarioPage({ graph }) {
+  const { user, getUserIdToken: token } = useContext(AuthenticationContext);
+  const { scenarioId, sceneId } = useParams();
+  const history = useHistory();
   const styles = useStyles();
-  const { currentSceneId, scenarioId } = useContext(PlayScenarioContext);
-  const { isLoading, graph } = useGraph(scenarioId);
 
-  if (currentSceneId === null || isLoading) {
-    return <LoadingPage text="Loading contents..." />;
-  }
+  const currentScene = graph?.getScene(sceneId);
+
+  if (!currentScene) return <LoadingPage text="Loading contents..." />;
+
+  const incrementor = (nextSceneId) => {
+    graph.visit(nextSceneId);
+    if (graph.isEndScene(nextSceneId)) {
+      const path = graph.getPath();
+      usePut(`/api/user/${user.uid}`, { scenarioId, path }, token);
+      path.forEach((id) => {
+        usePut(`/api/scenario/${scenarioId}/scene/visited/${id}`, {}, token);
+      });
+    }
+    history.replace(`/play/${scenarioId}/${nextSceneId}`);
+  };
 
   return (
     <>
-      {currentSceneId && (
-        <div className={styles.canvasContainer}>
-          <div className={styles.canvas}>
-            <PlayScenarioCanvas
-              progress={graph.progress(currentSceneId)}
-              graph={graph}
-            />
-          </div>
+      <div className={styles.canvasContainer}>
+        <div className={styles.canvas}>
+          <PlayScenarioCanvas
+            progress={graph.progress(sceneId)}
+            scene={currentScene}
+            incrementor={incrementor}
+          />
         </div>
+      </div>
+      {window.location === window.parent.location && (
+        <ScenarioPreloader scenarioId={scenarioId} graph={graph} key={1} />
       )}
-      {window.location === window.parent.location ? (
-        <ScenarioPreloader key={1} />
-      ) : null}
     </>
   );
 }
