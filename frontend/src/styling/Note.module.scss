@@ -103,3 +103,44 @@
 .inputField:focus {
   outline: none;
 }
+
+.note:hover {
+  box-shadow: 0 0 10px rgba(0, 0, 0, 1);
+}
+
+.noteContent {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: left;
+  background-color: rgb(255, 255, 255);
+  border: 5px solid #515151;
+  padding: 20px;
+  border-radius: 13px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  visibility: "visible";
+  opacity: 1;
+  transition: visibility 0s, opacity 0.5s linear;
+  z-index: 4;
+  width: 100%;
+  height: 100%;
+  flex-direction: column;
+}
+
+.closeButton{
+  position: fixed;
+  bottom: 50px;
+  right: 50%;
+  transform: translate(50%, 0);
+  width: 50%;
+  height: 40px;
+  border-radius: 5px;
+  color: rgb(0, 0, 0);
+  text-align: min;
+  transition-duration: 0.4s;
+  border: none;
+  background-color: #97d5f0;
+}
