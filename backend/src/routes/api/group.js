@@ -1,7 +1,10 @@
 import { Router } from "express";
 
-import { addSceneToPath, getCurrentScene } from "../../db/daos/groupDao";
-import createGroup from "../../db/daos/groupDao";
+import {
+  addSceneToPath,
+  getCurrentScene,
+  createGroup,
+} from "../../db/daos/groupDao";
 import { updateRoleList } from "../../db/daos/scenarioDao";
 import Group from "../../db/models/group";
 

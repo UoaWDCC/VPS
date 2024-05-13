@@ -31,9 +31,6 @@ const addSceneToPath = async (groupId, sceneId) => {
   }
 };
 
-export { getGroup, getCurrentScene, addSceneToPath };
-import Group from "../models/group";
-
 /**
  * Creates a group in the database,
  * @param {Map{String: String}} map of user_id: role
@@ -52,4 +49,4 @@ const createGroup = async (scenarioId, userList) => {
   return dbGroup;
 };
 
-export default createGroup;
+export { getGroup, getCurrentScene, addSceneToPath, createGroup };
