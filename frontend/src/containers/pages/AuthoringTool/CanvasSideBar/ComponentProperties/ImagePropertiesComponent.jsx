@@ -19,7 +19,7 @@ const CustomInputLabel = CustomInputLabelStyles()(InputLabel);
  * This component displays the properties in the sidebar for a button scene component.
  * @component
  */
-export default function ButtonPropertiesComponent({
+export default function ImagePropertiesComponent({
   component,
   componentIndex,
 }) {
@@ -27,49 +27,6 @@ export default function ButtonPropertiesComponent({
 
   return (
     <>
-      <CustomTextField
-        label="Text"
-        value={component.text}
-        fullWidth
-        onChange={(event) =>
-          updateComponentProperty(componentIndex, "text", event.target.value)
-        }
-        className={styles.componentProperty}
-      />
-      <FormControl fullWidth className={styles.componentProperty}>
-        <CustomInputLabel shrink>Variant</CustomInputLabel>
-        <Select
-          className={styles.selectInput}
-          value={component.variant}
-          onChange={(event) =>
-            updateComponentProperty(
-              componentIndex,
-              "variant",
-              event.target.value
-            )
-          }
-        >
-          <MenuItem value="contained">Contained</MenuItem>
-          <MenuItem value="outlined">Outlined</MenuItem>
-        </Select>
-      </FormControl>
-      <FormControl fullWidth className={styles.componentProperty}>
-        <CustomInputLabel shrink>Colour</CustomInputLabel>
-        <Select
-          className={styles.selectInput}
-          value={component.colour}
-          onChange={(event) =>
-            updateComponentProperty(
-              componentIndex,
-              "colour",
-              event.target.value
-            )
-          }
-        >
-          <MenuItem value="white">White</MenuItem>
-          <MenuItem value="teal">Teal</MenuItem>
-        </Select>
-      </FormControl>
       <FormControl fullWidth className={styles.componentProperty}>
         <CustomInputLabel shrink>Linked Scene</CustomInputLabel>
         <Select
@@ -111,7 +68,7 @@ export default function ButtonPropertiesComponent({
           }
           InputLabelProps={{
             // label moves up whenever there is input
-            shrink: !!component.zPosition,
+            shrink: !!component?.zPosition,
           }}
         />
       </FormControl>

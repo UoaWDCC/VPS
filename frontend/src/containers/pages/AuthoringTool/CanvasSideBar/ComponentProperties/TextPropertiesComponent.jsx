@@ -148,7 +148,7 @@ export default function TextPropertiesComponent({ component, componentIndex }) {
         <CustomTextField
           label="Z Axis Position"
           type="number"
-          value={component?.zPosition}
+          value={component?.zPosition || ""}
           fullWidth
           onChange={(event) =>
             updateComponentProperty(
