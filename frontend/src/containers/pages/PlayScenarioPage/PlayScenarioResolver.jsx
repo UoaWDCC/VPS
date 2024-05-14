@@ -41,12 +41,14 @@ export default function PlayScenarioResolver() {
   useEffect(async () => {
     if (!(graph && (isMain || (isMulti && !group)))) return;
 
-    const res = await get(`/api/user/${user.uid}/${scenarioId}/group`, token);
-    const sceneId = res?.data?.group?.current || graph.getScenes()[0]._id;
-    const multiplayerPath = res?.data?.group && "multiplayer";
+    const res = await get(`/api/user/${user.email}/${scenarioId}/group`, token);
+    const sceneId = res?.data?.current || graph.getScenes()[0]._id;
+    const scenarioPath = res?.data?.group
+      ? `${scenarioId}/multiplayer`
+      : scenarioId;
 
     setGroup(res?.data?.group || "none");
-    history.replace(`/play/${scenarioId}/${multiplayerPath}/${sceneId}`);
+    history.replace(`/play/${scenarioPath}/${sceneId}`);
   }, [graph, isMain, isMulti, scenarioId]);
 
   return (
