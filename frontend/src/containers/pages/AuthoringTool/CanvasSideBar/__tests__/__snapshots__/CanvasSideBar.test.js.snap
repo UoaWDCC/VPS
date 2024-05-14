@@ -52,13 +52,13 @@ exports[`Scenario Selection page snapshot test 1`] = `
           Scene Timer Duration
         </label>
         <div
-          className="MuiInputBase-root MuiInput-root MuiInput-underline MuiInputBase-fullWidth MuiInput-fullWidth MuiInputBase-formControl MuiInput-formControl MuiInputBase-adornedEnd"
+          className="MuiInputBase-root MuiInput-root MuiInput-underline MuiInputBase-fullWidth MuiInput-fullWidth MuiInputBase-formControl MuiInput-formControl"
           onClick={[Function]}
         >
           <input
             aria-invalid={false}
             autoFocus={false}
-            className="MuiInputBase-input MuiInput-input MuiInputBase-inputAdornedEnd"
+            className="MuiInputBase-input MuiInput-input"
             disabled={false}
             onAnimationStart={[Function]}
             onBlur={[Function]}
@@ -68,15 +68,6 @@ exports[`Scenario Selection page snapshot test 1`] = `
             type="number"
             value=""
           />
-          <div
-            className="MuiInputAdornment-root MuiInputAdornment-positionEnd"
-          >
-            <p
-              className="MuiTypography-root MuiTypography-body1 MuiTypography-colorTextSecondary"
-            >
-              seconds
-            </p>
-          </div>
         </div>
       </div>
     </div>
@@ -87,7 +78,7 @@ exports[`Scenario Selection page snapshot test 1`] = `
     <h1
       className="sideBarHeader"
     >
-      Component Properties
+      Properties
     </h1>
     <div
       className="sideBarBody empty"

@@ -29,7 +29,7 @@ exports[`Firebase audio properties component snapshot test 1`] = `
           </div>
         </div>
         <button
-          class="MuiButtonBase-root MuiButton-root MuiButton-contained makeStyles-playButton-7 MuiButton-containedPrimary MuiButton-containedSizeSmall MuiButton-sizeSmall"
+          class="MuiButtonBase-root MuiButton-root MuiButton-contained makeStyles-playButton-8 MuiButton-containedPrimary MuiButton-containedSizeSmall MuiButton-sizeSmall"
           tabindex="0"
           type="button"
         >
@@ -92,6 +92,30 @@ exports[`Firebase audio properties component snapshot test 1`] = `
             Loop
           </span>
         </label>
+      </div>
+      <div
+        class="MuiFormControl-root componentProperty MuiFormControl-fullWidth"
+      >
+        <div
+          class="MuiFormControl-root MuiTextField-root WithStyles(ForwardRef(TextField))-root-7 MuiFormControl-fullWidth"
+        >
+          <label
+            class="MuiFormLabel-root MuiInputLabel-root MuiInputLabel-formControl MuiInputLabel-animated"
+            data-shrink="false"
+          >
+            Z Axis Position
+          </label>
+          <div
+            class="MuiInputBase-root MuiInput-root MuiInput-underline MuiInputBase-fullWidth MuiInput-fullWidth MuiInputBase-formControl MuiInput-formControl"
+          >
+            <input
+              aria-invalid="false"
+              class="MuiInputBase-input MuiInput-input"
+              type="number"
+              value=""
+            />
+          </div>
+        </div>
       </div>
     </div>
   </div>
