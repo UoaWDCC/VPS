@@ -93,10 +93,7 @@ router.get("/:email/:scenarioId/data", async (req, res) => {
   const { email, scenarioId } = req.params;
   // TODO: filter to only what we need
   const group = await Group.findOne({ scenarioId, "users.email": email });
-
-  const current = group
-    ? group.path[group.path.length - 1]
-    : await fetchScene(email, scenarioId);
+  const current = group ? group.path[0] : await fetchScene(email, scenarioId);
 
   return res.status(HTTP_OK).json({ group, current });
 });

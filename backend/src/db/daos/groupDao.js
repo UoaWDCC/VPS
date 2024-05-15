@@ -8,19 +8,20 @@ const getGroup = async (groupId) => {
 };
 
 const getCurrentScene = async (groupId) => {
-  const group = await Group.findById(groupId);
-  const { path } = group;
+  const { path } = await Group.findById(groupId, "path");
   if (!path.length) return null;
-  return Scene.findById(path[path.length - 1]);
+  return Scene.findById(path[0]);
 };
 
 const addSceneToPath = async (groupId, sceneId) => {
   const session = await mongoose.startSession();
   session.startTransaction();
   try {
-    const group = await Group.findById(groupId).session(session);
-    group.path.push(sceneId);
-    await group.save({ session });
+    await Group.findByIdAndUpdate(
+      groupId,
+      { $push: { path: { $each: [sceneId], $position: 0 } } },
+      { session }
+    );
     await session.commitTransaction();
   } catch (error) {
     // if another transaction is happening, abort
