@@ -1,7 +1,7 @@
 import { useContext } from "react";
 import { useParams, useHistory } from "react-router-dom";
 import AuthenticationContext from "context/AuthenticationContext";
-import { usePut } from "hooks/crudHooks";
+import { usePost, usePut } from "hooks/crudHooks";
 import LoadingPage from "../LoadingPage";
 import ScenarioPreloader from "./Components/ScenarioPreloader";
 import PlayScenarioCanvas from "./PlayScenarioCanvas";
@@ -31,6 +31,7 @@ export default function PlayScenarioPage({ graph }) {
         usePut(`/api/scenario/${scenarioId}/scene/visited/${id}`, {}, token);
       });
     }
+    usePost(`/api/user/${user.uid}/${scenarioId}/path`, { nextSceneId }, token);
     history.replace(`/play/${scenarioId}/${nextSceneId}`);
   };
 

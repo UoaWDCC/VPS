@@ -41,7 +41,7 @@ export default function PlayScenarioResolver() {
   useEffect(async () => {
     if (!(graph && (isMain || (isMulti && !group)))) return;
 
-    const res = await get(`/api/user/${user.email}/${scenarioId}/group`, token);
+    const res = await get(`/api/user/${user.email}/${scenarioId}/data`, token);
     const sceneId = res?.data?.current || graph.getScenes()[0]._id;
     const scenarioPath = res?.data?.group
       ? `${scenarioId}/multiplayer`
