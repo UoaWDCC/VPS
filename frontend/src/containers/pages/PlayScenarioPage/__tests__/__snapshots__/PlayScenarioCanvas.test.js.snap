@@ -3,17 +3,40 @@
 exports[`PlayScenarioCanvas component snapshot test 1`] = `
 <body>
   <div>
+    <p
+      class="MuiTypography-root makeStyles-defaultComponentStyling-1 makeStyles-textComponentStyles-2 MuiTypography-body1"
+      id="0"
+      style="z-index: 0;"
+    >
+      default text
+    </p>
+    <button
+      class="MuiButtonBase-root MuiButton-root MuiButton-contained btn contained white makeStyles-defaultComponentStyling-5"
+      id="1"
+      style="z-index: 0;"
+      tabindex="0"
+      type="button"
+    >
+      <span
+        class="MuiButton-label"
+      >
+        Button
+      </span>
+      <span
+        class="MuiTouchRipple-root"
+      />
+    </button>
     <span
       aria-valuemax="100"
       aria-valuemin="0"
-      aria-valuenow="NaN"
+      aria-valuenow="50"
       class="MuiLinearProgress-root MuiLinearProgress-colorInherit MuiLinearProgress-determinate css-futumu-MuiLinearProgress-root"
       role="progressbar"
       style="height: 10px; width: 100%; position: relative; color: rgb(0, 176, 230);"
     >
       <span
         class="MuiLinearProgress-bar MuiLinearProgress-barColorInherit MuiLinearProgress-bar1Determinate css-1wqgwi1-MuiLinearProgress-bar1"
-        style="transform: translateX(NaN%);"
+        style="transform: translateX(-50%);"
       />
     </span>
   </div>
