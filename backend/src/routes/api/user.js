@@ -91,13 +91,14 @@ router.put("/:uid", async (req, res) => {
 // return format: { group: Group | null, current: SceneId | null }
 router.get("/:email/:scenarioId/data", async (req, res) => {
   const { email, scenarioId } = req.params;
-  // TODO: filter to only what we need
+  // TODO: filter to only what we need (depends on role info required etc.)
   const group = await Group.findOne({ scenarioId, "users.email": email });
   const current = group ? group.path[0] : await fetchScene(email, scenarioId);
 
   return res.status(HTTP_OK).json({ group, current });
 });
 
+// add a scene to the user's path
 router.post("/:uid/:scenarioId/path", async (req, res) => {
   const { nextSceneId } = req.body;
   const { uid, scenarioId } = req.params;

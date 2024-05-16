@@ -1,30 +1,27 @@
 import mongoose from "mongoose";
 
 import Group from "../models/group";
-import Scene from "../models/scene";
 
 const getGroup = async (groupId) => {
   return Group.findById(groupId);
 };
 
-const getCurrentScene = async (groupId) => {
-  const { path } = await Group.findById(groupId, "path");
-  if (!path.length) return null;
-  return Scene.findById(path[0]);
-};
-
-const addSceneToPath = async (groupId, sceneId) => {
+const addSceneToPath = async (groupId, currentSceneId, sceneId) => {
   const session = await mongoose.startSession();
   session.startTransaction();
   try {
-    await Group.findByIdAndUpdate(
-      groupId,
+    const res = await Group.findOneAndUpdate(
+      {
+        _id: groupId,
+        $or: [{ "path.0": currentSceneId }, { path: { $size: 0 } }],
+      },
       { $push: { path: { $each: [sceneId], $position: 0 } } },
       { session }
     );
+    if (!res) throw new Error();
     await session.commitTransaction();
   } catch (error) {
-    // if another transaction is happening, abort
+    // if another transaction is happening, or theres a scene mismatch, abort
     await session.abortTransaction();
     throw error;
   } finally {
@@ -50,4 +47,4 @@ const createGroup = async (scenarioId, userList) => {
   return dbGroup;
 };
 
-export { getGroup, getCurrentScene, addSceneToPath, createGroup };
+export { getGroup, addSceneToPath, createGroup };
