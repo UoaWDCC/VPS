@@ -30,6 +30,7 @@ function addButton(currentScene, setCurrentScene) {
     height: 6, // as percentage
     width: 20, // as percentage
     id: v4(),
+    zPosition: 0,
   };
 
   addComponent(newButton, currentScene, setCurrentScene);
@@ -51,6 +52,7 @@ function addText(currentScene, setCurrentScene) {
     height: 10, // as percentage
     width: 20, // as percentage
     id: v4(),
+    zPosition: 0,
   };
 
   addComponent(newText, currentScene, setCurrentScene);
@@ -66,10 +68,11 @@ function addSpeechText(currentScene, setCurrentScene) {
     textAlign: "left",
     left: 0, // as percentage
     top: 0, // as percentage
-    height: 10, // as percentage
+    height: 30, // as percentage
     width: 20, // as percentage
-    arrowLocation: "top",
+    arrowLocation: "bottom",
     id: v4(),
+    zPosition: 0,
   };
 
   addComponent(newSpeechText, currentScene, setCurrentScene);
@@ -88,6 +91,7 @@ function addImage(currentScene, setCurrentScene, image) {
     height: "auto", // as percentage
     width: "auto", // as percentage
     id: v4(),
+    zPosition: 0,
   };
 
   addComponent(newImage, currentScene, setCurrentScene);
@@ -108,6 +112,7 @@ function addFirebaseImage(currentScene, setCurrentScene, fileObject, url) {
     height: "auto", // as percentage
     width: "auto", // as percentage
     id: v4(),
+    zPosition: 0,
   };
 
   addComponent(newImage, currentScene, setCurrentScene);
@@ -131,6 +136,7 @@ function addFirebaseAudio(currentScene, setCurrentScene, fileObject, url) {
     height: 10, // as percentage
     width: 5, // as percentage
     id: v4(),
+    zPosition: 0,
   };
 
   addComponent(newAudio, currentScene, setCurrentScene);

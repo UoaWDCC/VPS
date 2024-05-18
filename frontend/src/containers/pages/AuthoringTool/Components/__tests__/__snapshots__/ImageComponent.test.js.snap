@@ -4,7 +4,7 @@ exports[`Add image component snapshot test 1`] = `
 <body>
   <div>
     <div
-      style="background-color: rgb(255, 255, 255); position: relative; display: contents;"
+      style="background-color: rgb(255, 255, 255); position: relative; display: contents; z-index: 0;"
     >
       
       <div

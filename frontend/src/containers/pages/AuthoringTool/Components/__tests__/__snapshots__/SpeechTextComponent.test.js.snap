@@ -5,7 +5,7 @@ exports[`Add speech text component snapshot test 1`] = `
   <div>
     <div
       class="makeStyles-defaultComponentStyling-5"
-      style="display: flex; flex-direction: row-reverse; min-width: 43.27833830537734px;"
+      style="display: flex; flex-direction: row-reverse; min-width: 43.27833830537734px; z-index: 0;"
     >
       <div
         style="position: relative; height: 33.278338305377346px; width: 33.27833830537734px; margin-left: -3.429px; align-self: flex-end; transform: rotate(90deg);"

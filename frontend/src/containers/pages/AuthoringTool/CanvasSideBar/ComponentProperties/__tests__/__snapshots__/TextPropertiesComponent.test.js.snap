@@ -13,7 +13,7 @@ exports[`Button properties component snapshot test 1`] = `
         Text
       </label>
       <div
-        class="MuiInputBase-root MuiOutlinedInput-root makeStyles-textArea-13 MuiInputBase-fullWidth MuiInputBase-formControl MuiInputBase-multiline MuiOutlinedInput-multiline"
+        class="MuiInputBase-root MuiOutlinedInput-root makeStyles-textArea-14 MuiInputBase-fullWidth MuiInputBase-formControl MuiInputBase-multiline MuiOutlinedInput-multiline"
       >
         <textarea
           aria-invalid="false"
@@ -39,7 +39,7 @@ exports[`Button properties component snapshot test 1`] = `
       </div>
     </div>
     <div
-      class="componentProperty makeStyles-inlineRow-14"
+      class="componentProperty makeStyles-inlineRow-15"
     >
       <div
         class="MuiFormControl-root"
@@ -253,6 +253,30 @@ exports[`Button properties component snapshot test 1`] = `
           Include border
         </span>
       </label>
+    </div>
+    <div
+      class="MuiFormControl-root componentProperty MuiFormControl-fullWidth"
+    >
+      <div
+        class="MuiFormControl-root MuiTextField-root WithStyles(ForwardRef(TextField))-root-13 MuiFormControl-fullWidth"
+      >
+        <label
+          class="MuiFormLabel-root MuiInputLabel-root MuiInputLabel-formControl MuiInputLabel-animated"
+          data-shrink="false"
+        >
+          Z Axis Position
+        </label>
+        <div
+          class="MuiInputBase-root MuiInput-root MuiInput-underline MuiInputBase-fullWidth MuiInput-fullWidth MuiInputBase-formControl MuiInput-formControl"
+        >
+          <input
+            aria-invalid="false"
+            class="MuiInputBase-input MuiInput-input"
+            type="number"
+            value=""
+          />
+        </div>
+      </div>
     </div>
   </div>
 </body>

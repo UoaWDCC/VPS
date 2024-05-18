@@ -2,7 +2,6 @@ import { ThemeProvider } from "@material-ui/core";
 import "normalize.css";
 import { BrowserRouter, Route, Switch } from "react-router-dom";
 import AuthenticationContextProvider from "../context/AuthenticationContextProvider";
-import PlayingScenarioContextProvider from "../context/PlayScenarioContextProvider";
 import ScenarioContextProvider from "../context/ScenarioContextProvider";
 import SceneContextProvider from "../context/SceneContextProvider";
 import AccessLevel from "../enums/route.access.level";
@@ -10,11 +9,12 @@ import ProtectedRoute from "../firebase/ProtectedRoute";
 import "../styling/style.scss";
 import DashboardPage from "./pages/Dashboard/DashboardPage";
 import LoginPage from "./pages/LoginPage";
-import PlayScenarioPage from "./pages/PlayScenarioPage/PlayScenarioPage";
 import ScenarioSelectionPage from "./pages/ScenarioSelectionPage";
+import ManageGroupsPage from "./pages/ManageGroups/ManageGroupsPage";
 import { ScenePage } from "./pages/SceneSelectionPage";
 import theme from "./theme/App.theme";
 import InvalidRolePage from "./pages/InvalidRolePage";
+import PlayScenarioResolver from "./pages/PlayScenarioPage/PlayScenarioResolver";
 
 export default function App() {
   return (
@@ -34,10 +34,8 @@ export default function App() {
               </ProtectedRoute>
               <Route exact path="/login" component={LoginPage} />
 
-              <ProtectedRoute path="/play/:scenarioId/:urlSceneId?">
-                <PlayingScenarioContextProvider>
-                  <PlayScenarioPage />
-                </PlayingScenarioContextProvider>
+              <ProtectedRoute path="/play/:scenarioId">
+                <PlayScenarioResolver />
               </ProtectedRoute>
 
               <ProtectedRoute exact path="/">
@@ -46,13 +44,18 @@ export default function App() {
                 </ScenarioContextProvider>
               </ProtectedRoute>
 
-              <ProtectedRoute path="/scenario/:scenarioId">
-                <ScenarioContextProvider>
-                  <SceneContextProvider>
-                    <ScenePage />
-                  </SceneContextProvider>
-                </ScenarioContextProvider>
-              </ProtectedRoute>
+              <ScenarioContextProvider>
+                <Switch>
+                  <ProtectedRoute index path="/scenario/:scenarioId">
+                    <SceneContextProvider>
+                      <ScenePage />
+                    </SceneContextProvider>
+                    <ProtectedRoute path="/scenario/:scenarioId/manage-groups">
+                      <ManageGroupsPage />
+                    </ProtectedRoute>
+                  </ProtectedRoute>
+                </Switch>
+              </ScenarioContextProvider>
 
               <ProtectedRoute
                 path="/dashboard"

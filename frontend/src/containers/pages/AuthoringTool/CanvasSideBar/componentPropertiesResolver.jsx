@@ -1,5 +1,6 @@
 import ButtonPropertiesComponent from "./ComponentProperties/ButtonPropertiesComponent";
 import FirebaseAudioPropertiesComponent from "./ComponentProperties/FirebaseAudioPropertiesComponent";
+import ImagePropertiesComponent from "./ComponentProperties/ImagePropertiesComponent";
 import SpeechTextPropertiesComponent from "./ComponentProperties/SpeechTextPropertiesComponent";
 import TextPropertiesComponent from "./ComponentProperties/TextPropertiesComponent";
 /**
@@ -36,6 +37,13 @@ export default function componentPropertiesResolver(component, componentIndex) {
     case "FIREBASEAUDIO":
       return (
         <FirebaseAudioPropertiesComponent
+          component={component}
+          componentIndex={componentIndex}
+        />
+      );
+    case "FIREBASEIMAGE":
+      return (
+        <ImagePropertiesComponent
           component={component}
           componentIndex={componentIndex}
         />

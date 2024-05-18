@@ -458,23 +458,14 @@ exports[`Authoring Tool page snapshot test 1`] = `
                   Scene Timer Duration
                 </label>
                 <div
-                  class="MuiInputBase-root MuiInput-root MuiInput-underline MuiInputBase-fullWidth MuiInput-fullWidth MuiInputBase-formControl MuiInput-formControl MuiInputBase-adornedEnd"
+                  class="MuiInputBase-root MuiInput-root MuiInput-underline MuiInputBase-fullWidth MuiInput-fullWidth MuiInputBase-formControl MuiInput-formControl"
                 >
                   <input
                     aria-invalid="false"
-                    class="MuiInputBase-input MuiInput-input MuiInputBase-inputAdornedEnd"
+                    class="MuiInputBase-input MuiInput-input"
                     type="number"
                     value=""
                   />
-                  <div
-                    class="MuiInputAdornment-root MuiInputAdornment-positionEnd"
-                  >
-                    <p
-                      class="MuiTypography-root MuiTypography-body1 MuiTypography-colorTextSecondary"
-                    >
-                      seconds
-                    </p>
-                  </div>
                 </div>
               </div>
             </div>
@@ -485,7 +476,7 @@ exports[`Authoring Tool page snapshot test 1`] = `
             <h1
               class="sideBarHeader"
             >
-              Component Properties
+              Properties
             </h1>
             <div
               class="sideBarBody empty"

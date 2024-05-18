@@ -14,7 +14,7 @@
     .sideBarBody {
       flex: 1 1;
       flex-basis: 0px;
-      padding: 2.5em 2.5em;
+      padding: 0.75em 1em;
       margin: 0em;
       background-color: #f0f0f0;
       overflow-y: scroll;
@@ -36,7 +36,7 @@
 }
 
 .sideBarHeader {
-  padding: 1.5em 2.5em;
+  padding: 1em 1em;
   margin: 0em;
   font-size: 100%;
   font-weight: 600;
@@ -46,8 +46,8 @@
 }
 
 .sideBarBody {
-  padding: 2.5em 2.5em;
-  margin: 0em;
+  padding: 0.1em 1em;
+  margin: 0;
   background-color: #f0f0f0;
 }
 
