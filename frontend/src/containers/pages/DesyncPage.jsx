@@ -1,14 +1,23 @@
-import { useContext, useEffect } from "react";
+import { useContext } from "react";
 import { Grid, Typography, Button } from "@material-ui/core";
+import { useGet } from "hooks/crudHooks";
 import { useHistory } from "react-router-dom";
-import PlayScenarioContext from "../../context/PlayScenarioContext";
+import AuthenticationContext from "context/AuthenticationContext";
 
-export default function DesyncPage() {
+export default function DesyncPage({ group }) {
+  const { getUserIdToken: token } = useContext(AuthenticationContext);
   const history = useHistory();
-  const { scenarioId } = useContext(PlayScenarioContext);
+
+  const handleGroupSceneIdRes = (res) => {
+    history.replace(`/play/${group.scenarioId}/multiplayer/${res._id}`);
+  };
 
   const onBack = () => {
-    history.push(`/play/${scenarioId}`);
+    if (group) {
+      useGet(`/api/group/${group._id}/desync`, handleGroupSceneIdRes, token);
+    } else {
+      history.goBack();
+    }
   };
 
   return (

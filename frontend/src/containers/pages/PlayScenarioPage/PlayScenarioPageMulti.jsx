@@ -41,7 +41,7 @@ export default function PlayScenarioPageMulti({ graph, group }) {
       token
     );
     if (res === "Scene added to path") incrementor(nextSceneId);
-    else window.reload(); // replace this with the redirection to the conflict page;
+    else history.replace(`/play/desync`);
   };
 
   return (

@@ -13,6 +13,7 @@ import useGraph from "hooks/useGraph";
 
 import PlayScenarioPage from "./PlayScenarioPage";
 import PlayScenarioPageMulti from "./PlayScenarioPageMulti";
+import DesyncPage from "../DesyncPage";
 
 // TODO: move this somewhere else and add error handling
 async function get(url, userIdToken) {
@@ -53,6 +54,9 @@ export default function PlayScenarioResolver() {
 
   return (
     <Switch>
+      <Route exact path="/play/desync">
+        <DesyncPage group={group} />
+      </Route>
       <Route path="/play/:scenarioId/multiplayer/:sceneId">
         <PlayScenarioPageMulti graph={graph} group={group} />
       </Route>
