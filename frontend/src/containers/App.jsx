@@ -15,7 +15,6 @@ import { ScenePage } from "./pages/SceneSelectionPage";
 import theme from "./theme/App.theme";
 import InvalidRolePage from "./pages/InvalidRolePage";
 import PlayScenarioResolver from "./pages/PlayScenarioPage/PlayScenarioResolver";
-import InvalidRolePage from "./pages/InvalidRolePage";
 
 export default function App() {
   return (
@@ -29,9 +28,7 @@ export default function App() {
                 path="/play/invalid-role"
                 component={InvalidRolePage}
               >
-                <PlayScenarioResolver>
-                  <InvalidRolePage />
-                </PlayScenarioResolver>
+                <InvalidRolePage />
               </ProtectedRoute>
               <Route exact path="/login" component={LoginPage} />
 
