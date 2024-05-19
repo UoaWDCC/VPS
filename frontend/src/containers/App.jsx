@@ -2,7 +2,6 @@ import { ThemeProvider } from "@material-ui/core";
 import "normalize.css";
 import { BrowserRouter, Route, Switch } from "react-router-dom";
 import AuthenticationContextProvider from "../context/AuthenticationContextProvider";
-import PlayingScenarioContextProvider from "../context/PlayScenarioContextProvider";
 import ScenarioContextProvider from "../context/ScenarioContextProvider";
 import SceneContextProvider from "../context/SceneContextProvider";
 import AccessLevel from "../enums/route.access.level";
@@ -10,11 +9,11 @@ import ProtectedRoute from "../firebase/ProtectedRoute";
 import "../styling/style.scss";
 import DashboardPage from "./pages/Dashboard/DashboardPage";
 import LoginPage from "./pages/LoginPage";
-import PlayScenarioPage from "./pages/PlayScenarioPage/PlayScenarioPage";
 import ScenarioSelectionPage from "./pages/ScenarioSelectionPage";
 import ManageGroupsPage from "./pages/ManageGroups/ManageGroupsPage";
 import { ScenePage } from "./pages/SceneSelectionPage";
 import theme from "./theme/App.theme";
+import PlayScenarioResolver from "./pages/PlayScenarioPage/PlayScenarioResolver";
 import DesyncPage from "./pages/DesyncPage";
 
 export default function App() {
@@ -26,17 +25,8 @@ export default function App() {
             <Switch>
               <Route exact path="/login" component={LoginPage} />
 
-              <ProtectedRoute path="/play/:scenarioId/:urlSceneId?">
-                <PlayingScenarioContextProvider>
-                  <Switch>
-                    <ProtectedRoute exact path="/play/:scenarioId/desync">
-                      <DesyncPage />
-                    </ProtectedRoute>
-                    <ProtectedRoute>
-                      <PlayScenarioPage />
-                    </ProtectedRoute>
-                  </Switch>
-                </PlayingScenarioContextProvider>
+              <ProtectedRoute path="/play/:scenarioId">
+                <PlayScenarioResolver />
               </ProtectedRoute>
 
               <ProtectedRoute exact path="/">

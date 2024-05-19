@@ -10,6 +10,7 @@ import {
   assignScenarioToUsers,
 } from "../../db/daos/userDao";
 import User from "../../db/models/user";
+import Group from "../../db/models/group";
 
 const router = Router();
 
@@ -83,6 +84,21 @@ router.put("/:uid", async (req, res) => {
   } else {
     res.sendStatus(HTTP_NOT_FOUND);
   }
+});
+
+router.get("/:email/:scenarioId/group", async (req, res) => {
+  const groups = await Group.find({ scenarioId: req.params.scenarioId });
+  if (!groups.length) return res.json({ group: null });
+
+  const group = await groups.find((g) =>
+    g.users.find((u) => u.email === req.params.email)
+  );
+  if (!group) return res.json({ group: null });
+
+  return res.json({
+    group,
+    current: group.path[group.path.length - 1],
+  });
 });
 
 export default router;
