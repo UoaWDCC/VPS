@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 
-const BackButton = () => {
+const BackToScenarioSelectionButton = () => {
   const containerStyle = {
     display: "flex",
     justifyContent: "center",
@@ -11,20 +11,20 @@ const BackButton = () => {
     padding: "10px 20px",
     fontSize: "16px",
     borderRadius: "5px",
-    backgroundColor: "#0d37de",
-    color: "#fff",
+    backgroundColor: "#035084",
     textDecoration: "none",
+    color: "#FFFFFF",
   };
 
   return (
     <div style={containerStyle}>
       <Link to="/" style={{ textDecoration: "none" }}>
         <button type="button" style={buttonStyle}>
-          Go back
+          Back to Scenarios
         </button>
       </Link>
     </div>
   );
 };
 
-export default BackButton;
+export default BackToScenarioSelectionButton;
