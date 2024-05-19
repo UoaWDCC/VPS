@@ -1,11 +1,10 @@
-import BackButton from "../../components/BackButton";
+import BacktoScenarioSelectionButton from "../../components/BacktoScenarioSelectionButton";
 
 function InvalidRolePage() {
   const currentUserRole = "Doctor";
   const rolesWithAccess = ["Nurse", "Patient"];
 
   const containerStyle = {
-    fontFamily: "Sitka Text, sans-serif",
     fontWeight: "600",
     display: "flex",
     flexDirection: "column",
@@ -16,7 +15,12 @@ function InvalidRolePage() {
   };
 
   const textMargin = {
-    margin: "40px 0",
+    margin: "50px 0",
+  };
+
+  const bottomTextContainerStyle = {
+    marginTop: "auto",
+    marginBottom: "30px",
   };
 
   return (
@@ -25,8 +29,10 @@ function InvalidRolePage() {
         Someone else is playing through this section of the scenario!
       </h1>
       <p style={textMargin}>Please wait for your role: {currentUserRole}</p>
-      <BackButton />
-      <p style={textMargin}>Roles with access: {rolesWithAccess.join(", ")}</p>
+      <BacktoScenarioSelectionButton />
+      <div style={bottomTextContainerStyle}>
+        <p>Roles with access to this scene: {rolesWithAccess.join(", ")}</p>
+      </div>
     </div>
   );
 }
