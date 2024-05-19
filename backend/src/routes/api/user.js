@@ -86,6 +86,7 @@ router.put("/:uid", async (req, res) => {
   }
 });
 
+// get user's group
 router.get("/:email/:scenarioId/group", async (req, res) => {
   const groups = await Group.find({ scenarioId: req.params.scenarioId });
   if (!groups.length) return res.json({ group: null });
