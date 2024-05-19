@@ -22,7 +22,8 @@ export default function PlayScenarioContextProvider({ children }) {
   );
 
   useEffect(() => {
-    if (urlSceneId) {
+    console.log(urlSceneId, "urlSceneId");
+    if (urlSceneId && urlSceneId !== "desync") {
       setCurrentSceneId(urlSceneId);
     } else if (currentScenario) {
       setCurrentSceneId(currentScenario[0]?._id);

@@ -15,6 +15,7 @@ import ScenarioSelectionPage from "./pages/ScenarioSelectionPage";
 import ManageGroupsPage from "./pages/ManageGroups/ManageGroupsPage";
 import { ScenePage } from "./pages/SceneSelectionPage";
 import theme from "./theme/App.theme";
+import DesyncPage from "./pages/DesyncPage";
 
 export default function App() {
   return (
@@ -27,7 +28,14 @@ export default function App() {
 
               <ProtectedRoute path="/play/:scenarioId/:urlSceneId?">
                 <PlayingScenarioContextProvider>
-                  <PlayScenarioPage />
+                  <Switch>
+                    <ProtectedRoute exact path="/play/:scenarioId/desync">
+                      <DesyncPage />
+                    </ProtectedRoute>
+                    <ProtectedRoute>
+                      <PlayScenarioPage />
+                    </ProtectedRoute>
+                  </Switch>
                 </PlayingScenarioContextProvider>
               </ProtectedRoute>
 
