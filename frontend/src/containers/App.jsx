@@ -14,6 +14,7 @@ import ManageGroupsPage from "./pages/ManageGroups/ManageGroupsPage";
 import { ScenePage } from "./pages/SceneSelectionPage";
 import theme from "./theme/App.theme";
 import PlayScenarioResolver from "./pages/PlayScenarioPage/PlayScenarioResolver";
+import InvalidRolePage from "./pages/InvalidRolePage";
 
 export default function App() {
   return (
