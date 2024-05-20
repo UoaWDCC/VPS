@@ -76,19 +76,19 @@ export default function ManageGroupsPage() {
     const headers = "email,first name,last name,group number,playable link\n";
     let csv = headers;
 
-data.forEach((row) => {
-  const entries = Object.entries(row);
-  entries.forEach(([prop, value]) => {
-    if (typeof value === "string") {
-      const email = `${value.replace(/\s/g, "")}@aucklanduni.ac.nz`;
-      const splitName = value.split(" ");
-      const firstName = splitName[0];
-      const lastName = splitName[splitName.length - 1];
-      const playableLink = `https://vps-dev.wdcc.co.nz/play/${scenarioId}/${row.groupNumber}`;
-      csv += `${email},${firstName},${lastName},${playableLink}\n`;
-    }
-  });
-});
+    data.forEach((row) => {
+      const entries = Object.entries(row);
+      entries.forEach(([, value]) => {
+        if (typeof value === "string") {
+          const email = `${value.replace(/\s/g, "")}@aucklanduni.ac.nz`;
+          const splitName = value.split(" ");
+          const firstName = splitName[0];
+          const lastName = splitName[splitName.length - 1];
+          const playableLink = `https://vps-dev.wdcc.co.nz/play/${scenarioId}/${row.groupNumber}`;
+          csv += `${email},${firstName},${lastName},${playableLink}\n`;
+        }
+      });
+    });
     return csv;
   };
 
