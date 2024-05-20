@@ -8,6 +8,7 @@ import {
   addPlayed,
   retrievePlayedUsers,
   assignScenarioToUsers,
+  fetchScene,
 } from "../../db/daos/userDao";
 import User from "../../db/models/user";
 import Group from "../../db/models/group";
@@ -86,19 +87,32 @@ router.put("/:uid", async (req, res) => {
   }
 });
 
-router.get("/:email/:scenarioId/group", async (req, res) => {
-  const groups = await Group.find({ scenarioId: req.params.scenarioId });
-  if (!groups.length) return res.json({ group: null });
+// fetch all the data needed for a scenario upfront
+// return format: { group: Group | null, current: SceneId | null }
+router.get("/:email/:scenarioId/data", async (req, res) => {
+  const { email, scenarioId } = req.params;
+  // TODO: filter to only what we need (depends on role info required etc.)
+  const group = await Group.findOne({ scenarioId, "users.email": email });
+  const current = group ? group.path[0] : await fetchScene(email, scenarioId);
 
-  const group = await groups.find((g) =>
-    g.users.find((u) => u.email === req.params.email)
+  return res.status(HTTP_OK).json({ group, current });
+});
+
+// add a scene to the user's path
+router.post("/:uid/:scenarioId/path", async (req, res) => {
+  const { nextSceneId } = req.body;
+  const { uid, scenarioId } = req.params;
+
+  await User.findOneAndUpdate(
+    { uid },
+    {
+      $push: {
+        [`paths.${scenarioId}`]: { $each: [nextSceneId], $position: 0 },
+      },
+    }
   );
-  if (!group) return res.json({ group: null });
 
-  return res.json({
-    group,
-    current: group.path[group.path.length - 1],
-  });
+  res.sendStatus(HTTP_OK);
 });
 
 export default router;
