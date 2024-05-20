@@ -107,6 +107,10 @@ export default class Graph {
     return this.scenes;
   }
 
+  getScene(sceneId) {
+    return this.scenes.find((scene) => scene._id === sceneId);
+  }
+
   getAdjList() {
     return this.adjList;
   }

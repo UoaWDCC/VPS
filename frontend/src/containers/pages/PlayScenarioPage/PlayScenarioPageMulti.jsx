@@ -1,26 +1,26 @@
 import { useContext } from "react";
 import { useParams, useHistory } from "react-router-dom";
 import AuthenticationContext from "context/AuthenticationContext";
-import { usePut } from "hooks/crudHooks";
+import { usePost, usePut } from "hooks/crudHooks";
 import LoadingPage from "../LoadingPage";
 import ScenarioPreloader from "./Components/ScenarioPreloader";
 import PlayScenarioCanvas from "./PlayScenarioCanvas";
 import useStyles from "./playScenarioPage.styles";
 
 /**
- * This page allows users to play a scenario.
+ * This page allows users to play a multiplayer scenario.
  *
  * @container
  */
-export default function PlayScenarioPage({ graph }) {
+export default function PlayScenarioPageMulti({ graph, group }) {
   const { user, getUserIdToken: token } = useContext(AuthenticationContext);
   const { scenarioId, sceneId } = useParams();
   const history = useHistory();
   const styles = useStyles();
 
-  const currentScene = graph?.getScene(sceneId);
+  const currScene = graph?.getScene(sceneId);
 
-  if (!currentScene) return <LoadingPage text="Loading contents..." />;
+  if (!currScene || !group) return <LoadingPage text="Loading contents..." />;
 
   const incrementor = (nextSceneId) => {
     graph.visit(nextSceneId);
@@ -31,7 +31,17 @@ export default function PlayScenarioPage({ graph }) {
         usePut(`/api/scenario/${scenarioId}/scene/visited/${id}`, {}, token);
       });
     }
-    history.replace(`/play/${scenarioId}/${nextSceneId}`);
+    history.replace(`/play/${scenarioId}/multiplayer/${nextSceneId}`);
+  };
+
+  const validatedIncrementor = async (nextSceneId) => {
+    const res = await usePost(
+      `/api/group/path/${group._id}`,
+      { currentSceneId: sceneId, nextSceneId },
+      token
+    );
+    if (res === "Scene added to path") incrementor(nextSceneId);
+    else window.reload(); // replace this with the redirection to the conflict page;
   };
 
   return (
@@ -40,8 +50,8 @@ export default function PlayScenarioPage({ graph }) {
         <div className={styles.canvas}>
           <PlayScenarioCanvas
             progress={graph.progress(sceneId)}
-            scene={currentScene}
-            incrementor={incrementor}
+            scene={currScene}
+            incrementor={validatedIncrementor}
           />
         </div>
       </div>
