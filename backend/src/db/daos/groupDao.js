@@ -8,7 +8,7 @@ const getGroup = async (groupId) => {
 };
 
 const getGroupByScenarioId = async (SId) => {
-  return Group.find({scenarioId: SId});
+  return Group.find({ scenarioId: SId });
 };
 
 const getCurrentScene = async (groupId) => {
@@ -53,4 +53,10 @@ const createGroup = async (scenarioId, userList) => {
   return dbGroup;
 };
 
-export { getGroup, getCurrentScene, addSceneToPath, createGroup, getGroupByScenarioId };
+export {
+  getGroup,
+  getCurrentScene,
+  addSceneToPath,
+  createGroup,
+  getGroupByScenarioId,
+};

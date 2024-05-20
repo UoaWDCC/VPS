@@ -53,7 +53,6 @@ router.get("/scenario/:scenarioId", async (req, res) => {
   }
 });
 
-
 // get the current scene of the group
 router.get("/path/:groupId", async (req, res) => {
   try {

@@ -78,9 +78,9 @@ export default function ManageGroupsPage() {
 
     tableData.forEach((row) => {
       for (const prop in row) {
-        if (typeof row[prop] == 'string') {
-          const email = `${row[prop].replace(/\s/g, '')}@aucklanduni.ac.nz`;
-          const split_name = row[prop].split(' ')
+        if (typeof row[prop] == "string") {
+          const email = `${row[prop].replace(/\s/g, "")}@aucklanduni.ac.nz`;
+          const split_name = row[prop].split(" ");
           const firstName = split_name[0];
           const lastName = split_name[split_name.length - 1];
           const playableLink = `https://vps-dev.wdcc.co.nz/play/${scenarioId}/${row.groupNumber}`;
@@ -93,11 +93,11 @@ export default function ManageGroupsPage() {
 
   const download = () => {
     const csv = convertToCSV(groups);
-    const blob = new Blob([csv], { type: 'text/csv' });
+    const blob = new Blob([csv], { type: "text/csv" });
     const url = window.URL.createObjectURL(blob);
-    const a = document.createElement('a');
+    const a = document.createElement("a");
     a.href = url;
-    a.download = 'groups_data.csv';
+    a.download = "groups_data.csv";
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
