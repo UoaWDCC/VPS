@@ -1,5 +1,5 @@
 import { Router } from "express";
-  
+
 import {
   addSceneToPath,
   getCurrentScene,
