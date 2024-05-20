@@ -1,7 +1,8 @@
 import { Button } from "@material-ui/core";
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { useParams } from "react-router-dom";
 import ScreenContainer from "components/ScreenContainer";
+import { useGet } from "hooks/crudHooks";
 import TopBar from "./TopBar";
 import GroupsTable from "./GroupTable";
 
@@ -13,6 +14,18 @@ import GroupsTable from "./GroupTable";
 
 export default function ManageGroupsPage() {
   const { scenarioId } = useParams();
+  const [scenarioGroupInfo, setScenarioGroupInfo] = useState([]);
+
+  // fetch groups assigned to this scenario
+  useGet(`/api/group/scenario/${scenarioId}`, setScenarioGroupInfo);
+  let groups;
+  if (scenarioGroupInfo[0].users) {
+    groups = scenarioGroupInfo[0].users;
+  } else {
+    console.log("no user data");
+    groups = [];
+  }
+
   const tableData = [
     {
       groupNumber: 1,
@@ -63,7 +76,7 @@ export default function ManageGroupsPage() {
     tableData.forEach((row) => {
       for (const prop in row) {
         if (typeof row[prop] == 'string') {
-          const email = `${row[prop].replace(/\s/g, '')}@aucklanduni.ac.nz`; // Assuming email pattern
+          const email = `${row[prop].replace(/\s/g, '')}@aucklanduni.ac.nz`;
           const split_name = row[prop].split(' ')
           const firstName = split_name[0];
           const lastName = split_name[split_name.length - 1];
@@ -76,7 +89,7 @@ export default function ManageGroupsPage() {
   };
 
   const download = () => {
-    const csv = convertToCSV(tableData);
+    const csv = convertToCSV(groups);
     const blob = new Blob([csv], { type: 'text/csv' });
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement('a');
