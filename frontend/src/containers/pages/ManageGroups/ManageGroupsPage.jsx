@@ -72,22 +72,23 @@ export default function ManageGroupsPage() {
     console.log("File uploaded:", event.target.files[0]);
   };
 
-  const convertToCSV = (tableData) => {
+  const convertToCSV = (data) => {
     const headers = "email,first name,last name,group number,playable link\n";
     let csv = headers;
 
-    tableData.forEach((row) => {
-      for (const prop in row) {
-        if (typeof row[prop] == "string") {
-          const email = `${row[prop].replace(/\s/g, "")}@aucklanduni.ac.nz`;
-          const split_name = row[prop].split(" ");
-          const firstName = split_name[0];
-          const lastName = split_name[split_name.length - 1];
-          const playableLink = `https://vps-dev.wdcc.co.nz/play/${scenarioId}/${row.groupNumber}`;
-          csv += `${email},${firstName},${lastName},${playableLink}\n`;
-        }
-      }
-    });
+data.forEach((row) => {
+  const entries = Object.entries(row);
+  entries.forEach(([prop, value]) => {
+    if (typeof value === "string") {
+      const email = `${value.replace(/\s/g, "")}@aucklanduni.ac.nz`;
+      const splitName = value.split(" ");
+      const firstName = splitName[0];
+      const lastName = splitName[splitName.length - 1];
+      const playableLink = `https://vps-dev.wdcc.co.nz/play/${scenarioId}/${row.groupNumber}`;
+      csv += `${email},${firstName},${lastName},${playableLink}\n`;
+    }
+  });
+});
     return csv;
   };
 

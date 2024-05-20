@@ -15,6 +15,7 @@ const router = Router();
 const HTTP_OK = 200;
 const HTTP_CONFLICT = 409;
 const HTTP_NO_CONTENT = 204;
+const HTTP_NOT_FOUND = 404;
 
 // add a scene to the group's shared path
 router.post("/path/:groupId", async (req, res) => {
@@ -86,14 +87,12 @@ router.post("/:scenarioId", async (req, res) => {
       const role = user.role.toLowerCase();
       if (roles.includes(role)) {
         res.status(HTTP_CONFLICT).send("Conflict");
-        console.log("roles includes role");
       }
       roles.push(role);
     });
 
     if (roles.length !== roleList.length) {
       res.status(HTTP_CONFLICT).send("Conflict");
-      console.log("incorrect roles.length");
     }
   });
 
