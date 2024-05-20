@@ -26,6 +26,7 @@
     "jest/prefer-to-have-length": "warn",
     "jest/valid-expect": "error",
     "no-unused-vars": "warn",
-    "func-names": "off"
+    "func-names": "off",
+    "no-underscore-dangle": "off"
   }
 }

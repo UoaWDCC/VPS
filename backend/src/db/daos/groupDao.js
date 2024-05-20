@@ -18,16 +18,22 @@ const getCurrentScene = async (groupId) => {
   return Scene.findById(path[path.length - 1]);
 };
 
-const addSceneToPath = async (groupId, sceneId) => {
+const addSceneToPath = async (groupId, currentSceneId, sceneId) => {
   const session = await mongoose.startSession();
   session.startTransaction();
   try {
-    const group = await Group.findById(groupId).session(session);
-    group.path.push(sceneId);
-    await group.save({ session });
+    const res = await Group.findOneAndUpdate(
+      {
+        _id: groupId,
+        $or: [{ "path.0": currentSceneId }, { path: { $size: 0 } }],
+      },
+      { $push: { path: { $each: [sceneId], $position: 0 } } },
+      { session }
+    );
+    if (!res) throw new Error();
     await session.commitTransaction();
   } catch (error) {
-    // if another transaction is happening, abort
+    // if another transaction is happening, or theres a scene mismatch, abort
     await session.abortTransaction();
     throw error;
   } finally {
