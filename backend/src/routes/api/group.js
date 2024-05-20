@@ -4,6 +4,7 @@ import {
   addSceneToPath,
   getCurrentScene,
   createGroup,
+  getGroupByScenarioId,
 } from "../../db/daos/groupDao";
 import { updateRoleList } from "../../db/daos/scenarioDao";
 import Group from "../../db/models/group";
@@ -40,6 +41,18 @@ router.post("/path/:groupId", async (req, res) => {
       .json({ error: "Scene mismatch b/w client and server" });
   }
 });
+
+// get the groups assigned to a scenario
+router.get("/scenario/:scenarioId", async (req, res) => {
+  try {
+    const { scenarioId } = req.params;
+    const groups = await getGroupByScenarioId(scenarioId);
+    return res.status(HTTP_OK).json(groups);
+  } catch (error) {
+    return res.status(HTTP_NOT_FOUND).json({ error: error.message });
+  }
+});
+
 
 // get the current scene of the group
 router.get("/path/:groupId", async (req, res) => {
@@ -85,12 +98,14 @@ router.post("/:scenarioId", async (req, res) => {
       const role = user.role.toLowerCase();
       if (roles.includes(role)) {
         res.status(HTTP_CONFLICT).send("Conflict");
+        console.log("roles includes role");
       }
       roles.push(role);
     });
 
     if (roles.length !== roleList.length) {
       res.status(HTTP_CONFLICT).send("Conflict");
+      console.log("incorrect roles.length");
     }
   });
 
