@@ -15,16 +15,19 @@ import GroupsTable from "./GroupTable";
 export default function ManageGroupsPage() {
   const { scenarioId } = useParams();
   const [scenarioGroupInfo, setScenarioGroupInfo] = useState([]);
+  let groups;
 
   // fetch groups assigned to this scenario
-  useGet(`/api/group/scenario/${scenarioId}`, setScenarioGroupInfo);
-  let groups;
-  if (scenarioGroupInfo[0].users) {
-    groups = scenarioGroupInfo[0].users;
-  } else {
-    console.log("no user data");
-    groups = [];
-  }
+  const fetchGroups = () => {
+    useGet(`/api/group/scenario/${scenarioId}`, setScenarioGroupInfo);
+    if (scenarioGroupInfo[0]) {
+      groups = scenarioGroupInfo[0].users;
+    } else {
+      groups = [];
+    }
+  };
+
+  fetchGroups();
 
   const tableData = [
     {
