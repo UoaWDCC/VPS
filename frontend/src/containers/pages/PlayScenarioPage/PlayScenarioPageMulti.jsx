@@ -20,6 +20,10 @@ export default function PlayScenarioPageMulti({ graph, group }) {
   const styles = useStyles();
 
   const currScene = graph?.getScene(sceneId);
+  console.log(group);
+  console.log(graph);
+  console.log(sceneId);
+  console.log(currScene);
 
   if (!currScene || !group) return <LoadingPage text="Loading contents..." />;
 
