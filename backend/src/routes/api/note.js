@@ -4,6 +4,7 @@ import {
   updateNote,
   retrieveNoteList,
   deleteNote,
+  retrieveNote,
 } from "../../db/daos/noteDao";
 
 const router = Router();
@@ -15,6 +16,13 @@ router.post("/retrieveList", async (req, res) => {
   const { groupId } = req.body;
   const notes = retrieveNoteList(groupId);
   res.status(HTTP_OK).json(notes);
+});
+
+// Retrieve a note
+router.post("/retrieve", async (req, res) => {
+  const { noteId } = req.body;
+  const note = retrieveNote(noteId);
+  res.status(HTTP_OK).json(note);
 });
 
 // Create an empty note

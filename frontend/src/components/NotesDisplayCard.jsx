@@ -1,25 +1,30 @@
 import { React, useState, useEffect } from "react";
+import { usePost } from "hooks/crudHooks";
 import styles from "../styling/NotesDisplayCard.module.scss";
 import Note from "./Note";
 
 export default function NotesDisplayCard({ group }) {
-  const [name, setName] = useState("default name");
   const [open, setOpen] = useState(false);
   const [notes, setNotes] = useState([]);
 
   const loadNotes = () => {
     console.log("group", group);
     const noteList = Object.entries(group.notes).map(([role, id]) => ({
-      title: role,
       id,
     }));
+    const noteData = [];
+    // retrieve notes from backend using noteId
+    noteList.forEach((note) => {
+      note = usePost("/api/note/retrieve", { noteId: note.id });
+
+      noteData.push(noteData);
+    });
 
     setNotes(noteList);
   };
 
   useEffect(() => {
     loadNotes();
-    console.log("notes", notes);
   }, []);
 
   const handleOpen = () => {

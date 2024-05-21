@@ -70,4 +70,14 @@ const retrieveNoteList = async (groupId) => {
   return allNotes;
 };
 
-export { createNote, updateNote, retrieveNoteList, deleteNote };
+/**
+ * Retreives a note from the database
+ * @param {String} noteId note ID
+ * @returns database note object
+ */
+const retrieveNote = async (noteId) => {
+  const note = await Note.findById(noteId);
+  return note;
+};
+
+export { createNote, updateNote, retrieveNoteList, deleteNote, retrieveNote };
