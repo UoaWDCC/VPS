@@ -5,17 +5,20 @@ import {
   FormControlLabel,
   Select,
   Checkbox,
-  Box,
+  MenuItem,
 } from "@material-ui/core";
 import TextField from "@material-ui/core/TextField";
 import { withStyles } from "@material-ui/core/styles";
 import { useContext, useState } from "react";
+import ScenarioContext from "context/ScenarioContext";
 import SceneContext from "../../../../context/SceneContext";
 
 import styles from "../../../../styling/CanvasSideBar.module.scss";
 import CustomInputLabelStyles from "./CustomPropertyInputStyles/CustomInputLabelStyles";
+import CustomCheckBoxStyles from "./CustomPropertyInputStyles/CustomCheckBoxStyles";
 
 const CustomInputLabel = CustomInputLabelStyles()(InputLabel);
+const CustomCheckBox = CustomCheckBoxStyles()(Checkbox);
 const CustomTextField = withStyles({
   root: {
     marginTop: "0.5em",
@@ -36,7 +39,13 @@ const CustomTextField = withStyles({
  */
 export default function SceneSettings() {
   const { currentScene, setCurrentScene } = useContext(SceneContext);
-  const [checked, setChecked] = useState([true, true, true]);
+  const { roleList } = useContext(ScenarioContext);
+
+  // TODO: Fetch actual selected roles from the backend
+  const selectedRoles = ["Doctor", "Pharmacist"];
+  const [checked, setChecked] = useState(
+    roleList.map((role) => selectedRoles.includes(role))
+  );
   const [allChecked, setAllChecked] = useState([true]);
 
   const handleCheckboxChange = (index) => {
@@ -52,7 +61,9 @@ export default function SceneSettings() {
     const newAllChecked = !allChecked;
     setAllChecked(newAllChecked);
 
-    const newChecked = allChecked ? [false, false, false] : [true, true, true];
+    const newChecked = newAllChecked
+      ? new Array(roleList.length).fill(true)
+      : new Array(roleList.length).fill(false);
     setChecked(newChecked);
   };
 
@@ -102,48 +113,37 @@ export default function SceneSettings() {
           <FormControl fullWidth>
             <CustomInputLabel>Scene Role(s)</CustomInputLabel>
             <Select className={styles.selectInput}>
-              <div style={{ display: "flex", flexDirection: "column" }}>
-                <FormControlLabel
-                  control={
-                    <Checkbox
-                      defaultChecked
-                      checked={allChecked}
-                      onChange={handleAllToggle}
+              {roleList && roleList.length > 0 ? (
+                <div style={{ display: "flex", flexDirection: "column" }}>
+                  <FormControlLabel
+                    control={
+                      <CustomCheckBox
+                        defaultChecked
+                        checked={allChecked}
+                        onChange={handleAllToggle}
+                      />
+                    }
+                    label="All"
+                  />
+                  {roleList.map((role, index) => (
+                    <FormControlLabel
+                      control={
+                        <CustomCheckBox
+                          defaultChecked
+                          checked={checked[index]}
+                          onChange={() => handleCheckboxChange(index)}
+                        />
+                      }
+                      label={role}
                     />
-                  }
-                  label="All"
-                />
-                <FormControlLabel
-                  control={
-                    <Checkbox
-                      defaultChecked
-                      checked={checked[0]}
-                      onChange={() => handleCheckboxChange(0)}
-                    />
-                  }
-                  label="Doctor"
-                />
-                <FormControlLabel
-                  control={
-                    <Checkbox
-                      defaultChecked
-                      checked={checked[1]}
-                      onChange={() => handleCheckboxChange(1)}
-                    />
-                  }
-                  label="Nurse"
-                />
-                <FormControlLabel
-                  control={
-                    <Checkbox
-                      defaultChecked
-                      checked={checked[2]}
-                      onChange={() => handleCheckboxChange(2)}
-                    />
-                  }
-                  label="Pharmacist"
-                />
-              </div>
+                  ))}
+                </div>
+              ) : (
+                <MenuItem>
+                  This scenario currently does not accommodate roles. Please
+                  upload a CSV file first under Manage Groups.
+                </MenuItem>
+              )}
             </Select>
           </FormControl>
         </div>
