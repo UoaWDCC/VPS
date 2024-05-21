@@ -41,7 +41,6 @@ const deleteNote = async (noteId, groupId) => {
  */
 const updateNote = async (noteId, updatedNote) => {
   const note = await Note.findById(noteId);
-
   note.title = updatedNote.title;
   note.text = updatedNote.text;
   note.date = updatedNote.date;

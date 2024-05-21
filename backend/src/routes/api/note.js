@@ -21,14 +21,14 @@ router.post("/retrieveList", async (req, res) => {
 // Retrieve a note
 router.post("/retrieve", async (req, res) => {
   const { noteId } = req.body;
-  const note = retrieveNote(noteId);
+  const note = await retrieveNote(noteId);
   res.status(HTTP_OK).json(note);
 });
 
 // Create an empty note
 router.post("/", async (req, res) => {
   const { groupId, title, role } = req.body;
-  createNote(groupId, title, role);
+     (groupId, title, role);
   res.status(HTTP_OK).json("note created");
 });
 
@@ -36,7 +36,7 @@ router.post("/", async (req, res) => {
 router.post("/update", async (req, res) => {
   const { noteId, text, title } = req.body;
   const date = new Date();
-  updateNote(noteId, { text, title, date });
+  await updateNote(noteId, { text, title, date });
   res.status(HTTP_OK).json("note updated");
 });
 

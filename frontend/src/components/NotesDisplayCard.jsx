@@ -1,4 +1,4 @@
-import { React, useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { usePost } from "hooks/crudHooks";
 import styles from "../styling/NotesDisplayCard.module.scss";
 import Note from "./Note";
@@ -7,21 +7,14 @@ export default function NotesDisplayCard({ group }) {
   const [open, setOpen] = useState(false);
   const [notes, setNotes] = useState([]);
 
-  const loadNotes = () => {
+  async function loadNotes() {
     console.log("group", group);
     const noteList = Object.entries(group.notes).map(([role, id]) => ({
+      role,
       id,
     }));
-    const noteData = [];
-    // retrieve notes from backend using noteId
-    noteList.forEach((note) => {
-      note = usePost("/api/note/retrieve", { noteId: note.id });
-
-      noteData.push(noteData);
-    });
-
     setNotes(noteList);
-  };
+  }
 
   useEffect(() => {
     loadNotes();
@@ -33,6 +26,17 @@ export default function NotesDisplayCard({ group }) {
 
   const handleClose = () => {
     setOpen(false);
+  };
+
+  const handleCreate = () => {
+    // create a new note (for testing purposes)
+    usePost("/api/note/", {
+      groupId: group._id,
+      title: "New Note",
+      role: "test",
+    });
+    console.log("note created");
+    loadNotes();
   };
 
   const handleKeyPress = (e) => {
@@ -60,18 +64,16 @@ export default function NotesDisplayCard({ group }) {
             tabIndex={0}
             onClick={handleClose}
             onKeyDown={handleKeyPress}
-            aria-label="Close Create Scenario Card"
+            aria-label="Close Card"
           />
 
           <div className={styles.noteCard}>
             {notes.map((note) => (
-              <Note
-                title={note.title}
-                content={note.id}
-                date={note.date}
-                role={note.role}
-              />
+              <Note role={note.role} id={note.id} />
             ))}
+            <button type="button" onClick={handleCreate}>
+              create note (for testing)
+            </button>
           </div>
         </div>
       )}
