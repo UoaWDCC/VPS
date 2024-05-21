@@ -43,11 +43,6 @@ export default function PlayScenarioResolver() {
 
     const res = await get(`/api/user/${user.email}/${scenarioId}/group`, token);
     const sceneId = res?.data?.current || graph.getScenes()[0]._id;
-    console.log(res);
-    console.log(graph);
-    console.log(res?.data?.current);
-    console.log(graph.getScenes()[0]._id);
-    console.log(sceneId);
     const scenarioPath = res?.data?.group
       ? `${scenarioId}/multiplayer`
       : scenarioId;

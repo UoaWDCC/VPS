@@ -21,9 +21,6 @@ export default function PlayScenarioPageMulti({ graph, group }) {
 
   const currScene = graph?.getScene(sceneId);
   console.log(group);
-  console.log(graph);
-  console.log(sceneId);
-  console.log(currScene);
 
   if (!currScene || !group) return <LoadingPage text="Loading contents..." />;
 
@@ -63,7 +60,7 @@ export default function PlayScenarioPageMulti({ graph, group }) {
       {window.location === window.parent.location && (
         <ScenarioPreloader scenarioId={scenarioId} graph={graph} key={1} />
       )}{" "}
-      <NotesDisplayCard />
+      <NotesDisplayCard group={group} />
     </>
   );
 }
