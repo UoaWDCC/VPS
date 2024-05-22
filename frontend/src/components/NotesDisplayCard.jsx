@@ -3,10 +3,9 @@ import { usePost } from "hooks/crudHooks";
 import styles from "../styling/NotesDisplayCard.module.scss";
 import Note from "./Note";
 
-export default function NotesDisplayCard({ group }) {
+export default function NotesDisplayCard({ group, user }) {
   const [open, setOpen] = useState(false);
   const [notes, setNotes] = useState([]);
-
   async function loadNotes() {
     console.log("group", group);
     const noteList = Object.entries(group.notes).map(([role, id]) => ({
@@ -18,6 +17,7 @@ export default function NotesDisplayCard({ group }) {
 
   useEffect(() => {
     loadNotes();
+    console.log("user'", user);
   }, []);
 
   const handleOpen = () => {

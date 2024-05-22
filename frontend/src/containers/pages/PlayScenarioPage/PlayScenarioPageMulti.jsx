@@ -59,7 +59,7 @@ export default function PlayScenarioPageMulti({ graph, group }) {
       {window.location === window.parent.location && (
         <ScenarioPreloader scenarioId={scenarioId} graph={graph} key={1} />
       )}{" "}
-      <NotesDisplayCard group={group} />
+      <NotesDisplayCard group={group} user={user} />
     </>
   );
 }
