@@ -5,7 +5,6 @@ import {
   FormControlLabel,
   Select,
   Checkbox,
-  MenuItem,
   Typography,
 } from "@material-ui/core";
 import TextField from "@material-ui/core/TextField";
@@ -49,7 +48,7 @@ export default function SceneSettings() {
   const initialCheckedState = roleList?.map((role) =>
     selectedRoles?.includes(role)
   );
-  const initialAllCheckedState = initialCheckedState.every(
+  const initialAllCheckedState = initialCheckedState?.every(
     (checked) => checked
   );
 
