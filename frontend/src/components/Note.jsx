@@ -14,8 +14,10 @@ export default function Note({ role, id, group, user }) {
     group.users.forEach((userToCheck) => {
       console.log(userToCheck);
       if (userToCheck.email === user.email) {
-        console.log("find it");
-        setRole(true);
+        if (userToCheck.role === role) {
+          setRole(true);
+          console.log("find it");
+        }
       }
     });
   };
@@ -107,13 +109,17 @@ export default function Note({ role, id, group, user }) {
         <div>
           {save && <div className={styles.loading}>Saving...</div>}
           <div className={styles.noteContent}>
-            <h1>{note.title}</h1>
-            <textarea
-              className={styles.inputField}
-              type="text"
-              value={noteContent}
-              onChange={(e) => handleInput(e)}
-            />
+            {/* Can be displayed as title */}
+            <h1>Note from {role}</h1>
+            {isRole && (
+              <textarea
+                className={styles.inputField}
+                type="text"
+                value={noteContent}
+                onChange={(e) => handleInput(e)}
+              />
+            )}
+            {!isRole && <p>{noteContent}</p>}
             <div>
               {" "}
               <button
@@ -123,13 +129,15 @@ export default function Note({ role, id, group, user }) {
               >
                 Close
               </button>
-              <button
-                type="button"
-                onClick={handleSave}
-                className={styles.saveButton}
-              >
-                save
-              </button>
+              {isRole && (
+                <button
+                  type="button"
+                  onClick={handleSave}
+                  className={styles.saveButton}
+                >
+                  Save
+                </button>
+              )}
             </div>
           </div>
         </div>
