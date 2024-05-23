@@ -42,11 +42,17 @@ export default function SceneSettings() {
   const { roleList } = useContext(ScenarioContext);
 
   // TODO: Fetch actual selected roles from the backend
-  const selectedRoles = ["Doctor", "Pharmacist"];
-  const [checked, setChecked] = useState(
-    roleList.map((role) => selectedRoles.includes(role))
+  const selectedRoles = ["Doctor", "Pharmacist", "Nurse"];
+
+  const initialCheckedState = roleList?.map((role) =>
+    selectedRoles.includes(role)
   );
-  const [allChecked, setAllChecked] = useState([true]);
+  const initialAllCheckedState = initialCheckedState.every(
+    (checked) => checked
+  );
+
+  const [checked, setChecked] = useState(initialCheckedState);
+  const [allChecked, setAllChecked] = useState(initialAllCheckedState);
 
   const handleCheckboxChange = (index) => {
     const newChecked = [...checked];

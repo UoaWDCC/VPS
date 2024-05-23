@@ -23,8 +23,8 @@ export default function ScenarioContextProvider({ children }) {
   );
 
   const { reFetch: reFetch3 } = useGet(
-    `api/group/${currentScenario._id}/roleList`,
-    setRoleList
+    currentScenario ? `api/group/${currentScenario._id}/roleList` : null,
+    currentScenario ? setRoleList : () => {}
   );
 
   return (
