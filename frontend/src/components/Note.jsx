@@ -2,20 +2,22 @@ import { useState, useEffect } from "react";
 import { usePost } from "hooks/crudHooks";
 import styles from "../styling/Note.module.scss";
 
-export default function Note({ role, id }) {
+export default function Note({ role, id, group, user }) {
   const [noteContent, setContent] = useState();
   const [note, setNote] = useState();
   const [open, setOpen] = useState(false);
   const [save, setSave] = useState(false);
+  const [isRole, setRole] = useState(false);
   const [date, setDate] = useState();
 
-  const options = {
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-    hour: "2-digit",
-    minute: "2-digit",
-    hour12: false,
+  const checkRole = () => {
+    group.users.forEach((userToCheck) => {
+      console.log(userToCheck);
+      if (userToCheck.email === user.email) {
+        console.log("find it");
+        setRole(true);
+      }
+    });
   };
 
   async function loadNote() {
@@ -24,7 +26,8 @@ export default function Note({ role, id }) {
     setNote(noteData);
     setContent(noteData.text);
     console.log(noteData);
-    setDate(dateObject.toLocaleDateString("en-US", options));
+    setDate(dateObject);
+    checkRole();
   }
 
   useEffect(() => {
@@ -89,10 +92,11 @@ export default function Note({ role, id }) {
         {role ? <h2>{role}</h2> : ""}
         <div>
           {" "}
-          {note ? (
+          {date instanceof Date ? (
             <div>
               <p>Last edit:</p>
-              <p>{date}</p>
+              <p>{date.toLocaleDateString()}</p>
+              <p>{date.toLocaleTimeString()}</p>
             </div>
           ) : (
             ""

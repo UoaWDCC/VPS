@@ -17,7 +17,7 @@ export default function NotesDisplayCard({ group, user }) {
 
   useEffect(() => {
     loadNotes();
-    console.log("user'", user);
+    console.log("user", user);
   }, []);
 
   const handleOpen = () => {
@@ -69,7 +69,13 @@ export default function NotesDisplayCard({ group, user }) {
 
           <div className={styles.noteCard}>
             {notes.map((note) => (
-              <Note role={note.role} id={note.id} />
+              <Note
+                key={note.id}
+                role={note.role}
+                id={note.id}
+                group={group}
+                user={user}
+              />
             ))}
             <button type="button" onClick={handleCreate}>
               create note (for testing)
