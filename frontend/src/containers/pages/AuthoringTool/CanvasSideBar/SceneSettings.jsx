@@ -6,6 +6,7 @@ import {
   Select,
   Checkbox,
   MenuItem,
+  Typography,
 } from "@material-ui/core";
 import TextField from "@material-ui/core/TextField";
 import { withStyles } from "@material-ui/core/styles";
@@ -42,11 +43,8 @@ export default function SceneSettings() {
   const { roleList } = useContext(ScenarioContext);
 
   // TODO: Fetch actual selected roles from the backend
-  const [selectedRoles, setSelectedRoles] = useState([
-    "Doctor",
-    "Nurse",
-    "Pharmacist",
-  ]);
+  const initialSelectedRoles = roleList ? [...roleList] : [];
+  const [selectedRoles, setSelectedRoles] = useState(initialSelectedRoles);
 
   const initialCheckedState = roleList?.map((role) =>
     selectedRoles?.includes(role)
@@ -135,6 +133,9 @@ export default function SceneSettings() {
             <CustomInputLabel>Scene Role(s)</CustomInputLabel>
             <Select
               className={styles.selectInput}
+              MenuProps={{
+                getContentAnchorEl: null,
+              }}
               value={selectedRoles}
               onChange={(event) => setSelectedRoles(event.target.value)}
               renderValue={(selected) =>
@@ -169,10 +170,10 @@ export default function SceneSettings() {
                   ))}
                 </div>
               ) : (
-                <MenuItem>
+                <Typography className={styles.menuItem}>
                   This scenario currently does not accommodate roles. Please
                   upload a CSV file first under Manage Groups.
-                </MenuItem>
+                </Typography>
               )}
             </Select>
           </FormControl>
