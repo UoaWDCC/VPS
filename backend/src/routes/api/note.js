@@ -28,7 +28,7 @@ router.post("/retrieve", async (req, res) => {
 // Create an empty note
 router.post("/", async (req, res) => {
   const { groupId, title, role } = req.body;
-     (groupId, title, role);
+  await createNote(groupId, title, role);
   res.status(HTTP_OK).json("note created");
 });
 

@@ -9,7 +9,7 @@
   padding: 1rem;
   border-radius: 0.5rem;
   background-color: #f5f5f5;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.7);
+  box-shadow: 8px 8px 10px rgba(0, 0, 0, 0.5);
   margin: 15px;
   transition: width 0.3s, height 0.3s;
 }
@@ -17,7 +17,7 @@
 .note:hover {
   width: 12vw;
   height: 14vw;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 1);
+  box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.9);
 }
 
 .note:hover h2 {
@@ -89,10 +89,9 @@
 }
 
 .inputField {
-  width: 90%;
+  width: 93%;
   height: auto;
   min-height: 50%;
-  border: none;
   resize: none;
   border-radius: 5px;
   white-space: pre-wrap;
@@ -104,19 +103,6 @@
   outline: none;
 }
 
-.note:hover {
-  width: 12vw;
-  height: 14vw;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 1);
-}
-
-.note:hover h2 {
-  font-size: 1.5rem;
-}
-
-.note:hover p {
-  font-size: 1rem;
-}
 
 .noteContent {
   position: fixed;
@@ -178,18 +164,3 @@
   width: 50%;
 }
 
-.inputField {
-  width: 90%;
-  height: auto;
-  min-height: 50%;
-  border: none;
-  resize: none;
-  border-radius: 5px;
-  white-space: pre-wrap;
-  padding: 10px;
-  margin: 10px;
-}
-
-.inputField:focus {
-  outline: none;
-}

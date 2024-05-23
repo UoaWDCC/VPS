@@ -28,16 +28,16 @@ export default function NotesDisplayCard({ group, user }) {
     setOpen(false);
   };
 
-  const handleCreate = () => {
-    // create a new note (for testing purposes)
-    usePost("/api/note/", {
-      groupId: group._id,
-      title: "New Note",
-      role: "test",
-    });
-    console.log("note created");
-    loadNotes();
-  };
+  // const handleCreate = () => {
+  //   // create a new note (for testing purposes)
+  //   usePost("/api/note/", {
+  //     groupId: group._id,
+  //     title: "New Note",
+  //     role: "Nurse",
+  //   });
+  //   console.log("note created");
+  //   loadNotes();
+  // };
 
   const handleKeyPress = (e) => {
     if (e.key === "Escape") {
@@ -77,9 +77,6 @@ export default function NotesDisplayCard({ group, user }) {
                 user={user}
               />
             ))}
-            <button type="button" onClick={handleCreate}>
-              create note (for testing)
-            </button>
           </div>
         </div>
       )}

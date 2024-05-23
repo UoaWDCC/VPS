@@ -12,11 +12,9 @@ export default function Note({ role, id, group, user }) {
 
   const checkRole = () => {
     group.users.forEach((userToCheck) => {
-      console.log(userToCheck);
       if (userToCheck.email === user.email) {
         if (userToCheck.role === role) {
           setRole(true);
-          console.log("find it");
         }
       }
     });
@@ -24,11 +22,13 @@ export default function Note({ role, id, group, user }) {
 
   async function loadNote() {
     const noteData = await usePost("/api/note/retrieve", { noteId: id });
-    const dateObject = new Date(noteData.date);
+    console.log("noteData", noteData.date);
     setNote(noteData);
     setContent(noteData.text);
-    console.log(noteData);
-    setDate(dateObject);
+    if (noteData.date) {
+      const dateObject = new Date(noteData.date);
+      setDate(dateObject);
+    }
     checkRole();
   }
 
@@ -109,7 +109,7 @@ export default function Note({ role, id, group, user }) {
         <div>
           {save && <div className={styles.loading}>Saving...</div>}
           <div className={styles.noteContent}>
-            {/* Can be displayed as title */}
+            {/* Can be changed to display title */}
             <h1>Note from {role}</h1>
             {isRole && (
               <textarea

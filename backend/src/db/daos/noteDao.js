@@ -8,12 +8,12 @@ import Group from "../models/group";
  * @param {String} role role of the note
  * @returns
  */
-const createNote = async (groupId, title, role) => {
-  const dbNote = new Note({ title, role });
+const createNote = async (groupId, title, role, text = "") => {
+  const dbNote = new Note({ title, role, text });
   await dbNote.save();
   const updateQuery = {};
   updateQuery[`notes.${role}`] = dbNote.id;
-  await Group.updateOne({ id: groupId }, { $push: updateQuery });
+  await Group.updateOne({ _id: groupId }, { $push: updateQuery });
   return dbNote;
 };
 
