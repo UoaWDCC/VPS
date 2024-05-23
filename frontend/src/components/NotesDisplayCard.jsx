@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import { usePost } from "hooks/crudHooks";
 import styles from "../styling/NotesDisplayCard.module.scss";
 import Note from "./Note";
 
