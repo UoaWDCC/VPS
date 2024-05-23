@@ -22,7 +22,6 @@ export default function Note({ role, id, group, user }) {
 
   async function loadNote() {
     const noteData = await usePost("/api/note/retrieve", { noteId: id });
-    console.log("noteData", noteData.date);
     setNote(noteData);
     setContent(noteData.text);
     if (noteData.date) {
@@ -61,13 +60,14 @@ export default function Note({ role, id, group, user }) {
   const handleSave = async () => {
     if (save) return;
     setSave(true);
+    console.log("saving note");
     try {
       await saveNote();
       await loadNote();
-      console.log("note updated");
     } catch (error) {
       console.log(error);
     } finally {
+      console.log("note updated");
       setSave(false);
     }
   };
@@ -107,7 +107,6 @@ export default function Note({ role, id, group, user }) {
       </div>
       {open && (
         <div>
-          {save && <div className={styles.loading}>Saving...</div>}
           <div className={styles.noteContent}>
             {/* Can be changed to display title */}
             <h1>Note from {role}</h1>
@@ -119,7 +118,12 @@ export default function Note({ role, id, group, user }) {
                 onChange={(e) => handleInput(e)}
               />
             )}
-            {!isRole && <p>{noteContent}</p>}
+            {!isRole && <p className={styles.inputField}>{noteContent}</p>}
+            <div>
+              <p>Last saved at:</p>
+              <p>{date.toLocaleDateString()}</p>
+              <p>{date.toLocaleTimeString()}</p>
+            </div>
             <div>
               {" "}
               <button
