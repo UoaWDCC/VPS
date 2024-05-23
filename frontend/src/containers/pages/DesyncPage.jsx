@@ -23,18 +23,13 @@ export default function DesyncPage({ group }) {
   return (
     <Grid
       container
-      spacing={6}
+      spacing={5}
       direction="column"
       alignItems="center"
       justifyContent="center"
       style={{ minHeight: "100vh" }}
     >
-      <Grid item>
-        <Typography style={{ color: "#FF00FF" }}>
-          Hosted at: {window.location.href}
-        </Typography>
-      </Grid>
-      <Grid item container direction="column" alignItems="center" spacing={2}>
+      <Grid item container direction="column" alignItems="center" spacing={4}>
         <Grid item>
           <Typography variant="h4">Desynchronised with server!</Typography>
         </Grid>
