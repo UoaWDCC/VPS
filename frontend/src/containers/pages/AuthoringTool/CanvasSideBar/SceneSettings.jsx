@@ -42,10 +42,14 @@ export default function SceneSettings() {
   const { roleList } = useContext(ScenarioContext);
 
   // TODO: Fetch actual selected roles from the backend
-  const selectedRoles = ["Doctor", "Pharmacist", "Nurse"];
+  const [selectedRoles, setSelectedRoles] = useState([
+    "Doctor",
+    "Nurse",
+    "Pharmacist",
+  ]);
 
   const initialCheckedState = roleList?.map((role) =>
-    selectedRoles.includes(role)
+    selectedRoles?.includes(role)
   );
   const initialAllCheckedState = initialCheckedState.every(
     (checked) => checked
@@ -61,6 +65,14 @@ export default function SceneSettings() {
 
     const isAllChecked = newChecked.every((isChecked) => isChecked);
     setAllChecked(isAllChecked);
+
+    const updatedSelectedRoles = newChecked.reduce((acc, isChecked, idx) => {
+      if (isChecked) {
+        acc.push(roleList[idx]);
+      }
+      return acc;
+    }, []);
+    setSelectedRoles(updatedSelectedRoles);
   };
 
   const handleAllToggle = () => {
@@ -71,6 +83,9 @@ export default function SceneSettings() {
       ? new Array(roleList.length).fill(true)
       : new Array(roleList.length).fill(false);
     setChecked(newChecked);
+
+    const newSelectedRoles = newAllChecked ? roleList : [];
+    setSelectedRoles(newSelectedRoles);
   };
 
   return (
@@ -118,7 +133,16 @@ export default function SceneSettings() {
           />
           <FormControl fullWidth>
             <CustomInputLabel>Scene Role(s)</CustomInputLabel>
-            <Select className={styles.selectInput}>
+            <Select
+              className={styles.selectInput}
+              value={selectedRoles}
+              onChange={(event) => setSelectedRoles(event.target.value)}
+              renderValue={(selected) =>
+                selected.length === roleList.length
+                  ? "All"
+                  : selected.join(", ")
+              }
+            >
               {roleList && roleList.length > 0 ? (
                 <div style={{ display: "flex", flexDirection: "column" }}>
                   <FormControlLabel
