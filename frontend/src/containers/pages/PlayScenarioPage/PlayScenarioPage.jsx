@@ -19,6 +19,8 @@ export default function PlayScenarioPage({ graph }) {
   const styles = useStyles();
 
   const currentScene = graph?.getScene(sceneId);
+  console.log(graph);
+  console.log(currentScene);
 
   if (!currentScene) return <LoadingPage text="Loading contents..." />;
 
