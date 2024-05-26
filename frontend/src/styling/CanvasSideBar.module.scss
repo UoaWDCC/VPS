@@ -73,5 +73,12 @@
 }
 
 .menuItem {
-  width: calc(18.5vw - 2em) !important;
+  width: calc(18.5vw - 4em) !important;
+  padding-left: 0.5em;
+  padding-right: 1em;
+}
+
+.formControl {
+  margin-top: 0.5em !important;
+  margin-bottom: 1em !important;
 }

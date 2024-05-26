@@ -41,9 +41,8 @@ export default function SceneSettings() {
   const { currentScene, setCurrentScene } = useContext(SceneContext);
   const { roleList } = useContext(ScenarioContext);
 
-  // TODO: Fetch actual selected roles from the backend
   const initialSelectedRoles = roleList ? [...roleList] : [];
-  const [selectedRoles, setSelectedRoles] = useState(initialSelectedRoles);
+  const [selectedRoles, setSelectedRoles] = useState(initialSelectedRoles); // TODO: Retrieve selected roles from the backend
 
   const initialCheckedState = roleList?.map((role) =>
     selectedRoles?.includes(role)
@@ -106,7 +105,7 @@ export default function SceneSettings() {
           <CustomTextField
             label="Scene Timer Duration"
             type="number"
-            value={currentScene?.time || ""}
+            value={currentScene?.time ?? 0}
             fullWidth
             onChange={(event) => {
               // limiting scene timer duration
@@ -119,22 +118,23 @@ export default function SceneSettings() {
             }}
             InputProps={{
               // seconds adornment appears when there is input
-              endAdornment: currentScene?.time ? (
+              endAdornment: (
                 <InputAdornment position="end">seconds</InputAdornment>
-              ) : null,
+              ),
             }}
             InputLabelProps={{
               // label moves up whenever there is input
-              shrink: !!currentScene?.time,
+              shrink: true,
             }}
           />
-          <FormControl fullWidth>
+          <FormControl fullWidth className={styles.formControl}>
             <CustomInputLabel>Scene Role(s)</CustomInputLabel>
             <Select
               className={styles.selectInput}
               MenuProps={{
                 getContentAnchorEl: null,
               }}
+              multiple
               value={selectedRoles}
               onChange={(event) => setSelectedRoles(event.target.value)}
               renderValue={(selected) =>
