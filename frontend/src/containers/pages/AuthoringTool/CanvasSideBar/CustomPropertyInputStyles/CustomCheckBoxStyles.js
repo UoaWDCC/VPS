@@ -9,6 +9,8 @@ export default function CustomCheckBoxStyles() {
       "&.Mui-checked": {
         color: "#0080a7",
       },
+      paddingLeft: "0.75em",
+      paddingRight: "0.75em",
     },
   });
 }

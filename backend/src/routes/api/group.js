@@ -7,7 +7,7 @@ import {
   getGroupByScenarioId,
 } from "../../db/daos/groupDao";
 
-import { updateRoleList } from "../../db/daos/scenarioDao";
+import { retrieveRoleList, updateRoleList } from "../../db/daos/scenarioDao";
 import Group from "../../db/models/group";
 
 const router = Router();
@@ -107,6 +107,14 @@ router.post("/:scenarioId", async (req, res) => {
   await Promise.all(promises);
 
   res.status(HTTP_OK).json(output);
+});
+
+router.get("/:scenarioId/roleList", async (req, res) => {
+  const { scenarioId } = req.params;
+
+  const roleList = await retrieveRoleList(scenarioId);
+
+  res.status(HTTP_OK).json(roleList);
 });
 
 export default router;
