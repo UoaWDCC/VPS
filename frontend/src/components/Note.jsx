@@ -92,7 +92,8 @@ export default function Note({ role, id, group, user }) {
         className={styles.note}
       >
         {role ? <h2>{role}</h2> : ""}
-        <div>
+        {note ? note.title : ""}
+        <div className={styles.timeInfo}>
           {" "}
           {date instanceof Date ? (
             <div>
@@ -109,7 +110,7 @@ export default function Note({ role, id, group, user }) {
         <div>
           <div className={styles.noteContent}>
             {/* Can be changed to display title */}
-            <h1>Note from {role}</h1>
+            <h1>{note.title}</h1>
             {isRole && (
               <textarea
                 className={styles.inputField}
@@ -119,11 +120,15 @@ export default function Note({ role, id, group, user }) {
               />
             )}
             {!isRole && <p className={styles.inputField}>{noteContent}</p>}
-            <div>
-              <p>Last saved at:</p>
-              <p>{date.toLocaleDateString()}</p>
-              <p>{date.toLocaleTimeString()}</p>
-            </div>
+            {date instanceof Date ? (
+              <div>
+                <p>Last saved at:</p>
+                <p>{date.toLocaleDateString()}</p>
+                <p>{date.toLocaleTimeString()}</p>
+              </div>
+            ) : (
+              ""
+            )}
             <div>
               {" "}
               <button

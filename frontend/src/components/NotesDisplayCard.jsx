@@ -67,7 +67,11 @@ export default function NotesDisplayCard({ group, user, handleClose }) {
                 user={user}
               />
             ))}
-            <button type="button" onClick={handleCreate}>
+            <button
+              type="button"
+              onClick={handleCreate}
+              className={styles.createButton}
+            >
               New Note
             </button>
           </div>

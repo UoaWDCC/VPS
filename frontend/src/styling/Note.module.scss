@@ -1,5 +1,6 @@
 .note {
   display: flex;
+  flex: 1 1 auto;
   flex-direction: column;
   justify-content: space-between;
   width: 8vw;
@@ -12,6 +13,7 @@
   box-shadow: 8px 8px 10px rgba(0, 0, 0, 0.5);
   margin: 15px;
   transition: width 0.3s, height 0.3s;
+  padding-bottom: 30px;
 }
 
 .note:hover {
@@ -161,4 +163,13 @@
 
 .saveButton:hover {
   width: 50%;
+}
+
+.timeInfo {
+  margin-top: 20px;
+}
+
+.timeInfo p {
+  margin: 2px 0;
+  padding: 0;
 }
