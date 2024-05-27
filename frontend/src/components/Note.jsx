@@ -4,6 +4,7 @@ import styles from "../styling/Note.module.scss";
 
 export default function Note({ role, id, group, user }) {
   const [noteContent, setContent] = useState();
+  const [title, setTitle] = useState();
   const [note, setNote] = useState();
   const [open, setOpen] = useState(false);
   const [save, setSave] = useState(false);
@@ -24,6 +25,7 @@ export default function Note({ role, id, group, user }) {
     const noteData = await usePost("/api/note/retrieve", { noteId: id });
     setNote(noteData);
     setContent(noteData.text);
+    setTitle(noteData.title);
     if (noteData.date) {
       const dateObject = new Date(noteData.date);
       setDate(dateObject);
@@ -35,8 +37,12 @@ export default function Note({ role, id, group, user }) {
     loadNote();
   }, []);
 
-  const handleInput = (e) => {
+  const handleContentInput = (e) => {
     setContent(e.target.value);
+  };
+
+  const handleTitleInput = (e) => {
+    setTitle(e.target.value);
   };
 
   const handleOpen = () => {
@@ -48,7 +54,7 @@ export default function Note({ role, id, group, user }) {
       await usePost("/api/note/update", {
         noteId: id,
         text: noteContent,
-        title: note.title,
+        title,
       });
       console.log("note saved");
     } catch (error) {
@@ -92,7 +98,7 @@ export default function Note({ role, id, group, user }) {
         className={styles.note}
       >
         {role ? <h2>{role}</h2> : ""}
-        {note ? note.title : ""}
+        {note ? title : ""}
         <div className={styles.timeInfo}>
           {" "}
           {date instanceof Date ? (
@@ -109,16 +115,24 @@ export default function Note({ role, id, group, user }) {
       {open && (
         <div>
           <div className={styles.noteContent}>
-            {/* Can be changed to display title */}
-            <h1>{note.title}</h1>
+            {isRole && (
+              <input
+                className={styles.titleInput}
+                type="text"
+                value={title}
+                maxLength="50"
+                onChange={(e) => handleTitleInput(e)}
+              />
+            )}
             {isRole && (
               <textarea
                 className={styles.inputField}
                 type="text"
                 value={noteContent}
-                onChange={(e) => handleInput(e)}
+                onChange={(e) => handleContentInput(e)}
               />
             )}
+            {!isRole && <h2>{title}</h2>}
             {!isRole && <p className={styles.inputField}>{noteContent}</p>}
             {date instanceof Date ? (
               <div>

@@ -1,6 +1,5 @@
 .note {
   display: flex;
-  flex: 1 1 auto;
   flex-direction: column;
   justify-content: space-between;
   width: 8vw;
@@ -88,6 +87,18 @@
 
 .saveButton:hover {
   width: 50%;
+}
+
+.titleInput {
+  width: 93%;
+  height: auto;
+  border: none;
+  font-size: 200%;
+  font-weight: bold;
+}
+
+.titleInput:focus {
+  outline: none;
 }
 
 .inputField {
