@@ -59,7 +59,6 @@
   width: 100%;
   padding: 10px;
   box-sizing: border-box;
-  gap: var(--note-gap, 20px);
 }
 
 .createButton {
@@ -82,9 +81,11 @@
 }
 
 .createButton:hover {
-  width: 10vw;
+  width: 8.5vw;
   height: 14vw;
   box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.9);
+  --cross-width: 110px;
+  --cross-hight: 110px;
 }
 
 .crossHorizontalLine {
@@ -94,6 +95,8 @@
   transform: translate(-50%, -50%);
   height: 10px;
   background: #adadad;
+  transition-duration: 0.3s;
+
   width: var(--cross-width, 80px);
   border-radius: 4px;
 }
@@ -104,6 +107,8 @@
   left: 50%;
   transform: translate(-50%, -50%);
   width: 10px;
+  transition-duration: 0.3s;
+
   background: #adadad;
   height: var(--cross-hight, 80px);
   border-radius: 4px;

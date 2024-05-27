@@ -1,6 +1,5 @@
 .note {
   display: flex;
-  flex: 1 1 auto;
   flex-direction: column;
   justify-content: space-between;
   width: 8vw;
@@ -15,14 +14,12 @@
   transition: width 0.3s, height 0.3s, rotate 0.3s;
   rotate: 3s;
   padding-bottom: 30px;
-  margin-right: auto;
-  margin-left: auto;
   rotate: 0deg;
 }
 
 .note:hover {
-  rotate: -3deg;
-  width: 10vw;
+  rotate: -5deg;
+  width: 8vw;
   height: 14vw;
   box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.9);
 }
@@ -147,7 +144,7 @@
 .closeButton {
   position: fixed;
   bottom: 50px;
-  right: 30%;
+  right: 20%;
   transform: translate(50%, 0);
   width: 25%;
   height: 40px;
@@ -160,13 +157,32 @@
 }
 
 .closeButton:hover {
+  width: 33%;
+}
+
+.notRoleCloseButton {
+  position: fixed;
+  bottom: 50px;
+  right: 50%;
+  transform: translate(50%, 0);
+  width: 25%;
+  height: 40px;
+  border-radius: 5px;
+  color: rgb(255, 0, 0);
+  text-align: min;
+  transition-duration: 0.4s;
+  border: none;
+  background-color: #e9e9e9;
+}
+
+.notRoleCloseButton:hover {
   width: 50%;
 }
 
 .saveButton {
   position: fixed;
   bottom: 50px;
-  left: 30%;
+  left: 50%;
   transform: translate(-50%, 0);
   width: 25%;
   height: 40px;
@@ -178,8 +194,27 @@
   background-color: #97d5f0;
 }
 
+.deleteButton {
+  position: fixed;
+  bottom: 50px;
+  left: 20%;
+  transform: translate(-50%, 0);
+  width: 25%;
+  height: 40px;
+  border-radius: 5px;
+  color: rgb(0, 0, 0);
+  text-align: min;
+  transition-duration: 0.4s;
+  border: none;
+  background-color: #fb9999;
+}
+
 .saveButton:hover {
-  width: 50%;
+  width: 33%;
+}
+
+.deleteButton:hover {
+  width: 33%;
 }
 
 .timeInfo {

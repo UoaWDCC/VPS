@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { usePost } from "hooks/crudHooks";
 import styles from "../styling/Note.module.scss";
 
-export default function Note({ role, id, group, user }) {
+export default function Note({ role, id, group, user, refetchGroup }) {
   const [noteContent, setContent] = useState();
   const [title, setTitle] = useState();
   const [note, setNote] = useState();
@@ -82,6 +82,19 @@ export default function Note({ role, id, group, user }) {
     setOpen(false);
   };
 
+  const handleDelete = async () => {
+    const res = window.confirm("Are you sure you want to delete this note?");
+    if (!res) return;
+    try {
+      await usePost("/api/note/delete", { noteId: id, groupId: group._id });
+      refetchGroup();
+      console.log("note deleted");
+      handleClose();
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   const handleKeyPress = (e) => {
     if (e.key === "Escape") {
       handleClose();
@@ -145,13 +158,15 @@ export default function Note({ role, id, group, user }) {
             )}
             <div>
               {" "}
-              <button
-                type="button"
-                onClick={handleClose}
-                className={styles.closeButton}
-              >
-                Close
-              </button>
+              {isRole && (
+                <button
+                  type="button"
+                  onClick={handleClose}
+                  className={styles.closeButton}
+                >
+                  Close
+                </button>
+              )}
               {isRole && (
                 <button
                   type="button"
@@ -159,6 +174,24 @@ export default function Note({ role, id, group, user }) {
                   className={styles.saveButton}
                 >
                   Save
+                </button>
+              )}
+              {isRole && (
+                <button
+                  type="button"
+                  onClick={handleDelete}
+                  className={styles.deleteButton}
+                >
+                  Delete
+                </button>
+              )}
+              {!isRole && (
+                <button
+                  type="button"
+                  onClick={handleClose}
+                  className={styles.notRoleCloseButton}
+                >
+                  Close
                 </button>
               )}
             </div>

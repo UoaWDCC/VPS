@@ -5,34 +5,46 @@ import Note from "./Note";
 
 export default function NotesDisplayCard({ group, user, handleClose }) {
   const [notes, setNotes] = useState([]);
+  const [userRole, setRole] = useState(null);
 
   async function loadNotes(groupData) {
-    console.log("group", group);
     const noteList = Object.entries(groupData.notes).flatMap(([role, ids]) =>
       ids.map((id) => ({ role, id }))
     );
     console.log("noteList", noteList);
     setNotes(noteList);
   }
+
   // refetch group data to get updated notes
   async function loadGroup() {
-    console.log("groupID", group._id);
     const groupData = await usePost("/api/group/", {
       groupId: group._id,
     });
-    console.log("newGroupData", groupData);
     loadNotes(groupData);
   }
 
+  const checkRole = () => {
+    group.users.forEach((userToCheck) => {
+      if (userToCheck.email === user.email) {
+        setRole(userToCheck.role);
+      }
+    });
+  };
+
   useEffect(() => {
-    loadNotes(group);
+    console.log(user);
+    loadGroup();
+    checkRole();
   }, []);
 
   const handleCreate = async () => {
+    if (!userRole) {
+      return;
+    }
     await usePost("/api/note/", {
       groupId: group._id,
       title: "New Note",
-      role: "Nurse",
+      role: userRole,
     });
     console.log("note created");
     loadGroup();
@@ -65,6 +77,7 @@ export default function NotesDisplayCard({ group, user, handleClose }) {
                 id={note.id}
                 group={group}
                 user={user}
+                refetchGroup={loadGroup}
               />
             ))}
             <div
@@ -74,7 +87,6 @@ export default function NotesDisplayCard({ group, user, handleClose }) {
               onClick={handleCreate}
               className={styles.createButton}
             >
-              <h2>New Note</h2>
               <div className={styles.crossHorizontalLine} />
               <div className={styles.crossVerticalLine} />
             </div>
