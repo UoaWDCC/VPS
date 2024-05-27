@@ -1,7 +1,8 @@
 import { Button } from "@material-ui/core";
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { useParams } from "react-router-dom";
 import ScreenContainer from "components/ScreenContainer";
+import { useGet } from "hooks/crudHooks";
 import TopBar from "./TopBar";
 import GroupsTable from "./GroupTable";
 
@@ -13,6 +14,21 @@ import GroupsTable from "./GroupTable";
 
 export default function ManageGroupsPage() {
   const { scenarioId } = useParams();
+  const [scenarioGroupInfo, setScenarioGroupInfo] = useState([]);
+  let groups;
+
+  // fetch groups assigned to this scenario
+  const fetchGroups = () => {
+    useGet(`/api/group/scenario/${scenarioId}`, setScenarioGroupInfo);
+    if (scenarioGroupInfo[0]) {
+      groups = scenarioGroupInfo[0].users;
+    } else {
+      groups = [];
+    }
+  };
+
+  fetchGroups();
+
   const tableData = [
     {
       groupNumber: 1,
@@ -56,9 +72,49 @@ export default function ManageGroupsPage() {
     console.log("File uploaded:", event.target.files[0]);
   };
 
-  function download() {
-    console.log("downloading current group config as .CSV");
-  }
+  const convertToCSV = (data) => {
+    const headers = "email,name,role,group number,playable link\n";
+    let csv = headers;
+
+    data.forEach((row) => {
+      let email = "";
+      let name = "";
+      let role = "";
+      let group = "";
+      const playableLink = `https://vps-dev.wdcc.co.nz/play/${scenarioId}`;
+
+      const entries = Object.entries(row);
+
+      entries.forEach(([key, value]) => {
+        if (key === "email") {
+          email = value;
+        } else if (key === "name") {
+          name = value;
+        } else if (key === "role") {
+          role = value;
+        } else if (key === "group") {
+          group = value;
+        }
+      });
+
+      csv += `${email},${name},${role},${group},${playableLink}\n`;
+    });
+
+    return csv;
+  };
+
+  const download = () => {
+    const csv = convertToCSV(groups);
+    const blob = new Blob([csv], { type: "text/csv" });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "groups_data.csv";
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    window.URL.revokeObjectURL(url);
+  };
 
   return (
     <ScreenContainer vertical>
