@@ -140,6 +140,11 @@ const retrieveAssignedScenarioList = async (userId) => {
   return retrieveScenarios(user.assigned);
 };
 
+const fetchScene = async (email, scenarioId) => {
+  const user = await User.findOne({ email }, { [`paths.${scenarioId}`]: 1 });
+  return (user && user.paths && user.paths.get(scenarioId)[0]) || null;
+};
+
 export {
   retrieveAllUser,
   createUser,
@@ -150,4 +155,5 @@ export {
   retrievePlayedUsers,
   assignScenarioToUsers,
   retrieveAssignedScenarioList,
+  fetchScene,
 };

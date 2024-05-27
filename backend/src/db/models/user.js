@@ -29,6 +29,11 @@ const userSchema = new Schema({
       type: String,
     },
   ],
+  // Map of scenarioId to path (sceneIds)
+  paths: {
+    type: Map,
+    of: [String],
+  },
 });
 
 const User = mongoose.model("model", userSchema, "users");
