@@ -21,7 +21,7 @@ const sceneSchema = new Schema({
     type: Number,
     default: 0,
   },
-  tag: [
+  roles: [
     {
     type: String,
     },
