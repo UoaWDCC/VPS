@@ -3,6 +3,7 @@ import { useParams, useHistory } from "react-router-dom";
 import AuthenticationContext from "context/AuthenticationContext";
 import { usePost, usePut } from "hooks/crudHooks";
 import LoadingPage from "../LoadingPage";
+import NotesDisplayCard from "../../../components/NotesDisplayCard";
 import ScenarioPreloader from "./Components/ScenarioPreloader";
 import PlayScenarioCanvas from "./PlayScenarioCanvas";
 import useStyles from "./playScenarioPage.styles";
@@ -41,7 +42,7 @@ export default function PlayScenarioPageMulti({ graph, group }) {
       token
     );
     if (res === "Scene added to path") incrementor(nextSceneId);
-    else window.reload(); // replace this with the redirection to the conflict page;
+    else history.replace(`/play/desync`);
   };
 
   return (
@@ -57,7 +58,8 @@ export default function PlayScenarioPageMulti({ graph, group }) {
       </div>
       {window.location === window.parent.location && (
         <ScenarioPreloader scenarioId={scenarioId} graph={graph} key={1} />
-      )}
+      )}{" "}
+      <NotesDisplayCard group={group} user={user} />
     </>
   );
 }

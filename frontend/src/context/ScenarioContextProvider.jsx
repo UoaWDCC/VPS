@@ -14,11 +14,17 @@ export default function ScenarioContextProvider({ children }) {
   );
   const [scenarios, setScenarios] = useState();
   const [assignedScenarios, setAssignedScenarios] = useState();
+  const [roleList, setRoleList] = useState();
 
   const { reFetch } = useGet(`api/scenario`, setScenarios);
   const { reFetch: reFetch2 } = useGet(
     `api/scenario/assigned`,
     setAssignedScenarios
+  );
+
+  const { reFetch: reFetch3 } = useGet(
+    currentScenario ? `api/group/${currentScenario._id}/roleList` : null,
+    currentScenario ? setRoleList : () => {}
   );
 
   return (
@@ -30,8 +36,10 @@ export default function ScenarioContextProvider({ children }) {
         assignedScenarios,
         setAssignedScenarios,
         reFetch2,
+        reFetch3,
         currentScenario,
         setCurrentScenario,
+        roleList,
       }}
     >
       {children}

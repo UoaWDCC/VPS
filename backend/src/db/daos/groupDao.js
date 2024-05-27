@@ -1,9 +1,21 @@
 import mongoose from "mongoose";
 
 import Group from "../models/group";
+import Scene from "../models/scene";
 
 const getGroup = async (groupId) => {
   return Group.findById(groupId);
+};
+
+const getGroupByScenarioId = async (SId) => {
+  return Group.find({ scenarioId: SId });
+};
+
+const getCurrentScene = async (groupId) => {
+  const group = await Group.findById(groupId);
+  const { path } = group;
+  if (!path.length) return null;
+  return Scene.findById(path[path.length - 1]);
 };
 
 const addSceneToPath = async (groupId, currentSceneId, sceneId) => {
@@ -47,4 +59,10 @@ const createGroup = async (scenarioId, userList) => {
   return dbGroup;
 };
 
-export { getGroup, addSceneToPath, createGroup };
+export {
+  getGroup,
+  getCurrentScene,
+  addSceneToPath,
+  createGroup,
+  getGroupByScenarioId,
+};

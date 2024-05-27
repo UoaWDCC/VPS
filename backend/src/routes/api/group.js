@@ -1,7 +1,13 @@
 import { Router } from "express";
 
-import { addSceneToPath, createGroup } from "../../db/daos/groupDao";
-import { updateRoleList } from "../../db/daos/scenarioDao";
+import {
+  addSceneToPath,
+  getCurrentScene,
+  createGroup,
+  getGroupByScenarioId,
+} from "../../db/daos/groupDao";
+
+import { retrieveRoleList, updateRoleList } from "../../db/daos/scenarioDao";
 import Group from "../../db/models/group";
 
 const router = Router();
@@ -9,6 +15,7 @@ const router = Router();
 const HTTP_OK = 200;
 const HTTP_CONFLICT = 409;
 const HTTP_NO_CONTENT = 204;
+const HTTP_NOT_FOUND = 404;
 
 // add a scene to the group's shared path
 router.post("/path/:groupId", async (req, res) => {
@@ -22,6 +29,28 @@ router.post("/path/:groupId", async (req, res) => {
     return res
       .status(HTTP_CONFLICT)
       .json({ error: "Scene mismatch b/w client and server" });
+  }
+});
+
+// get the groups assigned to a scenario
+router.get("/scenario/:scenarioId", async (req, res) => {
+  try {
+    const { scenarioId } = req.params;
+    const groups = await getGroupByScenarioId(scenarioId);
+    return res.status(HTTP_OK).json(groups);
+  } catch (error) {
+    return res.status(HTTP_NOT_FOUND).json({ error: error.message });
+  }
+});
+
+// get the current scene of the group
+router.get("/path/:groupId", async (req, res) => {
+  try {
+    const { groupId } = req.params;
+    const currentScene = await getCurrentScene(groupId);
+    return res.status(HTTP_OK).json(currentScene);
+  } catch (error) {
+    return res.status(HTTP_NOT_FOUND).json({ error: error.message });
   }
 });
 
@@ -78,6 +107,14 @@ router.post("/:scenarioId", async (req, res) => {
   await Promise.all(promises);
 
   res.status(HTTP_OK).json(output);
+});
+
+router.get("/:scenarioId/roleList", async (req, res) => {
+  const { scenarioId } = req.params;
+
+  const roleList = await retrieveRoleList(scenarioId);
+
+  res.status(HTTP_OK).json(roleList);
 });
 
 export default router;

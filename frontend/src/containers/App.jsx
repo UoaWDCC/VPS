@@ -13,6 +13,7 @@ import ScenarioSelectionPage from "./pages/ScenarioSelectionPage";
 import ManageGroupsPage from "./pages/ManageGroups/ManageGroupsPage";
 import { ScenePage } from "./pages/SceneSelectionPage";
 import theme from "./theme/App.theme";
+import InvalidRolePage from "./pages/InvalidRolePage";
 import PlayScenarioResolver from "./pages/PlayScenarioPage/PlayScenarioResolver";
 
 export default function App() {
@@ -22,6 +23,13 @@ export default function App() {
         <AuthenticationContextProvider>
           <BrowserRouter>
             <Switch>
+              <ProtectedRoute
+                exact
+                path="/play/invalid-role"
+                component={InvalidRolePage}
+              >
+                <InvalidRolePage />
+              </ProtectedRoute>
               <Route exact path="/login" component={LoginPage} />
 
               <ProtectedRoute path="/play/:scenarioId">
