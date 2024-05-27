@@ -23,6 +23,11 @@ export default function PlayScenarioPageMulti({ graph, group }) {
 
   if (!currScene || !group) return <LoadingPage text="Loading contents..." />;
 
+  const userRole = group.users.find((u) => u.email === user.email).role;
+  if (!currScene.roleList.includes(userRole)) {
+    history.replace(`/play/invalid-role`);
+  }
+
   const incrementor = (nextSceneId) => {
     graph.visit(nextSceneId);
     if (graph.isEndScene(nextSceneId)) {
