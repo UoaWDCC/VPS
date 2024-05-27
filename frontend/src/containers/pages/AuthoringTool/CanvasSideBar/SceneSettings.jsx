@@ -7,6 +7,9 @@ import {
   Checkbox,
   Typography,
 } from "@material-ui/core";
+import { useParams } from "react-router-dom";
+import { usePut } from "hooks/crudHooks";
+import AuthenticationContext from "context/AuthenticationContext";
 import TextField from "@material-ui/core/TextField";
 import { withStyles } from "@material-ui/core/styles";
 import { useContext, useState } from "react";
@@ -51,6 +54,25 @@ export default function SceneSettings() {
     (checked) => checked
   );
 
+  const { scenarioId } = useParams();
+  const { scenes } = useContext(SceneContext);
+  const { getUserIdToken } = useContext(AuthenticationContext);
+  async function saveRoles(newRoles) {
+    const updatedScenes = scenes.map(({ _id, name, roles: oldRoles }) => {
+      const roles = newRoles || oldRoles;
+      return {
+        _id,
+        name,
+        roles,
+      };
+    });
+    await usePut(
+      `/api/scenario/${scenarioId}/scene/roles`,
+      updatedScenes,
+      getUserIdToken
+    );
+  }
+
   const [checked, setChecked] = useState(initialCheckedState);
   const [allChecked, setAllChecked] = useState(initialAllCheckedState);
 
@@ -69,6 +91,7 @@ export default function SceneSettings() {
       return acc;
     }, []);
     setSelectedRoles(updatedSelectedRoles);
+    saveRoles(updatedSelectedRoles);
   };
 
   const handleAllToggle = () => {
@@ -82,6 +105,7 @@ export default function SceneSettings() {
 
     const newSelectedRoles = newAllChecked ? roleList : [];
     setSelectedRoles(newSelectedRoles);
+    saveRoles(newSelectedRoles);
   };
 
   return (
