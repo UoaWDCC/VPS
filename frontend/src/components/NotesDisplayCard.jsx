@@ -28,8 +28,8 @@ export default function NotesDisplayCard({ group, user, handleClose }) {
     loadNotes(group);
   }, []);
 
-  const handleCreate = () => {
-    usePost("/api/note/", {
+  const handleCreate = async () => {
+    await usePost("/api/note/", {
       groupId: group._id,
       title: "New Note",
       role: "Nurse",
@@ -67,13 +67,17 @@ export default function NotesDisplayCard({ group, user, handleClose }) {
                 user={user}
               />
             ))}
-            <button
-              type="button"
+            <div
+              role="button"
+              tabIndex={0}
+              onKeyDown={handleKeyPress}
               onClick={handleCreate}
               className={styles.createButton}
             >
-              New Note
-            </button>
+              <h2>New Note</h2>
+              <div className={styles.crossHorizontalLine} />
+              <div className={styles.crossVerticalLine} />
+            </div>
           </div>
         </div>
       </div>

@@ -59,9 +59,11 @@
   width: 100%;
   padding: 10px;
   box-sizing: border-box;
+  gap: var(--note-gap, 20px);
 }
 
 .createButton {
+  position: relative;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -75,4 +77,34 @@
   box-shadow: 8px 8px 10px rgba(0, 0, 0, 0.5);
   margin: 15px;
   transition: width 0.3s, height 0.3s;
+  margin-right: auto;
+  margin-left: auto;
+}
+
+.createButton:hover {
+  width: 10vw;
+  height: 14vw;
+  box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.9);
+}
+
+.crossHorizontalLine {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  height: 10px;
+  background: #adadad;
+  width: var(--cross-width, 80px);
+  border-radius: 4px;
+}
+
+.crossVerticalLine {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 10px;
+  background: #adadad;
+  height: var(--cross-hight, 80px);
+  border-radius: 4px;
 }
