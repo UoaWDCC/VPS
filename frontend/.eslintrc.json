@@ -36,7 +36,7 @@
     "jest/no-identical-title": "error",
     "jest/prefer-to-have-length": "warn",
     "jest/valid-expect": "error",
-    "prettier/prettier": ["error", { "endOfLine": "auto" }],
+    "prettier/prettier": ["warn", { "endOfLine": "auto" }],
     "no-unused-vars": "warn",
     "no-underscore-dangle": "off"
   },
