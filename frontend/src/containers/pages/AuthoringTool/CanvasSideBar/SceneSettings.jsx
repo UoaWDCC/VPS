@@ -42,7 +42,7 @@ export default function SceneSettings() {
   const { roleList } = useContext(ScenarioContext);
 
   const initialSelectedRoles = roleList ? [...roleList] : [];
-  const [selectedRoles, setSelectedRoles] = useState(initialSelectedRoles); // TODO: Retrieve selected roles from the backend
+  const [selectedRoles, setSelectedRoles] = useState(initialSelectedRoles);
 
   const initialCheckedState = roleList?.map((role) =>
     selectedRoles?.includes(role)
@@ -117,13 +117,11 @@ export default function SceneSettings() {
               });
             }}
             InputProps={{
-              // seconds adornment appears when there is input
               endAdornment: (
                 <InputAdornment position="end">seconds</InputAdornment>
               ),
             }}
             InputLabelProps={{
-              // label moves up whenever there is input
               shrink: true,
             }}
           />
