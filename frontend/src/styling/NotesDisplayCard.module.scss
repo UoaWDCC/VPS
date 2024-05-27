@@ -49,3 +49,14 @@
   background-color: rgba(0, 0, 0, 0.5);
   z-index: 1;
 }
+
+.notesContainer {
+  display: flex;
+  flex-wrap: wrap;
+  max-height: 100%;
+  overflow-y: auto;
+  max-width: 100%;
+  width: 100%;
+  padding: 10px;
+  box-sizing: border-box;
+}
