@@ -1,9 +1,10 @@
-import { useContext } from "react";
+import { useContext, useState } from "react";
 import { useParams, useHistory } from "react-router-dom";
 import AuthenticationContext from "context/AuthenticationContext";
 import { usePost, usePut } from "hooks/crudHooks";
 import LoadingPage from "../LoadingPage";
 import NotesDisplayCard from "../../../components/NotesDisplayCard";
+import PlayPageNoteButton from "../../../components/PlayPageNoteButton";
 import ScenarioPreloader from "./Components/ScenarioPreloader";
 import PlayScenarioCanvas from "./PlayScenarioCanvas";
 import useStyles from "./playScenarioPage.styles";
@@ -16,6 +17,7 @@ import useStyles from "./playScenarioPage.styles";
 export default function PlayScenarioPageMulti({ graph, group }) {
   const { user, getUserIdToken: token } = useContext(AuthenticationContext);
   const { scenarioId, sceneId } = useParams();
+  const [noteOpen, setNoteOpen] = useState(false);
   const history = useHistory();
   const styles = useStyles();
 
@@ -45,6 +47,14 @@ export default function PlayScenarioPageMulti({ graph, group }) {
     else history.replace(`/play/desync`);
   };
 
+  const handleClose = () => {
+    setNoteOpen(false);
+  };
+
+  const handleOpen = () => {
+    setNoteOpen(true);
+  };
+
   return (
     <>
       <div className={styles.canvasContainer}>
@@ -59,7 +69,10 @@ export default function PlayScenarioPageMulti({ graph, group }) {
       {window.location === window.parent.location && (
         <ScenarioPreloader scenarioId={scenarioId} graph={graph} key={1} />
       )}{" "}
-      <NotesDisplayCard group={group} user={user} />
+      <PlayPageNoteButton handleOpen={handleOpen} />
+      {noteOpen && (
+        <NotesDisplayCard group={group} user={user} handleClose={handleClose} />
+      )}
     </>
   );
 }
