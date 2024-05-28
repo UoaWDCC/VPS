@@ -28,7 +28,9 @@ export default function App() {
                 path="/play/invalid-role"
                 component={InvalidRolePage}
               >
-                <InvalidRolePage />
+                <PlayScenarioResolver>
+                  <InvalidRolePage />
+                </PlayScenarioResolver>
               </ProtectedRoute>
               <Route exact path="/login" component={LoginPage} />
 
