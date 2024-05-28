@@ -1,8 +1,21 @@
+import { useContext, useState } from "react";
+import AuthenticationContext from "../../context/AuthenticationContext";
+import NotesDisplayCard from "../../components/NotesDisplayCard";
 import BacktoScenarioSelectionButton from "../../components/BacktoScenarioSelectionButton";
 
-function InvalidRolePage() {
+function InvalidRolePage(group) {
   const currentUserRole = "Doctor";
   const rolesWithAccess = ["Nurse", "Patient"];
+  const [noteOpen, setNoteOpen] = useState(false);
+  const { user } = useContext(AuthenticationContext);
+
+  const handleClose = () => {
+    setNoteOpen(false);
+  };
+
+  const handleOpen = () => {
+    setNoteOpen(true);
+  };
 
   const containerStyle = {
     fontWeight: "600",
@@ -33,6 +46,12 @@ function InvalidRolePage() {
       <div style={bottomTextContainerStyle}>
         <p>Roles with access to this scene: {rolesWithAccess.join(", ")}</p>
       </div>
+      <button type="button" onClick={handleOpen}>
+        View Notes
+      </button>
+      {noteOpen && (
+        <NotesDisplayCard group={group} user={user} handleClose={handleClose} />
+      )}
     </div>
   );
 }
