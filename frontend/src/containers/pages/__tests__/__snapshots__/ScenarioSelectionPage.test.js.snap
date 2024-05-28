@@ -70,20 +70,22 @@ exports[`Scenario Selection page snapshot test 1`] = `
             </a>
           </li>
           <li>
-            <button
-              class="MuiButtonBase-root MuiButton-root WithStyles(ForwardRef(Button))-root-1 MuiButton-contained btn side contained"
-              tabindex="0"
-              type="button"
-            >
-              <span
-                class="MuiButton-label"
+            <div>
+              <button
+                class="MuiButtonBase-root MuiButton-root WithStyles(ForwardRef(Button))-root-1 MuiButton-contained btn side"
+                tabindex="0"
+                type="button"
               >
-                Delete
-              </span>
-              <span
-                class="MuiTouchRipple-root"
-              />
-            </button>
+                <span
+                  class="MuiButton-label"
+                >
+                  Delete
+                </span>
+                <span
+                  class="MuiTouchRipple-root"
+                />
+              </button>
+            </div>
           </li>
           <li>
             <button
