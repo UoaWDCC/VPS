@@ -9,6 +9,7 @@ export default function Note({ role, id, group, user, refetchGroup }) {
   const [open, setOpen] = useState(false);
   const [save, setSave] = useState(false);
   const [isRole, setRole] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
   const [date, setDate] = useState();
 
   const checkRole = () => {
@@ -82,9 +83,8 @@ export default function Note({ role, id, group, user, refetchGroup }) {
     setOpen(false);
   };
 
-  const handleDelete = async () => {
-    const res = window.confirm("Are you sure you want to delete this note?");
-    if (!res) return;
+  const deleteNote = async () => {
+    setShowConfirm(false);
     try {
       await usePost("/api/note/delete", { noteId: id, groupId: group._id });
       refetchGroup();
@@ -93,6 +93,10 @@ export default function Note({ role, id, group, user, refetchGroup }) {
     } catch (error) {
       console.log(error);
     }
+  };
+
+  const handleDelete = () => {
+    setShowConfirm(true);
   };
 
   const handleKeyPress = (e) => {
@@ -195,6 +199,34 @@ export default function Note({ role, id, group, user, refetchGroup }) {
                 </button>
               )}
             </div>
+            {showConfirm && (
+              <div
+                role="button"
+                onKeyDown={handleKeyPress}
+                tabIndex={0}
+                className={styles.overlay}
+                onClick={() => setShowConfirm(false)}
+              >
+                {" "}
+                <div className={styles.conform}>
+                  <p>Are you sure you want to delete this note?</p>
+                  <button
+                    type="button"
+                    onClick={deleteNote}
+                    className={styles.conformButton}
+                  >
+                    Yes
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setShowConfirm(false)}
+                    className={styles.rejectButton}
+                  >
+                    No
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       )}
