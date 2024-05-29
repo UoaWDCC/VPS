@@ -28,6 +28,7 @@ export default class Graph {
         _id: scene._id,
         visited: scene.visited,
         components: scene.components,
+        roles: scene.roles,
       });
 
       // Get adjacent scenes
