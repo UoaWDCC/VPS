@@ -6,9 +6,9 @@ import ScenarioContext from "../context/ScenarioContext";
 import AccessLevel from "../enums/route.access.level";
 import { useDelete, usePost } from "../hooks/crudHooks";
 import styles from "../styling/SideBar.module.scss";
-import DeleteButton from "./DeleteButton";
 import HelpButton from "./HelpButton";
 import CreateScenerioCard from "./CreateScenarioCard";
+import DeleteModal from "./DeleteModal";
 
 /**
  * Component used for navigation and executing actions located at the left side of the screen.
@@ -152,15 +152,10 @@ export default function SideBar() {
             </Button>
           </li>
           <li>
-            <DeleteButton
-              className="btn side contained"
-              color="default"
-              variant="contained"
-              disabled={!currentScenario}
-              onClick={deleteScenario}
-            >
-              Delete
-            </DeleteButton>
+            <DeleteModal
+              onDelete={deleteScenario}
+              currentScenario={currentScenario}
+            />
           </li>
           <li>
             <Button
