@@ -9,12 +9,11 @@ import ProtectedRoute from "../firebase/ProtectedRoute";
 import "../styling/style.scss";
 import DashboardPage from "./pages/Dashboard/DashboardPage";
 import LoginPage from "./pages/LoginPage";
-import ScenarioSelectionPage from "./pages/ScenarioSelectionPage";
 import ManageGroupsPage from "./pages/ManageGroups/ManageGroupsPage";
+import PlayScenarioResolver from "./pages/PlayScenarioPage/PlayScenarioResolver";
+import ScenarioSelectionPage from "./pages/ScenarioSelectionPage";
 import { ScenePage } from "./pages/SceneSelectionPage";
 import theme from "./theme/App.theme";
-import InvalidRolePage from "./pages/InvalidRolePage";
-import PlayScenarioResolver from "./pages/PlayScenarioPage/PlayScenarioResolver";
 
 export default function App() {
   return (
@@ -23,13 +22,6 @@ export default function App() {
         <AuthenticationContextProvider>
           <BrowserRouter>
             <Switch>
-              <ProtectedRoute
-                exact
-                path="/play/invalid-role"
-                component={InvalidRolePage}
-              >
-                <InvalidRolePage />
-              </ProtectedRoute>
               <Route exact path="/login" component={LoginPage} />
 
               <ProtectedRoute path="/play/:scenarioId">

@@ -1,5 +1,5 @@
-import { useState, useEffect } from "react";
 import { usePost } from "hooks/crudHooks";
+import { useEffect, useState } from "react";
 import styles from "../styling/NotesDisplayCard.module.scss";
 import Note from "./Note";
 
@@ -16,25 +16,22 @@ export default function NotesDisplayCard({ group, user, handleClose }) {
   }
 
   // refetch group data to get updated notes
-  async function loadGroup() {
+  async function fetchNotesData() {
     const groupData = await usePost("/api/group/", {
       groupId: group._id,
     });
-    loadNotes(groupData);
+    await loadNotes(groupData);
   }
 
-  const checkRole = () => {
+  useEffect(() => {
+    // Check roles
     group.users.forEach((userToCheck) => {
       if (userToCheck.email === user.email) {
         setRole(userToCheck.role);
       }
     });
-  };
 
-  useEffect(() => {
-    console.log(user);
-    loadGroup();
-    checkRole();
+    fetchNotesData();
   }, []);
 
   const handleCreate = async () => {
@@ -47,7 +44,7 @@ export default function NotesDisplayCard({ group, user, handleClose }) {
       role: userRole,
     });
     console.log("note created");
-    loadGroup();
+    fetchNotesData();
   };
 
   const handleKeyPress = (e) => {
@@ -77,7 +74,7 @@ export default function NotesDisplayCard({ group, user, handleClose }) {
                 id={note.id}
                 group={group}
                 user={user}
-                refetchGroup={loadGroup}
+                refetchGroup={fetchNotesData}
               />
             ))}
             <div

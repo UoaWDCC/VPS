@@ -1,35 +1,51 @@
 import { Button } from "@material-ui/core";
+import { Alert, Snackbar } from "@mui/material";
+import axios from "axios";
+import ScreenContainer from "components/ScreenContainer";
+import { useGet } from "hooks/crudHooks";
+import Papa from "papaparse";
 import { useRef, useState } from "react";
 import { useParams } from "react-router-dom";
-import Papa from "papaparse";
-import ScreenContainer from "components/ScreenContainer";
-import axios from "axios";
-import { useGet } from "hooks/crudHooks";
-import TopBar from "./TopBar";
 import GroupsTable from "./GroupTable";
+import TopBar from "./TopBar";
 
 /**
  * Page that shows the groups that the admin can manipulate
  *
  * @container
  */
-
 export default function ManageGroupsPage() {
   const { scenarioId } = useParams();
   const [scenarioGroupInfo, setScenarioGroupInfo] = useState([]);
-  let groups;
+
+  const [isToastShowing, setIsToastShowing] = useState(false);
+  const [toastText, setToastText] = useState("");
+  const [toastType, setToastType] = useState("");
+
+  let users = [];
 
   // fetch groups assigned to this scenario
-  const fetchGroups = () => {
-    useGet(`/api/group/scenario/${scenarioId}`, setScenarioGroupInfo);
-    if (scenarioGroupInfo[0]) {
-      groups = scenarioGroupInfo[0].users;
-    } else {
-      groups = [];
-    }
-  };
+  const { reFetch } = useGet(
+    `/api/group/scenario/${scenarioId}`,
+    setScenarioGroupInfo
+  );
+  console.log(scenarioGroupInfo);
+  if (scenarioGroupInfo.length) {
+    // Iterate groups and flatten to user list
+    scenarioGroupInfo.forEach((group) => {
+      if (group) {
+        users.push(...group.users);
+      }
+    });
+  } else {
+    users = [];
+  }
 
-  fetchGroups();
+  const showToast = (text, type = "success") => {
+    setToastText(text);
+    setToastType(type);
+    setIsToastShowing(true);
+  };
 
   // File input is a hidden input element that is activated via a click handler
   // This allows us to have an UI button that acts like a file <input> element.
@@ -88,12 +104,12 @@ export default function ManageGroupsPage() {
             jsonData
           );
 
+          reFetch();
           console.log("CSV data uploaded to MongoDB:", response.status);
-          // TODO: ESLINT ignore; change alerts so unexpected alerts error goes away
-          // alert("CSV successfully uploaded and data stored in MongoDB!");
+          showToast("Successfully formed groups!");
         } catch (error) {
           console.error("Error uploading CSV data:", error);
-          // alert("Error uploading CSV data.");
+          showToast("Error uploading CSV data!", "error");
         }
       },
     });
@@ -131,7 +147,7 @@ export default function ManageGroupsPage() {
   };
 
   const download = () => {
-    const csv = convertToCSV(groups);
+    const csv = convertToCSV(users);
     const blob = new Blob([csv], { type: "text/csv" });
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement("a");
@@ -141,6 +157,14 @@ export default function ManageGroupsPage() {
     a.click();
     document.body.removeChild(a);
     window.URL.revokeObjectURL(url);
+  };
+
+  // Toast close handler
+  const handleToastDismiss = (_, reason) => {
+    if (reason === "clickaway") {
+      return;
+    }
+    setIsToastShowing(false);
   };
 
   return (
@@ -171,9 +195,21 @@ export default function ManageGroupsPage() {
         </Button>
       </TopBar>
 
-      <GroupsTable data={groups} />
+      <GroupsTable data={users} />
+      <Snackbar
+        open={isToastShowing}
+        autoHideDuration={3000}
+        onClose={handleToastDismiss}
+        anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+      >
+        <Alert
+          onClose={handleToastDismiss}
+          severity={toastType}
+          sx={{ width: "100%" }}
+        >
+          {toastText}
+        </Alert>
+      </Snackbar>
     </ScreenContainer>
   );
 }
-
-// export FileUpload;
