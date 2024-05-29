@@ -1,4 +1,5 @@
-import { useEffect, useContext, useState } from "react";
+import axios from "axios";
+import { useContext, useEffect, useState } from "react";
 import {
   Route,
   Switch,
@@ -6,14 +7,14 @@ import {
   useLocation,
   useParams,
 } from "react-router-dom";
-import axios from "axios";
 
 import AuthenticationContext from "context/AuthenticationContext";
 import useGraph from "hooks/useGraph";
 
+import DesyncPage from "../DesyncPage";
+import InvalidRolePage from "../InvalidRolePage";
 import PlayScenarioPage from "./PlayScenarioPage";
 import PlayScenarioPageMulti from "./PlayScenarioPageMulti";
-import DesyncPage from "../DesyncPage";
 
 // TODO: move this somewhere else and add error handling
 async function get(url, userIdToken) {
@@ -54,6 +55,9 @@ export default function PlayScenarioResolver() {
 
   return (
     <Switch>
+      <Route exact path="/play/invalid-role">
+        <InvalidRolePage group={group} />
+      </Route>
       <Route exact path="/play/desync">
         <DesyncPage group={group} />
       </Route>

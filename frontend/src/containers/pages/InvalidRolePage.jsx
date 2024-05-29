@@ -1,9 +1,10 @@
+import { Button } from "@mui/material";
 import { useContext, useState } from "react";
-import AuthenticationContext from "../../context/AuthenticationContext";
-import NotesDisplayCard from "../../components/NotesDisplayCard";
 import BacktoScenarioSelectionButton from "../../components/BacktoScenarioSelectionButton";
+import NotesDisplayCard from "../../components/NotesDisplayCard";
+import AuthenticationContext from "../../context/AuthenticationContext";
 
-function InvalidRolePage(group) {
+function InvalidRolePage({ group }) {
   const currentUserRole = "Doctor";
   const rolesWithAccess = ["Nurse", "Patient"];
   const [noteOpen, setNoteOpen] = useState(false);
@@ -42,13 +43,23 @@ function InvalidRolePage(group) {
         Someone else is playing through this section of the scenario!
       </h1>
       <p style={textMargin}>Please wait for your role: {currentUserRole}</p>
+      <Button onClick={handleOpen} variant="outlined">
+        View Notes
+      </Button>
+      <p
+        style={{
+          marginBottom: "1em",
+          marginTop: "1em",
+          fontWeight: 400,
+          color: "#5c6573",
+        }}
+      >
+        — or —
+      </p>
       <BacktoScenarioSelectionButton />
       <div style={bottomTextContainerStyle}>
         <p>Roles with access to this scene: {rolesWithAccess.join(", ")}</p>
       </div>
-      <button type="button" onClick={handleOpen}>
-        View Notes
-      </button>
       {noteOpen && (
         <NotesDisplayCard group={group} user={user} handleClose={handleClose} />
       )}
