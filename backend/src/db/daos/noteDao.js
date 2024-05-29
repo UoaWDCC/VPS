@@ -25,10 +25,12 @@ const createNote = async (groupId, title, role, text = "") => {
  */
 const deleteNote = async (noteId, groupId) => {
   const note = await Note.findById(noteId);
-  const updateQuery = {};
-  updateQuery[`notes.${note.role}`] = noteId;
+  const updateQuery = {
+    $pull: { [`notes.${note.role}`]: noteId },
+  };
+
   //  delete note from group
-  await Group.updateOne({ _id: groupId }, { $pull: updateQuery });
+  await Group.updateOne({ _id: groupId }, updateQuery);
   //  delete note from note collection
   await note.delete();
 };

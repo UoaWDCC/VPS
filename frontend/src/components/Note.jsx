@@ -2,12 +2,14 @@ import { useState, useEffect } from "react";
 import { usePost } from "hooks/crudHooks";
 import styles from "../styling/Note.module.scss";
 
-export default function Note({ role, id, group, user }) {
+export default function Note({ role, id, group, user, refetchGroup }) {
   const [noteContent, setContent] = useState();
+  const [title, setTitle] = useState();
   const [note, setNote] = useState();
   const [open, setOpen] = useState(false);
   const [save, setSave] = useState(false);
   const [isRole, setRole] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
   const [date, setDate] = useState();
 
   const checkRole = () => {
@@ -24,6 +26,7 @@ export default function Note({ role, id, group, user }) {
     const noteData = await usePost("/api/note/retrieve", { noteId: id });
     setNote(noteData);
     setContent(noteData.text);
+    setTitle(noteData.title);
     if (noteData.date) {
       const dateObject = new Date(noteData.date);
       setDate(dateObject);
@@ -35,8 +38,12 @@ export default function Note({ role, id, group, user }) {
     loadNote();
   }, []);
 
-  const handleInput = (e) => {
+  const handleContentInput = (e) => {
     setContent(e.target.value);
+  };
+
+  const handleTitleInput = (e) => {
+    setTitle(e.target.value);
   };
 
   const handleOpen = () => {
@@ -48,7 +55,7 @@ export default function Note({ role, id, group, user }) {
       await usePost("/api/note/update", {
         noteId: id,
         text: noteContent,
-        title: note.title,
+        title,
       });
       console.log("note saved");
     } catch (error) {
@@ -76,6 +83,22 @@ export default function Note({ role, id, group, user }) {
     setOpen(false);
   };
 
+  const deleteNote = async () => {
+    setShowConfirm(false);
+    try {
+      await usePost("/api/note/delete", { noteId: id, groupId: group._id });
+      refetchGroup();
+      console.log("note deleted");
+      handleClose();
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const handleDelete = () => {
+    setShowConfirm(true);
+  };
+
   const handleKeyPress = (e) => {
     if (e.key === "Escape") {
       handleClose();
@@ -92,7 +115,8 @@ export default function Note({ role, id, group, user }) {
         className={styles.note}
       >
         {role ? <h2>{role}</h2> : ""}
-        <div>
+        {note ? title : ""}
+        <div className={styles.timeInfo}>
           {" "}
           {date instanceof Date ? (
             <div>
@@ -108,31 +132,45 @@ export default function Note({ role, id, group, user }) {
       {open && (
         <div>
           <div className={styles.noteContent}>
-            {/* Can be changed to display title */}
-            <h1>Note from {role}</h1>
+            {isRole && (
+              <input
+                className={styles.titleInput}
+                type="text"
+                value={title}
+                maxLength="50"
+                onChange={(e) => handleTitleInput(e)}
+              />
+            )}
             {isRole && (
               <textarea
                 className={styles.inputField}
                 type="text"
                 value={noteContent}
-                onChange={(e) => handleInput(e)}
+                onChange={(e) => handleContentInput(e)}
               />
             )}
+            {!isRole && <h2>{title}</h2>}
             {!isRole && <p className={styles.inputField}>{noteContent}</p>}
-            <div>
-              <p>Last saved at:</p>
-              <p>{date.toLocaleDateString()}</p>
-              <p>{date.toLocaleTimeString()}</p>
-            </div>
+            {date instanceof Date ? (
+              <div>
+                <p>Last saved at:</p>
+                <p>{date.toLocaleDateString()}</p>
+                <p>{date.toLocaleTimeString()}</p>
+              </div>
+            ) : (
+              ""
+            )}
             <div>
               {" "}
-              <button
-                type="button"
-                onClick={handleClose}
-                className={styles.closeButton}
-              >
-                Close
-              </button>
+              {isRole && (
+                <button
+                  type="button"
+                  onClick={handleClose}
+                  className={styles.closeButton}
+                >
+                  Close
+                </button>
+              )}
               {isRole && (
                 <button
                   type="button"
@@ -142,7 +180,53 @@ export default function Note({ role, id, group, user }) {
                   Save
                 </button>
               )}
+              {isRole && (
+                <button
+                  type="button"
+                  onClick={handleDelete}
+                  className={styles.deleteButton}
+                >
+                  Delete
+                </button>
+              )}
+              {!isRole && (
+                <button
+                  type="button"
+                  onClick={handleClose}
+                  className={styles.notRoleCloseButton}
+                >
+                  Close
+                </button>
+              )}
             </div>
+            {showConfirm && (
+              <div
+                role="button"
+                onKeyDown={handleKeyPress}
+                tabIndex={0}
+                className={styles.overlay}
+                onClick={() => setShowConfirm(false)}
+              >
+                {" "}
+                <div className={styles.conform}>
+                  <p>Are you sure you want to delete this note?</p>
+                  <button
+                    type="button"
+                    onClick={deleteNote}
+                    className={styles.conformButton}
+                  >
+                    Yes
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setShowConfirm(false)}
+                    className={styles.rejectButton}
+                  >
+                    No
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       )}

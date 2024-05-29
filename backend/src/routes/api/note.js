@@ -43,7 +43,7 @@ router.post("/update", async (req, res) => {
 // Delete a note
 router.post("/delete", async (req, res) => {
   const { noteId, groupId } = req.body;
-  deleteNote(noteId, groupId);
+  await deleteNote(noteId, groupId);
   res.status(HTTP_OK).json("note deleted");
 });
 export default router;

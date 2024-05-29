@@ -4,7 +4,8 @@ import Group from "../models/group";
 import Scene from "../models/scene";
 
 const getGroup = async (groupId) => {
-  return Group.findById(groupId);
+  const group = await Group.findById(groupId);
+  return group;
 };
 
 const getGroupByScenarioId = async (SId) => {

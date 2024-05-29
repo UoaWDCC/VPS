@@ -3,6 +3,7 @@ import { Router } from "express";
 import {
   addSceneToPath,
   getCurrentScene,
+  getGroup,
   createGroup,
   getGroupByScenarioId,
 } from "../../db/daos/groupDao";
@@ -115,6 +116,16 @@ router.get("/:scenarioId/roleList", async (req, res) => {
   const roleList = await retrieveRoleList(scenarioId);
 
   res.status(HTTP_OK).json(roleList);
+});
+
+// get a group by its id
+router.post("/", async (req, res) => {
+  const { groupId } = req.body;
+  const group = await getGroup(groupId);
+  if (!group) {
+    return res.status(HTTP_NOT_FOUND).json({ error: "Group not found" });
+  }
+  return res.status(HTTP_OK).json(group);
 });
 
 export default router;
