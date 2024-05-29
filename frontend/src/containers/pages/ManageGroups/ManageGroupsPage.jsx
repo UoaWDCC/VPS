@@ -89,10 +89,11 @@ export default function ManageGroupsPage() {
           );
 
           console.log("CSV data uploaded to MongoDB:", response.status);
-          alert("CSV successfully uploaded and data stored in MongoDB!");
+          // TODO: ESLINT ignore; change alerts so unexpected alerts error goes away
+          // alert("CSV successfully uploaded and data stored in MongoDB!");
         } catch (error) {
           console.error("Error uploading CSV data:", error);
-          alert("Error uploading CSV data.");
+          // alert("Error uploading CSV data.");
         }
       },
     });
