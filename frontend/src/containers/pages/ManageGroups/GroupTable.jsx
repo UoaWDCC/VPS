@@ -8,8 +8,7 @@
  *   </GroupsTable>
  * )
  */
-import React, { useEffect, useState } from "react";
-import axios from "axios";
+import { useEffect, useState } from "react";
 import { makeStyles } from "@material-ui/core/styles";
 import Table from "@material-ui/core/Table";
 import TableBody from "@material-ui/core/TableBody";
@@ -38,107 +37,52 @@ const useStyles = makeStyles({
   },
 });
 
-// export default function GroupTable({ data }) {
-//   const classes = useStyles();
-
-//   return (
-//     <div className={classes.root}>
-//       <Paper>
-//         <Typography variant="h5" component="h1" className={classes.heading}>
-//           Group Table
-//         </Typography>
-//         <TableContainer>
-//           <Table className={classes.table} aria-label="simple table">
-//             <TableHead>
-//               <TableRow>
-//                 <TableCell>Group Number</TableCell>
-//                 <TableCell align="right">Nurse</TableCell>
-//                 <TableCell align="right">Doctor</TableCell>
-//                 <TableCell align="right">Pharmacist</TableCell>
-//                 <TableCell align="right">Progress</TableCell>
-//               </TableRow>
-//             </TableHead>
-// //             <TableBody>
-// //               {data.map((group) => (
-//                 <TableRow key={group.groupNumber}>
-//                   <TableCell component="th" scope="row">
-//                     {group.groupNumber}
-//                   </TableCell>
-//                   <TableCell align="right">{group.nurse}</TableCell>
-//                   <TableCell align="right">{group.doctor}</TableCell>
-//                   <TableCell align="right">{group.pharmacist}</TableCell>
-//                   <TableCell align="right">{group.progress}</TableCell>
-//                 </TableRow>
-//               ))}
-//             </TableBody>
-//           </Table>
-//         </TableContainer>
-//       </Paper>
-//     </div>
-//   );
-// }
-
 const GroupsTable = ({ data }) => {
   const classes = useStyles();
 
+  const [users, setUsers] = useState([]);
+
+  useEffect(() => {
+    if (data) {
+      setUsers(data);
+    }
+  }, [data]);
+
   return (
-    <div className={classes.root}>
-      <Paper>
-        <Typography variant="h5" component="h1" className={classes.heading}>
-          Group Table
-        </Typography>
-        <TableContainer>
-          <Table className={classes.table} aria-label="simple table">
-            <TableHead>
-              <TableRow>
-                <TableCell>Group Number</TableCell>
-                <TableCell align="right">Nurse</TableCell>
-                <TableCell align="right">Doctor</TableCell>
-                <TableCell align="right">Pharmacist</TableCell>
-                <TableCell align="right">Progress</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {data.map((group) => (
-                <TableRow key={group._id}>
-                  <TableCell component="th" scope="row">
-                    {group._id}
-                  </TableCell>
-                  <TableCell align="right">
-                    <ul>
-                      {group.users.map((user) => (
-                        <li key={user.email}>
-                          {user.name} ({user.role})
-                        </li>
-                      ))}
-                    </ul>
-                  </TableCell>
-                  <TableCell align="right">{group.scenarioId}</TableCell>
+    <>
+      <div className={classes.root}>
+        <Paper>
+          <Typography variant="h5" component="h1" className={classes.heading}>
+            Group Table
+          </Typography>
+          <TableContainer>
+            <Table className={classes.table} aria-label="simple table">
+              <TableHead>
+                <TableRow>
+                  <TableCell>Group Number</TableCell>
+                  <TableCell align="right">Name</TableCell>
+                  <TableCell align="right">Email</TableCell>
+                  <TableCell align="right">Role</TableCell>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </TableContainer>
-      </Paper>
-    </div>
+              </TableHead>
+              <TableBody>
+                {users.map((user, index) => (
+                  <TableRow key={user.email || index}>
+                    <TableCell component="th" scope="row">
+                      {user.group}
+                    </TableCell>
+                    <TableCell align="right">{user.name}</TableCell>
+                    <TableCell align="right">{user.email}</TableCell>
+                    <TableCell align="right">{user.role}</TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
+        </Paper>
+      </div>
+    </>
   );
 };
 
-const ManageGroups = () => {
-  const [groups, setGroups] = useState([]);
-
-  useEffect(() => {
-    axios
-      .get("/api/groups")
-      .then((response) => {
-        setGroups(response.data);
-      })
-      .catch((error) => {
-        console.error("Error fetching groups:", error);
-      });
-  }, []);
-
-  return <GroupsTable data={groups} />;
-};
-
-export default ManageGroups;
+export default GroupsTable;

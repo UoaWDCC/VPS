@@ -31,37 +31,6 @@ export default function ManageGroupsPage() {
 
   fetchGroups();
 
-  const tableData = [
-    {
-      groupNumber: 1,
-      nurse: "Alice Cheng",
-      doctor: "Bob Marley",
-      pharmacist: "Charlie Puth",
-      progress: "50%",
-    },
-    {
-      groupNumber: 2,
-      nurse: "Alice Cheng",
-      doctor: "Bob Marley",
-      pharmacist: "Charlie Puth",
-      progress: "20%",
-    },
-    {
-      groupNumber: 3,
-      nurse: "Alice Cheng",
-      doctor: "Bob Marley",
-      pharmacist: "Charlie Puth",
-      progress: "0%",
-    },
-    {
-      groupNumber: 4,
-      nurse: "Alice Cheng",
-      doctor: "Bob Marley",
-      pharmacist: "Charlie Puth",
-      progress: "300%",
-    },
-  ];
-
   // File input is a hidden input element that is activated via a click handler
   // This allows us to have an UI button that acts like a file <input> element.
   const fileInputRef = useRef(null);
@@ -201,7 +170,7 @@ export default function ManageGroupsPage() {
         </Button>
       </TopBar>
 
-      <GroupsTable data={tableData} />
+      <GroupsTable data={groups} />
     </ScreenContainer>
   );
 }
