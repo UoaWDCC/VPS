@@ -7,9 +7,12 @@ import {
   Checkbox,
   Typography,
 } from "@material-ui/core";
+import { useParams } from "react-router-dom";
+import { usePut } from "hooks/crudHooks";
+import AuthenticationContext from "context/AuthenticationContext";
 import TextField from "@material-ui/core/TextField";
 import { withStyles } from "@material-ui/core/styles";
-import { useContext, useState } from "react";
+import { useContext, useState, useEffect } from "react";
 import ScenarioContext from "context/ScenarioContext";
 import SceneContext from "../../../../context/SceneContext";
 
@@ -40,19 +43,50 @@ const CustomTextField = withStyles({
 export default function SceneSettings() {
   const { currentScene, setCurrentScene } = useContext(SceneContext);
   const { roleList } = useContext(ScenarioContext);
+  const [selectedRoles, setSelectedRoles] = useState([]);
 
-  const initialSelectedRoles = roleList ? [...roleList] : [];
-  const [selectedRoles, setSelectedRoles] = useState(initialSelectedRoles);
+  const [checked, setChecked] = useState([]);
+  const [allChecked, setAllChecked] = useState(false);
 
-  const initialCheckedState = roleList?.map((role) =>
-    selectedRoles?.includes(role)
-  );
-  const initialAllCheckedState = initialCheckedState?.every(
-    (checked) => checked
-  );
+  useEffect(() => {
+    if (currentScene.roles) {
+      setSelectedRoles(currentScene.roles);
+    }
+    if (roleList) {
+      const initialCheckedState = roleList.map((role) =>
+        (currentScene.roles || []).includes(role)
+      );
+      setChecked(initialCheckedState);
 
-  const [checked, setChecked] = useState(initialCheckedState);
-  const [allChecked, setAllChecked] = useState(initialAllCheckedState);
+      // Initialize allChecked state
+      const initialAllCheckedState = initialCheckedState.every(
+        (check) => check
+      );
+      setAllChecked(initialAllCheckedState);
+    }
+  }, [roleList, currentScene]);
+
+  const { scenarioId } = useParams();
+  const { scenes } = useContext(SceneContext);
+  const { getUserIdToken } = useContext(AuthenticationContext);
+  async function saveRoles(newRoles) {
+    const updatedScenes = scenes.map(({ _id, name, roles: oldRoles }) => {
+      if (_id === currentScene._id) {
+        const roles = newRoles || oldRoles;
+        return {
+          _id,
+          name,
+          roles,
+        };
+      }
+      return { _id, name, roles: oldRoles };
+    });
+    await usePut(
+      `/api/scenario/${scenarioId}/scene/roles`,
+      updatedScenes,
+      getUserIdToken
+    );
+  }
 
   const handleCheckboxChange = (index) => {
     const newChecked = [...checked];
@@ -69,6 +103,7 @@ export default function SceneSettings() {
       return acc;
     }, []);
     setSelectedRoles(updatedSelectedRoles);
+    saveRoles(updatedSelectedRoles);
   };
 
   const handleAllToggle = () => {
@@ -82,6 +117,7 @@ export default function SceneSettings() {
 
     const newSelectedRoles = newAllChecked ? roleList : [];
     setSelectedRoles(newSelectedRoles);
+    saveRoles(newSelectedRoles);
   };
 
   return (
@@ -146,7 +182,6 @@ export default function SceneSettings() {
                   <FormControlLabel
                     control={
                       <CustomCheckBox
-                        defaultChecked
                         checked={allChecked}
                         onChange={handleAllToggle}
                       />
@@ -157,7 +192,6 @@ export default function SceneSettings() {
                     <FormControlLabel
                       control={
                         <CustomCheckBox
-                          defaultChecked
                           checked={checked[index]}
                           onChange={() => handleCheckboxChange(index)}
                         />
