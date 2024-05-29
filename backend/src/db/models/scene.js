@@ -23,7 +23,7 @@ const sceneSchema = new Schema({
   },
   roles: [
     {
-    type: String,
+      type: String,
     },
   ],
 });
