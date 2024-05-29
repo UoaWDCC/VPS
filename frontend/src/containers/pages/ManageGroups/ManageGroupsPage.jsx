@@ -1,7 +1,9 @@
 import { Button } from "@material-ui/core";
 import { useRef, useState } from "react";
 import { useParams } from "react-router-dom";
+import Papa from "papaparse";
 import ScreenContainer from "components/ScreenContainer";
+import axios from "axios";
 import { useGet } from "hooks/crudHooks";
 import TopBar from "./TopBar";
 import GroupsTable from "./GroupTable";
@@ -29,37 +31,6 @@ export default function ManageGroupsPage() {
 
   fetchGroups();
 
-  const tableData = [
-    {
-      groupNumber: 1,
-      nurse: "Alice Cheng",
-      doctor: "Bob Marley",
-      pharmacist: "Charlie Puth",
-      progress: "50%",
-    },
-    {
-      groupNumber: 2,
-      nurse: "Alice Cheng",
-      doctor: "Bob Marley",
-      pharmacist: "Charlie Puth",
-      progress: "20%",
-    },
-    {
-      groupNumber: 3,
-      nurse: "Alice Cheng",
-      doctor: "Bob Marley",
-      pharmacist: "Charlie Puth",
-      progress: "0%",
-    },
-    {
-      groupNumber: 4,
-      nurse: "Alice Cheng",
-      doctor: "Bob Marley",
-      pharmacist: "Charlie Puth",
-      progress: "300%",
-    },
-  ];
-
   // File input is a hidden input element that is activated via a click handler
   // This allows us to have an UI button that acts like a file <input> element.
   const fileInputRef = useRef(null);
@@ -70,6 +41,62 @@ export default function ManageGroupsPage() {
   const handleFileUpload = (event) => {
     // TODO: add csv file upload handling here!
     console.log("File uploaded:", event.target.files[0]);
+    const file = event.target.files[0];
+    Papa.parse(file, {
+      header: true,
+      skipEmptyLines: true,
+      complete: async (results) => {
+        console.log(results);
+        console.log("CSV data uploaded to MongoDB.");
+        const { data } = results;
+
+        // Group data by 'group' field
+        const groupMap = {};
+        data.forEach((user) => {
+          const { group } = user;
+          if (group) {
+            if (!groupMap[group]) {
+              groupMap[group] = [];
+            }
+            groupMap[group].push({
+              email: user.email,
+              name: user.name,
+              role: user.role,
+              group: user.group,
+            });
+          }
+        });
+
+        const groupList = Object.values(groupMap);
+
+        // Extract role list
+        const roleList = [
+          ...new Set(data.map((user) => user.role.toLowerCase())),
+        ].filter((str) => str.trim() !== "");
+
+        const jsonData = {
+          groupList,
+          roleList,
+        };
+
+        console.log("Processed JSON Data:", jsonData);
+
+        // Send the parsed JSON data to the backend
+        try {
+          const response = await axios.post(
+            `/api/group/${scenarioId}`,
+            jsonData
+          );
+
+          console.log("CSV data uploaded to MongoDB:", response.status);
+          // TODO: ESLINT ignore; change alerts so unexpected alerts error goes away
+          // alert("CSV successfully uploaded and data stored in MongoDB!");
+        } catch (error) {
+          console.error("Error uploading CSV data:", error);
+          // alert("Error uploading CSV data.");
+        }
+      },
+    });
   };
 
   const convertToCSV = (data) => {
@@ -144,7 +171,9 @@ export default function ManageGroupsPage() {
         </Button>
       </TopBar>
 
-      <GroupsTable data={tableData} />
+      <GroupsTable data={groups} />
     </ScreenContainer>
   );
 }
+
+// export FileUpload;
