@@ -52,7 +52,7 @@ export default function SceneSettings() {
     if (currentScene.roles) {
       setSelectedRoles(currentScene.roles);
     }
-    if (roleList.length > 0) {
+    if (roleList) {
       const initialCheckedState = roleList.map((role) =>
         (currentScene.roles || []).includes(role)
       );
@@ -64,7 +64,7 @@ export default function SceneSettings() {
       );
       setAllChecked(initialAllCheckedState);
     }
-  }, [roleList, currentScene.roles]);
+  }, [roleList, currentScene]);
 
   const { scenarioId } = useParams();
   const { scenes } = useContext(SceneContext);
