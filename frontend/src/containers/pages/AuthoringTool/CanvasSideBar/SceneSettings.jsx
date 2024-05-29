@@ -8,7 +8,7 @@ import {
   Typography,
 } from "@material-ui/core";
 import { useParams } from "react-router-dom";
-import { useGet, usePut } from "hooks/crudHooks";
+import { usePut } from "hooks/crudHooks";
 import AuthenticationContext from "context/AuthenticationContext";
 import TextField from "@material-ui/core/TextField";
 import { withStyles } from "@material-ui/core/styles";
