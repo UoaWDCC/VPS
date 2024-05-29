@@ -1,12 +1,12 @@
 import { Button } from "@material-ui/core";
+import axios from "axios";
+import ScreenContainer from "components/ScreenContainer";
+import { useGet } from "hooks/crudHooks";
+import Papa from "papaparse";
 import { useRef, useState } from "react";
 import { useParams } from "react-router-dom";
-import Papa from "papaparse";
-import ScreenContainer from "components/ScreenContainer";
-import axios from "axios";
-import { useGet } from "hooks/crudHooks";
-import TopBar from "./TopBar";
 import GroupsTable from "./GroupTable";
+import TopBar from "./TopBar";
 
 /**
  * Page that shows the groups that the admin can manipulate
@@ -17,15 +17,21 @@ import GroupsTable from "./GroupTable";
 export default function ManageGroupsPage() {
   const { scenarioId } = useParams();
   const [scenarioGroupInfo, setScenarioGroupInfo] = useState([]);
-  let groups;
+  let users = [];
 
   // fetch groups assigned to this scenario
   const fetchGroups = () => {
     useGet(`/api/group/scenario/${scenarioId}`, setScenarioGroupInfo);
-    if (scenarioGroupInfo[0]) {
-      groups = scenarioGroupInfo[0].users;
+    console.log(scenarioGroupInfo);
+    if (scenarioGroupInfo.length) {
+      // Iterate groups and flatten to user list
+      scenarioGroupInfo.forEach((group) => {
+        if (group) {
+          users.push(...group.users);
+        }
+      });
     } else {
-      groups = [];
+      users = [];
     }
   };
 
@@ -131,7 +137,7 @@ export default function ManageGroupsPage() {
   };
 
   const download = () => {
-    const csv = convertToCSV(groups);
+    const csv = convertToCSV(users);
     const blob = new Blob([csv], { type: "text/csv" });
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement("a");
@@ -171,7 +177,7 @@ export default function ManageGroupsPage() {
         </Button>
       </TopBar>
 
-      <GroupsTable data={groups} />
+      <GroupsTable data={users} />
     </ScreenContainer>
   );
 }
