@@ -82,19 +82,19 @@ export default class Graph {
     return this.dist[this.rule[startScene]][this.rule[endScene]];
   }
 
-  progress(currentScene) {
-    return this.endScenes
-      .filter(
-        (endScene) => this.distanceFrom(currentScene, endScene) !== Infinity
-      )
-      .map(
-        (endScene) =>
-          this.distanceFrom(this.root, currentScene) /
-          (this.distanceFrom(this.root, currentScene) +
-            this.distanceFrom(currentScene, endScene))
-      )
-      .reduce((prev, curr) => (prev < curr ? prev : curr));
-  }
+  // progress(currentScene) {
+  //   return this.endScenes
+  //     .filter(
+  //       (endScene) => this.distanceFrom(currentScene, endScene) !== Infinity
+  //     )
+  //     .map(
+  //       (endScene) =>
+  //         this.distanceFrom(this.root, currentScene) /
+  //         (this.distanceFrom(this.root, currentScene) +
+  //           this.distanceFrom(currentScene, endScene))
+  //     )
+  //     .reduce((prev, curr) => (prev < curr ? prev : curr));
+  // }
 
   visit(currentScene) {
     this.path.push(currentScene);
