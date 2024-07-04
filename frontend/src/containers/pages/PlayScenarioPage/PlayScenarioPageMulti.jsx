@@ -32,14 +32,13 @@ export default function PlayScenarioPageMulti({ graph, group }) {
   }
 
   const incrementor = (nextSceneId) => {
-    graph.visit(nextSceneId);
-    if (graph.isEndScene(nextSceneId)) {
-      const path = graph.getPath();
-      usePut(`/api/user/${user.uid}`, { scenarioId, path }, token);
-      path.forEach((id) => {
-        usePut(`/api/scenario/${scenarioId}/scene/visited/${id}`, {}, token);
-      });
-    }
+    // if (graph.isEndScene(nextSceneId)) {
+    //   const path = graph.getPath();
+    //   usePut(`/api/user/${user.uid}`, { scenarioId, path }, token);
+    //   path.forEach((id) => {
+    //     usePut(`/api/scenario/${scenarioId}/scene/visited/${id}`, {}, token);
+    //   });
+    // }
     history.replace(`/play/${scenarioId}/multiplayer/${nextSceneId}`);
   };
 
@@ -66,7 +65,6 @@ export default function PlayScenarioPageMulti({ graph, group }) {
       <div className={styles.canvasContainer}>
         <div className={styles.canvas}>
           <PlayScenarioCanvas
-            progress={graph.progress(sceneId)}
             scene={currScene}
             incrementor={validatedIncrementor}
           />

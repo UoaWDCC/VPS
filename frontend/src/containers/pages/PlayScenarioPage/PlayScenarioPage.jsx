@@ -41,11 +41,7 @@ export default function PlayScenarioPage({ graph }) {
     <>
       <div className={styles.canvasContainer}>
         <div className={styles.canvas}>
-          <PlayScenarioCanvas
-            progress={graph.progress(sceneId)}
-            scene={currentScene}
-            incrementor={incrementor}
-          />
+          <PlayScenarioCanvas scene={currentScene} incrementor={incrementor} />
         </div>
       </div>
       {window.location === window.parent.location && (
