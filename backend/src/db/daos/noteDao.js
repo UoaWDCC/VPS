@@ -31,6 +31,7 @@ const createNote = async (groupId, title, email, text = "") => {
  * Deletes a note from the database
  *  @param {String} noteId note ID
  *  @param {String} groupId group ID
+ * @param {String} email email of the user
  * @returns
  */
 const deleteNote = async (noteId, groupId, email) => {
@@ -61,6 +62,8 @@ const deleteNote = async (noteId, groupId, email) => {
  * updates a note in the database
  * @param {String} noteId note ID
  * @param {{title: String, text: String, role: String}} updatedNote updated note object
+ * @param {String} groupId group ID
+ * @param {String} email email of the user
  * @returns
  */
 const updateNote = async (noteId, updatedNote, groupId, email) => {
@@ -89,6 +92,7 @@ const updateNote = async (noteId, updatedNote, groupId, email) => {
 /**
  * Retrieves all notes of a  group
  * @param {String} groupId group ID
+ * @param {String} email email of the user
  * @returns list of database note objects
  */
 const retrieveNoteList = async (groupId, email) => {
