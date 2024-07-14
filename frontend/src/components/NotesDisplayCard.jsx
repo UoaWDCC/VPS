@@ -41,7 +41,7 @@ export default function NotesDisplayCard({ group, user, handleClose }) {
     await usePost("/api/note/", {
       groupId: group._id,
       title: "New Note",
-      role: userRole,
+      email: user.email,
     });
     console.log("note created");
     fetchNotesData();

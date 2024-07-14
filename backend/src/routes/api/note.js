@@ -6,10 +6,12 @@ import {
   deleteNote,
   retrieveNote,
 } from "../../db/daos/noteDao";
+import auth from "../../middleware/firebaseAuth";
 
 const router = Router();
-
 const HTTP_OK = 200;
+
+router.use(auth);
 
 // Retrieve note list
 router.post("/retrieveList", async (req, res) => {
@@ -27,8 +29,8 @@ router.post("/retrieve", async (req, res) => {
 
 // Create an empty note
 router.post("/", async (req, res) => {
-  const { groupId, title, role } = req.body;
-  await createNote(groupId, title, role);
+  const { groupId, title, email } = req.body;
+  await createNote(groupId, title, email);
   res.status(HTTP_OK).json("note created");
 });
 
