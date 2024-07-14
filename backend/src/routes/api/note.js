@@ -15,7 +15,7 @@ router.use(auth);
 
 // Retrieve note list
 router.post("/retrieveList", async (req, res) => {
-  const { groupId } = req.body;
+  const { groupId, email } = req.body;
   const notes = retrieveNoteList(groupId);
   res.status(HTTP_OK).json(notes);
 });
@@ -36,16 +36,16 @@ router.post("/", async (req, res) => {
 
 // Update a note
 router.post("/update", async (req, res) => {
-  const { noteId, text, title } = req.body;
+  const { noteId, text, title, groupId, email } = req.body;
   const date = new Date();
-  await updateNote(noteId, { text, title, date });
+  await updateNote(noteId, { text, title, date }, groupId, email);
   res.status(HTTP_OK).json("note updated");
 });
 
 // Delete a note
 router.post("/delete", async (req, res) => {
-  const { noteId, groupId } = req.body;
-  await deleteNote(noteId, groupId);
+  const { noteId, groupId, email } = req.body;
+  await deleteNote(noteId, groupId, email);
   res.status(HTTP_OK).json("note deleted");
 });
 export default router;
