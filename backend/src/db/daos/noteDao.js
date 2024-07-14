@@ -46,7 +46,7 @@ const deleteNote = async (noteId, groupId, email) => {
   if (note.role !== role) {
     return null;
   }
-  
+
   const updateQuery = {
     $pull: { [`notes.${note.role}`]: noteId },
   };
@@ -63,8 +63,21 @@ const deleteNote = async (noteId, groupId, email) => {
  * @param {{title: String, text: String, role: String}} updatedNote updated note object
  * @returns
  */
-const updateNote = async (noteId, updatedNote) => {
+const updateNote = async (noteId, updatedNote, groupId, email) => {
+  const dbGroup = await Group.findById(groupId);
+  let role = null;
+  dbGroup.users.forEach((userToCheck) => {
+    if (userToCheck.email === email) {
+      role = userToCheck.role;
+    }
+  });
+  if (role === null) {
+    return;
+  }
   const note = await Note.findById(noteId);
+  if (note.role !== role) {
+    return null;
+  }
   note.title = updatedNote.title;
   note.text = updatedNote.text;
   note.date = updatedNote.date;
@@ -78,8 +91,18 @@ const updateNote = async (noteId, updatedNote) => {
  * @param {String} groupId group ID
  * @returns list of database note objects
  */
-const retrieveNoteList = async (groupId) => {
+const retrieveNoteList = async (groupId, email) => {
   const dbGroup = await Group.findById(groupId);
+  let role = null;
+  dbGroup.users.forEach((userToCheck) => {
+    if (userToCheck.email === email) {
+      role = userToCheck.role;
+    }
+  });
+  //  if user is not in group return null
+  if (role === null) {
+    return null;
+  }
   const allNotes = [];
   const noteIds = [...dbGroup.notes.values()].flat();
   const dbNotes = await Note.find({ _id: { $in: noteIds } }, [
