@@ -8,7 +8,17 @@ import Group from "../models/group";
  * @param {String} role role of the note
  * @returns
  */
-const createNote = async (groupId, title, role, text = "") => {
+const createNote = async (groupId, title, email, text = "") => {
+  const dbGroup = await Group.findById(groupId);
+  let role = null;
+  dbGroup.users.forEach((userToCheck) => {
+    if (userToCheck.email === email) {
+      role = userToCheck.role;
+    }
+  });
+  if (role === null) {
+    return null;
+  }
   const dbNote = new Note({ title, role, text });
   await dbNote.save();
   const updateQuery = {};
