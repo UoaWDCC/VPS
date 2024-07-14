@@ -90,7 +90,7 @@ const addSceneToPath = async (groupId, currentSceneId, sceneId) => {
   return STATUS.OK;
 };
 
-router.get(
+router.post(
   "/",
   handle(async (req, res) => {
     const { uid, scenarioId, currentScene, nextScene } = req.body;
