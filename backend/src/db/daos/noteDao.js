@@ -33,8 +33,20 @@ const createNote = async (groupId, title, email, text = "") => {
  *  @param {String} groupId group ID
  * @returns
  */
-const deleteNote = async (noteId, groupId) => {
+const deleteNote = async (noteId, groupId, email) => {
+  const dbGroup = await Group.findById(groupId);
+  let role = null;
+  dbGroup.users.forEach((userToCheck) => {
+    if (userToCheck.email === email) {
+      role = userToCheck.role;
+    }
+  });
   const note = await Note.findById(noteId);
+
+  if (note.role !== role) {
+    return null;
+  }
+  
   const updateQuery = {
     $pull: { [`notes.${note.role}`]: noteId },
   };
