@@ -1,7 +1,6 @@
 import { Router } from "express";
 
 import {
-  addSceneToPath,
   getCurrentScene,
   getGroup,
   createGroup,
@@ -17,21 +16,6 @@ const HTTP_OK = 200;
 const HTTP_CONFLICT = 409;
 const HTTP_NO_CONTENT = 204;
 const HTTP_NOT_FOUND = 404;
-
-// add a scene to the group's shared path
-router.post("/path/:groupId", async (req, res) => {
-  const { currentSceneId, nextSceneId } = req.body;
-  const { groupId } = req.params;
-
-  try {
-    await addSceneToPath(groupId, currentSceneId, nextSceneId);
-    return res.status(HTTP_OK).json("Scene added to path");
-  } catch (error) {
-    return res
-      .status(HTTP_CONFLICT)
-      .json({ error: "Scene mismatch b/w client and server" });
-  }
-});
 
 // get the groups assigned to a scenario
 router.get("/scenario/:scenarioId", async (req, res) => {
