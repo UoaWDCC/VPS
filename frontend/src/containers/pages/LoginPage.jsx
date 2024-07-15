@@ -31,11 +31,26 @@ export default function LoginPage() {
     }
   }, [user]);
 
-  useEffect(() => {
-    if (!loading && !user) {
-      signInUsingGoogle();
-    }
-  }, [loading]);
+  // useEffect(() => {
+  //   if (!loading && !user) {
+  //     signInUsingGoogle();
+  //   }
+  // }, [loading]);
 
-  return <LoadingPage text="Redirecting..." />;
+  return (
+    <div>
+      <button
+        type="button"
+        onClick={() => {
+          if (!loading && !user) {
+            signInUsingGoogle();
+          } else {
+            <LoadingPage text="logging in..." />;
+          }
+        }}
+      >
+        WIP Login
+      </button>
+    </div>
+  );
 }
