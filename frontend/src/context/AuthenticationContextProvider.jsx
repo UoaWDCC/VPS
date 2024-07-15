@@ -1,4 +1,4 @@
-import { signInWithRedirect } from "firebase/auth";
+import { signInWithRedirect, signInWithPopup } from "firebase/auth";
 import { useState } from "react";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { auth, googleProvider } from "../firebase/firebase";
@@ -26,7 +26,8 @@ export default function AuthenticationContextProvider({ children }) {
   }
 
   function signInUsingGoogle() {
-    signInWithRedirect(auth, googleProvider);
+    signInWithPopup(auth, googleProvider);
+    // signInWithRedirect(auth, googleProvider);
   }
 
   function signOut() {
