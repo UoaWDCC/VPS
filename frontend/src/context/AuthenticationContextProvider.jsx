@@ -27,7 +27,6 @@ export default function AuthenticationContextProvider({ children }) {
 
   function signInUsingGoogle() {
     signInWithPopup(auth, googleProvider);
-    // signInWithRedirect(auth, googleProvider);
   }
 
   function signOut() {
