@@ -6,7 +6,7 @@ import staff from "./staff";
 import note from "./note";
 import user from "./user";
 import group from "./group";
-import navigate from "./navigate";
+import navigate from "./navigate/index";
 
 const router = Router();
 
