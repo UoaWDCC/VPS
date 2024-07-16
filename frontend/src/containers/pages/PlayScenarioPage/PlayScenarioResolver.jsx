@@ -9,50 +9,48 @@ import {
 } from "react-router-dom";
 
 import AuthenticationContext from "context/AuthenticationContext";
-import useGraph from "hooks/useGraph";
 
 import DesyncPage from "../DesyncPage";
 import InvalidRolePage from "../InvalidRolePage";
 import PlayScenarioPage from "./PlayScenarioPage";
 import PlayScenarioPageMulti from "./PlayScenarioPageMulti";
+import LoadingPage from "../LoadingPage";
 
-// TODO: move this somewhere else and add error handling
-async function get(url, userIdToken) {
-  const config = userIdToken && {
-    headers: { Authorization: `Bearer ${userIdToken()}` },
-  };
-
-  return axios.get(url, config);
-}
+const getGroup = async (user, scenarioId) => {
+  const token = await user.getIdToken();
+  const res = await axios.get(`/api/user/group/${scenarioId}`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  return res.data.group;
+};
 
 /**
  * This resolver fetches the necessary scenario data and redirects users to the correct page
  */
 export default function PlayScenarioResolver() {
+  const { user, loading, error: authError } = useContext(AuthenticationContext);
   const { scenarioId } = useParams();
-  const location = useLocation();
   const history = useHistory();
-
-  const { graph } = useGraph(scenarioId);
-  const { user, getUserIdToken: token } = useContext(AuthenticationContext);
   const [group, setGroup] = useState(null);
 
-  const isMain = location.pathname === `/play/${scenarioId}`;
-  const isMulti = location.pathname.includes("multiplayer");
+  // TODO: move these somewhere else ?
+  if (loading) return <LoadingPage text="Loading Scenario..." />;
+  if (authError) return <></>;
 
-  useEffect(async () => {
-    if (!(graph && (isMain || (isMulti && !group)))) return;
+  useEffect(() => {
+    const resolveType = async () => {
+      const fetchedGroup = await getGroup(user, scenarioId);
+      if (!fetchedGroup) {
+        setGroup("none");
+        return history.replace(`/play/${scenarioId}/singleplayer/`);
+      }
+      setGroup(fetchedGroup);
+      return history.replace(`/play/${scenarioId}/multiplayer/`);
+    };
+    resolveType();
+  }, [scenarioId]);
 
-    const res = await get(`/api/user/${user.email}/${scenarioId}/data`, token);
-
-    if (!res?.data?.group) {
-      const sceneId = res?.data?.current || graph.getScenes()[0]._id;
-      history.replace(`/play/${scenarioId}/${sceneId}`);
-      return;
-    }
-    setGroup(res?.data?.group);
-    history.replace(`/play/${scenarioId}/multiplayer/`);
-  }, [graph, isMain, isMulti, scenarioId]);
+  if (!group) return <LoadingPage text="Loading Scenario..." />;
 
   return (
     <Switch>
@@ -63,10 +61,10 @@ export default function PlayScenarioResolver() {
         <DesyncPage />
       </Route>
       <Route path="/play/:scenarioId/multiplayer/:sceneId?">
-        <PlayScenarioPageMulti graph={graph} group={group} />
+        <PlayScenarioPageMulti group={group} />
       </Route>
-      <Route path="/play/:scenarioId/:sceneId">
-        <PlayScenarioPage graph={graph} />
+      <Route path="/play/:scenarioId/singleplayer/:sceneId?">
+        <PlayScenarioPage />
       </Route>
     </Switch>
   );
