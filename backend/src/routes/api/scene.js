@@ -52,7 +52,6 @@ router.get("/all", async (req, res) => {
   res.status(HTTP_OK).json(fullScenes);
 });
 
-
 // Create a scene for a scenario
 router.post("/", async (req, res) => {
   const { name, components, time } = req.body;
