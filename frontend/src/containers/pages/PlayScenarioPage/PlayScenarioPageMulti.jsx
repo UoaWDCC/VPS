@@ -1,7 +1,7 @@
-import { useContext, useState } from "react";
+import { useContext, useState, useEffect } from "react";
 import { useParams, useHistory } from "react-router-dom";
 import AuthenticationContext from "context/AuthenticationContext";
-import { usePost, usePut } from "hooks/crudHooks";
+import axios from "axios";
 import LoadingPage from "../LoadingPage";
 import NotesDisplayCard from "../../../components/NotesDisplayCard";
 import PlayPageNoteButton from "../../../components/PlayPageNoteButton";
@@ -9,73 +9,87 @@ import ScenarioPreloader from "./Components/ScenarioPreloader";
 import PlayScenarioCanvas from "./PlayScenarioCanvas";
 import useStyles from "./playScenarioPage.styles";
 
+const sceneCache = new Map();
+
+// returns the scene id that we should switch to
+const navigate = async (user, groupId, currentScene, nextScene) => {
+  const token = await user.getIdToken();
+  const config = {
+    method: "post",
+    url: `http://localhost:5000/api/navigate/${groupId}`,
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    data: { currentScene, nextScene },
+  };
+  const res = await axios.request(config);
+  res.data.scenes.forEach((scene) => sceneCache.set(scene._id, scene));
+  return res.data.active;
+};
+
 /**
  * This page allows users to play a multiplayer scenario.
  *
  * @container
  */
 export default function PlayScenarioPageMulti({ graph, group }) {
-  const { user, getUserIdToken: token } = useContext(AuthenticationContext);
+  const { user, loading, error: authError } = useContext(AuthenticationContext);
+
   const { scenarioId, sceneId } = useParams();
-  const [noteOpen, setNoteOpen] = useState(false);
   const history = useHistory();
   const styles = useStyles();
 
-  const currScene = graph?.getScene(sceneId);
+  const [noteOpen, setNoteOpen] = useState(false);
+  const [previous, setPrevious] = useState(null);
+  const [error, setError] = useState(null);
 
-  if (!currScene || !group) return <LoadingPage text="Loading contents..." />;
+  // TODO: move these somewhere else ?
+  if (loading) return <LoadingPage text="Loading Scene..." />;
+  if (authError) return <></>;
 
-  const userRole = group.users.find((u) => u.email === user.email).role;
-  if (!currScene.roles?.includes(userRole)) {
-    history.replace(`/play/invalid-role`);
-    return null;
+  useEffect(async () => {
+    const res = await navigate(user, group._id, previous, sceneId).catch((e) =>
+      setError(e?.response)
+    );
+    if (!sceneId) history.replace(`/play/${scenarioId}/multiplayer/${res}`);
+  }, [sceneId]);
+
+  if (error) {
+    if (error.status === 409) {
+      history.push("/play/desync");
+    } else if (error.status === 403) {
+      history.push("/play/invalid-role");
+    }
+    // TODO: create a generic error page and redirect to it
+    return <></>;
   }
 
-  const incrementor = (nextSceneId) => {
-    // if (graph.isEndScene(nextSceneId)) {
-    //   const path = graph.getPath();
-    //   usePut(`/api/user/${user.uid}`, { scenarioId, path }, token);
-    //   path.forEach((id) => {
-    //     usePut(`/api/scenario/${scenarioId}/scene/visited/${id}`, {}, token);
-    //   });
-    // }
-    history.replace(`/play/${scenarioId}/multiplayer/${nextSceneId}`);
-  };
+  const currScene = sceneCache.get(sceneId);
+  if (!currScene || !group) return <LoadingPage text="Loading Scene..." />;
 
-  const validatedIncrementor = async (nextSceneId) => {
-    const res = await usePost(
-      `/api/group/path/${group._id}`,
-      { currentSceneId: sceneId, nextSceneId },
-      token
-    );
-    if (res === "Scene added to path") incrementor(nextSceneId);
-    else history.replace(`/play/desync`);
-  };
-
-  const handleClose = () => {
-    setNoteOpen(false);
-  };
-
-  const handleOpen = () => {
-    setNoteOpen(true);
+  const incrementor = (id) => {
+    setPrevious(sceneId);
+    history.push(`/play/${scenarioId}/multiplayer/${id}`);
   };
 
   return (
     <>
       <div className={styles.canvasContainer}>
         <div className={styles.canvas}>
-          <PlayScenarioCanvas
-            scene={currScene}
-            incrementor={validatedIncrementor}
-          />
+          <PlayScenarioCanvas scene={currScene} incrementor={incrementor} />
         </div>
       </div>
       {window.location === window.parent.location && (
         <ScenarioPreloader scenarioId={scenarioId} graph={graph} key={1} />
       )}{" "}
-      <PlayPageNoteButton handleOpen={handleOpen} />
+      <PlayPageNoteButton handleOpen={() => setNoteOpen(true)} />
       {noteOpen && (
-        <NotesDisplayCard group={group} user={user} handleClose={handleClose} />
+        <NotesDisplayCard
+          group={group}
+          user={user}
+          handleClose={() => setNoteOpen(false)}
+        />
       )}
     </>
   );
