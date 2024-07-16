@@ -5,7 +5,7 @@ import axios from "axios";
 import LoadingPage from "../LoadingPage";
 import NotesDisplayCard from "../../../components/NotesDisplayCard";
 import PlayPageNoteButton from "../../../components/PlayPageNoteButton";
-import ScenarioPreloader from "./Components/ScenarioPreloader";
+// import ScenarioPreloader from "./Components/ScenarioPreloader";
 import PlayScenarioCanvas from "./PlayScenarioCanvas";
 import useStyles from "./playScenarioPage.styles";
 
@@ -59,7 +59,11 @@ export default function PlayScenarioPageMulti({ group }) {
     if (error.status === 409) {
       history.push(`/play/${scenarioId}/desync`);
     } else if (error.status === 403) {
-      history.push(`/play/${scenarioId}/invalid-role`);
+      history.push(
+        `/play/${scenarioId}/invalid-role?roles=${JSON.stringify(
+          error.data.meta.roles_with_access
+        )}`
+      );
     }
     // TODO: create a generic error page and redirect to it
     return <></>;
@@ -69,7 +73,11 @@ export default function PlayScenarioPageMulti({ group }) {
   if (!currScene || !group) return <LoadingPage text="Loading Scene..." />;
 
   if (currScene.error) {
-    history.push(`/play/${scenarioId}/invalid-role`);
+    history.push(
+      `/play/${scenarioId}/invalid-role?roles=${JSON.stringify(
+        currScene.meta.roles_with_access
+      )}`
+    );
   }
 
   const incrementor = (id) => {

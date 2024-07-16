@@ -1,22 +1,22 @@
 import { Button } from "@mui/material";
 import { useContext, useState } from "react";
+import { useLocation } from "react-router-dom";
 import BacktoScenarioSelectionButton from "../../components/BacktoScenarioSelectionButton";
 import NotesDisplayCard from "../../components/NotesDisplayCard";
 import AuthenticationContext from "../../context/AuthenticationContext";
 
 function InvalidRolePage({ group }) {
-  const currentUserRole = "Doctor";
-  const rolesWithAccess = ["Nurse", "Patient"];
-  const [noteOpen, setNoteOpen] = useState(false);
   const { user } = useContext(AuthenticationContext);
+  const location = useLocation();
 
-  const handleClose = () => {
-    setNoteOpen(false);
-  };
+  const [noteOpen, setNoteOpen] = useState(false);
 
-  const handleOpen = () => {
-    setNoteOpen(true);
-  };
+  const queryParams = new URLSearchParams(location.search);
+  const rolesWithAccess = JSON.parse(queryParams.get("roles") || `["Stalin"]`);
+  const currentUserRole = group.users.find((u) => u.email === user.email).role;
+
+  const handleClose = () => setNoteOpen(false);
+  const handleOpen = () => setNoteOpen(true);
 
   const containerStyle = {
     fontWeight: "600",

@@ -3,7 +3,7 @@ import { useParams, useHistory } from "react-router-dom";
 import AuthenticationContext from "context/AuthenticationContext";
 import axios from "axios";
 import LoadingPage from "../LoadingPage";
-import ScenarioPreloader from "./Components/ScenarioPreloader";
+// import ScenarioPreloader from "./Components/ScenarioPreloader";
 import PlayScenarioCanvas from "./PlayScenarioCanvas";
 import useStyles from "./playScenarioPage.styles";
 
