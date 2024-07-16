@@ -12,6 +12,7 @@ import {
 } from "../../db/daos/userDao";
 import User from "../../db/models/user";
 import Group from "../../db/models/group";
+import auth from "../../middleware/firebaseAuth";
 
 const router = Router();
 
@@ -87,17 +88,6 @@ router.put("/:uid", async (req, res) => {
   }
 });
 
-// fetch all the data needed for a scenario upfront
-// return format: { group: Group | null, current: SceneId | null }
-router.get("/:email/:scenarioId/data", async (req, res) => {
-  const { email, scenarioId } = req.params;
-  // TODO: filter to only what we need (depends on role info required etc.)
-  const group = await Group.findOne({ scenarioId, "users.email": email });
-  const current = group ? group.path[0] : await fetchScene(email, scenarioId);
-
-  return res.status(HTTP_OK).json({ group, current });
-});
-
 // add a scene to the user's path
 router.post("/:uid/:scenarioId/path", async (req, res) => {
   const { nextSceneId } = req.body;
@@ -113,6 +103,17 @@ router.post("/:uid/:scenarioId/path", async (req, res) => {
   );
 
   res.sendStatus(HTTP_OK);
+});
+
+router.use(auth);
+
+// fetch the user's group needed for a scenario upfront
+router.get("/group/:scenarioId", async (req, res) => {
+  const { scenarioId } = req.params;
+  const { uid } = req.body;
+  const { email } = await User.findOne({ uid }, { email: 1 }).lean();
+  const group = await Group.findOne({ scenarioId, "users.email": email });
+  return res.status(HTTP_OK).json({ group });
 });
 
 export default router;
