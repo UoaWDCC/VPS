@@ -16,7 +16,7 @@ const navigate = async (user, groupId, currentScene, nextScene) => {
   const token = await user.getIdToken();
   const config = {
     method: "post",
-    url: `http://localhost:5000/api/navigate/${groupId}`,
+    url: `http://localhost:5000/api/navigate/group/${groupId}`,
     headers: {
       "Content-Type": "application/json",
       Authorization: `Bearer ${token}`,
@@ -33,7 +33,7 @@ const navigate = async (user, groupId, currentScene, nextScene) => {
  *
  * @container
  */
-export default function PlayScenarioPageMulti({ graph, group }) {
+export default function PlayScenarioPageMulti({ group }) {
   const { user, loading, error: authError } = useContext(AuthenticationContext);
 
   const { scenarioId, sceneId } = useParams();
@@ -80,9 +80,9 @@ export default function PlayScenarioPageMulti({ graph, group }) {
           <PlayScenarioCanvas scene={currScene} incrementor={incrementor} />
         </div>
       </div>
-      {window.location === window.parent.location && (
+      {/* {window.location === window.parent.location && (
         <ScenarioPreloader scenarioId={scenarioId} graph={graph} key={1} />
-      )}{" "}
+      )}{" "} */}
       <PlayPageNoteButton handleOpen={() => setNoteOpen(true)} />
       {noteOpen && (
         <NotesDisplayCard
