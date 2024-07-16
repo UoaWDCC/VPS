@@ -68,6 +68,10 @@ export default function PlayScenarioPageMulti({ group }) {
   const currScene = sceneCache.get(sceneId);
   if (!currScene || !group) return <LoadingPage text="Loading Scene..." />;
 
+  if (currScene.error) {
+    history.push(`/play/${scenarioId}/invalid-role`);
+  }
+
   const incrementor = (id) => {
     setPrevious(sceneId);
     history.push(`/play/${scenarioId}/multiplayer/${id}`);
