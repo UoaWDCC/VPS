@@ -57,9 +57,9 @@ export default function PlayScenarioPageMulti({ graph, group }) {
 
   if (error) {
     if (error.status === 409) {
-      history.push("/play/desync");
+      history.push(`/play/${scenarioId}/desync`);
     } else if (error.status === 403) {
-      history.push("/play/invalid-role");
+      history.push(`/play/${scenarioId}/invalid-role`);
     }
     // TODO: create a generic error page and redirect to it
     return <></>;
