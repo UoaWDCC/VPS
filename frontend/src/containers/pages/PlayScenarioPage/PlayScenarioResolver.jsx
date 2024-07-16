@@ -56,11 +56,11 @@ export default function PlayScenarioResolver() {
 
   return (
     <Switch>
-      <Route exact path="/play/invalid-role">
+      <Route exact path="/play/:scenarioId/invalid-role">
         <InvalidRolePage group={group} />
       </Route>
-      <Route exact path="/play/desync">
-        <DesyncPage group={group} />
+      <Route exact path="/play/:scenarioId/desync">
+        <DesyncPage />
       </Route>
       <Route path="/play/:scenarioId/multiplayer/:sceneId?">
         <PlayScenarioPageMulti graph={graph} group={group} />
