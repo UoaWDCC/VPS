@@ -44,13 +44,14 @@ export default function PlayScenarioResolver() {
     if (!(graph && (isMain || (isMulti && !group)))) return;
 
     const res = await get(`/api/user/${user.email}/${scenarioId}/data`, token);
-    const sceneId = res?.data?.current || graph.getScenes()[0]._id;
-    const scenarioPath = res?.data?.group
-      ? `${scenarioId}/multiplayer`
-      : scenarioId;
 
-    setGroup(res?.data?.group || "none");
-    history.replace(`/play/${scenarioPath}/${sceneId}`);
+    if (!res?.data?.group) {
+      const sceneId = res?.data?.current || graph.getScenes()[0]._id;
+      history.replace(`/play/${scenarioId}/${sceneId}`);
+      return;
+    }
+    setGroup(res?.data?.group);
+    history.replace(`/play/${scenarioId}/multiplayer/`);
   }, [graph, isMain, isMulti, scenarioId]);
 
   return (
@@ -61,7 +62,7 @@ export default function PlayScenarioResolver() {
       <Route exact path="/play/desync">
         <DesyncPage group={group} />
       </Route>
-      <Route path="/play/:scenarioId/multiplayer/:sceneId">
+      <Route path="/play/:scenarioId/multiplayer/:sceneId?">
         <PlayScenarioPageMulti graph={graph} group={group} />
       </Route>
       <Route path="/play/:scenarioId/:sceneId">
