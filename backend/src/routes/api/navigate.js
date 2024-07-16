@@ -10,6 +10,11 @@ import HttpError from "../../error/HttpError";
 import handle from "../../error/handle";
 import STATUS from "../../error/status";
 
+const createInvalidError = (roles) =>
+  new HttpError("Invalid role to access this scene", STATUS.FORBIDDEN, {
+    roles_with_access: roles,
+  });
+
 const router = Router();
 
 router.use(auth);
@@ -27,21 +32,19 @@ const getSimpleScene = async (sceneId) => {
 const getSceneConsideringRole = async (sceneId, role) => {
   const scene = await getSimpleScene(sceneId);
   if (scene.roles.length && !scene.roles.includes(role))
-    throw new HttpError("Invalid role to access this scene", STATUS.FORBIDDEN, {
-      roles_with_access: scene.roles,
-    });
+    throw createInvalidError(scene.roles);
   return scene;
 };
 
-const getGroupByScenarioAndUser = async (scenarioId, uid) => {
+const getGroupByIdAndUser = async (groupId, uid) => {
   const { email } = await User.findOne({ uid }, { email: 1 }).lean();
   const group = await Group.findOne(
-    { scenarioId, users: { $elemMatch: { email } } },
+    { _id: groupId, users: { $elemMatch: { email } } },
     { "users.$": 1, scenarioId: 1, path: 1 }
   ).lean();
   if (!group)
     throw new HttpError(
-      "No group exists for this user and scenario",
+      "No group exists for this id and user",
       STATUS.NOT_FOUND
     );
   return group;
@@ -54,7 +57,7 @@ const getScenarioFirstScene = async (scenarioId) => {
   return scenario.scenes[0];
 };
 
-const getConnectedScenes = async (sceneID, role) => {
+const getConnectedScenes = async (sceneID, role, active = true) => {
   const scene = await getSceneConsideringRole(sceneID, role);
   const connectedIds = scene.components
     .filter((c) => c.type === "BUTTON")
@@ -65,16 +68,13 @@ const getConnectedScenes = async (sceneID, role) => {
   ).lean();
   const filtered = connectedScenes.map((s) => {
     if (s.roles.includes(role) || !s.roles.length) return s;
-    const error = new HttpError(
-      "Invalid role to access this scene",
-      STATUS.FORBIDDEN,
-      {
-        roles_with_access: s.roles,
-      }
-    );
+    const error = createInvalidError(s.roles);
     return { _id: s._id, ...error.toJSON() };
   });
-  return { this: scene, connected: filtered };
+  return {
+    active: scene._id,
+    scenes: active ? [...filtered, scene] : filtered,
+  };
 };
 
 // this is atomic so will properly handle concurrent requests
@@ -91,27 +91,27 @@ const addSceneToPath = async (groupId, currentSceneId, sceneId) => {
 };
 
 router.post(
-  "/",
+  "/:groupId",
   handle(async (req, res) => {
-    const { uid, scenarioId, currentScene, nextScene } = req.body;
+    const { uid, currentScene, nextScene } = req.body;
 
-    const group = await getGroupByScenarioAndUser(scenarioId, uid);
+    const group = await getGroupByIdAndUser(req.params.groupId, uid);
     const { role } = group.users[0];
 
     // the first time any user in the group is navigating
     if (!group.path.length) {
-      const firstSceneID = await getScenarioFirstScene(scenarioId);
+      const firstSceneId = await getScenarioFirstScene(group.scenarioId);
       const [, scenes] = await Promise.all([
-        addSceneToPath(group._id, null, firstSceneID),
-        getConnectedScenes(firstSceneID, role),
+        addSceneToPath(group._id, null, firstSceneId),
+        getConnectedScenes(firstSceneId, role),
       ]);
       return res.status(STATUS.OK).json(scenes);
     }
 
     // the first time the user is navigating in their session
     if (!currentScene || !nextScene) {
-      const connectedScenes = await getConnectedScenes(group.path[0], role);
-      return res.status(STATUS.OK).json(connectedScenes);
+      const scenes = await getConnectedScenes(group.path[0], role);
+      return res.status(STATUS.OK).json(scenes);
     }
 
     // the user is navigating from one scene to another
@@ -128,10 +128,10 @@ router.post(
 
     const [, scenes] = await Promise.all([
       addSceneToPath(group._id, currentScene, nextScene),
-      getConnectedScenes(nextScene, role),
+      getConnectedScenes(nextScene, role, false),
     ]);
 
-    return res.status(STATUS.OK).json({ connected: scenes.connected });
+    return res.status(STATUS.OK).json(scenes);
   })
 );
 
