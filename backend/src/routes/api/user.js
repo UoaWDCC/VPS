@@ -8,7 +8,6 @@ import {
   addPlayed,
   retrievePlayedUsers,
   assignScenarioToUsers,
-  fetchScene,
 } from "../../db/daos/userDao";
 import User from "../../db/models/user";
 import Group from "../../db/models/group";
