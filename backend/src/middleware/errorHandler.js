@@ -1,7 +1,7 @@
 import HttpError from "../error/HttpError";
 import status from "../error/status";
 
-function errorHandler(err, req, res, next) {
+function errorHandler(err, req, res) {
   if (err instanceof HttpError) {
     return res
       .status(err.status)
