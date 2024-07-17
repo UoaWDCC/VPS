@@ -191,7 +191,8 @@ describe("Scene API tests", () => {
 
   it("GET api/scenario/:scenarioId/scene retrieve all scenes successfully", async () => {
     const response = await axios.get(
-      `http://localhost:${port}/api/scenario/${scenario2._id}/scene/`
+      `http://localhost:${port}/api/scenario/${scenario2._id}/scene/`,
+      authHeaders("user1")
     );
     expect(response.status).toBe(HTTP_OK);
 
@@ -212,7 +213,8 @@ describe("Scene API tests", () => {
     const response = await axios.get(
       `http://localhost:${port}/api/scenario/${
         scenario2._id
-      }/scene/full/${scene1._id.toString()}`
+      }/scene/full/${scene1._id.toString()}`,
+      authHeaders("user1")
     );
     expect(response.status).toBe(HTTP_OK);
 
