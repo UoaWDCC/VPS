@@ -7,7 +7,7 @@ test("PlayScenario page snapshot test", () => {
   const { baseElement } = render(
     <BrowserRouter>
       <AuthenticationContextProvider>
-        <PlayScenarioPage graph={null} />
+        <PlayScenarioPage />
       </AuthenticationContextProvider>
     </BrowserRouter>
   );
