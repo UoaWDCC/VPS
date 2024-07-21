@@ -18,6 +18,11 @@ const HTTP_OK = 200;
 const HTTP_NO_CONTENT = 204;
 const HTTP_NOT_FOUND = 404;
 
+// Apply auth middleware to all routes below this point
+router.use(auth);
+// Apply scenario auth middleware
+router.use(scenarioAuth);
+
 // Get scene infromation
 router.get("/full/:sceneId", async (req, res) => {
   const scene = await retrieveScene(req.params.sceneId);
@@ -46,11 +51,6 @@ router.get("/all", async (req, res) => {
   ).catch((err) => res.status(HTTP_NOT_FOUND).send(err));
   res.status(HTTP_OK).json(fullScenes);
 });
-
-// Apply auth middleware to all routes below this point
-router.use(auth);
-// Apply scenario auth middleware
-router.use(scenarioAuth);
 
 // Create a scene for a scenario
 router.post("/", async (req, res) => {

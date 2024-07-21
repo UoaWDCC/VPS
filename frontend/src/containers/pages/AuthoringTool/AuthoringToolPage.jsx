@@ -42,7 +42,7 @@ export default function AuthoringToolPage() {
   useGet(
     `/api/scenario/${currentScenario?._id}/scene/full/${currentScene?._id}`,
     setCurrentScene,
-    false
+    true
   );
 
   useEffect(async () => {

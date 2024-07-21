@@ -23,7 +23,7 @@ export default function SceneContextProvider({ children }) {
     getScenes = useGet(
       `api/scenario/${currentScenario._id}/scene`,
       setScenes,
-      false
+      true
     );
   }
 
