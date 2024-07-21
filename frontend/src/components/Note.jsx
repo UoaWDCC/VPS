@@ -1,9 +1,11 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import { usePost } from "hooks/crudHooks";
+import AuthenticationContext from "context/AuthenticationContext";
 import styles from "../styling/Note.module.scss";
 
-export default function Note({ role, id, group, user, refetchGroup }) {
+export default function Note({ role, id, group, refetchGroup }) {
   const [noteContent, setContent] = useState();
+  const { user, loading, error } = useContext(AuthenticationContext);
   const [title, setTitle] = useState();
   const [note, setNote] = useState();
   const [open, setOpen] = useState(false);
@@ -58,8 +60,8 @@ export default function Note({ role, id, group, user, refetchGroup }) {
         title,
       });
       console.log("note saved");
-    } catch (error) {
-      console.log(error);
+    } catch (e) {
+      console.log(e);
       throw new Error("Failed to save note");
     }
   };
@@ -71,8 +73,8 @@ export default function Note({ role, id, group, user, refetchGroup }) {
     try {
       await saveNote();
       await loadNote();
-    } catch (error) {
-      console.log(error);
+    } catch (e) {
+      console.log(e);
     } finally {
       console.log("note updated");
       setSave(false);
@@ -90,8 +92,8 @@ export default function Note({ role, id, group, user, refetchGroup }) {
       refetchGroup();
       console.log("note deleted");
       handleClose();
-    } catch (error) {
-      console.log(error);
+    } catch (e) {
+      console.log(e);
     }
   };
 
