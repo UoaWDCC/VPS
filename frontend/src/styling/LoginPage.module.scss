@@ -1,0 +1,25 @@
+.login {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex-grow: 1;
+  background-image: url("backgroundImg.jpg");
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+
+  .header {
+    font-size: 4rem;
+    margin-bottom: 1rem;
+    padding: 1rem;
+    font-weight: bold;
+  }
+
+  .infoBlock {
+    font-size: 2rem;
+    margin-bottom: 1rem;
+    padding: 1rem 6rem;
+    text-align: center;
+  }
+}

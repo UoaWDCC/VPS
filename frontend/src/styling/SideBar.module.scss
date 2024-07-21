@@ -4,6 +4,9 @@
   height: 100vh;
   background-color: #035084;
   text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 
   .logo {
     margin: 10px;
@@ -21,5 +24,33 @@
     .buttonDisabled {
       opacity: 0.3;
     }
+  }
+
+  .sideBarText {
+    color: white;
+    font-size: 1.5rem;
+    margin: 0;
+    padding: 2.5em 0;
+  }
+
+  .googleButton {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 0.5em;
+    background-color: #f4f4f4;
+    color: #035084;
+    font-size: 1rem;
+    padding: 0.75em 1em;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+
+  .sponsorText {
+    color: white;
+    font-size: 1rem;
+    margin: 0;
+    padding: 15rem 4em;
   }
 }
