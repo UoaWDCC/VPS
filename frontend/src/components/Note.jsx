@@ -5,7 +5,7 @@ import styles from "../styling/Note.module.scss";
 
 export default function Note({ role, id, group, refetchGroup }) {
   const [noteContent, setContent] = useState();
-  const { user, loading, error } = useContext(AuthenticationContext);
+  const { user } = useContext(AuthenticationContext);
   const [title, setTitle] = useState();
   const [note, setNote] = useState();
   const [open, setOpen] = useState(false);
@@ -13,7 +13,6 @@ export default function Note({ role, id, group, refetchGroup }) {
   const [isRole, setRole] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
   const [date, setDate] = useState();
-
   const checkRole = () => {
     group.users.forEach((userToCheck) => {
       if (userToCheck.email === user.email) {
@@ -25,6 +24,7 @@ export default function Note({ role, id, group, refetchGroup }) {
   };
 
   async function loadNote() {
+    const token = await user.getIdToken();
     const noteData = await usePost("/api/note/retrieve", { noteId: id });
     setNote(noteData);
     setContent(noteData.text);
@@ -58,6 +58,8 @@ export default function Note({ role, id, group, refetchGroup }) {
         noteId: id,
         text: noteContent,
         title,
+        groupId: group._id,
+        email: user.email,
       });
       console.log("note saved");
     } catch (e) {
@@ -88,7 +90,11 @@ export default function Note({ role, id, group, refetchGroup }) {
   const deleteNote = async () => {
     setShowConfirm(false);
     try {
-      await usePost("/api/note/delete", { noteId: id, groupId: group._id });
+      await usePost("/api/note/delete", {
+        noteId: id,
+        groupId: group._id,
+        email: user.email,
+      });
       refetchGroup();
       console.log("note deleted");
       handleClose();
