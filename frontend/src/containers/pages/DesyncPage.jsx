@@ -1,12 +1,11 @@
 import { Grid, Typography, Button } from "@material-ui/core";
-import { useHistory, useParams } from "react-router-dom";
+import { useHistory } from "react-router-dom";
 
 export default function DesyncPage() {
-  const { scenarioId } = useParams();
   const history = useHistory();
 
   const onBack = () => {
-    history.push(`/play/${scenarioId}`);
+    history.go(0);
   };
 
   return (
