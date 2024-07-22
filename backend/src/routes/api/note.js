@@ -11,7 +11,7 @@ import auth from "../../middleware/firebaseAuth";
 const router = Router();
 const HTTP_OK = 200;
 
-//router.use(auth);
+router.use(auth);
 
 // Retrieve note list
 router.post("/retrieveList", async (req, res) => {

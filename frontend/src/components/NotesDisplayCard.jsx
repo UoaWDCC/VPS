@@ -1,11 +1,14 @@
 import { usePost } from "hooks/crudHooks";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useContext } from "react";
+import AuthenticationContext from "context/AuthenticationContext";
+
 import styles from "../styling/NotesDisplayCard.module.scss";
 import Note from "./Note";
 
 export default function NotesDisplayCard({ group, user, handleClose }) {
   const [notes, setNotes] = useState([]);
   const [userRole, setRole] = useState(null);
+  const { getUserIdToken } = useContext(AuthenticationContext);
 
   async function loadNotes(groupData) {
     const noteList = Object.entries(groupData.notes).flatMap(([role, ids]) =>
@@ -38,11 +41,15 @@ export default function NotesDisplayCard({ group, user, handleClose }) {
     if (!userRole) {
       return;
     }
-    await usePost("/api/note/", {
-      groupId: group._id,
-      title: "New Note",
-      email: user.email,
-    });
+    await usePost(
+      "/api/note/",
+      {
+        groupId: group._id,
+        title: "New Note",
+        email: user.email,
+      },
+      getUserIdToken
+    );
     console.log("note created");
     fetchNotesData();
   };

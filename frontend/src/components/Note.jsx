@@ -5,7 +5,7 @@ import styles from "../styling/Note.module.scss";
 
 export default function Note({ role, id, group, refetchGroup }) {
   const [noteContent, setContent] = useState();
-  const { user } = useContext(AuthenticationContext);
+  const { user, getUserIdToken } = useContext(AuthenticationContext);
   const [title, setTitle] = useState();
   const [note, setNote] = useState();
   const [open, setOpen] = useState(false);
@@ -24,8 +24,11 @@ export default function Note({ role, id, group, refetchGroup }) {
   };
 
   async function loadNote() {
-    const token = await user.getIdToken();
-    const noteData = await usePost("/api/note/retrieve", { noteId: id });
+    const noteData = await usePost(
+      "/api/note/retrieve",
+      { noteId: id },
+      getUserIdToken
+    );
     setNote(noteData);
     setContent(noteData.text);
     setTitle(noteData.title);
@@ -54,13 +57,17 @@ export default function Note({ role, id, group, refetchGroup }) {
 
   const saveNote = async () => {
     try {
-      await usePost("/api/note/update", {
-        noteId: id,
-        text: noteContent,
-        title,
-        groupId: group._id,
-        email: user.email,
-      });
+      await usePost(
+        "/api/note/update",
+        {
+          noteId: id,
+          text: noteContent,
+          title,
+          groupId: group._id,
+          email: user.email,
+        },
+        getUserIdToken
+      );
       console.log("note saved");
     } catch (e) {
       console.log(e);
@@ -90,11 +97,15 @@ export default function Note({ role, id, group, refetchGroup }) {
   const deleteNote = async () => {
     setShowConfirm(false);
     try {
-      await usePost("/api/note/delete", {
-        noteId: id,
-        groupId: group._id,
-        email: user.email,
-      });
+      await usePost(
+        "/api/note/delete",
+        {
+          noteId: id,
+          groupId: group._id,
+          email: user.email,
+        },
+        getUserIdToken
+      );
       refetchGroup();
       console.log("note deleted");
       handleClose();

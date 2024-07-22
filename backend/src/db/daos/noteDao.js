@@ -43,8 +43,6 @@ const deleteNote = async (noteId, groupId, email) => {
     }
   });
   const note = await Note.findById(noteId);
-  console.log(role);
-  console.log(note.role);
   if (note.role !== role) {
     return null;
   }
