@@ -4,15 +4,18 @@ import AuthenticationContext from "context/AuthenticationContext";
 import styles from "../styling/Note.module.scss";
 
 export default function Note({ role, id, group, refetchGroup }) {
+  const { user, getUserIdToken, loading, error } = useContext(
+    AuthenticationContext
+  );
   const [noteContent, setContent] = useState();
-  const { user, getUserIdToken } = useContext(AuthenticationContext);
   const [title, setTitle] = useState();
   const [note, setNote] = useState();
+  const [date, setDate] = useState();
   const [open, setOpen] = useState(false);
   const [save, setSave] = useState(false);
   const [isRole, setRole] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
-  const [date, setDate] = useState();
+
   const checkRole = () => {
     group.users.forEach((userToCheck) => {
       if (userToCheck.email === user.email) {
@@ -26,7 +29,9 @@ export default function Note({ role, id, group, refetchGroup }) {
   async function loadNote() {
     const noteData = await usePost(
       "/api/note/retrieve",
-      { noteId: id },
+      {
+        noteId: id,
+      },
       getUserIdToken
     );
     setNote(noteData);
@@ -123,6 +128,34 @@ export default function Note({ role, id, group, refetchGroup }) {
       handleClose();
     }
   };
+
+  if (loading) {
+    return (
+      <div
+        role="button"
+        onClick={handleOpen}
+        onKeyDown={handleKeyPress}
+        tabIndex={0}
+        className={styles.note}
+      >
+        Loading...
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div
+        role="button"
+        onClick={handleOpen}
+        onKeyDown={handleKeyPress}
+        tabIndex={0}
+        className={styles.note}
+      >
+        Error
+      </div>
+    );
+  }
 
   return (
     <>
