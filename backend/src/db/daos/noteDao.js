@@ -93,7 +93,9 @@ const updateNote = async (noteId, updatedNote, groupId, email) => {
  * @param {String} email email of the user
  * @returns list of database note objects
  */
+//  I know the group is fetched for twice but this is currently not used anywhere
 const retrieveNoteList = async (groupId, email) => {
+  const dbGroup = await Group.findById(groupId);
   const role = await checkRole(groupId, email);
   //  if user is not in group return null
   if (role === null) {
