@@ -55,6 +55,7 @@ const deleteNote = async (noteId, groupId, email) => {
   await Group.updateOne({ _id: groupId }, updateQuery);
   //  delete note from note collection
   await note.delete();
+  return null;
 };
 
 /**
@@ -78,14 +79,12 @@ const updateNote = async (noteId, updatedNote, groupId, email) => {
   }
   const note = await Note.findById(noteId);
   if (note.role !== role) {
-    return null;
+    return;
   }
   note.title = updatedNote.title;
   note.text = updatedNote.text;
   note.date = updatedNote.date;
   await note.save();
-
-  return note;
 };
 
 /**

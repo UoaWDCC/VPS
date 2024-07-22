@@ -15,7 +15,7 @@ router.use(auth);
 
 // Retrieve note list
 router.post("/retrieveList", async (req, res) => {
-  const { groupId, email } = req.body;
+  const { groupId } = req.body;
   const notes = retrieveNoteList(groupId);
   res.status(HTTP_OK).json(notes);
 });
