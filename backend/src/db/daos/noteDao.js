@@ -2,6 +2,24 @@ import Note from "../models/note";
 import Group from "../models/group";
 
 /**
+ * Checks if a user is in a group
+ * @param {String} groupId group ID
+ * @param {String} email email of the user
+ * @returns role of the user in the group
+ * @returns null if user is not in group
+ */
+const checkRole = async (groupId, email) => {
+  const group = await Group.findById(groupId);
+  let role = null;
+  group.users.forEach((userToCheck) => {
+    if (userToCheck.email === email) {
+      role = userToCheck.role;
+    }
+  });
+  return role;
+};
+
+/**
  * Creates a empty note in the database
  * @param {String} groupId group ID the note belongs to
  * @param {String} title  title of the note
@@ -9,13 +27,7 @@ import Group from "../models/group";
  * @returns
  */
 const createNote = async (groupId, title, email, text = "") => {
-  const dbGroup = await Group.findById(groupId);
-  let role = null;
-  dbGroup.users.forEach((userToCheck) => {
-    if (userToCheck.email === email) {
-      role = userToCheck.role;
-    }
-  });
+  const role = await checkRole(groupId, email);
   if (role === null) {
     return null;
   }
@@ -35,13 +47,7 @@ const createNote = async (groupId, title, email, text = "") => {
  * @returns
  */
 const deleteNote = async (noteId, groupId, email) => {
-  const dbGroup = await Group.findById(groupId);
-  let role = null;
-  dbGroup.users.forEach((userToCheck) => {
-    if (userToCheck.email === email) {
-      role = userToCheck.role;
-    }
-  });
+  const role = await checkRole(groupId, email);
   const note = await Note.findById(noteId);
   if (note.role !== role) {
     return null;
@@ -67,13 +73,7 @@ const deleteNote = async (noteId, groupId, email) => {
  * @returns
  */
 const updateNote = async (noteId, updatedNote, groupId, email) => {
-  const dbGroup = await Group.findById(groupId);
-  let role = null;
-  dbGroup.users.forEach((userToCheck) => {
-    if (userToCheck.email === email) {
-      role = userToCheck.role;
-    }
-  });
+  const role = await checkRole(groupId, email);
   if (role === null) {
     return;
   }
@@ -94,13 +94,7 @@ const updateNote = async (noteId, updatedNote, groupId, email) => {
  * @returns list of database note objects
  */
 const retrieveNoteList = async (groupId, email) => {
-  const dbGroup = await Group.findById(groupId);
-  let role = null;
-  dbGroup.users.forEach((userToCheck) => {
-    if (userToCheck.email === email) {
-      role = userToCheck.role;
-    }
-  });
+  const role = await checkRole(groupId, email);
   //  if user is not in group return null
   if (role === null) {
     return null;
