@@ -36,7 +36,7 @@ const addSceneToPath = async (userId, scenarioId, currentSceneId, sceneId) => {
   return STATUS.OK;
 };
 
-const userNavigate = async (req) => {
+export const userNavigate = async (req) => {
   const { uid, currentScene, nextScene } = req.body;
   const { scenarioId } = req.params;
 
@@ -79,4 +79,24 @@ const userNavigate = async (req) => {
   return { status: STATUS.OK, json: scenes };
 };
 
-export default userNavigate;
+export const userReset = async (req) => {
+  const { uid, currentScene } = req.body;
+  const { scenarioId } = req.params;
+
+  const user = await User.findOne({ uid }, { paths: 1, _id: 1 }).lean();
+  const path = user.paths[scenarioId];
+
+  if (path[0] !== currentScene)
+    throw new HttpError("Scene mismatch has occured", STATUS.CONFLICT);
+
+  const scene = await getSimpleScene(currentScene);
+  const hasReset = scene.components.some((c) => c.type === "RESET_BUTTON");
+  if (!hasReset) throw new HttpError("Invalid reset", STATUS.FORBIDDEN);
+
+  await User.findOneAndUpdate(
+    { _id: user._id },
+    { $set: { [`paths.${scenarioId}`]: [] } }
+  );
+
+  return { status: STATUS.OK };
+};

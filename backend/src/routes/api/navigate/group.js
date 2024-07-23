@@ -83,7 +83,7 @@ const addSceneToPath = async (groupId, currentSceneId, sceneId) => {
   return STATUS.OK;
 };
 
-const groupNavigate = async (req) => {
+export const groupNavigate = async (req) => {
   const { uid, currentScene, nextScene } = req.body;
 
   const group = await getGroupByIdAndUser(req.params.groupId, uid);
@@ -125,4 +125,20 @@ const groupNavigate = async (req) => {
   return { status: STATUS.OK, json: scenes };
 };
 
-export default groupNavigate;
+export const groupReset = async (req) => {
+  const { uid, currentScene } = req.body;
+
+  const group = await getGroupByIdAndUser(req.params.groupId, uid);
+  const { role } = group.users[0];
+
+  if (group.path[0] !== currentScene)
+    throw new HttpError("Scene mismatch has occured", STATUS.CONFLICT);
+
+  const scene = await getSceneConsideringRole(currentScene, role);
+  const hasReset = scene.components.some((c) => c.type === "RESET_BUTTON");
+  if (!hasReset) throw new HttpError("Invalid reset", STATUS.FORBIDDEN);
+
+  await Group.findOneAndUpdate({ _id: group._id }, { $set: { path: [] } });
+
+  return { status: STATUS.OK };
+};
