@@ -1,6 +1,7 @@
 import { useContext, useState, useEffect } from "react";
 import { useParams, useHistory } from "react-router-dom";
 import AuthenticationContext from "context/AuthenticationContext";
+import { usePost } from "hooks/crudHooks";
 import axios from "axios";
 import LoadingPage from "../LoadingPage";
 import NotesDisplayCard from "../../../components/NotesDisplayCard";
@@ -34,7 +35,12 @@ const navigate = async (user, groupId, currentScene, nextScene) => {
  * @container
  */
 export default function PlayScenarioPageMulti({ group }) {
-  const { user, loading, error: authError } = useContext(AuthenticationContext);
+  const {
+    user,
+    loading,
+    error: authError,
+    getUserIdToken,
+  } = useContext(AuthenticationContext);
 
   const { scenarioId, sceneId } = useParams();
   const history = useHistory();
@@ -80,6 +86,21 @@ export default function PlayScenarioPageMulti({ group }) {
     );
   }
 
+  const reset = async () => {
+    const userId = user.uid;
+    const reqBody = { userId, currentScene: sceneId };
+    console.log("resetting");
+
+    await usePost(
+      `api/navigate/group/reset/${group._id}`,
+      reqBody,
+      getUserIdToken
+    );
+
+    console.log("reset");
+    window.location.reload();
+  };
+
   const incrementor = (id) => {
     setPrevious(sceneId);
     history.push(`/play/${scenarioId}/multiplayer/${id}`);
@@ -89,7 +110,11 @@ export default function PlayScenarioPageMulti({ group }) {
     <>
       <div className={styles.canvasContainer}>
         <div className={styles.canvas}>
-          <PlayScenarioCanvas scene={currScene} incrementor={incrementor} />
+          <PlayScenarioCanvas
+            scene={currScene}
+            incrementor={incrementor}
+            reset={reset}
+          />
         </div>
       </div>
       {/* {window.location === window.parent.location && (

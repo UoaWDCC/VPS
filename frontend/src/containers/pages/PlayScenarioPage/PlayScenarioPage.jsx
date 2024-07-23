@@ -2,7 +2,9 @@ import { useContext, useState, useEffect } from "react";
 import { useParams, useHistory } from "react-router-dom";
 import AuthenticationContext from "context/AuthenticationContext";
 import axios from "axios";
+import { usePost } from "hooks/crudHooks";
 import LoadingPage from "../LoadingPage";
+
 // import ScenarioPreloader from "./Components/ScenarioPreloader";
 import PlayScenarioCanvas from "./PlayScenarioCanvas";
 import useStyles from "./playScenarioPage.styles";
@@ -32,7 +34,12 @@ const navigate = async (user, scenarioId, currentScene, nextScene) => {
  * @container
  */
 export default function PlayScenarioPage() {
-  const { user, loading, error: authError } = useContext(AuthenticationContext);
+  const {
+    user,
+    loading,
+    error: authError,
+    getUserIdToken,
+  } = useContext(AuthenticationContext);
 
   const { scenarioId, sceneId } = useParams();
   const history = useHistory();
@@ -67,6 +74,21 @@ export default function PlayScenarioPage() {
 
   console.log(currScene);
 
+  const reset = async () => {
+    const userId = user.uid;
+    const reqBody = { userId, currentScene: sceneId };
+    console.log("resetting");
+
+    await usePost(
+      `api/navigate/user/reset/${scenarioId}`,
+      reqBody,
+      getUserIdToken
+    );
+
+    console.log("reset");
+    window.location.reload();
+  };
+
   const incrementor = (id) => {
     setPrevious(sceneId);
     history.push(`/play/${scenarioId}/singleplayer/${id}`);
@@ -76,7 +98,11 @@ export default function PlayScenarioPage() {
     <>
       <div className={styles.canvasContainer}>
         <div className={styles.canvas}>
-          <PlayScenarioCanvas scene={currScene} incrementor={incrementor} />
+          <PlayScenarioCanvas
+            scene={currScene}
+            incrementor={incrementor}
+            reset={reset}
+          />
         </div>
       </div>
       {/* {window.location === window.parent.location && (
