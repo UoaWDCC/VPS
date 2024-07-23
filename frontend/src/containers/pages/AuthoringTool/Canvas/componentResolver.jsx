@@ -26,6 +26,15 @@ export default function componentResolver(component, index, onClick) {
           component={component}
         />
       );
+    case "RESET_BUTTON":
+      return (
+        <ButtonComponent
+          key={component.id}
+          id={index}
+          onClick={onClick}
+          component={component}
+        />
+      );
     case "SPEECHTEXT":
       return (
         <SpeechTextComponent

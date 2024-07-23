@@ -6,7 +6,12 @@ import VolumeUpIcon from "@material-ui/icons/VolumeUp";
 import UploadAudio from "./Audio/UploadAudio";
 import ChooseBackgroundSubMenu from "./Background/ChooseBackgroundSubMenu";
 import UploadImage from "./Background/UploadImage";
-import { addButton, addSpeechText, addText } from "./ToolBarActions";
+import {
+  addButton,
+  addResetButton,
+  addSpeechText,
+  addText,
+} from "./ToolBarActions";
 
 /**
  * This file contains the data for the add component icons to be added into the ToolBar
@@ -33,6 +38,11 @@ const toolBarData = [
     title: "Button",
     icon: <ButtonIcon fontSize="medium" />,
     onClick: addButton,
+  },
+  {
+    title: "Reset",
+    icon: <ButtonIcon fontSize="medium" />,
+    onClick: addResetButton,
   },
   {
     title: "Audio",

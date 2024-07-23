@@ -7,6 +7,8 @@ import { v4 } from "uuid";
 function addComponent(component, currentScene, setCurrentScene) {
   const updatedComponents = currentScene.components;
 
+  console.log(component);
+
   updatedComponents.push(component);
 
   setCurrentScene({
@@ -34,6 +36,27 @@ function addButton(currentScene, setCurrentScene) {
   };
 
   addComponent(newButton, currentScene, setCurrentScene);
+}
+
+/**
+ * function to be put into ToolBarData when button is added
+ */
+function addResetButton(currentScene, setCurrentScene) {
+  const newResetButton = {
+    type: "RESET_BUTTON",
+    text: "Reset",
+    variant: "contained",
+    colour: "red",
+    nextScene: "",
+    left: 0, // as percentage
+    top: 0, // as percentage
+    height: 6, // as percentage
+    width: 20, // as percentage
+    id: v4(),
+    zPosition: 0,
+  };
+
+  addComponent(newResetButton, currentScene, setCurrentScene);
 }
 
 /**
@@ -144,6 +167,7 @@ function addFirebaseAudio(currentScene, setCurrentScene, fileObject, url) {
 
 export {
   addButton,
+  addResetButton,
   addFirebaseAudio,
   addFirebaseImage,
   addImage,
