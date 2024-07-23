@@ -33,6 +33,7 @@ const userSchema = new Schema({
   paths: {
     type: Map,
     of: [String],
+    default: {},
   },
 });
 
