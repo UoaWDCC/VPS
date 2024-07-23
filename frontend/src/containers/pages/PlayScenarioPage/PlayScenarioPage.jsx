@@ -16,7 +16,7 @@ const navigate = async (user, scenarioId, currentScene, nextScene) => {
   const token = await user.getIdToken();
   const config = {
     method: "post",
-    url: `http://localhost:5000/api/navigate/user/${scenarioId}`,
+    url: `/api/navigate/user/${scenarioId}`,
     headers: {
       "Content-Type": "application/json",
       Authorization: `Bearer ${token}`,
