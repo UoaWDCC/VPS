@@ -35,12 +35,7 @@ const navigate = async (user, groupId, currentScene, nextScene) => {
  * @container
  */
 export default function PlayScenarioPageMulti({ group }) {
-  const {
-    user,
-    loading,
-    error: authError,
-    getUserIdToken,
-  } = useContext(AuthenticationContext);
+  const { user, loading, error: authError } = useContext(AuthenticationContext);
 
   const { scenarioId, sceneId } = useParams();
   const history = useHistory();
@@ -54,22 +49,23 @@ export default function PlayScenarioPageMulti({ group }) {
   if (loading) return <LoadingPage text="Loading Scene..." />;
   if (authError) return <></>;
 
-  useEffect(async () => {
-    const res = await navigate(user, group._id, previous, sceneId).catch((e) =>
-      setError(e?.response)
-    );
-    if (!sceneId) history.replace(`/play/${scenarioId}/multiplayer/${res}`);
+  useEffect(() => {
+    const onSceneChange = async () => {
+      if (sceneId && !previous) return;
+      const res = await navigate(user, group._id, previous, sceneId).catch(
+        (e) => setError(e?.response)
+      );
+      if (!sceneId) history.replace(`/play/${scenarioId}/multiplayer/${res}`);
+    };
+    onSceneChange();
   }, [sceneId]);
 
   if (error) {
     if (error.status === 409) {
       history.push(`/play/${scenarioId}/desync`);
     } else if (error.status === 403) {
-      history.push(
-        `/play/${scenarioId}/invalid-role?roles=${JSON.stringify(
-          error.data.meta.roles_with_access
-        )}`
-      );
+      const roles = JSON.stringify(error.data.meta.roles_with_access);
+      history.push(`/play/${scenarioId}/invalid-role?roles=${roles}`);
     }
     // TODO: create a generic error page and redirect to it
     return <></>;
@@ -79,31 +75,26 @@ export default function PlayScenarioPageMulti({ group }) {
   if (!currScene || !group) return <LoadingPage text="Loading Scene..." />;
 
   if (currScene.error) {
-    history.push(
-      `/play/${scenarioId}/invalid-role?roles=${JSON.stringify(
-        currScene.meta.roles_with_access
-      )}`
-    );
+    const roles = JSON.stringify(currScene.meta.roles_with_access);
+    history.push(`/play/${scenarioId}/invalid-role?roles=${roles}`);
   }
 
   const reset = async () => {
-    const userId = user.uid;
-    const reqBody = { userId, currentScene: sceneId };
-    console.log("resetting");
-
     await usePost(
       `api/navigate/group/reset/${group._id}`,
-      reqBody,
-      getUserIdToken
+      { currentScene: sceneId },
+      user.getIdToken.bind(user)
     );
 
     console.log("reset");
-    window.location.reload();
+    setPrevious(null);
+    history.replace(`/play/${scenarioId}/multiplayer`);
   };
 
   const incrementor = (id) => {
+    if (!sceneCache.has(id)) return;
     setPrevious(sceneId);
-    history.push(`/play/${scenarioId}/multiplayer/${id}`);
+    history.replace(`/play/${scenarioId}/multiplayer/${id}`);
   };
 
   return (

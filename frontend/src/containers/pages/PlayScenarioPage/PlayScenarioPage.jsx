@@ -34,12 +34,7 @@ const navigate = async (user, scenarioId, currentScene, nextScene) => {
  * @container
  */
 export default function PlayScenarioPage() {
-  const {
-    user,
-    loading,
-    error: authError,
-    getUserIdToken,
-  } = useContext(AuthenticationContext);
+  const { user, loading, error: authError } = useContext(AuthenticationContext);
 
   const { scenarioId, sceneId } = useParams();
   const history = useHistory();
@@ -52,18 +47,20 @@ export default function PlayScenarioPage() {
   if (loading) return <LoadingPage text="Loading Scene..." />;
   if (authError) return <></>;
 
-  useEffect(async () => {
-    const res = await navigate(user, scenarioId, previous, sceneId).catch((e) =>
-      setError(e?.response)
-    );
-    if (!sceneId) history.replace(`/play/${scenarioId}/singleplayer/${res}`);
+  useEffect(() => {
+    const onSceneChange = async () => {
+      if (sceneId && !previous) return;
+      const res = await navigate(user, scenarioId, previous, sceneId).catch(
+        (e) => setError(e?.response)
+      );
+      if (!sceneId) history.replace(`/play/${scenarioId}/singleplayer/${res}`);
+    };
+    onSceneChange();
   }, [sceneId]);
 
   if (error) {
     if (error.status === 409) {
       history.push(`/play/${scenarioId}/desync`);
-    } else if (error.status === 403) {
-      history.push(`/play/${scenarioId}/invalid-role`);
     }
     // TODO: create a generic error page and redirect to it
     return <></>;
@@ -72,26 +69,22 @@ export default function PlayScenarioPage() {
   const currScene = sceneCache.get(sceneId);
   if (!currScene) return <LoadingPage text="Loading Scene..." />;
 
-  console.log(currScene);
-
   const reset = async () => {
-    const userId = user.uid;
-    const reqBody = { userId, currentScene: sceneId };
-    console.log("resetting");
-
     await usePost(
       `api/navigate/user/reset/${scenarioId}`,
-      reqBody,
-      getUserIdToken
+      { currentScene: sceneId },
+      user.getIdToken.bind(user)
     );
 
     console.log("reset");
-    window.location.reload();
+    setPrevious(null);
+    history.replace(`/play/${scenarioId}/singleplayer`);
   };
 
   const incrementor = (id) => {
+    if (!sceneCache.has(id)) return;
     setPrevious(sceneId);
-    history.push(`/play/${scenarioId}/singleplayer/${id}`);
+    history.replace(`/play/${scenarioId}/singleplayer/${id}`);
   };
 
   return (
