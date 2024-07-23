@@ -1,6 +1,3 @@
-/* eslint-disable no-param-reassign */
-
-// Shared components from authoring canvas
 import ButtonComponent from "../AuthoringTool/Components/ButtonComponent";
 import FirebaseImageComponent from "../AuthoringTool/Components/FirebaseImageComponent";
 import ImageComponent from "../AuthoringTool/Components/ImageComponent";
@@ -29,6 +26,15 @@ export default function componentResolver(component, index, onClick) {
           component={component}
         />
       );
+      case "RESET_BUTTON":
+        return (
+          <ButtonComponent
+            key={component.id}
+            id={index}
+            onClick={onClick}
+            component={component}
+          />
+        );
     case "SPEECHTEXT":
     case "TEXT":
       return (
