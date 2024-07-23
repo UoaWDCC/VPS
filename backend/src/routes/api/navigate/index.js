@@ -13,7 +13,7 @@ router.post(
   "/group/reset/:groupId",
   handle(async (req, res) => {
     const response = await groupReset(req);
-    return res.status(response.status);
+    return res.status(response.status).send();
   })
 );
 
@@ -29,7 +29,7 @@ router.post(
   "/user/reset/:scenarioId",
   handle(async (req, res) => {
     const response = await userReset(req);
-    return res.status(response.status);
+    return res.status(response.status).send();
   })
 );
 

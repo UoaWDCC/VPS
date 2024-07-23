@@ -95,7 +95,7 @@ export const userReset = async (req) => {
 
   await User.findOneAndUpdate(
     { _id: user._id },
-    { $set: { [`paths.${scenarioId}`]: [] } }
+    { $unset: { [`paths.${scenarioId}`]: "" } }
   );
 
   return { status: STATUS.OK };
