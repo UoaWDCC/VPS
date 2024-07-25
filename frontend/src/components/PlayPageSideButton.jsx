@@ -1,6 +1,6 @@
 import styles from "../styling/NotesDisplayCard.module.scss";
 
-export default function PlayPageNoteButton({ handleOpen }) {
+export default function PlayPageNoteButton({ handleOpen, buttonName }) {
   return (
     <button
       type="button"
@@ -9,7 +9,7 @@ export default function PlayPageNoteButton({ handleOpen }) {
         handleOpen();
       }}
     >
-      Notes
+      {buttonName}
     </button>
   );
 }
