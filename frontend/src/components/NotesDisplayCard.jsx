@@ -60,6 +60,13 @@ export default function NotesDisplayCard({ group, user, handleClose }) {
     }
   };
 
+  useEffect(() => {
+    document.addEventListener("keydown", handleKeyPress);
+    return () => {
+      document.removeEventListener("keydown", handleKeyPress);
+    };
+  }, []);
+
   return (
     <>
       <div>
