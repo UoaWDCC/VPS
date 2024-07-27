@@ -6,16 +6,18 @@ import componentResolver from "./componentResolver";
  *
  * @component
  */
-export default function PlayScenarioCanvas({ scene, incrementor }) {
+
+export default function PlayScenarioCanvas({ scene, incrementor, reset }) {
   return (
     <>
-      {scene.components?.map((component, index) =>
-        componentResolver(
-          component,
-          index,
-          () => component.nextScene && incrementor(component.nextScene)
-        )
-      )}
+      {scene.components?.map((component, index) => {
+        const action =
+          component.type === "RESET_BUTTON"
+            ? reset
+            : () => component.nextScene && incrementor(component.nextScene);
+
+        return componentResolver(component, index, action);
+      })}
       {scene.time && (
         <CountdownTimer
           targetDate={new Date().setSeconds(

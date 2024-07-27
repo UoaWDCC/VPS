@@ -1,6 +1,7 @@
 import { useContext, useState, useEffect } from "react";
 import { useParams, useHistory } from "react-router-dom";
 import AuthenticationContext from "context/AuthenticationContext";
+import { usePost } from "hooks/crudHooks";
 import axios from "axios";
 import LoadingPage from "../LoadingPage";
 import NotesDisplayCard from "../../../components/NotesDisplayCard";
@@ -48,22 +49,23 @@ export default function PlayScenarioPageMulti({ group }) {
   if (loading) return <LoadingPage text="Loading Scene..." />;
   if (authError) return <></>;
 
-  useEffect(async () => {
-    const res = await navigate(user, group._id, previous, sceneId).catch((e) =>
-      setError(e?.response)
-    );
-    if (!sceneId) history.replace(`/play/${scenarioId}/multiplayer/${res}`);
+  useEffect(() => {
+    const onSceneChange = async () => {
+      if (sceneId && !previous) return;
+      const res = await navigate(user, group._id, previous, sceneId).catch(
+        (e) => setError(e?.response)
+      );
+      if (!sceneId) history.replace(`/play/${scenarioId}/multiplayer/${res}`);
+    };
+    onSceneChange();
   }, [sceneId]);
 
   if (error) {
     if (error.status === 409) {
       history.push(`/play/${scenarioId}/desync`);
     } else if (error.status === 403) {
-      history.push(
-        `/play/${scenarioId}/invalid-role?roles=${JSON.stringify(
-          error.data.meta.roles_with_access
-        )}`
-      );
+      const roles = JSON.stringify(error.data.meta.roles_with_access);
+      history.push(`/play/${scenarioId}/invalid-role?roles=${roles}`);
     }
     // TODO: create a generic error page and redirect to it
     return <></>;
@@ -73,23 +75,37 @@ export default function PlayScenarioPageMulti({ group }) {
   if (!currScene || !group) return <LoadingPage text="Loading Scene..." />;
 
   if (currScene.error) {
-    history.push(
-      `/play/${scenarioId}/invalid-role?roles=${JSON.stringify(
-        currScene.meta.roles_with_access
-      )}`
-    );
+    const roles = JSON.stringify(currScene.meta.roles_with_access);
+    history.push(`/play/${scenarioId}/invalid-role?roles=${roles}`);
   }
 
+  const reset = async () => {
+    await usePost(
+      `api/navigate/group/reset/${group._id}`,
+      { currentScene: sceneId },
+      user.getIdToken.bind(user)
+    );
+
+    console.log("reset");
+    setPrevious(null);
+    history.replace(`/play/${scenarioId}/multiplayer`);
+  };
+
   const incrementor = (id) => {
+    if (!sceneCache.has(id)) return;
     setPrevious(sceneId);
-    history.push(`/play/${scenarioId}/multiplayer/${id}`);
+    history.replace(`/play/${scenarioId}/multiplayer/${id}`);
   };
 
   return (
     <>
       <div className={styles.canvasContainer}>
         <div className={styles.canvas}>
-          <PlayScenarioCanvas scene={currScene} incrementor={incrementor} />
+          <PlayScenarioCanvas
+            scene={currScene}
+            incrementor={incrementor}
+            reset={reset}
+          />
         </div>
       </div>
       {/* {window.location === window.parent.location && (
