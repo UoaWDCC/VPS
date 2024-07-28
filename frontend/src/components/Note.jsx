@@ -1,5 +1,5 @@
 import { useState, useEffect, useContext } from "react";
-import { usePost } from "hooks/crudHooks";
+import { usePost, useAuthPost } from "hooks/crudHooks";
 import AuthenticationContext from "context/AuthenticationContext";
 import styles from "../styling/Note.module.scss";
 
@@ -10,13 +10,21 @@ export default function Note({ role, id, group, refetchGroup }) {
   const [noteContent, setContent] = useState();
   const [title, setTitle] = useState();
   const [note, setNote] = useState();
+  const [text, setText] = useState();
   const [date, setDate] = useState();
   const [open, setOpen] = useState(false);
   const [save, setSave] = useState(false);
   const [isRole, setRole] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
 
-  const checkRole = () => {
+  const {
+    response: noteData,
+    loading: noteLoading,
+    error: noteError,
+    postRequest: retrieveNoteRequest,
+  } = useAuthPost("/api/note/retrieve");
+
+  const getRole = () => {
     group.users.forEach((userToCheck) => {
       if (userToCheck.email === user.email) {
         if (userToCheck.role === role) {
@@ -26,26 +34,33 @@ export default function Note({ role, id, group, refetchGroup }) {
     });
   };
 
-  async function loadNote() {
-    const noteData = await usePost(
-      "/api/note/retrieve",
-      {
-        noteId: id,
-      },
-      getUserIdToken
-    );
-    setNote(noteData);
-    setContent(noteData.text);
-    setTitle(noteData.title);
-    if (noteData.date) {
-      const dateObject = new Date(noteData.date);
-      setDate(dateObject);
+  const loadNote = async () => {
+    if (noteData) {
+      setContent(noteData.text);
+      setTitle(noteData.title);
+      if (noteData.date) {
+        const dateObject = new Date(noteData.date);
+        setDate(dateObject);
+      }
     }
-    checkRole();
+  };
+
+  async function fetchNote() {
+    await retrieveNoteRequest({
+      noteId: id,
+    });
+
+    console.log("response", noteData);
+    setNote(noteData);
+    getRole();
   }
 
   useEffect(() => {
     loadNote();
+  }, [note]);
+
+  useEffect(() => {
+    fetchNote();
   }, []);
 
   const handleContentInput = (e) => {
@@ -86,7 +101,7 @@ export default function Note({ role, id, group, refetchGroup }) {
     console.log("saving note");
     try {
       await saveNote();
-      await loadNote();
+      await fetchNote();
     } catch (e) {
       console.log(e);
     } finally {
@@ -167,7 +182,7 @@ export default function Note({ role, id, group, refetchGroup }) {
         className={styles.note}
       >
         {role ? <h2>{role}</h2> : ""}
-        {note ? title : ""}
+        {noteData ? noteData.title : ""}
         <div className={styles.timeInfo}>
           {" "}
           {date instanceof Date ? (

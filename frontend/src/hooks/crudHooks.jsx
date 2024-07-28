@@ -18,6 +18,77 @@ function isRealError(error) {
 }
 
 /**
+ * A custom hook which fetches data from the given URL. With built in authentication
+ */
+
+export function useAuthPost(url) {
+  const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [response, setResponse] = useState(null);
+  const {
+    user,
+    loading: authLoading,
+    error: authError,
+  } = useContext(AuthenticationContext);
+
+  const postRequest = async (requestBody) => {
+    async function getToken() {
+      // return false if loading or error or no user
+      if (user && !(authLoading || authError)) {
+        const userToken = await user.getIdToken();
+        if (userToken) {
+          return userToken;
+        }
+      }
+      return false;
+    }
+
+    async function refreshToken() {
+      const userToken = await user.refreshAuthToken();
+      if (userToken) {
+        return userToken;
+      }
+      return false;
+    }
+
+    async function fetchData(token) {
+      setError(null);
+      setLoading(true);
+      try {
+        let config = {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        };
+        let res = await axios.post(url, requestBody, config);
+        // if the response is 401, refresh the token and try again
+        if (res.status === 401) {
+          token = await refreshToken();
+          if (token) {
+            config = {
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            };
+            res = await axios.post(url, requestBody, config);
+          }
+        }
+        setResponse(res.data);
+      } catch (e) {
+        setError(e.response);
+      } finally {
+        setLoading(false);
+      }
+    }
+    const token = await getToken();
+    if (token) {
+      await fetchData(token);
+    }
+  };
+  return { response, loading, error, postRequest };
+}
+
+/**
  * Code below handles the server URL for axios calls when .env file is missing
  * When .env file is missing, React will take the proxy route as server URL as defined in package.json
  */
