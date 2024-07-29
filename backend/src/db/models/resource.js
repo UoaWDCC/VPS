@@ -13,7 +13,7 @@ const resourceSchema = new Schema({
   imageContent: {
     type: String,
   },
-  required_flags: [String],
+  requiredFlags: [String],
 });
 
 const Resource = mongoose.model("Resource", resourceSchema, "resources");
