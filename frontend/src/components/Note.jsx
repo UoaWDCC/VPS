@@ -4,7 +4,7 @@ import AuthenticationContext from "context/AuthenticationContext";
 import styles from "../styling/Note.module.scss";
 
 export default function Note({ role, id, group, refetchGroup }) {
-  const { user, getUserIdToken, loading, error } = useContext(
+  const { user, getUserIdToken } = useContext(
     AuthenticationContext
   );
   const [noteContent, setContent] = useState();
@@ -144,7 +144,7 @@ export default function Note({ role, id, group, refetchGroup }) {
     }
   };
 
-  if (loading) {
+  if (noteLoading) {
     return (
       <div
         role="button"
@@ -158,7 +158,7 @@ export default function Note({ role, id, group, refetchGroup }) {
     );
   }
 
-  if (error) {
+  if (noteError) {
     return (
       <div
         role="button"

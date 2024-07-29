@@ -17,11 +17,74 @@ function isRealError(error) {
   );
 }
 
+async function getToken(user, authLoading, authError) {
+  // return false if loading or error or no user
+  if (user && !(authLoading || authError)) {
+    const userToken = await user.getIdToken();
+    if (userToken) {
+      return userToken;
+    }
+  }
+  return false;
+}
+
+async function refreshToken(user) {
+  const userToken = await user.refreshAuthToken();
+  if (userToken) {
+    return userToken;
+  }
+  return false;
+}
+
+async function fetch(
+  token,
+  setResponse,
+  setError,
+  setLoading,
+  url,
+  requestBody,
+  callBack
+) {
+  setError(null);
+  setLoading(true);
+  try {
+    let config = {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    };
+    let res = await axios.post(url, requestBody, config);
+    // if the response is 401, refresh the token and try again
+    if (res.status === 401) {
+      token = await refreshToken();
+      if (token) {
+        config = {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        };
+        res = await axios.post(url, requestBody, config);
+      }
+    }
+    setResponse(res.data);
+    if (callBack) {
+      callBack(res.data);
+    }
+  } catch (e) {
+    if (callBack) {
+      callBack(null, e.response);
+    }
+    setError(e.response);
+  } finally {
+    setLoading(false);
+  }
+}
+
 /**
  * A custom hook which fetches data from the given URL. With built in authentication
  */
 
-export function useAuthPost(url) {
+export function useAuthPost(url, callBack) {
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
   const [response, setResponse] = useState(null);
@@ -32,57 +95,17 @@ export function useAuthPost(url) {
   } = useContext(AuthenticationContext);
 
   const postRequest = async (requestBody) => {
-    async function getToken() {
-      // return false if loading or error or no user
-      if (user && !(authLoading || authError)) {
-        const userToken = await user.getIdToken();
-        if (userToken) {
-          return userToken;
-        }
-      }
-      return false;
-    }
-
-    async function refreshToken() {
-      const userToken = await user.refreshAuthToken();
-      if (userToken) {
-        return userToken;
-      }
-      return false;
-    }
-
-    async function fetchData(token) {
-      setError(null);
-      setLoading(true);
-      try {
-        let config = {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        };
-        let res = await axios.post(url, requestBody, config);
-        // if the response is 401, refresh the token and try again
-        if (res.status === 401) {
-          token = await refreshToken();
-          if (token) {
-            config = {
-              headers: {
-                Authorization: `Bearer ${token}`,
-              },
-            };
-            res = await axios.post(url, requestBody, config);
-          }
-        }
-        setResponse(res.data);
-      } catch (e) {
-        setError(e.response);
-      } finally {
-        setLoading(false);
-      }
-    }
-    const token = await getToken();
+    const token = await getToken(user, authLoading, authError);
     if (token) {
-      await fetchData(token);
+      await fetch(
+        token,
+        setResponse,
+        setError,
+        setLoading,
+        url,
+        requestBody,
+        callBack
+      );
     }
   };
   return { response, loading, error, postRequest };
