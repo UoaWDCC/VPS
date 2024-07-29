@@ -5,7 +5,7 @@ import { usePost } from "hooks/crudHooks";
 import axios from "axios";
 import LoadingPage from "../LoadingPage";
 import NotesDisplayCard from "../../../components/NotesDisplayCard";
-import PlayPageNoteButton from "../../../components/PlayPageNoteButton";
+import PlayPageSideButton from "../../../components/PlayPageSideButton";
 // import ScenarioPreloader from "./Components/ScenarioPreloader";
 import PlayScenarioCanvas from "./PlayScenarioCanvas";
 import useStyles from "./playScenarioPage.styles";
@@ -111,7 +111,10 @@ export default function PlayScenarioPageMulti({ group }) {
       {/* {window.location === window.parent.location && (
         <ScenarioPreloader scenarioId={scenarioId} graph={graph} key={1} />
       )}{" "} */}
-      <PlayPageNoteButton handleOpen={() => setNoteOpen(true)} />
+      <PlayPageSideButton
+        handleOpen={() => setNoteOpen(true)}
+        buttonName="Note"
+      />
       {noteOpen && (
         <NotesDisplayCard
           group={group}
