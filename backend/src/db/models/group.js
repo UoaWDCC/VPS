@@ -16,6 +16,7 @@ const groupSchema = new Schema({
   scenarioId: {
     type: String,
   },
+  currentFlags: [String],
 });
 
 const Group = mongoose.model("Group", groupSchema, "groups");
