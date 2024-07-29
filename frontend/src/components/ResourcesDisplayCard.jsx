@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import styles from "../styling/NotesDisplayCard.module.scss";
 
 export default function ResourcesDisplayCard({ handleClose }) {
@@ -6,6 +7,12 @@ export default function ResourcesDisplayCard({ handleClose }) {
       handleClose();
     }
   };
+  useEffect(() => {
+    document.addEventListener("keydown", handleKeyPress);
+    return () => {
+      document.removeEventListener("keydown", handleKeyPress);
+    };
+  }, []);
 
   return (
     <>
