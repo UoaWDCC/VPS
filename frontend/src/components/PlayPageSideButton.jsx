@@ -1,10 +1,22 @@
-import styles from "../styling/NotesDisplayCard.module.scss";
+import styles from "../styling/PlayPageSideButton.module.scss";
 
-export default function PlayPageSideButton({ handleOpen, buttonName }) {
+export default function PlayPageSideButton({
+  handleOpen,
+  buttonName,
+  variant,
+}) {
+  let buttonClass = styles.notes;
+
+  if (variant === "notes") {
+    buttonClass = styles.notes;
+  } else if (variant === "resources") {
+    buttonClass = styles.resources;
+  }
+
   return (
     <button
       type="button"
-      className={styles.notesButton}
+      className={buttonClass}
       onClick={() => {
         handleOpen();
       }}
