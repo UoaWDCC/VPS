@@ -62,7 +62,6 @@
 }
 
 .createButton {
-  position: relative;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -75,21 +74,16 @@
   background-color: #f5f5f5;
   box-shadow: 8px 8px 10px rgba(0, 0, 0, 0.5);
   margin: 15px;
-  transition: width 0.3s, height 0.3s;
-  margin-right: auto;
-  margin-left: auto;
+  padding-bottom: 30px;
 }
 
 .createButton:hover {
-  width: 8.5vw;
-  height: 14vw;
+  transform: scale(1.1);
   box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.9);
-  --cross-width: 110px;
-  --cross-hight: 110px;
 }
 
 .crossHorizontalLine {
-  position: absolute;
+  position: relative;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
@@ -102,10 +96,10 @@
 }
 
 .crossVerticalLine {
-  position: absolute;
+  position: relative;
   top: 50%;
   left: 50%;
-  transform: translate(-50%, -50%);
+  transform: translate(-50%, -200%);
   width: 10px;
   transition-duration: 0.3s;
 

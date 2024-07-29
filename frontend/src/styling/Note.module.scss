@@ -11,16 +11,12 @@
   background-color: #f5f5f5;
   box-shadow: 8px 8px 10px rgba(0, 0, 0, 0.5);
   margin: 15px;
-  transition: width 0.3s, height 0.3s, rotate 0.3s;
-  rotate: 3s;
+  transform-style: 1s;
   padding-bottom: 30px;
-  rotate: 0deg;
 }
 
 .note:hover {
-  rotate: -5deg;
-  width: 8vw;
-  height: 14vw;
+  transform: scale(1.1);
   box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.9);
 }
 
