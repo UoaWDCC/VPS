@@ -5,7 +5,8 @@ import { usePost } from "hooks/crudHooks";
 import axios from "axios";
 import LoadingPage from "../LoadingPage";
 import NotesDisplayCard from "../../../components/NotesDisplayCard";
-import PlayPageNoteButton from "../../../components/PlayPageNoteButton";
+import ResourcesDisplayCard from "../../../components/ResourcesDisplayCard";
+import PlayPageSideButton from "../../../components/PlayPageSideButton";
 // import ScenarioPreloader from "./Components/ScenarioPreloader";
 import PlayScenarioCanvas from "./PlayScenarioCanvas";
 import useStyles from "./playScenarioPage.styles";
@@ -40,7 +41,7 @@ export default function PlayScenarioPageMulti({ group }) {
   const { scenarioId, sceneId } = useParams();
   const history = useHistory();
   const styles = useStyles();
-
+  const [resourcesOpen, setResourcesOpen] = useState(false);
   const [noteOpen, setNoteOpen] = useState(false);
   const [previous, setPrevious] = useState(null);
   const [error, setError] = useState(null);
@@ -111,12 +112,29 @@ export default function PlayScenarioPageMulti({ group }) {
       {/* {window.location === window.parent.location && (
         <ScenarioPreloader scenarioId={scenarioId} graph={graph} key={1} />
       )}{" "} */}
-      <PlayPageNoteButton handleOpen={() => setNoteOpen(true)} />
+      <PlayPageSideButton
+        handleOpen={() => setNoteOpen(true)}
+        buttonName="Note"
+        variant="notes"
+      />
+      <PlayPageSideButton
+        handleOpen={() => setResourcesOpen(true)}
+        buttonName="Resources"
+        variant="resources"
+      />
+
       {noteOpen && (
         <NotesDisplayCard
           group={group}
           user={user}
           handleClose={() => setNoteOpen(false)}
+        />
+      )}
+      {resourcesOpen && (
+        <ResourcesDisplayCard
+          group={group}
+          user={user}
+          handleClose={() => setResourcesOpen(false)}
         />
       )}
     </>
