@@ -71,13 +71,15 @@ router.post("/:scenarioId", async (req, res) => {
 
       const role = user.role.toLowerCase();
       if (roles.includes(role)) {
-        res.status(HTTP_CONFLICT).send("Conflict");
+        res
+          .status(HTTP_CONFLICT)
+          .send("Conflict - Duplicate roles in the same group!");
       }
       roles.push(role);
     });
 
     if (roles.length !== roleList.length) {
-      res.status(HTTP_CONFLICT).send("Conflict");
+      res.status(HTTP_CONFLICT).send("Conflict - Different number of roles!");
     }
   });
 
