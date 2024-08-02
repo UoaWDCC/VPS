@@ -22,7 +22,7 @@ function ProtectedRoute({
   return (
     <Route
       {...rest}
-      render={() => {
+      render={({ location }) => {
         if (loading) {
           return <LoadingPage text="Loading contents..." />;
         }
@@ -41,10 +41,16 @@ function ProtectedRoute({
           );
         }
 
+        const redirectPath =
+          location.pathname !== "/"
+            ? `?redirect=${location.pathname}${location.search}`
+            : "";
+
         return (
           <Redirect
             to={{
               pathname: "/login",
+              search: redirectPath,
             }}
           />
         );
