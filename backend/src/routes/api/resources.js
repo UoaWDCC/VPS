@@ -1,4 +1,5 @@
 import { Router } from "express";
+import auth from "../../middleware/firebaseAuth";
 
 const router = Router();
 
@@ -6,6 +7,9 @@ const HTTP_OK = 200;
 const HTTP_CREATED = 201;
 const HTTP_BAD_REQUEST = 400;
 const HTTP_NOT_FOUND = 404;
+
+// Apply auth middleware to all routes below this point
+router.use(auth);
 
 // Create a New Resource
 router.post("/resources", async (req, res) => {
