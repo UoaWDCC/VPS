@@ -17,12 +17,15 @@ router.post("/resources", async (req, res) => {
     if (!type || !content) {
       return res.status(HTTP_BAD_REQUEST).send('Bad Request');
     }
-    const newResource = await createResource({ type, content });
+    const newResource = await createResource(type, content);
     res.status(HTTP_CREATED).json(newResource);
   });
 
 // Retrieve a Specific Resource
 router.get("/resources/:resourceId", async (req, res) => {
+  if (!req.params.resourceId) {
+    return res.status(HTTP_BAD_REQUEST).send('Bad Request');
+  }
   const resource = await getResourceById(req.params.resourceId);
   if (!resource) {
     return res.status(HTTP_NOT_FOUND).send('Not Found');
@@ -32,6 +35,9 @@ router.get("/resources/:resourceId", async (req, res) => {
 
 // Delete a Resource
 router.delete("/resources/:resourceId", async (req, res) => {
+  if (!req.params.resourceId) {
+    return res.status(HTTP_BAD_REQUEST).send('Bad Request');
+  }
   const deleted = await deleteResourceById(req.params.resourceId);
   if (!deleted) {
     return res.status(HTTP_NOT_FOUND).send('Not Found');
@@ -43,8 +49,31 @@ router.delete("/resources/:resourceId", async (req, res) => {
 // Retrieve All Visible Resources
 router.get("/group/:groupId/resources", async (req, res) => {
   const { groupId } = req.params;
+  if (!groupId) {
+    return res.status(HTTP_BAD_REQUEST).send('Bad Request');
+  }
   const resources = await getAllVisibleResources(groupId);
   res.status(HTTP_OK).json(resources);
+});
+
+// Add a flag to group flags
+router.post("/group/:groupId/:flag", async (req, res) => {
+  const { groupId, flag } = req.params;
+  if (!groupId || !flag) {
+    return res.status(HTTP_BAD_REQUEST).send('Bad Request');
+  }
+  const flags = await addFlag(groupId, flag);
+  res.status(HTTP_OK).json(flags);
+});
+
+// Remove a flag from group flags
+router.delete("/group/:groupId/:flag", async (req, res) => {
+  const { groupId, flag } = req.params;
+  if (!groupId || !flag) {
+    return res.status(HTTP_BAD_REQUEST).send('Bad Request');
+  }
+  const flags = await removeFlag(groupId, flag);
+  res.status(HTTP_OK).json(flags);
 });
 
 export default router;
