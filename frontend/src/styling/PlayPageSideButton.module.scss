@@ -1,0 +1,39 @@
+.notes {
+  background-color: #6fc9e5;
+  position: fixed;
+  left: -110px;
+  top: 50px;
+  width: 200px;
+  height: 40px;
+  border-radius: 5px;
+  color: rgb(0, 0, 0);
+  text-align: right;
+  transition-duration: 0.4s;
+  border: none;
+}
+
+.resources {
+  background-color: #6fc9e5;
+  position: fixed;
+  left: -110px;
+  top: 105px;
+  width: 200px;
+  height: 40px;
+  border-radius: 5px;
+  color: rgb(0, 0, 0);
+  text-align: right;
+  transition-duration: 0.4s;
+  border: none;
+}
+
+.notes:hover {
+  left: -50px;
+  background-color: #6fc9e5;
+  color: rgb(0, 0, 0);
+}
+
+.resources:hover {
+  left: -50px;
+  background-color: #6fc9e5;
+  color: rgb(0, 0, 0);
+}

@@ -34,6 +34,19 @@ export default function NotesDisplayCard({ group, user, handleClose }) {
     fetchNotesData();
   }, []);
 
+  const handleKeyPress = (e) => {
+    if (e.key === "Escape") {
+      handleClose();
+    }
+  };
+
+  useEffect(() => {
+    document.addEventListener("keydown", handleKeyPress);
+    return () => {
+      document.removeEventListener("keydown", handleKeyPress);
+    };
+  }, []);
+
   const handleCreate = async () => {
     if (!userRole) {
       return;
@@ -45,12 +58,6 @@ export default function NotesDisplayCard({ group, user, handleClose }) {
     });
     console.log("note created");
     fetchNotesData();
-  };
-
-  const handleKeyPress = (e) => {
-    if (e.key === "Escape") {
-      handleClose();
-    }
   };
 
   return (
