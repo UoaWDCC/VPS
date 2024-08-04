@@ -17,3 +17,30 @@ router.post("/resources", async (req, res) => {
     res.status(HTTP_CREATED).json(newResource);
   });
 
+// Retrieve a Specific Resource
+router.get("/resources/:resourceId", async (req, res) => {
+  const resource = await getResourceById(req.params.resourceId);
+  if (!resource) {
+    return res.status(HTTP_NOT_FOUND).send('Not Found');
+  }
+  res.status(HTTP_OK).json(resource);
+});
+
+// Delete a Resource
+router.delete("/resources/:resourceId", async (req, res) => {
+  const deleted = await deleteResourceById(req.params.resourceId);
+  if (!deleted) {
+    return res.status(HTTP_NOT_FOUND).send('Not Found');
+  }
+  res.status(HTTP_NO_CONTENT).send();
+});
+
+
+// Retrieve All Visible Resources
+router.get("/group/:groupId/resources", async (req, res) => {
+  const { groupId } = req.params;
+  const resources = await getAllVisibleResources(groupId);
+  res.status(HTTP_OK).json(resources);
+});
+
+export default router;
