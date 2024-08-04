@@ -31,6 +31,26 @@ const deleteResourceById = async (resourceId) => {
 
 // }
 
+const addFlag = async (groupId, flag) => {
+    const group = await Group.findById(groupId);
+    if (!group.currentFlags.includes(flag)) {
+        group.currentFlags.push(flag);
+        await group.save();   
+    }
+    return group.currentFlags;
+}
+
+const removeFlag = async (groupId, flag) => {
+    const group = await Group.findById(groupId);
+
+    if (group.currentFlags.includes(flag)) {
+        const index = group.currentFlags.indexOf(flag);
+        group.currentFlags.splice(index, 1);
+        await group.save();
+    }
+
+    return group.currentFlags;
+}
 
 
-export { getGroup, createResource, getResourceById, deleteResourceById };
+export { getGroup, createResource, getResourceById, deleteResourceById, addFlag, removeFlag };
