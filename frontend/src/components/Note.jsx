@@ -63,8 +63,6 @@ export default function Note({ role, id, group, refetchGroup }) {
     await retrieveNoteRequest({
       noteId: id,
     });
-
-    console.log("response", noteData);
     getRole();
   }
 
@@ -99,6 +97,7 @@ export default function Note({ role, id, group, refetchGroup }) {
         groupId: group._id,
         email: user.email,
       });
+      setSaved(true);
     } catch (e) {
       console.log(e);
       throw new Error("Failed to save note");
