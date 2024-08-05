@@ -1,5 +1,5 @@
 import { useState, useEffect, useContext } from "react";
-import { usePost, useAuthPost } from "hooks/crudHooks";
+import { useAuthPost } from "hooks/crudHooks";
 import AuthenticationContext from "context/AuthenticationContext";
 import styles from "../styling/Note.module.scss";
 
@@ -9,10 +9,14 @@ export default function Note({ role, id, group, refetchGroup }) {
   const [title, setTitle] = useState();
   const [date, setDate] = useState();
   const [open, setOpen] = useState(false);
+  //  lock save process while saving
   const [save, setSave] = useState(false);
+  //  check if user has same role
   const [isRole, setRole] = useState(false);
+  //  show delete confirmation
   const [showConfirm, setShowConfirm] = useState(false);
-
+  //  is the current version of the note saved
+  const [saved, setSaved] = useState(false);
   const {
     response: noteData,
     loading: noteLoading,
@@ -73,10 +77,12 @@ export default function Note({ role, id, group, refetchGroup }) {
   }, []);
 
   const handleContentInput = (e) => {
+    setSaved(false);
     setContent(e.target.value);
   };
 
   const handleTitleInput = (e) => {
+    setSaved(false);
     setTitle(e.target.value);
   };
 
@@ -93,7 +99,6 @@ export default function Note({ role, id, group, refetchGroup }) {
         groupId: group._id,
         email: user.email,
       });
-      console.log("note saved");
     } catch (e) {
       console.log(e);
       throw new Error("Failed to save note");
@@ -103,7 +108,6 @@ export default function Note({ role, id, group, refetchGroup }) {
   const handleSave = async () => {
     if (save) return;
     setSave(true);
-    console.log("saving note");
     try {
       await saveNote();
       await fetchNote();
@@ -228,6 +232,12 @@ export default function Note({ role, id, group, refetchGroup }) {
             ) : (
               ""
             )}
+            {updateLoading ? <p>Saving...</p> : ""}
+            {updateError ? <p>Error saving note</p> : ""}
+            {saved && updateResult ? <p>Note saved</p> : ""}
+            {deleteLoading ? <p>Deleting...</p> : ""}
+            {deleteError ? <p>Error deleting note</p> : ""}
+            {deleteResult ? <p>Note deleted</p> : ""}
             <div>
               {" "}
               {isRole && (

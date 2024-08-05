@@ -85,8 +85,8 @@ async function fetch(
  */
 
 export function useAuthPost(url, callBack) {
-  const [error, setError] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [response, setResponse] = useState(null);
   const {
     user,
