@@ -10,7 +10,7 @@ import ScenarioContext from "../../../context/ScenarioContext";
 import SceneContext from "../../../context/SceneContext";
 import ToolbarContextProvider from "../../../context/ToolbarContextProvider";
 import { uploadFiles } from "../../../firebase/storage";
-import { useGet, usePut } from "../../../hooks/crudHooks";
+import { useGet, usePost, usePut } from "../../../hooks/crudHooks";
 import Canvas from "./Canvas/Canvas";
 import CanvasSideBar from "./CanvasSideBar/CanvasSideBar";
 import SceneNavigator from "./SceneNavigator/SceneNavigator";
@@ -119,10 +119,30 @@ export default function AuthoringToolPage() {
     }
   }
 
+  /** used to save the scene, as a helper function */
+  async function testApis() {
+    await usePost(
+      `/api/resources/new`,
+      {
+        type: "xyz",
+        content: "testing api",
+      },
+      getUserIdToken
+    );
+  }
+
   return (
     <>
       <ScreenContainer vertical>
         <TopBar back={`/scenario/${currentScenario?._id}`} confirmModal>
+          <Button
+            className="btn top contained white"
+            color="default"
+            variant="contained"
+            onClick={testApis}
+          >
+            test
+          </Button>
           <Button
             className="btn top contained white"
             color="default"
