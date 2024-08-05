@@ -88,6 +88,7 @@ export default function NotesDisplayCard({ group, user, handleClose }) {
           {groupError ? <div>Error loading notes</div> : ""}
           {noteCreating ? <div>Creating note...</div> : ""}
           {createError ? <div>Error creating note</div> : ""}
+          {createResponse ? <div>Note created</div> : ""}
           <div className={styles.notesContainer}>
             {notes.map((note) => (
               <Note
