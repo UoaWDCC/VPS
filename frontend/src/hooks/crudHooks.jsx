@@ -43,7 +43,8 @@ async function fetch(
   setLoading,
   url,
   requestBody,
-  callBack
+  callBack,
+  isPost
 ) {
   setError(null);
   setLoading(true);
@@ -53,7 +54,12 @@ async function fetch(
         Authorization: `Bearer ${token}`,
       },
     };
-    let res = await axios.post(url, requestBody, config);
+    let request = axios.get(url, config);
+    if (isPost) {
+      request = axios.post(url, requestBody, config);
+    }
+    let res = await request;
+
     // if the response is 401, refresh the token and try again
     if (res.status === 401) {
       token = await refreshToken();
@@ -63,7 +69,11 @@ async function fetch(
             Authorization: `Bearer ${token}`,
           },
         };
-        res = await axios.post(url, requestBody, config);
+        request = axios.get(url, config);
+        if (isPost) {
+          request = axios.post(url, requestBody, config);
+        }
+        res = await request;
       }
     }
     setResponse(res.data);
@@ -104,11 +114,40 @@ export function useAuthPost(url, callBack) {
         setLoading,
         url,
         requestBody,
-        callBack
+        callBack,
+        true
       );
     }
   };
   return { response, loading, error, postRequest };
+}
+
+export function useAuthGet(url, callBack) {
+  const [error, setError] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [response, setResponse] = useState(null);
+  const {
+    user,
+    loading: authLoading,
+    error: authError,
+  } = useContext(AuthenticationContext);
+
+  const getRequest = async () => {
+    const token = await getToken(user, authLoading, authError);
+    if (token) {
+      await fetch(
+        token,
+        setResponse,
+        setError,
+        setLoading,
+        url,
+        null,
+        callBack,
+        false
+      );
+    }
+  };
+  return { response, loading, error, getRequest };
 }
 
 /**
