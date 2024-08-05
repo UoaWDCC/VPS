@@ -1,18 +1,44 @@
-import { useState, useEffect } from "react";
-import { usePost } from "hooks/crudHooks";
+import { useState, useEffect, useContext } from "react";
+import { useAuthPost } from "hooks/crudHooks";
+import AuthenticationContext from "context/AuthenticationContext";
 import styles from "../styling/Note.module.scss";
 
-export default function Note({ role, id, group, user, refetchGroup }) {
+export default function Note({ role, id, group, refetchGroup }) {
+  const { user } = useContext(AuthenticationContext);
   const [noteContent, setContent] = useState();
   const [title, setTitle] = useState();
-  const [note, setNote] = useState();
-  const [open, setOpen] = useState(false);
-  const [save, setSave] = useState(false);
-  const [isRole, setRole] = useState(false);
-  const [showConfirm, setShowConfirm] = useState(false);
   const [date, setDate] = useState();
+  const [open, setOpen] = useState(false);
+  //  lock save process while saving
+  const [save, setSave] = useState(false);
+  //  check if user has same role
+  const [isRole, setRole] = useState(false);
+  //  show delete confirmation
+  const [showConfirm, setShowConfirm] = useState(false);
+  //  is the current version of the note saved
+  const [saved, setSaved] = useState(false);
+  const {
+    response: noteData,
+    loading: noteLoading,
+    error: noteError,
+    postRequest: retrieveNoteRequest,
+  } = useAuthPost("/api/note/retrieve");
 
-  const checkRole = () => {
+  const {
+    response: updateResult,
+    loading: updateLoading,
+    error: updateError,
+    postRequest: updateNoteRequest,
+  } = useAuthPost("/api/note/update");
+
+  const {
+    response: deleteResult,
+    loading: deleteLoading,
+    error: deleteError,
+    postRequest: deleteNoteRequest,
+  } = useAuthPost("/api/note/delete");
+
+  const getRole = () => {
     group.users.forEach((userToCheck) => {
       if (userToCheck.email === user.email) {
         if (userToCheck.role === role) {
@@ -22,27 +48,39 @@ export default function Note({ role, id, group, user, refetchGroup }) {
     });
   };
 
-  async function loadNote() {
-    const noteData = await usePost("/api/note/retrieve", { noteId: id });
-    setNote(noteData);
-    setContent(noteData.text);
-    setTitle(noteData.title);
-    if (noteData.date) {
-      const dateObject = new Date(noteData.date);
-      setDate(dateObject);
+  const loadNote = async () => {
+    if (noteData) {
+      setContent(noteData.text);
+      setTitle(noteData.title);
+      if (noteData.date) {
+        const dateObject = new Date(noteData.date);
+        setDate(dateObject);
+      }
     }
-    checkRole();
+  };
+
+  async function fetchNote() {
+    await retrieveNoteRequest({
+      noteId: id,
+    });
+    getRole();
   }
 
   useEffect(() => {
     loadNote();
+  }, [noteData]);
+
+  useEffect(() => {
+    fetchNote();
   }, []);
 
   const handleContentInput = (e) => {
+    setSaved(false);
     setContent(e.target.value);
   };
 
   const handleTitleInput = (e) => {
+    setSaved(false);
     setTitle(e.target.value);
   };
 
@@ -52,14 +90,16 @@ export default function Note({ role, id, group, user, refetchGroup }) {
 
   const saveNote = async () => {
     try {
-      await usePost("/api/note/update", {
+      await updateNoteRequest({
         noteId: id,
         text: noteContent,
         title,
+        groupId: group._id,
+        email: user.email,
       });
-      console.log("note saved");
-    } catch (error) {
-      console.log(error);
+      setSaved(true);
+    } catch (e) {
+      console.log(e);
       throw new Error("Failed to save note");
     }
   };
@@ -67,12 +107,11 @@ export default function Note({ role, id, group, user, refetchGroup }) {
   const handleSave = async () => {
     if (save) return;
     setSave(true);
-    console.log("saving note");
     try {
       await saveNote();
-      await loadNote();
-    } catch (error) {
-      console.log(error);
+      await fetchNote();
+    } catch (e) {
+      console.log(e);
     } finally {
       console.log("note updated");
       setSave(false);
@@ -86,12 +125,16 @@ export default function Note({ role, id, group, user, refetchGroup }) {
   const deleteNote = async () => {
     setShowConfirm(false);
     try {
-      await usePost("/api/note/delete", { noteId: id, groupId: group._id });
+      await deleteNoteRequest({
+        noteId: id,
+        groupId: group._id,
+        email: user.email,
+      });
       refetchGroup();
       console.log("note deleted");
       handleClose();
-    } catch (error) {
-      console.log(error);
+    } catch (e) {
+      console.log(e);
     }
   };
 
@@ -105,6 +148,34 @@ export default function Note({ role, id, group, user, refetchGroup }) {
     }
   };
 
+  if (noteLoading) {
+    return (
+      <div
+        role="button"
+        onClick={handleOpen}
+        onKeyDown={handleKeyPress}
+        tabIndex={0}
+        className={styles.note}
+      >
+        Loading...
+      </div>
+    );
+  }
+
+  if (noteError) {
+    return (
+      <div
+        role="button"
+        onClick={handleOpen}
+        onKeyDown={handleKeyPress}
+        tabIndex={0}
+        className={styles.note}
+      >
+        Error
+      </div>
+    );
+  }
+
   return (
     <>
       <div
@@ -115,7 +186,7 @@ export default function Note({ role, id, group, user, refetchGroup }) {
         className={styles.note}
       >
         {role ? <h2>{role}</h2> : ""}
-        {note ? title : ""}
+        {noteData ? noteData.title : ""}
         <div className={styles.timeInfo}>
           {" "}
           {date instanceof Date ? (
@@ -160,6 +231,12 @@ export default function Note({ role, id, group, user, refetchGroup }) {
             ) : (
               ""
             )}
+            {updateLoading ? <p>Saving...</p> : ""}
+            {updateError ? <p>Error saving note</p> : ""}
+            {saved && updateResult ? <p>Note saved</p> : ""}
+            {deleteLoading ? <p>Deleting...</p> : ""}
+            {deleteError ? <p>Error deleting note</p> : ""}
+            {deleteResult ? <p>Note deleted</p> : ""}
             <div>
               {" "}
               {isRole && (

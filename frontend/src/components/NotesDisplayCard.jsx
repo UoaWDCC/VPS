@@ -1,26 +1,45 @@
-import { usePost } from "hooks/crudHooks";
+import { useAuthPost } from "hooks/crudHooks";
 import { useEffect, useState } from "react";
+
 import styles from "../styling/NotesDisplayCard.module.scss";
 import Note from "./Note";
 
 export default function NotesDisplayCard({ group, user, handleClose }) {
   const [notes, setNotes] = useState([]);
   const [userRole, setRole] = useState(null);
+  const {
+    response: groupData,
+    loading: groupLoading,
+    error: groupError,
+    postRequest: retrieveGroupRequest,
+  } = useAuthPost("/api/group/");
 
-  async function loadNotes(groupData) {
+  const {
+    response: createResponse,
+    loading: noteCreating,
+    error: createError,
+    postRequest: createNoteRequest,
+  } = useAuthPost("/api/note/");
+
+  async function loadNotes() {
+    if (!groupData) {
+      return;
+    }
     const noteList = Object.entries(groupData.notes).flatMap(([role, ids]) =>
       ids.map((id) => ({ role, id }))
     );
-    console.log("noteList", noteList);
     setNotes(noteList);
   }
 
+  useEffect(() => {
+    loadNotes();
+  }, [groupData]);
+
   // refetch group data to get updated notes
   async function fetchNotesData() {
-    const groupData = await usePost("/api/group/", {
+    await retrieveGroupRequest({
       groupId: group._id,
     });
-    await loadNotes(groupData);
   }
 
   useEffect(() => {
@@ -51,12 +70,11 @@ export default function NotesDisplayCard({ group, user, handleClose }) {
     if (!userRole) {
       return;
     }
-    await usePost("/api/note/", {
+    await createNoteRequest({
       groupId: group._id,
       title: "New Note",
-      role: userRole,
+      email: user.email,
     });
-    console.log("note created");
     fetchNotesData();
   };
 
@@ -73,6 +91,11 @@ export default function NotesDisplayCard({ group, user, handleClose }) {
         />
 
         <div className={styles.noteCard}>
+          {groupLoading ? <div>Loading...</div> : ""}
+          {groupError ? <div>Error loading notes</div> : ""}
+          {noteCreating ? <div>Creating note...</div> : ""}
+          {createError ? <div>Error creating note</div> : ""}
+          {createResponse ? <div>Note created</div> : ""}
           <div className={styles.notesContainer}>
             {notes.map((note) => (
               <Note

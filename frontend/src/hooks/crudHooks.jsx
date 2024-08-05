@@ -17,6 +17,139 @@ function isRealError(error) {
   );
 }
 
+async function getToken(user, authLoading, authError) {
+  // return false if loading or error or no user
+  if (user && !(authLoading || authError)) {
+    const userToken = await user.getIdToken();
+    if (userToken) {
+      return userToken;
+    }
+  }
+  return false;
+}
+
+async function refreshToken(user) {
+  const userToken = await user.refreshAuthToken();
+  if (userToken) {
+    return userToken;
+  }
+  return false;
+}
+
+async function fetch(
+  token,
+  setResponse,
+  setError,
+  setLoading,
+  url,
+  requestBody,
+  callBack,
+  isPost
+) {
+  setError(null);
+  setLoading(true);
+  try {
+    let config = {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    };
+    let request = axios.get(url, config);
+    if (isPost) {
+      request = axios.post(url, requestBody, config);
+    }
+    let res = await request;
+
+    // if the response is 401, refresh the token and try again
+    if (res.status === 401) {
+      token = await refreshToken();
+      if (token) {
+        config = {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        };
+        request = axios.get(url, config);
+        if (isPost) {
+          request = axios.post(url, requestBody, config);
+        }
+        res = await request;
+      }
+    }
+    setResponse(res.data);
+    if (callBack) {
+      callBack(res.data);
+    }
+  } catch (e) {
+    if (callBack) {
+      callBack(null, e.response);
+    }
+    setError(e.response);
+  } finally {
+    setLoading(false);
+  }
+}
+
+/**
+ * A custom hook which fetches data from the given URL. With built in authentication
+ */
+
+export function useAuthPost(url, callBack) {
+  const [error, setError] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [response, setResponse] = useState(null);
+  const {
+    user,
+    loading: authLoading,
+    error: authError,
+  } = useContext(AuthenticationContext);
+
+  const postRequest = async (requestBody) => {
+    const token = await getToken(user, authLoading, authError);
+    if (token) {
+      await fetch(
+        token,
+        setResponse,
+        setError,
+        setLoading,
+        url,
+        requestBody,
+        callBack,
+        true
+      );
+    }
+  };
+  return { response, loading, error, postRequest };
+}
+
+export function useAuthGet(url, callBack) {
+  const [error, setError] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [response, setResponse] = useState(null);
+  const {
+    user,
+    loading: authLoading,
+    error: authError,
+  } = useContext(AuthenticationContext);
+
+  const getRequest = async () => {
+    const token = await getToken(user, authLoading, authError);
+    if (token) {
+      await fetch(
+        token,
+        setResponse,
+        setError,
+        setLoading,
+        url,
+        null,
+        callBack,
+        false
+      );
+    }
+  };
+  return { response, loading, error, getRequest };
+}
+
 /**
  * Code below handles the server URL for axios calls when .env file is missing
  * When .env file is missing, React will take the proxy route as server URL as defined in package.json
