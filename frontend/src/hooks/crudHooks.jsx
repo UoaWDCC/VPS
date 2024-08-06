@@ -70,6 +70,7 @@ export function useGet(url, setData, requireAuth = true) {
     fetchData();
   }, [url, version]);
 
+
   return { isLoading, reFetch };
 }
 
@@ -113,7 +114,6 @@ export function usePost(url, requestBody = null, getUserIdToken = null) {
           Authorization: `Bearer ${token}`,
         },
       };
-      console.log(token);
     }
 
     const response = await axios.post(url, requestBody, config).catch((err) => {

@@ -1,15 +1,33 @@
 import Resource from "../models/resource";
 import Group from "../models/group";
 
-const getGroup = async (groupId) => {
-  const group = await Group.findById(groupId);
-  return group;
-};
-
 // Create a New Resource
-const createResource = async (type, resource) => {
-  const dbResource = new Resource({ type, resource });
-  await dbResource.save();
+const createResource = async (type, content, name) => {
+  let dbResource = null;
+
+  switch (type) {
+    case "text":
+      dbResource = new Resource({
+        name: name,
+        textContent: content,
+        imageContent: "",
+        requiredFlags: [],
+      });
+      await dbResource.save();
+      break;
+    case "image":
+      dbResource = new Resource({
+        name: name,
+        textContent: "",
+        imageContent: content,
+        requiredFlags: [],
+      });
+      await dbResource.save();
+      break;
+    default:
+      throw new Error(`Unsupported resource type: ${type}`);
+  }
+
   return dbResource;
 };
 
@@ -19,16 +37,23 @@ const getResourceById = async (resourceId) => {
 };
 
 const deleteResourceById = async (resourceId) => {
-  const resource = await Resource.findByIdAndRemove(resourceId);
+  const resource = await Resource.findById(resourceId);
+  await Resource.findByIdAndRemove(resourceId);
   return resource;
 };
 
-// const getAllVisibleResources = async (groupId) => {
-//     const resource = await Group.findById(groupId);
+const getAllVisibleResources = async (groupId) => {
+  const group = await Group.findById(groupId);
+  const allResources = await Resource.find({});
+  const flags = group.currentFlags;
 
-//     // return the groups resources?
+  // Filter resources based on the comparison
+  const visibleResources = allResources.filter((resource) =>
+    resource.requiredFlags.every((flag) => flags.includes(flag))
+  );
 
-// }
+  return visibleResources;
+};
 
 const addFlag = async (groupId, flag) => {
   const group = await Group.findById(groupId);
@@ -52,10 +77,10 @@ const removeFlag = async (groupId, flag) => {
 };
 
 export {
-  getGroup,
   createResource,
   getResourceById,
   deleteResourceById,
   addFlag,
   removeFlag,
+  getAllVisibleResources,
 };
