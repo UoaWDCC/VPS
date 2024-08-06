@@ -1,5 +1,5 @@
 import { useContext, useEffect } from "react";
-import { useHistory } from "react-router-dom";
+import { useHistory, useLocation } from "react-router-dom";
 import ScreenContainer from "components/ScreenContainer";
 import AuthenticationContext from "../../context/AuthenticationContext";
 import { usePost } from "../../hooks/crudHooks";
@@ -17,6 +17,10 @@ export default function LoginPage() {
     AuthenticationContext
   );
   const history = useHistory();
+  const location = useLocation();
+
+  const params = new URLSearchParams(location.search);
+  const redirectPath = params.get("redirect") || "/";
 
   useEffect(() => {
     if (user) {
@@ -30,7 +34,7 @@ export default function LoginPage() {
         },
         getUserIdToken
       );
-      history.push("/");
+      history.push(redirectPath);
     }
   }, [user]);
 
