@@ -128,14 +128,6 @@ export default function AuthoringToolPage() {
             className="btn top contained white"
             color="default"
             variant="contained"
-            onClick={testApis}
-          >
-            test
-          </Button>
-          <Button
-            className="btn top contained white"
-            color="default"
-            variant="contained"
             onClick={save}
           >
             {saveButtonText}
