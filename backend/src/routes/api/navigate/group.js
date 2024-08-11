@@ -2,7 +2,7 @@ import Scene from "../../../db/models/scene";
 import User from "../../../db/models/user";
 import Group from "../../../db/models/group";
 import Scenario from "../../../db/models/scenario";
-
+import Note from "../../../db/models/note";
 import HttpError from "../../../error/HttpError";
 import STATUS from "../../../error/status";
 
@@ -19,6 +19,25 @@ export const getSimpleScene = async (sceneId) => {
   if (!scene)
     throw new HttpError("No scene exists with that id", STATUS.NOT_FOUND);
   return scene;
+};
+
+const deleteNoteNoRoleCheck = async (noteId) => {
+  const note = await Note.findById(noteId);
+  if (!note) {
+    throw new HttpError("Note not found", STATUS.NOT_FOUND);
+  }
+  await note.delete();
+  return true;
+};
+
+const createNoteIdList = (groupData) => {
+  if (!groupData) {
+    return;
+  }
+  const noteList = Object.entries(groupData.notes).flatMap(([role, ids]) =>
+    ids.map((id) => ({ role, id }))
+  );
+  return noteList;
 };
 
 export const getScenarioFirstScene = async (scenarioId) => {
@@ -127,9 +146,16 @@ export const groupNavigate = async (req) => {
 
 export const groupReset = async (req) => {
   const { uid, currentScene } = req.body;
-
+  console.log(req.body);
   const group = await getGroupByIdAndUser(req.params.groupId, uid);
+  console.log(group);
   const { role } = group.users[0];
+
+  const noteList = createNoteIdList(group);
+  console.log(noteList);
+  if (noteList && noteList.length > 0) {
+    await Promise.all(noteList.map(({ id }) => deleteNoteNoRoleCheck(id)));
+  }
 
   if (group.path[0] !== currentScene)
     throw new HttpError("Scene mismatch has occured", STATUS.CONFLICT);
@@ -138,7 +164,10 @@ export const groupReset = async (req) => {
   const hasReset = scene.components.some((c) => c.type === "RESET_BUTTON");
   if (!hasReset) throw new HttpError("Invalid reset", STATUS.FORBIDDEN);
 
-  await Group.findOneAndUpdate({ _id: group._id }, { $set: { path: [] } });
+  await Group.findOneAndUpdate(
+    { _id: group._id },
+    { $set: { path: [], notes: new Map() } }
+  );
 
   return { status: STATUS.OK };
 };
