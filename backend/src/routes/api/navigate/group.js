@@ -21,8 +21,14 @@ export const getSimpleScene = async (sceneId) => {
   return scene;
 };
 
-const deleteNoteNoRoleCheck = async (noteId) => {
+const deleteNoteNoRoleCheck = async (noteId, groupId) => {
   const note = await Note.findById(noteId);
+  const updateQuery = {
+    $pull: { [`notes.${note.role}`]: noteId },
+  };
+  //  delete note from group
+  await Group.updateOne({ _id: groupId }, updateQuery);
+
   if (!note) {
     throw new HttpError("Note not found", STATUS.NOT_FOUND);
   }
@@ -30,14 +36,22 @@ const deleteNoteNoRoleCheck = async (noteId) => {
   return true;
 };
 
-const createNoteIdList = (groupData) => {
-  if (!groupData) {
+const deleteAllNotes = async (groupData) => {
+  const groupId = groupData._id;
+  const group = await Group.findById(groupId, { notes: 1 }).lean();
+  if (!group) {
+    console.error(`Group with ID ${groupId} not found.`);
     return;
   }
-  const noteList = Object.entries(groupData.notes).flatMap(([role, ids]) =>
+  const noteList = Object.entries(group.notes).flatMap(([role, ids]) =>
     ids.map((id) => ({ role, id }))
   );
-  return noteList;
+  if (noteList && noteList.length > 0) {
+    await Promise.all(
+      noteList.map(({ id }) => deleteNoteNoRoleCheck(id, groupId))
+    );
+  }
+  return true;
 };
 
 export const getScenarioFirstScene = async (scenarioId) => {
@@ -146,15 +160,11 @@ export const groupNavigate = async (req) => {
 
 export const groupReset = async (req) => {
   const { uid, currentScene } = req.body;
-  console.log(req.body);
   const group = await getGroupByIdAndUser(req.params.groupId, uid);
-  console.log(group);
   const { role } = group.users[0];
 
-  const noteList = createNoteIdList(group);
-  console.log(noteList);
-  if (noteList && noteList.length > 0) {
-    await Promise.all(noteList.map(({ id }) => deleteNoteNoRoleCheck(id)));
+  if (!(await deleteAllNotes(group))) {
+    throw new HttpError("Failed to delete notes", STATUS.INTERNAL_SERVER_ERROR);
   }
 
   if (group.path[0] !== currentScene)
@@ -164,10 +174,7 @@ export const groupReset = async (req) => {
   const hasReset = scene.components.some((c) => c.type === "RESET_BUTTON");
   if (!hasReset) throw new HttpError("Invalid reset", STATUS.FORBIDDEN);
 
-  await Group.findOneAndUpdate(
-    { _id: group._id },
-    { $set: { path: [], notes: new Map() } }
-  );
+  await Group.findOneAndUpdate({ _id: group._id }, { $set: { path: [] } });
 
   return { status: STATUS.OK };
 };
