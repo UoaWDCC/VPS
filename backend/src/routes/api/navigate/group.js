@@ -40,8 +40,7 @@ const deleteAllNotes = async (groupData) => {
   const groupId = groupData._id;
   const group = await Group.findById(groupId, { notes: 1 }).lean();
   if (!group) {
-    console.error(`Group with ID ${groupId} not found.`);
-    return;
+    throw new HttpError("Group not found", STATUS.NOT_FOUND);
   }
   const noteList = Object.entries(group.notes).flatMap(([role, ids]) =>
     ids.map((id) => ({ role, id }))
@@ -51,7 +50,6 @@ const deleteAllNotes = async (groupData) => {
       noteList.map(({ id }) => deleteNoteNoRoleCheck(id, groupId))
     );
   }
-  return true;
 };
 
 export const getScenarioFirstScene = async (scenarioId) => {
