@@ -76,6 +76,20 @@ const removeFlag = async (groupId, flag) => {
   return group.currentFlags;
 };
 
+const updateResourceById = async (resourceId, name, type, content) => {
+  const resource = await Resource.findById(resourceId);
+  
+  resource.name = name;
+  switch (type) {
+    case 'text':
+      resource.textContent = content;
+    case 'image':
+      resource.imageContent = content;
+  }
+
+  await resource.save();
+  return resource;
+  }
 export {
   createResource,
   getResourceById,
@@ -83,4 +97,5 @@ export {
   addFlag,
   removeFlag,
   getAllVisibleResources,
+  updateResourceById
 };
