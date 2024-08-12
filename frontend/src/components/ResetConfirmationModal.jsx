@@ -12,7 +12,10 @@ import { withStyles } from "@material-ui/core/styles";
 export default function ResetConfirmationModal({ isOpen, onClose, onConfirm }) {
   const DialogActions = withStyles(() => ({
     root: {
-      justifyContent: "space-between",
+      display: "flex",
+      flexDirection: "column",
+      alignItems: "center", // Center the text and buttons horizontally
+      gap: "16px",
     },
   }))(MuiDialogActions);
 
@@ -28,7 +31,6 @@ export default function ResetConfirmationModal({ isOpen, onClose, onConfirm }) {
       <DialogActions>
         <Button
           className="btn contained red"
-          autoFocus
           color="primary"
           onClick={onConfirm}
         >
@@ -36,7 +38,6 @@ export default function ResetConfirmationModal({ isOpen, onClose, onConfirm }) {
         </Button>
         <Button
           className="btn contained white"
-          autoFocus
           color="primary"
           onClick={onClose}
         >
