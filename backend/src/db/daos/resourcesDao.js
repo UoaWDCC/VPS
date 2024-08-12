@@ -8,7 +8,7 @@ const createResource = async (type, content, name) => {
   switch (type) {
     case "text":
       dbResource = new Resource({
-        name: name,
+        name,
         textContent: content,
         imageContent: "",
         requiredFlags: [],
@@ -17,7 +17,7 @@ const createResource = async (type, content, name) => {
       break;
     case "image":
       dbResource = new Resource({
-        name: name,
+        name,
         textContent: "",
         imageContent: content,
         requiredFlags: [],
@@ -83,8 +83,12 @@ const updateResourceById = async (resourceId, name, type, content) => {
   switch (type) {
     case "text":
       resource.textContent = content;
+      break;
     case "image":
       resource.imageContent = content;
+      break;
+    default:
+      throw new Error(`Unsupported resource type: ${type}`);
   }
 
   await resource.save();
