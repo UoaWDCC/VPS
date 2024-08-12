@@ -16,7 +16,7 @@ app.options("*", cors()); // include before all routes
 app.use(cors());
 app.use(express.json());
 app.use("/", routes);
-app.use(errorHandler);
+// app.use(errorHandler);
 
 // Make the "public" folder available statically
 app.use(express.static(join(__dirname, "../public")));
