@@ -58,32 +58,32 @@ export default function ResourcesDisplayCard({ handleClose }) {
               </p>
             ))}
           </nav>
-        </div>
-
-        {/* Content */}
-        <div className={resourceStyles.r_content_card}>
-          {currentResource.content.map((item) => {
-            if (item.type === "text") {
-              return (
-                <p key={`text-${currentResource.id}`}>
-                  {item.items.map((textItem) => (
-                    <p key={`${textItem}-${currentResource.id}`}>{textItem}</p>
-                  ))}
-                </p>
-              );
-            }
-            if (item.type === "image") {
-              return (
-                <img
-                  key={`image-${currentResource.id}`}
-                  src={item.src}
-                  alt={item.alt}
-                  className={styles.resourceImage}
-                />
-              );
-            }
-            return null;
-          })}
+          <div className={resourceStyles.r_content_card}>
+            {currentResource.content.map((item) => {
+              if (item.type === "text") {
+                return (
+                  <p key={`text-${currentResource.id}`}>
+                    {item.items.map((textItem) => (
+                      <p key={`${textItem}-${currentResource.id}`}>
+                        {textItem}
+                      </p>
+                    ))}
+                  </p>
+                );
+              }
+              if (item.type === "image") {
+                return (
+                  <img
+                    key={`image-${currentResource.id}`}
+                    src={item.src}
+                    alt={item.alt}
+                    className={styles.resourceImage}
+                  />
+                );
+              }
+              return null;
+            })}
+          </div>
         </div>
       </div>
     </>
