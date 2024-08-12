@@ -1,6 +1,7 @@
 import HttpError from "../error/HttpError";
 import status from "../error/status";
 
+// eslint-disable-next-line
 function errorHandler(err, req, res, next) {
   if (err instanceof HttpError) {
     return res
