@@ -70,7 +70,6 @@ export function useGet(url, setData, requireAuth = true) {
     fetchData();
   }, [url, version]);
 
-
   return { isLoading, reFetch };
 }
 

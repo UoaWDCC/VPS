@@ -119,7 +119,6 @@ export default function AuthoringToolPage() {
     }
   }
 
-
   return (
     <>
       <ScreenContainer vertical>
