@@ -16,6 +16,26 @@
     gap: 10px;
   }
 
+.modalHeading{
+  text-align: center;
+  font-size: 1.5rem;
+}
+
+.closeButton {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  background: transparent;
+  border: none;
+  font-size: 30px;
+  cursor: pointer;
+  color: #333;
+}
+
+.closeButton:hover {
+  color: #000;
+}
+
 .navBar {
     display: flex;
     padding: 10px; 
@@ -54,4 +74,13 @@ border-bottom: 5px solid black;
     height: 80%;
     display: flex;
     width: 100%;
+
+}
+
+.resourceImage {
+  max-width: 100%;     // Ensure the image does not exceed the modal width
+  max-height: 100%;    // Ensure the image does not exceed the modal height
+  object-fit: contain; // Maintain aspect ratio while fitting inside the container
+  display: block;      // Ensure no unexpected spacing around the image
+  margin: 0 auto;      // Center the image horizontally
 }

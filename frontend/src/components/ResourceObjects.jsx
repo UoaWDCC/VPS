@@ -7,7 +7,7 @@ const resources = [
     content: [
       {
         type: "image",
-        src: "images/inital vitals.png",
+        src: "https://resusmonitor.com/static/cropped_monitor.png",
         alt: "Initial Vital Signs Monitor",
       },
     ],
@@ -30,7 +30,7 @@ const resources = [
     content: [
       {
         type: "image",
-        src: "images/ECG_inital.png",
+        src: "https://www.ecgedu.com/wp-content/uploads/2022/05/Junctional-tachycardia-strip-black-on-red-paper.png",
         alt: "Initial ECG Graph",
       },
     ],
@@ -41,7 +41,8 @@ const resources = [
     content: [
       {
         type: "image",
-        src: "images/ECG_improved.png",
+        src: "https://www.ecgedu.com/wp-content/uploads/2022/05/Ventricular-fibrillation-strip-black-on-red-paper.jpeg",
+        // src: "images/ECG_improved.png",
         alt: "Improved ECG Graph",
       },
     ],
@@ -52,7 +53,7 @@ const resources = [
     content: [
       {
         type: "image",
-        src: "images/ECG_deteriorated.png",
+        src: "https://wtcs.pressbooks.pub/app/uploads/sites/36/2022/11/Sinus-Tachycardia-1-1024x281.jpg",
         alt: "Deteriorated ECG Graph",
       },
     ],
@@ -65,7 +66,9 @@ const resources = [
       {
         type: "text",
         items: [
-          "Type 2 diabetes, hypertension, chronic kidney disease stage 3",
+          "Type 2 diabetes",
+          "Hypertension",
+          "Chronic kidney disease stage 3",
         ],
       },
     ],

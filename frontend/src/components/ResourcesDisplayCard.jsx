@@ -41,6 +41,16 @@ export default function ResourcesDisplayCard({ handleClose }) {
         />
 
         <div className={resourceStyles.display_card}>
+          <button
+            type="button"
+            className={resourceStyles.closeButton}
+            onClick={handleClose}
+            aria-label="Close"
+          >
+            &times;
+          </button>
+
+          <h2 className={resourceStyles.modalHeading}>Resources</h2>
           <nav className={resourceStyles.navBar}>
             {resources.map((resource) => (
               <p key={resource.id}>
@@ -74,10 +84,10 @@ export default function ResourcesDisplayCard({ handleClose }) {
               if (item.type === "image") {
                 return (
                   <img
+                    className={resourceStyles.resourceImage}
                     key={`image-${currentResource.id}`}
                     src={item.src}
                     alt={item.alt}
-                    className={styles.resourceImage}
                   />
                 );
               }
