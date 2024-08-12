@@ -61,7 +61,7 @@
       "last 1 safari version"
     ]
   },
-  "proxy": "http://localhost:5003",
+  "proxy": "http://localhost:5000",
   "devDependencies": {
     "@types/react-router-dom": "^5.1.7",
     "eslint": "^7.22.0",
