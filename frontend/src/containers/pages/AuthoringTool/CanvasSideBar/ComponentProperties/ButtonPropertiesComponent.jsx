@@ -6,6 +6,7 @@ import {
   InputLabel,
   MenuItem,
   Select,
+  Snackbar,
   TextField,
   Typography,
 } from "@material-ui/core";
@@ -32,6 +33,7 @@ export default function ButtonPropertiesComponent({
   const { scenes, updateComponentProperty } = useContext(SceneContext);
 
   const [newFlag, setNewFlag] = useState("");
+  const [open, setOpen] = useState(false);
 
   const handleInputChange = (event) => {
     setNewFlag(event.target.value);
@@ -39,7 +41,7 @@ export default function ButtonPropertiesComponent({
 
   const handleAddFlag = () => {
     if (Object.keys(component.flagList).includes(`add ${newFlag}`)) {
-      alert("Flag already exists in the flag list.");
+      setOpen(true);
       return;
     }
 
@@ -52,6 +54,10 @@ export default function ButtonPropertiesComponent({
       setNewFlag("");
       updateComponentProperty(componentIndex, "flagList", newFlagList);
     }
+  };
+
+  const handleClose = () => {
+    setOpen(false);
   };
 
   const handleCheckboxChange = (flag) => {
@@ -154,13 +160,13 @@ export default function ButtonPropertiesComponent({
           style={{ marginTop: "10px" }}
           multiple
           className={styles.selectInput}
-          value={Object.keys(component.flagList)}
+          value={Object.keys(component.flagList || {})}
           renderValue={(selected) =>
             selected.filter((flag) => component.flagList[flag]).join(", ")
           }
           displayEmpty
         >
-          {Object.keys(component.flagList).length > 0 ? (
+          {Object.keys(component.flagList || {}).length > 0 ? (
             <div style={{ display: "flex", flexDirection: "column" }}>
               {Object.keys(component.flagList).map((flag) => (
                 <FormControlLabel
@@ -182,6 +188,12 @@ export default function ButtonPropertiesComponent({
             </Typography>
           )}
         </Select>
+        <Snackbar
+          open={open}
+          autoHideDuration={3000}
+          onClose={handleClose}
+          message="Flag already exists"
+        />
       </FormControl>
 
       <FormControl fullWidth className={styles.componentProperty}>

@@ -149,8 +149,8 @@ exports[`Button properties component snapshot test 1`] = `
           class="MuiFormControl-root MuiTextField-root WithStyles(ForwardRef(TextField))-root-1 MuiFormControl-fullWidth"
         >
           <label
-            class="MuiFormLabel-root MuiInputLabel-root MuiInputLabel-formControl MuiInputLabel-animated MuiInputLabel-shrink MuiFormLabel-filled"
-            data-shrink="true"
+            class="MuiFormLabel-root MuiInputLabel-root MuiInputLabel-formControl MuiInputLabel-animated"
+            data-shrink="false"
           >
             New Flag
           </label>
@@ -161,7 +161,7 @@ exports[`Button properties component snapshot test 1`] = `
               aria-invalid="false"
               class="MuiInputBase-input MuiInput-input"
               type="text"
-              value="New Flag"
+              value=""
             />
           </div>
         </div>
@@ -190,13 +190,15 @@ exports[`Button properties component snapshot test 1`] = `
           role="button"
           tabindex="0"
         >
-          add flag_1, remove flag_1, add flag_2, remove flag_2
+          <span>
+            ​
+          </span>
         </div>
         <input
           aria-hidden="true"
           class="MuiSelect-nativeInput"
           tabindex="-1"
-          value="add flag_1,remove flag_1,add flag_2,remove flag_2"
+          value=""
         />
         <svg
           aria-hidden="true"
