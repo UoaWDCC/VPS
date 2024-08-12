@@ -70,11 +70,15 @@ export default function PlayScenarioPage() {
   if (!currScene) return <LoadingPage text="Loading Scene..." />;
 
   const reset = async () => {
-    await usePost(
+    const res = await usePost(
       `api/navigate/user/reset/${scenarioId}`,
       { currentScene: sceneId },
       user.getIdToken.bind(user)
     );
+    if (res.status) {
+      setError(res);
+      return;
+    }
 
     console.log("reset");
     setPrevious(null);

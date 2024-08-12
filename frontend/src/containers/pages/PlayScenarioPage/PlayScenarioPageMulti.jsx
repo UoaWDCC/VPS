@@ -81,11 +81,15 @@ export default function PlayScenarioPageMulti({ group }) {
   }
 
   const reset = async () => {
-    await usePost(
+    const res = await usePost(
       `api/navigate/group/reset/${group._id}`,
       { currentScene: sceneId },
       user.getIdToken.bind(user)
     );
+    if (res.status) {
+      setError(res);
+      return;
+    }
 
     console.log("reset");
     setPrevious(null);
