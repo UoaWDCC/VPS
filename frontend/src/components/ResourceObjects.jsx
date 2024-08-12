@@ -3,7 +3,7 @@
 const resources = [
   {
     id: "vital_signs_initial",
-    displayName: "Vital Signs",
+    displayName: "Initial Vitals",
     content: [
       {
         type: "image",
@@ -14,7 +14,7 @@ const resources = [
   },
   {
     id: "vital_signs_improved",
-    displayName: "Vital Signs",
+    displayName: "Improved Vitals",
     content: [
       {
         type: "image",
@@ -26,7 +26,7 @@ const resources = [
 
   {
     id: "inital_ecg",
-    displayName: "ECG",
+    displayName: "Initial ECG",
     content: [
       {
         type: "image",
@@ -37,7 +37,7 @@ const resources = [
   },
   {
     id: "improved_ecg",
-    displayName: "ECG",
+    displayName: "Improved ECG",
     content: [
       {
         type: "image",
@@ -49,7 +49,7 @@ const resources = [
   },
   {
     id: "deteriorated_ecg",
-    displayName: "ECG",
+    displayName: "Deteriorated ECG",
     content: [
       {
         type: "image",
@@ -75,7 +75,7 @@ const resources = [
   },
   {
     id: "medication_history",
-    displayName: "Medication History",
+    displayName: "Initial Medication History",
     content: [
       {
         type: "text",
@@ -90,7 +90,7 @@ const resources = [
   },
   {
     id: "new_medication_history",
-    displayName: "Medication History",
+    displayName: "Updated Medication History",
     content: [
       {
         type: "text",
@@ -128,7 +128,12 @@ const resources = [
     content: [
       {
         type: "text",
-        items: ["Don't overdose patient", "Keep patient fed"],
+        items: [
+          "Don't overdose patient",
+          "Feed patient",
+          "Keep patient alive",
+          "Fix patient",
+        ],
       },
     ],
   },
