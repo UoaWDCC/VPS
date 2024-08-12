@@ -1,22 +1,22 @@
 .display_card {
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    display: flex;
-    background-color: rgb(255, 255, 255);
-    border: 5px solid #515151;
-    padding: 20px;
-    border-radius: 13px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    z-index: 2;
-    width: 70%;
-    height: 70%;
-    flex-direction: column;
-    gap: 10px;
-  }
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  background-color: rgb(255, 255, 255);
+  border: 5px solid #515151;
+  padding: 20px;
+  border-radius: 13px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  z-index: 2;
+  width: 70%;
+  height: 70%;
+  flex-direction: column;
+  gap: 10px;
+}
 
-.modalHeading{
+.modalHeading {
   text-align: center;
   font-size: 1.5rem;
 }
@@ -37,52 +37,51 @@
 }
 
 .navBar {
-    display: flex;
-    padding: 10px; 
-    width: 100%;
-    height: 12%;
-    overflow-x: auto; 
-    overflow-y: hidden;
-    box-sizing: border-box;
-    white-space: nowrap;
-    background-color: #6fc9e5;
-    align-items: center;
-    flex-shrink: 0;
-    font-size: 1rem;
-  }
+  display: flex;
+  padding: 10px;
+  width: 100%;
+  height: 12%;
+  overflow-x: auto;
+  overflow-y: hidden;
+  box-sizing: border-box;
+  white-space: nowrap;
+  background-color: #6fc9e5;
+  align-items: center;
+  flex-shrink: 0;
+  font-size: 1rem;
+}
 
 .navBar > p {
   margin: 0;
 }
 
 .navBar button {
-border: none; 
-padding: 10px 15px; 
-font-size: 1.2rem;
-// border-radius: 10px;
-cursor: pointer; 
-// transition: background-color 0.3s ease; 
-background-color: transparent;
+  border: none;
+  padding: 10px 15px;
+  font-size: 1.2rem;
+  // border-radius: 10px;
+  cursor: pointer;
+  // transition: background-color 0.3s ease;
+  background-color: transparent;
 }
 
 .navBar .active {
-// background-color: #e0e0e0; 
-// color: white; 
-font-weight: bold;
-border-bottom: 5px solid black;
+  // background-color: #e0e0e0;
+  // color: white;
+  font-weight: bold;
+  border-bottom: 5px solid black;
 }
 
-.r_content_card{
-    height: 75%;
-    display: flex;
-    width: 100%;
-
+.r_content_card {
+  height: 75%;
+  display: flex;
+  width: 100%;
 }
 
 .resourceImage {
-  max-width: 100%;     
-  max-height: 100%;    
-  object-fit: contain; 
-  display: block;      
-  margin: 0 auto;      
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  display: block;
+  margin: 0 auto;
 }
