@@ -7,6 +7,7 @@ import {
   MenuItem,
   Select,
   TextField,
+  Typography,
 } from "@material-ui/core";
 import { useContext, useState } from "react";
 import SceneContext from "../../../../../context/SceneContext";
@@ -30,39 +31,35 @@ export default function ButtonPropertiesComponent({
 }) {
   const { scenes, updateComponentProperty } = useContext(SceneContext);
 
-  const [newFlag, setNewFlag] = useState("New Flag");
-  const [flagList, setFlags] = useState(
-    () =>
-      component.flags || [
-        "add flag_1",
-        "remove flag_1",
-        "add flag_2",
-        "remove flag_2",
-      ]
-  );
-  const [checked, setChecked] = useState(
-    () => component.flagStates || [false, false, false, false]
-  );
+  const [newFlag, setNewFlag] = useState("");
 
   const handleInputChange = (event) => {
     setNewFlag(event.target.value);
   };
 
   const handleAddFlag = () => {
+    if (Object.keys(component.flagList).includes(`add ${newFlag}`)) {
+      alert("Flag already exists in the flag list.");
+      return;
+    }
+
     if (newFlag.trim() !== "") {
-      const newFlagList = [...flagList, `add ${newFlag}`, `remove ${newFlag}`];
-      setFlags(newFlagList);
-      setChecked([...checked, false, false]);
+      const newFlagList = {
+        ...component.flagList,
+        [`add ${newFlag}`]: false,
+        [`remove ${newFlag}`]: false,
+      };
       setNewFlag("");
-      updateComponentProperty(componentIndex, "flags", newFlagList);
+      updateComponentProperty(componentIndex, "flagList", newFlagList);
     }
   };
 
-  const handleCheckboxChange = (index) => {
-    const newChecked = [...checked];
-    newChecked[index] = !checked[index];
-    setChecked(newChecked);
-    updateComponentProperty(componentIndex, "flagStates", newChecked);
+  const handleCheckboxChange = (flag) => {
+    const newFlagList = {
+      ...component.flagList,
+      [`${flag}`]: !component.flagList[flag],
+    };
+    updateComponentProperty(componentIndex, "flagList", newFlagList);
 
     // TODO:
     // Need to implement the functionality when
@@ -157,24 +154,33 @@ export default function ButtonPropertiesComponent({
           style={{ marginTop: "10px" }}
           multiple
           className={styles.selectInput}
-          value={flagList}
-          renderValue={(selected) => selected.join(", ")}
+          value={Object.keys(component.flagList)}
+          renderValue={(selected) =>
+            selected.filter((flag) => component.flagList[flag]).join(", ")
+          }
           displayEmpty
         >
-          <div style={{ display: "flex", flexDirection: "column" }}>
-            {flagList.map((flag, index) => (
-              <FormControlLabel
-                key={componentIndex + flag}
-                control={
-                  <CustomCheckBox
-                    checked={checked[index] || false}
-                    onChange={() => handleCheckboxChange(index)}
-                  />
-                }
-                label={flag}
-              />
-            ))}
-          </div>
+          {Object.keys(component.flagList).length > 0 ? (
+            <div style={{ display: "flex", flexDirection: "column" }}>
+              {Object.keys(component.flagList).map((flag) => (
+                <FormControlLabel
+                  key={flag}
+                  control={
+                    <CustomCheckBox
+                      checked={component.flagList[flag]}
+                      onChange={() => handleCheckboxChange(flag)}
+                    />
+                  }
+                  label={flag}
+                />
+              ))}
+            </div>
+          ) : (
+            <Typography className={styles.menuItem}>
+              This button property currently does not have any flags. Please add
+              flags first using the text field above.
+            </Typography>
+          )}
         </Select>
       </FormControl>
 
