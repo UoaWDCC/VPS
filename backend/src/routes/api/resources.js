@@ -1,6 +1,5 @@
 import { Router } from "express";
 import auth from "../../middleware/firebaseAuth";
-import scenarioAuth from "../../middleware/scenarioAuth";
 
 import {
   createResource,
