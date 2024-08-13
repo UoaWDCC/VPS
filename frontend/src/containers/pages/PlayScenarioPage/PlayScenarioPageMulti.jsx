@@ -44,41 +44,37 @@ export default function PlayScenarioPageMulti({ group }) {
   const [resourcesOpen, setResourcesOpen] = useState(false);
   const [noteOpen, setNoteOpen] = useState(false);
   const [previous, setPrevious] = useState(null);
-  const [error, setError] = useState(null);
 
   // TODO: move these somewhere else ?
   if (loading) return <LoadingPage text="Loading Scene..." />;
   if (authError) return <></>;
 
+  const setError = (error) => {
+    if (!error) return;
+    if (error.status === 409) {
+      history.push(`/play/${scenarioId}/desync`);
+    } else if (error.status === 403) {
+      const roles = JSON.stringify(error.meta.roles_with_access);
+      history.push(`/play/${scenarioId}/invalid-role?roles=${roles}`);
+    }
+  };
+
   useEffect(() => {
     const onSceneChange = async () => {
       if (sceneId && !previous) return;
-      const res = await navigate(user, group._id, previous, sceneId).catch(
-        (e) => setError(e?.response)
-      );
-      if (!sceneId) history.replace(`/play/${scenarioId}/multiplayer/${res}`);
+      if (sceneCache.get(sceneId)?.error) setError(sceneCache.get(sceneId));
+      try {
+        const res = await navigate(user, group._id, previous, sceneId);
+        if (!sceneId) history.replace(`/play/${scenarioId}/multiplayer/${res}`);
+      } catch (e) {
+        setError(e?.response?.data);
+      }
     };
     onSceneChange();
   }, [sceneId]);
 
-  if (error) {
-    if (error.status === 409) {
-      history.push(`/play/${scenarioId}/desync`);
-    } else if (error.status === 403) {
-      const roles = JSON.stringify(error.data.meta.roles_with_access);
-      history.push(`/play/${scenarioId}/invalid-role?roles=${roles}`);
-    }
-    // TODO: create a generic error page and redirect to it
-    return <></>;
-  }
-
   const currScene = sceneCache.get(sceneId);
   if (!currScene || !group) return <LoadingPage text="Loading Scene..." />;
-
-  if (currScene.error) {
-    const roles = JSON.stringify(currScene.meta.roles_with_access);
-    history.push(`/play/${scenarioId}/invalid-role?roles=${roles}`);
-  }
 
   const reset = async () => {
     const res = await usePost(

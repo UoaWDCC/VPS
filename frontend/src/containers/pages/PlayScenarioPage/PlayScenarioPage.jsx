@@ -39,32 +39,33 @@ export default function PlayScenarioPage() {
   const { scenarioId, sceneId } = useParams();
   const history = useHistory();
   const styles = useStyles();
-
   const [previous, setPrevious] = useState(null);
-  const [error, setError] = useState(null);
 
   // TODO: move these somewhere else ?
   if (loading) return <LoadingPage text="Loading Scene..." />;
   if (authError) return <></>;
 
-  useEffect(() => {
-    const onSceneChange = async () => {
-      if (sceneId && !previous) return;
-      const res = await navigate(user, scenarioId, previous, sceneId).catch(
-        (e) => setError(e?.response)
-      );
-      if (!sceneId) history.replace(`/play/${scenarioId}/singleplayer/${res}`);
-    };
-    onSceneChange();
-  }, [sceneId]);
-
-  if (error) {
+  const setError = (error) => {
+    if (!error) return;
     if (error.status === 409) {
       history.push(`/play/${scenarioId}/desync`);
     }
-    // TODO: create a generic error page and redirect to it
-    return <></>;
-  }
+  };
+
+  useEffect(() => {
+    const onSceneChange = async () => {
+      if (sceneId && !previous) return;
+      if (sceneCache.get(sceneId)?.error) setError(sceneCache.get(sceneId));
+      try {
+        const res = await navigate(user, scenarioId, previous, sceneId);
+        if (!sceneId)
+          history.replace(`/play/${scenarioId}/singleplayer/${res}`);
+      } catch (e) {
+        setError(e?.response?.data);
+      }
+    };
+    onSceneChange();
+  }, [sceneId]);
 
   const currScene = sceneCache.get(sceneId);
   if (!currScene) return <LoadingPage text="Loading Scene..." />;
