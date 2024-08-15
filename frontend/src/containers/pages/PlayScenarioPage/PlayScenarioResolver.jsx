@@ -4,11 +4,13 @@ import { Route, Switch, useHistory, useParams } from "react-router-dom";
 
 import AuthenticationContext from "context/AuthenticationContext";
 
-import DesyncPage from "../DesyncPage";
-import InvalidRolePage from "../InvalidRolePage";
+import DesyncPage from "../ErrorPages/DesyncPage";
+import InvalidRolePage from "../ErrorPages/InvalidRolePage";
+import ErrorPage from "../ErrorPages/ErrorPage";
+import LoadingPage from "../LoadingPage";
+
 import PlayScenarioPage from "./PlayScenarioPage";
 import PlayScenarioPageMulti from "./PlayScenarioPageMulti";
-import LoadingPage from "../LoadingPage";
 
 const getGroup = async (user, scenarioId) => {
   const token = await user.getIdToken();
@@ -48,6 +50,9 @@ export default function PlayScenarioResolver() {
 
   return (
     <Switch>
+      <Route exact path="/play/:scenarioId/error">
+        <ErrorPage />
+      </Route>
       <Route exact path="/play/:scenarioId/invalid-role">
         <InvalidRolePage group={group} />
       </Route>

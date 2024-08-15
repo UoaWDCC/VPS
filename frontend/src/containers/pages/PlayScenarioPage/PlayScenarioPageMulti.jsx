@@ -1,4 +1,4 @@
-import { useContext, useState, useEffect } from "react";
+import { useContext, useState, useEffect, useCallback } from "react";
 import { useParams, useHistory } from "react-router-dom";
 import AuthenticationContext from "context/AuthenticationContext";
 import { usePost } from "hooks/crudHooks";
@@ -45,19 +45,17 @@ export default function PlayScenarioPageMulti({ group }) {
   const [noteOpen, setNoteOpen] = useState(false);
   const [previous, setPrevious] = useState(null);
 
-  // TODO: move these somewhere else ?
-  if (loading) return <LoadingPage text="Loading Scene..." />;
-  if (authError) return <></>;
-
-  const setError = (error) => {
+  const setError = useCallback((error) => {
     if (!error) return;
     if (error.status === 409) {
       history.push(`/play/${scenarioId}/desync`);
     } else if (error.status === 403) {
       const roles = JSON.stringify(error.meta.roles_with_access);
       history.push(`/play/${scenarioId}/invalid-role?roles=${roles}`);
+    } else {
+      history.push(`/play/${scenarioId}/error`);
     }
-  };
+  }, []);
 
   useEffect(() => {
     const onSceneChange = async () => {
@@ -73,10 +71,7 @@ export default function PlayScenarioPageMulti({ group }) {
     onSceneChange();
   }, [sceneId]);
 
-  const currScene = sceneCache.get(sceneId);
-  if (!currScene || !group) return <LoadingPage text="Loading Scene..." />;
-
-  const reset = async () => {
+  const reset = useCallback(async () => {
     const res = await usePost(
       `api/navigate/group/reset/${group._id}`,
       { currentScene: sceneId },
@@ -90,7 +85,13 @@ export default function PlayScenarioPageMulti({ group }) {
     console.log("reset");
     setPrevious(null);
     history.replace(`/play/${scenarioId}/multiplayer`);
-  };
+  }, [sceneId]);
+
+  if (loading) return <LoadingPage text="Loading Scene..." />;
+  if (authError) return <></>;
+
+  const currScene = sceneCache.get(sceneId);
+  if (!currScene || !group) return <LoadingPage text="Loading Scene..." />;
 
   const incrementor = (id) => {
     if (!sceneCache.has(id)) return;
