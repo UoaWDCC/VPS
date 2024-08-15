@@ -1,4 +1,4 @@
-import { useContext, useState, useEffect, useCallback } from "react";
+import { useContext, useState, useEffect } from "react";
 import { useParams, useHistory } from "react-router-dom";
 import AuthenticationContext from "context/AuthenticationContext";
 import axios from "axios";
@@ -41,45 +41,45 @@ export default function PlayScenarioPage() {
   const styles = useStyles();
   const [previous, setPrevious] = useState(null);
 
-  const setError = useCallback((error) => {
+  const handleError = (error) => {
     if (!error) return;
     if (error.status === 409) {
       history.push(`/play/${scenarioId}/desync`);
     } else {
       history.push(`/play/${scenarioId}/error`);
     }
-  }, []);
+  };
 
   useEffect(() => {
     const onSceneChange = async () => {
       if (sceneId && !previous) return;
-      if (sceneCache.get(sceneId)?.error) setError(sceneCache.get(sceneId));
+      if (sceneCache.get(sceneId)?.error) handleError(sceneCache.get(sceneId));
       try {
-        const res = await navigate(user, scenarioId, previous, sceneId);
+        const newSceneId = await navigate(user, scenarioId, previous, sceneId);
         if (!sceneId)
-          history.replace(`/play/${scenarioId}/singleplayer/${res}`);
+          history.replace(`/play/${scenarioId}/singleplayer/${newSceneId}`);
       } catch (e) {
-        setError(e?.response?.data);
+        handleError(e?.response?.data);
       }
     };
     onSceneChange();
   }, [sceneId]);
 
-  const reset = useCallback(async () => {
+  const reset = async () => {
     const res = await usePost(
       `api/navigate/user/reset/${scenarioId}`,
       { currentScene: sceneId },
       user.getIdToken.bind(user)
     );
     if (res.status) {
-      setError(res);
+      handleError(res);
       return;
     }
 
     console.log("reset");
     setPrevious(null);
     history.replace(`/play/${scenarioId}/singleplayer`);
-  }, [sceneId]);
+  };
 
   if (loading) return <LoadingPage text="Loading Scene..." />;
   if (authError) return <></>;
