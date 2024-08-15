@@ -82,3 +82,17 @@
   margin-top: 0.5em !important;
   margin-bottom: 1em !important;
 }
+
+.plusLabel::before {
+  content: "+";
+  color: green;
+  margin-right: 8px;
+  font-weight: bold;
+}
+
+.minusLabel::before {
+  content: "-";
+  color: red;
+  margin-right: 8px;
+  font-weight: bold;
+}

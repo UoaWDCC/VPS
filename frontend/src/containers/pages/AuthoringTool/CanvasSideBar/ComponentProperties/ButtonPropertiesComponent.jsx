@@ -40,19 +40,28 @@ export default function ButtonPropertiesComponent({
   };
 
   const handleAddFlag = () => {
-    if (Object.keys(component.flagList).includes(`add ${newFlag}`)) {
+    if (!component.flagAdditions) {
+      updateComponentProperty(componentIndex, "flagAdditions", {});
+    }
+    if (!component.flagDeletions) {
+      updateComponentProperty(componentIndex, "flagDeletions", {});
+    }
+
+    if (Object.keys(component.flagAdditions).includes(`${newFlag}`)) {
       setOpen(true);
       return;
     }
 
     if (newFlag.trim() !== "") {
-      const newFlagList = {
-        ...component.flagList,
-        [`add ${newFlag}`]: false,
-        [`remove ${newFlag}`]: false,
-      };
       setNewFlag("");
-      updateComponentProperty(componentIndex, "flagList", newFlagList);
+      updateComponentProperty(componentIndex, "flagAdditions", {
+        ...component.flagAdditions,
+        [newFlag]: false,
+      });
+      updateComponentProperty(componentIndex, "flagDeletions", {
+        ...component.flagDeletions,
+        [newFlag]: false,
+      });
     }
   };
 
@@ -60,17 +69,18 @@ export default function ButtonPropertiesComponent({
     setOpen(false);
   };
 
-  const handleCheckboxChange = (flag) => {
-    const newFlagList = {
-      ...component.flagList,
-      [`${flag}`]: !component.flagList[flag],
-    };
-    updateComponentProperty(componentIndex, "flagList", newFlagList);
-
-    // TODO:
-    // Need to implement the functionality when
-    // a checkbox is checked, the labelled flag should be
-    // added to the groups active flag list
+  const handleCheckboxChange = (flag, adding) => {
+    if (adding) {
+      updateComponentProperty(componentIndex, "flagAdditions", {
+        ...component.flagAdditions,
+        [flag]: !component.flagAdditions[flag],
+      });
+    } else {
+      updateComponentProperty(componentIndex, "flagDeletions", {
+        ...component.flagDeletions,
+        [flag]: !component.flagDeletions[flag],
+      });
+    }
   };
 
   return (
@@ -155,29 +165,80 @@ export default function ButtonPropertiesComponent({
           />
           <Button onClick={handleAddFlag}>Add</Button>
         </div>
+      </FormControl>
 
+      <FormControl fullWidth className={styles.componentProperty}>
+        <CustomInputLabel shrink className={styles.plusLabel}>
+          Select flags to be added
+        </CustomInputLabel>
         <Select
-          style={{ marginTop: "10px" }}
           multiple
           className={styles.selectInput}
-          value={Object.keys(component.flagList || {})}
+          value={Object.keys(component.flagAdditions || {})}
+          // renderValue={(selected) =>
+          //   selected.filter((flag) => component.flagAdditions[flag]).length > 0
+          //     ? selected.filter((flag) => component.flagAdditions[flag]).join(", ")
+          //     : "Select flags to be added"
+          // }
           renderValue={(selected) =>
-            selected.filter((flag) => component.flagList[flag]).join(", ")
+            selected.filter((flag) => component.flagAdditions[flag]).join(", ")
           }
           displayEmpty
         >
-          {Object.keys(component.flagList || {}).length > 0 ? (
+          {Object.keys(component.flagAdditions || {}).length > 0 ? (
             <div style={{ display: "flex", flexDirection: "column" }}>
-              {Object.keys(component.flagList).map((flag) => (
+              {Object.keys(component.flagAdditions).map((flag) => (
                 <FormControlLabel
                   key={flag}
                   control={
                     <CustomCheckBox
-                      checked={component.flagList[flag]}
-                      onChange={() => handleCheckboxChange(flag)}
+                      checked={component.flagAdditions[flag]}
+                      onChange={() => handleCheckboxChange(flag, true)}
                     />
                   }
-                  label={flag}
+                  label={<span className={styles.plusLabel}>{flag}</span>}
+                />
+              ))}
+            </div>
+          ) : (
+            <Typography className={styles.menuItem}>
+              This button property currently does not have any flags. Please add
+              flags first using the text field above.
+            </Typography>
+          )}
+        </Select>
+      </FormControl>
+      <FormControl fullWidth className={styles.componentProperty}>
+        <CustomInputLabel shrink className={styles.minusLabel}>
+          Select flags to be removed
+        </CustomInputLabel>
+        <Select
+          // style={{ marginTop: "10px" }}
+          multiple
+          className={styles.selectInput}
+          value={Object.keys(component.flagDeletions || {})}
+          // renderValue={(selected) =>
+          //   selected.filter((flag) => component.flagDeletions[flag]).length > 0
+          //     ? selected.filter((flag) => component.flagDeletions[flag]).join(", ")
+          //     : "Select flags to be removed"
+          // }
+          renderValue={(selected) =>
+            selected.filter((flag) => component.flagDeletions[flag]).join(", ")
+          }
+          displayEmpty
+        >
+          {Object.keys(component.flagDeletions || {}).length > 0 ? (
+            <div style={{ display: "flex", flexDirection: "column" }}>
+              {Object.keys(component.flagDeletions).map((flag) => (
+                <FormControlLabel
+                  key={flag}
+                  control={
+                    <CustomCheckBox
+                      checked={component.flagDeletions[flag]}
+                      onChange={() => handleCheckboxChange(flag, false)}
+                    />
+                  }
+                  label={<span className={styles.minusLabel}>{flag}</span>}
                 />
               ))}
             </div>

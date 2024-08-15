@@ -180,9 +180,58 @@ exports[`Button properties component snapshot test 1`] = `
           />
         </button>
       </div>
+    </div>
+    <div
+      class="MuiFormControl-root componentProperty MuiFormControl-fullWidth"
+    >
+      <label
+        class="MuiFormLabel-root MuiInputLabel-root WithStyles(ForwardRef(InputLabel))-root-2 plusLabel MuiInputLabel-formControl MuiInputLabel-animated MuiInputLabel-shrink"
+        data-shrink="true"
+      >
+        Select flags to be added
+      </label>
       <div
         class="MuiInputBase-root MuiInput-root MuiInput-underline selectInput MuiInputBase-formControl MuiInput-formControl"
-        style="margin-top: 10px;"
+      >
+        <div
+          aria-haspopup="listbox"
+          class="MuiSelect-root MuiSelect-select MuiSelect-selectMenu MuiInputBase-input MuiInput-input"
+          role="button"
+          tabindex="0"
+        >
+          <span>
+            ​
+          </span>
+        </div>
+        <input
+          aria-hidden="true"
+          class="MuiSelect-nativeInput"
+          tabindex="-1"
+          value=""
+        />
+        <svg
+          aria-hidden="true"
+          class="MuiSvgIcon-root MuiSelect-icon"
+          focusable="false"
+          viewBox="0 0 24 24"
+        >
+          <path
+            d="M7 10l5 5 5-5z"
+          />
+        </svg>
+      </div>
+    </div>
+    <div
+      class="MuiFormControl-root componentProperty MuiFormControl-fullWidth"
+    >
+      <label
+        class="MuiFormLabel-root MuiInputLabel-root WithStyles(ForwardRef(InputLabel))-root-2 minusLabel MuiInputLabel-formControl MuiInputLabel-animated MuiInputLabel-shrink"
+        data-shrink="true"
+      >
+        Select flags to be removed
+      </label>
+      <div
+        class="MuiInputBase-root MuiInput-root MuiInput-underline selectInput MuiInputBase-formControl MuiInput-formControl"
       >
         <div
           aria-haspopup="listbox"
