@@ -1,4 +1,4 @@
-import { useContext, useState, useEffect, useCallback } from "react";
+import { useContext, useState, useEffect } from "react";
 import { useParams, useHistory } from "react-router-dom";
 import AuthenticationContext from "context/AuthenticationContext";
 import { usePost } from "hooks/crudHooks";
@@ -45,7 +45,7 @@ export default function PlayScenarioPageMulti({ group }) {
   const [noteOpen, setNoteOpen] = useState(false);
   const [previous, setPrevious] = useState(null);
 
-  const setError = useCallback((error) => {
+  const handleError = (error) => {
     if (!error) return;
     if (error.status === 409) {
       history.push(`/play/${scenarioId}/desync`);
@@ -55,37 +55,38 @@ export default function PlayScenarioPageMulti({ group }) {
     } else {
       history.push(`/play/${scenarioId}/error`);
     }
-  }, []);
+  };
 
   useEffect(() => {
     const onSceneChange = async () => {
       if (sceneId && !previous) return;
-      if (sceneCache.get(sceneId)?.error) setError(sceneCache.get(sceneId));
+      if (sceneCache.get(sceneId)?.error) handleError(sceneCache.get(sceneId));
       try {
-        const res = await navigate(user, group._id, previous, sceneId);
-        if (!sceneId) history.replace(`/play/${scenarioId}/multiplayer/${res}`);
+        const newSceneId = await navigate(user, group._id, previous, sceneId);
+        if (!sceneId)
+          history.replace(`/play/${scenarioId}/multiplayer/${newSceneId}`);
       } catch (e) {
-        setError(e?.response?.data);
+        handleError(e?.response?.data);
       }
     };
     onSceneChange();
   }, [sceneId]);
 
-  const reset = useCallback(async () => {
+  const reset = async () => {
     const res = await usePost(
       `api/navigate/group/reset/${group._id}`,
       { currentScene: sceneId },
       user.getIdToken.bind(user)
     );
     if (res.status) {
-      setError(res);
+      handleError(res);
       return;
     }
 
     console.log("reset");
     setPrevious(null);
     history.replace(`/play/${scenarioId}/multiplayer`);
-  }, [sceneId]);
+  };
 
   if (loading) return <LoadingPage text="Loading Scene..." />;
   if (authError) return <></>;
