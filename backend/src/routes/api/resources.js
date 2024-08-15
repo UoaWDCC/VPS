@@ -1,5 +1,6 @@
 import { Router } from "express";
 import auth from "../../middleware/firebaseAuth";
+import handle from "../../error/handle";
 
 import {
   createResource,
@@ -18,20 +19,20 @@ const HTTP_CREATED = 201;
 const HTTP_NO_CONTENT = 204;
 const HTTP_BAD_REQUEST = 400;
 const HTTP_NOT_FOUND = 404;
-const HTTP_FORBIDDEN = 403;
+const HTTP_INTERNAL_SERVER_ERROR = 500;
 
 // Apply auth middleware to all routes below this point
 router.use(auth);
 
 // Create a New Resource
-router.post("/", async (req, res) => {
-  const { type, content, name } = req.body;
-  if (!type || !content || !name) {
-    return res.status(HTTP_BAD_REQUEST).send("Bad Request");
-  }
-  const newResource = await createResource(type, content, name);
-  return res.status(HTTP_CREATED).json(newResource);
-});
+router.post(
+  "/",
+  handle(async (req, res) => {
+    const { type, content, name } = req.body;
+    const newResource = await createResource(type, content, name);
+    return res.status(HTTP_CREATED).json(newResource).send();
+  })
+);
 
 // Retrieve a Specific Resource
 router.get("/:resourceId", async (req, res) => {
@@ -110,7 +111,7 @@ router.put("/:resourceId", async (req, res) => {
 
     return res.status(HTTP_OK).json(updatedResource);
   } catch (error) {
-    return res.status(HTTP_FORBIDDEN).send("Forbidden");
+    return res.status(HTTP_INTERNAL_SERVER_ERROR).send("Internal Server Error");
   }
 });
 
