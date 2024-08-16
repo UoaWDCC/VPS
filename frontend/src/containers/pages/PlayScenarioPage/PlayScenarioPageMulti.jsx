@@ -5,7 +5,7 @@ import { usePost } from "hooks/crudHooks";
 import axios from "axios";
 import LoadingPage from "../LoadingPage";
 import NotesDisplayCard from "../../../components/NotesDisplayCard";
-import ResourcesDisplayCard from "../../../components/ResourcesDisplayCard";
+import ResourcesModal from "../../../components/ResourcesModal";
 import PlayPageSideButton from "../../../components/PlayPageSideButton";
 // import ScenarioPreloader from "./Components/ScenarioPreloader";
 import PlayScenarioCanvas from "./PlayScenarioCanvas";
@@ -135,7 +135,7 @@ export default function PlayScenarioPageMulti({ group }) {
         />
       )}
       {resourcesOpen && (
-        <ResourcesDisplayCard
+        <ResourcesModal
           group={group}
           user={user}
           handleClose={() => setResourcesOpen(false)}
