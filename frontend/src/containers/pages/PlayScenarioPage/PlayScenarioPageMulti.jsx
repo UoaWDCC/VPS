@@ -14,7 +14,14 @@ import useStyles from "./playScenarioPage.styles";
 const sceneCache = new Map();
 
 // returns the scene id that we should switch to
-const navigate = async (user, groupId, currentScene, nextScene, addFlags, removeFlags) => {
+const navigate = async (
+  user,
+  groupId,
+  currentScene,
+  nextScene,
+  addFlags,
+  removeFlags
+) => {
   const token = await user.getIdToken();
   const config = {
     method: "post",
