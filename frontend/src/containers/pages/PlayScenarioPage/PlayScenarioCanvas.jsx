@@ -7,14 +7,29 @@ import componentResolver from "./componentResolver";
  * @component
  */
 
-export default function PlayScenarioCanvas({ scene, incrementor, reset }) {
+export default function PlayScenarioCanvas({
+  scene,
+  incrementor,
+  reset,
+  setAddFlags,
+  setRemoveFlags,
+}) {
   return (
     <>
       {scene.components?.map((component, index) => {
-        const action =
-          component.type === "RESET_BUTTON"
-            ? reset
-            : () => component.nextScene && incrementor(component.nextScene);
+        let action = () =>
+          component.nextScene && incrementor(component.nextScene);
+        switch (component.type) {
+          case "RESET_BUTTON":
+            action = reset;
+            break;
+          case "BUTTON":
+            setAddFlags(component.flagAdditions);
+            setRemoveFlags(component.flagDeletions);
+            break;
+          default:
+            break;
+        }
 
         return componentResolver(component, index, action);
       })}

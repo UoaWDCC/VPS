@@ -14,7 +14,7 @@ import useStyles from "./playScenarioPage.styles";
 const sceneCache = new Map();
 
 // returns the scene id that we should switch to
-const navigate = async (user, groupId, currentScene, nextScene) => {
+const navigate = async (user, groupId, currentScene, nextScene, addFlags, removeFlags) => {
   const token = await user.getIdToken();
   const config = {
     method: "post",
@@ -23,7 +23,7 @@ const navigate = async (user, groupId, currentScene, nextScene) => {
       "Content-Type": "application/json",
       Authorization: `Bearer ${token}`,
     },
-    data: { currentScene, nextScene },
+    data: { currentScene, nextScene, addFlags, removeFlags },
   };
   const res = await axios.request(config);
   res.data.scenes.forEach((scene) => sceneCache.set(scene._id, scene));
@@ -46,6 +46,9 @@ export default function PlayScenarioPageMulti({ group }) {
   const [previous, setPrevious] = useState(null);
   const [error, setError] = useState(null);
 
+  const [addFlags, setAddFlags] = useState([]);
+  const [removeFlags, setRemoveFlags] = useState([]);
+
   // TODO: move these somewhere else ?
   if (loading) return <LoadingPage text="Loading Scene..." />;
   if (authError) return <></>;
@@ -53,9 +56,14 @@ export default function PlayScenarioPageMulti({ group }) {
   useEffect(() => {
     const onSceneChange = async () => {
       if (sceneId && !previous) return;
-      const res = await navigate(user, group._id, previous, sceneId).catch(
-        (e) => setError(e?.response)
-      );
+      const res = await navigate(
+        user,
+        group._id,
+        previous,
+        sceneId,
+        addFlags,
+        removeFlags
+      ).catch((e) => setError(e?.response));
       if (!sceneId) history.replace(`/play/${scenarioId}/multiplayer/${res}`);
     };
     onSceneChange();
@@ -106,6 +114,8 @@ export default function PlayScenarioPageMulti({ group }) {
             scene={currScene}
             incrementor={incrementor}
             reset={reset}
+            setAddFlags={setAddFlags}
+            setRemoveFlags={setRemoveFlags}
           />
         </div>
       </div>

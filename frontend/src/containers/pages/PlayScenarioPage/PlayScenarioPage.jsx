@@ -43,6 +43,9 @@ export default function PlayScenarioPage() {
   const [previous, setPrevious] = useState(null);
   const [error, setError] = useState(null);
 
+  const [addFlags, setAddFlags] = useState([]);
+  const [removeFlags, setRemoveFlags] = useState([]);
+
   // TODO: move these somewhere else ?
   if (loading) return <LoadingPage text="Loading Scene..." />;
   if (authError) return <></>;
@@ -95,6 +98,8 @@ export default function PlayScenarioPage() {
             scene={currScene}
             incrementor={incrementor}
             reset={reset}
+            setAddFlags={setAddFlags}
+            setRemoveFlags={setRemoveFlags}
           />
         </div>
       </div>
