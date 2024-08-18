@@ -1,5 +1,3 @@
-import { Link } from "react-router-dom";
-
 const BackToScenarioSelectionButton = () => {
   const containerStyle = {
     display: "flex",
@@ -16,13 +14,15 @@ const BackToScenarioSelectionButton = () => {
     color: "#FFFFFF",
   };
 
+  const handleClick = () => {
+    window.location.reload();
+  };
+
   return (
     <div style={containerStyle}>
-      <Link to="/" style={{ textDecoration: "none" }}>
-        <button type="button" style={buttonStyle}>
-          Back to Scenarios
-        </button>
-      </Link>
+      <button type="button" style={buttonStyle} onClick={handleClick}>
+        Try Access Scenario
+      </button>
     </div>
   );
 };
