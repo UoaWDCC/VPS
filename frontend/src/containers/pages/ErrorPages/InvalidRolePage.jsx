@@ -64,7 +64,8 @@ function InvalidRolePage({ group }) {
       <BacktoScenarioSelectionButton />
       <p style={textMargin}>
         If you have just finished playing your part of the scenario, let your
-        group member with the {rolesWithAccess.join(", ")} role know it’s their turn.
+        group member with the {rolesWithAccess.join(", ")} role know it is their
+        turn
       </p>
       {noteOpen && (
         <NotesDisplayCard group={group} user={user} handleClose={handleClose} />
