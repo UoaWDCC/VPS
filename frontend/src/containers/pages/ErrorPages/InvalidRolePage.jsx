@@ -1,9 +1,9 @@
 import { Button } from "@mui/material";
 import { useContext, useState } from "react";
 import { useLocation } from "react-router-dom";
-import BacktoScenarioSelectionButton from "../../../components/BacktoScenarioSelectionButton";
-import NotesDisplayCard from "../../../components/NotesDisplayCard";
-import AuthenticationContext from "../../../context/AuthenticationContext";
+import TryAccessScenarioButton from "../../components/TryAccessScenarioButton";
+import NotesDisplayCard from "../../components/NotesDisplayCard";
+import AuthenticationContext from "../../context/AuthenticationContext";
 
 function InvalidRolePage({ group }) {
   const { user } = useContext(AuthenticationContext);
@@ -61,7 +61,7 @@ function InvalidRolePage({ group }) {
       >
         — or —
       </p>
-      <BacktoScenarioSelectionButton />
+      <TryAccessScenarioButton />
       <p style={textMargin}>
         If you have just finished playing your part of the scenario, let your
         group member with the {rolesWithAccess.join(", ")} role know it is their
