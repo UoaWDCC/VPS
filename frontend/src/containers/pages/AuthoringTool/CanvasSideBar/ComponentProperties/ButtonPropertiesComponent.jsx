@@ -52,7 +52,7 @@ export default function ButtonPropertiesComponent({
       return;
     }
 
-    if (newFlag.trim() !== "") {
+    if (newFlag.trim().length !== 0) {
       setNewFlag("");
       updateComponentProperty(componentIndex, "flagAdditions", {
         ...component.flagAdditions,
@@ -175,11 +175,6 @@ export default function ButtonPropertiesComponent({
           multiple
           className={styles.selectInput}
           value={Object.keys(component.flagAdditions || {})}
-          // renderValue={(selected) =>
-          //   selected.filter((flag) => component.flagAdditions[flag]).length > 0
-          //     ? selected.filter((flag) => component.flagAdditions[flag]).join(", ")
-          //     : "Select flags to be added"
-          // }
           renderValue={(selected) =>
             selected.filter((flag) => component.flagAdditions[flag]).join(", ")
           }
@@ -213,15 +208,9 @@ export default function ButtonPropertiesComponent({
           Select flags to be removed
         </CustomInputLabel>
         <Select
-          // style={{ marginTop: "10px" }}
           multiple
           className={styles.selectInput}
           value={Object.keys(component.flagDeletions || {})}
-          // renderValue={(selected) =>
-          //   selected.filter((flag) => component.flagDeletions[flag]).length > 0
-          //     ? selected.filter((flag) => component.flagDeletions[flag]).join(", ")
-          //     : "Select flags to be removed"
-          // }
           renderValue={(selected) =>
             selected.filter((flag) => component.flagDeletions[flag]).join(", ")
           }
