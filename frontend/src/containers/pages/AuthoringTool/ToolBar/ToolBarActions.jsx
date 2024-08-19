@@ -33,6 +33,8 @@ function addButton(currentScene, setCurrentScene) {
     width: 20, // as percentage
     id: v4(),
     zPosition: 0,
+    flagAdditions: {},
+    flagDeletions: {},
   };
 
   addComponent(newButton, currentScene, setCurrentScene);
