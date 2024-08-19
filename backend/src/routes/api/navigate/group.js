@@ -21,21 +21,6 @@ export const getSimpleScene = async (sceneId) => {
   return scene;
 };
 
-const deleteNoteNoRoleCheck = async (noteId, groupId) => {
-  const note = await Note.findById(noteId);
-  const updateQuery = {
-    $pull: { [`notes.${note.role}`]: noteId },
-  };
-  //  delete note from group
-  await Group.updateOne({ _id: groupId }, updateQuery);
-
-  if (!note) {
-    throw new HttpError("Note not found", STATUS.NOT_FOUND);
-  }
-  await note.delete();
-  return true;
-};
-
 const deleteAllNotes = async (groupData) => {
   const groupId = groupData._id;
   const group = await Group.findById(groupId, { notes: 1 }).lean();
@@ -45,10 +30,14 @@ const deleteAllNotes = async (groupData) => {
   const noteList = Object.entries(group.notes).flatMap(([role, ids]) =>
     ids.map((id) => ({ role, id }))
   );
-  if (noteList && noteList.length > 0) {
-    await Promise.all(
-      noteList.map(({ id }) => deleteNoteNoRoleCheck(id, groupId))
-    );
+  const noteId = noteList.map(({ id }) => id);
+  await Note.deleteMany({ _id: { $in: noteId } });
+  const res = await Group.updateOne(
+    { _id: groupId },
+    { $set: { notes: {} } }
+  ).exec();
+  if (res.nModified !== 1) {
+    throw new HttpError("Failed to delete notes", STATUS.INTERNAL_SERVER_ERROR);
   }
 };
 
