@@ -12,7 +12,16 @@ import useStyles from "./playScenarioPage.styles";
 const sceneCache = new Map();
 
 // returns the scene id that we should switch to
-const navigate = async (user, scenarioId, currentScene, nextScene) => {
+const navigate = async (
+  user,
+  scenarioId,
+  currentScene,
+  nextScene,
+  addFlags,
+  removeFlags
+) => {
+  console.log("navigating");
+
   const token = await user.getIdToken();
   const config = {
     method: "post",
@@ -21,7 +30,7 @@ const navigate = async (user, scenarioId, currentScene, nextScene) => {
       "Content-Type": "application/json",
       Authorization: `Bearer ${token}`,
     },
-    data: { currentScene, nextScene },
+    data: { currentScene, nextScene, addFlags, removeFlags },
   };
   const res = await axios.request(config);
   res.data.scenes.forEach((scene) => sceneCache.set(scene._id, scene));
@@ -44,7 +53,6 @@ export default function PlayScenarioPage() {
   const [addFlags, setAddFlags] = useState([]);
   const [removeFlags, setRemoveFlags] = useState([]);
 
-
   const handleError = (error) => {
     if (!error) return;
     if (error.status === 409) {
@@ -59,7 +67,14 @@ export default function PlayScenarioPage() {
       if (sceneId && !previous) return;
       if (sceneCache.get(sceneId)?.error) handleError(sceneCache.get(sceneId));
       try {
-        const newSceneId = await navigate(user, scenarioId, previous, sceneId);
+        const newSceneId = await navigate(
+          user,
+          scenarioId,
+          previous,
+          sceneId,
+          addFlags,
+          removeFlags
+        );
         if (!sceneId)
           history.replace(`/play/${scenarioId}/singleplayer/${newSceneId}`);
       } catch (e) {

@@ -54,7 +54,6 @@ export default function PlayScenarioPageMulti({ group }) {
   const [addFlags, setAddFlags] = useState([]);
   const [removeFlags, setRemoveFlags] = useState([]);
 
-
   const handleError = (error) => {
     if (!error) return;
     if (error.status === 409) {
@@ -79,7 +78,7 @@ export default function PlayScenarioPageMulti({ group }) {
           sceneId,
           addFlags,
           removeFlags
-        ).catch((e) => setError(e?.response));
+        );
         if (!sceneId)
           history.replace(`/play/${scenarioId}/multiplayer/${newSceneId}`);
       } catch (e) {

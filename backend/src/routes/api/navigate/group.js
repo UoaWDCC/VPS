@@ -157,7 +157,7 @@ export const groupNavigate = async (req) => {
   if (!connectedIds.includes(nextScene))
     throw new HttpError("Invalid scene transition", STATUS.FORBIDDEN);
 
-  const [, , scenes] = await Promise.all([
+  const [, , , scenes] = await Promise.all([
     addSceneToPath(group._id, currentScene, nextScene),
     addFlagsToGroup(group._id, addFlags),
     removeFlagsFromGroup(group._id, removeFlags),
