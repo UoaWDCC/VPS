@@ -1,9 +1,9 @@
 import { Button } from "@mui/material";
 import { useContext, useState } from "react";
 import { useLocation } from "react-router-dom";
-import BacktoScenarioSelectionButton from "../../components/BacktoScenarioSelectionButton";
-import NotesDisplayCard from "../../components/NotesDisplayCard";
-import AuthenticationContext from "../../context/AuthenticationContext";
+import BacktoScenarioSelectionButton from "../../../components/BacktoScenarioSelectionButton";
+import NotesDisplayCard from "../../../components/NotesDisplayCard";
+import AuthenticationContext from "../../../context/AuthenticationContext";
 
 function InvalidRolePage({ group }) {
   const { user } = useContext(AuthenticationContext);

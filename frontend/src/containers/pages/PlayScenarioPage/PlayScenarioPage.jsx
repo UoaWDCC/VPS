@@ -39,50 +39,57 @@ export default function PlayScenarioPage() {
   const { scenarioId, sceneId } = useParams();
   const history = useHistory();
   const styles = useStyles();
-
   const [previous, setPrevious] = useState(null);
-  const [error, setError] = useState(null);
 
   const [addFlags, setAddFlags] = useState([]);
   const [removeFlags, setRemoveFlags] = useState([]);
 
-  // TODO: move these somewhere else ?
-  if (loading) return <LoadingPage text="Loading Scene..." />;
-  if (authError) return <></>;
+
+  const handleError = (error) => {
+    if (!error) return;
+    if (error.status === 409) {
+      history.push(`/play/${scenarioId}/desync`);
+    } else {
+      history.push(`/play/${scenarioId}/error`);
+    }
+  };
 
   useEffect(() => {
     const onSceneChange = async () => {
       if (sceneId && !previous) return;
-      const res = await navigate(user, scenarioId, previous, sceneId).catch(
-        (e) => setError(e?.response)
-      );
-      if (!sceneId) history.replace(`/play/${scenarioId}/singleplayer/${res}`);
+      if (sceneCache.get(sceneId)?.error) handleError(sceneCache.get(sceneId));
+      try {
+        const newSceneId = await navigate(user, scenarioId, previous, sceneId);
+        if (!sceneId)
+          history.replace(`/play/${scenarioId}/singleplayer/${newSceneId}`);
+      } catch (e) {
+        handleError(e?.response?.data);
+      }
     };
     onSceneChange();
   }, [sceneId]);
 
-  if (error) {
-    if (error.status === 409) {
-      history.push(`/play/${scenarioId}/desync`);
-    }
-    // TODO: create a generic error page and redirect to it
-    return <></>;
-  }
-
-  const currScene = sceneCache.get(sceneId);
-  if (!currScene) return <LoadingPage text="Loading Scene..." />;
-
   const reset = async () => {
-    await usePost(
+    const res = await usePost(
       `api/navigate/user/reset/${scenarioId}`,
       { currentScene: sceneId },
       user.getIdToken.bind(user)
     );
+    if (res.status) {
+      handleError(res);
+      return;
+    }
 
     console.log("reset");
     setPrevious(null);
     history.replace(`/play/${scenarioId}/singleplayer`);
   };
+
+  if (loading) return <LoadingPage text="Loading Scene..." />;
+  if (authError) return <></>;
+
+  const currScene = sceneCache.get(sceneId);
+  if (!currScene) return <LoadingPage text="Loading Scene..." />;
 
   const incrementor = (id) => {
     if (!sceneCache.has(id)) return;

@@ -1,3 +1,5 @@
+import ResetConfirmationModal from "components/ResetConfirmationModal";
+import { useState } from "react";
 import CountdownTimer from "../../../components/TimerComponent";
 import componentResolver from "./componentResolver";
 
@@ -14,6 +16,20 @@ export default function PlayScenarioCanvas({
   setAddFlags,
   setRemoveFlags,
 }) {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const handleResetClick = () => {
+    setIsModalOpen(true);
+  };
+
+  const handleConfirmReset = () => {
+    setIsModalOpen(false);
+    reset();
+  };
+
+  const handleCancelReset = () => {
+    setIsModalOpen(false);
+  };
   return (
     <>
       {scene.components?.map((component, index) => {
@@ -21,7 +37,7 @@ export default function PlayScenarioCanvas({
           component.nextScene && incrementor(component.nextScene);
         switch (component.type) {
           case "RESET_BUTTON":
-            action = reset;
+            action = handleResetClick;
             break;
           case "BUTTON":
             setAddFlags(component.flagAdditions);
@@ -41,6 +57,11 @@ export default function PlayScenarioCanvas({
           sceneTime={scene.time}
         />
       )}
+      <ResetConfirmationModal
+        isOpen={isModalOpen}
+        onConfirm={handleConfirmReset}
+        onClose={handleCancelReset}
+      />
     </>
   );
 }

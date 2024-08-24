@@ -5,7 +5,7 @@ import { usePost } from "hooks/crudHooks";
 import axios from "axios";
 import LoadingPage from "../LoadingPage";
 import NotesDisplayCard from "../../../components/NotesDisplayCard";
-import ResourcesDisplayCard from "../../../components/ResourcesDisplayCard";
+import ResourcesModal from "../../../components/ResourcesModal";
 import PlayPageSideButton from "../../../components/PlayPageSideButton";
 // import ScenarioPreloader from "./Components/ScenarioPreloader";
 import PlayScenarioCanvas from "./PlayScenarioCanvas";
@@ -51,61 +51,65 @@ export default function PlayScenarioPageMulti({ group }) {
   const [resourcesOpen, setResourcesOpen] = useState(false);
   const [noteOpen, setNoteOpen] = useState(false);
   const [previous, setPrevious] = useState(null);
-  const [error, setError] = useState(null);
-
   const [addFlags, setAddFlags] = useState([]);
   const [removeFlags, setRemoveFlags] = useState([]);
 
-  // TODO: move these somewhere else ?
-  if (loading) return <LoadingPage text="Loading Scene..." />;
-  if (authError) return <></>;
+
+  const handleError = (error) => {
+    if (!error) return;
+    if (error.status === 409) {
+      history.push(`/play/${scenarioId}/desync`);
+    } else if (error.status === 403) {
+      const roles = JSON.stringify(error.meta.roles_with_access);
+      history.push(`/play/${scenarioId}/invalid-role?roles=${roles}`);
+    } else {
+      history.push(`/play/${scenarioId}/error`);
+    }
+  };
 
   useEffect(() => {
     const onSceneChange = async () => {
       if (sceneId && !previous) return;
-      const res = await navigate(
-        user,
-        group._id,
-        previous,
-        sceneId,
-        addFlags,
-        removeFlags
-      ).catch((e) => setError(e?.response));
-      if (!sceneId) history.replace(`/play/${scenarioId}/multiplayer/${res}`);
+      if (sceneCache.get(sceneId)?.error) handleError(sceneCache.get(sceneId));
+      try {
+        const newSceneId = await navigate(
+          user,
+          group._id,
+          previous,
+          sceneId,
+          addFlags,
+          removeFlags
+        ).catch((e) => setError(e?.response));
+        if (!sceneId)
+          history.replace(`/play/${scenarioId}/multiplayer/${newSceneId}`);
+      } catch (e) {
+        handleError(e?.response?.data);
+      }
     };
     onSceneChange();
   }, [sceneId]);
 
-  if (error) {
-    if (error.status === 409) {
-      history.push(`/play/${scenarioId}/desync`);
-    } else if (error.status === 403) {
-      const roles = JSON.stringify(error.data.meta.roles_with_access);
-      history.push(`/play/${scenarioId}/invalid-role?roles=${roles}`);
-    }
-    // TODO: create a generic error page and redirect to it
-    return <></>;
-  }
-
-  const currScene = sceneCache.get(sceneId);
-  if (!currScene || !group) return <LoadingPage text="Loading Scene..." />;
-
-  if (currScene.error) {
-    const roles = JSON.stringify(currScene.meta.roles_with_access);
-    history.push(`/play/${scenarioId}/invalid-role?roles=${roles}`);
-  }
-
   const reset = async () => {
-    await usePost(
+    const res = await usePost(
       `api/navigate/group/reset/${group._id}`,
       { currentScene: sceneId },
       user.getIdToken.bind(user)
     );
+    if (res.status) {
+      handleError(res);
+      return;
+    }
 
     console.log("reset");
     setPrevious(null);
     history.replace(`/play/${scenarioId}/multiplayer`);
   };
+
+  if (loading) return <LoadingPage text="Loading Scene..." />;
+  if (authError) return <></>;
+
+  const currScene = sceneCache.get(sceneId);
+  if (!currScene || !group) return <LoadingPage text="Loading Scene..." />;
 
   const incrementor = (id) => {
     if (!sceneCache.has(id)) return;
@@ -148,7 +152,7 @@ export default function PlayScenarioPageMulti({ group }) {
         />
       )}
       {resourcesOpen && (
-        <ResourcesDisplayCard
+        <ResourcesModal
           group={group}
           user={user}
           handleClose={() => setResourcesOpen(false)}
