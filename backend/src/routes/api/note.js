@@ -21,7 +21,7 @@ router.post("/retrieveList", async (req, res) => {
 });
 
 // Retrieve a note
-router.post("/retrieve", async (req, res) => {
+router.get("/retrieve", async (req, res) => {
   const { noteId } = req.body;
   const note = await retrieveNote(noteId);
   res.status(HTTP_OK).json(note);
@@ -35,7 +35,7 @@ router.post("/", async (req, res) => {
 });
 
 // Update a note
-router.post("/update", async (req, res) => {
+router.put("/update", async (req, res) => {
   const { noteId, text, title, groupId, email } = req.body;
   const date = new Date();
   await updateNote(noteId, { text, title, date }, groupId, email);
@@ -43,7 +43,7 @@ router.post("/update", async (req, res) => {
 });
 
 // Delete a note
-router.post("/delete", async (req, res) => {
+router.delete("/delete", async (req, res) => {
   const { noteId, groupId, email } = req.body;
   await deleteNote(noteId, groupId, email);
   res.status(HTTP_OK).json("note deleted");
