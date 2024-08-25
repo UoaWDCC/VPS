@@ -14,15 +14,15 @@ const HTTP_OK = 200;
 router.use(auth);
 
 // Retrieve note list
-router.post("/retrieveList", async (req, res) => {
-  const { groupId } = req.body;
+router.get("/retrieveList/:groupId", async (req, res) => {
+  const { groupId } = req.params;
   const notes = retrieveNoteList(groupId);
   res.status(HTTP_OK).json(notes);
 });
 
 // Retrieve a note
-router.get("/retrieve", async (req, res) => {
-  const { noteId } = req.body;
+router.get("/retrieve/:noteId", async (req, res) => {
+  const { noteId } = req.params;
   const note = await retrieveNote(noteId);
   res.status(HTTP_OK).json(note);
 });

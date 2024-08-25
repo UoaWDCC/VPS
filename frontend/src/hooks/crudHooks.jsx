@@ -59,7 +59,7 @@ async function fetch(
       request = axios.post(url, requestBody, config);
     }
     let res = await request;
-
+    console.log(res);
     // if the response is 401, refresh the token and try again
     if (res.status === 401) {
       token = await refreshToken();
@@ -132,7 +132,7 @@ export function useAuthGet(url, callBack) {
     error: authError,
   } = useContext(AuthenticationContext);
 
-  const getRequest = async () => {
+  const getRequest = async (requestBody) => {
     const token = await getToken(user, authLoading, authError);
     if (token) {
       await fetch(
@@ -141,7 +141,7 @@ export function useAuthGet(url, callBack) {
         setError,
         setLoading,
         url,
-        null,
+        requestBody,
         callBack,
         false
       );

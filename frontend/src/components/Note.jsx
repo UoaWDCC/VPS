@@ -1,5 +1,5 @@
 import { useState, useEffect, useContext } from "react";
-import { useAuthPost } from "hooks/crudHooks";
+import { useAuthPost, useAuthGet } from "hooks/crudHooks";
 import AuthenticationContext from "context/AuthenticationContext";
 import styles from "../styling/Note.module.scss";
 
@@ -22,7 +22,7 @@ export default function Note({ role, id, group, refetchGroup }) {
     loading: noteLoading,
     error: noteError,
     postRequest: retrieveNoteRequest,
-  } = useAuthPost("/api/note/retrieve");
+  } = useAuthGet(`/api/note/retrieve/${id}`);
 
   const {
     response: updateResult,
@@ -60,9 +60,7 @@ export default function Note({ role, id, group, refetchGroup }) {
   };
 
   async function fetchNote() {
-    await retrieveNoteRequest({
-      noteId: id,
-    });
+    await retrieveNoteRequest;
     getRole();
   }
 
