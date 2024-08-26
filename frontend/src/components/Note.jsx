@@ -1,5 +1,5 @@
 import { useState, useEffect, useContext } from "react";
-import { useAuthPost, useAuthGet, useAuthDelete } from "hooks/crudHooks";
+import { useAuthGet, useAuthDelete, useAuthPut } from "hooks/crudHooks";
 import AuthenticationContext from "context/AuthenticationContext";
 import styles from "../styling/Note.module.scss";
 
@@ -28,8 +28,8 @@ export default function Note({ role, noteId, group, refetchGroup }) {
     response: updateResult,
     loading: updateLoading,
     error: updateError,
-    postRequest: updateNoteRequest,
-  } = useAuthPost("/api/note/update");
+    putRequest: updateNoteRequest,
+  } = useAuthPut("/api/note/update");
 
   const {
     response: deleteResult,

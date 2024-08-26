@@ -80,6 +80,49 @@ async function deleteRecord(
   }
 }
 
+async function put(
+  token,
+  setResponse,
+  setError,
+  setLoading,
+  url,
+  requestBody,
+  callBack
+) {
+  setError(null);
+  setLoading(true);
+  try {
+    let config = {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    };
+    let res = await axios.put(url, requestBody, config);
+    if (res.status === 401) {
+      token = await refreshToken();
+      if (token) {
+        config = {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        };
+        res = await axios.put(url, requestBody, config);
+      }
+    }
+    setResponse(res.data);
+    if (callBack) {
+      callBack(res.data);
+    }
+  } catch (e) {
+    setError(e.response);
+    if (callBack) {
+      callBack(null, e.response);
+    }
+  } finally {
+    setLoading(false);
+  }
+}
+
 async function fetch(
   token,
   setResponse,
@@ -221,6 +264,33 @@ export function useAuthDelete(url, callBack) {
     }
   };
   return { response, loading, error, deleteRequest };
+}
+
+export function useAuthPut(url, callBack) {
+  const [error, setError] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [response, setResponse] = useState(null);
+  const {
+    user,
+    loading: authLoading,
+    error: authError,
+  } = useContext(AuthenticationContext);
+
+  const putRequest = async (requestBody) => {
+    const token = await getToken(user, authLoading, authError);
+    if (token) {
+      await put(
+        token,
+        setResponse,
+        setError,
+        setLoading,
+        url,
+        requestBody,
+        callBack
+      );
+    }
+  };
+  return { response, loading, error, putRequest };
 }
 
 /**
