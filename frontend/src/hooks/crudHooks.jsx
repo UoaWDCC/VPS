@@ -48,7 +48,6 @@ async function deleteRecord(
   setError(null);
   setLoading(true);
   try {
-    console.log(token);
     let config = {
       headers: {
         Authorization: `Bearer ${token}`,

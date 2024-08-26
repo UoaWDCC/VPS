@@ -105,8 +105,8 @@ router.get("/:scenarioId/roleList", async (req, res) => {
 });
 
 // get a group by its id
-router.post("/", async (req, res) => {
-  const { groupId } = req.body;
+router.get("/retrieve/:groupId", async (req, res) => {
+  const { groupId } = req.params;
   const group = await getGroup(groupId);
   if (!group) {
     return res.status(HTTP_NOT_FOUND).json({ error: "Group not found" });
