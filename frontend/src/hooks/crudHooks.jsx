@@ -36,6 +36,24 @@ async function refreshToken(user) {
   return false;
 }
 
+async function deleteRecord(token, url, setResponse, setError, setLoading) {
+  setError(null);
+  setLoading(true);
+  try {
+    const config = {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    };
+    const res = await axios.delete(url, config);
+    setResponse(res.data);
+  } catch (e) {
+    setError(e.response);
+  } finally {
+    setLoading(false);
+  }
+}
+
 async function fetch(
   token,
   setResponse,
@@ -59,7 +77,6 @@ async function fetch(
       request = axios.post(url, requestBody, config);
     }
     let res = await request;
-    console.log(res);
     // if the response is 401, refresh the token and try again
     if (res.status === 401) {
       token = await refreshToken();

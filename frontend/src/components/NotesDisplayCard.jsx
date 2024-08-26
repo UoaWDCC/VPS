@@ -101,7 +101,7 @@ export default function NotesDisplayCard({ group, user, handleClose }) {
               <Note
                 key={note.id}
                 role={note.role}
-                id={note.id}
+                noteId={note.id}
                 group={group}
                 user={user}
                 refetchGroup={fetchNotesData}

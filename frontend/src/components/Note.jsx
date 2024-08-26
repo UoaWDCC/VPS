@@ -3,7 +3,7 @@ import { useAuthPost, useAuthGet } from "hooks/crudHooks";
 import AuthenticationContext from "context/AuthenticationContext";
 import styles from "../styling/Note.module.scss";
 
-export default function Note({ role, id, group, refetchGroup }) {
+export default function Note({ role, noteId, group, refetchGroup }) {
   const { user } = useContext(AuthenticationContext);
   const [noteContent, setContent] = useState();
   const [title, setTitle] = useState();
@@ -21,8 +21,8 @@ export default function Note({ role, id, group, refetchGroup }) {
     response: noteData,
     loading: noteLoading,
     error: noteError,
-    postRequest: retrieveNoteRequest,
-  } = useAuthGet(`/api/note/retrieve/${id}`);
+    getRequest: retrieveNoteRequest,
+  } = useAuthGet(`/api/note/retrieve/${noteId}`);
 
   const {
     response: updateResult,
@@ -60,7 +60,8 @@ export default function Note({ role, id, group, refetchGroup }) {
   };
 
   async function fetchNote() {
-    await retrieveNoteRequest;
+    console.log("fetching note");
+    await retrieveNoteRequest();
     getRole();
   }
 
@@ -89,7 +90,7 @@ export default function Note({ role, id, group, refetchGroup }) {
   const saveNote = async () => {
     try {
       await updateNoteRequest({
-        noteId: id,
+        noteId,
         text: noteContent,
         title,
         groupId: group._id,
@@ -124,7 +125,7 @@ export default function Note({ role, id, group, refetchGroup }) {
     setShowConfirm(false);
     try {
       await deleteNoteRequest({
-        noteId: id,
+        noteId,
         groupId: group._id,
         email: user.email,
       });
