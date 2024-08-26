@@ -1,5 +1,5 @@
 import { useState, useEffect, useContext } from "react";
-import { useAuthPost, useAuthGet } from "hooks/crudHooks";
+import { useAuthPost, useAuthGet, useAuthDelete } from "hooks/crudHooks";
 import AuthenticationContext from "context/AuthenticationContext";
 import styles from "../styling/Note.module.scss";
 
@@ -35,8 +35,8 @@ export default function Note({ role, noteId, group, refetchGroup }) {
     response: deleteResult,
     loading: deleteLoading,
     error: deleteError,
-    postRequest: deleteNoteRequest,
-  } = useAuthPost("/api/note/delete");
+    deleteRequest: deleteNoteRequest,
+  } = useAuthDelete(`/api/note/delete`);
 
   const getRole = () => {
     group.users.forEach((userToCheck) => {
@@ -130,7 +130,6 @@ export default function Note({ role, noteId, group, refetchGroup }) {
         email: user.email,
       });
       refetchGroup();
-      console.log("note deleted");
       handleClose();
     } catch (e) {
       console.log(e);

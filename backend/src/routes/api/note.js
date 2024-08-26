@@ -45,6 +45,7 @@ router.put("/update", async (req, res) => {
 // Delete a note
 router.delete("/delete", async (req, res) => {
   const { noteId, groupId, email } = req.body;
+  console.log(noteId, groupId, email);
   await deleteNote(noteId, groupId, email);
   res.status(HTTP_OK).json("note deleted");
 });

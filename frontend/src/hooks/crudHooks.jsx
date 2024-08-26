@@ -38,21 +38,34 @@ async function refreshToken(user) {
 
 async function deleteRecord(
   token,
-  url,
   setResponse,
   setError,
   setLoading,
-  callBack
+  url,
+  callBack,
+  requestBody
 ) {
   setError(null);
   setLoading(true);
   try {
-    const config = {
+    console.log(token);
+    let config = {
       headers: {
         Authorization: `Bearer ${token}`,
       },
     };
-    const res = await axios.delete(url, config);
+    let res = await axios.delete(url, requestBody, config);
+    if (res.status === 401) {
+      token = await refreshToken();
+      if (token) {
+        config = {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        };
+        res = await axios.delete(url, requestBody, config);
+      }
+    }
     setResponse(res.data);
     if (callBack) {
       callBack(res.data);
@@ -193,16 +206,17 @@ export function useAuthDelete(url, callBack) {
     error: authError,
   } = useContext(AuthenticationContext);
 
-  const deleteRequest = async () => {
+  const deleteRequest = async (requestBody) => {
     const token = await getToken(user, authLoading, authError);
     if (token) {
       await deleteRecord(
         token,
-        url,
         setResponse,
         setError,
         setLoading,
-        callBack
+        url,
+        callBack,
+        requestBody
       );
     }
   };
