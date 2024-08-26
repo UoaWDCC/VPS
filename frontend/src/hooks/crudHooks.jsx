@@ -36,7 +36,14 @@ async function refreshToken(user) {
   return false;
 }
 
-async function deleteRecord(token, url, setResponse, setError, setLoading) {
+async function deleteRecord(
+  token,
+  url,
+  setResponse,
+  setError,
+  setLoading,
+  callBack
+) {
   setError(null);
   setLoading(true);
   try {
@@ -47,8 +54,14 @@ async function deleteRecord(token, url, setResponse, setError, setLoading) {
     };
     const res = await axios.delete(url, config);
     setResponse(res.data);
+    if (callBack) {
+      callBack(res.data);
+    }
   } catch (e) {
     setError(e.response);
+    if (callBack) {
+      callBack(null, e.response);
+    }
   } finally {
     setLoading(false);
   }
@@ -165,6 +178,35 @@ export function useAuthGet(url, callBack) {
     }
   };
   return { response, loading, error, getRequest };
+}
+
+/**
+ * A custom hook which deletes data with the given URL. With built in authentication
+ * */
+export function useAuthDelete(url, callBack) {
+  const [error, setError] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [response, setResponse] = useState(null);
+  const {
+    user,
+    loading: authLoading,
+    error: authError,
+  } = useContext(AuthenticationContext);
+
+  const deleteRequest = async () => {
+    const token = await getToken(user, authLoading, authError);
+    if (token) {
+      await deleteRecord(
+        token,
+        url,
+        setResponse,
+        setError,
+        setLoading,
+        callBack
+      );
+    }
+  };
+  return { response, loading, error, deleteRequest };
 }
 
 /**
