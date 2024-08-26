@@ -1,7 +1,7 @@
 import { Button } from "@mui/material";
 import { useContext, useState } from "react";
 import { useLocation } from "react-router-dom";
-import TryAccessScenarioButton from "../../components/TryAccessScenarioButton";
+import TryAccessScenarioButton from "../../../components/TryAccessScenarioButton";
 import NotesDisplayCard from "../../components/NotesDisplayCard";
 import AuthenticationContext from "../../context/AuthenticationContext";
 
