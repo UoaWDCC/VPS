@@ -9,7 +9,13 @@ import componentResolver from "./componentResolver";
  * @component
  */
 
-export default function PlayScenarioCanvas({ scene, incrementor, reset }) {
+export default function PlayScenarioCanvas({
+  scene,
+  incrementor,
+  reset,
+  setAddFlags,
+  setRemoveFlags,
+}) {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const handleResetClick = () => {
@@ -24,13 +30,47 @@ export default function PlayScenarioCanvas({ scene, incrementor, reset }) {
   const handleCancelReset = () => {
     setIsModalOpen(false);
   };
+
+  const setFlags = (component) => {
+    if (component.flagAdditions) {
+      const newFlags = Object.keys(component.flagAdditions).filter(
+        (key) => component.flagAdditions[key] === true
+      );
+      setAddFlags(newFlags);
+    } else {
+      setAddFlags([]);
+    }
+
+    if (component.flagDeletions) {
+      const removalFlags = Object.keys(component.flagDeletions).filter(
+        (key) => component.flagDeletions[key] === true
+      );
+      setRemoveFlags(removalFlags);
+    } else {
+      setRemoveFlags([]);
+    }
+  };
+
   return (
     <>
       {scene.components?.map((component, index) => {
-        const action =
-          component.type === "RESET_BUTTON"
-            ? handleResetClick
-            : () => component.nextScene && incrementor(component.nextScene);
+        let action = () =>
+          component.nextScene && incrementor(component.nextScene);
+        switch (component.type) {
+          case "RESET_BUTTON":
+            action = handleResetClick;
+            break;
+          case "BUTTON":
+            action = () => {
+              if (component.nextScene) {
+                incrementor(component.nextScene);
+                setFlags(component);
+              }
+            };
+            break;
+          default:
+            break;
+        }
 
         return componentResolver(component, index, action);
       })}

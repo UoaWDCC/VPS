@@ -83,8 +83,46 @@ const addSceneToPath = async (groupId, currentSceneId, sceneId) => {
   return STATUS.OK;
 };
 
+// Adds flags to group on scene change
+const addFlagsToGroup = async (groupId, newFlags) => {
+  try {
+    const group = await Group.findOneAndUpdate(
+      { _id: groupId },
+      { $addToSet: { currentFlags: { $each: newFlags } } },
+      { new: true }
+    );
+
+    if (!group) {
+      throw new Error("Group not found");
+    }
+
+    return STATUS.OK;
+  } catch (error) {
+    throw new Error("Error updating group flags:", error);
+  }
+};
+
+// Remove flags to group on scene change
+const removeFlagsFromGroup = async (groupId, flags) => {
+  try {
+    const group = await Group.findOneAndUpdate(
+      { _id: groupId },
+      { $pull: { currentFlags: { $in: flags } } },
+      { new: true }
+    );
+
+    if (!group) {
+      throw new Error("Group not found");
+    }
+
+    return STATUS.OK;
+  } catch (error) {
+    throw new Error("Error updating group flags:", error);
+  }
+};
+
 export const groupNavigate = async (req) => {
-  const { uid, currentScene, nextScene } = req.body;
+  const { uid, currentScene, nextScene, addFlags, removeFlags } = req.body;
 
   const group = await getGroupByIdAndUser(req.params.groupId, uid);
   const { role } = group.users[0];
@@ -92,8 +130,10 @@ export const groupNavigate = async (req) => {
   // the first time any user in the group is navigating
   if (!group.path.length) {
     const firstSceneId = await getScenarioFirstScene(group.scenarioId);
-    const [, scenes] = await Promise.all([
+    const [, , , scenes] = await Promise.all([
       addSceneToPath(group._id, null, firstSceneId),
+      addFlagsToGroup(group._id, addFlags),
+      removeFlagsFromGroup(group._id, removeFlags),
       getConnectedScenes(firstSceneId, role),
     ]);
     return { status: STATUS.OK, json: scenes };
@@ -117,8 +157,10 @@ export const groupNavigate = async (req) => {
   if (!connectedIds.includes(nextScene))
     throw new HttpError("Invalid scene transition", STATUS.FORBIDDEN);
 
-  const [, scenes] = await Promise.all([
+  const [, , , scenes] = await Promise.all([
     addSceneToPath(group._id, currentScene, nextScene),
+    addFlagsToGroup(group._id, addFlags),
+    removeFlagsFromGroup(group._id, removeFlags),
     getConnectedScenes(nextScene, role, false),
   ]);
 
