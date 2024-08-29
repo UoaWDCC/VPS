@@ -2,7 +2,7 @@ import Scene from "../../../db/models/scene";
 import User from "../../../db/models/user";
 import Group from "../../../db/models/group";
 import Scenario from "../../../db/models/scenario";
-
+import Note from "../../../db/models/note";
 import HttpError from "../../../error/HttpError";
 import STATUS from "../../../error/status";
 
@@ -19,6 +19,26 @@ export const getSimpleScene = async (sceneId) => {
   if (!scene)
     throw new HttpError("No scene exists with that id", STATUS.NOT_FOUND);
   return scene;
+};
+
+const deleteAllNotes = async (groupData) => {
+  const groupId = groupData._id;
+  const group = await Group.findById(groupId, { notes: 1 }).lean();
+  if (!group) {
+    throw new HttpError("Group not found", STATUS.NOT_FOUND);
+  }
+  const noteList = Object.entries(group.notes).flatMap(([role, ids]) =>
+    ids.map((id) => ({ role, id }))
+  );
+  const noteId = noteList.map(({ id }) => id);
+  await Note.deleteMany({ _id: { $in: noteId } });
+  const res = await Group.updateOne(
+    { _id: groupId },
+    { $set: { notes: {} } }
+  ).exec();
+  if (res.nModified !== 1) {
+    throw new HttpError("Failed to delete notes", STATUS.INTERNAL_SERVER_ERROR);
+  }
 };
 
 export const getScenarioFirstScene = async (scenarioId) => {
@@ -169,9 +189,12 @@ export const groupNavigate = async (req) => {
 
 export const groupReset = async (req) => {
   const { uid, currentScene } = req.body;
-
   const group = await getGroupByIdAndUser(req.params.groupId, uid);
   const { role } = group.users[0];
+
+  if (!(await deleteAllNotes(group))) {
+    throw new HttpError("Failed to delete notes", STATUS.INTERNAL_SERVER_ERROR);
+  }
 
   if (group.path[0] !== currentScene)
     throw new HttpError("Scene mismatch has occured", STATUS.CONFLICT);
