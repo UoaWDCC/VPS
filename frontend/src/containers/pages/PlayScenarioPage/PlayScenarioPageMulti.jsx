@@ -37,6 +37,25 @@ const navigate = async (
   return res.data.active;
 };
 
+// returns resources in the scene
+const getResources = async (
+  user,
+  groupId
+) => {
+  const token = await user.getIdToken();
+  const config = {
+    method: "get",
+    url: `/api/resources/${groupId}`,
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    }
+  };
+  const res = await axios.request(config);
+  console.log(res);
+  return res.data.active;
+};
+
 /**
  * This page allows users to play a multiplayer scenario.
  *
@@ -53,6 +72,7 @@ export default function PlayScenarioPageMulti({ group }) {
   const [previous, setPrevious] = useState(null);
   const [addFlags, setAddFlags] = useState([]);
   const [removeFlags, setRemoveFlags] = useState([]);
+  const [resources, setResources] = useState([]);
 
   const handleError = (error) => {
     if (!error) return;
@@ -79,6 +99,11 @@ export default function PlayScenarioPageMulti({ group }) {
           addFlags,
           removeFlags
         );
+        const newResources = await getResources( 
+          user,
+          group._id
+        );
+        setResources(newResources);
         if (!sceneId)
           history.replace(`/play/${scenarioId}/multiplayer/${newSceneId}`);
       } catch (e) {
