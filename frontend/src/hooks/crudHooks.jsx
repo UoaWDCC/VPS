@@ -48,6 +48,40 @@ async function refreshToken(user) {
   return false;
 }
 
+async function sendRequest(
+  token,
+  setResponse,
+  setError,
+  setLoading,
+  url,
+  requestBody,
+  callBack,
+  method
+) {
+  setError(null);
+  setLoading(true);
+  try {
+    let res = await axios[method](url, getConfig(token, requestBody));
+    if (res.status === 401) {
+      token = await refreshToken();
+      if (token) {
+        res = await axios[method](url, getConfig(token, requestBody));
+      }
+    }
+    setResponse(res.data);
+    if (callBack) {
+      callBack(res.data);
+    }
+  } catch (e) {
+    setError(e.response);
+    if (callBack) {
+      callBack(null, e.response);
+    }
+  } finally {
+    setLoading(false);
+  }
+}
+
 async function deleteRecord(
   token,
   setResponse,
@@ -202,7 +236,7 @@ export function useAuthGet(url, callBack) {
   const getRequest = async (requestBody) => {
     const token = await getToken(user, authLoading, authError);
     if (token) {
-      await fetchRecord(
+      await sendRequest(
         token,
         setResponse,
         setError,
@@ -210,7 +244,7 @@ export function useAuthGet(url, callBack) {
         url,
         requestBody,
         callBack,
-        false
+        "get"
       );
     }
   };
