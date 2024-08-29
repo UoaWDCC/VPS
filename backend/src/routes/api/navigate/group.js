@@ -100,6 +100,8 @@ const addFlagsToGroup = async (groupId, newFlags) => {
   } catch (error) {
     throw new Error("Error updating group flags:", error);
   }
+
+  
 };
 
 // Remove flags to group on scene change
