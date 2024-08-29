@@ -101,7 +101,7 @@ const addFlagsToGroup = async (groupId, newFlags) => {
     throw new Error("Error updating group flags:", error);
   }
 
-  
+
 };
 
 // Remove flags to group on scene change
@@ -182,7 +182,11 @@ export const groupReset = async (req) => {
   const hasReset = scene.components.some((c) => c.type === "RESET_BUTTON");
   if (!hasReset) throw new HttpError("Invalid reset", STATUS.FORBIDDEN);
 
-  await Group.findOneAndUpdate({ _id: group._id }, { $set: { path: [] } });
+  await Group.findOneAndUpdate(
+    { _id: group._id },
+    { $set: { path: [], currentFlags: [] } },
+    { new: true }
+  );
 
   return { status: STATUS.OK };
 };
