@@ -17,6 +17,14 @@ function isRealError(error) {
   );
 }
 
+function getConfig(token) {
+  return {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  };
+}
+
 async function getToken(user, authLoading, authError) {
   // return false if loading or error or no user
   if (user && !(authLoading || authError)) {
@@ -42,27 +50,17 @@ async function deleteRecord(
   setError,
   setLoading,
   url,
-  callBack,
-  requestBody
+  requestBody,
+  callBack
 ) {
   setError(null);
   setLoading(true);
   try {
-    let config = {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    };
-    let res = await axios.delete(url, requestBody, config);
+    let res = await axios.delete(url, requestBody, getConfig(token));
     if (res.status === 401) {
       token = await refreshToken();
       if (token) {
-        config = {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        };
-        res = await axios.delete(url, requestBody, config);
+        res = await axios.delete(url, requestBody, getConfig(token));
       }
     }
     setResponse(res.data);
@@ -79,7 +77,7 @@ async function deleteRecord(
   }
 }
 
-async function put(
+async function putRecord(
   token,
   setResponse,
   setError,
@@ -91,21 +89,11 @@ async function put(
   setError(null);
   setLoading(true);
   try {
-    let config = {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    };
-    let res = await axios.put(url, requestBody, config);
+    let res = await axios.put(url, requestBody, getConfig(token));
     if (res.status === 401) {
       token = await refreshToken();
       if (token) {
-        config = {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        };
-        res = await axios.put(url, requestBody, config);
+        res = await axios.put(url, requestBody, getConfig(token));
       }
     }
     setResponse(res.data);
@@ -122,7 +110,7 @@ async function put(
   }
 }
 
-async function fetch(
+async function fetchRecord(
   token,
   setResponse,
   setError,
@@ -135,28 +123,18 @@ async function fetch(
   setError(null);
   setLoading(true);
   try {
-    let config = {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    };
-    let request = axios.get(url, config);
+    let request = axios.get(url, getConfig(token));
     if (isPost) {
-      request = axios.post(url, requestBody, config);
+      request = axios.post(url, requestBody, getConfig(token));
     }
     let res = await request;
     // if the response is 401, refresh the token and try again
     if (res.status === 401) {
       token = await refreshToken();
       if (token) {
-        config = {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        };
-        request = axios.get(url, config);
+        request = axios.get(url, getConfig(token));
         if (isPost) {
-          request = axios.post(url, requestBody, config);
+          request = axios.post(url, requestBody, getConfig(token));
         }
         res = await request;
       }
@@ -192,7 +170,7 @@ export function useAuthPost(url, callBack) {
   const postRequest = async (requestBody) => {
     const token = await getToken(user, authLoading, authError);
     if (token) {
-      await fetch(
+      await fetchRecord(
         token,
         setResponse,
         setError,
@@ -220,7 +198,7 @@ export function useAuthGet(url, callBack) {
   const getRequest = async (requestBody) => {
     const token = await getToken(user, authLoading, authError);
     if (token) {
-      await fetch(
+      await fetchRecord(
         token,
         setResponse,
         setError,
@@ -257,8 +235,8 @@ export function useAuthDelete(url, callBack) {
         setError,
         setLoading,
         url,
-        callBack,
-        requestBody
+        requestBody,
+        callBack
       );
     }
   };
@@ -278,7 +256,7 @@ export function useAuthPut(url, callBack) {
   const putRequest = async (requestBody) => {
     const token = await getToken(user, authLoading, authError);
     if (token) {
-      await put(
+      await putRecord(
         token,
         setResponse,
         setError,
