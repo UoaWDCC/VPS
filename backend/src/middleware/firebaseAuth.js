@@ -18,11 +18,9 @@ const HTTP_UNAUTHORISED = 401;
  */
 export default async function auth(req, res, next) {
   if (!req.headers.authorization) {
-    console.log("no auth header");
     res.sendStatus(HTTP_UNAUTHORISED);
   } else {
     const idToken = req.headers.authorization.split(" ")[1];
-    console.log("Token is in the header");
     admin
       .auth()
       .verifyIdToken(idToken)

@@ -17,12 +17,16 @@ function isRealError(error) {
   );
 }
 
-function getConfig(token) {
-  return {
+function getConfig(token, data) {
+  const config = {
     headers: {
       Authorization: `Bearer ${token}`,
     },
   };
+  if (data) {
+    config.data = data;
+  }
+  return config;
 }
 
 async function getToken(user, authLoading, authError) {
@@ -56,11 +60,11 @@ async function deleteRecord(
   setError(null);
   setLoading(true);
   try {
-    let res = await axios.delete(url, requestBody, getConfig(token));
+    let res = await axios.delete(url, getConfig(token, requestBody));
     if (res.status === 401) {
       token = await refreshToken();
       if (token) {
-        res = await axios.delete(url, requestBody, getConfig(token));
+        res = await axios.delete(url, getConfig(token, requestBody));
       }
     }
     setResponse(res.data);
