@@ -61,120 +61,20 @@ async function sendRequest(
   setError(null);
   setLoading(true);
   try {
-    let res = await axios[method](url, getConfig(token, requestBody));
+    let res;
+    if (method === "get" || method === "delete") {
+      res = await axios[method](url, getConfig(token, requestBody));
+    } else {
+      res = await axios[method](url, requestBody, getConfig(token));
+    }
     if (res.status === 401) {
       token = await refreshToken();
       if (token) {
-        res = await axios[method](url, getConfig(token, requestBody));
-      }
-    }
-    setResponse(res.data);
-    if (callBack) {
-      callBack(res.data);
-    }
-  } catch (e) {
-    setError(e.response);
-    if (callBack) {
-      callBack(null, e.response);
-    }
-  } finally {
-    setLoading(false);
-  }
-}
-
-async function deleteRecord(
-  token,
-  setResponse,
-  setError,
-  setLoading,
-  url,
-  requestBody,
-  callBack
-) {
-  setError(null);
-  setLoading(true);
-  try {
-    let res = await axios.delete(url, getConfig(token, requestBody));
-    if (res.status === 401) {
-      token = await refreshToken();
-      if (token) {
-        res = await axios.delete(url, getConfig(token, requestBody));
-      }
-    }
-    setResponse(res.data);
-    if (callBack) {
-      callBack(res.data);
-    }
-  } catch (e) {
-    setError(e.response);
-    if (callBack) {
-      callBack(null, e.response);
-    }
-  } finally {
-    setLoading(false);
-  }
-}
-
-async function putRecord(
-  token,
-  setResponse,
-  setError,
-  setLoading,
-  url,
-  requestBody,
-  callBack
-) {
-  setError(null);
-  setLoading(true);
-  try {
-    let res = await axios.put(url, requestBody, getConfig(token));
-    if (res.status === 401) {
-      token = await refreshToken();
-      if (token) {
-        res = await axios.put(url, requestBody, getConfig(token));
-      }
-    }
-    setResponse(res.data);
-    if (callBack) {
-      callBack(res.data);
-    }
-  } catch (e) {
-    setError(e.response);
-    if (callBack) {
-      callBack(null, e.response);
-    }
-  } finally {
-    setLoading(false);
-  }
-}
-
-async function fetchRecord(
-  token,
-  setResponse,
-  setError,
-  setLoading,
-  url,
-  requestBody,
-  callBack,
-  isPost
-) {
-  setError(null);
-  setLoading(true);
-  try {
-    let request = axios.get(url, getConfig(token));
-    if (isPost) {
-      request = axios.post(url, requestBody, getConfig(token));
-    }
-    let res = await request;
-    // if the response is 401, refresh the token and try again
-    if (res.status === 401) {
-      token = await refreshToken();
-      if (token) {
-        request = axios.get(url, getConfig(token));
-        if (isPost) {
-          request = axios.post(url, requestBody, getConfig(token));
+        if (method === "get" || method === "delete") {
+          res = await axios[method](url, getConfig(token, requestBody));
+        } else {
+          res = await axios[method](url, requestBody, getConfig(token));
         }
-        res = await request;
       }
     }
     setResponse(res.data);
@@ -182,18 +82,14 @@ async function fetchRecord(
       callBack(res.data);
     }
   } catch (e) {
+    setError(e.response);
     if (callBack) {
       callBack(null, e.response);
     }
-    setError(e.response);
   } finally {
     setLoading(false);
   }
 }
-
-/**
- * A custom hook which fetches data from the given URL. With built in authentication
- */
 
 export function useAuthPost(url, callBack) {
   const [error, setError] = useState(false);
@@ -208,7 +104,7 @@ export function useAuthPost(url, callBack) {
   const postRequest = async (requestBody) => {
     const token = await getToken(user, authLoading, authError);
     if (token) {
-      await fetchRecord(
+      await sendRequest(
         token,
         setResponse,
         setError,
@@ -216,7 +112,7 @@ export function useAuthPost(url, callBack) {
         url,
         requestBody,
         callBack,
-        true
+        "post"
       );
     }
   };
@@ -267,14 +163,15 @@ export function useAuthDelete(url, callBack) {
   const deleteRequest = async (requestBody) => {
     const token = await getToken(user, authLoading, authError);
     if (token) {
-      await deleteRecord(
+      await sendRequest(
         token,
         setResponse,
         setError,
         setLoading,
         url,
         requestBody,
-        callBack
+        callBack,
+        "delete"
       );
     }
   };
@@ -294,14 +191,15 @@ export function useAuthPut(url, callBack) {
   const putRequest = async (requestBody) => {
     const token = await getToken(user, authLoading, authError);
     if (token) {
-      await putRecord(
+      await sendRequest(
         token,
         setResponse,
         setError,
         setLoading,
         url,
         requestBody,
-        callBack
+        callBack,
+        "put"
       );
     }
   };
