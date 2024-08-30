@@ -19,15 +19,14 @@ function ResourcesModal({ handleClose, resources }) {
   );
 
   const ResourceContent = ({ item }) => {
-    const hasTextContent = item.textContent?.length > 0 && item.textContent[0] !== "";
+    const hasTextContent =
+      item.textContent?.length > 0 && item.textContent[0] !== "";
     const hasImageContent = item.imageContent && item.imageContent !== "";
 
     return (
       <div>
         {hasTextContent &&
-          item.textContent.map((textItem) => (
-            <p key={textItem}>{textItem}</p>
-          ))}
+          item.textContent.map((textItem) => <p key={textItem}>{textItem}</p>)}
         {hasImageContent && (
           <img
             className={resourceStyles.resourceImage}

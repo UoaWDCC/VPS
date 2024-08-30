@@ -11,7 +11,7 @@ const createResource = async (type, content, name, requiredFlags) => {
         name,
         textContent: content,
         imageContent: "",
-        requiredFlags: requiredFlags,
+        requiredFlags,
       });
       await dbResource.save();
       break;
@@ -20,7 +20,7 @@ const createResource = async (type, content, name, requiredFlags) => {
         name,
         textContent: "",
         imageContent: content,
-        requiredFlags: requiredFlags,
+        requiredFlags,
       });
       await dbResource.save();
       break;
@@ -76,7 +76,13 @@ const removeFlag = async (groupId, flag) => {
   return group.currentFlags;
 };
 
-const updateResourceById = async (resourceId, name, type, content, requiredFlags) => {
+const updateResourceById = async (
+  resourceId,
+  name,
+  type,
+  content,
+  requiredFlags
+) => {
   const resource = await Resource.findById(resourceId);
 
   resource.name = name;
