@@ -19,19 +19,25 @@ function ResourcesModal({ handleClose, resources }) {
   );
 
   const ResourceContent = ({ item }) => {
-    if (item.textContent) {
-      return <p>{item.textContent}</p>;
-    }
-    if (item.imageContent) {
-      return (
-        <img
-          className={resourceStyles.resourceImage}
-          src={item.imageContent}
-          alt={item.name || "Resource Image"}
-        />
-      );
-    }
-    return <p>No Content Available</p>;
+    const hasTextContent = item.textContent?.length > 0 && item.textContent[0] !== "";
+    const hasImageContent = item.imageContent && item.imageContent !== "";
+
+    return (
+      <div>
+        {hasTextContent &&
+          item.textContent.map((textItem) => (
+            <p key={textItem}>{textItem}</p>
+          ))}
+        {hasImageContent && (
+          <img
+            className={resourceStyles.resourceImage}
+            src={item.imageContent}
+            alt={item.name || "Resource Image"}
+          />
+        )}
+        {!hasTextContent && !hasImageContent && <p>No Content Available</p>}
+      </div>
+    );
   };
 
   return (

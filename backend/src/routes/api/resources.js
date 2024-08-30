@@ -22,14 +22,14 @@ const HTTP_NOT_FOUND = 404;
 const HTTP_INTERNAL_SERVER_ERROR = 500;
 
 // Apply auth middleware to all routes below this point
-router.use(auth);
+// router.use(auth);
 
 /**
  * @route POST /
  * @desc Create a New Resource
  * @param {Object} req.body - The resource details.
- * @param {string} req.body.type - The type of the resource.
- * @param {string} req.body.content - The content of the resource.
+ * @param {string} req.body.type - The type of the resource as text or image
+ * @param {string} req.body.content - The content of the resource. as either a string or an image?
  * @param {string} req.body.name - The name of the resource.
  * @returns {Object} 201 - The newly created resource.
  */
