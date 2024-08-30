@@ -1,4 +1,4 @@
-import { useAuthPost } from "hooks/crudHooks";
+import { useAuthGet, useAuthPost } from "hooks/crudHooks";
 import { useEffect, useState } from "react";
 
 import styles from "../styling/NotesDisplayCard.module.scss";
@@ -11,8 +11,8 @@ export default function NotesDisplayCard({ group, user, handleClose }) {
     response: groupData,
     loading: groupLoading,
     error: groupError,
-    postRequest: retrieveGroupRequest,
-  } = useAuthPost("/api/group/");
+    getRequest: retrieveGroupRequest,
+  } = useAuthGet(`/api/group/retrieve/${group._id}`);
 
   const {
     response: createResponse,
@@ -37,9 +37,7 @@ export default function NotesDisplayCard({ group, user, handleClose }) {
 
   // refetch group data to get updated notes
   async function fetchNotesData() {
-    await retrieveGroupRequest({
-      groupId: group._id,
-    });
+    await retrieveGroupRequest();
   }
 
   useEffect(() => {
@@ -101,7 +99,7 @@ export default function NotesDisplayCard({ group, user, handleClose }) {
               <Note
                 key={note.id}
                 role={note.role}
-                id={note.id}
+                noteId={note.id}
                 group={group}
                 user={user}
                 refetchGroup={fetchNotesData}

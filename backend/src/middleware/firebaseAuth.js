@@ -21,7 +21,6 @@ export default async function auth(req, res, next) {
     res.sendStatus(HTTP_UNAUTHORISED);
   } else {
     const idToken = req.headers.authorization.split(" ")[1];
-
     admin
       .auth()
       .verifyIdToken(idToken)

@@ -17,6 +17,18 @@ function isRealError(error) {
   );
 }
 
+function getConfig(token, data) {
+  const config = {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  };
+  if (data) {
+    config.data = data;
+  }
+  return config;
+}
+
 async function getToken(user, authLoading, authError) {
   // return false if loading or error or no user
   if (user && !(authLoading || authError)) {
@@ -36,7 +48,7 @@ async function refreshToken(user) {
   return false;
 }
 
-async function fetch(
+async function sendRequest(
   token,
   setResponse,
   setError,
@@ -44,36 +56,25 @@ async function fetch(
   url,
   requestBody,
   callBack,
-  isPost
+  method
 ) {
   setError(null);
   setLoading(true);
   try {
-    let config = {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    };
-    let request = axios.get(url, config);
-    if (isPost) {
-      request = axios.post(url, requestBody, config);
+    let res;
+    if (method === "get" || method === "delete") {
+      res = await axios[method](url, getConfig(token, requestBody));
+    } else {
+      res = await axios[method](url, requestBody, getConfig(token));
     }
-    let res = await request;
-
-    // if the response is 401, refresh the token and try again
     if (res.status === 401) {
       token = await refreshToken();
       if (token) {
-        config = {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        };
-        request = axios.get(url, config);
-        if (isPost) {
-          request = axios.post(url, requestBody, config);
+        if (method === "get" || method === "delete") {
+          res = await axios[method](url, getConfig(token, requestBody));
+        } else {
+          res = await axios[method](url, requestBody, getConfig(token));
         }
-        res = await request;
       }
     }
     setResponse(res.data);
@@ -81,18 +82,14 @@ async function fetch(
       callBack(res.data);
     }
   } catch (e) {
+    setError(e.response);
     if (callBack) {
       callBack(null, e.response);
     }
-    setError(e.response);
   } finally {
     setLoading(false);
   }
 }
-
-/**
- * A custom hook which fetches data from the given URL. With built in authentication
- */
 
 export function useAuthPost(url, callBack) {
   const [error, setError] = useState(false);
@@ -107,7 +104,7 @@ export function useAuthPost(url, callBack) {
   const postRequest = async (requestBody) => {
     const token = await getToken(user, authLoading, authError);
     if (token) {
-      await fetch(
+      await sendRequest(
         token,
         setResponse,
         setError,
@@ -115,7 +112,7 @@ export function useAuthPost(url, callBack) {
         url,
         requestBody,
         callBack,
-        true
+        "post"
       );
     }
   };
@@ -132,22 +129,81 @@ export function useAuthGet(url, callBack) {
     error: authError,
   } = useContext(AuthenticationContext);
 
-  const getRequest = async () => {
+  const getRequest = async (requestBody) => {
     const token = await getToken(user, authLoading, authError);
     if (token) {
-      await fetch(
+      await sendRequest(
         token,
         setResponse,
         setError,
         setLoading,
         url,
-        null,
+        requestBody,
         callBack,
-        false
+        "get"
       );
     }
   };
   return { response, loading, error, getRequest };
+}
+
+/**
+ * A custom hook which deletes data with the given URL. With built in authentication
+ * */
+export function useAuthDelete(url, callBack) {
+  const [error, setError] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [response, setResponse] = useState(null);
+  const {
+    user,
+    loading: authLoading,
+    error: authError,
+  } = useContext(AuthenticationContext);
+
+  const deleteRequest = async (requestBody) => {
+    const token = await getToken(user, authLoading, authError);
+    if (token) {
+      await sendRequest(
+        token,
+        setResponse,
+        setError,
+        setLoading,
+        url,
+        requestBody,
+        callBack,
+        "delete"
+      );
+    }
+  };
+  return { response, loading, error, deleteRequest };
+}
+
+export function useAuthPut(url, callBack) {
+  const [error, setError] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [response, setResponse] = useState(null);
+  const {
+    user,
+    loading: authLoading,
+    error: authError,
+  } = useContext(AuthenticationContext);
+
+  const putRequest = async (requestBody) => {
+    const token = await getToken(user, authLoading, authError);
+    if (token) {
+      await sendRequest(
+        token,
+        setResponse,
+        setError,
+        setLoading,
+        url,
+        requestBody,
+        callBack,
+        "put"
+      );
+    }
+  };
+  return { response, loading, error, putRequest };
 }
 
 /**
