@@ -99,6 +99,7 @@ export default function PlayScenarioPageMulti({ group }) {
         );
         const newResources = await getResources(user, group._id);
         setResources(newResources);
+        console.log(resources);
         if (!sceneId)
           history.replace(`/play/${scenarioId}/multiplayer/${newSceneId}`);
       } catch (e) {
