@@ -36,8 +36,8 @@ const HTTP_INTERNAL_SERVER_ERROR = 500;
 router.post(
   "/",
   handle(async (req, res) => {
-    const { type, content, name } = req.body;
-    const newResource = await createResource(type, content, name);
+    const { type, content, name, requiredFlags } = req.body;
+    const newResource = await createResource(type, content, name, requiredFlags);
     return res.status(HTTP_CREATED).json(newResource).send();
   })
 );
@@ -146,7 +146,7 @@ router.delete("/group/:groupId/:flag", async (req, res) => {
 
 router.put("/:resourceId", async (req, res) => {
   const { resourceId } = req.params;
-  const { name, type, content } = req.body;
+  const { name, type, content, requiredFlags   } = req.body;
 
   if (!content || !name || !type) {
     return res.status(HTTP_BAD_REQUEST).send("Bad Request");
@@ -157,7 +157,8 @@ router.put("/:resourceId", async (req, res) => {
       resourceId,
       name,
       type,
-      content
+      content,
+      requiredFlags
     );
 
     if (!updatedResource) {
