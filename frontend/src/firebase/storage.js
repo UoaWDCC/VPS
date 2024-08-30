@@ -108,7 +108,7 @@ const uploadFiles = async (components, endImage, scenarioId, sceneId) => {
         sceneId,
         false
       );
-      // delete components[i].fileObject; // Remove the fileObject after uploading
+      delete components[i].fileObject; // Remove the fileObject after uploading
     }
   }
 
