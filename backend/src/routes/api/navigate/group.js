@@ -37,9 +37,9 @@ const deleteAllNotes = async (groupData) => {
     { _id: groupId },
     { $set: { notes: {} } }
   ).exec();
-  if (res.nModified !== 1) {
-    throw new HttpError("Failed to delete notes", STATUS.INTERNAL_SERVER_ERROR);
-  }
+  // if (res.nModified !== 1) {
+  //   throw new HttpError("Failed to delete notes", STATUS.INTERNAL_SERVER_ERROR);
+  // }
   return true;
 };
 
