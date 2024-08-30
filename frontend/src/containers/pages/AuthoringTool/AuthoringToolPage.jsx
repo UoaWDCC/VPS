@@ -89,8 +89,8 @@ export default function AuthoringToolPage() {
   }
 
   /** called when save and close button is clicked */
-  function savePlusClose() {
-    saveScene();
+  async function savePlusClose() {
+    await save();
     /* redirects user to the scenario page */
     window.location.href = `/scenario/${currentScenario?._id}`;
   }
