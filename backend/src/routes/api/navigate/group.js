@@ -33,10 +33,7 @@ const deleteAllNotes = async (groupData) => {
   );
   const noteId = noteList.map(({ id }) => id);
   await Note.deleteMany({ _id: { $in: noteId } });
-  const res = await Group.updateOne(
-    { _id: groupId },
-    { $set: { notes: {} } }
-  ).exec();
+  await Group.updateOne({ _id: groupId }, { $set: { notes: {} } }).exec();
   // if (res.nModified !== 1) {
   //   throw new HttpError("Failed to delete notes", STATUS.INTERNAL_SERVER_ERROR);
   // }
