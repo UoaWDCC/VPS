@@ -3,6 +3,7 @@ import User from "../../../db/models/user";
 import Group from "../../../db/models/group";
 import Scenario from "../../../db/models/scenario";
 import Note from "../../../db/models/note";
+import Resource from "../../../db/models/resource";
 import HttpError from "../../../error/HttpError";
 import STATUS from "../../../error/status";
 
@@ -32,13 +33,11 @@ const deleteAllNotes = async (groupData) => {
   );
   const noteId = noteList.map(({ id }) => id);
   await Note.deleteMany({ _id: { $in: noteId } });
-  const res = await Group.updateOne(
-    { _id: groupId },
-    { $set: { notes: {} } }
-  ).exec();
-  if (res.nModified !== 1) {
-    throw new HttpError("Failed to delete notes", STATUS.INTERNAL_SERVER_ERROR);
-  }
+  await Group.updateOne({ _id: groupId }, { $set: { notes: {} } }).exec();
+  // if (res.nModified !== 1) {
+  //   throw new HttpError("Failed to delete notes", STATUS.INTERNAL_SERVER_ERROR);
+  // }
+  return true;
 };
 
 export const getScenarioFirstScene = async (scenarioId) => {
@@ -192,9 +191,8 @@ export const groupReset = async (req) => {
   const group = await getGroupByIdAndUser(req.params.groupId, uid);
   const { role } = group.users[0];
 
-  if (!(await deleteAllNotes(group))) {
+  if (!(await deleteAllNotes(group)))
     throw new HttpError("Failed to delete notes", STATUS.INTERNAL_SERVER_ERROR);
-  }
 
   if (group.path[0] !== currentScene)
     throw new HttpError("Scene mismatch has occured", STATUS.CONFLICT);
@@ -221,10 +219,19 @@ export const groupGetResources = async (req) => {
   }
 
   const flags = group.currentFlags || [];
-  let resources = [];
-  if (flags) {
-    // TODO: add logic to map certain flags to groups here
-    resources = [];
+  const resources = [];
+
+  if (flags.length > 0) {
+    // Fetch all resources from the database
+    const allResources = await Resource.find({});
+
+    // Filter resources where all requiredFlags are present in the group's current flags
+    const matchingResources = allResources.filter((resource) =>
+      resource.requiredFlags.every((flag) => flags.includes(flag))
+    );
+
+    // Push the filtered resources to the resources array
+    resources.push(...matchingResources);
   }
   return { status: STATUS.OK, json: resources };
 };

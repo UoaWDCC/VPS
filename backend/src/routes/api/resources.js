@@ -28,16 +28,21 @@ router.use(auth);
  * @route POST /
  * @desc Create a New Resource
  * @param {Object} req.body - The resource details.
- * @param {string} req.body.type - The type of the resource.
- * @param {string} req.body.content - The content of the resource.
+ * @param {string} req.body.type - The type of the resource as text or image
+ * @param {string} req.body.content - The content of the resource. as either a string or an image?
  * @param {string} req.body.name - The name of the resource.
  * @returns {Object} 201 - The newly created resource.
  */
 router.post(
   "/",
   handle(async (req, res) => {
-    const { type, content, name } = req.body;
-    const newResource = await createResource(type, content, name);
+    const { type, content, name, requiredFlags } = req.body;
+    const newResource = await createResource(
+      type,
+      content,
+      name,
+      requiredFlags
+    );
     return res.status(HTTP_CREATED).json(newResource).send();
   })
 );
@@ -146,7 +151,7 @@ router.delete("/group/:groupId/:flag", async (req, res) => {
 
 router.put("/:resourceId", async (req, res) => {
   const { resourceId } = req.params;
-  const { name, type, content } = req.body;
+  const { name, type, content, requiredFlags } = req.body;
 
   if (!content || !name || !type) {
     return res.status(HTTP_BAD_REQUEST).send("Bad Request");
@@ -157,7 +162,8 @@ router.put("/:resourceId", async (req, res) => {
       resourceId,
       name,
       type,
-      content
+      content,
+      requiredFlags
     );
 
     if (!updatedResource) {

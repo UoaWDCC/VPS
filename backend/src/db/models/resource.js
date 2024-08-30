@@ -7,9 +7,7 @@ const resourceSchema = new Schema({
     type: String,
     required: true,
   },
-  textContent: {
-    type: String,
-  },
+  textContent: [String],
   imageContent: {
     type: String,
   },

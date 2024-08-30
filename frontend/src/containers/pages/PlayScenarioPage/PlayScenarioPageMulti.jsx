@@ -48,10 +48,8 @@ const getResources = async (user, groupId) => {
       Authorization: `Bearer ${token}`,
     },
   };
-  console.log(config);
   const res = await axios.request(config);
-  console.log(res);
-  return res.data.active;
+  return res.data;
 };
 
 /**
@@ -99,7 +97,6 @@ export default function PlayScenarioPageMulti({ group }) {
         );
         const newResources = await getResources(user, group._id);
         setResources(newResources);
-        console.log(resources);
         if (!sceneId)
           history.replace(`/play/${scenarioId}/multiplayer/${newSceneId}`);
       } catch (e) {
@@ -173,6 +170,7 @@ export default function PlayScenarioPageMulti({ group }) {
       )}
       {resourcesOpen && (
         <ResourcesModal
+          resources={resources}
           group={group}
           user={user}
           handleClose={() => setResourcesOpen(false)}

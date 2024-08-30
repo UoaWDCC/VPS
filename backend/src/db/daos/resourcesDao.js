@@ -2,7 +2,7 @@ import Resource from "../models/resource";
 import Group from "../models/group";
 
 // Create a New Resource
-const createResource = async (type, content, name) => {
+const createResource = async (type, content, name, requiredFlags) => {
   let dbResource = null;
 
   switch (type) {
@@ -11,7 +11,7 @@ const createResource = async (type, content, name) => {
         name,
         textContent: content,
         imageContent: "",
-        requiredFlags: [],
+        requiredFlags,
       });
       await dbResource.save();
       break;
@@ -20,7 +20,7 @@ const createResource = async (type, content, name) => {
         name,
         textContent: "",
         imageContent: content,
-        requiredFlags: [],
+        requiredFlags,
       });
       await dbResource.save();
       break;
@@ -76,16 +76,24 @@ const removeFlag = async (groupId, flag) => {
   return group.currentFlags;
 };
 
-const updateResourceById = async (resourceId, name, type, content) => {
+const updateResourceById = async (
+  resourceId,
+  name,
+  type,
+  content,
+  requiredFlags
+) => {
   const resource = await Resource.findById(resourceId);
 
   resource.name = name;
   switch (type) {
     case "text":
       resource.textContent = content;
+      resource.requiredFlags = requiredFlags;
       break;
     case "image":
       resource.imageContent = content;
+      resource.requiredFlags = requiredFlags;
       break;
     default:
       throw new Error(`Unsupported resource type: ${type}`);

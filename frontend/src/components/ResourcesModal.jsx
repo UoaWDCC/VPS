@@ -1,10 +1,9 @@
 import { useEffect, useState } from "react";
-import resources from "./ResourceObjects";
 import styles from "../styling/NotesDisplayCard.module.scss";
 import resourceStyles from "../styling/ResourceModal.module.scss";
 
-function ResourcesModal({ handleClose }) {
-  const [currentResourceId, setCurrentResourceId] = useState(resources[0]?.id);
+function ResourcesModal({ handleClose, resources }) {
+  const [currentResourceId, setCurrentResourceId] = useState(resources[0]?._id);
 
   const handleKeyPress = (e) => {
     if (e.key === "Escape") handleClose();
@@ -15,28 +14,29 @@ function ResourcesModal({ handleClose }) {
     return () => document.removeEventListener("keydown", handleKeyPress);
   }, []);
 
-  const currentResource = resources.find(({ id }) => id === currentResourceId);
+  const currentResource = resources.find(
+    ({ _id }) => _id === currentResourceId
+  );
 
   const ResourceContent = ({ item }) => {
-    if (item.type === "text") {
-      return (
-        <p>
-          {item.items.map((textItem) => (
-            <p>{textItem}</p>
-          ))}
-        </p>
-      );
-    }
-    if (item.type === "image") {
-      return (
-        <img
-          className={resourceStyles.resourceImage}
-          src={item.src}
-          alt={item.alt}
-        />
-      );
-    }
-    return null;
+    const hasTextContent =
+      item.textContent?.length > 0 && item.textContent[0] !== "";
+    const hasImageContent = item.imageContent && item.imageContent !== "";
+
+    return (
+      <div>
+        {hasTextContent &&
+          item.textContent.map((textItem) => <p key={textItem}>{textItem}</p>)}
+        {hasImageContent && (
+          <img
+            className={resourceStyles.resourceImage}
+            src={item.imageContent}
+            alt={item.name || "Resource Image"}
+          />
+        )}
+        {!hasTextContent && !hasImageContent && <p>No Content Available</p>}
+      </div>
+    );
   };
 
   return (
@@ -58,23 +58,27 @@ function ResourcesModal({ handleClose }) {
         <h2 className={resourceStyles.modalHeading}>Resources</h2>
         <nav className={resourceStyles.navBar}>
           {resources.map((resource) => (
-            <p key={resource.id}>
+            <p key={resource._id}>
               <button
                 type="button"
-                onClick={() => setCurrentResourceId(resource.id)}
+                onClick={() => setCurrentResourceId(resource._id)}
                 className={
-                  currentResourceId === resource.id ? resourceStyles.active : ""
+                  currentResourceId === resource._id
+                    ? resourceStyles.active
+                    : ""
                 }
               >
-                {resource.displayName}
+                {resource.name}
               </button>
             </p>
           ))}
         </nav>
         <div className={resourceStyles.r_content_card}>
-          {currentResource?.content.map((item) => (
-            <ResourceContent item={item} />
-          )) || <p>No Resource Selected</p>}
+          {currentResource ? (
+            <ResourceContent item={currentResource} />
+          ) : (
+            <p>No Resource Selected</p>
+          )}
         </div>
       </div>
     </div>
