@@ -14,7 +14,9 @@ function ResourcesModal({ handleClose, resources }) {
     return () => document.removeEventListener("keydown", handleKeyPress);
   }, []);
 
-  const currentResource = resources.find(({ _id }) => _id === currentResourceId);
+  const currentResource = resources.find(
+    ({ _id }) => _id === currentResourceId
+  );
 
   const ResourceContent = ({ item }) => {
     if (item.textContent) {
@@ -56,7 +58,9 @@ function ResourcesModal({ handleClose, resources }) {
                 type="button"
                 onClick={() => setCurrentResourceId(resource._id)}
                 className={
-                  currentResourceId === resource._id ? resourceStyles.active : ""
+                  currentResourceId === resource._id
+                    ? resourceStyles.active
+                    : ""
                 }
               >
                 {resource.name}

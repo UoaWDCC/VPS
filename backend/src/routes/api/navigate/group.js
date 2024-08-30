@@ -2,7 +2,8 @@ import Scene from "../../../db/models/scene";
 import User from "../../../db/models/user";
 import Group from "../../../db/models/group";
 import Scenario from "../../../db/models/scenario";
-import Note from "../../../db/models/note";import Resource from "../../../db/models/resource" 
+import Note from "../../../db/models/note";
+import Resource from "../../../db/models/resource";
 import HttpError from "../../../error/HttpError";
 import STATUS from "../../../error/status";
 
@@ -221,23 +222,21 @@ export const groupGetResources = async (req) => {
   }
 
   const flags = group.currentFlags || [];
-  let resources = [];
+  const resources = [];
 
   if (flags.length > 0) {
     // Find resources that require flags present in the group's current flags
     const allResources = await Resource.find({});
-    console.log(flags)
-    console.log(resources);
-      // Log the requiredFlags of each resource
-    allResources.forEach(resource => {
-      let condition = true
-      resource.requiredFlags.forEach(flag=>{
-        if(!flags.includes(flag)){
-          condition = false
+    // Log the requiredFlags of each resource
+    allResources.forEach((resource) => {
+      let condition = true;
+      resource.requiredFlags.forEach((flag) => {
+        if (!flags.includes(flag)) {
+          condition = false;
         }
-      })
-      if (condition){
-        resources.push(resource)
+      });
+      if (condition) {
+        resources.push(resource);
       }
     });
   }
