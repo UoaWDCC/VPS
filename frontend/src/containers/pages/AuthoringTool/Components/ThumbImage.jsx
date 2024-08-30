@@ -22,20 +22,22 @@ const lineGen = ({ text, fontSize, width }) => {
   return lines;
 };
 
-const TextEl = ({ text, fontSize, x, y, w }) => (
-  <text x={x + 10} y={y + 10} style={{ fill: "#ffffff" }}>
+const TextEl = ({ text, fontSize, x, y, w, colour }) => (
+  <text x={x + 10} y={y + 10} fill={colour || "black"}>
     {lineGen({ text, fontSize, width: w - 20 }).map((line) => (
-      <tspan x={x + 10} dy="1.2em">
+      <tspan key={line} x={x + 10} dy="1.2em">
         {line}
       </tspan>
     ))}
   </text>
 );
 
+const changeLater = { fill: "white", stroke: "black", strokeWidth: 3 };
+
 const Button = ({ c, x, y, w, h }) => {
   return (
     <g>
-      <rect x={x} y={y} width={w} height={h} />
+      <rect x={x} y={y} width={w} height={h} {...changeLater} fill={c.colour} />
       <TextEl text={c.text} fontSize={16} x={x} y={y} w={w} />
     </g>
   );
@@ -44,10 +46,14 @@ const Button = ({ c, x, y, w, h }) => {
 const TextBox = ({ c, x, y, w, h }) => {
   return (
     <g>
-      <rect x={x} y={y} width={w} height={h} />
+      <rect x={x} y={y} width={w} height={h} {...changeLater} />
       <TextEl text={c.text} fontSize={16} x={x} y={y} w={w} />
     </g>
   );
+};
+
+const Image = ({ c, x, y, w, h }) => {
+  return <g>{/* <image href={c.url} x={x} y={y} width={w} height={h} /> */}</g>;
 };
 
 const positions = {
@@ -70,8 +76,8 @@ const SpeechBox = ({ c, x, y, w, h }) => {
 
   return (
     <g>
-      <path d={d} fill="black" />
-      <TextEl text={c.text} fontSize={16} x={x} y={y} w={w} />
+      <path d={d} {...changeLater} />
+      <TextEl text={c.text} fontSize={16} x={x} y={y} w={w} colour={c.color} />
     </g>
   );
 };
@@ -91,6 +97,8 @@ const ThumbElement = ({ component }) => {
     case "BUTTON":
     case "RESET_BUTTON":
       return <Button key={component.id} c={component} {...dims} />;
+    case "FIREBASEIMAGE":
+      return <Image key={component.id} c={component} {...dims} />;
     default:
       return null;
   }
@@ -99,7 +107,7 @@ const ThumbElement = ({ component }) => {
 const ThumbImage = ({ components }) => {
   return (
     <svg viewBox="0 0 1920 1080" width="160px">
-      <rect x="0" y="0" width="1920" height="1080" fill="yellow" />
+      <rect x="0" y="0" width="1920" height="1080" fill="white" />
       {components.map((c) => (
         <ThumbElement key={c.id} component={c} />
       ))}
