@@ -40,6 +40,7 @@ const deleteAllNotes = async (groupData) => {
   if (res.nModified !== 1) {
     throw new HttpError("Failed to delete notes", STATUS.INTERNAL_SERVER_ERROR);
   }
+  return true;
 };
 
 export const getScenarioFirstScene = async (scenarioId) => {
@@ -193,9 +194,8 @@ export const groupReset = async (req) => {
   const group = await getGroupByIdAndUser(req.params.groupId, uid);
   const { role } = group.users[0];
 
-  if (!(await deleteAllNotes(group))) {
+  if (!(await deleteAllNotes(group)))
     throw new HttpError("Failed to delete notes", STATUS.INTERNAL_SERVER_ERROR);
-  }
 
   if (group.path[0] !== currentScene)
     throw new HttpError("Scene mismatch has occured", STATUS.CONFLICT);
