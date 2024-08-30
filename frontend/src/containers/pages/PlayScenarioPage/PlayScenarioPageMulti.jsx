@@ -38,10 +38,7 @@ const navigate = async (
 };
 
 // returns resources in the scene
-const getResources = async (
-  user,
-  groupId
-) => {
+const getResources = async (user, groupId) => {
   const token = await user.getIdToken();
   const config = {
     method: "get",
@@ -49,7 +46,7 @@ const getResources = async (
     headers: {
       "Content-Type": "application/json",
       Authorization: `Bearer ${token}`,
-    }
+    },
   };
   console.log(config);
   const res = await axios.request(config);
@@ -100,10 +97,7 @@ export default function PlayScenarioPageMulti({ group }) {
           addFlags,
           removeFlags
         );
-        const newResources = await getResources( 
-          user,
-          group._id
-        );
+        const newResources = await getResources(user, group._id);
         setResources(newResources);
         if (!sceneId)
           history.replace(`/play/${scenarioId}/multiplayer/${newSceneId}`);

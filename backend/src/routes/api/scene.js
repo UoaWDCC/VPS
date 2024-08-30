@@ -11,7 +11,6 @@ import {
 } from "../../db/daos/sceneDao";
 import auth from "../../middleware/firebaseAuth";
 import scenarioAuth from "../../middleware/scenarioAuth";
-import Group from "../../db/models/group";
 
 const router = Router({ mergeParams: true });
 
@@ -20,9 +19,9 @@ const HTTP_NO_CONTENT = 204;
 const HTTP_NOT_FOUND = 404;
 
 // Apply auth middleware to all routes below this point
-// router.use(auth);
+router.use(auth);
 // Apply scenario auth middleware
-// router.use(scenarioAuth);
+router.use(scenarioAuth);
 
 // Get scene infromation
 router.get("/full/:sceneId", async (req, res) => {

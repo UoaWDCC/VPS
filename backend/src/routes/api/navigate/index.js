@@ -31,7 +31,7 @@ router.get(
     const response = await groupGetResources(req);
     return res.status(response.status).json(response.json);
   })
-)
+);
 
 router.post(
   "/user/reset/:scenarioId",

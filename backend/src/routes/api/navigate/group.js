@@ -100,8 +100,6 @@ const addFlagsToGroup = async (groupId, newFlags) => {
   } catch (error) {
     throw new Error("Error updating group flags:", error);
   }
-
-
 };
 
 // Remove flags to group on scene change
@@ -192,7 +190,7 @@ export const groupReset = async (req) => {
 };
 
 // Fetches groups flags and returns resources
-export const groupGetResources = async (req, res) => {
+export const groupGetResources = async (req) => {
   const group = await Group.findById(req.params.groupId);
 
   if (!group) {
@@ -202,8 +200,8 @@ export const groupGetResources = async (req, res) => {
   const flags = group.currentFlags || [];
   let resources = [];
   if (flags) {
-      // TODO: add logic to map certain flags to groups here  
-      resources = [];
+    // TODO: add logic to map certain flags to groups here
+    resources = [];
   }
-  return { status: STATUS.OK, json: resources }
+  return { status: STATUS.OK, json: resources };
 };
