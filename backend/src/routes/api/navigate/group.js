@@ -2,7 +2,7 @@ import Scene from "../../../db/models/scene";
 import User from "../../../db/models/user";
 import Group from "../../../db/models/group";
 import Scenario from "../../../db/models/scenario";
-import Note from "../../../db/models/note";
+import Note from "../../../db/models/note";import Resource from "../../../db/models/resource" 
 import HttpError from "../../../error/HttpError";
 import STATUS from "../../../error/status";
 
@@ -222,9 +222,24 @@ export const groupGetResources = async (req) => {
 
   const flags = group.currentFlags || [];
   let resources = [];
-  if (flags) {
-    // TODO: add logic to map certain flags to groups here
-    resources = [];
+
+  if (flags.length > 0) {
+    // Find resources that require flags present in the group's current flags
+    allResources = await Resource.find({},{'requiredFlags':1});
+    console.log(flags)
+    console.log(resources);
+      // Log the requiredFlags of each resource
+    allResources.forEach(resource => {
+      let condition = True
+      resource.requiredFlags.forEach(flag=>{
+        if(!flags.includes(flag)){
+          condition = False
+        }
+      })
+      if (condition){
+        resources.push(resource._id)
+      }
+    });
   }
   return { status: STATUS.OK, json: resources };
 };
