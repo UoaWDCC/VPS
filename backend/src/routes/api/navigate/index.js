@@ -2,7 +2,7 @@ import { Router } from "express";
 import auth from "../../../middleware/firebaseAuth";
 
 import handle from "../../../error/handle";
-import { groupNavigate, groupReset } from "./group";
+import { groupNavigate, groupReset, groupGetResources } from "./group";
 import { userNavigate, userReset } from "./user";
 
 const router = Router();
@@ -24,6 +24,14 @@ router.post(
     return res.status(response.status).json(response.json);
   })
 );
+
+router.get(
+  "/group/resources/:groupId",
+  handle(async (req, res) => {
+    const response = await groupGetResources(req);
+    return res.status(response.status).json(response.json);
+  })
+)
 
 router.post(
   "/user/reset/:scenarioId",

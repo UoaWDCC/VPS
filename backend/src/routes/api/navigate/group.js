@@ -190,3 +190,20 @@ export const groupReset = async (req) => {
 
   return { status: STATUS.OK };
 };
+
+// Fetches groups flags and returns resources
+export const groupGetResources = async (req, res) => {
+  const group = await Group.findById(req.params.groupId);
+
+  if (!group) {
+    throw new HttpError("Group not found", STATUS.NOT_FOUND);
+  }
+
+  const flags = group.currentFlags || [];
+  let resources = [];
+  if (flags) {
+      // TODO: add logic to map certain flags to groups here  
+      resources = [];
+  }
+  return { status: STATUS.OK, json: resources }
+};

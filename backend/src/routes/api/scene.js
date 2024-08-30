@@ -20,9 +20,9 @@ const HTTP_NO_CONTENT = 204;
 const HTTP_NOT_FOUND = 404;
 
 // Apply auth middleware to all routes below this point
-router.use(auth);
+// router.use(auth);
 // Apply scenario auth middleware
-router.use(scenarioAuth);
+// router.use(scenarioAuth);
 
 // Get scene infromation
 router.get("/full/:sceneId", async (req, res) => {
@@ -115,23 +115,5 @@ router.put("/visited/:sceneId", async (req, res) => {
   const scene = await incrementVisisted(req.params.sceneId);
   res.status(HTTP_OK).json(scene);
 });
-
-
-// Get a list of the current flags
-router.get("/:sceneId", async (req, res) => {
-  try {
-    const group = await Group.findOne({ sceneID: req.params.sceneId });
-
-    if (!group) {
-      return res.sendStatus(HTTP_NOT_FOUND);
-    }
-
-    const flags = group.currentFlags || [];
-    res.status(HTTP_OK).json(flags);
-  } catch (err) {
-    res.status(HTTP_NOT_FOUND).send(err.message);
-  }
-});
-
 
 export default router;

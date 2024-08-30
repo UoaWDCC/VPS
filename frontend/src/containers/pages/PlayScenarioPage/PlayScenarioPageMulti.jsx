@@ -45,12 +45,13 @@ const getResources = async (
   const token = await user.getIdToken();
   const config = {
     method: "get",
-    url: `/api/resources/${groupId}`,
+    url: `/api/navigate/group/resources/${groupId}`,
     headers: {
       "Content-Type": "application/json",
       Authorization: `Bearer ${token}`,
     }
   };
+  console.log(config);
   const res = await axios.request(config);
   console.log(res);
   return res.data.active;
