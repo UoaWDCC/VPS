@@ -17,55 +17,9 @@ import theme from "./theme/App.theme";
 
 export default function App() {
   return (
-    <>
-      <ThemeProvider theme={theme}>
-        <AuthenticationContextProvider>
-          <BrowserRouter>
-            <Switch>
-              <Route exact path="/login" component={LoginPage} />
-
-              <ProtectedRoute path="/play/:scenarioId">
-                <PlayScenarioResolver />
-              </ProtectedRoute>
-
-              <ProtectedRoute exact path="/">
-                <ScenarioContextProvider>
-                  <ScenarioSelectionPage />
-                </ScenarioContextProvider>
-              </ProtectedRoute>
-
-              <ScenarioContextProvider>
-                <Switch>
-                  <ProtectedRoute index path="/scenario/:scenarioId">
-                    <SceneContextProvider>
-                      <ScenePage />
-                    </SceneContextProvider>
-                    <ProtectedRoute path="/scenario/:scenarioId/manage-groups">
-                      <ManageGroupsPage />
-                    </ProtectedRoute>
-                  </ProtectedRoute>
-                </Switch>
-              </ScenarioContextProvider>
-
-              <ProtectedRoute
-                path="/dashboard"
-                accessLevelReq={AccessLevel.STAFF}
-              >
-                <ScenarioContextProvider>
-                  <DashboardPage />
-                </ScenarioContextProvider>
-              </ProtectedRoute>
-
-              {/* Default path if nothing matches */}
-              <ProtectedRoute path="/">
-                <ScenarioContextProvider>
-                  <ScenarioSelectionPage />
-                </ScenarioContextProvider>
-              </ProtectedRoute>
-            </Switch>
-          </BrowserRouter>
-        </AuthenticationContextProvider>
-      </ThemeProvider>
-    </>
+    <div className="bg-blue-500 text-white text-center p-10">
+      <h1 className="text-4xl font-bold">Tailwind CSS is working!</h1>
+      <p className="mt-4">This is a test of Tailwind CSS.</p>
+    </div>
   );
 }
