@@ -225,19 +225,19 @@ export const groupGetResources = async (req) => {
 
   if (flags.length > 0) {
     // Find resources that require flags present in the group's current flags
-    allResources = await Resource.find({},{'requiredFlags':1});
+    const allResources = await Resource.find({});
     console.log(flags)
     console.log(resources);
       // Log the requiredFlags of each resource
     allResources.forEach(resource => {
-      let condition = True
+      let condition = true
       resource.requiredFlags.forEach(flag=>{
         if(!flags.includes(flag)){
-          condition = False
+          condition = false
         }
       })
       if (condition){
-        resources.push(resource._id)
+        resources.push(resource)
       }
     });
   }
