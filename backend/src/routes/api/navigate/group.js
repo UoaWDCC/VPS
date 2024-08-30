@@ -225,20 +225,16 @@ export const groupGetResources = async (req) => {
   const resources = [];
 
   if (flags.length > 0) {
-    // Find resources that require flags present in the group's current flags
+    // Fetch all resources from the database
     const allResources = await Resource.find({});
-    // Log the requiredFlags of each resource
-    allResources.forEach((resource) => {
-      let condition = true;
-      resource.requiredFlags.forEach((flag) => {
-        if (!flags.includes(flag)) {
-          condition = false;
-        }
-      });
-      if (condition) {
-        resources.push(resource);
-      }
-    });
+  
+    // Filter resources where all requiredFlags are present in the group's current flags
+    const matchingResources = allResources.filter((resource) =>
+      resource.requiredFlags.every((flag) => flags.includes(flag))
+    );
+  
+    // Push the filtered resources to the resources array
+    resources.push(...matchingResources);
   }
   return { status: STATUS.OK, json: resources };
 };
