@@ -20,7 +20,8 @@ const createScenario = async (name, uid) => {
 const addThumbs = async (scenarios) => {
   const scenarioData = await Promise.all(
     scenarios.map(async (scenario) => {
-      if (!scenario.scenes || !scenario.scenes[0]) return scenario;
+      if (!scenario.scenes || !scenario.scenes[0])
+        return { _id: scenario._id, name: scenario.name };
       const thumbnail = await Scene.findById(scenario.scenes[0], {
         components: 1,
         _id: 0,
