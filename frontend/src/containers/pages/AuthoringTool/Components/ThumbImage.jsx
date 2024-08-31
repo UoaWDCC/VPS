@@ -29,10 +29,10 @@ const lineGen = ({ text, fontSize, width }) => {
   return lines;
 };
 
-const TextEl = ({ text, fontSize, x, y, w, colour }) => (
-  <text x={x + 10} y={y + 10} fill={colour || "black"}>
-    {lineGen({ text, fontSize, width: w - 40 }).map((line) => (
-      <tspan key={line} x={x + 10} dy="1.2em">
+const TextEl = ({ text, fontSize, x, y, w, colour, ...props }) => (
+  <text x={x} y={y} fill={colour || "black"} {...props}>
+    {lineGen({ text, fontSize, width: w - 40 }).map((line, i) => (
+      <tspan key={line} x={x + 10} dy={i ? "1.2em" : ""}>
         {line}
       </tspan>
     ))}
@@ -42,10 +42,21 @@ const TextEl = ({ text, fontSize, x, y, w, colour }) => (
 const changeLater = { fill: "white", stroke: "black", strokeWidth: 3 };
 
 const Button = ({ c, x, y, w, h }) => {
+  const newX = x + w / 2;
+  const newY = y + h / 2;
   return (
     <g>
-      <rect x={x} y={y} width={w} height={h} {...changeLater} fill={c.colour} />
-      <TextEl text={c.text} fontSize={16} x={x} y={y} w={w} />
+      <rect x={x} y={y} width={w} height={h} rx="0.5rem" fill={c.colour} />
+      <TextEl
+        text={c.text}
+        fontSize={16}
+        x={newX}
+        y={newY}
+        w={w}
+        fill={c.colour !== "white" ? "white" : "black"}
+        dominantBaseline="middle"
+        textAnchor="middle"
+      />
     </g>
   );
 };
@@ -54,7 +65,7 @@ const TextBox = ({ c, x, y, w, h }) => {
   return (
     <g>
       <rect x={x} y={y} width={w} height={h} {...changeLater} />
-      <TextEl text={c.text} fontSize={16} x={x} y={y} w={w} />
+      <TextEl text={c.text} fontSize={16} x={x} y={y + 25} w={w} />
     </g>
   );
 };
@@ -84,7 +95,14 @@ const SpeechBox = ({ c, x, y, w, h }) => {
   return (
     <g>
       <path d={d} {...changeLater} />
-      <TextEl text={c.text} fontSize={16} x={x} y={y} w={w} colour={c.color} />
+      <TextEl
+        text={c.text}
+        fontSize={16}
+        x={x}
+        y={y + 25}
+        w={w}
+        colour={c.color}
+      />
     </g>
   );
 };
