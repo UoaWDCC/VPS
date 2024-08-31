@@ -3,7 +3,7 @@ import { useContext, useEffect, useState } from "react";
 import { useHistory, useParams } from "react-router-dom";
 import styles from "styling/SceneNavigator.module.scss";
 import SceneListItem from "./SceneListItem";
-import ThumbImage from "../Components/ThumbImage";
+import Thumbnail from "../Components/Thumbnail";
 
 const SceneNavigator = ({ saveScene }) => {
   const [thumbnails, setThumbnails] = useState(null);
@@ -48,7 +48,7 @@ const SceneNavigator = ({ saveScene }) => {
               }
               key={scene._id}
             >
-              <ThumbImage components={scene.components} />
+              <Thumbnail components={scene.components} />
             </button>
           </>
         ),

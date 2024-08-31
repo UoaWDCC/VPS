@@ -1,18 +1,12 @@
 import { Box } from "@material-ui/core";
 import { Handle, Position } from "react-flow-renderer";
-import Thumbnail from "../../../components/Thumbnail";
 
-function SceneNode({ data }) {
-  const { scenarioId, sceneId } = data;
+function SceneNode() {
+  // const { scenarioId, sceneId } = data;
 
   return (
     <Box>
       <Handle type="target" position={Position.Top} />
-      <Thumbnail
-        url={`${process.env.PUBLIC_URL}/play/${scenarioId}/${sceneId}`}
-        width="160"
-        height="90"
-      />
       <Handle type="source" position={Position.Bottom} id="a" />
       {/* <h5 style={textStyle}>{sceneTitle}</h5> */}
     </Box>

@@ -4,9 +4,8 @@ import { Box } from "@material-ui/core";
 import ImageList from "@material-ui/core/ImageList";
 import ImageListItem from "@material-ui/core/ImageListItem";
 
-import ThumbImage from "containers/pages/AuthoringTool/Components/ThumbImage";
+import Thumbnail from "containers/pages/AuthoringTool/Components/Thumbnail";
 import DashedCard from "./DashedCard";
-import Thumbnail from "./Thumbnail";
 
 import styles from "../styling/ListContainer.module.scss";
 import useStyles from "./component.styles";
@@ -130,9 +129,9 @@ export default function ListContainer({
                       }}
                     >
                       {sceneSelectionPage ? (
-                        <ThumbImage components={item.components} />
+                        <Thumbnail components={item.components} />
                       ) : (
-                        <ThumbImage
+                        <Thumbnail
                           components={item.thumbnail?.components || []}
                         />
                       )}
