@@ -1,6 +1,6 @@
 import { useContext } from "react";
 import { Redirect, Route } from "react-router-dom";
-import LoadingPage from "../containers/pages/LoadingPage";
+import LoadingPage from "../features/status/LoadingPage";
 import AuthenticationContext from "../context/AuthenticationContext";
 import AccessLevel from "../enums/route.access.level";
 
