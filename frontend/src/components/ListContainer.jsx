@@ -1,10 +1,14 @@
+import { useState } from "react";
+
 import { Box } from "@material-ui/core";
 import ImageList from "@material-ui/core/ImageList";
 import ImageListItem from "@material-ui/core/ImageListItem";
-import { useState } from "react";
-import styles from "../styling/ListContainer.module.scss";
+
+import ThumbImage from "containers/pages/AuthoringTool/Components/ThumbImage";
 import DashedCard from "./DashedCard";
 import Thumbnail from "./Thumbnail";
+
+import styles from "../styling/ListContainer.module.scss";
 import useStyles from "./component.styles";
 
 /**
@@ -117,6 +121,7 @@ export default function ListContainer({
                       }
                       overflow="hidden"
                       textAlign="center"
+                      display="flex"
                       sx={{
                         background: "#f1f1f1",
                         "&:hover": {
@@ -125,9 +130,7 @@ export default function ListContainer({
                       }}
                     >
                       {sceneSelectionPage ? (
-                        <Thumbnail
-                          url={`${process.env.PUBLIC_URL}/play/${scenarioId}/${item._id}`}
-                        />
+                        <ThumbImage components={item.components} />
                       ) : (
                         <Thumbnail
                           url={`${process.env.PUBLIC_URL}/play/${item._id}`}

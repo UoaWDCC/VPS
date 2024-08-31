@@ -151,7 +151,7 @@ const ThumbElement = ({ component }) => {
 
 const ThumbImage = ({ components }) => {
   return (
-    <svg viewBox="0 0 1920 1080" width="160px">
+    <svg viewBox="0 0 1920 1080">
       <rect x="0" y="0" width="1920" height="1080" fill="white" />
       {components.map((c) => (
         <ThumbElement key={c.id} component={c} />
