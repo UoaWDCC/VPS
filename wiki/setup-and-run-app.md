@@ -31,6 +31,5 @@ Alternative way to run app
 ### Tool versions
 
 - Ideally you should use the following versions to make this repository work.
-- node v14.17.\*
+- node v20\*
 - yarn 1.22.\*
-- NPM 6.14.\*
