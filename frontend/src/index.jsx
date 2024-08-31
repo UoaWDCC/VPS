@@ -1,5 +1,5 @@
 import ReactDOM from "react-dom";
-import App from "./containers/App";
+import App from "containers/App";
+import "./index.css";
 
-/** This is the main entry point of ReactJS */
 ReactDOM.render(<App />, document.getElementById("root"));

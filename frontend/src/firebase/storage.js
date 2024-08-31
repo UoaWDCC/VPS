@@ -1,5 +1,3 @@
-/* eslint-disable no-param-reassign */
-/* eslint-disable no-await-in-loop */
 import {
   ref,
   uploadBytesResumable,

@@ -83,7 +83,9 @@ export default function ListContainer({
           wide ? styles.scenarioListContainerWide : styles.scenarioListContainer
         }
       >
-        {!sceneSelectionPage && <h1>Created scenarios</h1>}
+        {!sceneSelectionPage && (
+          <h1 className="text-3xl font-bold my-3">Created scenarios</h1>
+        )}
 
         <ImageList rowHeight={210} cols={columns} gap={30}>
           {addCard ? (
@@ -153,7 +155,9 @@ export default function ListContainer({
 
         {assignedScenarios ? (
           <>
-            {!sceneSelectionPage && <h1>Assigned scenarios</h1>}
+            {!sceneSelectionPage && (
+              <h1 className="text-3xl font-bold my-3">Assigned scenarios</h1>
+            )}
 
             <ImageList rowHeight={210} cols={columns} gap={30}>
               {addCard ? (
@@ -196,13 +200,9 @@ export default function ListContainer({
                           }}
                         >
                           {sceneSelectionPage ? (
-                            <Thumbnail
-                              url={`${process.env.PUBLIC_URL}/play/${scenarioId}/${_id}`}
-                            />
+                            <Thumbnail url={`/play/${scenarioId}/${_id}`} />
                           ) : (
-                            <Thumbnail
-                              url={`${process.env.PUBLIC_URL}/play/${_id}`}
-                            />
+                            <Thumbnail url={`/play/${_id}`} />
                           )}
                         </Box>
                         <input

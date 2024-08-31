@@ -1,5 +1,3 @@
-/* eslint-disable jest/no-mocks-import */
-
 /**
  * This file is automatically ran by React when running tests
  */

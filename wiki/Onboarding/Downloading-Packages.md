@@ -7,11 +7,11 @@ There are also a few recommended tools to download, for ease of use, version con
 ## Node
 
 Node is an open-source, cross-platform JavaScript runtime environment that allows developers to execute JavaScript code server-side.
-If using nvm (see below), it can be installed by running `nvm install 14.17.4` or it can be downloaded [from the node website](https://nodejs.org/en) (note that clicking 'download' on this website installs Node 18 (current) instead of Node 14, so go to previous releases). To verify it installed successfully, run `node --version` in the terminal.
+If using nvm (see below), it can be installed by running `nvm install 20` or it can be downloaded [from the node website](https://nodejs.org/en) (note that clicking 'download' on this website installs the current version of Node instead of Node v20, so go to previous releases). To verify it installed successfully, run `node --version` in the terminal.
 
 ### Versions of Node/NVM
 
-However, Node has many different versions available, with the most current version being Node 18. Due to dependency issues, this codebase runs on Node versions of 14.17.*, with Node 14.17.4 recommended (this version is confirmed to work). 
+However, Node has many different versions available. This codebase has been developed on Node version of 20.
 
 In order to easily switch between Node versions (especially recommended if you are using Node for other projects as well), it is recommended to install nvm (Node Version Manager) which allows you to have multiple versions of Node on your machine simultaneously. This can be downloaded:
 Windows: [https://github.com/coreybutler/nvm-windows](https://github.com/coreybutler/nvm-windows)
@@ -23,10 +23,9 @@ To check nvm installed correctly, run the command `nvm --version` in the termina
 
 NPM, which stands for Node Package Manager, is the default package manager for Node.js. It is a command-line tool that allows developers to install, share, and manage dependencies for their Node.js projects. Note that this is different to NVM (Node Version Manager, mentioned above).
 NPM should install automatically when you install Node, and this can be checked by running the terminal command: `npm --version`.
-It is recommended to use an NPM version similar to 6.14.14 (which is the version automatically installed with Node 14.17.4)
 
 Yarn is a package manager for JavaScript that serves as an alternative to npm (basically it is a better version of NPM which we use to manage our repo).
-This project works with Yarn 1.22.21, which can be installed by running the following terminal command: `npm install -g yarn@1.22.21`.
+This project works with Yarn 1.22.21, which can be installed by running the following terminal command: `npm install -g yarn`.
 If you already have yarn installed, uninstall it via `npm uninstall -g yarn` (note this prevents you from using the current version of Yarn in any other projects simultaneously).
 To check it installed successfully, run the command `yarn --version`. 
 
