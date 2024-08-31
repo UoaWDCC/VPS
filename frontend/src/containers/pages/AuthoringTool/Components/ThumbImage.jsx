@@ -1,3 +1,6 @@
+import { useGet } from "hooks/crudHooks";
+import { useState } from "react";
+
 const scale = (percentages, max) => {
   return percentages.map((p) => (p / 100) * max);
 };
@@ -70,8 +73,23 @@ const TextBox = ({ c, x, y, w, h }) => {
   );
 };
 
+const FBImage = ({ c, x, y, w, h }) => {
+  return (
+    <g>
+      <image href={c.url || ""} x={x} y={y} width={w} height={h} />
+    </g>
+  );
+};
+
 const Image = ({ c, x, y, w, h }) => {
-  return <g>{/* <image href={c.url} x={x} y={y} width={w} height={h} /> */}</g>;
+  const [image, setImage] = useState();
+  useGet(`/api/image/${c.imageId}`, setImage, false);
+
+  return (
+    <g>
+      <image href={image?.url || ""} x={x} y={y} width={w} height={h} />
+    </g>
+  );
 };
 
 const positions = {
@@ -122,8 +140,10 @@ const ThumbElement = ({ component }) => {
     case "BUTTON":
     case "RESET_BUTTON":
       return <Button key={component.id} c={component} {...dims} />;
-    case "FIREBASEIMAGE":
+    case "IMAGE":
       return <Image key={component.id} c={component} {...dims} />;
+    case "FIREBASEIMAGE":
+      return <FBImage key={component.id} c={component} {...dims} />;
     default:
       return null;
   }
