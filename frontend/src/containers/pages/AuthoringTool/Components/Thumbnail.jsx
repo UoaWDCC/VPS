@@ -149,7 +149,7 @@ const ThumbElement = ({ component }) => {
   }
 };
 
-const ThumbImage = ({ components }) => {
+const Thumbnail = ({ components }) => {
   return (
     <svg viewBox="0 0 1920 1080">
       <rect x="0" y="0" width="1920" height="1080" fill="white" />
@@ -160,4 +160,4 @@ const ThumbImage = ({ components }) => {
   );
 };
 
-export default ThumbImage;
+export default Thumbnail;
