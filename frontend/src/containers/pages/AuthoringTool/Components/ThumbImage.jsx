@@ -5,14 +5,15 @@ const scale = (percentages, max) => {
   return percentages.map((p) => (p / 100) * max);
 };
 
-const getTextWidth = (text, font = "400 16px Arial") => {
+// this is artificial and the font size needs to be dynamic in future
+const getTextWidth = (text, font = "400 26px Arial") => {
   const canvas = document.createElement("canvas");
   const context = canvas.getContext("2d");
   context.font = font;
   return context.measureText(text).width;
 };
 
-const lineGen = ({ text, fontSize, width }) => {
+const lineGen = ({ text, width }) => {
   const lines = [];
   const textA = text.split(" ");
   // eslint-disable-next-line no-restricted-syntax
@@ -33,7 +34,7 @@ const lineGen = ({ text, fontSize, width }) => {
 };
 
 const TextEl = ({ text, fontSize, x, y, w, colour, ...props }) => (
-  <text x={x} y={y} fill={colour || "black"} {...props}>
+  <text x={x} y={y} fill={colour || "black"} {...props} fontSize="26px">
     {lineGen({ text, fontSize, width: w - 40 }).map((line, i) => (
       <tspan key={line} x={x + 10} dy={i ? "1.2em" : ""}>
         {line}
@@ -49,10 +50,16 @@ const Button = ({ c, x, y, w, h }) => {
   const newY = y + h / 2;
   return (
     <g>
-      <rect x={x} y={y} width={w} height={h} rx="0.5rem" fill={c.colour} />
+      <rect
+        x={x}
+        y={y}
+        width={w}
+        height={h}
+        rx="0.5rem"
+        fill={c.colour === "white" ? "#fafafa" : c.colour}
+      />
       <TextEl
         text={c.text}
-        fontSize={16}
         x={newX}
         y={newY}
         w={w}
@@ -68,7 +75,7 @@ const TextBox = ({ c, x, y, w, h }) => {
   return (
     <g>
       <rect x={x} y={y} width={w} height={h} {...changeLater} />
-      <TextEl text={c.text} fontSize={16} x={x} y={y + 25} w={w} />
+      <TextEl text={c.text} x={x} y={y + 25} w={w} />
     </g>
   );
 };
@@ -113,14 +120,7 @@ const SpeechBox = ({ c, x, y, w, h }) => {
   return (
     <g>
       <path d={d} {...changeLater} />
-      <TextEl
-        text={c.text}
-        fontSize={16}
-        x={x}
-        y={y + 25}
-        w={w}
-        colour={c.color}
-      />
+      <TextEl text={c.text} x={x} y={y + 25} w={w} colour={c.color} />
     </g>
   );
 };
