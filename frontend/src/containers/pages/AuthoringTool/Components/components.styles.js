@@ -9,8 +9,8 @@ export default function useStyles(component) {
       position: "absolute",
       top: `${component.top}%`,
       left: `${component.left}%`,
-      height: `${component.height}%`,
-      width: `${component.width}%`,
+      height: `${component.height / 2}em`,
+      width: `${component.width}em`,
       boxSizing: "border-box",
     },
     textComponentStyles: {
