@@ -1,4 +1,5 @@
 import Scenario from "../models/scenario";
+import Scene from "../models/scene";
 
 /**
  * Creates a scenario in the database
@@ -16,13 +17,31 @@ const createScenario = async (name, uid) => {
   return dbScenario;
 };
 
+const addThumbs = async (scenarios) => {
+  const scenarioData = await Promise.all(
+    scenarios.map(async (scenario) => {
+      if (!scenario.scenes || !scenario.scenes[0]) return scenario;
+      const thumbnail = await Scene.findById(scenario.scenes[0], {
+        components: 1,
+        _id: 0,
+      }).lean();
+      return { _id: scenario._id, name: scenario.name, thumbnail };
+    })
+  );
+  return scenarioData;
+};
+
 /**
  * Retrieves all scenarios authored by particular user
  * @param {String} uid ID of user
  * @returns list of database scenario objects
  */
 const retrieveScenarioList = async (uid) => {
-  return Scenario.find({ uid }, "name");
+  const scenarios = await Scenario.find(
+    { uid },
+    { name: 1, scenes: { $slice: 1 } }
+  ).lean();
+  return addThumbs(scenarios);
 };
 
 /**
@@ -41,8 +60,11 @@ const retrieveScenario = async (scenarioId) => {
  * @returns database scenario objects
  */
 const retrieveScenarios = async (scenarioIds) => {
-  const scenarios = await Scenario.find({ _id: { $in: scenarioIds } }, "name");
-  return scenarios;
+  const scenarios = await Scenario.find(
+    { _id: { $in: scenarioIds } },
+    { name: 1, scenes: { $slice: 1 } }
+  );
+  return addThumbs(scenarios);
 };
 
 /**

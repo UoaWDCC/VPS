@@ -132,8 +132,8 @@ export default function ListContainer({
                       {sceneSelectionPage ? (
                         <ThumbImage components={item.components} />
                       ) : (
-                        <Thumbnail
-                          url={`${process.env.PUBLIC_URL}/play/${item._id}`}
+                        <ThumbImage
+                          components={item.thumbnail?.components || []}
                         />
                       )}
                     </Box>
