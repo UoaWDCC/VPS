@@ -221,17 +221,16 @@ export const groupGetResources = async (req) => {
   const flags = group.currentFlags || [];
   const resources = [];
 
-  if (flags.length > 0) {
-    // Fetch all resources from the database
-    const allResources = await Resource.find({});
+  // Fetch all resources from the database
+  const allResources = await Resource.find({});
 
-    // Filter resources where all requiredFlags are present in the group's current flags
-    const matchingResources = allResources.filter((resource) =>
-      resource.requiredFlags.every((flag) => flags.includes(flag))
-    );
+  // Filter resources where all requiredFlags are present in the group's current flags
+  const matchingResources = allResources.filter((resource) =>
+    resource.requiredFlags.every((flag) => flags.includes(flag))
+  );
 
-    // Push the filtered resources to the resources array
-    resources.push(...matchingResources);
-  }
+  // Push the filtered resources to the resources array
+  resources.push(...matchingResources);
+
   return { status: STATUS.OK, json: resources };
 };
