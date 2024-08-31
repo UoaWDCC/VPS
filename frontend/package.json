@@ -37,8 +37,8 @@
   "scripts": {
     "start": "vite",
     "build": "vite build",
-    "lint": "eslint --ext .js,.jsx ./src",
-    "lint:fix": "eslint --fix --ext .js,.jsx ./src",
+    "lint": "eslint --config eslint.config.mjs ./src",
+    "lint:fix": "eslint --config eslint.config.mjs --fix ./src",
     "prettier": "prettier --check src",
     "prettify": "prettier --write src"
   },
