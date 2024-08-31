@@ -2,6 +2,13 @@ const scale = (percentages, max) => {
   return percentages.map((p) => (p / 100) * max);
 };
 
+const getTextWidth = (text, font = "400 16px Arial") => {
+  const canvas = document.createElement("canvas");
+  const context = canvas.getContext("2d");
+  context.font = font;
+  return context.measureText(text).width;
+};
+
 const lineGen = ({ text, fontSize, width }) => {
   const lines = [];
   const textA = text.split(" ");
@@ -12,7 +19,7 @@ const lineGen = ({ text, fontSize, width }) => {
     } else {
       const lastLine = lines[lines.length - 1];
       const testLine = `${lastLine} ${word}`;
-      if (testLine.length * (fontSize - 9) > width) {
+      if (getTextWidth(testLine) >= width) {
         lines.push(word);
       } else {
         lines[lines.length - 1] = testLine;
@@ -24,7 +31,7 @@ const lineGen = ({ text, fontSize, width }) => {
 
 const TextEl = ({ text, fontSize, x, y, w, colour }) => (
   <text x={x + 10} y={y + 10} fill={colour || "black"}>
-    {lineGen({ text, fontSize, width: w - 20 }).map((line) => (
+    {lineGen({ text, fontSize, width: w - 40 }).map((line) => (
       <tspan key={line} x={x + 10} dy="1.2em">
         {line}
       </tspan>
