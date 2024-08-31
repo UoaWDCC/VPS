@@ -1,5 +1,4 @@
 import { useState } from "react";
-
 import ResetConfirmationModal from "./modals/ResetConfirmationModal";
 import componentResolver from "./componentResolver";
 
