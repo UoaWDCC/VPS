@@ -81,7 +81,7 @@ export default function AuthoringToolPage() {
 
   /** called when save button is clicked */
   async function save() {
-    saveScene();
+    await saveScene();
     setSaveButtonText("Saved!");
     setTimeout(() => {
       setSaveButtonText("Save");
