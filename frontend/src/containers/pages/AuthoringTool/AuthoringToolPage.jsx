@@ -139,28 +139,6 @@ export default function AuthoringToolPage() {
           >
             Save & close
           </Button>
-          <Button
-            className={`btn top contained white ${
-              disableBefore ? "disabled" : ""
-            }`}
-            color="default"
-            variant="contained"
-            disabled={disableBefore}
-            onClick={() => updateScene(-1)}
-          >
-            Before
-          </Button>
-          <Button
-            className={`btn top contained white ${
-              disableNext ? "disabled" : ""
-            }`}
-            color="default"
-            variant="contained"
-            disabled={disableNext}
-            onClick={() => updateScene(1)}
-          >
-            Next
-          </Button>
           <HelpButton />
         </TopBar>
         <ToolbarContextProvider>

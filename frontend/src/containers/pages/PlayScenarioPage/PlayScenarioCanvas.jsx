@@ -1,6 +1,5 @@
 import ResetConfirmationModal from "components/ResetConfirmationModal";
 import { useState } from "react";
-import CountdownTimer from "../../../components/TimerComponent";
 import componentResolver from "./componentResolver";
 
 /**
