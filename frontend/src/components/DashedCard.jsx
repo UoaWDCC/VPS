@@ -1,5 +1,5 @@
 import { Box } from "@material-ui/core";
-import styles from "../styling/ListContainer.module.scss";
+import styles from "./ListContainer/ListContainer.module.scss";
 
 /**
  * Component used to represent a card with a dashed border, used to indicate that a new card can be created.

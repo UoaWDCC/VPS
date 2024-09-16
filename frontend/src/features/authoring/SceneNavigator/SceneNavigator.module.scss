@@ -1,0 +1,43 @@
+.sceneNavigator {
+  background-color: #f0f0f0;
+  filter: drop-shadow(2.5px 0 5px rgba(0, 0, 0, 0.1));
+  padding: 1rem 1rem 1rem 1rem;
+  display: flex;
+  flex-direction: column;
+
+  position: relative;
+  z-index: 10;
+
+  overflow-y: auto;
+  overflow-x: hidden;
+  gap: 1rem;
+  align-items: flex-start;
+  justify-content: stretch;
+
+  li {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .sceneButton {
+    border: 3px solid transparent;
+    width: 160px;
+    background-color: transparent;
+    position: relative;
+    overflow: hidden;
+
+    .sceneText {
+      font-size: small;
+      z-index: 2;
+      position: absolute;
+      left: -20px;
+      top: -5px;
+      color: #727272;
+    }
+  }
+
+  .sceneButton:hover {
+    border: 3px solid #cfcfcf;
+  }
+}
