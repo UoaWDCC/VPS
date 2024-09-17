@@ -77,14 +77,6 @@ export default function PlayScenarioCanvas({
 
         return componentResolver(component, index, action);
       })}
-      {scene.time && (
-        <CountdownTimer
-          targetDate={new Date().setSeconds(
-            new Date().getSeconds() + scene.time
-          )}
-          sceneTime={scene.time}
-        />
-      )}
       <ResetConfirmationModal
         isOpen={isModalOpen}
         onConfirm={handleConfirmReset}
