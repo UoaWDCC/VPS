@@ -1,8 +1,8 @@
 import { Button } from "@mui/material";
 import { useContext, useState } from "react";
 import { useLocation } from "react-router-dom";
-import NotesDisplayCard from "../playScenario/modals/NotesModal/NotesModal";
 import AuthenticationContext from "../../context/AuthenticationContext";
+import NotesDisplayCard from "../playScenario/modals/NotesModal/NotesModal";
 
 function InvalidRolePage({ group }) {
   const { user } = useContext(AuthenticationContext);
@@ -61,8 +61,8 @@ function InvalidRolePage({ group }) {
         — or —
       </p>
       <button
+        className="btn btn-neutral"
         type="button"
-        style={buttonStyle}
         onClick={() => window.location.reload()}
       >
         Try Access Scenario
