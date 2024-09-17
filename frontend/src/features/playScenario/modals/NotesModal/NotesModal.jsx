@@ -1,8 +1,9 @@
 import { useAuthGet, useAuthPost } from "hooks/crudHooks";
 import { useEffect, useState } from "react";
 
-import styles from "./NotesModal.module.scss";
+import { Add } from "@material-ui/icons";
 import Note from "../../components/Note/Note";
+import styles from "./NotesModal.module.scss";
 
 export default function NotesModal({ group, user, handleClose }) {
   const [notes, setNotes] = useState([]);
@@ -106,14 +107,13 @@ export default function NotesModal({ group, user, handleClose }) {
               />
             ))}
             <div
-              role="button"
-              tabIndex={0}
-              onKeyDown={handleKeyPress}
+              className="card bg-slate-50 w-60 h-40 shadow-xl cursor-pointer hover:border-2 border-slate-300"
               onClick={handleCreate}
-              className={styles.createButton}
+              onKeyDown={handleKeyPress}
             >
-              <div className={styles.crossHorizontalLine} />
-              <div className={styles.crossVerticalLine} />
+              <div className="card-body flex justify-center items-center text-slate-500">
+                <Add fontSize="large" />
+              </div>
             </div>
           </div>
         </div>
