@@ -48,11 +48,20 @@ const deleteAllFlags = async (groupData) => {
   }
 
   await Group.updateOne({ _id: groupId }, { $set: { currentFlags: [] } }).exec();
-  // if (res.nModified !== 1) {
-  //   throw new HttpError("Failed to delete notes", STATUS.INTERNAL_SERVER_ERROR);
-  // }
   return true;
 };
+
+const deleteAllPaths = async (groupData) => {
+  const groupId = groupData._id;
+  const group = await Group.findById(groupId).lean();
+  if (!group) {
+    throw new HttpError("Group not found", STATUS.NOT_FOUND);
+  }
+
+  await Group.updateOne({ _id: groupId }, { $set: { path: [] } }).exec();
+  return true;
+};
+
 
 export const getScenarioFirstScene = async (scenarioId) => {
   const scenario = await Scenario.findById(scenarioId, {
@@ -223,12 +232,12 @@ export const groupReset = async (req) => {
   const hasReset = scene.components.some((c) => c.type === "RESET_BUTTON");
   if (!hasReset) throw new HttpError("Invalid reset", STATUS.FORBIDDEN);
 
-
-  console.log(group)
-
   if (!(await deleteAllFlags(group)))
     throw new HttpError("Failed to delete flags", STATUS.INTERNAL_SERVER_ERROR);
-  
+
+  if (!(await deleteAllPaths(group)))
+    throw new HttpError("Failed to delete paths", STATUS.INTERNAL_SERVER_ERROR);
+
   return { status: STATUS.OK };
 };
 
