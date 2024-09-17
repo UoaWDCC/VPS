@@ -153,7 +153,7 @@ export default function ListContainer({
             : null}
         </ImageList>
 
-        {assignedScenarios ? (
+        {assignedScenarios.length ? (
           <>
             {!sceneSelectionPage && (
               <h1 className="text-3xl font-bold my-3">Assigned scenarios</h1>
