@@ -1,3 +1,4 @@
+import SpeechTextComponent from "features/authoring/components/SpeechTextComponent";
 import ButtonComponent from "../authoring/components/ButtonComponent";
 import FirebaseImageComponent from "../authoring/components/FirebaseImageComponent";
 import ImageComponent from "../authoring/components/ImageComponent";
@@ -24,6 +25,7 @@ export default function componentResolver(component, index, onClick) {
     case "RESET_BUTTON":
       return <ButtonComponent {...props} />;
     case "SPEECHTEXT":
+      return <SpeechTextComponent {...props} />;
     case "TEXT":
       return <TextComponent {...props} />;
     case "IMAGE":
