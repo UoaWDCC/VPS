@@ -1,5 +1,6 @@
 import User from "../models/user";
 import Scenario from "../models/scenario";
+import Groups from "../models/group";
 import { retrieveScenarios } from "./scenarioDao";
 
 /**
@@ -76,6 +77,12 @@ const deleteUser = async (uid) => {
 };
 
 /**
+ * @deprecated 17/09/2024
+ * We currently do not support play history - a larger refactor is likely required, at which point,
+ * we should support both single and multiplayer
+ *
+ * Not removing as there are possible regressions not accounted for.
+ *
  * Appendings new object "newPlayed" to user's played array and adds the users uid to scenario's user array
  * @param {String} uid user's unique id
  * @param {{scenarioId: String, path: Object[]}} newPlayed user's new played object
@@ -135,9 +142,16 @@ const assignScenarioToUsers = async (scenarioId, newAssignees) => {
  */
 const retrieveAssignedScenarioList = async (userId) => {
   const user = await User.findOne({ uid: userId });
-  if (!user.assigned || !user.assigned.length) return [];
+  if (!user.assigned) return []; // even if list is empty, we may have groups this user is a part of.
 
-  return retrieveScenarios(user.assigned);
+  const multiplayerScenarios = await Groups.find(
+    { "users.email": user.email },
+    { scenarioId: 1, _id: 0 }
+  );
+
+  return retrieveScenarios(
+    user.assigned.concat(multiplayerScenarios.map((doc) => doc.scenarioId))
+  );
 };
 
 const fetchScene = async (email, scenarioId) => {
