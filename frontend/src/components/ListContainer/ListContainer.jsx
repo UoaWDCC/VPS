@@ -153,7 +153,7 @@ export default function ListContainer({
             : null}
         </ImageList>
 
-        {assignedScenarios.length ? (
+        {assignedScenarios && assignedScenarios.length ? (
           <>
             {!sceneSelectionPage && (
               <h1 className="text-3xl font-bold my-3">Assigned scenarios</h1>
@@ -171,14 +171,15 @@ export default function ListContainer({
                 </ImageListItem>
               ) : null}
               {assignedScenarios && assignedScenarios.length > 0
-                ? assignedScenarios.map(({ _id, name }) => (
+                ? assignedScenarios.map((item) => (
                     <ImageListItem
                       className={classes.listContainerItem}
-                      key={_id}
+                      key={item._id}
                       cols={1}
                       height={200}
-                      onClick={(event) => onItemClick(event, { _id })}
-                      onContextMenu={() => onItemRightClick({ _id })}
+                      onClick={() => {
+                        window.open(`/play/${item._id}`, "_blank");
+                      }}
                     >
                       <div
                         className={
@@ -189,7 +190,9 @@ export default function ListContainer({
                           height={160}
                           border={5}
                           borderRadius={10}
-                          borderColor={_id === selected ? "#035084" : "#747474"}
+                          borderColor={
+                            item._id === selected ? "#035084" : "#747474"
+                          }
                           overflow="hidden"
                           textAlign="center"
                           sx={{
@@ -199,20 +202,22 @@ export default function ListContainer({
                             },
                           }}
                         >
-                          {sceneSelectionPage ? (
-                            <Thumbnail url={`/play/${scenarioId}/${_id}`} />
-                          ) : (
-                            <Thumbnail url={`/play/${_id}`} />
-                          )}
+                          <Thumbnail
+                            components={
+                              sceneSelectionPage
+                                ? item.components
+                                : item.thumbnail?.components || []
+                            }
+                          />
                         </Box>
                         <input
                           className={styles.text}
-                          defaultValue={name}
+                          defaultValue={item.name}
                           onBlur={onItemBlur}
-                          key={_id}
+                          key={item._id}
                         />
                       </div>
-                      {invalidNameId === _id && (
+                      {invalidNameId === item._id && (
                         <p1 className="nullNameWarning">invalid null name</p1>
                       )}
                     </ImageListItem>
