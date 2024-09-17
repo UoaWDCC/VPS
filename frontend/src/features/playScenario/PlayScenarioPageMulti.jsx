@@ -119,7 +119,6 @@ export default function PlayScenarioPageMulti({ group }) {
       console.error("Error during reset:", error);
     }
   };
-  
 
   if (loading) return <LoadingPage text="Loading Scene..." />;
   if (authError) return <></>;

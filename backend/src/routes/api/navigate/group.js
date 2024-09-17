@@ -47,7 +47,10 @@ const deleteAllFlags = async (groupData) => {
     throw new HttpError("Group not found", STATUS.NOT_FOUND);
   }
 
-  await Group.updateOne({ _id: groupId }, { $set: { currentFlags: [] } }).exec();
+  await Group.updateOne(
+    { _id: groupId },
+    { $set: { currentFlags: [] } }
+  ).exec();
   return true;
 };
 
@@ -61,7 +64,6 @@ const deleteAllPaths = async (groupData) => {
   await Group.updateOne({ _id: groupId }, { $set: { path: [] } }).exec();
   return true;
 };
-
 
 export const getScenarioFirstScene = async (scenarioId) => {
   const scenario = await Scenario.findById(scenarioId, {
@@ -225,7 +227,6 @@ export const groupReset = async (req) => {
 
   const scene = await getSceneConsideringRole(currentScene, role);
   if (!scene || !scene.components) {
-    console.error("Invalid scene or missing components:", scene);
     throw new HttpError("Scene not found or invalid", STATUS.NOT_FOUND);
   }
 
@@ -251,8 +252,6 @@ export const groupGetResources = async (req) => {
 
   const flags = group.currentFlags || [];
   const resources = [];
-
-  console.log(flags)
 
   // Fetch all resources from the database
   const allResources = await Resource.find({});

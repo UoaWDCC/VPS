@@ -29,7 +29,6 @@ export default function PlayScenarioCanvas({
       console.error("Error during reset confirmation:", error);
     }
   };
-  
 
   const handleCancelReset = () => {
     setIsModalOpen(false);
