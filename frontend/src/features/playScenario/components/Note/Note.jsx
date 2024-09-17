@@ -1,6 +1,6 @@
-import { useState, useEffect, useContext } from "react";
-import { useAuthGet, useAuthDelete, useAuthPut } from "hooks/crudHooks";
 import AuthenticationContext from "context/AuthenticationContext";
+import { useAuthDelete, useAuthGet, useAuthPut } from "hooks/crudHooks";
+import { useContext, useEffect, useState } from "react";
 import styles from "./Note.module.scss";
 
 export default function Note({ role, noteId, group, refetchGroup }) {
@@ -177,27 +177,27 @@ export default function Note({ role, noteId, group, refetchGroup }) {
   return (
     <>
       <div
-        role="button"
+        className="card bg-slate-50 w-60 h-40 shadow-xl cursor-pointer border-2 border-slate-50 hover:border-slate-300 "
         onClick={handleOpen}
         onKeyDown={handleKeyPress}
-        tabIndex={0}
-        className={styles.note}
       >
-        {role ? <h2>{role}</h2> : ""}
-        {noteData ? noteData.title : ""}
-        <div className={styles.timeInfo}>
-          {" "}
-          {date instanceof Date ? (
-            <div>
-              <p>Last edit:</p>
-              <p>{date.toLocaleDateString()}</p>
-              <p>{date.toLocaleTimeString()}</p>
-            </div>
-          ) : (
-            ""
-          )}
+        <div className="card-body p-5">
+          <h2 className="card-title overflow-hidden text-ellipsis text-nowrap">
+            <span className="capitalize">[{role || "-"}]</span>
+            <span className="overflow-hidden text-ellipsis">
+              {noteData?.title || "-"}
+            </span>
+          </h2>
+          <p className="overflow-hidden text-ellipsis">
+            {noteData?.text || "-"}
+          </p>
+          {/* Date time */}
+          <p>
+            Last edit: {date instanceof Date ? date.toLocaleDateString() : "-"}
+          </p>
         </div>
       </div>
+
       {open && (
         <div>
           <div className={styles.noteContent}>
