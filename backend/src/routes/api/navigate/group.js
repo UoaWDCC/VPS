@@ -40,6 +40,31 @@ const deleteAllNotes = async (groupData) => {
   return true;
 };
 
+const deleteAllFlags = async (groupData) => {
+  const groupId = groupData._id;
+  const group = await Group.findById(groupId).lean();
+  if (!group) {
+    throw new HttpError("Group not found", STATUS.NOT_FOUND);
+  }
+
+  await Group.updateOne(
+    { _id: groupId },
+    { $set: { currentFlags: [] } }
+  ).exec();
+  return true;
+};
+
+const deleteAllPaths = async (groupData) => {
+  const groupId = groupData._id;
+  const group = await Group.findById(groupId).lean();
+  if (!group) {
+    throw new HttpError("Group not found", STATUS.NOT_FOUND);
+  }
+
+  await Group.updateOne({ _id: groupId }, { $set: { path: [] } }).exec();
+  return true;
+};
+
 export const getScenarioFirstScene = async (scenarioId) => {
   const scenario = await Scenario.findById(scenarioId, {
     scenes: { $slice: 1 },
@@ -189,6 +214,9 @@ export const groupNavigate = async (req) => {
 export const groupReset = async (req) => {
   const { uid, currentScene } = req.body;
   const group = await getGroupByIdAndUser(req.params.groupId, uid);
+  if (!group) {
+    throw new HttpError("Group not found", STATUS.NOT_FOUND);
+  }
   const { role } = group.users[0];
 
   if (!(await deleteAllNotes(group)))
@@ -198,14 +226,18 @@ export const groupReset = async (req) => {
     throw new HttpError("Scene mismatch has occured", STATUS.CONFLICT);
 
   const scene = await getSceneConsideringRole(currentScene, role);
+  if (!scene || !scene.components) {
+    throw new HttpError("Scene not found or invalid", STATUS.NOT_FOUND);
+  }
+
   const hasReset = scene.components.some((c) => c.type === "RESET_BUTTON");
   if (!hasReset) throw new HttpError("Invalid reset", STATUS.FORBIDDEN);
 
-  await Group.findOneAndUpdate(
-    { _id: group._id },
-    { $set: { path: [], currentFlags: [] } },
-    { new: true }
-  );
+  if (!(await deleteAllFlags(group)))
+    throw new HttpError("Failed to delete flags", STATUS.INTERNAL_SERVER_ERROR);
+
+  if (!(await deleteAllPaths(group)))
+    throw new HttpError("Failed to delete paths", STATUS.INTERNAL_SERVER_ERROR);
 
   return { status: STATUS.OK };
 };
