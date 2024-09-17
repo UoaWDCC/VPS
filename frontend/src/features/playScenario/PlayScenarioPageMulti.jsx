@@ -106,20 +106,20 @@ export default function PlayScenarioPageMulti({ group }) {
   }, [sceneId]);
 
   const reset = async () => {
-    const res = await usePost(
-      `api/navigate/group/reset/${group._id}`,
-      { currentScene: sceneId },
-      user.getIdToken.bind(user)
-    );
-    if (res.status) {
-      handleError(res);
-      return;
-    }
+    try {
+      const res = await usePost(
+        `api/navigate/group/reset/${group._id}`,
+        { currentScene: sceneId },
+        user.getIdToken.bind(user)
+      );
 
-    console.log("reset");
-    setPrevious(null);
-    history.replace(`/play/${scenarioId}/multiplayer`);
+      setPrevious(null);
+      history.replace(`/play/${scenarioId}/multiplayer`);
+    } catch (error) {
+      console.error("Error during reset:", error);
+    }
   };
+  
 
   if (loading) return <LoadingPage text="Loading Scene..." />;
   if (authError) return <></>;

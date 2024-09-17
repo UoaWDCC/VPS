@@ -21,10 +21,15 @@ export default function PlayScenarioCanvas({
     setIsModalOpen(true);
   };
 
-  const handleConfirmReset = () => {
+  const handleConfirmReset = async () => {
     setIsModalOpen(false);
-    reset();
+    try {
+      await reset();
+    } catch (error) {
+      console.error("Error during reset confirmation:", error);
+    }
   };
+  
 
   const handleCancelReset = () => {
     setIsModalOpen(false);
