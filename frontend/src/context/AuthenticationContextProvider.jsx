@@ -11,6 +11,7 @@ import AuthenticationContext from "./AuthenticationContext";
  */
 export default function AuthenticationContextProvider({ children }) {
   const [user, loading, error] = useAuthState(auth);
+  const [isSigningIn, setIsSigningIn] = useState(false); // Whether or not the user is currently in the signin popup.
 
   /**
    * No idToken is stored in state to ensure the non-expired idToken is always used
@@ -26,7 +27,8 @@ export default function AuthenticationContextProvider({ children }) {
   }
 
   function signInUsingGoogle() {
-    signInWithPopup(auth, googleProvider);
+    setIsSigningIn(true);
+    signInWithPopup(auth, googleProvider).finally(() => setIsSigningIn(false));
   }
 
   function signOut() {
@@ -48,6 +50,7 @@ export default function AuthenticationContextProvider({ children }) {
     <AuthenticationContext.Provider
       value={{
         getUserIdToken,
+        isSigningIn,
         loading,
         user,
         error,
