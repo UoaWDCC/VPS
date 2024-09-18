@@ -1,13 +1,10 @@
 import { useContext, useEffect } from "react";
 import { useHistory, useLocation } from "react-router-dom";
-import ScreenContainer from "components/ScreenContainer/ScreenContainer";
 import AuthenticationContext from "context/AuthenticationContext";
 import { usePost } from "hooks/crudHooks";
 import LoadingPage from "features/status/LoadingPage";
 import styles from "./LoginPage.module.scss";
-import sideBarStyles from "components/SideBar/SideBar.module.scss";
 import GoogleIcon from "./GoogleIcon";
-import toast from "react-hot-toast";
 
 /**
  * Container for the login page. Redirects logged-in users to main page and allows users to sign up using Google.
@@ -41,12 +38,13 @@ export default function LoginPage() {
 
   return (
     <div className="w-full h-full flex flex-col items-center p-10 graph-paper">
+      <div className="w-full flex justify-center"></div>
       {/* Main title + subtitle */}
-      <div className="flex flex-col justify-end items-center basis-[70%] gap-3 text-center font-mona">
-        <h1 className={`font-semibold text-6xl ${styles.gradient}`}>
+      <div className="flex flex-col justify-end items-center basis-[60%] gap-5 text-center font-mona">
+        <h1 className={`font-semibold text-6xl text-uoa-blue`}>
           Virtual Patient Simulator
         </h1>
-        <p className="text-slate-600 max-w-[75rem]">
+        <p className="text-slate-600 max-w-[65rem]">
           This tool aims to provide Medical and Health Science students at the
           University of Auckland with a tool that supports interactive and
           immersive education through virtual patient scenarios.
@@ -54,6 +52,7 @@ export default function LoginPage() {
 
         <button
           className="btn btn-outline mt-16 cursor-pointer"
+          disabled={loading || isSigningIn}
           onClick={() => {
             if (!loading && !user) {
               signInUsingGoogle();
@@ -75,18 +74,29 @@ export default function LoginPage() {
       </div>
 
       {/* credits */}
-      <div className="font-mona font-light text-xs tracking-wider text-slate-400 flex-grow flex justify-center items-end ">
+      <div className="w-full font-mona font-light text-xs tracking-wider text-slate-400 flex-grow flex justify-center items-end text-center">
         <p>
           Crafted by many hands, across many teams, over many years at{" "}
           <a
             className={`font-bold ${styles.gradient} `}
             href="https://wdcc.co.nz/"
+            target="_blank"
           >
             WDCC
           </a>
-          !
+          .
         </p>
       </div>
+
+      {/* Hidden on small screens. UoA is not *that* important in this... */}
+      <a href="https://www.auckland.ac.nz" target="_blank">
+        <img
+          draggable="false"
+          src="uoa-logo-filled.png"
+          alt="University of Auckland Logo"
+          className="w-10 right-7 bottom-7 fixed md:block hidden"
+        />
+      </a>
     </div>
   );
 }

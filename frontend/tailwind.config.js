@@ -6,6 +6,9 @@ module.exports = {
       fontFamily: {
         mona: ["MonaSans"],
       },
+      colors: {
+        "uoa-blue": "#035084",
+      },
     },
   },
   plugins: [require("daisyui")],
