@@ -7,6 +7,7 @@ import LoadingPage from "features/status/LoadingPage";
 import styles from "./LoginPage.module.scss";
 import sideBarStyles from "components/SideBar/SideBar.module.scss";
 import GoogleIcon from "./GoogleIcon";
+import toast from "react-hot-toast";
 
 /**
  * Container for the login page. Redirects logged-in users to main page and allows users to sign up using Google.

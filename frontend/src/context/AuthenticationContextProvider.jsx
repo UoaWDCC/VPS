@@ -4,6 +4,7 @@ import { useAuthState } from "react-firebase-hooks/auth";
 import { auth, googleProvider } from "../firebase/firebase";
 import { useGetSimplified } from "../hooks/crudHooks";
 import AuthenticationContext from "./AuthenticationContext";
+import toast from "react-hot-toast";
 
 /**
  * This is a Context Provider made with the React Context API
@@ -28,7 +29,9 @@ export default function AuthenticationContextProvider({ children }) {
 
   function signInUsingGoogle() {
     setIsSigningIn(true);
-    signInWithPopup(auth, googleProvider).finally(() => setIsSigningIn(false));
+    signInWithPopup(auth, googleProvider)
+      .catch(() => toast.error("Failed to log in."))
+      .finally(() => setIsSigningIn(false));
   }
 
   function signOut() {
