@@ -40,31 +40,6 @@ const deleteAllNotes = async (groupData) => {
   return true;
 };
 
-const deleteAllFlags = async (groupData) => {
-  const groupId = groupData._id;
-  const group = await Group.findById(groupId).lean();
-  if (!group) {
-    throw new HttpError("Group not found", STATUS.NOT_FOUND);
-  }
-
-  await Group.updateOne(
-    { _id: groupId },
-    { $set: { currentFlags: [] } }
-  ).exec();
-  return true;
-};
-
-const deleteAllPaths = async (groupData) => {
-  const groupId = groupData._id;
-  const group = await Group.findById(groupId).lean();
-  if (!group) {
-    throw new HttpError("Group not found", STATUS.NOT_FOUND);
-  }
-
-  await Group.updateOne({ _id: groupId }, { $set: { path: [] } }).exec();
-  return true;
-};
-
 export const getScenarioFirstScene = async (scenarioId) => {
   const scenario = await Scenario.findById(scenarioId, {
     scenes: { $slice: 1 },
@@ -213,6 +188,7 @@ export const groupNavigate = async (req) => {
 
 export const groupReset = async (req) => {
   const { uid, currentScene } = req.body;
+
   const group = await getGroupByIdAndUser(req.params.groupId, uid);
   if (!group) {
     throw new HttpError("Group not found", STATUS.NOT_FOUND);
@@ -233,11 +209,10 @@ export const groupReset = async (req) => {
   const hasReset = scene.components.some((c) => c.type === "RESET_BUTTON");
   if (!hasReset) throw new HttpError("Invalid reset", STATUS.FORBIDDEN);
 
-  if (!(await deleteAllFlags(group)))
-    throw new HttpError("Failed to delete flags", STATUS.INTERNAL_SERVER_ERROR);
-
-  if (!(await deleteAllPaths(group)))
-    throw new HttpError("Failed to delete paths", STATUS.INTERNAL_SERVER_ERROR);
+  await Group.updateOne(
+    { _id: req.params.groupId },
+    { $set: { path: [], currentFlags: [] } }
+  ).exec();
 
   return { status: STATUS.OK };
 };
