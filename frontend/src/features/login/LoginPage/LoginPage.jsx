@@ -38,7 +38,6 @@ export default function LoginPage() {
 
   return (
     <div className="w-full h-full flex flex-col items-center p-10 graph-paper">
-      <div className="w-full flex justify-center"></div>
       {/* Main title + subtitle */}
       <div className="flex flex-col justify-end items-center basis-[60%] gap-5 text-center font-mona">
         <h1 className={`font-semibold text-6xl text-uoa-blue`}>
