@@ -107,12 +107,14 @@ export default function PlayScenarioPageMulti({ group }) {
 
   const reset = async () => {
     try {
-      const res = await usePost(
+      await usePost(
         `api/navigate/group/reset/${group._id}`,
         { currentScene: sceneId },
         user.getIdToken.bind(user)
       );
 
+      setAddFlags([]);
+      setRemoveFlags([]);
       setPrevious(null);
       history.replace(`/play/${scenarioId}/multiplayer`);
     } catch (error) {

@@ -213,6 +213,7 @@ export const groupNavigate = async (req) => {
 
 export const groupReset = async (req) => {
   const { uid, currentScene } = req.body;
+  const groupId = req.params.groupId;
   const group = await getGroupByIdAndUser(req.params.groupId, uid);
   if (!group) {
     throw new HttpError("Group not found", STATUS.NOT_FOUND);
@@ -233,12 +234,16 @@ export const groupReset = async (req) => {
   const hasReset = scene.components.some((c) => c.type === "RESET_BUTTON");
   if (!hasReset) throw new HttpError("Invalid reset", STATUS.FORBIDDEN);
 
-  if (!(await deleteAllFlags(group)))
-    throw new HttpError("Failed to delete flags", STATUS.INTERNAL_SERVER_ERROR);
+  await Group.updateOne(
+    { _id: groupId },
+    { $set: { path: [], currentFlags: [] } }
+  ).exec();
 
-  if (!(await deleteAllPaths(group)))
-    throw new HttpError("Failed to delete paths", STATUS.INTERNAL_SERVER_ERROR);
+  const groupTest = await Group.findById(groupId).lean();
 
+  console.log(groupTest);
+
+  console.log(`${Date.now()} reset done`)
   return { status: STATUS.OK };
 };
 
