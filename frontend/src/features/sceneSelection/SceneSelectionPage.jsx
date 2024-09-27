@@ -180,6 +180,7 @@ export function SceneSelectionPage({ data = null }) {
       `/api/scenario/${scenarioId}/scene/${currentScene._id}`,
       {
         name: target.value,
+        components: currentScene.components,
       },
       getUserIdToken
     );
