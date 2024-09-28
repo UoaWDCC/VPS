@@ -51,9 +51,20 @@ router.patch("/assigned/:scenarioId", async (req, res) => {
   res.status(HTTP_OK);
 });
 
-// creats new user
+const allowedDomains = new Set([
+  "projects.wdcc.co.nz",
+  "auckland.ac.nz",
+  "aucklanduni.ac.nz",
+]);
+
+// creates a new user
 router.post("/", async (req, res) => {
   const { name, uid, email, pictureURL } = req.body;
+
+  if (!allowedDomains.has(email.split("@")[1])) {
+    res.status(403).json({ error: "Forbidden" });
+    return;
+  }
 
   const existingUser = await retrieveUserByEmail(email);
   if (existingUser) {
