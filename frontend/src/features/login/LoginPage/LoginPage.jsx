@@ -1,10 +1,27 @@
 import { useContext, useEffect } from "react";
 import { useHistory, useLocation } from "react-router-dom";
 import AuthenticationContext from "context/AuthenticationContext";
-import { usePost } from "hooks/crudHooks";
 import LoadingPage from "features/status/LoadingPage";
 import styles from "./LoginPage.module.scss";
 import GoogleIcon from "./GoogleIcon";
+
+import axios from "axios";
+
+const createAccount = async (user) => {
+  const token = await user.getIdToken();
+  const config = {
+    method: "post",
+    url: `api/user/`,
+    headers: { Authorization: `Bearer ${token}` },
+    data: {
+      name: user.displayName,
+      uid: user.uid,
+      email: user.email,
+      pictureURL: user.photoURL,
+    },
+  };
+  return axios.request(config);
+};
 
 /**
  * Container for the login page. Redirects logged-in users to main page and allows users to sign up using Google.
@@ -12,8 +29,9 @@ import GoogleIcon from "./GoogleIcon";
  * @container
  */
 export default function LoginPage() {
-  const { user, loading, isSigningIn, signInUsingGoogle, getUserIdToken } =
-    useContext(AuthenticationContext);
+  const { user, loading, isSigningIn, signInUsingGoogle, signOut } = useContext(
+    AuthenticationContext
+  );
   const history = useHistory();
   const location = useLocation();
 
@@ -21,19 +39,17 @@ export default function LoginPage() {
   const redirectPath = params.get("redirect") || "/";
 
   useEffect(() => {
-    if (user) {
-      usePost(
-        `/api/user`,
-        {
-          name: user.displayName,
-          uid: user.uid,
-          email: user.email,
-          pictureURL: user.photoURL,
-        },
-        getUserIdToken
-      );
-      history.push(redirectPath);
-    }
+    if (!user) return;
+
+    createAccount(user)
+      .then(() => history.push(redirectPath))
+      .catch((e) => {
+        if (e.response.status === 403) {
+          console.log("Sign in with your UoA account");
+          // add some sort of toast here
+          signOut();
+        }
+      });
   }, [user]);
 
   return (
