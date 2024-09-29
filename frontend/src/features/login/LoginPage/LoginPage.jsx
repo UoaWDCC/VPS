@@ -5,9 +5,10 @@ import LoadingPage from "features/status/LoadingPage";
 import styles from "./LoginPage.module.scss";
 import GoogleIcon from "./GoogleIcon";
 
+import toast from "react-hot-toast";
 import axios from "axios";
 
-const createAccount = async (user) => {
+const handleSignIn = async (user) => {
   const token = await user.getIdToken();
   const config = {
     method: "post",
@@ -41,12 +42,11 @@ export default function LoginPage() {
   useEffect(() => {
     if (!user) return;
 
-    createAccount(user)
+    handleSignIn(user)
       .then(() => history.push(redirectPath))
       .catch((e) => {
         if (e.response.status === 403) {
-          console.log("Sign in with your UoA account");
-          // add some sort of toast here
+          toast.error("Please sign in with your UoA account");
           signOut();
         }
       });
@@ -86,6 +86,9 @@ export default function LoginPage() {
             </>
           )}
         </button>
+        <p className="font-light font-mona text-xs text-slate-400">
+          Make sure to use your <b>university account</b>.
+        </p>
       </div>
 
       {/* credits */}
