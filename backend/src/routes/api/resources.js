@@ -1,6 +1,6 @@
 import { Router } from "express";
-import auth from "../../middleware/firebaseAuth.js";
-import handle from "../../error/handle.js";
+import auth from "../../middleware/firebaseAuth";
+import { handle } from "../../util/error";
 
 import {
   createResource,
