@@ -18,12 +18,6 @@ const scenarioSchema = new Schema({
       ref: "Scene",
     },
   ],
-  users: [
-    {
-      type: String,
-      ref: "User",
-    },
-  ],
   roleList: [
     {
       type: String,
