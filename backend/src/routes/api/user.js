@@ -13,12 +13,10 @@ import User from "../../db/models/user.js";
 import Group from "../../db/models/group.js";
 import auth from "../../middleware/firebaseAuth.js";
 
-const router = Router();
+import STATUS from "../../util/status";
+import { handle, HttpError } from "../../util/error";
 
-const HTTP_OK = 200;
-const HTTP_NO_CONTENT = 204;
-const HTTP_NOT_FOUND = 404;
-const HTTP_CONFLICT = 409;
+const router = Router();
 
 // gets all users
 router.get("/", async (req, res) => {
@@ -48,7 +46,7 @@ router.patch("/assigned/:scenarioId", async (req, res) => {
 
   await assignScenarioToUsers(req.params.scenarioId, newAssigneeIds);
 
-  res.status(HTTP_OK);
+  res.status(STATUS.OK);
 });
 
 const allowedDomains = new Set([
@@ -57,33 +55,27 @@ const allowedDomains = new Set([
   "aucklanduni.ac.nz",
 ]);
 
-// creates a new user
-router.post("/", async (req, res) => {
-  const { name, uid, email, pictureURL } = req.body;
-
-  if (!allowedDomains.has(email.split("@")[1])) {
-    res.status(403).json({ error: "Forbidden" });
-    return;
-  }
-
-  const existingUser = await retrieveUserByEmail(email);
-  if (existingUser) {
-    res.status(HTTP_CONFLICT).json(existingUser);
-    return;
-  }
-
-  const user = await createUser(name, uid, email, pictureURL);
-
-  res.status(HTTP_OK).json(user);
-});
+// handles a sign in request
+router.post(
+  "/",
+  handle(async (req, res) => {
+    if (!allowedDomains.has(req.body.email.split("@")[1])) {
+      throw new HttpError("Sign in with your UoA account", STATUS.FORBIDDEN);
+    }
+    if (!(await retrieveUserByEmail(req.body.email))) {
+      await createUser(req.body);
+    }
+    res.status(STATUS.OK).send();
+  })
+);
 
 // delete user by uid
 router.delete("/:uid", async (req, res) => {
   const deleted = await deleteUser(req.params.uid);
   if (deleted) {
-    res.sendStatus(HTTP_NO_CONTENT);
+    res.sendStatus(STATUS.NO_CONTENT);
   } else {
-    res.sendStatus(HTTP_NOT_FOUND);
+    res.sendStatus(STATUS.NOT_FOUND);
   }
 });
 
@@ -92,9 +84,9 @@ router.put("/:uid", async (req, res) => {
   const scenarioID = Object.values(req.body)[0];
   const added = await addPlayed(req.params.uid, req.body, scenarioID);
   if (added) {
-    res.status(HTTP_OK).json(added);
+    res.status(STATUS.OK).json(added);
   } else {
-    res.sendStatus(HTTP_NOT_FOUND);
+    res.sendStatus(STATUS.NOT_FOUND);
   }
 });
 
@@ -112,7 +104,7 @@ router.post("/:uid/:scenarioId/path", async (req, res) => {
     }
   );
 
-  res.sendStatus(HTTP_OK);
+  res.sendStatus(STATUS.OK);
 });
 
 router.use(auth);
@@ -123,7 +115,7 @@ router.get("/group/:scenarioId", async (req, res) => {
   const { uid } = req.body;
   const { email } = await User.findOne({ uid }, { email: 1 }).lean();
   const group = await Group.findOne({ scenarioId, "users.email": email });
-  return res.status(HTTP_OK).json({ group });
+  return res.status(STATUS.OK).json({ group });
 });
 
 export default router;

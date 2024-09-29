@@ -1,5 +1,5 @@
-import HttpError from "../error/HttpError.js";
-import status from "../error/status.js";
+import { HttpError } from "../util/error";
+import status from "../util/status";
 
 // eslint-disable-next-line
 function errorHandler(err, req, res, next) {

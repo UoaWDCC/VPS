@@ -40,25 +40,11 @@ const retrievePlayedUsers = async (scenarioId) => {
 
 /**
  * Creates a user in the database,
- * @param {String} name user's name
- * @param {String} uid user's unique id
- * @param {String} email user's email address
- * @param {String} pictureURL URL to user's profile picture
+ * @param {Record<String, String>} info user's info
  * @returns the created database user object
  */
-const createUser = async (name, uid, email, pictureURL) => {
-  const user = await User.find({ uid });
-  if (user.length === 0) {
-    const dbUser = new User({
-      name,
-      uid,
-      email,
-      pictureURL,
-    });
-    await dbUser.save();
-    return dbUser;
-  }
-  return user;
+const createUser = async (info) => {
+  return new User(info).save();
 };
 
 /**
