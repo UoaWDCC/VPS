@@ -22,6 +22,7 @@ export default function componentResolver(
   zoomLevel
 ) {
   const props = { key: component.id, id: index, onClick, component, zoomLevel };
+  console.log("zoomLevel", zoomLevel);
 
   switch (component.type) {
     // ADD NEW COMPONENT TYPES HERE
