@@ -16,12 +16,13 @@ export default function PlayScenarioCanvas({
   setRemoveFlags,
 }) {
   const [isModalOpen, setIsModalOpen] = useState(false);
-
   const [zoomLevel, setZoomLevel] = useState(1);
+
+  const initialZoomLevel = window.devicePixelRatio;
 
   useEffect(() => {
     const handleResize = () => {
-      setZoomLevel(window.devicePixelRatio);
+      setZoomLevel(window.devicePixelRatio / initialZoomLevel);
     };
 
     window.addEventListener("resize", handleResize);
@@ -89,7 +90,13 @@ export default function PlayScenarioCanvas({
             break;
         }
 
-        return componentResolver(component, index, action, zoomLevel);
+        return componentResolver(
+          component,
+          index,
+          action,
+          zoomLevel,
+          initialZoomLevel
+        );
       })}
       <ResetConfirmationModal
         isOpen={isModalOpen}

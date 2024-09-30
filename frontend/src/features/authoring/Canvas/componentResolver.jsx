@@ -24,6 +24,7 @@ export default function componentResolver(component, index, onClick) {
           id={index}
           onClick={onClick}
           component={component}
+          zoomLevel={1}
         />
       );
     case "RESET_BUTTON":
@@ -33,6 +34,7 @@ export default function componentResolver(component, index, onClick) {
           id={index}
           onClick={onClick}
           component={component}
+          zoomLevel={1}
         />
       );
     case "SPEECHTEXT":
@@ -51,6 +53,7 @@ export default function componentResolver(component, index, onClick) {
           id={index}
           onClick={onClick}
           component={component}
+          zoomLevel={1}
         />
       );
     case "IMAGE":
@@ -69,6 +72,7 @@ export default function componentResolver(component, index, onClick) {
           id={index}
           onClick={onClick}
           component={component}
+          zoomLevel={1}
         />
       );
     case "FIREBASEAUDIO":

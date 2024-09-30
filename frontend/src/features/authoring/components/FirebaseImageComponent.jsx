@@ -27,9 +27,6 @@ export default function FirebaseImageComponent({
       component.width = (imageElement.offsetWidth / canvas.width) * 100;
       component.height = (imageElement.offsetHeight / canvas.height) * 100;
     }
-
-    console.log("width", component.width);
-    console.log("height", component.height);
   };
 
   useEffect(() => {
@@ -40,7 +37,7 @@ export default function FirebaseImageComponent({
     <Image
       id={id}
       src={component.url}
-      imageStyle={imageStyles(component)}
+      imageStyle={imageStyles(component, zoomLevel)}
       style={{
         ...imageContainerStyles(),
         zIndex: component?.zPosition || 0,
