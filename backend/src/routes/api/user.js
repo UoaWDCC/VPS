@@ -8,10 +8,10 @@ import {
   addPlayed,
   retrievePlayedUsers,
   assignScenarioToUsers,
-} from "../../db/daos/userDao";
-import User from "../../db/models/user";
-import Group from "../../db/models/group";
-import auth from "../../middleware/firebaseAuth";
+} from "../../db/daos/userDao.js";
+import User from "../../db/models/user.js";
+import Group from "../../db/models/group.js";
+import auth from "../../middleware/firebaseAuth.js";
 
 const router = Router();
 

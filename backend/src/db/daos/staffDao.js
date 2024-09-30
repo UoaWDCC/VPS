@@ -1,4 +1,4 @@
-import Staff from "../models/staff";
+import Staff from "../models/staff.js";
 
 /**
  * Retrieves all the authorised staff stored in the database

@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import { tryDeleteFile } from "../../firebase/storage";
+import { tryDeleteFile } from "../../firebase/storage.js";
 
 const { Schema } = mongoose;
 mongoose.set("useFindAndModify", false);

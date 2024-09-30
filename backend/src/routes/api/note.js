@@ -5,8 +5,8 @@ import {
   retrieveNoteList,
   deleteNote,
   retrieveNote,
-} from "../../db/daos/noteDao";
-import auth from "../../middleware/firebaseAuth";
+} from "../../db/daos/noteDao.js";
+import auth from "../../middleware/firebaseAuth.js";
 
 const router = Router();
 const HTTP_OK = 200;

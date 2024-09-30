@@ -8,9 +8,9 @@ import {
   deleteScene,
   duplicateScene,
   incrementVisisted,
-} from "../../db/daos/sceneDao";
-import auth from "../../middleware/firebaseAuth";
-import scenarioAuth from "../../middleware/scenarioAuth";
+} from "../../db/daos/sceneDao.js";
+import auth from "../../middleware/firebaseAuth.js";
+import scenarioAuth from "../../middleware/scenarioAuth.js";
 
 const router = Router({ mergeParams: true });
 

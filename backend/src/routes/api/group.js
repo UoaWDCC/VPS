@@ -5,10 +5,10 @@ import {
   getGroup,
   createGroup,
   getGroupByScenarioId,
-} from "../../db/daos/groupDao";
+} from "../../db/daos/groupDao.js";
 
-import { retrieveRoleList, updateRoleList } from "../../db/daos/scenarioDao";
-import Group from "../../db/models/group";
+import { retrieveRoleList, updateRoleList } from "../../db/daos/scenarioDao.js";
+import Group from "../../db/models/group.js";
 
 const router = Router();
 

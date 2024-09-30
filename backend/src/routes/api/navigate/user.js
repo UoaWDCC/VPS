@@ -1,10 +1,10 @@
-import Scene from "../../../db/models/scene";
-import User from "../../../db/models/user";
+import Scene from "../../../db/models/scene.js";
+import User from "../../../db/models/user.js";
 
-import HttpError from "../../../error/HttpError";
-import STATUS from "../../../error/status";
+import HttpError from "../../../error/HttpError.js";
+import STATUS from "../../../error/status.js";
 
-import { getScenarioFirstScene, getSimpleScene } from "./group";
+import { getScenarioFirstScene, getSimpleScene } from "./group.js";
 
 const getConnectedScenes = async (sceneID, active = true) => {
   const scene = await getSimpleScene(sceneID);

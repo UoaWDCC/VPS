@@ -1,7 +1,7 @@
-import User from "../models/user";
-import Scenario from "../models/scenario";
-import Groups from "../models/group";
-import { retrieveScenarios } from "./scenarioDao";
+import User from "../models/user.js";
+import Scenario from "../models/scenario.js";
+import Groups from "../models/group.js";
+import { retrieveScenarios } from "./scenarioDao.js";
 
 /**
  * Retrieves all users

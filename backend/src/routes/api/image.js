@@ -4,7 +4,7 @@ import {
   createImage,
   retrieveImage,
   retrieveImageList,
-} from "../../db/daos/imageDao";
+} from "../../db/daos/imageDao.js";
 
 const router = Router();
 

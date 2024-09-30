@@ -6,8 +6,8 @@ import { MongoMemoryServer } from "mongodb-memory-server";
 import express from "express";
 import mongoose from "mongoose";
 import axios from "axios";
-import routes from "../..";
-import Image from "../../../db/models/image";
+import routes from "../../index.js";
+import Image from "../../../db/models/image.js";
 
 jest.mock("firebase-admin"); // Needed to mock the firebase-admin dependency in firebase-auth.js which is in routes
 

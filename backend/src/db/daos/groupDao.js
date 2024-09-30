@@ -1,5 +1,5 @@
-import Group from "../models/group";
-import Scene from "../models/scene";
+import Group from "../models/group.js";
+import Scene from "../models/scene.js";
 
 const getGroup = async (groupId) => {
   const group = await Group.findById(groupId);

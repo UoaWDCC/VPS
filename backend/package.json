@@ -3,6 +3,7 @@
   "version": "0.0.0",
   "private": true,
   "main": "./src/index.js",
+  "type": "module",
   "scripts": {
     "start": "node -r esm ./src/index.js",
     "dev": "nodemon -r esm ./src/index.js",
