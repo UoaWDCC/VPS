@@ -1,8 +1,8 @@
 /* eslint-disable no-underscore-dangle */
 import { MongoMemoryServer } from "mongodb-memory-server";
 import mongoose from "mongoose";
-import Scenario from "../../db/models/scenario";
-import scenarioAuth from "../scenarioAuth";
+import Scenario from "../../db/models/scenario.js";
+import scenarioAuth from "../scenarioAuth.js";
 
 describe("Scenario Auth Middleware tests", () => {
   const HTTP_UNAUTHORISED = 401;

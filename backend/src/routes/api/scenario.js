@@ -1,6 +1,6 @@
 import { Router } from "express";
-import auth from "../../middleware/firebaseAuth";
-import scenarioAuth from "../../middleware/scenarioAuth";
+import auth from "../../middleware/firebaseAuth.js";
+import scenarioAuth from "../../middleware/scenarioAuth.js";
 
 import {
   createScenario,
@@ -8,11 +8,11 @@ import {
   updateScenario,
   deleteScenario,
   updateDurations,
-} from "../../db/daos/scenarioDao";
+} from "../../db/daos/scenarioDao.js";
 
-import { retrieveAssignedScenarioList } from "../../db/daos/userDao";
+import { retrieveAssignedScenarioList } from "../../db/daos/userDao.js";
 
-import scene from "./scene";
+import scene from "./scene.js";
 
 const router = Router();
 

@@ -3,11 +3,11 @@ import { MongoMemoryServer } from "mongodb-memory-server";
 import express from "express";
 import mongoose from "mongoose";
 import axios from "axios";
-import routes from "../..";
-import Scenario from "../../../db/models/scenario";
-import Scene from "../../../db/models/scene";
-import auth from "../../../middleware/firebaseAuth";
-import scenarioAuth from "../../../middleware/scenarioAuth";
+import routes from "../../index.js";
+import Scenario from "../../../db/models/scenario.js";
+import Scene from "../../../db/models/scene.js";
+import auth from "../../../middleware/firebaseAuth.js";
+import scenarioAuth from "../../../middleware/scenarioAuth.js";
 
 jest.mock("../../../middleware/firebaseAuth");
 jest.mock("../../../middleware/scenarioAuth");

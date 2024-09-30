@@ -1,7 +1,7 @@
 /* eslint-disable no-underscore-dangle */
-import Scene from "../models/scene";
-import Scenario from "../models/scenario";
-import { tryDeleteFile, updateFileMetadata } from "../../firebase/storage";
+import Scene from "../models/scene.js";
+import Scenario from "../models/scenario.js";
+import { tryDeleteFile, updateFileMetadata } from "../../firebase/storage.js";
 
 /**
  * Creates a scene in the database, and updates its parent scenario to contain the scene

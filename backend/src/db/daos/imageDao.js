@@ -1,5 +1,5 @@
 /* eslint-disable no-underscore-dangle */
-import Image from "../models/image";
+import Image from "../models/image.js";
 
 /**
  * Creates and persists an image object with a url into the database

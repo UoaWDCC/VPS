@@ -1,5 +1,5 @@
-import Scenario from "../models/scenario";
-import Scene from "../models/scene";
+import Scenario from "../models/scenario.js";
+import Scene from "../models/scene.js";
 
 /**
  * Creates a scenario in the database

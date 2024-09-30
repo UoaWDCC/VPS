@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import Scene from "./scene";
+import Scene from "./scene.js";
 
 const { Schema } = mongoose;
 
