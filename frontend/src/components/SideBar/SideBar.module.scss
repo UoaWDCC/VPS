@@ -7,6 +7,9 @@
   display: flex;
   flex-direction: column;
   align-items: center;
+  overflow-y: auto; 
+  max-height: 100vh;
+  scrollbar-width: none; 
 
   .logo {
     margin: 10px;
