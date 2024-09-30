@@ -12,28 +12,11 @@ import useStyles from "./components.styles";
  *    component={component}
  * />
  */
-export default function ButtonComponent({ id, onClick, component, isEditing }) {
+export default function ButtonComponent({ id, onClick, component, zoomLevel }) {
   const styles = useStyles(component);
-  const [zoomLevel, setZoomLevel] = useState(1);
   const userDefinedWidth = component.width;
   const userDefinedHeight = component.height;
 
-  useEffect(() => {
-    const handleResize = () => {
-      if (isEditing) {
-        setZoomLevel(1);
-        return;
-      }
-      setZoomLevel(window.devicePixelRatio);
-    };
-
-    window.addEventListener("resize", handleResize);
-
-    return () => {
-      window.removeEventListener("resize", handleResize);
-    };
-  }, []);
-  console.log(`Zoom level: ${zoomLevel}`);
   return (
     <Button
       style={{

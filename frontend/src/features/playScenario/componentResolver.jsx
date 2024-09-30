@@ -15,8 +15,13 @@ import AudioComponent from "./components/AudioComponent";
  *   componentResolver(component, index, selectElement)
  * )}
  */
-export default function componentResolver(component, index, onClick) {
-  const props = { key: component.id, id: index, onClick, component };
+export default function componentResolver(
+  component,
+  index,
+  onClick,
+  zoomLevel
+) {
+  const props = { key: component.id, id: index, onClick, component, zoomLevel };
 
   switch (component.type) {
     // ADD NEW COMPONENT TYPES HERE
