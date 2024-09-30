@@ -41,7 +41,9 @@ const retrieveScenarioList = async (uid) => {
   const scenarios = await Scenario.find(
     { uid },
     { name: 1, scenes: { $slice: 1 } }
-  ).lean();
+  )
+    .sort({ _id: 1 })
+    .lean();
   return addThumbs(scenarios);
 };
 
