@@ -108,7 +108,7 @@ export default function Canvas() {
       <div className={styles.canvasContainer}>
         <div id="canvas" className={styles.canvas} onClick={clearElement}>
           {currentScene?.components?.map((component, index) =>
-            componentResolver(component, index, selectElement)
+            componentResolver(component, index, selectElement, true)
           )}
         </div>
       </div>

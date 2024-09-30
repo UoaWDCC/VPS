@@ -14,7 +14,7 @@ import TextComponent from "../components/TextComponent";
  *   componentResolver(component, index, selectElement)
  * )}
  */
-export default function componentResolver(component, index, onClick) {
+export default function componentResolver(component, index, onClick, isEditing) {
   switch (component.type) {
     // ADD NEW COMPONENT TYPES HERE
     case "BUTTON":
@@ -24,6 +24,7 @@ export default function componentResolver(component, index, onClick) {
           id={index}
           onClick={onClick}
           component={component}
+          isEditing={isEditing}
         />
       );
     case "RESET_BUTTON":
@@ -33,6 +34,7 @@ export default function componentResolver(component, index, onClick) {
           id={index}
           onClick={onClick}
           component={component}
+          isEditing={isEditing}
         />
       );
     case "SPEECHTEXT":
