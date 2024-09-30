@@ -4,6 +4,7 @@ import { useAuthState } from "react-firebase-hooks/auth";
 import { auth, googleProvider } from "../firebase/firebase";
 import { useGetSimplified } from "../hooks/crudHooks";
 import AuthenticationContext from "./AuthenticationContext";
+import toast from "react-hot-toast";
 
 /**
  * This is a Context Provider made with the React Context API
@@ -11,6 +12,7 @@ import AuthenticationContext from "./AuthenticationContext";
  */
 export default function AuthenticationContextProvider({ children }) {
   const [user, loading, error] = useAuthState(auth);
+  const [isSigningIn, setIsSigningIn] = useState(false); // Whether or not the user is currently in the signin popup.
 
   /**
    * No idToken is stored in state to ensure the non-expired idToken is always used
@@ -26,7 +28,10 @@ export default function AuthenticationContextProvider({ children }) {
   }
 
   function signInUsingGoogle() {
-    signInWithPopup(auth, googleProvider);
+    setIsSigningIn(true);
+    signInWithPopup(auth, googleProvider)
+      .catch(() => toast.error("Failed to log in."))
+      .finally(() => setIsSigningIn(false));
   }
 
   function signOut() {
@@ -48,6 +53,7 @@ export default function AuthenticationContextProvider({ children }) {
     <AuthenticationContext.Provider
       value={{
         getUserIdToken,
+        isSigningIn,
         loading,
         user,
         error,

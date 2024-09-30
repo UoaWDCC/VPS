@@ -15,9 +15,28 @@ import ScenarioSelectionPage from "./features/scenarioSelection/ScenarioSelectio
 import { ScenePage } from "./features/sceneSelection/SceneSelectionPage";
 import theme from "./theme/App.theme";
 
+import { Toaster } from "react-hot-toast";
+
+const TOAST_OFFSET = 25;
+
 export default function App() {
   return (
     <>
+      {/* Toaster container */}
+      <Toaster
+        position="bottom-right"
+        toastOptions={{
+          style: {
+            padding: "1rem",
+          },
+        }}
+        containerStyle={{
+          bottom: TOAST_OFFSET,
+          right: TOAST_OFFSET,
+        }}
+      />
+
+      {/* Routes */}
       <ThemeProvider theme={theme}>
         <AuthenticationContextProvider>
           <BrowserRouter>
