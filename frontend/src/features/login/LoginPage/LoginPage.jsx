@@ -45,9 +45,12 @@ export default function LoginPage() {
     handleSignIn(user)
       .then(() => history.push(redirectPath))
       .catch((e) => {
-        if (e.response.status === 403) {
+        if (e.response?.status === 403) {
           toast.error("Please sign in with your UoA account");
           signOut();
+        } else {
+          console.log(e);
+          toast.error("An unexpected error occurred while signing in");
         }
       });
   }, [user]);
