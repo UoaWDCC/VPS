@@ -32,13 +32,13 @@ const HelpButton = (props) => {
         <dialog id="help_modal" className="modal modal-open">
           <form method="dialog" className="modal-box relative">
             <button
-              className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2"
+              className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2 text-black"
               onClick={handleClose}
             >
               ✕
             </button>
-            <h3 className="font-bold text-lg text-center">Help</h3>
-            <div className="py-4">
+            <h3 className="font-bold text-lg text-center text-black">Help</h3>
+            <div className="py-4 text-black">
               <p>
                 Welcome to the Virtual Patient Simulator! To create a new
                 scenario, click Create and start adding scenes. To play an

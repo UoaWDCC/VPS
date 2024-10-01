@@ -30,12 +30,12 @@ export default function ModalDialogue({
         <dialog id="modal" className="modal modal-open">
           <form method="dialog" className="modal-box relative max-w-lg">
             <button
-              className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2"
+              className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2 text-black"
               onClick={hide}
             >
               ✕
             </button>
-            <h3 className="font-bold text-lg">{title}</h3>
+            <h3 className="font-bold text-lg text-black">{title}</h3>
             <div className="py-4 max-h-64 overflow-y-auto">
               {children}
             </div>

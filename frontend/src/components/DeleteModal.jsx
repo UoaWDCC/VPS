@@ -28,10 +28,11 @@ function DeleteModal({ onDelete, currentScenario }) {
       </DeleteButton>
       <dialog id="my_modal_5" className="modal modal-bottom sm:modal-middle">
       <div className="modal-box relative">
-    <p className="py-4">Are you sure you want to delete the scenario?</p>
+      <h3 className="font-bold text-lg text-center text-black">Delete Scenario</h3>
+    <p className="py-4 text-black">Are you sure you want to delete the scenario?</p>
     <div className="modal-action flex justify-center">
       <form method="dialog">
-      <button className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
+      <button className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2 text-black">✕</button>
       <DeleteButton onClick={handleDelete} className="btn">Delete</DeleteButton>
       </form>
     </div>
