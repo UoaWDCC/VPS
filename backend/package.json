@@ -5,8 +5,8 @@
   "main": "./src/index.js",
   "type": "module",
   "scripts": {
-    "start": "node -r esm ./src/index.js",
-    "dev": "nodemon -r esm ./src/index.js",
+    "start": "node ./src/index.js",
+    "dev": "nodemon ./src/index.js",
     "server": "npm run start",
     "test": "jest",
     "lint": "eslint --ext .js,.jsx .",
@@ -15,29 +15,29 @@
     "prettify": "prettier --write src"
   },
   "dependencies": {
-    "axios": "^0.21.1",
+    "axios": "^1.7.7",
     "cors": "^2.8.5",
     "dotenv": "^8.2.0",
-    "esm": "^3.2.25",
-    "express": "~4.16.1",
+    "express": "^4.21.0",
     "firebase": "^9.1.1",
     "firebase-admin": "^9.11.1",
-    "mongodb-memory-server": "^7.3.6",
-    "mongoose": "^5.12.3",
+    "mongodb-memory-server": "^10.0.1",
+    "mongoose": "^8.7.0",
     "nodemon": "^3.0.1"
   },
   "devDependencies": {
-    "@babel/core": "^7.13.14",
+    "@babel/core": "^7.25.2",
+    "@babel/plugin-transform-modules-commonjs": "^7.24.8",
     "@babel/preset-env": "^7.13.12",
-    "@types/jest": "^26.0.22",
-    "babel-jest": "^26.6.3",
+    "@types/jest": "^29.5.13",
+    "babel-jest": "^29.7.0",
     "eslint": "^7.23.0",
     "eslint-config-airbnb-base": "^14.2.1",
     "eslint-config-prettier": "^8.1.0",
     "eslint-plugin-import": "^2.22.1",
     "eslint-plugin-jest": "^24.3.4",
     "eslint-plugin-prettier": "^3.3.1",
-    "jest": "^26.6.0",
+    "jest": "^29.7.0",
     "prettier": "^2.2.1"
   }
 }

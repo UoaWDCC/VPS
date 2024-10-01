@@ -98,24 +98,19 @@ const updateScene = async (sceneId, updatedScene) => {
  * Deletes a scene from the database, and removes it from its parent scenario
  * @param {String} scenarioId MongoDB ID of scenario
  * @param {String} sceneId MongoDB ID of scene
- * @returns {Boolean} True if successfully deleted, False if error
+ * @returns {Promise<Boolean>} true if scene was deleted, false otherwise
  */
 const deleteScene = async (scenarioId, sceneId) => {
-  const scenarioRes = await Scenario.updateOne(
+  const scenarioRes = await Scenario.findOneAndUpdate(
     { _id: scenarioId },
     { $pull: { scenes: sceneId } }
   );
-  if (scenarioRes.n !== 1) {
+  if (!scenarioRes) {
     return false;
   }
 
-  try {
-    const scene = await Scene.findById(sceneId);
-    await scene.remove();
-    return true;
-  } catch (e) {
-    return false;
-  }
+  const res = await Scene.findOneAndDelete({ _id: sceneId });
+  return res !== null;
 };
 
 /**

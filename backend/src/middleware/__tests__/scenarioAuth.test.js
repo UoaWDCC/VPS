@@ -34,10 +34,7 @@ describe("Scenario Auth Middleware tests", () => {
     mongoServer = await MongoMemoryServer.create();
     const uri = mongoServer.getUri();
 
-    await mongoose.connect(uri, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-    });
+    await mongoose.connect(uri);
   });
 
   beforeEach(async () => {

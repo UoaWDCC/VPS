@@ -94,9 +94,8 @@ router.put("/:sceneId", async (req, res) => {
 // Delete a scene
 router.delete("/:sceneId", async (req, res) => {
   const deleted = await deleteScene(req.params.scenarioId, req.params.sceneId);
-
   if (deleted) {
-    res.sendStatus(HTTP_NO_CONTENT);
+    res.sendStatus(HTTP_OK);
   } else {
     res.sendStatus(HTTP_NOT_FOUND);
   }
