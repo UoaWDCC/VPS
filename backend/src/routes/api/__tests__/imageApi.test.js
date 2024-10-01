@@ -56,7 +56,7 @@ describe("Image API tests", () => {
     expect(response.status).toBe(HTTP_OK);
 
     // check if scenario has been persisted to db
-    const dbImages = await Image.find();
+    const dbImages = await Image.find().sort({ url: 1 });
 
     expect(dbImages).toHaveLength(2);
     expect(dbImages[0].url).toEqual(body.urls[0]);
@@ -69,14 +69,7 @@ describe("Image API tests", () => {
       "https://drive.google.com/uc?export=view&id=1uRyrBAvCZf2dPHXR0TjsPVncU_rz0vuZ",
     ];
 
-    // eslint-disable-next-line no-restricted-syntax
-    for (const url of urls) {
-      const dbImage = new Image({
-        url,
-      });
-      // eslint-disable-next-line no-await-in-loop
-      await dbImage.save();
-    }
+    await Promise.all(urls.map((url) => new Image({ url }).save()));
 
     const response = await axios.get(`http://localhost:${port}/api/image/`);
     expect(response.status).toBe(HTTP_OK);
