@@ -197,41 +197,65 @@ export function SceneSelectionPage({ data = null }) {
     <ScreenContainer vertical>
       <TopBar>
         {VpsUser.role === AccessLevel.STAFF ? (
-          <Button
-            className="btn top contained white"
-            color="default"
-            variant="contained"
+          // <Button
+          //   className="btn top contained white"
+          //   color="default"
+          //   variant="contained"
+          //   onClick={openDashboard}
+          // >
+          //   Dashboard
+          // </Button>
+          <button
+            className="btn btn-primary text-secondary"
             onClick={openDashboard}
           >
             Dashboard
-          </Button>
+          </button>
         ) : (
           ""
         )}
-        <Button
+        {/* <Button
           className="btn top contained white"
           color="default"
           variant="contained"
           onClick={manageGroups}
         >
           Groups
-        </Button>
-        <Button
+        </Button> */}
+        <button
+          className="btn btn-primary text-secondary"
+          onClick={manageGroups}
+        >
+          Groups
+        </button>
+        {/* <Button
           className="btn top contained white"
           color="default"
           variant="contained"
           onClick={playScenario}
         >
           Play
-        </Button>
-        <Button
+        </Button> */}
+        <button
+          className="btn btn-primary text-secondary"
+          onClick={playScenario}
+        >
+          Play
+        </button>
+        {/* <Button
           className="btn top contained white"
           color="default"
           variant="outlined"
           onClick={() => setShareModalOpen(true)}
         >
           Share
-        </Button>
+        </Button> */}
+        <button
+          className="btn btn-primary text-secondary"
+          onClick={() => setShareModalOpen(true)}
+        >
+          Share
+        </button>
         <input
           type="file"
           ref={fileInputRef}

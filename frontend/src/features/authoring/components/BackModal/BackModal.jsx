@@ -5,7 +5,7 @@ import MuiDialogActions from "@material-ui/core/DialogActions";
 import Typography from "@material-ui/core/Typography";
 import { withStyles } from "@material-ui/core/styles";
 import { useContext } from "react";
-import { Link } from "react-router-dom";
+import { useHistory, Link } from "react-router-dom";
 import ScenarioContext from "context/ScenarioContext";
 import styles from "./BackModal.module.scss";
 
@@ -19,6 +19,7 @@ export default function BackModal({
   handleDisgard,
 }) {
   const { currentScenario } = useContext(ScenarioContext);
+  const history = useHistory();
 
   const DialogActions = withStyles(() => ({
     root: {
@@ -43,7 +44,7 @@ export default function BackModal({
           </Typography>
         </DialogContent>
         <DialogActions className={`${styles.dialogBody}`}>
-          <Button
+          {/* <Button
             className="btn contained red"
             autoFocus
             component={Link}
@@ -60,7 +61,21 @@ export default function BackModal({
             onClick={handleClose}
           >
             No, keep editing
-          </Button>
+          </Button> */}
+          <button
+            className="btn btn-error text-primary"
+            onClick={() => {
+              history.push(`/scenario/${currentScenario._id}`);
+            }}
+          >
+            Yes, discard changes
+          </button>
+          <button
+            className="btn btn-primary text-secondary"
+            onClick={handleClose}
+          >
+            No, keep editing
+          </button>
         </DialogActions>
       </Dialog>
     </div>

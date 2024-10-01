@@ -18,10 +18,10 @@ module.exports = {
       {
         VPSTheme: {
           primary: "#fafafa",
-          secondary: "#0080a7",
+          secondary: "#035084",
+          error: "#c13216",
         },
       },
-      "emerald",
     ],
   },
 };

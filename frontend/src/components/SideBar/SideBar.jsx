@@ -1,6 +1,6 @@
 import Button from "@material-ui/core/Button";
 import { useContext, useState } from "react";
-import { Link, useHistory } from "react-router-dom";
+import { Link, Router, useHistory } from "react-router-dom";
 import AuthenticationContext from "../../context/AuthenticationContext";
 import ScenarioContext from "../../context/ScenarioContext";
 import AccessLevel from "../../enums/route.access.level";
@@ -49,9 +49,7 @@ export default function SideBar() {
   }
 
   /** Calls backend end point to switch to the lecturer's dashboard */
-  function openDashboard() {
-    history.push("/dashboard");
-  }
+  function openDashboard() {}
 
   /** Calls backend end point to delete a scenario. */
   async function deleteScenario() {
@@ -92,7 +90,7 @@ export default function SideBar() {
         />
         <ul className={styles.sideBarList}>
           <li>
-            <Button
+            {/* <Button
               className="btn side contained white"
               color="default"
               variant="contained"
@@ -101,11 +99,19 @@ export default function SideBar() {
               }}
             >
               Create
-            </Button>
+            </Button> */}
+            <button
+              className="btn btn-primary text-secondary w-full"
+              onClick={() => {
+                handleOpenCard();
+              }}
+            >
+              Create
+            </button>
           </li>
           {VpsUser.role === AccessLevel.STAFF ? (
             <li>
-              <Button
+              {/* <Button
                 className={`btn side contained white ${
                   currentScenario ? "" : "disabled"
                 }  `}
@@ -115,13 +121,22 @@ export default function SideBar() {
                 disabled={!currentScenario}
               >
                 Dashboard
-              </Button>
+              </Button> */}
+              <button
+                className="btn btdisabled:btn-outline text-secondary disabled:opacity-30 w-full"
+                onClick={() => {
+                  history.push("/dashboard");
+                }}
+                disabled={!currentScenario}
+              >
+                Dashboard
+              </button>
             </li>
           ) : (
             ""
           )}
           <li>
-            <Button
+            {/* <Button
               className={`btn side contained white ${
                 currentScenario ? "" : "disabled"
               }  `}
@@ -131,10 +146,17 @@ export default function SideBar() {
               disabled={!currentScenario}
             >
               Play
-            </Button>
+            </Button> */}
+            <button
+              className="btn btn-primary text-secondary disabled:bg-primary disabled:text-secondary disabled:opacity-30 w-full"
+              onClick={playScenario}
+              disabled={!currentScenario}
+            >
+              Play
+            </button>
           </li>
           <li>
-            <Button
+            {/* <Button
               className={`btn side contained white ${
                 currentScenario ? "" : "disabled"
               }  `}
@@ -149,7 +171,32 @@ export default function SideBar() {
               disabled={!currentScenario}
             >
               Edit
-            </Button>
+            </Button> */}
+            <button
+              className="btn btn-primary text-secondary disabled:bg-primary disabled:text-secondary disabled:opacity-30 w-full"
+              disabled={!currentScenario}
+              onClick={() => {
+                history.push(`/scenario/${currentScenario._id}`);
+              }}
+            >
+              Edit
+            </button>
+            {/* {currentScenario ? (
+              <a
+                role="button"
+                className="btn btn-primary text-secondary"
+                href="/scenario/${currentScenario._id}"
+              >
+                Edit
+              </a>
+            ) : (
+              <button
+                className="btn disabled:bg-primary disabled:text-secondary disabled:opacity-30"
+                disabled="true"
+              >
+                Edit
+              </button>
+            )} */}
           </li>
           <li>
             <DeleteModal
@@ -158,14 +205,20 @@ export default function SideBar() {
             />
           </li>
           <li>
-            <Button
+            {/* <Button
               className="btn side contained white"
               color="default"
               variant="contained"
               onClick={signOut}
             >
               Logout
-            </Button>
+            </Button> */}
+            <button
+              className="btn btn-primary text-secondary w-full"
+              onClick={signOut}
+            >
+              Logout
+            </button>
           </li>
           <li>
             <HelpButton isSidebar />

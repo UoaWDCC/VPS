@@ -58,24 +58,38 @@ export default function TopBar({
         <ul className={styles.leftTopBarList}>
           <li className={styles.listItem}>
             {confirmModal ? (
-              <Button
-                className="btn top outlined white"
-                color="default"
-                variant="outlined"
+              // <Button
+              //   className="btn top outlined white"
+              //   color="default"
+              //   variant="outlined"
+              //   onClick={handleLeaveAuthoringTool}
+              // >
+              //   Back
+              // </Button>
+              <button
+                className="btn btn-primary text-secondary"
                 onClick={handleLeaveAuthoringTool}
               >
                 Back
-              </Button>
+              </button>
             ) : (
-              <Button
-                className="btn top outlined white"
-                color="default"
-                variant="outlined"
-                component={Link}
-                to={back}
+              // <Button
+              //   className="btn top outlined white"
+              //   color="default"
+              //   variant="outlined"
+              //   component={Link}
+              //   to={back}
+              // >
+              //   Back
+              // </Button>
+              <button
+                className="btn btn-primary text-secondary"
+                onClick={() => {
+                  history.push(back);
+                }}
               >
                 Back
-              </Button>
+              </button>
             )}
           </li>
         </ul>

@@ -42,13 +42,19 @@ export default function CreateScenarioCard({ onCreate, onClose }) {
           value={name}
           onChange={(e) => setName(e.target.value)}
         />
-        <Button
+        {/* <Button
           className="btn side contained blue"
           type="button"
           onClick={handleCreate}
         >
           Create
-        </Button>
+        </Button> */}
+        <button
+          className="btn btn-primary text-secondary"
+          onClick={handleCreate}
+        >
+          Create
+        </button>
       </div>
     </div>
   );

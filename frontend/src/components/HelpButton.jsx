@@ -34,7 +34,7 @@ const HelpButton = (props) => {
 
   return (
     <>
-      <Button
+      {/* <Button
         variant="outlined"
         className={`btn outlined white ${isSidebar ? "side" : "top"}`}
         color="default"
@@ -42,7 +42,14 @@ const HelpButton = (props) => {
         onClick={handleOpen}
       >
         Help
-      </Button>
+      </Button> */}
+      <button
+        className="btn btn-outline btn-primary cursor-pointer"
+        onClick={handleOpen}
+      >
+        <HelpIcon />
+        Help
+      </button>
       <Modal
         open={open}
         onClose={handleClose}

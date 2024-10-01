@@ -21,21 +21,33 @@ function DeleteModal({ onDelete, currentScenario }) {
 
   return (
     <div>
-      <DeleteButton
+      {/* <DeleteButton
         className="btn side"
         variant="contained"
         onClick={handleClickOpen}
         disabled={!currentScenario}
       >
         Delete
-      </DeleteButton>
+      </DeleteButton> */}
+      <button
+        className="btn btn-error text-primary disabled:bg-error disabled:text-primary disabled:opacity-30 w-full"
+        onClick={handleClickOpen}
+        disabled={!currentScenario}
+      >
+        Delete
+      </button>
       <Dialog open={open} onClose={handleClose}>
         <DialogTitle>Are you sure you want to delete the scenario?</DialogTitle>
         <DialogActions>
-          <Button onClick={handleClose} color="primary">
+          <button
+            className="btn btn-primary text-secondary"
+            onClick={handleClose}
+          >
             Go Back
-          </Button>
-          <DeleteButton onClick={handleDelete}>Delete</DeleteButton>
+          </button>
+          <button className="btn btn-error text-primary" onClick={handleDelete}>
+            Delete
+          </button>
         </DialogActions>
       </Dialog>
     </div>
