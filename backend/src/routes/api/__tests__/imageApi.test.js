@@ -1,7 +1,3 @@
-/* eslint-disable no-await-in-loop */
-/* eslint-disable guard-for-in */
-/* eslint-disable no-restricted-syntax */
-/* eslint-disable no-underscore-dangle */
 import { MongoMemoryServer } from "mongodb-memory-server";
 import express from "express";
 import mongoose from "mongoose";
@@ -23,10 +19,7 @@ describe("Image API tests", () => {
     mongoServer = await MongoMemoryServer.create();
     const uri = mongoServer.getUri();
 
-    await mongoose.connect(uri, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-    });
+    await mongoose.connect(uri);
 
     const app = express();
     app.use(express.json());

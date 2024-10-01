@@ -2,7 +2,6 @@ import mongoose from "mongoose";
 import { tryDeleteFile } from "../../firebase/storage.js";
 
 const { Schema } = mongoose;
-mongoose.set("useFindAndModify", false);
 
 const sceneSchema = new Schema({
   name: {

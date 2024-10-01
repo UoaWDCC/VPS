@@ -1,7 +1,6 @@
 import mongoose from "mongoose";
 
 const { Schema } = mongoose;
-mongoose.set("useFindAndModify", false);
 
 const imageSchema = new Schema({
   url: {

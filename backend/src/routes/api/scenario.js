@@ -17,7 +17,6 @@ import scene from "./scene.js";
 const router = Router();
 
 const HTTP_OK = 200;
-const HTTP_NO_CONTENT = 204;
 const HTTP_NOT_FOUND = 404;
 
 router.use("/:scenarioId/scene", scene);
@@ -69,7 +68,7 @@ router.put("/:scenarioId", async (req, res) => {
 router.delete("/:scenarioId", async (req, res) => {
   const deleted = await deleteScenario(req.params.scenarioId);
   if (deleted) {
-    res.sendStatus(HTTP_NO_CONTENT);
+    res.sendStatus(HTTP_OK);
   } else {
     res.sendStatus(HTTP_NOT_FOUND);
   }

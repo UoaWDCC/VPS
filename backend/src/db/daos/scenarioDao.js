@@ -145,13 +145,16 @@ const updateRoleList = async (scenarioId, updatedRoleList) => {
 /**
  * Deletes a scenario from the database
  * @param {String} scenarioId MongoDB ID of scenario
- * @returns {Boolean} True if successfully deleted, False if error
+ * @returns {Promise<Boolean>} True if successfully deleted, False if error
  */
 const deleteScenario = async (scenarioId) => {
   try {
-    const scenario = await Scenario.findById(scenarioId);
-    await scenario.remove();
-    return true;
+    const res = await Scenario.findOneAndDelete({ _id: scenarioId });
+    if (res !== null) {
+      await Scene.deleteMany({ _id: { $in: res.scenes } });
+      return true;
+    }
+    return false;
   } catch (e) {
     return false;
   }
