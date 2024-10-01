@@ -28,18 +28,18 @@ export default function ModalDialogue({
     <div>
       {isShowing && (
         <dialog id="modal" className="modal modal-open">
-          <form method="dialog" className="modal-box relative max-w-lg">
+          <form method="dialog" className="modal-box relative max-w-lg flex flex-col items-center">
             <button
               className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2 text-black"
               onClick={hide}
             >
               ✕
             </button>
-            <h3 className="font-bold text-lg text-black">{title}</h3>
-            <div className="py-4 max-h-64 overflow-y-auto">
+            <h3 className="font-bold text-lg text-center text-black">{title}</h3>
+            <div className="py-4 max-h-64 overflow-y-auto overflow-x-hidden text-center">
               {children}
             </div>
-            <div className="modal-action fixed bottom-0 left-0 right-0 bg-white p-4 shadow-lg">
+            <div className="modal-action w-full flex justify-center">
               {dialogueAction}
             </div>
           </form>
