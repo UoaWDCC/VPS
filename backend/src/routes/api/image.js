@@ -13,9 +13,8 @@ const HTTP_OK = 200;
 // add an image to the database
 router.post("/", async (req, res) => {
   const { urls } = req.body;
-  urls.forEach((url) => createImage(url));
-
-  res.status(HTTP_OK).json("image received");
+  await Promise.all(urls.map(createImage));
+  res.status(HTTP_OK).send();
 });
 
 // retrieve all database images
