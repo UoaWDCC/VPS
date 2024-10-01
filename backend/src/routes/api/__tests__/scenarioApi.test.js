@@ -33,7 +33,6 @@ function authHeaders(id) {
 
 describe("Scenario API tests", () => {
   const HTTP_OK = 200;
-  const HTTP_NO_CONTENT = 204;
 
   let mongoServer;
   let server;

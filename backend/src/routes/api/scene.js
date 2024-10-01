@@ -15,7 +15,6 @@ import scenarioAuth from "../../middleware/scenarioAuth.js";
 const router = Router({ mergeParams: true });
 
 const HTTP_OK = 200;
-const HTTP_NO_CONTENT = 204;
 const HTTP_NOT_FOUND = 404;
 
 // Apply auth middleware to all routes below this point
