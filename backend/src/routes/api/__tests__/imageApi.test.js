@@ -69,10 +69,12 @@ describe("Image API tests", () => {
       "https://drive.google.com/uc?export=view&id=1uRyrBAvCZf2dPHXR0TjsPVncU_rz0vuZ",
     ];
 
+    // eslint-disable-next-line no-restricted-syntax
     for (const url of urls) {
       const dbImage = new Image({
         url,
       });
+      // eslint-disable-next-line no-await-in-loop
       await dbImage.save();
     }
 

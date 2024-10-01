@@ -28,6 +28,6 @@
     "no-unused-vars": "warn",
     "func-names": "off",
     "no-underscore-dangle": "off",
-    "import/extensions": "ignorePackages"
+    "import/extensions": "off"
   }
 }

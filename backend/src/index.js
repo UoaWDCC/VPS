@@ -32,13 +32,3 @@ connectToDatabase().then(function () {
   // eslint-disable-next-line no-console
   app.listen(port, () => console.log(`App server listening on port ${port}!`));
 });
-
-const bag = {
-  weight: 10,
-  color: "red",
-  brand: "Nike",
-};
-
-console.log(bag?.weight);
-console.log(bag?.price?.cents);
-console.log(bag?.brand);
