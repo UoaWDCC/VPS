@@ -1,51 +1,4 @@
-import Dialog from "@material-ui/core/Dialog";
-import MuiDialogActions from "@material-ui/core/DialogActions";
-import MuiDialogContent from "@material-ui/core/DialogContent";
-import MuiDialogTitle from "@material-ui/core/DialogTitle";
-import IconButton from "@material-ui/core/IconButton";
-import Typography from "@material-ui/core/Typography";
-import { withStyles } from "@material-ui/core/styles";
-import CloseIcon from "@material-ui/icons/Close";
-
-const styles = (theme) => ({
-  root: {
-    margin: 0,
-    padding: theme.spacing(2),
-  },
-  closeButton: {
-    position: "absolute",
-    right: theme.spacing(1),
-    top: theme.spacing(1),
-    color: theme.palette.grey[500],
-  },
-});
-
-/**
- * Material-UI dialog title component with custom styling used as a dialog title.
- *
- * @component
- * @example
- * return (
- *   <DialogTitle />
- * )
- */
-const DialogTitle = withStyles(styles)((props) => {
-  const { children, classes, onClose, ...other } = props;
-  return (
-    <MuiDialogTitle disableTypography className={classes.root} {...other}>
-      <Typography variant="h6">{children}</Typography>
-      {onClose ? (
-        <IconButton
-          aria-label="close"
-          className={classes.closeButton}
-          onClick={onClose}
-        >
-          <CloseIcon />
-        </IconButton>
-      ) : null}
-    </MuiDialogTitle>
-  );
-});
+import React from "react";
 
 /**
  * Component used to a display a model on the screen.
@@ -73,17 +26,30 @@ export default function ModalDialogue({
 }) {
   return (
     <div>
-      <Dialog
-        onClose={hide}
-        aria-labelledby="customized-dialog-title"
-        open={isShowing}
-      >
-        <DialogTitle id="customized-dialog-title" onClose={hide}>
-          {title}
-        </DialogTitle>
-        <MuiDialogContent dividers>{children}</MuiDialogContent>
-        <MuiDialogActions>{dialogueAction}</MuiDialogActions>
-      </Dialog>
+      {isShowing && (
+        <dialog id="modal" className="modal modal-open">
+          <form
+            method="dialog"
+            className="modal-box relative max-w-lg flex flex-col items-center"
+          >
+            <button
+              className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2 text-black"
+              onClick={hide}
+            >
+              ✕
+            </button>
+            <h3 className="font-bold text-lg text-center text-black">
+              {title}
+            </h3>
+            <div className="py-4 max-h-64 overflow-y-auto overflow-x-hidden text-center">
+              {children}
+            </div>
+            <div className="modal-action w-full flex justify-center">
+              {dialogueAction}
+            </div>
+          </form>
+        </dialog>
+      )}
     </div>
   );
 }

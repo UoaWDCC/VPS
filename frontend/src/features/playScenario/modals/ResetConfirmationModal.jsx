@@ -1,8 +1,5 @@
-import { DialogContent, DialogTitle } from "@material-ui/core";
 import Button from "@material-ui/core/Button";
-import Dialog from "@material-ui/core/Dialog";
 import MuiDialogActions from "@material-ui/core/DialogActions";
-import Typography from "@material-ui/core/Typography";
 import { withStyles } from "@material-ui/core/styles";
 
 /**
@@ -20,30 +17,40 @@ export default function ResetConfirmationModal({ isOpen, onClose, onConfirm }) {
   }))(MuiDialogActions);
 
   return (
-    <Dialog onClose={onClose} open={isOpen} maxWidth="xs">
-      <DialogTitle>Confirm Reset</DialogTitle>
-      <DialogContent>
-        <Typography>
-          This will reset your whole group’s progress to the beginning. You will
-          have to notify your group members to re-play through the scenario.
-        </Typography>
-      </DialogContent>
-      <DialogActions>
-        <Button
-          className="btn contained red"
-          color="primary"
-          onClick={onConfirm}
-        >
-          Reset Scenario
-        </Button>
-        <Button
-          className="btn contained white"
-          color="primary"
-          onClick={onClose}
-        >
-          Cancel
-        </Button>
-      </DialogActions>
-    </Dialog>
+    <div>
+      <dialog
+        id="reset_modal"
+        className={`modal ${isOpen ? "modal-open" : ""}`}
+      >
+        <form method="dialog" className="modal-box relative">
+          <button
+            className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2 text-black"
+            onClick={onClose}
+          >
+            ✕
+          </button>
+
+          <h3 className="font-bold text-lg text-center text-black">
+            Confirm Reset
+          </h3>
+
+          <p className="py-4 text-center text-black">
+            This will reset your whole group’s progress to the beginning. You
+            will have to notify your group members to re-play through the
+            scenario.
+          </p>
+
+          <div className="modal-action flex flex-col items-center gap-4">
+            <Button
+              className="btn contained red"
+              color="primary"
+              onClick={onConfirm}
+            >
+              Reset Scenario
+            </Button>
+          </div>
+        </form>
+      </dialog>
+    </div>
   );
 }
