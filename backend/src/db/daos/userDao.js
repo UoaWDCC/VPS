@@ -128,7 +128,7 @@ const assignScenarioToUsers = async (scenarioId, newAssignees) => {
  */
 const retrieveAssignedScenarioList = async (userId) => {
   const user = await User.findOne({ uid: userId });
-  if (!user.assigned) return []; // even if list is empty, we may have groups this user is a part of.
+  if (!user?.assigned) return []; // even if list is empty, we may have groups this user is a part of.
 
   const multiplayerScenarios = await Groups.find(
     { "users.email": user.email },
