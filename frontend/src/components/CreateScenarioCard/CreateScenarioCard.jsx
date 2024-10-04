@@ -30,7 +30,9 @@ export default function CreateScenarioCard({ onCreate, onClose }) {
         >
           ✕
         </button>
-        <h1 className="text-xl font-bold mb-4 text-center text-black">Create New Scenario</h1>
+        <h1 className="text-xl font-bold mb-4 text-center text-black">
+          Create New Scenario
+        </h1>
         <div className="flex items-center space-x-4 mb-4">
           <h3 className="text-lg text-black">Scenario name:</h3>
           <input
@@ -42,13 +44,13 @@ export default function CreateScenarioCard({ onCreate, onClose }) {
           />
         </div>
         <div className="flex justify-center">
-        <Button
-          className="btn side contained blue"
-          type="button"
-          onClick={handleCreate}
-        >
-          Create
-        </Button>
+          <Button
+            className="btn side contained blue"
+            type="button"
+            onClick={handleCreate}
+          >
+            Create
+          </Button>
         </div>
       </div>
     </div>

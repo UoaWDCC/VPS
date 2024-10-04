@@ -24,17 +24,16 @@ export default function BackModal({
 
   return (
     <div>
-      <dialog
-        id="back_modal"
-        className={`modal ${isOpen ? 'modal-open' : ''}`}
-      >
-        <form method="dialog" className="modal-box relative flex flex-col items-center justify-center"
+      <dialog id="back_modal" className={`modal ${isOpen ? "modal-open" : ""}`}>
+        <form
+          method="dialog"
+          className="modal-box relative flex flex-col items-center justify-center"
           style={{
-            backgroundColor: 'white',
-            color: 'black',
-            borderRadius: '10px',
-          }}>
-
+            backgroundColor: "white",
+            color: "black",
+            borderRadius: "10px",
+          }}
+        >
           <button
             className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2"
             onClick={handleClose}
@@ -42,14 +41,10 @@ export default function BackModal({
             ✕
           </button>
 
-          <h3 className="font-bold text-lg">
-            You have unsaved changes
-          </h3>
+          <h3 className="font-bold text-lg">You have unsaved changes</h3>
 
           <div className="py-4">
-            <p>
-              Are you sure you want to leave? Unsaved changes will be lost.
-            </p>
+            <p>Are you sure you want to leave? Unsaved changes will be lost.</p>
           </div>
 
           <div className="modal-action flex justify-between">

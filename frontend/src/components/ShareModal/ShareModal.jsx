@@ -31,15 +31,15 @@ export default function ShareModal({ isOpen, handleClose }) {
     <div>
       <dialog
         id="share_modal"
-        className={`modal ${isOpen ? 'modal-open' : ''}`}
+        className={`modal ${isOpen ? "modal-open" : ""}`}
       >
         <form
           method="dialog"
           className="modal-box relative flex flex-col items-center justify-center"
           style={{
-            backgroundColor: 'white',
-            color: 'black',
-            borderRadius: '10px',
+            backgroundColor: "white",
+            color: "black",
+            borderRadius: "10px",
           }}
         >
           <button
@@ -62,27 +62,26 @@ export default function ShareModal({ isOpen, handleClose }) {
               onFocus={(e) => e.target.select()}
               className="input input-bordered w-full mb-4 text-center"
               style={{
-                backgroundColor: 'white',
-                color: 'black',
-                borderRadius: '5px',
+                backgroundColor: "white",
+                color: "black",
+                borderRadius: "5px",
               }}
             />
             <div className="flex justify-center">
-            <Button
-            className={`btn contained white ${styles.dialogItem}`}
-            autoFocus
-            onClick={() => {
-              navigator.clipboard.writeText(url);
-              setCopySuccess(true);
-            }}
-            color="primary"
-          >
-            {copySuccess ? "Copied!" : "Copy Link"}
-          </Button>
+              <Button
+                className={`btn contained white ${styles.dialogItem}`}
+                autoFocus
+                onClick={() => {
+                  navigator.clipboard.writeText(url);
+                  setCopySuccess(true);
+                }}
+                color="primary"
+              >
+                {copySuccess ? "Copied!" : "Copy Link"}
+              </Button>
+            </div>
           </div>
-          </div>
-          <div className="modal-action">
-          </div>
+          <div className="modal-action"></div>
         </form>
       </dialog>
     </div>
