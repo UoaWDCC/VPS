@@ -1,11 +1,11 @@
-import Scene from "../../../db/models/scene";
-import User from "../../../db/models/user";
-import Group from "../../../db/models/group";
-import Scenario from "../../../db/models/scenario";
-import Note from "../../../db/models/note";
-import Resource from "../../../db/models/resource";
-import { HttpError } from "../../../util/error";
-import STATUS from "../../../util/status";
+import Scene from "../../../db/models/scene.js";
+import User from "../../../db/models/user.js";
+import Group from "../../../db/models/group.js";
+import Scenario from "../../../db/models/scenario.js";
+import Note from "../../../db/models/note.js";
+import Resource from "../../../db/models/resource.js";
+import { HttpError } from "../../../util/error.js";
+import STATUS from "../../../util/status.js";
 
 const createInvalidError = (roles) =>
   new HttpError("Invalid role to access this scene", STATUS.FORBIDDEN, {
