@@ -57,15 +57,19 @@ const allowedDomains = new Set([
 
 const allowedEmails = new Set([
   "wdccvpstesting1@gmail.com",
-  "wdccvpstesting2@gmail.com"
-])
+  "wdccvpstesting2@gmail.com",
+]);
 
 // handles a sign in request
 router.post(
   "/",
   handle(async (req, res) => {
     const email = req?.body?.email || "";
-    if (!(email.split("@").length > 1) && !allowedDomains.has(email.split("@")[1]) && !allowedEmails.has(email)) {
+    if (
+      !(email.split("@").length > 1) &&
+      !allowedDomains.has(email.split("@")[1]) &&
+      !allowedEmails.has(email)
+    ) {
       throw new HttpError("Sign in with your UoA account", STATUS.FORBIDDEN);
     }
     if (!(await retrieveUserByEmail(req.body.email))) {
