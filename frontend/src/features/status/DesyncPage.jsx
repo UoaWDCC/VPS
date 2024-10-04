@@ -32,9 +32,9 @@ export default function DesyncPage() {
         </Grid>
       </Grid>
       <Grid item>
-        <Button color="primary" variant="contained" onClick={onBack}>
+        <button className="btn vps" onClick={onBack}>
           Back to Scenario
-        </Button>
+        </button>
       </Grid>
     </Grid>
   );

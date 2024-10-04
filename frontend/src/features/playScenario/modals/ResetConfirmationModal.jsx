@@ -29,20 +29,12 @@ export default function ResetConfirmationModal({ isOpen, onClose, onConfirm }) {
         </Typography>
       </DialogContent>
       <DialogActions>
-        <Button
-          className="btn contained red"
-          color="primary"
-          onClick={onConfirm}
-        >
+        <button className="btn error" onClick={onConfirm}>
           Reset Scenario
-        </Button>
-        <Button
-          className="btn contained white"
-          color="primary"
-          onClick={onClose}
-        >
+        </button>
+        <button className="btn vps" onClick={onClose}>
           Cancel
-        </Button>
+        </button>
       </DialogActions>
     </Dialog>
   );

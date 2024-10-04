@@ -177,26 +177,10 @@ export default function ManageGroupsPage() {
           style={{ display: "none" }}
           onChange={handleFileUpload}
         />
-        {/* <Button
-          className="btn top contained white"
-          color="default"
-          variant="contained"
-          onClick={upload}
-        >
-          Upload
-        </Button> */}
-        <button className="btn btn-primary text-secondary" onClick={upload}>
+        <button className="btn vps w-[100px]" onClick={upload}>
           Upload
         </button>
-        {/* <Button
-          className="btn top contained white"
-          color="default"
-          variant="contained"
-          onClick={download}
-        >
-          Download
-        </Button> */}
-        <button className="btn btn-primary text-secondary" onClick={download}>
+        <button className="btn vps w-[100px]" onClick={download}>
           Download
         </button>
       </TopBar>

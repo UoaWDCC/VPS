@@ -52,19 +52,8 @@ export default function ShareModal({ isOpen, handleClose }) {
             variant="outlined"
             fullWidth
           />
-          {/* <Button
-            className={`btn contained white ${styles.dialogItem}`}
-            autoFocus
-            onClick={() => {
-              navigator.clipboard.writeText(url);
-              setCopySuccess(true);
-            }}
-            color="primary"
-          >
-            {copySuccess ? "Copied!" : "Copy Link"}
-          </Button> */}
           <button
-            className="btn btn-primary text-secondary"
+            className="btn vps"
             onClick={() => {
               navigator.clipboard.writeText(url);
               setCopySuccess(true);

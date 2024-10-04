@@ -90,18 +90,8 @@ export default function SideBar() {
         />
         <ul className={styles.sideBarList}>
           <li>
-            {/* <Button
-              className="btn side contained white"
-              color="default"
-              variant="contained"
-              onClick={() => {
-                handleOpenCard();
-              }}
-            >
-              Create
-            </Button> */}
             <button
-              className="btn btn-primary text-secondary w-full"
+              className="btn vps w-full"
               onClick={() => {
                 handleOpenCard();
               }}
@@ -111,19 +101,8 @@ export default function SideBar() {
           </li>
           {VpsUser.role === AccessLevel.STAFF ? (
             <li>
-              {/* <Button
-                className={`btn side contained white ${
-                  currentScenario ? "" : "disabled"
-                }  `}
-                color="default"
-                variant="contained"
-                onClick={openDashboard}
-                disabled={!currentScenario}
-              >
-                Dashboard
-              </Button> */}
               <button
-                className="btn btdisabled:btn-outline text-secondary disabled:opacity-30 w-full"
+                className="btn vps w-full"
                 onClick={() => {
                   history.push("/dashboard");
                 }}
@@ -136,19 +115,8 @@ export default function SideBar() {
             ""
           )}
           <li>
-            {/* <Button
-              className={`btn side contained white ${
-                currentScenario ? "" : "disabled"
-              }  `}
-              color="default"
-              variant="contained"
-              onClick={playScenario}
-              disabled={!currentScenario}
-            >
-              Play
-            </Button> */}
             <button
-              className="btn btn-primary text-secondary disabled:bg-primary disabled:text-secondary disabled:opacity-30 w-full"
+              className="btn vps w-full"
               onClick={playScenario}
               disabled={!currentScenario}
             >
@@ -156,24 +124,8 @@ export default function SideBar() {
             </button>
           </li>
           <li>
-            {/* <Button
-              className={`btn side contained white ${
-                currentScenario ? "" : "disabled"
-              }  `}
-              color="default"
-              variant="contained"
-              component={Link}
-              to={
-                currentScenario
-                  ? `/scenario/${currentScenario._id}`
-                  : "/scenario/null"
-              }
-              disabled={!currentScenario}
-            >
-              Edit
-            </Button> */}
             <button
-              className="btn btn-primary text-secondary disabled:bg-primary disabled:text-secondary disabled:opacity-30 w-full"
+              className="btn vps w-full"
               disabled={!currentScenario}
               onClick={() => {
                 history.push(`/scenario/${currentScenario._id}`);
@@ -181,22 +133,6 @@ export default function SideBar() {
             >
               Edit
             </button>
-            {/* {currentScenario ? (
-              <a
-                role="button"
-                className="btn btn-primary text-secondary"
-                href="/scenario/${currentScenario._id}"
-              >
-                Edit
-              </a>
-            ) : (
-              <button
-                className="btn disabled:bg-primary disabled:text-secondary disabled:opacity-30"
-                disabled="true"
-              >
-                Edit
-              </button>
-            )} */}
           </li>
           <li>
             <DeleteModal
@@ -205,18 +141,7 @@ export default function SideBar() {
             />
           </li>
           <li>
-            {/* <Button
-              className="btn side contained white"
-              color="default"
-              variant="contained"
-              onClick={signOut}
-            >
-              Logout
-            </Button> */}
-            <button
-              className="btn btn-primary text-secondary w-full"
-              onClick={signOut}
-            >
+            <button className="btn vps w-full" onClick={signOut}>
               Logout
             </button>
           </li>

@@ -26,17 +26,8 @@ export default function TopBar({ back = "/", children = [] }) {
       <div className={styles.topBar}>
         <ul className={styles.leftTopBarList}>
           <li className={styles.listItem}>
-            {/* <Button
-              className="btn top outlined white"
-              color="default"
-              variant="outlined"
-              component={Link}
-              to={back}
-            >
-              Back
-            </Button> */}
             <button
-              className="btn btn-primary text-secondary"
+              className="btn vps w-[100px]"
               onClick={() => {
                 history.push(`/scenario/${currentScenario._id}`);
               }}

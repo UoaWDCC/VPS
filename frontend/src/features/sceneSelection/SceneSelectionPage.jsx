@@ -197,61 +197,20 @@ export function SceneSelectionPage({ data = null }) {
     <ScreenContainer vertical>
       <TopBar>
         {VpsUser.role === AccessLevel.STAFF ? (
-          // <Button
-          //   className="btn top contained white"
-          //   color="default"
-          //   variant="contained"
-          //   onClick={openDashboard}
-          // >
-          //   Dashboard
-          // </Button>
-          <button
-            className="btn btn-primary text-secondary"
-            onClick={openDashboard}
-          >
+          <button className="btn vps" onClick={openDashboard}>
             Dashboard
           </button>
         ) : (
           ""
         )}
-        {/* <Button
-          className="btn top contained white"
-          color="default"
-          variant="contained"
-          onClick={manageGroups}
-        >
-          Groups
-        </Button> */}
-        <button
-          className="btn btn-primary text-secondary"
-          onClick={manageGroups}
-        >
+        <button className="btn vps w-[100px]" onClick={manageGroups}>
           Groups
         </button>
-        {/* <Button
-          className="btn top contained white"
-          color="default"
-          variant="contained"
-          onClick={playScenario}
-        >
-          Play
-        </Button> */}
-        <button
-          className="btn btn-primary text-secondary"
-          onClick={playScenario}
-        >
+        <button className="btn vps w-[100px]" onClick={playScenario}>
           Play
         </button>
-        {/* <Button
-          className="btn top contained white"
-          color="default"
-          variant="outlined"
-          onClick={() => setShareModalOpen(true)}
-        >
-          Share
-        </Button> */}
         <button
-          className="btn btn-primary text-secondary"
+          className="btn vps w-[100px]"
           onClick={() => setShareModalOpen(true)}
         >
           Share

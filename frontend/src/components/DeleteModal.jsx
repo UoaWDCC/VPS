@@ -21,16 +21,8 @@ function DeleteModal({ onDelete, currentScenario }) {
 
   return (
     <div>
-      {/* <DeleteButton
-        className="btn side"
-        variant="contained"
-        onClick={handleClickOpen}
-        disabled={!currentScenario}
-      >
-        Delete
-      </DeleteButton> */}
       <button
-        className="btn btn-error text-primary disabled:bg-error disabled:text-primary disabled:opacity-30 w-full"
+        className="btn error w-full"
         onClick={handleClickOpen}
         disabled={!currentScenario}
       >
@@ -39,13 +31,10 @@ function DeleteModal({ onDelete, currentScenario }) {
       <Dialog open={open} onClose={handleClose}>
         <DialogTitle>Are you sure you want to delete the scenario?</DialogTitle>
         <DialogActions>
-          <button
-            className="btn btn-primary text-secondary"
-            onClick={handleClose}
-          >
+          <button className="btn vps" onClick={handleClose}>
             Go Back
           </button>
-          <button className="btn btn-error text-primary" onClick={handleDelete}>
+          <button className="btn error" onClick={handleDelete}>
             Delete
           </button>
         </DialogActions>

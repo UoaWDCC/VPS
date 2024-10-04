@@ -47,9 +47,9 @@ function InvalidRolePage({ group }) {
         members should let you know), click the below button:
       </p>
 
-      <Button onClick={handleOpen} variant="outlined">
+      <button className="btn vps" onClick={handleOpen}>
         View Notes
-      </Button>
+      </button>
       <p
         style={{
           marginBottom: "1em",

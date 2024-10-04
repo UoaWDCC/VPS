@@ -44,36 +44,15 @@ export default function BackModal({
           </Typography>
         </DialogContent>
         <DialogActions className={`${styles.dialogBody}`}>
-          {/* <Button
-            className="btn contained red"
-            autoFocus
-            component={Link}
-            to={`/scenario/${currentScenario._id}`}
-            color="primary"
-            onClick={handleDisgard}
-          >
-            Yes, discard changes
-          </Button>
-          <Button
-            className="btn contained white"
-            autoFocus
-            color="primary"
-            onClick={handleClose}
-          >
-            No, keep editing
-          </Button> */}
           <button
-            className="btn btn-error text-primary"
+            className="btn error"
             onClick={() => {
               history.push(`/scenario/${currentScenario._id}`);
             }}
           >
             Yes, discard changes
           </button>
-          <button
-            className="btn btn-primary text-secondary"
-            onClick={handleClose}
-          >
+          <button className="btn vps" onClick={handleClose}>
             No, keep editing
           </button>
         </DialogActions>
