@@ -4,11 +4,11 @@ import DeleteButton from "./DeleteButton";
 function DeleteModal({ onDelete, currentScenario }) {
 
   const handleClickOpen = () => {
-    document.getElementById("my_modal_5").showModal();
+    document.getElementById("delete_modal").showModal();
   };
 
   const handleClose = () => {
-    document.getElementById("my_modal_5").close();
+    document.getElementById("delete_modal").close();
   };
 
   const handleDelete = () => {
@@ -26,7 +26,7 @@ function DeleteModal({ onDelete, currentScenario }) {
       >
         Delete
       </DeleteButton>
-      <dialog id="my_modal_5" className="modal modal-bottom sm:modal-middle">
+      <dialog id="delete_modal" className="modal modal-bottom sm:modal-middle">
       <div className="modal-box relative">
       <h3 className="font-bold text-lg text-center text-black">Delete Scenario</h3>
     <p className="py-4 text-black">Are you sure you want to delete the scenario?</p>
