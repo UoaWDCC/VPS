@@ -1,8 +1,8 @@
 import Scene from "../../../db/models/scene.js";
 import User from "../../../db/models/user.js";
 
-import { HttpError } from "../../../util/error";
-import STATUS from "../../../util/status";
+import { HttpError } from "../../../util/error.js";
+import STATUS from "../../../util/status.js";
 
 import { getScenarioFirstScene, getSimpleScene } from "./group.js";
 

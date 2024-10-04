@@ -13,8 +13,8 @@ import User from "../../db/models/user.js";
 import Group from "../../db/models/group.js";
 import auth from "../../middleware/firebaseAuth.js";
 
-import STATUS from "../../util/status";
-import { handle, HttpError } from "../../util/error";
+import STATUS from "../../util/status.js";
+import { handle, HttpError } from "../../util/error.js";
 
 const router = Router();
 
