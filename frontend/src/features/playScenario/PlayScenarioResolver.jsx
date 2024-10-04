@@ -4,7 +4,6 @@ import { Route, Switch, useHistory, useParams } from "react-router-dom";
 
 import AuthenticationContext from "context/AuthenticationContext";
 
-import DesyncPage from "../status/DesyncPage";
 import InvalidRolePage from "../status/InvalidRolePage";
 import GenericErrorPage from "../status/GenericErrorPage";
 import LoadingPage from "../status/LoadingPage";
@@ -54,9 +53,6 @@ export default function PlayScenarioResolver() {
       </Route>
       <Route exact path="/play/:scenarioId/invalid-role">
         <InvalidRolePage group={group} />
-      </Route>
-      <Route exact path="/play/:scenarioId/desync">
-        <DesyncPage />
       </Route>
       <Route path="/play/:scenarioId/multiplayer/:sceneId?">
         <PlayScenarioPageMulti group={group} />
