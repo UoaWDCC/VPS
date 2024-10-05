@@ -14,7 +14,7 @@ import useStyles from "./components.styles";
  *    onDoubleClick={handleDoubleClick}
  * />
  */
-export default function TextComponent({ id, onClick, component }) {
+export default function TextComponent({ id, onClick, component, zoomLevel }) {
   const styles = useStyles(component);
 
   const context = useContext(AuthoringToolContext);
@@ -26,7 +26,11 @@ export default function TextComponent({ id, onClick, component }) {
       id={id}
       onClick={onClick}
       onDoubleClick={() => textRef?.current?.focus()}
-      style={{ zIndex: component?.zPosition || "0" }}
+      style={{
+        zIndex: component?.zPosition || "0",
+        width: `${component.width * zoomLevel}%`,
+        height: `${component.height * zoomLevel}%`,
+      }}
     >
       {component.text}
     </Typography>
