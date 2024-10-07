@@ -1,6 +1,7 @@
 import express from "express";
 import cors from "cors";
-import { join } from "path";
+import { join, dirname } from "path";
+import { fileURLToPath } from "url";
 import connectToDatabase from "./db/db-connect.js";
 
 // Setup our routes.
@@ -18,8 +19,9 @@ app.use(express.json());
 app.use("/", routes);
 app.use(errorHandler);
 
+const __dirname = dirname(fileURLToPath(import.meta.url));
 // Make the "public" folder available statically
-app.use(express.static(join(import.meta.dirname, "../public")));
+app.use(express.static(join(__dirname, "../public")));
 
 // Serve up the frontend's "build" directory, if we're running in production mode.
 if (process.env.NODE_ENV === "production") {
