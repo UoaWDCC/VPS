@@ -19,12 +19,13 @@
 .modalHeading {
   text-align: center;
   font-size: 1.5rem;
+  font-weight: bold;
 }
 
 .closeButton {
   position: absolute;
-  top: 10px;
-  left: 10px;
+  top: 0px;
+  right: 10px;
   background: transparent;
   border: none;
   font-size: 2rem;
@@ -34,42 +35,6 @@
 
 .closeButton:hover {
   color: #000;
-}
-
-.navBar {
-  display: flex;
-  padding: 10px;
-  width: 100%;
-  height: 12%;
-  overflow-x: auto;
-  overflow-y: hidden;
-  box-sizing: border-box;
-  white-space: nowrap;
-  background-color: #6fc9e5;
-  align-items: center;
-  flex-shrink: 0;
-  font-size: 1rem;
-}
-
-.navBar > p {
-  margin: 0;
-}
-
-.navBar button {
-  border: none;
-  padding: 10px 15px;
-  font-size: 1.2rem;
-  // border-radius: 10px;
-  cursor: pointer;
-  // transition: background-color 0.3s ease;
-  background-color: transparent;
-}
-
-.navBar .active {
-  // background-color: #e0e0e0;
-  // color: white;
-  font-weight: bold;
-  border-bottom: 5px solid black;
 }
 
 .r_content_card {
