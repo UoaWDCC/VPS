@@ -1,5 +1,5 @@
-import Resource from "../models/resource";
-import Group from "../models/group";
+import Resource from "../models/resource.js";
+import Group from "../models/group.js";
 
 // Create a New Resource
 const createResource = async (type, content, name, requiredFlags) => {

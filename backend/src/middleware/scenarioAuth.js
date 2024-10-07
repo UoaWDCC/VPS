@@ -1,4 +1,4 @@
-import { retrieveScenario } from "../db/daos/scenarioDao";
+import { retrieveScenario } from "../db/daos/scenarioDao.js";
 
 const HTTP_UNAUTHORISED = 401;
 const HTTP_NOT_FOUND = 404;

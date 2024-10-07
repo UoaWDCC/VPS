@@ -1,13 +1,12 @@
-/* eslint-disable no-underscore-dangle */
 import { MongoMemoryServer } from "mongodb-memory-server";
 import express from "express";
 import mongoose from "mongoose";
 import axios from "axios";
-import routes from "../..";
-import Scene from "../../../db/models/scene";
-import Scenario from "../../../db/models/scenario";
-import auth from "../../../middleware/firebaseAuth";
-import scenarioAuth from "../../../middleware/scenarioAuth";
+import routes from "../../index.js";
+import Scene from "../../../db/models/scene.js";
+import Scenario from "../../../db/models/scenario.js";
+import auth from "../../../middleware/firebaseAuth.js";
+import scenarioAuth from "../../../middleware/scenarioAuth.js";
 
 jest.mock("../../../middleware/firebaseAuth");
 jest.mock("../../../middleware/scenarioAuth");
@@ -34,7 +33,6 @@ function authHeaders(id) {
 
 describe("Scene API tests", () => {
   const HTTP_OK = 200;
-  const HTTP_NO_CONTENT = 204;
 
   let mongoServer;
   let server;
@@ -78,10 +76,7 @@ describe("Scene API tests", () => {
     mongoServer = await MongoMemoryServer.create();
     const uri = mongoServer.getUri();
 
-    await mongoose.connect(uri, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-    });
+    await mongoose.connect(uri);
 
     const app = express();
     app.use(express.json());
@@ -249,7 +244,7 @@ describe("Scene API tests", () => {
       `http://localhost:${port}/api/scenario/${scenario2._id}/scene/${scene1._id}/`,
       authHeaders("user1")
     );
-    expect(response.status).toBe(HTTP_NO_CONTENT);
+    expect(response.status).toBe(HTTP_OK);
 
     // check scene has been removed
     const dbScene1 = await Scene.findById(scene1._id);

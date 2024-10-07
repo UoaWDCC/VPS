@@ -8,14 +8,13 @@ import {
   deleteScene,
   duplicateScene,
   incrementVisisted,
-} from "../../db/daos/sceneDao";
-import auth from "../../middleware/firebaseAuth";
-import scenarioAuth from "../../middleware/scenarioAuth";
+} from "../../db/daos/sceneDao.js";
+import auth from "../../middleware/firebaseAuth.js";
+import scenarioAuth from "../../middleware/scenarioAuth.js";
 
 const router = Router({ mergeParams: true });
 
 const HTTP_OK = 200;
-const HTTP_NO_CONTENT = 204;
 const HTTP_NOT_FOUND = 404;
 
 // Apply auth middleware to all routes below this point
@@ -94,9 +93,8 @@ router.put("/:sceneId", async (req, res) => {
 // Delete a scene
 router.delete("/:sceneId", async (req, res) => {
   const deleted = await deleteScene(req.params.scenarioId, req.params.sceneId);
-
   if (deleted) {
-    res.sendStatus(HTTP_NO_CONTENT);
+    res.sendStatus(HTTP_OK);
   } else {
     res.sendStatus(HTTP_NOT_FOUND);
   }

@@ -1,6 +1,6 @@
 import { Router } from "express";
-import auth from "../../middleware/firebaseAuth";
-import handle from "../../error/handle";
+import auth from "../../middleware/firebaseAuth.js";
+import { handle } from "../../util/error.js";
 
 import {
   createResource,
@@ -10,7 +10,7 @@ import {
   removeFlag,
   getAllVisibleResources,
   updateResourceById,
-} from "../../db/daos/resourcesDao";
+} from "../../db/daos/resourcesDao.js";
 
 const router = Router();
 

@@ -1,7 +1,4 @@
-import { DialogContent, DialogTitle, TextField } from "@material-ui/core";
 import Button from "@material-ui/core/Button";
-import Dialog from "@material-ui/core/Dialog";
-import Typography from "@material-ui/core/Typography";
 import { useContext, useState } from "react";
 import ScenarioContext from "../../context/ScenarioContext";
 import styles from "./ShareModal.module.scss";
@@ -32,37 +29,59 @@ export default function ShareModal({ isOpen, handleClose }) {
 
   return (
     <div>
-      <Dialog
-        className={styles.dialog}
-        onClose={onClose}
-        open={isOpen}
-        maxWidth="sm"
+      <dialog
+        id="share_modal"
+        className={`modal ${isOpen ? "modal-open" : ""}`}
       >
-        <DialogTitle className={styles.dialogTitle}>Shareable Link</DialogTitle>
-        <DialogContent className={styles.dialogContent}>
-          <Typography className={styles.dialogItem}>
-            Give this link to others so they can play this scenario
-          </Typography>
-          <TextField
-            className={`${styles.textField} ${styles.dialogItem}`}
-            defaultValue={url}
-            InputProps={{
-              readOnly: true,
-            }}
-            variant="outlined"
-            fullWidth
-          />
+        <form
+          method="dialog"
+          className="modal-box relative flex flex-col items-center justify-center"
+          style={{
+            backgroundColor: "white",
+            color: "black",
+            borderRadius: "10px",
+          }}
+        >
           <button
-            className="btn vps"
-            onClick={() => {
-              navigator.clipboard.writeText(url);
-              setCopySuccess(true);
-            }}
+            className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2"
+            onClick={onClose}
           >
-            {copySuccess ? "Copied!" : "Copy Link"}
+            ✕
           </button>
-        </DialogContent>
-      </Dialog>
+          <h3 className="font-bold text-lg text-center mb-4 text-black">
+            Shareable Link
+          </h3>
+          <div className="w-full">
+            <p className="text-center text-black mb-4">
+              Give this link to others so they can play this scenario
+            </p>
+            <input
+              type="text"
+              value={url}
+              readOnly
+              onFocus={(e) => e.target.select()}
+              className="input input-bordered w-full mb-4 text-center"
+              style={{
+                backgroundColor: "white",
+                color: "black",
+                borderRadius: "5px",
+              }}
+            />
+            <div className="flex justify-center">
+              <button
+                className="btn vps"
+                onClick={() => {
+                  navigator.clipboard.writeText(url);
+                  setCopySuccess(true);
+                }}
+              >
+                {copySuccess ? "Copied!" : "Copy Link"}
+              </button>
+            </div>
+          </div>
+          <div className="modal-action"></div>
+        </form>
+      </dialog>
     </div>
   );
 }

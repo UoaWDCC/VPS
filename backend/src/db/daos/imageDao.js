@@ -1,15 +1,12 @@
 /* eslint-disable no-underscore-dangle */
-import Image from "../models/image";
+import Image from "../models/image.js";
 
 /**
  * Creates and persists an image object with a url into the database
  * @param {String} url link to the image
  */
 const createImage = async (url) => {
-  const dbImage = new Image({
-    url,
-  });
-  await dbImage.save();
+  return new Image({ url }).save();
 };
 
 /**
@@ -17,7 +14,7 @@ const createImage = async (url) => {
  * @returns list of database image objects
  */
 const retrieveImageList = async () => {
-  return Image.find();
+  return Image.find().sort({ url: 1 });
 };
 
 /**

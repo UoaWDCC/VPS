@@ -1,8 +1,8 @@
 /* eslint-disable no-underscore-dangle */
 import { MongoMemoryServer } from "mongodb-memory-server";
 import mongoose from "mongoose";
-import Scenario from "../../db/models/scenario";
-import scenarioAuth from "../scenarioAuth";
+import Scenario from "../../db/models/scenario.js";
+import scenarioAuth from "../scenarioAuth.js";
 
 describe("Scenario Auth Middleware tests", () => {
   const HTTP_UNAUTHORISED = 401;
@@ -34,10 +34,7 @@ describe("Scenario Auth Middleware tests", () => {
     mongoServer = await MongoMemoryServer.create();
     const uri = mongoServer.getUri();
 
-    await mongoose.connect(uri, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-    });
+    await mongoose.connect(uri);
   });
 
   beforeEach(async () => {

@@ -5,7 +5,7 @@ import {
   getMetadata,
   updateMetadata,
 } from "firebase/storage";
-import { storage } from "./firebase";
+import { storage } from "./firebase.js";
 
 /**
  * Attempts to delete a file from the firebase storage.

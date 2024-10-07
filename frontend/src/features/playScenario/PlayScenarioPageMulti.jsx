@@ -69,10 +69,18 @@ export default function PlayScenarioPageMulti({ group }) {
   const [removeFlags, setRemoveFlags] = useState([]);
   const [resources, setResources] = useState([]);
 
+  const reload = () => {
+    setPrevious(null);
+    history.replace(`/play/${scenarioId}/multiplayer`);
+  };
+
   const handleError = (error) => {
     if (!error) return;
     if (error.status === 409) {
-      history.push(`/play/${scenarioId}/desync`);
+      reload();
+      toast.success(
+        "Someone else made a move first, but you're back on track!"
+      );
     } else if (error.status === 403) {
       const roles = JSON.stringify(error.meta.roles_with_access);
       history.push(`/play/${scenarioId}/invalid-role?roles=${roles}`);
@@ -115,8 +123,7 @@ export default function PlayScenarioPageMulti({ group }) {
 
       setAddFlags([]);
       setRemoveFlags([]);
-      setPrevious(null);
-      history.replace(`/play/${scenarioId}/multiplayer`);
+      reload();
     } catch (error) {
       console.error("Error during reset:", error);
     }

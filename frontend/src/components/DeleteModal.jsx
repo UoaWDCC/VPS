@@ -1,17 +1,13 @@
 import { useState } from "react";
-import Button from "@mui/material/Button";
-import { Dialog, DialogActions, DialogTitle } from "@mui/material";
 import DeleteButton from "./DeleteButton";
 
 function DeleteModal({ onDelete, currentScenario }) {
-  const [open, setOpen] = useState(false);
-
   const handleClickOpen = () => {
-    setOpen(true);
+    document.getElementById("delete_modal").showModal();
   };
 
   const handleClose = () => {
-    setOpen(false);
+    document.getElementById("delete_modal").close();
   };
 
   const handleDelete = () => {
@@ -28,17 +24,26 @@ function DeleteModal({ onDelete, currentScenario }) {
       >
         Delete
       </button>
-      <Dialog open={open} onClose={handleClose}>
-        <DialogTitle>Are you sure you want to delete the scenario?</DialogTitle>
-        <DialogActions>
-          <button className="btn vps" onClick={handleClose}>
-            Go Back
-          </button>
-          <button className="btn error" onClick={handleDelete}>
-            Delete
-          </button>
-        </DialogActions>
-      </Dialog>
+      <dialog id="delete_modal" className="modal modal-bottom sm:modal-middle">
+        <div className="modal-box relative">
+          <h3 className="font-bold text-lg text-center text-black">
+            Delete Scenario
+          </h3>
+          <p className="py-4 text-black">
+            Are you sure you want to delete the scenario?
+          </p>
+          <div className="modal-action flex justify-center">
+            <form method="dialog">
+              <button className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2 text-black">
+                ✕
+              </button>
+              <DeleteButton onClick={handleDelete} className="btn">
+                Delete
+              </DeleteButton>
+            </form>
+          </div>
+        </div>
+      </dialog>
     </div>
   );
 }

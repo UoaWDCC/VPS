@@ -1,7 +1,7 @@
-import User from "../models/user";
-import Scenario from "../models/scenario";
-import Groups from "../models/group";
-import { retrieveScenarios } from "./scenarioDao";
+import User from "../models/user.js";
+import Scenario from "../models/scenario.js";
+import Groups from "../models/group.js";
+import { retrieveScenarios } from "./scenarioDao.js";
 
 /**
  * Retrieves all users
@@ -40,25 +40,11 @@ const retrievePlayedUsers = async (scenarioId) => {
 
 /**
  * Creates a user in the database,
- * @param {String} name user's name
- * @param {String} uid user's unique id
- * @param {String} email user's email address
- * @param {String} pictureURL URL to user's profile picture
+ * @param {Record<String, String>} info user's info
  * @returns the created database user object
  */
-const createUser = async (name, uid, email, pictureURL) => {
-  const user = await User.find({ uid });
-  if (user.length === 0) {
-    const dbUser = new User({
-      name,
-      uid,
-      email,
-      pictureURL,
-    });
-    await dbUser.save();
-    return dbUser;
-  }
-  return user;
+const createUser = async (info) => {
+  return new User(info).save();
 };
 
 /**
@@ -142,7 +128,7 @@ const assignScenarioToUsers = async (scenarioId, newAssignees) => {
  */
 const retrieveAssignedScenarioList = async (userId) => {
   const user = await User.findOne({ uid: userId });
-  if (!user.assigned) return []; // even if list is empty, we may have groups this user is a part of.
+  if (!user?.assigned) return []; // even if list is empty, we may have groups this user is a part of.
 
   const multiplayerScenarios = await Groups.find(
     { "users.email": user.email },

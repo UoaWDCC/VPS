@@ -19,11 +19,6 @@ const userSchema = new Schema({
     type: String,
     required: true,
   },
-  played: [
-    {
-      type: Object,
-    },
-  ],
   assigned: [
     {
       type: String,

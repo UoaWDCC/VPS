@@ -3,7 +3,7 @@ import dotenv from "dotenv";
 
 dotenv.config();
 
-const DEFAULT_CONNECTION_STRING = `mongodb+srv://${process.env.MONGODB_USER}:${process.env.MONGODB_PASSWORD}@cluster0.ly1k5.mongodb.net/myFirstDatabase?retryWrites=true&w=majority`;
+const DEFAULT_CONNECTION_STRING = `mongodb+srv://${process.env.MONGODB_USER}:${process.env.MONGODB_PASSWORD}@cluster0.ly1k5.mongodb.net/VPS?retryWrites=true&w=majority`;
 
 /**
  * This function begins the process of connecting to the database, and returns a promise that will
@@ -12,8 +12,5 @@ const DEFAULT_CONNECTION_STRING = `mongodb+srv://${process.env.MONGODB_USER}:${p
 export default function connectToDatabase(
   connectionString = DEFAULT_CONNECTION_STRING
 ) {
-  return mongoose.connect(connectionString, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-  });
+  return mongoose.connect(connectionString);
 }

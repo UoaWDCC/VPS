@@ -1,5 +1,5 @@
-import Note from "../models/note";
-import Group from "../models/group";
+import Note from "../models/note.js";
+import Group from "../models/group.js";
 
 /**
  * Checks if a user is in a group

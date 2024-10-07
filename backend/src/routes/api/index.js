@@ -1,13 +1,13 @@
 import { Router } from "express";
 
-import scenario from "./scenario";
-import image from "./image";
-import staff from "./staff";
-import note from "./note";
-import user from "./user";
-import group from "./group";
-import resource from "./resources";
-import navigate from "./navigate/index";
+import scenario from "./scenario.js";
+import image from "./image.js";
+import staff from "./staff.js";
+import note from "./note.js";
+import user from "./user.js";
+import group from "./group.js";
+import resource from "./resources.js";
+import navigate from "./navigate/index.js";
 
 const router = Router();
 

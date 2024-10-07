@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import Scene from "./scene";
+import Scene from "./scene.js";
 
 const { Schema } = mongoose;
 
@@ -16,12 +16,6 @@ const scenarioSchema = new Schema({
     {
       type: Schema.Types.ObjectId,
       ref: "Scene",
-    },
-  ],
-  users: [
-    {
-      type: String,
-      ref: "User",
     },
   ],
   roleList: [

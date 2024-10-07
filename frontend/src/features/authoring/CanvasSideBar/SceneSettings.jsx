@@ -137,30 +137,7 @@ export default function SceneSettings() {
               });
             }}
           />
-          {/* input for scene timer duration */}
-          <CustomTextField
-            label="Scene Timer Duration"
-            type="number"
-            value={currentScene?.time ?? 0}
-            fullWidth
-            onChange={(event) => {
-              // limiting scene timer duration
-              const timeInput = event.target.value < 0 ? 0 : event.target.value;
-
-              setCurrentScene({
-                ...currentScene,
-                time: timeInput,
-              });
-            }}
-            InputProps={{
-              endAdornment: (
-                <InputAdornment position="end">seconds</InputAdornment>
-              ),
-            }}
-            InputLabelProps={{
-              shrink: true,
-            }}
-          />
+          {/* input for scene roles */}
           <FormControl fullWidth className={styles.formControl}>
             <CustomInputLabel>Scene Role(s)</CustomInputLabel>
             <Select

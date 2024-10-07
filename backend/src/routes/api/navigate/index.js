@@ -1,9 +1,9 @@
 import { Router } from "express";
-import auth from "../../../middleware/firebaseAuth";
+import auth from "../../../middleware/firebaseAuth.js";
 
-import handle from "../../../error/handle";
-import { groupNavigate, groupReset, groupGetResources } from "./group";
-import { userNavigate, userReset } from "./user";
+import { handle } from "../../../util/error.js";
+import { groupNavigate, groupReset, groupGetResources } from "./group.js";
+import { userNavigate, userReset } from "./user.js";
 
 const router = Router();
 

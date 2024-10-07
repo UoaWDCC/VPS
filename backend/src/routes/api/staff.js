@@ -1,5 +1,5 @@
 import { Router } from "express";
-import retrieveAuthorisedStaffList from "../../db/daos/staffDao";
+import retrieveAuthorisedStaffList from "../../db/daos/staffDao.js";
 
 const router = Router();
 const HTTP_OK = 200;

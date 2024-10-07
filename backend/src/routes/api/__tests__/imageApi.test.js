@@ -1,13 +1,9 @@
-/* eslint-disable no-await-in-loop */
-/* eslint-disable guard-for-in */
-/* eslint-disable no-restricted-syntax */
-/* eslint-disable no-underscore-dangle */
 import { MongoMemoryServer } from "mongodb-memory-server";
 import express from "express";
 import mongoose from "mongoose";
 import axios from "axios";
-import routes from "../..";
-import Image from "../../../db/models/image";
+import routes from "../../index.js";
+import Image from "../../../db/models/image.js";
 
 jest.mock("firebase-admin"); // Needed to mock the firebase-admin dependency in firebase-auth.js which is in routes
 
@@ -23,10 +19,7 @@ describe("Image API tests", () => {
     mongoServer = await MongoMemoryServer.create();
     const uri = mongoServer.getUri();
 
-    await mongoose.connect(uri, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-    });
+    await mongoose.connect(uri);
 
     const app = express();
     app.use(express.json());
@@ -63,7 +56,7 @@ describe("Image API tests", () => {
     expect(response.status).toBe(HTTP_OK);
 
     // check if scenario has been persisted to db
-    const dbImages = await Image.find();
+    const dbImages = await Image.find().sort({ url: 1 });
 
     expect(dbImages).toHaveLength(2);
     expect(dbImages[0].url).toEqual(body.urls[0]);
@@ -76,12 +69,7 @@ describe("Image API tests", () => {
       "https://drive.google.com/uc?export=view&id=1uRyrBAvCZf2dPHXR0TjsPVncU_rz0vuZ",
     ];
 
-    for (const url of urls) {
-      const dbImage = new Image({
-        url,
-      });
-      await dbImage.save();
-    }
+    await Promise.all(urls.map((url) => new Image({ url }).save()));
 
     const response = await axios.get(`http://localhost:${port}/api/image/`);
     expect(response.status).toBe(HTTP_OK);
