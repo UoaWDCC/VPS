@@ -145,7 +145,7 @@ export default function SideBar() {
               Logout
             </button>
           </li>
-          <li>
+          <li className="styles.helpButton">
             <HelpButton isSidebar />
           </li>
         </ul>

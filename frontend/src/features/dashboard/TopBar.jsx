@@ -46,6 +46,7 @@ export default function TopBar({
             )}
           </li>
         </ul>
+        <div>{children}</div>
         <ul className={styles.rightTopBarList}>
           <li className={styles.listItem}>{children}</li>
         </ul>

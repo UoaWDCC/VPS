@@ -76,9 +76,7 @@ export default function TopBar({
             )}
           </li>
         </ul>
-        <ul className={styles.rightTopBarList}>
-          <li className={styles.listItem}>{children}</li>
-        </ul>
+        <div className={styles.rightTopBarList}>{children}</div>
       </div>
       <BackModal
         isOpen={showModal}
