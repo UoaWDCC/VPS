@@ -41,9 +41,11 @@ function InvalidRolePage({ group }) {
         It's your group members turn to play through the scenario!
       </h1>
       <p style={textMargin} className="font-semibold text-xl">
-        If you have just finished playing your part of the scenario, <br/><span className="underline">let your
-        group member with the {rolesWithAccess.join(", ")} role know it is their
-        turn</span>
+        If you have just finished playing your part of the scenario, <br />
+        <span className="underline">
+          let your group member with the {rolesWithAccess.join(", ")} role know
+          it is their turn
+        </span>
       </p>
       <p style={textMargin} className="text-slate-600">
         Wait for your group member(s) to finish playing through their part of
@@ -52,7 +54,7 @@ function InvalidRolePage({ group }) {
       </p>
 
       <div className="flex justify-around w-[60%]">
-        <button 
+        <button
           type="button"
           className="btn btn-general"
           onClick={handleOpen}
@@ -81,7 +83,7 @@ function InvalidRolePage({ group }) {
       </div>
       <p className="font-mono text-xs mt-20">
         Current user role: {currentUserRole}
-        <br/>
+        <br />
         Allowed roles: {rolesWithAccess.join(", ")}
       </p>
       {noteOpen && (
