@@ -43,13 +43,18 @@ export default function useStyles(component) {
   })();
 }
 
-export function imageStyles(component) {
+export function imageStyles(component, zoomLevel) {
   return {
     maxHeight: "100%",
     maxWidth: "100%",
-    width: component.width === "auto" ? component.width : `${component.width}%`,
+    width:
+      component.width === "auto"
+        ? component.width
+        : `${component.width * zoomLevel}%`,
     height:
-      component.height === "auto" ? component.height : `${component.height}%`,
+      component.height === "auto"
+        ? component.height
+        : `${component.height * zoomLevel}%`,
     top: `${component.top}%`,
     left: `${component.left}%`,
   };
