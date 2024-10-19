@@ -1,5 +1,5 @@
-import { Button, Divider, MenuItem } from "@material-ui/core";
-import ListContainer from "components/ListContainer/ListContainer";
+import { Divider, MenuItem } from "@material-ui/core";
+import ThumbnailList from "components/ListContainer/ThumbnailList";
 import Papa from "papaparse";
 import { useContext, useEffect, useRef, useState } from "react";
 import {
@@ -16,9 +16,16 @@ import ShareModal from "../../components/ShareModal/ShareModal";
 import TopBar from "../../components/TopBar/TopBar";
 import AuthenticationContext from "../../context/AuthenticationContext";
 import AuthoringToolContextProvider from "../../context/AuthoringToolContextProvider";
+import ScenarioContext from "../../context/ScenarioContext";
 import SceneContext from "../../context/SceneContext";
 import AccessLevel from "../../enums/route.access.level";
-import { useDelete, usePatch, usePost, usePut } from "../../hooks/crudHooks";
+import {
+  useDelete,
+  useGet,
+  usePatch,
+  usePost,
+  usePut,
+} from "../../hooks/crudHooks";
 import AuthoringToolPage from "../authoring/AuthoringToolPage";
 
 // !! this should be handled by the backend instead
@@ -35,14 +42,23 @@ function generateUID() {
  *
  * @container
  */
-export function SceneSelectionPage({ data = null }) {
+export function SceneSelectionPage() {
   const [isShareModalOpen, setShareModalOpen] = useState(false);
   const { scenarioId } = useParams();
   const { url } = useRouteMatch();
   const history = useHistory();
+  const { currentScenario, setCurrentScenario } = useContext(ScenarioContext);
   const { scenes, currentScene, setCurrentScene, reFetch } =
     useContext(SceneContext);
-  const { getUserIdToken, VpsUser } = useContext(AuthenticationContext);
+  const { user, getUserIdToken, VpsUser } = useContext(AuthenticationContext);
+
+  // Retrieve scenario on load
+  useGet(
+    `api/scenario/${scenarioId}`,
+    setCurrentScenario,
+    true,
+    !(user && (!currentScenario || currentScenario?._id != scenarioId))
+  );
 
   // File input is a hidden input element that is activated via a click handler
   // This allows us to have an UI button that acts like a file <input> element.
@@ -228,17 +244,14 @@ export function SceneSelectionPage({ data = null }) {
       </TopBar>
 
       {/* On top of the action button available in the top menu bar, we also override user's rightclick context menu to offer the same functionality. */}
-      <div onContextMenu={handleContextMenu}>
+      <div onContextMenu={handleContextMenu} className="px-10 py-7">
         {/* Scene list */}
-        <ListContainer
-          data={data || scenes}
+        <ThumbnailList
+          data={scenes}
           onItemSelected={setCurrentScene}
           onItemDoubleClick={editScene}
           addCard={createNewScene}
-          wide
           onItemBlur={changeSceneName}
-          sceneSelectionPage
-          scenarioId={scenarioId}
           invalidNameId={invalidNameId}
         />
 
