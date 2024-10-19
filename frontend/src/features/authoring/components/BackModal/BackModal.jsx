@@ -50,7 +50,7 @@ export default function BackModal({
 
           <div className="modal-action flex justify-between">
             <button
-              className="btn error"
+              className="btn important"
               onClick={() => {
                 history.push(`/scenario/${currentScenario._id}`);
               }}

@@ -18,7 +18,7 @@ function DeleteModal({ onDelete, currentScenario }) {
   return (
     <div>
       <button
-        className="btn error w-full"
+        className="btn important w-full"
         onClick={handleClickOpen}
         disabled={!currentScenario}
       >
@@ -37,9 +37,9 @@ function DeleteModal({ onDelete, currentScenario }) {
               <button className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2 text-black">
                 ✕
               </button>
-              <DeleteButton onClick={handleDelete} className="btn">
+              <button onClick={handleDelete} className="btn important">
                 Delete
-              </DeleteButton>
+              </button>
             </form>
           </div>
         </div>

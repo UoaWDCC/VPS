@@ -41,7 +41,7 @@ export default function ResetConfirmationModal({ isOpen, onClose, onConfirm }) {
           </p>
 
           <div className="modal-action flex flex-col items-center gap-4">
-            <button className="btn error" onClick={onConfirm}>
+            <button className="btn important" onClick={onConfirm}>
               Reset Scenario
             </button>
             <button className="btn vps" onClick={onClose}>
