@@ -233,6 +233,8 @@ export function useGet(url, setData, requireAuth = true, skipRequest = false) {
   }
 
   useEffect(() => {
+    let isMounted = true;
+
     async function fetchData() {
       let hasError = false;
       setLoading(true);
@@ -252,7 +254,7 @@ export function useGet(url, setData, requireAuth = true, skipRequest = false) {
         hasError = isRealError(err);
       });
 
-      if (!hasError) {
+      if (!hasError && isMounted) {
         setData(response.data);
       }
 
@@ -263,7 +265,11 @@ export function useGet(url, setData, requireAuth = true, skipRequest = false) {
     if (!skipRequest) {
       fetchData();
     }
-  }, [url, version]);
+
+    return () => {
+      isMounted = false;
+    };
+  }, [url, skipRequest, version]);
 
   return { isLoading, reFetch };
 }
