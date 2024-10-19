@@ -17,6 +17,7 @@ module.exports = {
     themes: [
       {
         VPSTheme: {
+          ...require("daisyui/src/theming/themes")["emerald"],
           primary: "#fafafa",
           secondary: "#035084",
           error: "#c13216",
