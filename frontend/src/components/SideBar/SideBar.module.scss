@@ -1,36 +1,30 @@
 .sideBar {
-  min-width: 250px;
-  width: 15vw;
-  height: 100vh;
-  background-color: #035084;
-  text-align: center;
+  min-width: 16rem /* 240px */;
+  width: 16rem /* 240px */;
+  height: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
-  --tooltip-color: black;
-
-  .logo {
-    margin: 10px;
-    width: 230px;
-  }
 
   .sideBarList {
     list-style: none;
-    padding: 0;
-    width: 12.5rem;
-
-    li:not(:last-child) {
-      margin-bottom: 10%;
-    }
+    width: 100%;
+    padding-left: 1.75rem /* 28px */;
+    padding-right: 1.75rem /* 28px */;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 0.75rem /* 12px */;
 
     .buttonDisabled {
       opacity: 0.3;
     }
-  }
 
-  .helpButton {
-    & > button {
+    li > button {
       width: 100%;
+      letter-spacing: 0.05em;
+      font-weight: 300;
+      text-align: left;
     }
   }
 

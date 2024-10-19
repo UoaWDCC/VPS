@@ -1,14 +1,17 @@
-import Button from "@material-ui/core/Button";
 import { useContext, useState } from "react";
-import { Link, Router, useHistory } from "react-router-dom";
+import { useHistory } from "react-router-dom";
 import AuthenticationContext from "../../context/AuthenticationContext";
 import ScenarioContext from "../../context/ScenarioContext";
-import AccessLevel from "../../enums/route.access.level";
 import { useDelete, usePost } from "../../hooks/crudHooks";
-import styles from "./SideBar.module.scss";
-import HelpButton from "../HelpButton";
 import CreateScenerioCard from "../CreateScenarioCard/CreateScenarioCard";
 import DeleteModal from "../DeleteModal";
+import HelpButton from "../HelpButton";
+import styles from "./SideBar.module.scss";
+
+import AddCircleOutlineRoundedIcon from "@mui/icons-material/AddCircleOutlineRounded";
+import EditRoundedIcon from "@mui/icons-material/EditRounded";
+import LogoutIcon from "@mui/icons-material/Logout";
+import PlayArrowRoundedIcon from "@mui/icons-material/PlayArrowRounded";
 
 /**
  * Component used for navigation and executing actions located at the left side of the screen.
@@ -48,9 +51,6 @@ export default function SideBar() {
     history.push(`/scenario/${newScenario._id}`);
   }
 
-  /** Calls backend end point to switch to the lecturer's dashboard */
-  function openDashboard() {}
-
   /** Calls backend end point to delete a scenario. */
   async function deleteScenario() {
     await useDelete(`/api/scenario/${currentScenario._id}`, getUserIdToken);
@@ -81,74 +81,74 @@ export default function SideBar() {
           onClose={handleCloseCard}
         />
       )}
-      <div className={styles.sideBar}>
-        <img
-          draggable="false"
-          className={styles.logo}
-          src="uoa-logo.png"
-          alt="University of Auckland Logo"
-        />
-        <ul className={styles.sideBarList}>
-          <li>
-            <button
-              className="btn vps w-full"
-              onClick={() => {
-                handleOpenCard();
-              }}
-            >
-              Create
-            </button>
-          </li>
-          {VpsUser.role === AccessLevel.STAFF ? (
+
+      {/* Main sidebar */}
+      <div className={`${styles.sideBar} bg-uoa-blue gap-5`}>
+        {/* UoA logo container */}
+        <div className="flex-0 p-7">
+          <img
+            draggable="false"
+            className={styles.logo}
+            src="uoa-logo.png"
+            alt="University of Auckland Logo"
+          />
+        </div>
+
+        {/* Button containers */}
+        <div className="flex flex-col w-full flex-1 justify-between py-5">
+          <ul className={`${styles.sideBarList}`}>
             <li>
               <button
-                className="btn vps w-full"
+                className="btn vps font-mono"
                 onClick={() => {
-                  history.push("/dashboard");
+                  handleOpenCard();
                 }}
-                disabled={!currentScenario}
               >
-                Dashboard
+                <AddCircleOutlineRoundedIcon />
+                <span className="min-w-12">Create</span>
               </button>
             </li>
-          ) : (
-            ""
-          )}
-          <li>
-            <button
-              className="btn vps w-full"
-              onClick={playScenario}
-              disabled={!currentScenario}
-            >
-              Play
-            </button>
-          </li>
-          <li>
-            <button
-              className="btn vps w-full"
-              disabled={!currentScenario}
-              onClick={() => {
-                history.push(`/scenario/${currentScenario._id}`);
-              }}
-            >
-              Edit
-            </button>
-          </li>
-          <li>
-            <DeleteModal
-              onDelete={deleteScenario}
-              currentScenario={currentScenario}
-            />
-          </li>
-          <li>
-            <button className="btn vps w-full" onClick={signOut}>
-              Logout
-            </button>
-          </li>
-          <li className="styles.helpButton">
-            <HelpButton isSidebar />
-          </li>
-        </ul>
+            <li>
+              <button
+                className="btn vps font-mono"
+                onClick={playScenario}
+                disabled={!currentScenario}
+              >
+                <PlayArrowRoundedIcon />
+                <span className="min-w-12">Play</span>
+              </button>
+            </li>
+            <li>
+              <button
+                className="btn vps font-mono"
+                disabled={!currentScenario}
+                onClick={() => {
+                  history.push(`/scenario/${currentScenario._id}`);
+                }}
+              >
+                <EditRoundedIcon />
+                <span className="min-w-12">Edit</span>
+              </button>
+            </li>
+            <li>
+              <DeleteModal
+                onDelete={deleteScenario}
+                currentScenario={currentScenario}
+              />
+            </li>
+          </ul>
+
+          <ul className={styles.sideBarList}>
+            <li>
+              <button className="btn vps font-mono" onClick={signOut}>
+                <LogoutIcon /> <span className="min-w-13">Logout</span>
+              </button>
+            </li>
+            <li>
+              <HelpButton isSidebar />
+            </li>
+          </ul>
+        </div>
       </div>
     </>
   );
