@@ -77,7 +77,7 @@ const retrieveScenarios = async (scenarioIds) => {
  */
 const retrieveRoleList = async (scenarioId) => {
   const scenario = await Scenario.findById(scenarioId);
-  return scenario.roleList;
+  return scenario?.roleList ?? [];
 };
 
 /**
@@ -162,12 +162,12 @@ const deleteScenario = async (scenarioId) => {
 
 export {
   createScenario,
-  retrieveScenarioList,
-  retrieveScenario,
-  retrieveScenarios,
-  retrieveRoleList,
-  updateScenario,
   deleteScenario,
+  retrieveRoleList,
+  retrieveScenario,
+  retrieveScenarioList,
+  retrieveScenarios,
   updateDurations,
   updateRoleList,
+  updateScenario,
 };
