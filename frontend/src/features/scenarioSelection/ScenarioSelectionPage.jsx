@@ -24,7 +24,6 @@ export default function ScenarioSelectionPage({ data = null }) {
     currentScenario,
     setCurrentScenario,
   } = useContext(ScenarioContext);
-  console.log(assignedScenarios);
   const { getUserIdToken, VpsUser } = useContext(AuthenticationContext);
   const history = useHistory();
 

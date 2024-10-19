@@ -37,40 +37,54 @@ function InvalidRolePage({ group }) {
 
   return (
     <div style={containerStyle}>
-      <h1 style={textMargin}>
-        Someone else is playing through this section of the scenario!
+      <h1 style={textMargin} className="font-semibold text-4xl text-uoa-blue">
+        It's your group members turn to play through the scenario!
       </h1>
-      <p style={textMargin}>Please wait for your role: {currentUserRole}</p>
-      <p style={textMargin}>
+      <p style={textMargin} className="font-semibold text-xl">
+        If you have just finished playing your part of the scenario, <br />
+        <span className="underline">
+          let your group member with the {rolesWithAccess.join(", ")} role know
+          it is their turn
+        </span>
+      </p>
+      <p style={textMargin} className="text-slate-600">
         Wait for your group member(s) to finish playing through their part of
         the scenario. Then, when it's your turn to play through (your group
         members should let you know), click the below button:
       </p>
 
-      <button className="btn vps" onClick={handleOpen}>
-        View Notes
-      </button>
-      <p
-        style={{
-          marginBottom: "1em",
-          marginTop: "1em",
-          fontWeight: 400,
-          color: "#5c6573",
-        }}
-      >
-        — or —
-      </p>
-      <button
-        className="btn btn-neutral"
-        type="button"
-        onClick={() => window.location.reload()}
-      >
-        Try Access Scenario
-      </button>
-      <p style={textMargin}>
-        If you have just finished playing your part of the scenario, let your
-        group member with the {rolesWithAccess.join(", ")} role know it is their
-        turn
+      <div className="flex justify-around w-[60%]">
+        <button
+          type="button"
+          className="btn btn-general"
+          onClick={handleOpen}
+          style={{ width: "210px" }}
+        >
+          View Notes
+        </button>
+        <p
+          style={{
+            marginBottom: "1em",
+            marginTop: "1em",
+            fontWeight: 400,
+            color: "#5c6573",
+          }}
+        >
+          — or —
+        </p>
+        <button
+          className="btn btn-neutral"
+          type="button"
+          onClick={() => window.location.reload()}
+          style={{ width: "210px" }}
+        >
+          Try Access Scenario
+        </button>
+      </div>
+      <p className="font-mono text-xs mt-20">
+        Current user role: {currentUserRole}
+        <br />
+        Allowed roles: {rolesWithAccess.join(", ")}
       </p>
       {noteOpen && (
         <NotesDisplayCard group={group} user={user} handleClose={handleClose} />

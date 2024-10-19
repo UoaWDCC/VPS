@@ -23,10 +23,11 @@ export default function ScenarioContextProvider({ children }) {
     true
   );
 
-  const { reFetch: reFetch3 } = useGet(
-    currentScenario ? `api/group/${currentScenario._id}/roleList` : null,
-    currentScenario ? setRoleList : () => {},
-    true
+  useGet(
+    `api/group/${currentScenario?._id}/roleList`,
+    setRoleList,
+    true,
+    !currentScenario // Skip request if there is no current scenario.
   );
 
   return (
@@ -38,7 +39,6 @@ export default function ScenarioContextProvider({ children }) {
         assignedScenarios,
         setAssignedScenarios,
         reFetch2,
-        reFetch3,
         currentScenario,
         setCurrentScenario,
         roleList,
