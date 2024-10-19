@@ -7,6 +7,7 @@
   display: flex;
   flex-direction: column;
   align-items: center;
+  --tooltip-color: black;
 
   .logo {
     margin: 10px;
@@ -16,6 +17,7 @@
   .sideBarList {
     list-style: none;
     padding: 0;
+    width: 12.5rem;
 
     li:not(:last-child) {
       margin-bottom: 10%;
@@ -23,6 +25,12 @@
 
     .buttonDisabled {
       opacity: 0.3;
+    }
+  }
+
+  .helpButton {
+    & > button {
+      width: 100%;
     }
   }
 

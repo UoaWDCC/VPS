@@ -155,14 +155,8 @@ export default function PlayScenarioPageMulti({ group }) {
         </div>
       </div>
       <PlayPageSideButton
-        handleOpen={() => setNoteOpen(true)}
-        buttonName="Note"
-        variant="notes"
-      />
-      <PlayPageSideButton
-        handleOpen={() => setResourcesOpen(true)}
-        buttonName="Resources"
-        variant="resources"
+        setNoteOpen={setNoteOpen}
+        setResourcesOpen={setResourcesOpen}
       />
 
       {noteOpen && (

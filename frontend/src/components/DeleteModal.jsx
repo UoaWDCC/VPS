@@ -17,14 +17,13 @@ function DeleteModal({ onDelete, currentScenario }) {
 
   return (
     <div>
-      <DeleteButton
-        className="btn side"
-        variant="contained"
+      <button
+        className="btn important w-full"
         onClick={handleClickOpen}
         disabled={!currentScenario}
       >
         Delete
-      </DeleteButton>
+      </button>
       <dialog id="delete_modal" className="modal modal-bottom sm:modal-middle">
         <div className="modal-box relative">
           <h3 className="font-bold text-lg text-center text-black">
@@ -38,9 +37,9 @@ function DeleteModal({ onDelete, currentScenario }) {
               <button className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2 text-black">
                 ✕
               </button>
-              <DeleteButton onClick={handleDelete} className="btn">
+              <button onClick={handleDelete} className="btn important">
                 Delete
-              </DeleteButton>
+              </button>
             </form>
           </div>
         </div>

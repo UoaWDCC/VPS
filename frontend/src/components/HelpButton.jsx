@@ -19,15 +19,13 @@ const HelpButton = (props) => {
 
   return (
     <>
-      <Button
-        variant="outlined"
-        className={`btn outlined white ${isSidebar ? "side" : "top"}`}
-        color="default"
-        startIcon={<HelpIcon />}
+      <button
+        className={`btn btn-outline btn-primary cursor-pointer gap-2 ${isSidebar ? "w-full" : ""}`}
         onClick={handleOpen}
       >
+        <HelpIcon />
         Help
-      </Button>
+      </button>
       {open && (
         <dialog id="help_modal" className="modal modal-open">
           <form method="dialog" className="modal-box relative">

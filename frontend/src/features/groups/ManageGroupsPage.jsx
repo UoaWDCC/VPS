@@ -177,22 +177,12 @@ export default function ManageGroupsPage() {
           style={{ display: "none" }}
           onChange={handleFileUpload}
         />
-        <Button
-          className="btn top contained white"
-          color="default"
-          variant="contained"
-          onClick={upload}
-        >
+        <button className="btn vps w-[100px]" onClick={upload}>
           Upload
-        </Button>
-        <Button
-          className="btn top contained white"
-          color="default"
-          variant="contained"
-          onClick={download}
-        >
+        </button>
+        <button className="btn vps w-[100px]" onClick={download}>
           Download
-        </Button>
+        </button>
       </TopBar>
 
       <GroupsTable data={users} />

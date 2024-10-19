@@ -1,6 +1,6 @@
 import Button from "@material-ui/core/Button";
 import { useContext, useState } from "react";
-import { Link, useHistory } from "react-router-dom";
+import { Link, Router, useHistory } from "react-router-dom";
 import AuthenticationContext from "../../context/AuthenticationContext";
 import ScenarioContext from "../../context/ScenarioContext";
 import AccessLevel from "../../enums/route.access.level";
@@ -49,9 +49,7 @@ export default function SideBar() {
   }
 
   /** Calls backend end point to switch to the lecturer's dashboard */
-  function openDashboard() {
-    history.push("/dashboard");
-  }
+  function openDashboard() {}
 
   /** Calls backend end point to delete a scenario. */
   async function deleteScenario() {
@@ -92,64 +90,49 @@ export default function SideBar() {
         />
         <ul className={styles.sideBarList}>
           <li>
-            <Button
-              className="btn side contained white"
-              color="default"
-              variant="contained"
+            <button
+              className="btn vps w-full"
               onClick={() => {
                 handleOpenCard();
               }}
             >
               Create
-            </Button>
+            </button>
           </li>
           {VpsUser.role === AccessLevel.STAFF ? (
             <li>
-              <Button
-                className={`btn side contained white ${
-                  currentScenario ? "" : "disabled"
-                }  `}
-                color="default"
-                variant="contained"
-                onClick={openDashboard}
+              <button
+                className="btn vps w-full"
+                onClick={() => {
+                  history.push("/dashboard");
+                }}
                 disabled={!currentScenario}
               >
                 Dashboard
-              </Button>
+              </button>
             </li>
           ) : (
             ""
           )}
           <li>
-            <Button
-              className={`btn side contained white ${
-                currentScenario ? "" : "disabled"
-              }  `}
-              color="default"
-              variant="contained"
+            <button
+              className="btn vps w-full"
               onClick={playScenario}
               disabled={!currentScenario}
             >
               Play
-            </Button>
+            </button>
           </li>
           <li>
-            <Button
-              className={`btn side contained white ${
-                currentScenario ? "" : "disabled"
-              }  `}
-              color="default"
-              variant="contained"
-              component={Link}
-              to={
-                currentScenario
-                  ? `/scenario/${currentScenario._id}`
-                  : "/scenario/null"
-              }
+            <button
+              className="btn vps w-full"
               disabled={!currentScenario}
+              onClick={() => {
+                history.push(`/scenario/${currentScenario._id}`);
+              }}
             >
               Edit
-            </Button>
+            </button>
           </li>
           <li>
             <DeleteModal
@@ -158,16 +141,11 @@ export default function SideBar() {
             />
           </li>
           <li>
-            <Button
-              className="btn side contained white"
-              color="default"
-              variant="contained"
-              onClick={signOut}
-            >
+            <button className="btn vps w-full" onClick={signOut}>
               Logout
-            </Button>
+            </button>
           </li>
-          <li>
+          <li className="styles.helpButton">
             <HelpButton isSidebar />
           </li>
         </ul>

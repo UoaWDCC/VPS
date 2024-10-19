@@ -68,17 +68,15 @@ export default function ShareModal({ isOpen, handleClose }) {
               }}
             />
             <div className="flex justify-center">
-              <Button
-                className={`btn contained white ${styles.dialogItem}`}
-                autoFocus
+              <button
+                className="btn vps"
                 onClick={() => {
                   navigator.clipboard.writeText(url);
                   setCopySuccess(true);
                 }}
-                color="primary"
               >
                 {copySuccess ? "Copied!" : "Copy Link"}
-              </Button>
+              </button>
             </div>
           </div>
           <div className="modal-action"></div>

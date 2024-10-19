@@ -19,24 +19,13 @@
   }
 
   .rightTopBarList {
-    list-style: none;
-    margin: 0;
-    padding: 0;
-    overflow: hidden;
+    display: flex;
+    gap: 15px;
     justify-content: flex-end;
-
-    .listItem {
-      margin: 0;
-      > Button {
-        margin-left: 20px;
-      }
-    }
   }
 
   .rightTopBarList > * {
     // gives all children in list padding
-    display: inline;
     text-align: center;
-    margin: 16px;
   }
 }

@@ -44,13 +44,9 @@ export default function CreateScenarioCard({ onCreate, onClose }) {
           />
         </div>
         <div className="flex justify-center">
-          <Button
-            className="btn side contained blue"
-            type="button"
-            onClick={handleCreate}
-          >
+          <button className="btn vps" onClick={handleCreate}>
             Create
-          </Button>
+          </button>
         </div>
       </div>
     </div>

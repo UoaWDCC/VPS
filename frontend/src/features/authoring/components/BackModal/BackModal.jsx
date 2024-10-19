@@ -2,7 +2,7 @@ import Button from "@material-ui/core/Button";
 import MuiDialogActions from "@material-ui/core/DialogActions";
 import { withStyles } from "@material-ui/core/styles";
 import { useContext } from "react";
-import { Link } from "react-router-dom";
+import { useHistory, Link } from "react-router-dom";
 import ScenarioContext from "context/ScenarioContext";
 
 /**
@@ -15,6 +15,7 @@ export default function BackModal({
   handleDisgard,
 }) {
   const { currentScenario } = useContext(ScenarioContext);
+  const history = useHistory();
 
   const DialogActions = withStyles(() => ({
     root: {
@@ -48,16 +49,17 @@ export default function BackModal({
           </div>
 
           <div className="modal-action flex justify-between">
-            <Button
-              className="btn contained red"
-              autoFocus
-              component={Link}
-              to={`/scenario/${currentScenario._id}`}
-              color="primary"
-              onClick={handleDisgard}
+            <button
+              className="btn important"
+              onClick={() => {
+                history.push(`/scenario/${currentScenario._id}`);
+              }}
             >
               Yes, discard changes
-            </Button>
+            </button>
+            <button className="btn vps" onClick={handleClose}>
+              No, keep editing
+            </button>
           </div>
         </form>
       </dialog>

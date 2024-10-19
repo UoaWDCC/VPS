@@ -35,19 +35,18 @@ export default function ResetConfirmationModal({ isOpen, onClose, onConfirm }) {
           </h3>
 
           <p className="py-4 text-center text-black">
-            This will reset your whole group’s progress to the beginning. You
+            This will reset your whole group's progress to the beginning. You
             will have to notify your group members to re-play through the
             scenario.
           </p>
 
           <div className="modal-action flex flex-col items-center gap-4">
-            <Button
-              className="btn contained red"
-              color="primary"
-              onClick={onConfirm}
-            >
+            <button className="btn important" onClick={onConfirm}>
               Reset Scenario
-            </Button>
+            </button>
+            <button className="btn vps" onClick={onClose}>
+              Cancel
+            </button>
           </div>
         </form>
       </dialog>

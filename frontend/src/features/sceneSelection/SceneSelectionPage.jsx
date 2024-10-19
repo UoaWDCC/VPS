@@ -198,41 +198,24 @@ export function SceneSelectionPage({ data = null }) {
     <ScreenContainer vertical>
       <TopBar>
         {VpsUser.role === AccessLevel.STAFF ? (
-          <Button
-            className="btn top contained white"
-            color="default"
-            variant="contained"
-            onClick={openDashboard}
-          >
+          <button className="btn vps" onClick={openDashboard}>
             Dashboard
-          </Button>
+          </button>
         ) : (
           ""
         )}
-        <Button
-          className="btn top contained white"
-          color="default"
-          variant="contained"
-          onClick={manageGroups}
-        >
+        <button className="btn vps w-[100px]" onClick={manageGroups}>
           Groups
-        </Button>
-        <Button
-          className="btn top contained white"
-          color="default"
-          variant="contained"
-          onClick={playScenario}
-        >
+        </button>
+        <button className="btn vps w-[100px]" onClick={playScenario}>
           Play
-        </Button>
-        <Button
-          className="btn top contained white"
-          color="default"
-          variant="outlined"
+        </button>
+        <button
+          className="btn vps w-[100px]"
           onClick={() => setShareModalOpen(true)}
         >
           Share
-        </Button>
+        </button>
         <input
           type="file"
           ref={fileInputRef}
