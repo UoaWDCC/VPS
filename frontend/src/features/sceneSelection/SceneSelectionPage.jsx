@@ -244,7 +244,10 @@ export function SceneSelectionPage() {
       </TopBar>
 
       {/* On top of the action button available in the top menu bar, we also override user's rightclick context menu to offer the same functionality. */}
-      <div onContextMenu={handleContextMenu} className="px-10 py-7">
+      <div
+        onContextMenu={handleContextMenu}
+        className="w-full h-full px-10 py-7 overflow-y-scroll"
+      >
         {/* Scene list */}
         <ThumbnailList
           data={scenes}
