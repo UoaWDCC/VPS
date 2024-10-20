@@ -2,7 +2,7 @@ import Button from "@material-ui/core/Button";
 import ScenarioContext from "../../context/ScenarioContext";
 import { Link, useHistory } from "react-router-dom";
 
-import styles from "components/TopBar/TopBar.module.scss";
+import styles from "../../components/TopBar/TopBar.module.scss";
 import { useContext } from "react";
 
 /**
@@ -36,9 +36,7 @@ export default function TopBar({ back = "/", children = [] }) {
             </button>
           </li>
         </ul>
-        <ul className={styles.rightTopBarList}>
-          <li className={styles.listItem}>{children}</li>
-        </ul>
+        <div className={styles.rightTopBarList}>{children}</div>
       </div>
     </>
   );
