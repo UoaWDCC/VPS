@@ -3,7 +3,7 @@ name: Fly Deploy Staging
 on:
   push:
     branches:
-      - main
+      - master
 
 jobs:
   deploy-web:
