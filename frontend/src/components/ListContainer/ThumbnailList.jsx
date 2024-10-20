@@ -43,9 +43,9 @@ export default function ThumbnailList({
   invalidNameId,
   highlightOnSelect = true, // Whether or not to highlight the card border on select.
   addCard,
+  onItemBlur,
   onItemSelected = () => {},
   onItemDoubleClick = () => {},
-  onItemBlur = () => {},
 }) {
   const classes = useStyles();
   const [selected, setSelected] = useState();
@@ -113,12 +113,18 @@ export default function ThumbnailList({
                       <Thumbnail components={item?.components || []} />
                     </Box>
                     <div className="w-full flex justify-center ">
-                      <input
-                        className="w-fit font-mona bg-white border border-slate-300 rounded-lg text-center px-2 py-[0.125rem] max-w-full overflow-ellipsis"
-                        defaultValue={item.name}
-                        onBlur={onItemBlur}
-                        key={item._id}
-                      />
+                      {onItemBlur ? (
+                        <input
+                          className="w-fit font-mona bg-white border border-slate-300 rounded-lg text-center px-2 py-[0.125rem] max-w-full overflow-ellipsis"
+                          defaultValue={item.name}
+                          onBlur={onItemBlur}
+                          key={item._id}
+                        />
+                      ) : (
+                        <p className="w-fit font-mona bg-slate-200 rounded-full text-center px-4 py-[0.125rem] max-w-full overflow-ellipsis">
+                          {item.name}
+                        </p>
+                      )}
                     </div>
                   </div>
                   {invalidNameId === item._id && (

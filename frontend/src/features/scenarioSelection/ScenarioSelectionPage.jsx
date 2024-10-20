@@ -169,7 +169,6 @@ export default function ScenarioSelectionPage() {
                   // For assigned scenarios, play the scenario on click.
                   window.open(`/play/${scenario._id}`, "_blank");
                 }}
-                onItemBlur={changeScenarioName}
                 invalidNameId={invalidNameId}
                 highlightOnSelect={false}
               />
