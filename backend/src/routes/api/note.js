@@ -16,9 +16,9 @@ const HTTP_OK = 200;
 router.use(auth);
 
 // Retrieve note list
-router.get("/retrieveList/:groupId", async (req, res) => {
+router.get("/retrieveAll/:groupId", async (req, res) => {
   const { groupId } = req.params;
-  const notes = retrieveNoteList(groupId);
+  const notes = await retrieveNoteList(groupId);
   res.status(HTTP_OK).json(notes);
 });
 
