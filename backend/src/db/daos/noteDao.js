@@ -1,5 +1,6 @@
 import Note from "../models/note.js";
 import Group from "../models/group.js";
+import { HttpError } from "../../util/error.js";
 
 /**
  * Checks if a user is in a group
@@ -48,19 +49,17 @@ const createNote = async (groupId, title, email, text = "") => {
  */
 const deleteNote = async (noteId, groupId, email) => {
   const role = await checkRole(groupId, email);
-  const note = await Note.findById(noteId);
-  if (note.role !== role) {
-    return null;
-  }
+  const note = await Note.findById(noteId, { role: 1 }).lean();
+  if (note?.role !== role) throw new HttpError(403, "Forbidden");
 
-  const updateQuery = {
-    $pull: { [`notes.${note.role}`]: noteId },
-  };
+  const updateQuery = { $pull: { [`notes.${note.role}`]: noteId } };
+  await Promise.all([
+    // remove reference
+    Group.updateOne({ _id: groupId }, updateQuery),
+    // remove document
+    Note.deleteOne({ _id: noteId }),
+  ]);
 
-  //  delete note from group
-  await Group.updateOne({ _id: groupId }, updateQuery);
-  //  delete note from note collection
-  await note.delete();
   return null;
 };
 
