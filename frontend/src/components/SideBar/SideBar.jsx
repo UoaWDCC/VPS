@@ -83,7 +83,7 @@ export default function SideBar() {
       )}
 
       {/* Main sidebar */}
-      <div className={`${styles.sideBar} bg-uoa-blue gap-5`}>
+      <div className={`${styles.sideBar} bg-uoa-blue `}>
         {/* UoA logo container */}
         <div className="flex-0 p-7">
           <img
@@ -95,7 +95,7 @@ export default function SideBar() {
         </div>
 
         {/* Button containers */}
-        <div className="flex flex-col w-full flex-1 justify-between py-5">
+        <div className="flex flex-col w-full flex-1 justify-between pb-5">
           <ul className={`${styles.sideBarList}`}>
             <li>
               <button
