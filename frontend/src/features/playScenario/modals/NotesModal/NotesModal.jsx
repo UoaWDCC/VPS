@@ -38,16 +38,23 @@ export default function NotesModal({ group, user, handleClose }) {
           aria-label="Close Card"
         />
         <div className={styles.noteCard}>
-          <div className={styles.notesContainer}>
+          <div className="flex flex-col gap-5 w-full">
             {!content ? (
               <ViewPage
                 group={group}
                 user={user}
                 role={role}
                 setContent={setContent}
+                handleClose={handleClose}
               />
             ) : (
-              <EditPage noteId={content} group={group} role={role} />
+              <EditPage
+                noteId={content}
+                group={group}
+                role={role}
+                goBack={() => setContent("")}
+                handleClose={handleClose}
+              />
             )}
           </div>
         </div>
