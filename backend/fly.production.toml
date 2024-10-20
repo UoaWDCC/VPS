@@ -1,12 +1,11 @@
-app = 'wdcc-vps-staging'
+app = 'wdcc-vps-api'
 primary_region = 'syd'
 
 [build]
-  # dockerfile contains build time non-sensitive env vars
   dockerfile = "Dockerfile"
 
 [http_service]
-  internal_port = 80
+  internal_port = 5000
   force_https = true
   auto_stop_machines = true
   auto_start_machines = true

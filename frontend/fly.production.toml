@@ -1,4 +1,4 @@
-app = 'wdcc-vps-staging'
+app = 'wdcc-vps'
 primary_region = 'syd'
 
 [build]
