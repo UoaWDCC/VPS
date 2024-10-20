@@ -55,7 +55,7 @@ export default function PlayScenarioCanvas({
   };
 
   return (
-    <>
+    <div className="bg-white" style={{ width: "100vw", height: "100vh" }}>
       {scene.components?.map((component, index) => {
         let action = () =>
           component.nextScene && incrementor(component.nextScene);
@@ -82,6 +82,6 @@ export default function PlayScenarioCanvas({
         onConfirm={handleConfirmReset}
         onClose={handleCancelReset}
       />
-    </>
+    </div>
   );
 }
