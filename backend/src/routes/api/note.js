@@ -7,6 +7,8 @@ import {
   retrieveNote,
 } from "../../db/daos/noteDao.js";
 import auth from "../../middleware/firebaseAuth.js";
+import { handle } from "../../util/error.js";
+import STATUS from "../../util/status.js";
 
 const router = Router();
 const HTTP_OK = 200;
@@ -43,9 +45,12 @@ router.put("/update", async (req, res) => {
 });
 
 // Delete a note
-router.delete("/delete", async (req, res) => {
-  const { noteId, groupId, email } = req.body;
-  await deleteNote(noteId, groupId, email);
-  res.status(HTTP_OK).json("note deleted");
-});
+router.delete(
+  "/delete",
+  handle(async (req, res) => {
+    const { noteId, groupId, email } = req.body;
+    await deleteNote(noteId, groupId, email);
+    res.status(STATUS.OK).json("note deleted");
+  })
+);
 export default router;
