@@ -93,24 +93,13 @@ const updateNote = async (noteId, updatedNote, groupId, email) => {
  * @returns list of database note objects
  */
 //  I know the group is fetched for twice but this is currently not used anywhere
-const retrieveNoteList = async (groupId, email) => {
-  const dbGroup = await Group.findById(groupId);
-  const role = await checkRole(groupId, email);
-  //  if user is not in group return null
-  if (role === null) {
-    return null;
-  }
-  const allNotes = [];
-  const noteIds = [...dbGroup.notes.values()].flat();
-  const dbNotes = await Note.find({ _id: { $in: noteIds } }, [
-    "title",
-    "role",
-    "date",
-    "text",
-  ]);
+const retrieveNoteList = async (groupId) => {
+  const { notes } = await Group.findById(groupId, { notes: 1 }).lean();
 
-  allNotes.push(...dbNotes);
-  return allNotes;
+  const noteIds = Object.values(notes).flat();
+  const dbNotes = await Note.find({ _id: { $in: noteIds } }, { __v: 0 });
+
+  return dbNotes;
 };
 
 /**

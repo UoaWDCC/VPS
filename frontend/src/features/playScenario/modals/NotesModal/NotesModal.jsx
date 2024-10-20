@@ -13,8 +13,8 @@ export default function NotesModal({ group, user, handleClose }) {
     response: groupData,
     loading: groupLoading,
     error: groupError,
-    getRequest: retrieveGroupRequest,
-  } = useAuthGet(`/api/group/retrieve/${group._id}`);
+    getRequest: retrieveNotes,
+  } = useAuthGet(`/api/note/retrieveAll/${group._id}`, setNotes);
 
   const {
     response: createResponse,
@@ -22,25 +22,6 @@ export default function NotesModal({ group, user, handleClose }) {
     error: createError,
     postRequest: createNoteRequest,
   } = useAuthPost("/api/note/");
-
-  async function loadNotes() {
-    if (!groupData) {
-      return;
-    }
-    const noteList = Object.entries(groupData.notes).flatMap(([role, ids]) =>
-      ids.map((id) => ({ role, id }))
-    );
-    setNotes(noteList);
-  }
-
-  useEffect(() => {
-    loadNotes();
-  }, [groupData]);
-
-  // refetch group data to get updated notes
-  async function fetchNotesData() {
-    await retrieveGroupRequest();
-  }
 
   useEffect(() => {
     // Check roles
@@ -50,7 +31,7 @@ export default function NotesModal({ group, user, handleClose }) {
       }
     });
 
-    fetchNotesData();
+    retrieveNotes();
   }, []);
 
   const handleKeyPress = (e) => {
@@ -75,7 +56,7 @@ export default function NotesModal({ group, user, handleClose }) {
       title: "New Note",
       email: user.email,
     });
-    fetchNotesData();
+    retrieveNotes();
   };
 
   console.log(notes);
