@@ -64,9 +64,9 @@ function ResourcesModal({ handleClose, resources }) {
               key={resource._id}
               role="tab"
               onClick={() => setCurrentResourceId(resource._id)}
-              className={`tab ${
+              className={`tab text-lg ${
                 currentResourceId === resource._id
-                ? "tab-active text-[#035084] border-white font-bold" 
+                ? "tab-active text-[#035084] border-bottom-[#035084] border-[#035084] font-bold" 
                   : ""
               }`}
             >
