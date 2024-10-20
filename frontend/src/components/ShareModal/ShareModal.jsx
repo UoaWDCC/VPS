@@ -1,7 +1,5 @@
-import Button from "@material-ui/core/Button";
 import { useContext, useState } from "react";
 import ScenarioContext from "../../context/ScenarioContext";
-import styles from "./ShareModal.module.scss";
 
 /**
  * Component used to a display a share model on the screen, conisting of a copiable link and a button.
@@ -19,7 +17,7 @@ import styles from "./ShareModal.module.scss";
 export default function ShareModal({ isOpen, handleClose }) {
   const { currentScenario } = useContext(ScenarioContext);
   const [copySuccess, setCopySuccess] = useState(false);
-  const url = `${window.location.origin}/play/${currentScenario._id}`;
+  const url = `${window.location.origin}/play/${currentScenario?._id}`;
 
   /** Function which executes when the modal is closed. */
   function onClose() {

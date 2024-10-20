@@ -2,7 +2,7 @@ import MenuItem from "@material-ui/core/MenuItem";
 import { useContext, useEffect, useState } from "react";
 import { useHistory } from "react-router-dom";
 import ContextMenu from "../../components/ContextMenu";
-import ListContainer from "../../components/ListContainer/ListContainer";
+import ThumbnailList from "../../components/ListContainer/ThumbnailList";
 import ScreenContainer from "../../components/ScreenContainer/ScreenContainer";
 import SideBar from "../../components/SideBar/SideBar";
 import AuthenticationContext from "../../context/AuthenticationContext";
@@ -10,14 +10,17 @@ import ScenarioContext from "../../context/ScenarioContext";
 import AccessLevel from "../../enums/route.access.level";
 import { useDelete, usePut } from "../../hooks/crudHooks";
 
+import MovieFilterRoundedIcon from "@mui/icons-material/MovieFilterRounded";
+import TheatersRoundedIcon from "@mui/icons-material/TheatersRounded";
+
 /**
  * Page that shows the user's existing scenarios.
  *
  * @container
  */
-export default function ScenarioSelectionPage({ data = null }) {
+export default function ScenarioSelectionPage() {
   const {
-    scenarios,
+    scenarios: userScenarios,
     reFetch,
     assignedScenarios,
     reFetch2,
@@ -103,7 +106,7 @@ export default function ScenarioSelectionPage({ data = null }) {
   return (
     <ScreenContainer>
       <SideBar />
-      <div onContextMenu={handleContextMenu}>
+      <div onContextMenu={handleContextMenu} className="w-full h-full">
         <ContextMenu
           position={contextMenuPosition}
           setPosition={setContextMenuPosition}
@@ -125,14 +128,53 @@ export default function ScenarioSelectionPage({ data = null }) {
             ""
           )}
         </ContextMenu>
-        <ListContainer
-          data={data || scenarios}
-          assignedScenarios={assignedScenarios || []}
-          onItemSelected={setCurrentScenario}
-          onItemDoubleClick={editScenario}
-          onItemBlur={changeScenarioName}
-          invalidNameId={invalidNameId}
-        />
+
+        {/* Scenario List */}
+        <div className="w-full h-full px-10 py-10 overflow-x-hidden overflow-y-scroll flex flex-col gap-10">
+          {/* List of scenarios created by the logged-in user */}
+          {userScenarios && (
+            <div>
+              <h1 className="text-3xl font-mona font-bold my-3 flex items-center gap-3">
+                <MovieFilterRoundedIcon fontSize="large" /> Your Scenarios
+              </h1>
+
+              <div>
+                <ThumbnailList
+                  // data={userScenarios}
+                  data={userScenarios.map((scenario) => {
+                    scenario.components = scenario.thumbnail?.components || [];
+                    return scenario;
+                  })}
+                  onItemSelected={setCurrentScenario}
+                  onItemDoubleClick={editScenario}
+                  onItemBlur={changeScenarioName}
+                  invalidNameId={invalidNameId}
+                />
+              </div>
+            </div>
+          )}
+
+          {/* List of scenarios assigned to the logged-in user */}
+          {assignedScenarios && (
+            <div>
+              <h1 className="text-3xl font-mona font-bold my-3 flex items-center gap-3">
+                <TheatersRoundedIcon fontSize="large" /> Assigned Scenarios
+              </h1>
+              <ThumbnailList
+                data={assignedScenarios.map((scenario) => {
+                  scenario.components = scenario.thumbnail?.components || [];
+                  return scenario;
+                })}
+                onItemSelected={(scenario) => {
+                  // For assigned scenarios, play the scenario on click.
+                  window.open(`/play/${scenario._id}`, "_blank");
+                }}
+                invalidNameId={invalidNameId}
+                highlightOnSelect={false}
+              />
+            </div>
+          )}
+        </div>
       </div>
     </ScreenContainer>
   );

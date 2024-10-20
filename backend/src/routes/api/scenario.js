@@ -1,13 +1,15 @@
 import { Router } from "express";
 import auth from "../../middleware/firebaseAuth.js";
 import scenarioAuth from "../../middleware/scenarioAuth.js";
+import validScenarioId from "../../middleware/validScenarioId.js";
 
 import {
   createScenario,
-  retrieveScenarioList,
-  updateScenario,
   deleteScenario,
+  retrieveScenario,
+  retrieveScenarioList,
   updateDurations,
+  updateScenario,
 } from "../../db/daos/scenarioDao.js";
 
 import { retrieveAssignedScenarioList } from "../../db/daos/userDao.js";
@@ -48,7 +50,14 @@ router.post("/", async (req, res) => {
 });
 
 // Apply scenario auth middleware
+router.use("/:scenarioId", validScenarioId);
 router.use("/:scenarioId", scenarioAuth);
+
+// Get a scenario by id.
+router.get("/:scenarioId", async (req, res) => {
+  const scenario = await retrieveScenario(req.params.scenarioId);
+  res.status(HTTP_OK).json(scenario);
+});
 
 // Update a scenario by a user
 router.put("/:scenarioId", async (req, res) => {

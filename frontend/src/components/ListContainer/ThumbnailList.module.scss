@@ -1,31 +1,15 @@
-.scenarioListContainer {
-  width: 85vw;
-  height: 100vh;
+.listContainer {
+  width: 100%;
   overflow-y: scroll;
   overflow-x: hidden;
   padding-right: 30px;
   padding-left: 30px;
 }
 
-.scenarioListContainerWide {
-  flex-grow: 1;
-  width: 100vw;
-  height: 90vh;
-  overflow-y: scroll;
-  overflow-x: hidden;
-}
-
 .imageListItem {
   margin-top: 20px;
   margin-left: 3px;
   margin-right: 3px;
-  cursor: pointer;
-}
-
-.imageListItemWide {
-  padding-top: 20px;
-  padding-left: 20px;
-  padding-right: 20px;
   cursor: pointer;
 }
 

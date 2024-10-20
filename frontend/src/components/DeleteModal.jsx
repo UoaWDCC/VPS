@@ -1,5 +1,4 @@
-import { useState } from "react";
-import DeleteButton from "./DeleteButton";
+import DeleteOutlineRoundedIcon from "@mui/icons-material/DeleteOutlineRounded";
 
 function DeleteModal({ onDelete, currentScenario }) {
   const handleClickOpen = () => {
@@ -18,10 +17,11 @@ function DeleteModal({ onDelete, currentScenario }) {
   return (
     <div>
       <button
-        className="btn important w-full"
+        className="btn important w-full font-mono"
         onClick={handleClickOpen}
         disabled={!currentScenario}
       >
+        <DeleteOutlineRoundedIcon />
         Delete
       </button>
       <dialog id="delete_modal" className="modal modal-bottom sm:modal-middle">

@@ -5,7 +5,7 @@
 /* MonaSans - licensed under OFL. See https://github.com/github/mona-sans/blob/main/LICENSE */
 @font-face {
   font-family: "MonaSans";
-  src: url("fonts/MonaSans.woff2") format("woff2");
+  src: url("/fonts/MonaSans.woff2") format("woff2");
 }
 
 /* Pass down viewport width/height to children */

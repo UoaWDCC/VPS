@@ -1,14 +1,15 @@
 import { Router } from "express";
-
 import {
+  createGroup,
   getCurrentScene,
   getGroup,
-  createGroup,
   getGroupByScenarioId,
 } from "../../db/daos/groupDao.js";
 
 import { retrieveRoleList, updateRoleList } from "../../db/daos/scenarioDao.js";
 import Group from "../../db/models/group.js";
+
+import validScenarioId from "../../middleware/validScenarioId.js";
 
 const router = Router();
 
@@ -16,6 +17,7 @@ const HTTP_OK = 200;
 const HTTP_CONFLICT = 409;
 const HTTP_NO_CONTENT = 204;
 const HTTP_NOT_FOUND = 404;
+const HTTP_BAD_REQUEST = 400;
 
 // get the groups assigned to a scenario
 router.get("/scenario/:scenarioId", async (req, res) => {
@@ -39,6 +41,19 @@ router.get("/path/:groupId", async (req, res) => {
   }
 });
 
+// get a group by its id
+router.get("/retrieve/:groupId", async (req, res) => {
+  const { groupId } = req.params;
+  const group = await getGroup(groupId);
+  if (!group) {
+    return res.status(HTTP_NOT_FOUND).json({ error: "Group not found" });
+  }
+  return res.status(HTTP_OK).json(group);
+});
+
+export default router;
+
+router.use("/:scenarioId", validScenarioId);
 // create a new group
 router.post("/:scenarioId", async (req, res) => {
   const { groupList, roleList } = req.body;
@@ -98,20 +113,7 @@ router.post("/:scenarioId", async (req, res) => {
 
 router.get("/:scenarioId/roleList", async (req, res) => {
   const { scenarioId } = req.params;
-
   const roleList = await retrieveRoleList(scenarioId);
 
   res.status(HTTP_OK).json(roleList);
 });
-
-// get a group by its id
-router.get("/retrieve/:groupId", async (req, res) => {
-  const { groupId } = req.params;
-  const group = await getGroup(groupId);
-  if (!group) {
-    return res.status(HTTP_NOT_FOUND).json({ error: "Group not found" });
-  }
-  return res.status(HTTP_OK).json(group);
-});
-
-export default router;

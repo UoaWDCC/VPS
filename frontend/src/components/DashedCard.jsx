@@ -1,5 +1,6 @@
 import { Box } from "@material-ui/core";
-import styles from "./ListContainer/ListContainer.module.scss";
+
+import AddRoundedIcon from "@mui/icons-material/AddRounded";
 
 /**
  * Component used to represent a card with a dashed border, used to indicate that a new card can be created.
@@ -16,27 +17,27 @@ import styles from "./ListContainer/ListContainer.module.scss";
  */
 export default function DashedCard({ onClick }) {
   return (
-    <div className={styles.imageListItemWide}>
+    <div>
       <div style={{ position: "relative" }}>
         <Box
           height={160}
-          border="5px dashed grey"
-          borderRadius={10}
-          borderColor="#747474"
-          overflow="hidden"
-          textAlign="center"
+          onClick={onClick}
           sx={{
-            background: "#f1f1f1",
+            background: "#f1f5f9",
             "&:hover": {
-              background: "#cccccc",
+              background: "#fff",
             },
           }}
-          onClick={onClick}
-        />
-        <div className={styles.crossHorizontalLine} />
-        <div className={styles.crossVerticalLine} />
+          className="cursor-pointer flex justify-center items-center overflow-hidden rounded-xl border-2 border-dashed border-slate-400 bg-slate-100"
+        >
+          <AddRoundedIcon
+            className="text-slate-500"
+            sx={{
+              fontSize: "5rem",
+            }}
+          />
+        </Box>
       </div>
-      <p className={styles.text}>Create New Scene</p>
     </div>
   );
 }
