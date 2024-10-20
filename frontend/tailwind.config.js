@@ -8,6 +8,7 @@ module.exports = {
       },
       colors: {
         "uoa-blue": "#035084",
+        main: "#f8fafc",
       },
     },
   },

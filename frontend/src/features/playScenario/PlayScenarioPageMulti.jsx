@@ -143,17 +143,13 @@ export default function PlayScenarioPageMulti({ group }) {
 
   return (
     <>
-      <div style={{ width: "100vw", height: "100vh" }}>
-        <div>
-          <PlayScenarioCanvas
-            scene={currScene}
-            incrementor={incrementor}
-            reset={reset}
-            setAddFlags={setAddFlags}
-            setRemoveFlags={setRemoveFlags}
-          />
-        </div>
-      </div>
+      <PlayScenarioCanvas
+        scene={currScene}
+        incrementor={incrementor}
+        reset={reset}
+        setAddFlags={setAddFlags}
+        setRemoveFlags={setRemoveFlags}
+      />
       <PlayPageSideButton
         setNoteOpen={setNoteOpen}
         setResourcesOpen={setResourcesOpen}
