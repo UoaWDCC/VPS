@@ -2,12 +2,13 @@ import { useAuthGet, useAuthPost } from "hooks/crudHooks";
 import { useEffect, useState } from "react";
 
 import { Add } from "@material-ui/icons";
-import Note from "../../components/Note/Note";
+import NoteCard from "./NoteCard.jsx";
 import styles from "./NotesModal.module.scss";
 
 export default function NotesModal({ group, user, handleClose }) {
   const [notes, setNotes] = useState([]);
   const [userRole, setRole] = useState(null);
+
   const {
     response: groupData,
     loading: groupLoading,
@@ -77,6 +78,8 @@ export default function NotesModal({ group, user, handleClose }) {
     fetchNotesData();
   };
 
+  console.log(notes);
+
   return (
     <>
       <div>
@@ -88,22 +91,15 @@ export default function NotesModal({ group, user, handleClose }) {
           onKeyDown={handleKeyPress}
           aria-label="Close Card"
         />
-
         <div className={styles.noteCard}>
-          {groupLoading ? <div>Loading...</div> : ""}
-          {groupError ? <div>Error loading notes</div> : ""}
-          {noteCreating ? <div>Creating note...</div> : ""}
-          {createError ? <div>Error creating note</div> : ""}
-          {createResponse ? <div>Note created</div> : ""}
           <div className={styles.notesContainer}>
             {notes.map((note) => (
-              <Note
+              <NoteCard
                 key={note.id}
+                title={note.title}
                 role={note.role}
-                noteId={note.id}
-                group={group}
-                user={user}
-                refetchGroup={fetchNotesData}
+                text={note.text}
+                date={note.date}
               />
             ))}
             <div
