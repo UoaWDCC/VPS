@@ -1,9 +1,11 @@
 import AuthenticationContext from "context/AuthenticationContext";
 import { useAuthDelete, useAuthGet, useAuthPut } from "hooks/crudHooks";
 import { useContext, useEffect, useState } from "react";
+import CloseIcon from "@mui/icons-material/Close";
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import styles from "./Note.module.scss";
 
-export default function EditPage({ role, noteId, group, refetchGroup }) {
+export default function EditPage({ role, noteId, group, goBack, handleClose }) {
   const { user } = useContext(AuthenticationContext);
   const [noteContent, setContent] = useState();
   const [title, setTitle] = useState();
@@ -37,16 +39,6 @@ export default function EditPage({ role, noteId, group, refetchGroup }) {
     deleteRequest: deleteNoteRequest,
   } = useAuthDelete(`/api/note/delete`);
 
-  const getRole = () => {
-    group.users.forEach((userToCheck) => {
-      if (userToCheck.email === user.email) {
-        if (userToCheck.role === role) {
-          setRole(true);
-        }
-      }
-    });
-  };
-
   const loadNote = async () => {
     if (noteData) {
       setContent(noteData.text);
@@ -55,13 +47,14 @@ export default function EditPage({ role, noteId, group, refetchGroup }) {
         const dateObject = new Date(noteData.date);
         setDate(dateObject);
       }
+      if (noteData.role === role) {
+        setRole(true);
+      }
     }
   };
 
   async function fetchNote() {
-    console.log("fetching note");
     await retrieveNoteRequest();
-    getRole();
   }
 
   useEffect(() => {
@@ -80,10 +73,6 @@ export default function EditPage({ role, noteId, group, refetchGroup }) {
   const handleTitleInput = (e) => {
     setSaved(false);
     setTitle(e.target.value);
-  };
-
-  const handleOpen = () => {
-    setOpen(true);
   };
 
   const saveNote = async () => {
@@ -116,10 +105,6 @@ export default function EditPage({ role, noteId, group, refetchGroup }) {
     }
   };
 
-  const handleClose = () => {
-    setOpen(false);
-  };
-
   const deleteNote = async () => {
     setShowConfirm(false);
     try {
@@ -128,7 +113,6 @@ export default function EditPage({ role, noteId, group, refetchGroup }) {
         groupId: group._id,
         email: user.email,
       });
-      refetchGroup();
       handleClose();
     } catch (e) {
       console.log(e);
@@ -139,119 +123,68 @@ export default function EditPage({ role, noteId, group, refetchGroup }) {
     setShowConfirm(true);
   };
 
-  const handleKeyPress = (e) => {
-    if (e.key === "Escape") {
-      handleClose();
-    }
-  };
-
-  if (noteLoading) {
-    return (
-      <div
-        role="button"
-        onClick={handleOpen}
-        onKeyDown={handleKeyPress}
-        tabIndex={0}
-        className={styles.note}
-      >
-        Loading...
-      </div>
-    );
-  }
-
-  if (noteError) {
-    return (
-      <div
-        role="button"
-        onClick={handleOpen}
-        onKeyDown={handleKeyPress}
-        tabIndex={0}
-        className={styles.note}
-      >
-        Error
-      </div>
-    );
-  }
-
   return (
-    <div>
-      {isRole && (
+    <>
+      <div className="flex w-full justify-between gap-10">
         <input
-          className={styles.titleInput}
+          className="text-2xl font-semibold grow bg-slate-50 p-2 rounded-md border-slate-300 border-2"
           type="text"
           value={title}
           maxLength="50"
-          onChange={(e) => handleTitleInput(e)}
+          onChange={handleTitleInput}
+          disabled={!isRole}
         />
-      )}
-      {isRole && (
-        <textarea
-          className={styles.inputField}
-          type="text"
-          value={noteContent}
-          onChange={(e) => handleContentInput(e)}
-        />
-      )}
-      {!isRole && <h2>{title}</h2>}
-      {!isRole && <p className={styles.inputField}>{noteContent}</p>}
-      {date instanceof Date ? (
-        <div>
-          <p>Last saved at:</p>
-          <p>{date.toLocaleDateString()}</p>
-          <p>{date.toLocaleTimeString()}</p>
-        </div>
-      ) : (
-        ""
-      )}
-      {updateLoading ? <p>Saving...</p> : ""}
-      {updateError ? <p>Error saving note</p> : ""}
-      {saved && updateResult ? <p>Note saved</p> : ""}
-      {deleteLoading ? <p>Deleting...</p> : ""}
-      {deleteError ? <p>Error deleting note</p> : ""}
-      {deleteResult ? <p>Note deleted</p> : ""}
-      <div>
-        {" "}
-        {isRole && (
-          <button
-            type="button"
-            onClick={handleClose}
-            className={styles.closeButton}
-          >
-            Close
-          </button>
+        <button type="button" onClick={goBack}>
+          <ArrowBackIcon />
+        </button>
+        <button type="button" onClick={handleClose}>
+          <CloseIcon />
+        </button>
+      </div>
+      <textarea
+        className="w-full grow bg-slate-50 p-2 rounded-md border-slate-300 border-2"
+        type="text"
+        value={noteContent}
+        onChange={(e) => handleContentInput(e)}
+        disabled={!isRole}
+      />
+      <div className="flex flex-row justify-between">
+        {date ? (
+          <p>
+            {`Last edit: ${date.toLocaleDateString()} at ${date.toLocaleTimeString(
+              [],
+              {
+                hour: "2-digit",
+                minute: "2-digit",
+              }
+            )}`}
+            {}
+          </p>
+        ) : (
+          ""
         )}
         {isRole && (
-          <button
-            type="button"
-            onClick={handleSave}
-            className={styles.saveButton}
-          >
-            Save
-          </button>
-        )}
-        {isRole && (
-          <button
-            type="button"
-            onClick={handleDelete}
-            className={styles.deleteButton}
-          >
-            Delete
-          </button>
-        )}
-        {!isRole && (
-          <button
-            type="button"
-            onClick={handleClose}
-            className={styles.notRoleCloseButton}
-          >
-            Close
-          </button>
+          <div className="flex gap-10 grow flex-row-reverse">
+            <button
+              type="button"
+              onClick={handleSave}
+              className="btn vps w-[100px]"
+            >
+              Save
+            </button>
+            <button
+              type="button"
+              onClick={handleDelete}
+              className="btn vps important w-[100px]"
+            >
+              Delete
+            </button>
+          </div>
         )}
       </div>
       {showConfirm && (
         <div
           role="button"
-          onKeyDown={handleKeyPress}
           tabIndex={0}
           className={styles.overlay}
           onClick={() => setShowConfirm(false)}
@@ -276,6 +209,6 @@ export default function EditPage({ role, noteId, group, refetchGroup }) {
           </div>
         </div>
       )}
-    </div>
+    </>
   );
 }
