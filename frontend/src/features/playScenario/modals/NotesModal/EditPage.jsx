@@ -174,7 +174,7 @@ export default function EditPage({ role, noteId, group, refetchGroup }) {
   }
 
   return (
-    <div className={styles.noteContent}>
+    <div>
       {isRole && (
         <input
           className={styles.titleInput}
