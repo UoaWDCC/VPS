@@ -56,23 +56,25 @@ function ResourcesModal({ handleClose, resources }) {
           &times;
         </button>
         <h2 className={resourceStyles.modalHeading}>Resources</h2>
-        <nav className={resourceStyles.navBar}>
+
+        {/* DaisyUI Tabs Implementation */}
+        <div role="tablist" className="tabs tabs-bordered">
           {resources.map((resource) => (
-            <p key={resource._id}>
-              <button
-                type="button"
-                onClick={() => setCurrentResourceId(resource._id)}
-                className={
-                  currentResourceId === resource._id
-                    ? resourceStyles.active
-                    : ""
-                }
-              >
-                {resource.name}
-              </button>
-            </p>
+            <a
+              key={resource._id}
+              role="tab"
+              onClick={() => setCurrentResourceId(resource._id)}
+              className={`tab text-lg ${
+                currentResourceId === resource._id
+                  ? "tab-active text-[#035084] border-bottom-[#035084] border-[#035084] font-bold"
+                  : ""
+              }`}
+            >
+              {resource.name}
+            </a>
           ))}
-        </nav>
+        </div>
+
         <div className={resourceStyles.r_content_card}>
           {currentResource ? (
             <ResourceContent item={currentResource} />
