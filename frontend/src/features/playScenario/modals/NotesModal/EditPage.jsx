@@ -127,7 +127,7 @@ export default function EditPage({ role, noteId, group, goBack, handleClose }) {
     <>
       <div className="flex w-full justify-between gap-10">
         <input
-          className="text-2xl font-semibold grow bg-slate-50 p-2 rounded-md border-slate-300 border-2"
+          className="text-2xl font-semibold grow bg-slate-50 p-2 rounded-md outline-none border-slate-150 border-2 focus:border-slate-300"
           type="text"
           value={title}
           maxLength="50"
@@ -142,7 +142,7 @@ export default function EditPage({ role, noteId, group, goBack, handleClose }) {
         </button>
       </div>
       <textarea
-        className="w-full grow bg-slate-50 p-2 rounded-md border-slate-300 border-2"
+        className="w-full grow bg-slate-50 p-2 rounded-md outline-none border-slate-150 border-2 focus:border-slate-300"
         type="text"
         value={noteContent}
         onChange={(e) => handleContentInput(e)}
