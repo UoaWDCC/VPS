@@ -32,7 +32,7 @@ const createNote = async (groupId, title, email, text = "") => {
   if (role === null) {
     return null;
   }
-  const dbNote = new Note({ title, role, text });
+  const dbNote = new Note({ title, role, text, date: new Date() });
   await dbNote.save();
   const updateQuery = {};
   updateQuery[`notes.${role}`] = dbNote.id;
