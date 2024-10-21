@@ -1,7 +1,7 @@
 const NoteCard = ({ title, role, text, date, onClick }) => {
   return (
     <div
-      className="card bg-slate-50 w-60 h-40 shadow-xl cursor-pointer border-2 border-slate-50 hover:border-slate-300 "
+      className="card bg-slate-50 w-60 h-40 shadow-md cursor-pointer border-2 border-slate-50 hover:border-slate-300 "
       onClick={onClick}
     >
       <div className="card-body p-5">

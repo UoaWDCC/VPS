@@ -61,7 +61,7 @@ export default function ViewPage({
           />
         ))}
         <div
-          className="card bg-slate-50 w-60 h-40 shadow-xl cursor-pointer hover:border-2 border-slate-300"
+          className="card bg-slate-50 w-60 h-40 shadow-md cursor-pointer hover:border-2 border-slate-300"
           onClick={handleCreate}
         >
           <div className="card-body flex justify-center items-center text-slate-500">
