@@ -1,0 +1,26 @@
+name: Fly Deploy Production
+
+on: [workflow_dispatch]
+
+jobs:
+  deploy-web:
+    name: Deploy Web
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: superfly/flyctl-actions/setup-flyctl@master
+      - run: flyctl deploy --remote-only --config fly.production.toml --build-arg VITE_FIREBASE_PROJECT_ID=${{ secrets.VITE_FIREBASE_PROJECT_ID }} --build-arg VITE_REACT_APP_API_KEY=${{ secrets.VITE_REACT_APP_API_KEY }} --build-arg VITE_REACT_APP_AUTH_DOMAIN=${{ secrets.VITE_REACT_APP_AUTH_DOMAIN }} --build-arg VITE_REACT_APP_STORAGE_BUCKET=${{ secrets.VITE_REACT_APP_STORAGE_BUCKET }} --build-arg VITE_REACT_APP_MESSAGING_SENDER_ID=${{ secrets.VITE_REACT_APP_MESSAGING_SENDER_ID }} --build-arg VITE_REACT_APP_APP_ID=${{ secrets.VITE_REACT_APP_APP_ID }} --build-arg VITE_REACT_APP_MEASUREMENT_ID=${{ secrets.VITE_REACT_APP_MEASUREMENT_ID }} --build-arg VITE_REACT_APP_SERVER_URL=${{ secrets.VITE_REACT_APP_SERVER_URL_PRODUCTION }}
+        working-directory: ./frontend
+        env:
+          FLY_API_TOKEN: ${{ secrets.FLY_PRODUCTION_API_TOKEN }}
+
+  deploy-api:
+    name: Deploy Api
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: superfly/flyctl-actions/setup-flyctl@master
+      - run: flyctl deploy --remote-only --config fly.production.toml
+        working-directory: ./backend
+        env:
+          FLY_API_TOKEN: ${{ secrets.FLY_API_PRODUCTION_API_TOKEN }}

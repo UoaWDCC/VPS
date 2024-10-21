@@ -220,8 +220,10 @@ if (import.meta.env.VITE_REACT_APP_SERVER_URL === undefined) {
  * A custom hook which fetches data from the given URL. Includes functionality to determine
  * whether the data is still being loaded or not.
  * Code adapted from SOFTENG750 lab4 https://gitlab.com/cs732-s1c/cs732-labs/cs732-lab-04/-/blob/master/frontend/src/hooks/useGet.js
+ *
+ * skipRequest: a boolean that skips the request if set to true.
  */
-export function useGet(url, setData, requireAuth = true) {
+export function useGet(url, setData, requireAuth = true, skipRequest = false) {
   const [isLoading, setLoading] = useState(false);
   const [version, setVersion] = useState(0);
   const { getUserIdToken } = useContext(AuthenticationContext);
@@ -231,6 +233,8 @@ export function useGet(url, setData, requireAuth = true) {
   }
 
   useEffect(() => {
+    let isMounted = true;
+
     async function fetchData() {
       let hasError = false;
       setLoading(true);
@@ -250,14 +254,22 @@ export function useGet(url, setData, requireAuth = true) {
         hasError = isRealError(err);
       });
 
-      if (!hasError) {
+      if (!hasError && isMounted) {
         setData(response.data);
       }
 
       setLoading(false);
     }
-    fetchData();
-  }, [url, version]);
+
+    // Only execute request if skipRequest is false!
+    if (!skipRequest) {
+      fetchData();
+    }
+
+    return () => {
+      isMounted = false;
+    };
+  }, [url, skipRequest, version]);
 
   return { isLoading, reFetch };
 }

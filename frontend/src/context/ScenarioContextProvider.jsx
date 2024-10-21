@@ -1,6 +1,8 @@
-import { useState } from "react";
+import { useContext, useEffect, useState } from "react";
+
 import { useGet } from "../hooks/crudHooks";
 import useLocalStorage from "../hooks/useLocalStorage";
+import AuthenticationContext from "./AuthenticationContext";
 import ScenarioContext from "./ScenarioContext";
 
 /**
@@ -8,6 +10,7 @@ import ScenarioContext from "./ScenarioContext";
  * ScenarioContextProvider allows access to scenario info and the refetch function
  */
 export default function ScenarioContextProvider({ children }) {
+  const { user } = useContext(AuthenticationContext);
   const [currentScenario, setCurrentScenario] = useLocalStorage(
     "currentScenario",
     null
@@ -16,18 +19,29 @@ export default function ScenarioContextProvider({ children }) {
   const [assignedScenarios, setAssignedScenarios] = useState();
   const [roleList, setRoleList] = useState();
 
-  const { reFetch } = useGet(`api/scenario`, setScenarios, true);
+  const { reFetch } = useGet(`api/scenario`, setScenarios, true, !user);
   const { reFetch: reFetch2 } = useGet(
     `api/scenario/assigned`,
     setAssignedScenarios,
-    true
+    true,
+    !user
   );
 
   const { reFetch: reFetch3 } = useGet(
-    currentScenario ? `api/group/${currentScenario._id}/roleList` : null,
-    currentScenario ? setRoleList : () => {},
-    true
+    `api/group/${currentScenario?._id}/roleList`,
+    setRoleList,
+    true,
+    !currentScenario // Skip request if there is no current scenario.
   );
+
+  // We may load before the auth is ready, refetch if we did.
+  useEffect(() => {
+    if (user) {
+      reFetch();
+      reFetch2();
+      reFetch3();
+    }
+  }, [user]);
 
   return (
     <ScenarioContext.Provider
@@ -38,7 +52,6 @@ export default function ScenarioContextProvider({ children }) {
         assignedScenarios,
         setAssignedScenarios,
         reFetch2,
-        reFetch3,
         currentScenario,
         setCurrentScenario,
         roleList,

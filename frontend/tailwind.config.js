@@ -8,6 +8,7 @@ module.exports = {
       },
       colors: {
         "uoa-blue": "#035084",
+        main: "#f8fafc",
       },
     },
   },
@@ -17,13 +18,12 @@ module.exports = {
     themes: [
       {
         VPSTheme: {
+          ...require("daisyui/src/theming/themes")["emerald"],
           primary: "#fafafa",
           secondary: "#035084",
           error: "#c13216",
-          // "base-content": "#035084",
         },
       },
-      "emerald",
     ],
   },
 };

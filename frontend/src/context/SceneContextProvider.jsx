@@ -1,6 +1,7 @@
 import { useContext, useEffect, useRef, useState } from "react";
 import { useGet } from "../hooks/crudHooks";
 import useLocalStorage from "../hooks/useLocalStorage";
+import AuthenticationContext from "./AuthenticationContext";
 import ScenarioContext from "./ScenarioContext";
 import SceneContext from "./SceneContext";
 
@@ -10,6 +11,7 @@ import SceneContext from "./SceneContext";
  */
 export default function SceneContextProvider({ children }) {
   const { currentScenario } = useContext(ScenarioContext);
+  const { user } = useContext(AuthenticationContext);
   const [scenes, setScenes] = useState([]);
   const [currentScene, setCurrentScene] = useLocalStorage("currentScene", null);
   const [monitorChange, setMonitorChange] = useState(false);
@@ -17,15 +19,16 @@ export default function SceneContextProvider({ children }) {
 
   const currentSceneRef = useRef(currentScene);
 
-  let getScenes = null;
+  const { reFetch } = useGet(
+    `api/scenario/${currentScenario?._id}/scene/all`,
+    setScenes,
+    true,
+    !currentScenario
+  );
 
-  if (currentScenario) {
-    getScenes = useGet(
-      `api/scenario/${currentScenario._id}/scene/all`,
-      setScenes,
-      true
-    );
-  }
+  useEffect(() => {
+    reFetch();
+  }, [user]);
 
   /**
    * monitorChange variable is used to determine
@@ -67,7 +70,7 @@ export default function SceneContextProvider({ children }) {
       value={{
         scenes,
         setScenes,
-        reFetch: getScenes?.reFetch,
+        reFetch,
         currentScene,
         setCurrentScene,
         hasChange,

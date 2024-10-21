@@ -1,6 +1,7 @@
-# VPS
-
+# Virtual Patient Simulator (VPS)
 This project aims to provide Medical and Health Science students at the University of Auckland with a tool that supports interactive and immersive education through virtual patient scenarios.
+
+![VPS home page](/images/vps-hero.png)
 
 This project was associated with The University of Auckland SOFTENG 761 but since 2022, is being developed by WDCC project teams. The repo located here for this project is a bare clone of the original repo, which no longer exists.
 

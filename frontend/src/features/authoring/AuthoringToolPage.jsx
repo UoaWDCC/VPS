@@ -123,22 +123,12 @@ export default function AuthoringToolPage() {
     <>
       <ScreenContainer vertical>
         <TopBar back={`/scenario/${currentScenario?._id}`} confirmModal>
-          <Button
-            className="btn top contained white"
-            color="default"
-            variant="contained"
-            onClick={save}
-          >
+          <button className="btn vps w-[150px]" onClick={save}>
             {saveButtonText}
-          </Button>
-          <Button
-            className="btn top contained white"
-            color="default"
-            variant="contained"
-            onClick={savePlusClose}
-          >
-            Save & close
-          </Button>
+          </button>
+          <button className="btn vps w-[150px]" onClick={savePlusClose}>
+            Save & Close
+          </button>
           <HelpButton />
         </TopBar>
         <ToolbarContextProvider>

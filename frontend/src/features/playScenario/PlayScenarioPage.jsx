@@ -1,6 +1,7 @@
 import { useContext, useState, useEffect } from "react";
 import { useParams, useHistory } from "react-router-dom";
 import axios from "axios";
+import toast from "react-hot-toast";
 
 import AuthenticationContext from "context/AuthenticationContext";
 import { usePost } from "hooks/crudHooks";
@@ -51,10 +52,18 @@ export default function PlayScenarioPage() {
   const [addFlags, setAddFlags] = useState([]);
   const [removeFlags, setRemoveFlags] = useState([]);
 
+  const reload = () => {
+    setPrevious(null);
+    history.replace(`/play/${scenarioId}/singleplayer`);
+  };
+
   const handleError = (error) => {
     if (!error) return;
     if (error.status === 409) {
-      history.push(`/play/${scenarioId}/desync`);
+      reload();
+      toast.success(
+        "A move from somewhere else was made, but you're back on track!"
+      );
     } else {
       history.push(`/play/${scenarioId}/error`);
     }
@@ -93,9 +102,7 @@ export default function PlayScenarioPage() {
       return;
     }
 
-    console.log("reset");
-    setPrevious(null);
-    history.replace(`/play/${scenarioId}/singleplayer`);
+    reload();
   };
 
   if (loading) return <LoadingPage text="Loading Scene..." />;
@@ -111,18 +118,12 @@ export default function PlayScenarioPage() {
   };
 
   return (
-    <>
-      <div style={{ width: "100vw", height: "100vh" }}>
-        <div>
-          <PlayScenarioCanvas
-            scene={currScene}
-            incrementor={incrementor}
-            reset={reset}
-            setAddFlags={setAddFlags}
-            setRemoveFlags={setRemoveFlags}
-          />
-        </div>
-      </div>
-    </>
+    <PlayScenarioCanvas
+      scene={currScene}
+      incrementor={incrementor}
+      reset={reset}
+      setAddFlags={setAddFlags}
+      setRemoveFlags={setRemoveFlags}
+    />
   );
 }
