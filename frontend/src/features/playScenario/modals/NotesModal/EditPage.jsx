@@ -113,7 +113,7 @@ export default function EditPage({ role, noteId, group, goBack, handleClose }) {
         groupId: group._id,
         email: user.email,
       });
-      handleClose();
+      goBack();
     } catch (e) {
       console.log(e);
     }
