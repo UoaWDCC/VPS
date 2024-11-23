@@ -7,7 +7,8 @@ This project was associated with The University of Auckland SOFTENG 761 but sinc
 
 # Live deployments
 
-DEV: https://vps-dev.wdcc.co.nz/
+DEV: https://vps.wdcc.co.nz/
+Staging: https://wdcc-vps-staging.fly.dev/
 
 # Onboarding
 Onboarding documentation can be found in the Github Wiki under `Wiki/Onboarding`

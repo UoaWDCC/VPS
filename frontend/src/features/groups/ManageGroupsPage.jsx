@@ -124,7 +124,7 @@ export default function ManageGroupsPage() {
       let name = "";
       let role = "";
       let group = "";
-      const playableLink = `https://vps-dev.wdcc.co.nz/play/${scenarioId}`;
+      const playableLink = `https://vps.wdcc.co.nz/play/${scenarioId}`;
 
       const entries = Object.entries(row);
 
