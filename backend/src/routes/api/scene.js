@@ -36,7 +36,6 @@ const symbolForNoTag = "-";
 router.get("/", async (req, res) => {
   const scenes = await retrieveSceneList(req.params.scenarioId);
   scenes.map((scene) => {
-    // eslint-disable-next-line no-underscore-dangle, no-param-reassign
     scene._doc.tag = scene._doc.tag || symbolForNoTag;
     return scene;
   });
@@ -47,7 +46,6 @@ router.get("/", async (req, res) => {
 router.get("/all", async (req, res) => {
   const scenes = await retrieveSceneList(req.params.scenarioId);
   const fullScenes = await Promise.all(
-    // eslint-disable-next-line no-underscore-dangle
     scenes.map((it) => retrieveScene(it._id))
   ).catch((err) => res.status(HTTP_NOT_FOUND).send(err));
   res.status(HTTP_OK).json(fullScenes);
@@ -71,7 +69,6 @@ router.put("/roles", async (req, res) => {
 
   await Promise.all(
     updatedRoles.map(async (scene) => {
-      // eslint-disable-next-line no-underscore-dangle
       await updateScene(scene._id, scene);
     })
   );

@@ -171,7 +171,7 @@ router.put("/:resourceId", async (req, res) => {
     }
 
     return res.status(HTTP_OK).json(updatedResource);
-  } catch (error) {
+  } catch {
     return res.status(HTTP_INTERNAL_SERVER_ERROR).send("Internal Server Error");
   }
 });

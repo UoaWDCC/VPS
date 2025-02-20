@@ -1,4 +1,3 @@
-/* eslint-disable no-underscore-dangle */
 import Scene from "../models/scene.js";
 import Scenario from "../models/scenario.js";
 import { tryDeleteFile, updateFileMetadata } from "../../firebase/storage.js";
@@ -84,7 +83,6 @@ const updateScene = async (sceneId, updatedScene) => {
 
   // is new name empty or null?
   if (dbScene.name === "" || dbScene.name === null) {
-    // eslint-disable-next-line no-param-reassign
     updatedScene.name = previousName;
   }
 
@@ -154,7 +152,6 @@ const incrementVisisted = async (sceneId) => {
   await Scene.updateOne({ _id: sceneId }, { visited: countVisited + 1 });
 };
 
-// eslint-disable-next-line import/prefer-default-export
 export {
   createScene,
   retrieveSceneList,

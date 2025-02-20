@@ -1,4 +1,3 @@
-/* eslint-disable no-underscore-dangle */
 import Image from "../models/image.js";
 
 /**
@@ -26,5 +25,4 @@ const retrieveImage = async (imageId) => {
   return Image.findById(imageId);
 };
 
-// eslint-disable-next-line import/prefer-default-export
 export { createImage, retrieveImageList, retrieveImage };

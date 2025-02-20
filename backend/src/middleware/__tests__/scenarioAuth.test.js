@@ -1,4 +1,14 @@
-/* eslint-disable no-underscore-dangle */
+import {
+  jest,
+  describe,
+  beforeAll,
+  beforeEach,
+  afterEach,
+  afterAll,
+  it,
+  expect,
+} from "@jest/globals";
+
 import { MongoMemoryServer } from "mongodb-memory-server";
 import mongoose from "mongoose";
 import Scenario from "../../db/models/scenario.js";

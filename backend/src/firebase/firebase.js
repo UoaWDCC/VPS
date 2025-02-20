@@ -1,4 +1,3 @@
-/* eslint-disable import/prefer-default-export */
 import { initializeApp } from "firebase/app";
 import { getStorage } from "firebase/storage";
 

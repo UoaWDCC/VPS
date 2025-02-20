@@ -57,7 +57,7 @@ const deleteUser = async (uid) => {
     const user = await User.find({ uid });
     await user.remove();
     return true;
-  } catch (e) {
+  } catch {
     return false;
   }
 };
@@ -84,7 +84,7 @@ const addPlayed = async (uid, newPlayed, scenarioId) => {
 
     await Scenario.updateOne({ _id: scenarioId }, { $push: { users: uid } });
     return true;
-  } catch (e) {
+  } catch {
     return false;
   }
 };
@@ -111,7 +111,6 @@ const assignScenarioToUsers = async (scenarioId, newAssignees) => {
       }
     );
   } catch (e) {
-    // eslint-disable-next-line no-console
     console.error(
       "Something went wrong while assigning a user to a scenario:",
       e

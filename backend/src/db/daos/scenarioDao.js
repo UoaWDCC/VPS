@@ -119,7 +119,7 @@ const updateDurations = async (scenarioId, updatedDurations) => {
     scenario.durations = scenario.durations.push(updatedDurations);
     await scenario.save();
     return scenario;
-  } catch (e) {
+  } catch {
     return scenario;
   }
 };
@@ -137,7 +137,7 @@ const updateRoleList = async (scenarioId, updatedRoleList) => {
     scenario.roleList = updatedRoleList;
     await scenario.save();
     return scenario;
-  } catch (e) {
+  } catch {
     return scenario;
   }
 };
@@ -155,7 +155,7 @@ const deleteScenario = async (scenarioId) => {
       return true;
     }
     return false;
-  } catch (e) {
+  } catch {
     return false;
   }
 };

@@ -1,3 +1,14 @@
+import {
+  jest,
+  describe,
+  beforeAll,
+  beforeEach,
+  afterEach,
+  afterAll,
+  it,
+  expect,
+} from "@jest/globals";
+
 import { MongoMemoryServer } from "mongodb-memory-server";
 import express from "express";
 import mongoose from "mongoose";
@@ -14,7 +25,6 @@ jest.mock("firebase-admin"); // Needed to mock the firebase-admin dependency in 
 
 // Mock the firebase auth middleware to have the auth token be the user id
 auth.mockImplementation(async (req, res, next) => {
-  // eslint-disable-next-line prefer-destructuring
   req.body.uid = req.headers.authorization.split(" ")[1];
   next();
 });
