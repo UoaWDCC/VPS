@@ -1,9 +1,13 @@
-import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
-import path from "path";
+import tailwindcss from "@tailwindcss/vite";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 
-export default defineConfig({
-  plugins: [react()],
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+
+/** @type {import('vite').UserConfig} */
+export default {
+  plugins: [react(), tailwindcss()],
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "src"),
@@ -15,4 +19,4 @@ export default defineConfig({
       hooks: path.resolve(__dirname, "src/hooks"),
     },
   },
-});
+};

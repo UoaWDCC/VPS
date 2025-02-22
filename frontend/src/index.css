@@ -1,6 +1,23 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
+@plugin "daisyui";
+
+@theme {
+  --font-mona: "MonaSans", sans-serif;
+  --color-uoa-blue: #035084;
+  --color-main: #f8fafc;
+}
+
+@plugin "daisyui/theme" {
+  name: "vps";
+  default: false;
+  prefersdark: false;
+  color-scheme: light;
+
+  --color-base-content: #035084;
+  --color-primary: #fafafa;
+  --color-secondary: #035084;
+  --color-error: #c13216;
+}
 
 /* MonaSans - licensed under OFL. See https://github.com/github/mona-sans/blob/main/LICENSE */
 @font-face {
