@@ -1,6 +1,5 @@
-import Button from "@material-ui/core/Button";
 import ScenarioContext from "../../context/ScenarioContext";
-import { Link, useHistory } from "react-router-dom";
+import { useHistory } from "react-router-dom";
 
 import styles from "../../components/TopBar/TopBar.module.scss";
 import { useContext } from "react";
@@ -17,7 +16,7 @@ import { useContext } from "react";
  *   </TopBar>
  * )
  */
-export default function TopBar({ back = "/", children = [] }) {
+export default function TopBar({ children = [] }) {
   const history = useHistory();
   const { currentScenario } = useContext(ScenarioContext);
 

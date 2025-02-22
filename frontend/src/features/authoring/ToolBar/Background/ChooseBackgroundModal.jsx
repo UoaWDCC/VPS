@@ -17,7 +17,6 @@ export default function ChooseBackgroundModal({ isShowing, hide }) {
   const [images, setImages] = useState();
   const { handleDropdownClose } = useContext(ToolbarContext);
 
-  // eslint-disable-next-line no-unused-vars
   const [selectedImage, setSelectedImage] = useState();
   useGet("/api/image", setImages);
 

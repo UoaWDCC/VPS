@@ -16,7 +16,7 @@ const getTextWidth = (text, font = "400 26px Arial") => {
 const lineGen = ({ text, width }) => {
   const lines = [];
   const textA = text.split(" ");
-  // eslint-disable-next-line no-restricted-syntax
+
   for (const word of textA) {
     if (!lines.length) {
       lines.push(word);

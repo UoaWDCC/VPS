@@ -8,7 +8,6 @@ import Thumbnail from "features/authoring/components/Thumbnail";
 import DashedCard from "../DashedCard";
 
 import styles from "./ThumbnailList.module.scss";
-import useStyles from "./component.styles";
 
 /**
  * Component used to display cards in a list format for scenario and scene selection.
@@ -47,7 +46,6 @@ export default function ThumbnailList({
   onItemSelected = () => {},
   onItemDoubleClick = () => {},
 }) {
-  const classes = useStyles();
   const [selected, setSelected] = useState();
 
   /** Function which executes when an image in the image list is clicked. */

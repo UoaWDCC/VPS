@@ -1,6 +1,5 @@
-import Button from "@material-ui/core/Button";
 import { useContext, useState } from "react";
-import { Link, useHistory } from "react-router-dom";
+import { useHistory } from "react-router-dom";
 
 import BackModal from "../../features/authoring/components/BackModal/BackModal";
 import AuthoringToolContext from "../../context/AuthoringToolContext";

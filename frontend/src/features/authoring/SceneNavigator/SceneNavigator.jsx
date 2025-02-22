@@ -62,11 +62,9 @@ const SceneNavigator = ({ saveScene }) => {
         <ul className={styles.sceneNavigator}>
           {thumbnails.map(({ sceneListItem: thumbnail, sceneId }) => (
             <SceneListItem
-              {...{
-                thumbnail,
-                sceneId,
-                key: sceneId,
-              }}
+              thumbnail={thumbnail}
+              sceneId={sceneId}
+              key={sceneId}
             />
           ))}
         </ul>

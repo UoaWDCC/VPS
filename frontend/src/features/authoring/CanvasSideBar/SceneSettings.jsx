@@ -1,6 +1,5 @@
 import {
   InputLabel,
-  InputAdornment,
   FormControl,
   FormControlLabel,
   Select,
@@ -174,6 +173,7 @@ export default function SceneSettings() {
                         />
                       }
                       label={role}
+                      key={index}
                     />
                   ))}
                 </div>

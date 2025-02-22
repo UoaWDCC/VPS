@@ -102,6 +102,7 @@ export default function LoginPage() {
             className={`font-bold ${styles.gradient} `}
             href="https://wdcc.co.nz/"
             target="_blank"
+            rel="noreferrer"
           >
             WDCC
           </a>
@@ -110,7 +111,7 @@ export default function LoginPage() {
       </div>
 
       {/* Hidden on small screens. UoA is not *that* important in this... */}
-      <a href="https://www.auckland.ac.nz" target="_blank">
+      <a href="https://www.auckland.ac.nz" target="_blank" rel="noreferrer">
         <img
           draggable="false"
           src="uoa-logo-filled.png"

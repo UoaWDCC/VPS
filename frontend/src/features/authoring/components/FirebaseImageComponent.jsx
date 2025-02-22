@@ -1,4 +1,3 @@
-/* eslint-disable no-param-reassign */
 import Image from "material-ui-image";
 import { imageContainerStyles, imageStyles } from "./components.styles";
 

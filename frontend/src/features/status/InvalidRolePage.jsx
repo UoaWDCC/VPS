@@ -1,4 +1,3 @@
-import { Button } from "@mui/material";
 import { useContext, useState } from "react";
 import { useLocation } from "react-router-dom";
 import AuthenticationContext from "../../context/AuthenticationContext";
@@ -38,7 +37,7 @@ function InvalidRolePage({ group }) {
   return (
     <div style={containerStyle}>
       <h1 style={textMargin} className="font-semibold text-4xl text-uoa-blue">
-        It's your group members turn to play through the scenario!
+        It&apos;s your group members turn to play through the scenario!
       </h1>
       <p style={textMargin} className="font-semibold text-xl">
         If you have just finished playing your part of the scenario, <br />
@@ -49,7 +48,7 @@ function InvalidRolePage({ group }) {
       </p>
       <p style={textMargin} className="text-slate-600">
         Wait for your group member(s) to finish playing through their part of
-        the scenario. Then, when it's your turn to play through (your group
+        the scenario. Then, when it&apos;s your turn to play through (your group
         members should let you know), click the below button:
       </p>
 

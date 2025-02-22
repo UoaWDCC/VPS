@@ -1,4 +1,3 @@
-import { useAuthGet, useAuthPost } from "hooks/crudHooks";
 import { useEffect, useState } from "react";
 
 import styles from "./NotesModal.module.scss";

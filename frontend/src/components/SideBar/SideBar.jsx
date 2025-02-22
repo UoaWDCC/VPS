@@ -25,9 +25,7 @@ import PlayArrowRoundedIcon from "@mui/icons-material/PlayArrowRounded";
 export default function SideBar() {
   const { currentScenario, setCurrentScenario, reFetch } =
     useContext(ScenarioContext);
-  const { signOut, getUserIdToken, VpsUser } = useContext(
-    AuthenticationContext
-  );
+  const { signOut, getUserIdToken } = useContext(AuthenticationContext);
   const history = useHistory();
 
   /** Calls backend end point to create a new empty scenario. */
@@ -47,7 +45,7 @@ export default function SideBar() {
       getUserIdToken
     );
     setCurrentScenario(newScenario);
-    // eslint-disable-next-line no-underscore-dangle
+
     history.push(`/scenario/${newScenario._id}`);
   }
 

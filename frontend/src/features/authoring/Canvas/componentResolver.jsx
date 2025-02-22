@@ -1,4 +1,3 @@
-/* eslint-disable no-param-reassign */
 import ButtonComponent from "../components/ButtonComponent";
 import FirebaseAudioComponent from "../components/FirebaseAudioComponent";
 import FirebaseImageComponent from "../components/FirebaseImageComponent";

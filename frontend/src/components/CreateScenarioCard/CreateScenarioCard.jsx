@@ -1,5 +1,4 @@
 import { useState } from "react";
-import Button from "@material-ui/core/Button";
 
 export default function CreateScenarioCard({ onCreate, onClose }) {
   const [name, setName] = useState("default name");
@@ -8,17 +7,6 @@ export default function CreateScenarioCard({ onCreate, onClose }) {
     console.log(`Creating scenario with name: ${name}`);
     onCreate(name);
     onClose();
-  };
-
-  const handleOverlayClick = (event) => {
-    event.stopPropagation();
-    onClose();
-  };
-
-  const handleKeyPress = (e) => {
-    if (e.key === "Escape") {
-      onClose();
-    }
   };
 
   return (

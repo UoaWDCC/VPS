@@ -1,27 +1,14 @@
-import Button from "@material-ui/core/Button";
-import MuiDialogActions from "@material-ui/core/DialogActions";
-import { withStyles } from "@material-ui/core/styles";
 import { useContext } from "react";
-import { useHistory, Link } from "react-router-dom";
+import { useHistory } from "react-router-dom";
 import ScenarioContext from "context/ScenarioContext";
 
 /**
  * This component shows a confirmation model. It is shown when the user exits the editing tool without saving.
  * @component
  */
-export default function BackModal({
-  isOpen = true,
-  handleClose,
-  handleDisgard,
-}) {
+export default function BackModal({ isOpen = true, handleClose }) {
   const { currentScenario } = useContext(ScenarioContext);
   const history = useHistory();
-
-  const DialogActions = withStyles(() => ({
-    root: {
-      justifyContent: "space-between",
-    },
-  }))(MuiDialogActions);
 
   return (
     <div>

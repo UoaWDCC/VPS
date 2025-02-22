@@ -14,19 +14,12 @@ export default function ViewPage({
 }) {
   const [notes, setNotes] = useState([]);
 
-  const {
-    response: groupData,
-    loading: groupLoading,
-    error: groupError,
-    getRequest: retrieveNotes,
-  } = useAuthGet(`/api/note/retrieveAll/${group._id}`, setNotes);
+  const { getRequest: retrieveNotes } = useAuthGet(
+    `/api/note/retrieveAll/${group._id}`,
+    setNotes
+  );
 
-  const {
-    response: createResponse,
-    loading: noteCreating,
-    error: createError,
-    postRequest: createNoteRequest,
-  } = useAuthPost("/api/note/");
+  const { postRequest: createNoteRequest } = useAuthPost("/api/note/");
 
   useEffect(() => {
     retrieveNotes();

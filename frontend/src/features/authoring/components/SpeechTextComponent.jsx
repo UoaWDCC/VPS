@@ -61,7 +61,6 @@ export default function SpeechTextComponent({ id, onClick, component }) {
   }[arrowLocation];
 
   return (
-    // eslint-disable-next-line jsx-a11y/no-static-element-interactions, jsx-a11y/click-events-have-key-events
     <div
       className={defaultComponentStyling}
       style={{

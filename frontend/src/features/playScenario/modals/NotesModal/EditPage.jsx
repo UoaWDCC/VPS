@@ -17,27 +17,15 @@ export default function EditPage({ role, noteId, group, goBack, handleClose }) {
   //  show delete confirmation
   const [showConfirm, setShowConfirm] = useState(false);
   //  is the current version of the note saved
-  const [saved, setSaved] = useState(false);
-  const {
-    response: noteData,
-    loading: noteLoading,
-    error: noteError,
-    getRequest: retrieveNoteRequest,
-  } = useAuthGet(`/api/note/retrieve/${noteId}`);
+  const [, setSaved] = useState(false);
+  const { response: noteData, getRequest: retrieveNoteRequest } = useAuthGet(
+    `/api/note/retrieve/${noteId}`
+  );
 
-  const {
-    response: updateResult,
-    loading: updateLoading,
-    error: updateError,
-    putRequest: updateNoteRequest,
-  } = useAuthPut("/api/note/update");
+  const { putRequest: updateNoteRequest } = useAuthPut("/api/note/update");
 
-  const {
-    response: deleteResult,
-    loading: deleteLoading,
-    error: deleteError,
-    deleteRequest: deleteNoteRequest,
-  } = useAuthDelete(`/api/note/delete`);
+  const { deleteRequest: deleteNoteRequest } =
+    useAuthDelete(`/api/note/delete`);
 
   const loadNote = async () => {
     if (noteData) {

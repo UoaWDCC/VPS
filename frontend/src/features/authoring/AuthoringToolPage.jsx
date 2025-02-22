@@ -1,6 +1,5 @@
-import { Button } from "@material-ui/core";
 import { useContext, useEffect, useState } from "react";
-import { useHistory, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import HelpButton from "components/HelpButton";
 import ScreenContainer from "components/ScreenContainer/ScreenContainer";
 import TopBar from "components/TopBar/TopBar";
@@ -23,7 +22,6 @@ import ToolBar from "./ToolBar/ToolBar";
 export default function AuthoringToolPage() {
   const { scenarioId, sceneId } = useParams();
   const {
-    scenes,
     currentScene,
     setCurrentScene,
     setMonitorChange,
@@ -35,9 +33,6 @@ export default function AuthoringToolPage() {
   const { getUserIdToken } = useContext(AuthenticationContext);
   const [firstTimeRender, setFirstTimeRender] = useState(true);
   const [saveButtonText, setSaveButtonText] = useState("Save");
-  const [disableNext, setDisableNext] = useState(false);
-  const [disableBefore, setDisableBefore] = useState(false);
-  const history = useHistory();
 
   useGet(
     `/api/scenario/${currentScenario?._id}/scene/full/${currentScene?._id}`,
@@ -93,30 +88,6 @@ export default function AuthoringToolPage() {
     await save();
     /* redirects user to the scenario page */
     window.location.href = `/scenario/${currentScenario?._id}`;
-  }
-
-  function updateScene(direction) {
-    const ids = scenes.map((scene) => scene._id);
-    const oldIndex = ids.indexOf(currentScene._id);
-    const newIndex = oldIndex + direction;
-
-    if (newIndex > -1 && newIndex < ids.length) {
-      saveScene();
-      setDisableBefore(false);
-      setDisableNext(false);
-      setCurrentScene(scenes[newIndex]);
-      history.push({
-        pathname: `/scenario/${scenarioId}/scene/${scenes[newIndex]._id}`,
-      });
-    }
-
-    if (newIndex === ids.length - 1) {
-      setDisableNext(true);
-    }
-
-    if (newIndex === 0) {
-      setDisableBefore(true);
-    }
   }
 
   return (
