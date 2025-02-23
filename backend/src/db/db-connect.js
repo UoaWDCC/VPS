@@ -12,5 +12,5 @@ const DEFAULT_CONNECTION_STRING = `mongodb+srv://${process.env.MONGODB_USER}:${p
 export default function connectToDatabase(
   connectionString = DEFAULT_CONNECTION_STRING
 ) {
-  return mongoose.connect(connectionString, { useNewUrlParser: true });
+  return mongoose.connect(connectionString);
 }

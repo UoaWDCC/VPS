@@ -1,21 +1,16 @@
 {
-  "name": "mern-template",
+  "name": "vps",
   "version": "0.1.0",
   "private": true,
-  "devDependencies": {
-    "all-contributors-cli": "^6.20.0"
-  },
   "scripts": {
-    "start": "concurrently \"cd frontend && yarn run start\" \"cd backend && yarn run start\"",
-    "dev": "concurrently \"cd frontend && yarn run start\" \"cd backend && yarn run dev\"",
-    "init": "yarn add concurrently && concurrently \"cd frontend && yarn install\" \"cd backend && yarn install\"",
+    "dev": "concurrently \"cd frontend && yarn run dev\" \"cd backend && yarn run dev\"",
+    "setup": "yarn install && concurrently \"cd frontend && yarn install\" \"cd backend && yarn install\"",
     "contributors:add": "all-contributors add",
     "contributors:generate": "all-contributors generate"
   },
-  "dependencies": {
-    "concurrently": "^9.0.1",
-    "npm": "6.14",
-    "papaparse": "^5.4.1",
-    "react-hot-toast": "^2.4.1"
+  "dependencies": {},
+  "devDependencies": {
+    "all-contributors-cli": "^6.20.0",
+    "concurrently": "^9.1.2"
   }
 }
