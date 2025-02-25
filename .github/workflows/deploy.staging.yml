@@ -26,3 +26,47 @@ jobs:
         working-directory: ./backend
         env:
           FLY_API_TOKEN: ${{ secrets.FLY_API_STAGING_API_TOKEN }}
+
+  finalize-deployment:
+    name: Finalize Deployment
+    runs-on: ubuntu-latest
+    needs: [deploy-web, deploy-api]
+    if: always()
+    steps:
+      - name: Create Deployment via GitHub API
+        id: create
+        run: |
+          response=$(curl -s -X POST \
+            -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+            -H "Accept: application/vnd.github.v3+json" \
+            https://api.github.com/repos/${{ github.repository }}/deployments \
+            -d '{
+              "ref": "${{ github.sha }}",
+              "environment": "Fly Staging",
+              "required_contexts": [],
+              "auto_merge": false,
+              "description": "Deploying frontend and backend to Staging"
+            }')
+          echo "deployment_id=$(echo $response | jq -r '.id')" >> $GITHUB_OUTPUT
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Mark Deployment as Success
+        if: success()
+        run: |
+          curl -X POST -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+            -H "Accept: application/vnd.github.v3+json" \
+            https://api.github.com/repos/${{ github.repository }}/deployments/${{ steps.create.outputs.deployment_id }}/statuses \
+            -d '{"state": "success"}'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Mark Deployment as Failure
+        if: failure()
+        run: |
+          curl -X POST -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+            -H "Accept: application/vnd.github.v3+json" \
+            https://api.github.com/repos/${{ github.repository }}/deployments/${{ steps.create.outputs.deployment_id }}/statuses \
+            -d '{"state": "failure"}'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
