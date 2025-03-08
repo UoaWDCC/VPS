@@ -13,6 +13,7 @@
   prefersdark: false;
   color-scheme: light;
 
+  --color-base-100: #f8fafc;
   --color-base-content: #035084;
   --color-primary: #fafafa;
   --color-secondary: #035084;

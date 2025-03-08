@@ -10,8 +10,8 @@ export default function CreateScenarioCard({ onCreate, onClose }) {
   };
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
-      <div className="modal-box relative max-w-md w-full bg-white p-6 rounded-lg shadow-md">
+    <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50">
+      <div className="relative max-w-md w-full bg-white p-6 rounded-lg shadow-md">
         <button
           className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2 text-black"
           onClick={onClose}
@@ -28,7 +28,7 @@ export default function CreateScenarioCard({ onCreate, onClose }) {
             placeholder="Scenario name"
             value={name}
             onChange={(e) => setName(e.target.value)}
-            className="input input-bordered flex-1 text-black"
+            className="input input-bordered flex-1 text-black bg-white"
           />
         </div>
         <div className="flex justify-center">
