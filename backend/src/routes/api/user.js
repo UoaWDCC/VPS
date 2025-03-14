@@ -58,6 +58,8 @@ const allowedDomains = new Set([
 const allowedEmails = new Set([
   "wdccvpstesting1@gmail.com",
   "wdccvpstesting2@gmail.com",
+  "wdccvpstesting3@gmail.com",
+  "wdccvpstesting4@gmail.com",
 ]);
 
 // handles a sign in request
