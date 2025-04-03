@@ -210,10 +210,10 @@ export function useAuthPut(url, callBack) {
  * Code below handles the server URL for axios calls when .env file is missing
  * When .env file is missing, React will take the proxy route as server URL as defined in package.json
  */
-if (import.meta.env.VITE_REACT_APP_SERVER_URL === undefined) {
+if (import.meta.env.VITE_SERVER_URL === undefined) {
   axios.defaults.baseURL = "/";
 } else {
-  axios.defaults.baseURL = `${import.meta.env.VITE_REACT_APP_SERVER_URL}`;
+  axios.defaults.baseURL = `${import.meta.env.VITE_SERVER_URL}`;
 }
 
 /**
