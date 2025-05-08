@@ -81,6 +81,7 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
     </tr>
     <tr>
       <td align="center" valign="top" width="16.66%"><a href="https://github.com/RLee64"><img src="https://avatars.githubusercontent.com/u/159082701?v=4?s=100" width="100px;" alt="Rayen Lee"/><br /><sub><b>Rayen Lee</b></sub></a><br /><a href="https://github.com/UoaWDCC/VPS/commits?author=RLee64" title="Code">💻</a></td>
+      <td align="center" valign="top" width="16.66%"><a href="https://github.com/R4H3N"><img src="https://avatars.githubusercontent.com/u/126861359?v=4?s=100" width="100px;" alt="Rohan Dhingra"/><br /><sub><b>Rohan Dhingra</b></sub></a><br /><a href="https://github.com/UoaWDCC/VPS/commits?author=R4H3N" title="Code">💻</a></td>
     </tr>
   </tbody>
 </table>
