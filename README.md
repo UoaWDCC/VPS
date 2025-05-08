@@ -89,6 +89,7 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
     </tr>
     <tr>
       <td align="center" valign="top" width="16.66%"><a href="https://github.com/mshi672"><img src="https://avatars.githubusercontent.com/u/162376891?v=4?s=100" width="100px;" alt="mshi672"/><br /><sub><b>mshi672</b></sub></a><br /><a href="https://github.com/UoaWDCC/VPS/commits?author=mshi672" title="Code">💻</a> <a href="#design-mshi672" title="Design">🎨</a></td>
+      <td align="center" valign="top" width="16.66%"><a href="https://github.com/IceBear-2000"><img src="https://avatars.githubusercontent.com/u/160542881?v=4?s=100" width="100px;" alt="IceBear-2000"/><br /><sub><b>IceBear-2000</b></sub></a><br /><a href="https://github.com/UoaWDCC/VPS/commits?author=IceBear-2000" title="Code">💻</a> <a href="#design-IceBear-2000" title="Design">🎨</a></td>
       <td align="center" valign="top" width="16.66%"><a href="https://github.com/R4H3N"><img src="https://avatars.githubusercontent.com/u/126861359?v=4?s=100" width="100px;" alt="Rohan Dhingra"/><br /><sub><b>Rohan Dhingra</b></sub></a><br /><a href="https://github.com/UoaWDCC/VPS/commits?author=R4H3N" title="Code">💻</a></td>
     </tr>
   </tbody>
