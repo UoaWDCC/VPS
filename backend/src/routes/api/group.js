@@ -15,7 +15,7 @@ const router = Router();
 
 const HTTP_OK = 200;
 const HTTP_CONFLICT = 409;
-const HTTP_NO_CONTENT = 204;
+const HTTP_BAD_REQUEST = 400;
 const HTTP_NOT_FOUND = 404;
 
 // get the groups assigned to a scenario
@@ -65,26 +65,26 @@ router.post("/:scenarioId", async (req, res) => {
   // validation
   for (const userList of groupList) {
     if (!userList) {
-      return res.status(HTTP_NO_CONTENT).send("No content");
+      return res.status(HTTP_BAD_REQUEST).send("No user list found");
     }
 
     const roles = [];
     for (const user of userList) {
       if (!user.email || !user.name || !user.role || !user.group) {
-        return res.status(HTTP_NO_CONTENT).send("No content");
+        return res.status(HTTP_BAD_REQUEST).send("All users must have a name, email, role and group");
       }
 
       const role = user.role.toLowerCase();
       if (roles.includes(role)) {
         return res
           .status(HTTP_CONFLICT)
-          .send("Conflict - Duplicate roles in the same group!");
+          .send("All students must have different roles in a group");
       }
       roles.push(role);
     }
 
     if (roles.length !== roleList.length) {
-      return res.status(HTTP_CONFLICT).send("Conflict - Different number of roles!");
+      return res.status(HTTP_CONFLICT).send("All roles must be used in a group");
     }
   };
 
