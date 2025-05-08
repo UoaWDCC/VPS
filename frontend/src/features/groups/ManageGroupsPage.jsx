@@ -108,7 +108,10 @@ export default function ManageGroupsPage() {
           showToast("Successfully formed groups!");
         } catch (error) {
           console.error("Error uploading CSV data:", error.response.data);
-          showToast(`Error uploading CSV data: ${error.response.data}`, "error");
+          showToast(
+            `Error uploading CSV data: ${error.response.data}`,
+            "error"
+          );
         }
       },
     });

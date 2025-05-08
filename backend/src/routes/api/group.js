@@ -70,7 +70,9 @@ router.post("/:scenarioId", async (req, res) => {
     const roles = [];
     for (const user of userList) {
       if (!user.email || !user.name || !user.role || !user.group) {
-        return res.status(HTTP_BAD_REQUEST).send("All users must have a name, email, role and group");
+        return res
+          .status(HTTP_BAD_REQUEST)
+          .send("All users must have a name, email, role and group");
       }
 
       const role = user.role.toLowerCase();
@@ -85,7 +87,7 @@ router.post("/:scenarioId", async (req, res) => {
     if (roles.length !== roleList.length) {
       return res.status(HTTP_BAD_REQUEST).send("Each group must use all roles");
     }
-  };
+  }
 
   await Group.deleteMany({ scenarioId });
 
