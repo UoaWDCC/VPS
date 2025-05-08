@@ -187,7 +187,7 @@ export default function ManageGroupsPage() {
       <GroupsTable data={users} />
       <Snackbar
         open={isToastShowing}
-        autoHideDuration={3000}
+        autoHideDuration={5000}
         onClose={handleToastDismiss}
         anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
       >
