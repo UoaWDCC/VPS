@@ -345,6 +345,26 @@
       "contributions": [
         "code"
       ]
+    },
+    {
+      "login": "IceBear-2000",
+      "name": "IceBear-2000",
+      "avatar_url": "https://avatars.githubusercontent.com/u/160542881?v=4",
+      "profile": "https://github.com/IceBear-2000",
+      "contributions": [
+        "question",
+        "bug",
+        "code",
+        "content",
+        "data",
+        "design",
+        "doc",
+        "eventOrganizing",
+        "ideas",
+        "review",
+        "tutorial",
+        "userTesting"
+      ]
     }
   ],
   "contributorsPerLine": 6
