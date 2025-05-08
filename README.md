@@ -80,6 +80,7 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
       <td align="center" valign="top" width="16.66%"><a href="https://github.com/Ray-F"><img src="https://avatars.githubusercontent.com/u/19633284?v=4?s=100" width="100px;" alt="Raymond Feng"/><br /><sub><b>Raymond Feng</b></sub></a><br /><a href="#infra-Ray-F" title="Infrastructure (Hosting, Build-Tools, etc)">🚇</a></td>
     </tr>
     <tr>
+      <td align="center" valign="top" width="16.66%"><a href="https://github.com/Richman-Tan"><img src="https://avatars.githubusercontent.com/u/160602954?v=4?s=100" width="100px;" alt="rtan654"/><br /><sub><b>rtan654</b></sub></a><br /><a href="https://github.com/UoaWDCC/VPS/commits?author=Richman-Tan" title="Code">💻</a></td>
       <td align="center" valign="top" width="16.66%"><a href="https://github.com/RLee64"><img src="https://avatars.githubusercontent.com/u/159082701?v=4?s=100" width="100px;" alt="Rayen Lee"/><br /><sub><b>Rayen Lee</b></sub></a><br /><a href="https://github.com/UoaWDCC/VPS/commits?author=RLee64" title="Code">💻</a></td>
       <td align="center" valign="top" width="16.66%"><a href="https://github.com/mshi672"><img src="https://avatars.githubusercontent.com/u/162376891?v=4?s=100" width="100px;" alt="mshi672"/><br /><sub><b>mshi672</b></sub></a><br /><a href="https://github.com/UoaWDCC/VPS/commits?author=mshi672" title="Code">💻</a> <a href="#design-mshi672" title="Design">🎨</a></td>
     </tr>
