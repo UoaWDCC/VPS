@@ -338,6 +338,7 @@
       ]
     },
     {
+<<<<<<< HEAD
       "login": "oorjagandhi",
       "name": "Oorja Gandhi",
       "avatar_url": "https://avatars.githubusercontent.com/u/72714597?v=4",
@@ -347,14 +348,21 @@
       ]
     },
     {
+=======
+>>>>>>> a998a2c (chore: add @richmantan as a contributor. (#271))
       "login": "Richman-Tan",
       "name": "rtan654",
       "avatar_url": "https://avatars.githubusercontent.com/u/160602954?v=4",
       "profile": "https://github.com/Richman-Tan",
       "contributions": [
         "code"
+<<<<<<< HEAD
       ]
     },
+=======
+        ]
+      },
+>>>>>>> a998a2c (chore: add @richmantan as a contributor. (#271))
       {
       "login": "RLee64",
       "name": "Rayen Lee",
@@ -362,6 +370,7 @@
       "profile": "https://github.com/RLee64",
       "contributions": [
         "code"
+<<<<<<< HEAD
       ]
     },
     {
@@ -386,5 +395,10 @@
       ]
     }
   ],
+=======
+        ]
+      }
+    ],
+>>>>>>> a998a2c (chore: add @richmantan as a contributor. (#271))
   "contributorsPerLine": 6
 }
