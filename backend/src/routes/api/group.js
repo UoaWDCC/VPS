@@ -63,39 +63,30 @@ router.post("/:scenarioId", async (req, res) => {
   await updateRoleList(scenarioId, roleList);
 
   // validation
-  groupList.forEach((userList) => {
+  for (const userList of groupList) {
     if (!userList) {
-      res.status(HTTP_NO_CONTENT).send("No content");
+      return res.status(HTTP_NO_CONTENT).send("No content");
     }
 
     const roles = [];
-    userList.forEach((user) => {
-      if (!user.email) {
-        res.status(HTTP_NO_CONTENT).send("No content");
-      }
-      if (!user.name) {
-        res.status(HTTP_NO_CONTENT).send("No content");
-      }
-      if (!user.role) {
-        res.status(HTTP_NO_CONTENT).send("No content");
-      }
-      if (!user.group) {
-        res.status(HTTP_NO_CONTENT).send("No content");
+    for (const user of userList) {
+      if (!user.email || !user.name || !user.role || !user.group) {
+        return res.status(HTTP_NO_CONTENT).send("No content");
       }
 
       const role = user.role.toLowerCase();
       if (roles.includes(role)) {
-        res
+        return res
           .status(HTTP_CONFLICT)
           .send("Conflict - Duplicate roles in the same group!");
       }
       roles.push(role);
-    });
+    }
 
     if (roles.length !== roleList.length) {
-      res.status(HTTP_CONFLICT).send("Conflict - Different number of roles!");
+      return res.status(HTTP_CONFLICT).send("Conflict - Different number of roles!");
     }
-  });
+  };
 
   await Group.deleteMany({ scenarioId });
 
@@ -107,7 +98,7 @@ router.post("/:scenarioId", async (req, res) => {
 
   await Promise.all(promises);
 
-  res.status(HTTP_OK).json(output);
+  return res.status(HTTP_OK).json(output);
 });
 
 router.get("/:scenarioId/roleList", async (req, res) => {
