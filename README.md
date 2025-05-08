@@ -79,6 +79,9 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
       <td align="center" valign="top" width="16.66%"><a href="https://github.com/nroh555"><img src="https://avatars.githubusercontent.com/u/100507962?v=4?s=100" width="100px;" alt="Naren Rohan"/><br /><sub><b>Naren Rohan</b></sub></a><br /><a href="#infra-nroh555" title="Infrastructure (Hosting, Build-Tools, etc)">🚇</a></td>
       <td align="center" valign="top" width="16.66%"><a href="https://github.com/Ray-F"><img src="https://avatars.githubusercontent.com/u/19633284?v=4?s=100" width="100px;" alt="Raymond Feng"/><br /><sub><b>Raymond Feng</b></sub></a><br /><a href="#infra-Ray-F" title="Infrastructure (Hosting, Build-Tools, etc)">🚇</a></td>
     </tr>
+    <tr>
+      <td align="center" valign="top" width="16.66%"><a href="https://github.com/kelvinchen8"><img src="https://avatars.githubusercontent.com/u/161402193?v=4?s=100" width="100px;" alt="kelvinchen8"/><br /><sub><b>kelvinchen8</b></sub></a><br /><a href="https://github.com/UoaWDCC/VPS/commits?author=kelvinchen8" title="Code">💻</a></td>
+    </tr>
   </tbody>
 </table>
 
