@@ -345,6 +345,16 @@
       "contributions": [
         "code"
       ]
+    },
+    {
+      "login": "hazikchaudhry",
+      "name": "Hazik Chaudhry",
+      "avatar_url": "https://avatars.githubusercontent.com/u/99319319?v=4",
+      "profile": "https://github.com/hazikchaudhry",
+      "contributions": [
+        "code",
+        "design"
+      ]
     }
   ],
   "contributorsPerLine": 6
