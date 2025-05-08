@@ -345,6 +345,15 @@
       "contributions": [
         "code"
       ]
+    },
+    {
+      "login": "becky-n",
+      "name": "Becky Ngan",
+      "avatar_url": "https://avatars.githubusercontent.com/u/51529481?v=4",
+      "profile": "https://github.com/becky-n",
+      "contributions": [
+        "projectManagement"
+      ]
     }
   ],
   "contributorsPerLine": 6
