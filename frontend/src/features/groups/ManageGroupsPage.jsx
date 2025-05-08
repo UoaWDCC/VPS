@@ -107,8 +107,8 @@ export default function ManageGroupsPage() {
           console.log("CSV data uploaded to MongoDB:", response.status);
           showToast("Successfully formed groups!");
         } catch (error) {
-          console.error("Error uploading CSV data:", error);
-          showToast("Error uploading CSV data!", "error");
+          console.error("Error uploading CSV data:", error.response.data);
+          showToast(`Error uploading CSV data: ${error.response.data}`, "error");
         }
       },
     });
