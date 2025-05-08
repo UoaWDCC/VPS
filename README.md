@@ -94,6 +94,7 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
 <<<<<<< HEAD
       <td align="center" valign="top" width="16.66%"><a href="https://github.com/hazikchaudhry"><img src="https://avatars.githubusercontent.com/u/99319319?v=4?s=100" width="100px;" alt="Hazik Chaudhry"/><br /><sub><b>Hazik Chaudhry</b></sub></a><br /><a href="https://github.com/UoaWDCC/VPS/commits?author=hazikchaudhry" title="Code">💻</a> <a href="#design-hazikchaudhry" title="Design">🎨</a></td>
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
       <td align="center" valign="top" width="16.66%"><a href="https://github.com/hazikchaudhry"><img src="https://avatars.githubusercontent.com/u/99319319?v=4?s=100" width="100px;" alt="Hazik Chaudhry"/><br /><sub><b>Hazik Chaudhry</b></sub></a><br /><a href="https://github.com/UoaWDCC/VPS/commits?author=hazikchaudhry" title="Code">💻</a> <a href="#design-hazikchaudhry" title="Design">🎨</a></td>
 >>>>>>> c5771de (added Hazik to contributors (#273))
@@ -103,6 +104,11 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
 =======
       <td align="center" valign="top" width="16.66%"><a href="https://github.com/mshi672"><img src="https://avatars.githubusercontent.com/u/162376891?v=4?s=100" width="100px;" alt="mshi672"/><br /><sub><b>mshi672</b></sub></a><br /><a href="https://github.com/UoaWDCC/VPS/commits?author=mshi672" title="Code">💻</a> <a href="#design-mshi672" title="Design">🎨</a></td>
 >>>>>>> 38bd511 (docs: add mike to contributor list (#270))
+=======
+      <td align="center" valign="top" width="16.66%"><a href="https://github.com/mshi672"><img src="https://avatars.githubusercontent.com/u/162376891?v=4?s=100" width="100px;" alt="mshi672"/><br /><sub><b>mshi672</b></sub></a><br /><a href="https://github.com/UoaWDCC/VPS/commits?author=mshi672" title="Code">💻</a> <a href="#design-mshi672" title="Design">🎨</a></td>
+=======
+>>>>>>> 690696a (added Hazik to contributors)
+>>>>>>> 01dea03 (added Hazik to contributors)
     </tr>
   </tbody>
 </table>
