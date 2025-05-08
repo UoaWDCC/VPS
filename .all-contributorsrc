@@ -336,6 +336,15 @@
       "contributions": [
         "infra"
       ]
+    },
+    {
+      "login": "oorjagandhi",
+      "name": "Oorja Gandhi",
+      "avatar_url": "https://avatars.githubusercontent.com/u/72714597?v=4",
+      "profile": "https://github.com/oorjagandhi",
+      "contributions": [
+        "code"
+      ]
     }
   ],
   "contributorsPerLine": 6
