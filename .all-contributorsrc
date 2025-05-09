@@ -338,6 +338,15 @@
       ]
     },
     {
+      "login": "Richman-Tan",
+      "name": "rtan654",
+      "avatar_url": "https://avatars.githubusercontent.com/u/160602954?v=4",
+      "profile": "https://github.com/Richman-Tan",
+      "contributions": [
+        "code"
+        ]
+      },
+      {
       "login": "RLee64",
       "name": "Rayen Lee",
       "avatar_url": "https://avatars.githubusercontent.com/u/159082701?v=4",
@@ -351,6 +360,16 @@
       "name": "Hazik Chaudhry",
       "avatar_url": "https://avatars.githubusercontent.com/u/99319319?v=4",
       "profile": "https://github.com/hazikchaudhry",
+       "contributions": [
+        "code",
+        "design"
+      ]
+    },  
+    {
+      "login": "mshi672",
+      "name": "mshi672",
+      "avatar_url": "https://avatars.githubusercontent.com/u/162376891?v=4",
+      "profile": "https://github.com/mshi672",
       "contributions": [
         "code",
         "design"
