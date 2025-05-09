@@ -371,6 +371,7 @@
       "contributions": [
         "code"
 <<<<<<< HEAD
+<<<<<<< HEAD
       ]
     },
     {
@@ -385,6 +386,11 @@
       ]
     },  
     {
+=======
+      ]
+    },
+    {
+>>>>>>> 38bd511 (docs: add mike to contributor list (#270))
       "login": "mshi672",
       "name": "mshi672",
       "avatar_url": "https://avatars.githubusercontent.com/u/162376891?v=4",
@@ -395,10 +401,13 @@
       ]
     }
   ],
+<<<<<<< HEAD
 =======
         ]
       }
     ],
 >>>>>>> a998a2c (chore: add @richmantan as a contributor. (#271))
+=======
+>>>>>>> 38bd511 (docs: add mike to contributor list (#270))
   "contributorsPerLine": 6
 }
