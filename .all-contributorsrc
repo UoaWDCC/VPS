@@ -353,8 +353,18 @@
       "profile": "https://github.com/RLee64",
       "contributions": [
         "code"
-        ]
-      }
-    ],
+      ]
+    },
+    {
+      "login": "mshi672",
+      "name": "mshi672",
+      "avatar_url": "https://avatars.githubusercontent.com/u/162376891?v=4",
+      "profile": "https://github.com/mshi672",
+      "contributions": [
+        "code",
+        "design"
+      ]
+    }
+  ],
   "contributorsPerLine": 6
 }
