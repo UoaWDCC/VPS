@@ -15,12 +15,12 @@ import AddRoundedIcon from "@mui/icons-material/AddRounded";
  *   <DashedCard onClick={onClick} />
  * )
  */
-export default function DashedCard({ onClick }) {
+export default function DashedCard({ height, onClick }) {
   return (
-    <div>
+    <div className="w-full">
       <div style={{ position: "relative" }}>
         <Box
-          height={160}
+          height={height}
           onClick={onClick}
           sx={{
             background: "#f1f5f9",

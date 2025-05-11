@@ -4,13 +4,24 @@ import { useHistory, useParams } from "react-router-dom";
 import styles from "./SceneNavigator.module.scss";
 import SceneListItem from "./SceneListItem";
 import Thumbnail from "../components/Thumbnail";
+import DashedCard from "../../../components/DashedCard";
+import { useAuthPost } from "../../../hooks/crudHooks";
+import toast from "react-hot-toast";
 
 const SceneNavigator = ({ saveScene }) => {
   const [thumbnails, setThumbnails] = useState(null);
-  const { scenes, currentScene, currentSceneRef, setCurrentScene } =
+  const { scenes, currentScene, currentSceneRef, setCurrentScene, reFetch } =
     useContext(SceneContext);
   const { scenarioId } = useParams();
   const history = useHistory();
+  const { error, postRequest } = useAuthPost(
+    `/api/scenario/${scenarioId}/scene`
+  );
+
+  const addScene = async () => {
+    await postRequest({ name: `Scene ${scenes.length}` });
+    reFetch();
+  };
 
   useEffect(() => {
     if (!scenes?.length) return;
@@ -56,6 +67,12 @@ const SceneNavigator = ({ saveScene }) => {
     );
   }, [scenes, currentScene]);
 
+  if (error) {
+    console.error(error);
+    toast.error("Something went wrong, unable to create scene.");
+    // TODO: we should have more comprehensive error handling
+  }
+
   return (
     thumbnails && (
       <div style={{ display: "flex", position: "relative" }}>
@@ -67,6 +84,7 @@ const SceneNavigator = ({ saveScene }) => {
               key={sceneId}
             />
           ))}
+          <DashedCard height={94} onClick={addScene} />
         </ul>
       </div>
     )

@@ -76,7 +76,7 @@ export default function ThumbnailList({
               key={-1}
               cols={1}
             >
-              <DashedCard onClick={addCard} />
+              <DashedCard height={160} onClick={addCard} />
             </ImageListItem>
           ) : null}
           {data && data.length > 0
