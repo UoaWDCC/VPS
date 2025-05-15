@@ -30,7 +30,7 @@ export default function ButtonPropertiesComponent({
   component,
   componentIndex,
 }) {
-  const { scenes, updateComponentProperty } = useContext(SceneContext);
+  const { scenes, updateComponentProperty, currentScene } = useContext(SceneContext);
 
   const [newFlag, setNewFlag] = useState("");
   const [open, setOpen] = useState(false);
@@ -81,6 +81,28 @@ export default function ButtonPropertiesComponent({
         [flag]: !component.flagDeletions[flag],
       });
     }
+  };
+
+  const handleSendToBack = () => {
+    if (!currentScene || !currentScene.components) return;
+
+    const zPositions = currentScene.components
+      .map((c) => c.zPosition)
+      .filter((z) => typeof z === "number");
+
+    const minZ = zPositions.length > 0 ? Math.min(...zPositions) : 0;
+    updateComponentProperty(componentIndex, "zPosition", minZ - 1);
+  };
+
+  const handleBringToFront = () => {
+    if (!currentScene || !currentScene.components) return;
+
+    const zPositions = currentScene.components
+      .map((c) => c.zPosition)
+      .filter((z) => typeof z === "number");
+
+    const maxZ = zPositions.length > 0 ? Math.max(...zPositions) : 0;
+    updateComponentProperty(componentIndex, "zPosition", maxZ + 1);
   };
 
   return (
@@ -248,7 +270,7 @@ export default function ButtonPropertiesComponent({
 
       <FormControl fullWidth className={styles.componentProperty}>
         <CustomInputLabel shrink>Z Axis Position</CustomInputLabel>
-        <div style={{ display: "flex", alignItems: "center", gap: "1em" , marginTop: "1.5em"}}>
+        <div style={{ display: "flex", alignItems: "center", gap: "0.5em" , marginTop: "1.5em", width: "30%"}}>
           <Button
             variant="outlined"
             onClick={() =>
@@ -259,9 +281,8 @@ export default function ButtonPropertiesComponent({
               )
             }
           >
-            Move Back
+            Move Backward
           </Button>
-         
           <Button
             variant="outlined"
             onClick={() =>
@@ -272,10 +293,25 @@ export default function ButtonPropertiesComponent({
               )
             }
           >
-            Bring Forward
+            Move Forward
+          </Button>
+          <Button
+            variant="outlined"
+            onClick={handleSendToBack}
+            fullWidth
+          >
+            Send to Back
+          </Button>
+          <Button
+            variant="outlined"
+            onClick={handleBringToFront}
+            fullWidth
+          >
+            Bring to Front
           </Button>
         </div>
       </FormControl>
+
     </>
   );
 }
