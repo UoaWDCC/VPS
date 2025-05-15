@@ -81,7 +81,7 @@ export default function FirebaseAudioPropertiesComponent({
       }
     }
     if ((component?.zPosition ?? 0) < minZ) {
-      return;
+        return;
     }
     updateComponentProperty(componentIndex, "zPosition", minZ - 1);
   };
@@ -96,12 +96,12 @@ export default function FirebaseAudioPropertiesComponent({
     const maxZ = zPositions.length > 0 ? Math.max(...zPositions) : 0;
 
     if ((component?.zPosition ?? 0) === maxZ) {
-      if (zPositions.length > 0 || (component?.zPosition ?? 0) > 0) {
+       if (zPositions.length > 0 || (component?.zPosition ?? 0) > 0) {
         return;
       }
     }
     if ((component?.zPosition ?? 0) > maxZ) {
-      return;
+        return;
     }
     updateComponentProperty(componentIndex, "zPosition", maxZ + 1);
   };
@@ -148,25 +148,10 @@ export default function FirebaseAudioPropertiesComponent({
       </FormControl>
       <FormControl fullWidth className={styles.componentProperty}>
         <CustomInputLabel shrink>Z Axis Position</CustomInputLabel>
-        <Typography
-          variant="body2"
-          style={{
-            marginTop: "0.5em",
-            marginBottom: "0.5em",
-            textAlign: "center",
-          }}
-        >
+        <Typography variant="body2" style={{ marginTop: "0.5em", marginBottom: "0.5em", textAlign: "center" }}>
           Current Z: {component?.zPosition ?? 0}
         </Typography>
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: "0.5em",
-            marginTop: "0.5em",
-            width: "100%",
-          }}
-        >
+        <div style={{ display: "flex", alignItems: "center", gap: "0.5em" , marginTop: "0.5em", width: "100%"}}>
           <Button
             variant="outlined"
             style={{ fontSize: "0.50rem" }}
