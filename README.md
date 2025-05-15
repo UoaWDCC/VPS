@@ -81,9 +81,13 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
     </tr>
     <tr>
 <<<<<<< HEAD
+<<<<<<< HEAD
       <td align="center" valign="top" width="16.66%"><a href="https://github.com/oorjagandhi"><img src="https://avatars.githubusercontent.com/u/72714597?v=4?s=100" width="100px;" alt="Oorja Gandhi"/><br /><sub><b>Oorja Gandhi</b></sub></a><br /><a href="https://github.com/UoaWDCC/VPS/commits?author=oorjagandhi" title="Code">💻</a></td>
 =======
 >>>>>>> a998a2c (chore: add @richmantan as a contributor. (#271))
+=======
+      <td align="center" valign="top" width="16.66%"><a href="https://github.com/oorjagandhi"><img src="https://avatars.githubusercontent.com/u/72714597?v=4?s=100" width="100px;" alt="Oorja Gandhi"/><br /><sub><b>Oorja Gandhi</b></sub></a><br /><a href="https://github.com/UoaWDCC/VPS/commits?author=oorjagandhi" title="Code">💻</a></td>
+>>>>>>> ddbec4f (adding Oorja's name to the contributor list (#279))
       <td align="center" valign="top" width="16.66%"><a href="https://github.com/Richman-Tan"><img src="https://avatars.githubusercontent.com/u/160602954?v=4?s=100" width="100px;" alt="rtan654"/><br /><sub><b>rtan654</b></sub></a><br /><a href="https://github.com/UoaWDCC/VPS/commits?author=Richman-Tan" title="Code">💻</a></td>
       <td align="center" valign="top" width="16.66%"><a href="https://github.com/RLee64"><img src="https://avatars.githubusercontent.com/u/159082701?v=4?s=100" width="100px;" alt="Rayen Lee"/><br /><sub><b>Rayen Lee</b></sub></a><br /><a href="https://github.com/UoaWDCC/VPS/commits?author=RLee64" title="Code">💻</a></td>
 <<<<<<< HEAD
