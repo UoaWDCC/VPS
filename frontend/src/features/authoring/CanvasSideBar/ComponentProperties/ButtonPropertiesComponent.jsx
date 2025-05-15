@@ -30,7 +30,8 @@ export default function ButtonPropertiesComponent({
   component,
   componentIndex,
 }) {
-  const { scenes, updateComponentProperty, currentScene } = useContext(SceneContext);
+  const { scenes, updateComponentProperty, currentScene } =
+    useContext(SceneContext);
 
   const [newFlag, setNewFlag] = useState("");
   const [open, setOpen] = useState(false);
@@ -90,22 +91,16 @@ export default function ButtonPropertiesComponent({
       .map((c) => c.zPosition)
       .filter((z) => typeof z === "number");
 
-    if (zPositions.length === 0 && (component?.zPosition ?? 0) === 0) {
-     
-    }
-
     const minZ = zPositions.length > 0 ? Math.min(...zPositions) : 0;
 
-    
     if ((component?.zPosition ?? 0) === minZ) {
-     
       if (zPositions.length > 0 || (component?.zPosition ?? 0) < 0) {
         return;
       }
     }
-   
+
     if ((component?.zPosition ?? 0) < minZ) {
-        return;
+      return;
     }
 
     updateComponentProperty(componentIndex, "zPosition", minZ - 1);
@@ -120,16 +115,14 @@ export default function ButtonPropertiesComponent({
 
     const maxZ = zPositions.length > 0 ? Math.max(...zPositions) : 0;
 
-   
     if ((component?.zPosition ?? 0) === maxZ) {
-      
-       if (zPositions.length > 0 || (component?.zPosition ?? 0) > 0) {
+      if (zPositions.length > 0 || (component?.zPosition ?? 0) > 0) {
         return;
       }
     }
-    
+
     if ((component?.zPosition ?? 0) > maxZ) {
-        return;
+      return;
     }
 
     updateComponentProperty(componentIndex, "zPosition", maxZ + 1);
@@ -300,10 +293,25 @@ export default function ButtonPropertiesComponent({
 
       <FormControl fullWidth className={styles.componentProperty}>
         <CustomInputLabel shrink>Z Axis Position</CustomInputLabel>
-        <Typography variant="body2" style={{ marginTop: "0.5em", marginBottom: "0.5em", textAlign: "center" }}>
+        <Typography
+          variant="body2"
+          style={{
+            marginTop: "0.5em",
+            marginBottom: "0.5em",
+            textAlign: "center",
+          }}
+        >
           Current Z: {component?.zPosition ?? 0}
         </Typography>
-        <div style={{ display: "flex", alignItems: "center", gap: "0.5em" , marginTop: "0.5em", width: "100%"}}>
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "0.5em",
+            marginTop: "0.5em",
+            width: "100%",
+          }}
+        >
           <Button
             style={{ fontSize: "0.50rem" }}
             variant="outlined"
@@ -348,7 +356,6 @@ export default function ButtonPropertiesComponent({
           </Button>
         </div>
       </FormControl>
-
     </>
   );
 }
