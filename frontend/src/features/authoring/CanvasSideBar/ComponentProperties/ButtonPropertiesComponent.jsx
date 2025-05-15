@@ -90,7 +90,24 @@ export default function ButtonPropertiesComponent({
       .map((c) => c.zPosition)
       .filter((z) => typeof z === "number");
 
+    if (zPositions.length === 0 && (component?.zPosition ?? 0) === 0) {
+     
+    }
+
     const minZ = zPositions.length > 0 ? Math.min(...zPositions) : 0;
+
+    
+    if ((component?.zPosition ?? 0) === minZ) {
+     
+      if (zPositions.length > 0 || (component?.zPosition ?? 0) < 0) {
+        return;
+      }
+    }
+   
+    if ((component?.zPosition ?? 0) < minZ) {
+        return;
+    }
+
     updateComponentProperty(componentIndex, "zPosition", minZ - 1);
   };
 
@@ -102,6 +119,19 @@ export default function ButtonPropertiesComponent({
       .filter((z) => typeof z === "number");
 
     const maxZ = zPositions.length > 0 ? Math.max(...zPositions) : 0;
+
+   
+    if ((component?.zPosition ?? 0) === maxZ) {
+      
+       if (zPositions.length > 0 || (component?.zPosition ?? 0) > 0) {
+        return;
+      }
+    }
+    
+    if ((component?.zPosition ?? 0) > maxZ) {
+        return;
+    }
+
     updateComponentProperty(componentIndex, "zPosition", maxZ + 1);
   };
 
@@ -270,8 +300,12 @@ export default function ButtonPropertiesComponent({
 
       <FormControl fullWidth className={styles.componentProperty}>
         <CustomInputLabel shrink>Z Axis Position</CustomInputLabel>
-        <div style={{ display: "flex", alignItems: "center", gap: "0.5em" , marginTop: "1.5em", width: "30%"}}>
+        <Typography variant="body2" style={{ marginTop: "0.5em", marginBottom: "0.5em", textAlign: "center" }}>
+          Current Z: {component?.zPosition ?? 0}
+        </Typography>
+        <div style={{ display: "flex", alignItems: "center", gap: "0.5em" , marginTop: "0.5em", width: "100%"}}>
           <Button
+            style={{ fontSize: "0.50rem" }}
             variant="outlined"
             onClick={() =>
               updateComponentProperty(
@@ -284,6 +318,7 @@ export default function ButtonPropertiesComponent({
             Move Backward
           </Button>
           <Button
+            style={{ fontSize: "0.50rem" }}
             variant="outlined"
             onClick={() =>
               updateComponentProperty(
@@ -296,6 +331,7 @@ export default function ButtonPropertiesComponent({
             Move Forward
           </Button>
           <Button
+            style={{ fontSize: "0.50rem" }}
             variant="outlined"
             onClick={handleSendToBack}
             fullWidth
@@ -303,6 +339,7 @@ export default function ButtonPropertiesComponent({
             Send to Back
           </Button>
           <Button
+            style={{ fontSize: "0.50rem" }}
             variant="outlined"
             onClick={handleBringToFront}
             fullWidth
