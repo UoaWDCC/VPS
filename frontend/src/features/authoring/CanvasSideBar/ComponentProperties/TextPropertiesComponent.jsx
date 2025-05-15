@@ -7,6 +7,8 @@ import {
   OutlinedInput,
   Select,
   TextField,
+  Button,
+  Typography,
 } from "@material-ui/core";
 import FormatAlignCenterIcon from "@material-ui/icons/FormatAlignCenter";
 import FormatAlignJustifyIcon from "@material-ui/icons/FormatAlignJustify";
@@ -36,7 +38,7 @@ const sizes = [6, 8, 9, 10, 11, 12, 14, 16, 18, 20, 24, 30, 36, 42, 48, 60, 72];
  */
 export default function TextPropertiesComponent({ component, componentIndex }) {
   const textComponentStyles = useStyles();
-  const { updateComponentProperty } = useContext(SceneContext);
+  const { updateComponentProperty, currentScene } = useContext(SceneContext);
 
   const addPropertyRef = useContext(AuthoringToolContext)?.addPropertyRef;
   const textRef = useRef(null);
@@ -46,6 +48,50 @@ export default function TextPropertiesComponent({ component, componentIndex }) {
       addPropertyRef("text", textRef);
     }
   }, []);
+
+  const handleSendToBack = () => {
+    if (!currentScene || !currentScene.components) return;
+
+    const zPositions = currentScene.components
+      .map((c) => c.zPosition)
+      .filter((z) => typeof z === "number");
+
+    if (zPositions.length === 0 && (component?.zPosition ?? 0) === 0) {
+      // Empty block from diff
+    }
+
+    const minZ = zPositions.length > 0 ? Math.min(...zPositions) : 0;
+
+    if ((component?.zPosition ?? 0) === minZ) {
+      if (zPositions.length > 0 || (component?.zPosition ?? 0) < 0) {
+        return;
+      }
+    }
+    if ((component?.zPosition ?? 0) < minZ) {
+        return;
+    }
+    updateComponentProperty(componentIndex, "zPosition", minZ - 1);
+  };
+
+  const handleBringToFront = () => {
+    if (!currentScene || !currentScene.components) return;
+
+    const zPositions = currentScene.components
+      .map((c) => c.zPosition)
+      .filter((z) => typeof z === "number");
+
+    const maxZ = zPositions.length > 0 ? Math.max(...zPositions) : 0;
+
+    if ((component?.zPosition ?? 0) === maxZ) {
+       if (zPositions.length > 0 || (component?.zPosition ?? 0) > 0) {
+        return;
+      }
+    }
+    if ((component?.zPosition ?? 0) > maxZ) {
+        return;
+    }
+    updateComponentProperty(componentIndex, "zPosition", maxZ + 1);
+  };
 
   return (
     <>
@@ -144,24 +190,56 @@ export default function TextPropertiesComponent({ component, componentIndex }) {
           label="Include border"
         />
       </FormControl>
+      
       <FormControl fullWidth className={styles.componentProperty}>
-        <CustomTextField
-          label="Z Axis Position"
-          type="number"
-          value={component?.zPosition || ""}
-          fullWidth
-          onChange={(event) =>
-            updateComponentProperty(
-              componentIndex,
-              "zPosition",
-              event.target.value
-            )
-          }
-          InputLabelProps={{
-            // label moves up whenever there is input
-            shrink: !!component.zPosition,
-          }}
-        />
+        <CustomInputLabel shrink>Z Axis Position</CustomInputLabel>
+        <Typography variant="body2" style={{ marginTop: "0.5em", marginBottom: "0.5em", textAlign: "center" }}>
+          Current Z: {component?.zPosition ?? 0}
+        </Typography>
+        <div style={{ display: "flex", alignItems: "center", gap: "0.5em" , marginTop: "0.5em", width: "100%"}}>
+          <Button
+            style={{ fontSize: "0.50rem" }}
+            variant="outlined"
+            onClick={() =>
+              updateComponentProperty(
+                componentIndex,
+                "zPosition",
+                (component?.zPosition ?? 0) - 1
+              )
+            }
+          >
+            Move Backward
+          </Button>
+          <Button
+            style={{ fontSize: "0.50rem" }}
+            variant="outlined"
+            onClick={() =>
+              updateComponentProperty(
+                componentIndex,
+                "zPosition",
+                (component?.zPosition ?? 0) + 1
+              )
+            }
+          >
+            Move Forward
+          </Button>
+          <Button
+            style={{ fontSize: "0.50rem" }}
+            variant="outlined"
+            onClick={handleSendToBack}
+            fullWidth
+          >
+            Send to Back
+          </Button>
+          <Button
+            style={{ fontSize: "0.50rem" }}
+            variant="outlined"
+            onClick={handleBringToFront}
+            fullWidth
+          >
+            Bring to Front
+          </Button>
+        </div>
       </FormControl>
     </>
   );
