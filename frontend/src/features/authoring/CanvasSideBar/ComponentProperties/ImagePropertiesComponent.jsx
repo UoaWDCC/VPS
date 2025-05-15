@@ -3,14 +3,12 @@ import {
   InputLabel,
   MenuItem,
   Select,
-  TextField,
   Button,
   Typography,
 } from "@material-ui/core";
 import { useContext } from "react";
 import SceneContext from "context/SceneContext";
 import CustomInputLabelStyles from "features/authoring/CanvasSideBar/CustomPropertyInputStyles/CustomInputLabelStyles";
-import CustomTextFieldStyles from "features/authoring/CanvasSideBar/CustomPropertyInputStyles/CustomTextFieldStyles";
 
 import styles from "../CanvasSideBar.module.scss";
 

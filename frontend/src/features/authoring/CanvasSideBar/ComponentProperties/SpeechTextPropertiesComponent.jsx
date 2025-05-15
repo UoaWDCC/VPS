@@ -4,7 +4,6 @@ import {
   MenuItem,
   OutlinedInput,
   Select,
-  TextField,
   Button,
   Typography,
 } from "@material-ui/core";
@@ -18,7 +17,6 @@ import SceneContext from "context/SceneContext";
 import { useContext, useEffect, useRef } from "react";
 
 import styles from "../CanvasSideBar.module.scss";
-import CustomTextFieldStyles from "features/authoring/CanvasSideBar/CustomPropertyInputStyles/CustomTextFieldStyles";
 import CustomInputLabelStyles from "features/authoring/CanvasSideBar/CustomPropertyInputStyles/CustomInputLabelStyles";
 import useStyles from "./TextPropertiesComponent.styles";
 

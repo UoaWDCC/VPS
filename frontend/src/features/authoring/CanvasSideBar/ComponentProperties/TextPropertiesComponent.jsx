@@ -6,7 +6,6 @@ import {
   MenuItem,
   OutlinedInput,
   Select,
-  TextField,
   Button,
   Typography,
 } from "@material-ui/core";
@@ -22,7 +21,6 @@ import SceneContext from "context/SceneContext";
 
 import styles from "../CanvasSideBar.module.scss";
 import CustomCheckBoxStyles from "features/authoring/CanvasSideBar/CustomPropertyInputStyles/CustomCheckBoxStyles";
-import CustomTextFieldStyles from "features/authoring/CanvasSideBar/CustomPropertyInputStyles/CustomTextFieldStyles";
 import CustomInputLabelStyles from "features/authoring/CanvasSideBar/CustomPropertyInputStyles/CustomInputLabelStyles";
 import useStyles from "./TextPropertiesComponent.styles";
 
