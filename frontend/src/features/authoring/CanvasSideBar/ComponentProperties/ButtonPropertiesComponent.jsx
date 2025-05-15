@@ -30,7 +30,8 @@ export default function ButtonPropertiesComponent({
   component,
   componentIndex,
 }) {
-  const { scenes, updateComponentProperty } = useContext(SceneContext);
+  const { scenes, updateComponentProperty, currentScene } =
+    useContext(SceneContext);
 
   const [newFlag, setNewFlag] = useState("");
   const [open, setOpen] = useState(false);
@@ -81,6 +82,50 @@ export default function ButtonPropertiesComponent({
         [flag]: !component.flagDeletions[flag],
       });
     }
+  };
+
+  const handleSendToBack = () => {
+    if (!currentScene || !currentScene.components) return;
+
+    const zPositions = currentScene.components
+      .map((c) => c.zPosition)
+      .filter((z) => typeof z === "number");
+
+    const minZ = zPositions.length > 0 ? Math.min(...zPositions) : 0;
+
+    if ((component?.zPosition ?? 0) === minZ) {
+      if (zPositions.length > 0 || (component?.zPosition ?? 0) < 0) {
+        return;
+      }
+    }
+
+    if ((component?.zPosition ?? 0) < minZ) {
+      return;
+    }
+
+    updateComponentProperty(componentIndex, "zPosition", minZ - 1);
+  };
+
+  const handleBringToFront = () => {
+    if (!currentScene || !currentScene.components) return;
+
+    const zPositions = currentScene.components
+      .map((c) => c.zPosition)
+      .filter((z) => typeof z === "number");
+
+    const maxZ = zPositions.length > 0 ? Math.max(...zPositions) : 0;
+
+    if ((component?.zPosition ?? 0) === maxZ) {
+      if (zPositions.length > 0 || (component?.zPosition ?? 0) > 0) {
+        return;
+      }
+    }
+
+    if ((component?.zPosition ?? 0) > maxZ) {
+      return;
+    }
+
+    updateComponentProperty(componentIndex, "zPosition", maxZ + 1);
   };
 
   return (
@@ -247,23 +292,69 @@ export default function ButtonPropertiesComponent({
       </FormControl>
 
       <FormControl fullWidth className={styles.componentProperty}>
-        <CustomTextField
-          label="Z Axis Position"
-          type="number"
-          value={component?.zPosition || ""}
-          fullWidth
-          onChange={(event) =>
-            updateComponentProperty(
-              componentIndex,
-              "zPosition",
-              event.target.value
-            )
-          }
-          InputLabelProps={{
-            // label moves up whenever there is input
-            shrink: !!component.zPosition,
+        <CustomInputLabel shrink>Z Axis Position</CustomInputLabel>
+        <Typography
+          variant="body2"
+          style={{
+            marginTop: "0.5em",
+            marginBottom: "0.5em",
+            textAlign: "center",
           }}
-        />
+        >
+          Current Z: {component?.zPosition ?? 0}
+        </Typography>
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "0.5em",
+            marginTop: "0.5em",
+            width: "100%",
+          }}
+        >
+          <Button
+            style={{ fontSize: "0.50rem" }}
+            variant="outlined"
+            onClick={() =>
+              updateComponentProperty(
+                componentIndex,
+                "zPosition",
+                (component?.zPosition ?? 0) - 1
+              )
+            }
+          >
+            Move Backward
+          </Button>
+          <Button
+            style={{ fontSize: "0.50rem" }}
+            variant="outlined"
+            onClick={() =>
+              updateComponentProperty(
+                componentIndex,
+                "zPosition",
+                (component?.zPosition ?? 0) + 1
+              )
+            }
+          >
+            Move Forward
+          </Button>
+          <Button
+            style={{ fontSize: "0.50rem" }}
+            variant="outlined"
+            onClick={handleSendToBack}
+            fullWidth
+          >
+            Send to Back
+          </Button>
+          <Button
+            style={{ fontSize: "0.50rem" }}
+            variant="outlined"
+            onClick={handleBringToFront}
+            fullWidth
+          >
+            Bring to Front
+          </Button>
+        </div>
       </FormControl>
     </>
   );
