@@ -141,7 +141,7 @@ export default function TextPropertiesComponent({ component, componentIndex }) {
               }
             />
           }
-          label="Include border"
+          label="Show Background"
         />
       </FormControl>
       <FormControl fullWidth className={styles.componentProperty}>
