@@ -157,7 +157,11 @@ export default function ManageGroupsPage() {
     document.body.removeChild(a);
     window.URL.revokeObjectURL(url);
   };
-
+  <a href="/sample-group-data.csv" download>
+    <button className="btn vps w-[150px]">
+      Download Sample
+    </button>
+  </a>
   // Toast close handler
   const handleToastDismiss = (_, reason) => {
     if (reason === "clickaway") {
@@ -182,6 +186,9 @@ export default function ManageGroupsPage() {
         <button className="btn vps w-[100px]" onClick={download}>
           Download
         </button>
+        <a href="/sample-group-data.csv" download>
+          <button className="btn vps w-[150px]">Download Sample</button>
+        </a>
       </TopBar>
 
       <GroupsTable data={users} />
