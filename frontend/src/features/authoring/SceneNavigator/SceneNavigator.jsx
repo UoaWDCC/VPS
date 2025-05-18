@@ -4,10 +4,10 @@ import { useHistory, useParams } from "react-router-dom";
 import styles from "./SceneNavigator.module.scss";
 import SceneListItem from "./SceneListItem";
 import Thumbnail from "../components/Thumbnail";
-import RightContextMenu from "../../../components/contextMenu/rightContextMenu";
+import RightContextMenu from "../../../components/ContextMenu/RightContextMenu";
 import { MenuItem, MenuList, Paper } from "@material-ui/core";
 import AuthenticationContext from "../../../context/AuthenticationContext";
-import { handle } from "../../../components/contextMenu/portal";
+import { handle } from "../../../components/ContextMenu/portal";
 import { api, handleGeneric } from "../../../util/api";
 
 const SceneMenu = ({ id, deleteScene, duplicateScene }) => {

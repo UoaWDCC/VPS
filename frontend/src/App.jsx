@@ -14,7 +14,7 @@ import { ScenePage } from "./features/sceneSelection/SceneSelectionPage";
 import theme from "./theme/App.theme";
 
 import { Toaster } from "react-hot-toast";
-import { ContextMenuPortal } from "./components/contextMenu/portal";
+import { ContextMenuPortal } from "./components/ContextMenu/portal";
 
 const TOAST_OFFSET = 25;
 
