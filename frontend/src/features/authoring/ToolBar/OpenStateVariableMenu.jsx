@@ -20,7 +20,7 @@ const OpenStateVariableMenu = () => {
       >
         Open State Menu
       </MenuItem>
-      <div>Menu here</div>
+      <StateVariableMenu show={show} setShow={setShow} />
     </div>
   );
 };
