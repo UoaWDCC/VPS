@@ -12,13 +12,14 @@ import {
   addSpeechText,
   addText,
 } from "./ToolBarActions";
+import OpenStateVariableMenu from "./OpenStateVariableMenu";
 
 /**
  * This file contains the data for the add component icons to be added into the ToolBar
  */
 const toolBarData = [
   {
-    title: "Image",
+    title: "Add Image",
     icon: <ImageIcon fontSize="medium" />,
     dropdown: [
       {
@@ -30,22 +31,22 @@ const toolBarData = [
     ],
   },
   {
-    title: "Text",
+    title: "Add Text",
     icon: <TextFieldsIcon fontSize="medium" />,
     onClick: addText,
   },
   {
-    title: "Button",
+    title: "Add Button",
     icon: <ButtonIcon fontSize="medium" />,
     onClick: addButton,
   },
   {
-    title: "Reset",
+    title: "Add Reset",
     icon: <ButtonIcon fontSize="medium" />,
     onClick: addResetButton,
   },
   {
-    title: "Audio",
+    title: "Add Audio",
     icon: <VolumeUpIcon fontSize="medium" />,
     dropdown: [
       {
@@ -54,10 +55,19 @@ const toolBarData = [
     ],
   },
   {
-    title: "Speech text",
+    title: "Add Speech text",
     icon: <ChatBubbleIcon fontSize="medium" />,
     onClick: addSpeechText,
   },
+  {
+    title: "State Variables",
+    icon: <TextFieldsIcon fontSize="medium" />,
+    dropdown: [
+      {
+        component: <OpenStateVariableMenu />,
+      },
+    ],
+  }
 ];
 
 export default toolBarData;
