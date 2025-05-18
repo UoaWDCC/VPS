@@ -29,7 +29,7 @@ const StateVariableMenu = ({ show, setShow }) => {
     <Modal open={show} onClose={() => setShow(false)}>
       <Box sx={style}>
         <Typography variant="h5">State Variable Menu</Typography>
-        
+        <CreateStateVariable />
         <Button
           variant="contained"
           color="primary"
