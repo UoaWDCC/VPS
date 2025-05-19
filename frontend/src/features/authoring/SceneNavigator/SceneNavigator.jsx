@@ -9,6 +9,7 @@ import { MenuItem, MenuList, Paper } from "@material-ui/core";
 import AuthenticationContext from "../../../context/AuthenticationContext";
 import { handle } from "../../../components/ContextMenu/portal";
 import { api, handleGeneric } from "../../../util/api";
+import DashedCard from "../../../components/DashedCard";
 
 const SceneMenu = ({ id, deleteScene, duplicateScene }) => {
   return (
@@ -43,6 +44,15 @@ const SceneNavigator = ({ saveScene }) => {
       .catch(handleGeneric);
   };
 
+  const addScene = async () => {
+    api
+      .post(user, `/api/scenario/${scenarioId}/scene`, {
+        name: `Scene ${scenes.length}`,
+      })
+      .then(reFetch)
+      .catch(handleGeneric);
+  };
+
   useEffect(() => {
     if (!scenes?.length) return;
 
@@ -54,14 +64,7 @@ const SceneNavigator = ({ saveScene }) => {
             menu={SceneMenu({ id: scene._id, deleteScene, duplicateScene })}
           >
             <div className="flex items-center gap-2.5">
-              <p
-                className={styles.sceneText}
-                style={
-                  currentScene._id === scene._id ? { color: "#035084" } : null
-                }
-              >
-                {index + 1}
-              </p>
+              <p className="w-4">{index + 1}</p>
               <button
                 type="button"
                 onClick={() => {
@@ -102,6 +105,9 @@ const SceneNavigator = ({ saveScene }) => {
               key={sceneId}
             />
           ))}
+          <div className="w-full pl-6.5">
+            <DashedCard height={94} onClick={addScene} />
+          </div>
         </ul>
       </div>
     )

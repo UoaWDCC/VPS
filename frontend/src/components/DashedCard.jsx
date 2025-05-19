@@ -15,29 +15,27 @@ import AddRoundedIcon from "@mui/icons-material/AddRounded";
  *   <DashedCard onClick={onClick} />
  * )
  */
-export default function DashedCard({ onClick }) {
+export default function DashedCard({ height, onClick }) {
   return (
-    <div>
-      <div style={{ position: "relative" }}>
-        <Box
-          height={160}
-          onClick={onClick}
+    <div style={{ position: "relative" }}>
+      <Box
+        height={height}
+        onClick={onClick}
+        sx={{
+          background: "#f1f5f9",
+          "&:hover": {
+            background: "#fff",
+          },
+        }}
+        className="cursor-pointer flex justify-center items-center overflow-hidden rounded-xl border-2 border-dashed border-slate-400 bg-slate-100"
+      >
+        <AddRoundedIcon
+          className="text-slate-500"
           sx={{
-            background: "#f1f5f9",
-            "&:hover": {
-              background: "#fff",
-            },
+            fontSize: "5rem",
           }}
-          className="cursor-pointer flex justify-center items-center overflow-hidden rounded-xl border-2 border-dashed border-slate-400 bg-slate-100"
-        >
-          <AddRoundedIcon
-            className="text-slate-500"
-            sx={{
-              fontSize: "5rem",
-            }}
-          />
-        </Box>
-      </div>
+        />
+      </Box>
     </div>
   );
 }
