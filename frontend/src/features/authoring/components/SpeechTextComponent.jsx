@@ -3,6 +3,7 @@ import SpeechTextboxArrow from "components/SpeechboxArrow/SpeechboxArrow";
 import AuthoringToolContext from "context/AuthoringToolContext";
 import { useContext, useState } from "react";
 import useStyles from "./components.styles";
+import { toRgbaString } from "../../../utils/colourUtils";
 
 const borderWidth = 3.429; // px
 
@@ -46,6 +47,7 @@ export default function SpeechTextComponent({ id, onClick, component }) {
 
   // style related values
   const speechboxWidthOffset = 10;
+  const colour = toRgbaString(component.colour);
   const arrowLocation = component.arrowLocation || "right";
   const arrowLocationStyles = {
     top: { flexDirection: "column", squareCorner: "TopRight" },
@@ -87,6 +89,7 @@ export default function SpeechTextComponent({ id, onClick, component }) {
             speechboxWidthOffset,
             arrowLocationStyles.squareCorner
           ),
+          color: colour,
         }}
         className={speechTextComponentStyles}
       >
