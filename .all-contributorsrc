@@ -338,10 +338,6 @@
       ]
     },
     {
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
->>>>>>> ddbec4f (adding Oorja's name to the contributor list (#279))
       "login": "oorjagandhi",
       "name": "Oorja Gandhi",
       "avatar_url": "https://avatars.githubusercontent.com/u/72714597?v=4",
@@ -351,38 +347,21 @@
       ]
     },
     {
-<<<<<<< HEAD
-=======
->>>>>>> a998a2c (chore: add @richmantan as a contributor. (#271))
-=======
->>>>>>> ddbec4f (adding Oorja's name to the contributor list (#279))
       "login": "Richman-Tan",
       "name": "rtan654",
       "avatar_url": "https://avatars.githubusercontent.com/u/160602954?v=4",
       "profile": "https://github.com/Richman-Tan",
       "contributions": [
         "code"
-<<<<<<< HEAD
-<<<<<<< HEAD
       ]
     },
-=======
-        ]
-      },
->>>>>>> a998a2c (chore: add @richmantan as a contributor. (#271))
-=======
-      ]
-    },
->>>>>>> ddbec4f (adding Oorja's name to the contributor list (#279))
-      {
+    {
       "login": "RLee64",
       "name": "Rayen Lee",
       "avatar_url": "https://avatars.githubusercontent.com/u/159082701?v=4",
       "profile": "https://github.com/RLee64",
       "contributions": [
         "code"
-<<<<<<< HEAD
-<<<<<<< HEAD
       ]
     },
     {
@@ -390,24 +369,12 @@
       "name": "Hazik Chaudhry",
       "avatar_url": "https://avatars.githubusercontent.com/u/99319319?v=4",
       "profile": "https://github.com/hazikchaudhry",
-<<<<<<< HEAD
-
-=======
->>>>>>> c5771de (added Hazik to contributors (#273))
-       "contributions": [
+      "contributions": [
         "code",
         "design"
       ]
-    },  
-    {
-<<<<<<< HEAD
-=======
-      ]
     },
     {
->>>>>>> 38bd511 (docs: add mike to contributor list (#270))
-=======
->>>>>>> c5771de (added Hazik to contributors (#273))
       "login": "mshi672",
       "name": "mshi672",
       "avatar_url": "https://avatars.githubusercontent.com/u/162376891?v=4",
@@ -418,13 +385,5 @@
       ]
     }
   ],
-<<<<<<< HEAD
-=======
-        ]
-      }
-    ],
->>>>>>> a998a2c (chore: add @richmantan as a contributor. (#271))
-=======
->>>>>>> 38bd511 (docs: add mike to contributor list (#270))
   "contributorsPerLine": 6
 }

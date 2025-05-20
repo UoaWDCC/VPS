@@ -80,35 +80,11 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
       <td align="center" valign="top" width="16.66%"><a href="https://github.com/Ray-F"><img src="https://avatars.githubusercontent.com/u/19633284?v=4?s=100" width="100px;" alt="Raymond Feng"/><br /><sub><b>Raymond Feng</b></sub></a><br /><a href="#infra-Ray-F" title="Infrastructure (Hosting, Build-Tools, etc)">🚇</a></td>
     </tr>
     <tr>
-<<<<<<< HEAD
-<<<<<<< HEAD
       <td align="center" valign="top" width="16.66%"><a href="https://github.com/oorjagandhi"><img src="https://avatars.githubusercontent.com/u/72714597?v=4?s=100" width="100px;" alt="Oorja Gandhi"/><br /><sub><b>Oorja Gandhi</b></sub></a><br /><a href="https://github.com/UoaWDCC/VPS/commits?author=oorjagandhi" title="Code">💻</a></td>
-=======
->>>>>>> a998a2c (chore: add @richmantan as a contributor. (#271))
-=======
-      <td align="center" valign="top" width="16.66%"><a href="https://github.com/oorjagandhi"><img src="https://avatars.githubusercontent.com/u/72714597?v=4?s=100" width="100px;" alt="Oorja Gandhi"/><br /><sub><b>Oorja Gandhi</b></sub></a><br /><a href="https://github.com/UoaWDCC/VPS/commits?author=oorjagandhi" title="Code">💻</a></td>
->>>>>>> ddbec4f (adding Oorja's name to the contributor list (#279))
       <td align="center" valign="top" width="16.66%"><a href="https://github.com/Richman-Tan"><img src="https://avatars.githubusercontent.com/u/160602954?v=4?s=100" width="100px;" alt="rtan654"/><br /><sub><b>rtan654</b></sub></a><br /><a href="https://github.com/UoaWDCC/VPS/commits?author=Richman-Tan" title="Code">💻</a></td>
       <td align="center" valign="top" width="16.66%"><a href="https://github.com/RLee64"><img src="https://avatars.githubusercontent.com/u/159082701?v=4?s=100" width="100px;" alt="Rayen Lee"/><br /><sub><b>Rayen Lee</b></sub></a><br /><a href="https://github.com/UoaWDCC/VPS/commits?author=RLee64" title="Code">💻</a></td>
-<<<<<<< HEAD
-<<<<<<< HEAD
       <td align="center" valign="top" width="16.66%"><a href="https://github.com/hazikchaudhry"><img src="https://avatars.githubusercontent.com/u/99319319?v=4?s=100" width="100px;" alt="Hazik Chaudhry"/><br /><sub><b>Hazik Chaudhry</b></sub></a><br /><a href="https://github.com/UoaWDCC/VPS/commits?author=hazikchaudhry" title="Code">💻</a> <a href="#design-hazikchaudhry" title="Design">🎨</a></td>
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
-      <td align="center" valign="top" width="16.66%"><a href="https://github.com/hazikchaudhry"><img src="https://avatars.githubusercontent.com/u/99319319?v=4?s=100" width="100px;" alt="Hazik Chaudhry"/><br /><sub><b>Hazik Chaudhry</b></sub></a><br /><a href="https://github.com/UoaWDCC/VPS/commits?author=hazikchaudhry" title="Code">💻</a> <a href="#design-hazikchaudhry" title="Design">🎨</a></td>
->>>>>>> c5771de (added Hazik to contributors (#273))
       <td align="center" valign="top" width="16.66%"><a href="https://github.com/mshi672"><img src="https://avatars.githubusercontent.com/u/162376891?v=4?s=100" width="100px;" alt="mshi672"/><br /><sub><b>mshi672</b></sub></a><br /><a href="https://github.com/UoaWDCC/VPS/commits?author=mshi672" title="Code">💻</a> <a href="#design-mshi672" title="Design">🎨</a></td>
-=======
->>>>>>> 690696a (added Hazik to contributors)
-=======
-      <td align="center" valign="top" width="16.66%"><a href="https://github.com/mshi672"><img src="https://avatars.githubusercontent.com/u/162376891?v=4?s=100" width="100px;" alt="mshi672"/><br /><sub><b>mshi672</b></sub></a><br /><a href="https://github.com/UoaWDCC/VPS/commits?author=mshi672" title="Code">💻</a> <a href="#design-mshi672" title="Design">🎨</a></td>
->>>>>>> 38bd511 (docs: add mike to contributor list (#270))
-=======
-      <td align="center" valign="top" width="16.66%"><a href="https://github.com/mshi672"><img src="https://avatars.githubusercontent.com/u/162376891?v=4?s=100" width="100px;" alt="mshi672"/><br /><sub><b>mshi672</b></sub></a><br /><a href="https://github.com/UoaWDCC/VPS/commits?author=mshi672" title="Code">💻</a> <a href="#design-mshi672" title="Design">🎨</a></td>
-=======
->>>>>>> 690696a (added Hazik to contributors)
->>>>>>> 01dea03 (added Hazik to contributors)
     </tr>
   </tbody>
 </table>
