@@ -4,7 +4,8 @@ import {
   MenuItem,
   OutlinedInput,
   Select,
-  TextField,
+  Button,
+  Typography,
 } from "@material-ui/core";
 import FormatAlignCenterIcon from "@material-ui/icons/FormatAlignCenter";
 import FormatAlignJustifyIcon from "@material-ui/icons/FormatAlignJustify";
@@ -14,15 +15,19 @@ import { ToggleButton, ToggleButtonGroup } from "@mui/material";
 import AuthoringToolContext from "context/AuthoringToolContext";
 import SceneContext from "context/SceneContext";
 import { useContext, useEffect, useRef } from "react";
+import {
+  handleSendToBack,
+  handleBringToFront,
+  handleMoveBackward,
+  handleMoveForward,
+} from "./utils/zAxisUtils";
 
 import styles from "../CanvasSideBar.module.scss";
-import CustomTextFieldStyles from "features/authoring/CanvasSideBar/CustomPropertyInputStyles/CustomTextFieldStyles";
 import CustomInputLabelStyles from "features/authoring/CanvasSideBar/CustomPropertyInputStyles/CustomInputLabelStyles";
 import useStyles from "./TextPropertiesComponent.styles";
 import ColourPickerComponent from "../../components/ColourPickerComponent";
 import { ensureRgbObject } from "../../../../utils/colourUtils";
 
-const CustomTextField = CustomTextFieldStyles()(TextField);
 const CustomInputLabel = CustomInputLabelStyles()(InputLabel);
 const sizes = [6, 8, 9, 10, 11, 12, 14, 16, 18, 20, 24, 30, 36, 42, 48, 60, 72];
 // export const reference = useRef(null);
@@ -36,7 +41,7 @@ export default function SpeechTextPropertiesComponent({
   componentIndex,
 }) {
   const textComponentStyles = useStyles();
-  const { updateComponentProperty } = useContext(SceneContext);
+  const { updateComponentProperty, currentScene } = useContext(SceneContext);
 
   const { addPropertyRef } = useContext(AuthoringToolContext);
   const textRef = useRef(null);
@@ -140,24 +145,85 @@ export default function SpeechTextPropertiesComponent({
           <MenuItem value="bottom">Bottom</MenuItem>
         </Select>
       </FormControl>
+
       <FormControl fullWidth className={styles.componentProperty}>
-        <CustomTextField
-          label="Z Axis Position"
-          type="number"
-          value={component?.zPosition || ""}
-          fullWidth
-          onChange={(event) =>
-            updateComponentProperty(
-              componentIndex,
-              "zPosition",
-              event.target.value
-            )
-          }
-          InputLabelProps={{
-            // label moves up whenever there is input
-            shrink: !!component.zPosition,
+        <CustomInputLabel shrink>Z Axis Position</CustomInputLabel>
+        <Typography
+          variant="body2"
+          style={{
+            marginTop: "0.5em",
+            marginBottom: "0.5em",
+            textAlign: "center",
           }}
-        />
+        >
+          Current Z: {component?.zPosition ?? 0}
+        </Typography>
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "0.5em",
+            marginTop: "0.5em",
+            width: "100%",
+          }}
+        >
+          <Button
+            style={{ fontSize: "0.50rem" }}
+            variant="outlined"
+            onClick={() =>
+              handleMoveBackward({
+                component,
+                componentIndex,
+                updateComponentProperty,
+              })
+            }
+          >
+            Move Backward
+          </Button>
+          <Button
+            style={{ fontSize: "0.50rem" }}
+            variant="outlined"
+            onClick={() =>
+              handleMoveForward({
+                component,
+                componentIndex,
+                updateComponentProperty,
+              })
+            }
+          >
+            Move Forward
+          </Button>
+          <Button
+            style={{ fontSize: "0.50rem" }}
+            variant="outlined"
+            onClick={() =>
+              handleSendToBack({
+                currentScene,
+                component,
+                componentIndex,
+                updateComponentProperty,
+              })
+            }
+            fullWidth
+          >
+            Send to Back
+          </Button>
+          <Button
+            style={{ fontSize: "0.50rem" }}
+            variant="outlined"
+            onClick={() =>
+              handleBringToFront({
+                currentScene,
+                component,
+                componentIndex,
+                updateComponentProperty,
+              })
+            }
+            fullWidth
+          >
+            Bring to Front
+          </Button>
+        </div>
       </FormControl>
     </>
   );

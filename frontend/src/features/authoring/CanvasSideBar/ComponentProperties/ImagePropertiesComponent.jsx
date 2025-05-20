@@ -3,16 +3,21 @@ import {
   InputLabel,
   MenuItem,
   Select,
-  TextField,
+  Button,
+  Typography,
 } from "@material-ui/core";
 import { useContext } from "react";
 import SceneContext from "context/SceneContext";
 import CustomInputLabelStyles from "features/authoring/CanvasSideBar/CustomPropertyInputStyles/CustomInputLabelStyles";
-import CustomTextFieldStyles from "features/authoring/CanvasSideBar/CustomPropertyInputStyles/CustomTextFieldStyles";
+import {
+  handleSendToBack,
+  handleBringToFront,
+  handleMoveBackward,
+  handleMoveForward,
+} from "./utils/zAxisUtils";
 
 import styles from "../CanvasSideBar.module.scss";
 
-const CustomTextField = CustomTextFieldStyles()(TextField);
 const CustomInputLabel = CustomInputLabelStyles()(InputLabel);
 
 /**
@@ -23,7 +28,8 @@ export default function ImagePropertiesComponent({
   component,
   componentIndex,
 }) {
-  const { scenes, updateComponentProperty } = useContext(SceneContext);
+  const { scenes, updateComponentProperty, currentScene } =
+    useContext(SceneContext);
 
   return (
     <>
@@ -54,23 +60,83 @@ export default function ImagePropertiesComponent({
         </Select>
       </FormControl>
       <FormControl fullWidth className={styles.componentProperty}>
-        <CustomTextField
-          label="Z Axis Position"
-          type="number"
-          value={component?.zPosition || ""}
-          fullWidth
-          onChange={(event) =>
-            updateComponentProperty(
-              componentIndex,
-              "zPosition",
-              event.target.value
-            )
-          }
-          InputLabelProps={{
-            // label moves up whenever there is input
-            shrink: !!component?.zPosition,
+        <CustomInputLabel shrink>Z Axis Position</CustomInputLabel>
+        <Typography
+          variant="body2"
+          style={{
+            marginTop: "0.5em",
+            marginBottom: "0.5em",
+            textAlign: "center",
           }}
-        />
+        >
+          Current Z: {component?.zPosition ?? 0}
+        </Typography>
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "0.5em",
+            marginTop: "0.5em",
+            width: "100%",
+          }}
+        >
+          <Button
+            style={{ fontSize: "0.50rem" }}
+            variant="outlined"
+            onClick={() =>
+              handleMoveBackward({
+                component,
+                componentIndex,
+                updateComponentProperty,
+              })
+            }
+          >
+            Move Backward
+          </Button>
+          <Button
+            style={{ fontSize: "0.50rem" }}
+            variant="outlined"
+            onClick={() =>
+              handleMoveForward({
+                component,
+                componentIndex,
+                updateComponentProperty,
+              })
+            }
+          >
+            Move Forward
+          </Button>
+          <Button
+            style={{ fontSize: "0.50rem" }}
+            variant="outlined"
+            onClick={() =>
+              handleSendToBack({
+                currentScene,
+                component,
+                componentIndex,
+                updateComponentProperty,
+              })
+            }
+            fullWidth
+          >
+            Send to Back
+          </Button>
+          <Button
+            style={{ fontSize: "0.50rem" }}
+            variant="outlined"
+            onClick={() =>
+              handleBringToFront({
+                currentScene,
+                component,
+                componentIndex,
+                updateComponentProperty,
+              })
+            }
+            fullWidth
+          >
+            Bring to Front
+          </Button>
+        </div>
       </FormControl>
     </>
   );
