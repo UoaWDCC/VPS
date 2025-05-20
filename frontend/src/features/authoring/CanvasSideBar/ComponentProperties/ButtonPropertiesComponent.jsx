@@ -26,7 +26,6 @@ import {
 import ColourPickerComponent from "../../components/ColourPickerComponent";
 import { ensureRgbObject } from "../../../../utils/colourUtils";
 
-
 import styles from "../CanvasSideBar.module.scss";
 
 const CustomTextField = CustomTextFieldStyles()(TextField);

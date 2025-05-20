@@ -34,7 +34,6 @@ import {
 import ColourPickerComponent from "../../components/ColourPickerComponent";
 import { ensureRgbObject } from "../../../../utils/colourUtils";
 
-
 const CustomInputLabel = CustomInputLabelStyles()(InputLabel);
 const CustomCheckBox = CustomCheckBoxStyles()(Checkbox);
 const sizes = [6, 8, 9, 10, 11, 12, 14, 16, 18, 20, 24, 30, 36, 42, 48, 60, 72];
