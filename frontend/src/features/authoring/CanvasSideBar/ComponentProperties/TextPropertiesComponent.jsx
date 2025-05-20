@@ -23,6 +23,12 @@ import styles from "../CanvasSideBar.module.scss";
 import CustomCheckBoxStyles from "features/authoring/CanvasSideBar/CustomPropertyInputStyles/CustomCheckBoxStyles";
 import CustomInputLabelStyles from "features/authoring/CanvasSideBar/CustomPropertyInputStyles/CustomInputLabelStyles";
 import useStyles from "./TextPropertiesComponent.styles";
+import {
+  handleSendToBack,
+  handleBringToFront,
+  handleMoveBackward,
+  handleMoveForward,
+} from "./utils/zAxisUtils";
 
 const CustomInputLabel = CustomInputLabelStyles()(InputLabel);
 const CustomCheckBox = CustomCheckBoxStyles()(Checkbox);
@@ -45,50 +51,6 @@ export default function TextPropertiesComponent({ component, componentIndex }) {
       addPropertyRef("text", textRef);
     }
   }, []);
-
-  const handleSendToBack = () => {
-    if (!currentScene || !currentScene.components) return;
-
-    const zPositions = currentScene.components
-      .map((c) => c.zPosition)
-      .filter((z) => typeof z === "number");
-
-    if (zPositions.length === 0 && (component?.zPosition ?? 0) === 0) {
-      // Empty block from diff
-    }
-
-    const minZ = zPositions.length > 0 ? Math.min(...zPositions) : 0;
-
-    if ((component?.zPosition ?? 0) === minZ) {
-      if (zPositions.length > 0 || (component?.zPosition ?? 0) < 0) {
-        return;
-      }
-    }
-    if ((component?.zPosition ?? 0) < minZ) {
-      return;
-    }
-    updateComponentProperty(componentIndex, "zPosition", minZ - 1);
-  };
-
-  const handleBringToFront = () => {
-    if (!currentScene || !currentScene.components) return;
-
-    const zPositions = currentScene.components
-      .map((c) => c.zPosition)
-      .filter((z) => typeof z === "number");
-
-    const maxZ = zPositions.length > 0 ? Math.max(...zPositions) : 0;
-
-    if ((component?.zPosition ?? 0) === maxZ) {
-      if (zPositions.length > 0 || (component?.zPosition ?? 0) > 0) {
-        return;
-      }
-    }
-    if ((component?.zPosition ?? 0) > maxZ) {
-      return;
-    }
-    updateComponentProperty(componentIndex, "zPosition", maxZ + 1);
-  };
 
   return (
     <>
@@ -213,11 +175,11 @@ export default function TextPropertiesComponent({ component, componentIndex }) {
             style={{ fontSize: "0.50rem" }}
             variant="outlined"
             onClick={() =>
-              updateComponentProperty(
+              handleMoveBackward({
+                component,
                 componentIndex,
-                "zPosition",
-                (component?.zPosition ?? 0) - 1
-              )
+                updateComponentProperty,
+              })
             }
           >
             Move Backward
@@ -226,11 +188,11 @@ export default function TextPropertiesComponent({ component, componentIndex }) {
             style={{ fontSize: "0.50rem" }}
             variant="outlined"
             onClick={() =>
-              updateComponentProperty(
+              handleMoveForward({
+                component,
                 componentIndex,
-                "zPosition",
-                (component?.zPosition ?? 0) + 1
-              )
+                updateComponentProperty,
+              })
             }
           >
             Move Forward
@@ -238,7 +200,14 @@ export default function TextPropertiesComponent({ component, componentIndex }) {
           <Button
             style={{ fontSize: "0.50rem" }}
             variant="outlined"
-            onClick={handleSendToBack}
+            onClick={() =>
+              handleSendToBack({
+                currentScene,
+                component,
+                componentIndex,
+                updateComponentProperty,
+              })
+            }
             fullWidth
           >
             Send to Back
@@ -246,7 +215,14 @@ export default function TextPropertiesComponent({ component, componentIndex }) {
           <Button
             style={{ fontSize: "0.50rem" }}
             variant="outlined"
-            onClick={handleBringToFront}
+            onClick={() =>
+              handleBringToFront({
+                currentScene,
+                component,
+                componentIndex,
+                updateComponentProperty,
+              })
+            }
             fullWidth
           >
             Bring to Front

@@ -15,6 +15,12 @@ import SceneContext from "context/SceneContext";
 import CustomInputLabelStyles from "features/authoring/CanvasSideBar/CustomPropertyInputStyles/CustomInputLabelStyles";
 import CustomTextFieldStyles from "features/authoring/CanvasSideBar/CustomPropertyInputStyles/CustomTextFieldStyles";
 import CustomCheckBoxStyles from "features/authoring/CanvasSideBar/CustomPropertyInputStyles/CustomCheckBoxStyles";
+import {
+  handleSendToBack,
+  handleBringToFront,
+  handleMoveBackward,
+  handleMoveForward,
+} from "./utils/zAxisUtils";
 
 import styles from "../CanvasSideBar.module.scss";
 
@@ -82,50 +88,6 @@ export default function ButtonPropertiesComponent({
         [flag]: !component.flagDeletions[flag],
       });
     }
-  };
-
-  const handleSendToBack = () => {
-    if (!currentScene || !currentScene.components) return;
-
-    const zPositions = currentScene.components
-      .map((c) => c.zPosition)
-      .filter((z) => typeof z === "number");
-
-    const minZ = zPositions.length > 0 ? Math.min(...zPositions) : 0;
-
-    if ((component?.zPosition ?? 0) === minZ) {
-      if (zPositions.length > 0 || (component?.zPosition ?? 0) < 0) {
-        return;
-      }
-    }
-
-    if ((component?.zPosition ?? 0) < minZ) {
-      return;
-    }
-
-    updateComponentProperty(componentIndex, "zPosition", minZ - 1);
-  };
-
-  const handleBringToFront = () => {
-    if (!currentScene || !currentScene.components) return;
-
-    const zPositions = currentScene.components
-      .map((c) => c.zPosition)
-      .filter((z) => typeof z === "number");
-
-    const maxZ = zPositions.length > 0 ? Math.max(...zPositions) : 0;
-
-    if ((component?.zPosition ?? 0) === maxZ) {
-      if (zPositions.length > 0 || (component?.zPosition ?? 0) > 0) {
-        return;
-      }
-    }
-
-    if ((component?.zPosition ?? 0) > maxZ) {
-      return;
-    }
-
-    updateComponentProperty(componentIndex, "zPosition", maxZ + 1);
   };
 
   return (
@@ -316,11 +278,11 @@ export default function ButtonPropertiesComponent({
             style={{ fontSize: "0.50rem" }}
             variant="outlined"
             onClick={() =>
-              updateComponentProperty(
+              handleMoveBackward({
+                component,
                 componentIndex,
-                "zPosition",
-                (component?.zPosition ?? 0) - 1
-              )
+                updateComponentProperty,
+              })
             }
           >
             Move Backward
@@ -329,11 +291,11 @@ export default function ButtonPropertiesComponent({
             style={{ fontSize: "0.50rem" }}
             variant="outlined"
             onClick={() =>
-              updateComponentProperty(
+              handleMoveForward({
+                component,
                 componentIndex,
-                "zPosition",
-                (component?.zPosition ?? 0) + 1
-              )
+                updateComponentProperty,
+              })
             }
           >
             Move Forward
@@ -341,7 +303,14 @@ export default function ButtonPropertiesComponent({
           <Button
             style={{ fontSize: "0.50rem" }}
             variant="outlined"
-            onClick={handleSendToBack}
+            onClick={() =>
+              handleSendToBack({
+                currentScene,
+                component,
+                componentIndex,
+                updateComponentProperty,
+              })
+            }
             fullWidth
           >
             Send to Back
@@ -349,7 +318,14 @@ export default function ButtonPropertiesComponent({
           <Button
             style={{ fontSize: "0.50rem" }}
             variant="outlined"
-            onClick={handleBringToFront}
+            onClick={() =>
+              handleBringToFront({
+                currentScene,
+                component,
+                componentIndex,
+                updateComponentProperty,
+              })
+            }
             fullWidth
           >
             Bring to Front

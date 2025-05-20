@@ -13,6 +13,12 @@ import { useContext, useEffect, useState } from "react";
 import SceneContext from "context/SceneContext";
 import CustomCheckBoxStyles from "features/authoring/CanvasSideBar/CustomPropertyInputStyles/CustomCheckBoxStyles";
 import CustomInputLabelStyles from "features/authoring/CanvasSideBar/CustomPropertyInputStyles/CustomInputLabelStyles";
+import {
+  handleSendToBack,
+  handleBringToFront,
+  handleMoveBackward,
+  handleMoveForward,
+} from "./utils/zAxisUtils";
 
 import styles from "../CanvasSideBar.module.scss";
 import useStyles from "./FirebaseAudioPropertiesComponent.styles";
@@ -65,46 +71,6 @@ export default function FirebaseAudioPropertiesComponent({
       setPlaying(false);
     }
   }
-
-  const handleSendToBack = () => {
-    if (!currentScene || !currentScene.components) return;
-
-    const zPositions = currentScene.components
-      .map((c) => c.zPosition)
-      .filter((z) => typeof z === "number");
-
-    const minZ = zPositions.length > 0 ? Math.min(...zPositions) : 0;
-
-    if ((component?.zPosition ?? 0) === minZ) {
-      if (zPositions.length > 0 || (component?.zPosition ?? 0) < 0) {
-        return;
-      }
-    }
-    if ((component?.zPosition ?? 0) < minZ) {
-      return;
-    }
-    updateComponentProperty(componentIndex, "zPosition", minZ - 1);
-  };
-
-  const handleBringToFront = () => {
-    if (!currentScene || !currentScene.components) return;
-
-    const zPositions = currentScene.components
-      .map((c) => c.zPosition)
-      .filter((z) => typeof z === "number");
-
-    const maxZ = zPositions.length > 0 ? Math.max(...zPositions) : 0;
-
-    if ((component?.zPosition ?? 0) === maxZ) {
-      if (zPositions.length > 0 || (component?.zPosition ?? 0) > 0) {
-        return;
-      }
-    }
-    if ((component?.zPosition ?? 0) > maxZ) {
-      return;
-    }
-    updateComponentProperty(componentIndex, "zPosition", maxZ + 1);
-  };
 
   return (
     <div onBlur={(e) => handleDeselect(e)}>
@@ -171,11 +137,11 @@ export default function FirebaseAudioPropertiesComponent({
             variant="outlined"
             style={{ fontSize: "0.50rem" }}
             onClick={() =>
-              updateComponentProperty(
+              handleMoveBackward({
+                component,
                 componentIndex,
-                "zPosition",
-                (component?.zPosition ?? 0) - 1
-              )
+                updateComponentProperty,
+              })
             }
           >
             Move Backward
@@ -184,18 +150,25 @@ export default function FirebaseAudioPropertiesComponent({
             variant="outlined"
             style={{ fontSize: "0.50rem" }}
             onClick={() =>
-              updateComponentProperty(
+              handleMoveForward({
+                component,
                 componentIndex,
-                "zPosition",
-                (component?.zPosition ?? 0) + 1
-              )
+                updateComponentProperty,
+              })
             }
           >
             Move Forward
           </Button>
           <Button
             variant="outlined"
-            onClick={handleSendToBack}
+            onClick={() =>
+              handleSendToBack({
+                currentScene,
+                component,
+                componentIndex,
+                updateComponentProperty,
+              })
+            }
             fullWidth
             style={{ fontSize: "0.50rem" }}
           >
@@ -203,7 +176,14 @@ export default function FirebaseAudioPropertiesComponent({
           </Button>
           <Button
             variant="outlined"
-            onClick={handleBringToFront}
+            onClick={() =>
+              handleBringToFront({
+                currentScene,
+                component,
+                componentIndex,
+                updateComponentProperty,
+              })
+            }
             fullWidth
             style={{ fontSize: "0.50rem" }}
           >

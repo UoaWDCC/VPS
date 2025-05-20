@@ -15,6 +15,12 @@ import { ToggleButton, ToggleButtonGroup } from "@mui/material";
 import AuthoringToolContext from "context/AuthoringToolContext";
 import SceneContext from "context/SceneContext";
 import { useContext, useEffect, useRef } from "react";
+import {
+  handleSendToBack,
+  handleBringToFront,
+  handleMoveBackward,
+  handleMoveForward,
+} from "./utils/zAxisUtils";
 
 import styles from "../CanvasSideBar.module.scss";
 import CustomInputLabelStyles from "features/authoring/CanvasSideBar/CustomPropertyInputStyles/CustomInputLabelStyles";
@@ -41,50 +47,6 @@ export default function SpeechTextPropertiesComponent({
   useEffect(() => {
     addPropertyRef("text", textRef);
   }, []);
-
-  const handleSendToBack = () => {
-    if (!currentScene || !currentScene.components) return;
-
-    const zPositions = currentScene.components
-      .map((c) => c.zPosition)
-      .filter((z) => typeof z === "number");
-
-    if (zPositions.length === 0 && (component?.zPosition ?? 0) === 0) {
-      // Empty block from diff
-    }
-
-    const minZ = zPositions.length > 0 ? Math.min(...zPositions) : 0;
-
-    if ((component?.zPosition ?? 0) === minZ) {
-      if (zPositions.length > 0 || (component?.zPosition ?? 0) < 0) {
-        return;
-      }
-    }
-    if ((component?.zPosition ?? 0) < minZ) {
-      return;
-    }
-    updateComponentProperty(componentIndex, "zPosition", minZ - 1);
-  };
-
-  const handleBringToFront = () => {
-    if (!currentScene || !currentScene.components) return;
-
-    const zPositions = currentScene.components
-      .map((c) => c.zPosition)
-      .filter((z) => typeof z === "number");
-
-    const maxZ = zPositions.length > 0 ? Math.max(...zPositions) : 0;
-
-    if ((component?.zPosition ?? 0) === maxZ) {
-      if (zPositions.length > 0 || (component?.zPosition ?? 0) > 0) {
-        return;
-      }
-    }
-    if ((component?.zPosition ?? 0) > maxZ) {
-      return;
-    }
-    updateComponentProperty(componentIndex, "zPosition", maxZ + 1);
-  };
 
   return (
     <>
@@ -211,11 +173,11 @@ export default function SpeechTextPropertiesComponent({
             style={{ fontSize: "0.50rem" }}
             variant="outlined"
             onClick={() =>
-              updateComponentProperty(
+              handleMoveBackward({
+                component,
                 componentIndex,
-                "zPosition",
-                (component?.zPosition ?? 0) - 1
-              )
+                updateComponentProperty,
+              })
             }
           >
             Move Backward
@@ -224,11 +186,11 @@ export default function SpeechTextPropertiesComponent({
             style={{ fontSize: "0.50rem" }}
             variant="outlined"
             onClick={() =>
-              updateComponentProperty(
+              handleMoveForward({
+                component,
                 componentIndex,
-                "zPosition",
-                (component?.zPosition ?? 0) + 1
-              )
+                updateComponentProperty,
+              })
             }
           >
             Move Forward
@@ -236,7 +198,14 @@ export default function SpeechTextPropertiesComponent({
           <Button
             style={{ fontSize: "0.50rem" }}
             variant="outlined"
-            onClick={handleSendToBack}
+            onClick={() =>
+              handleSendToBack({
+                currentScene,
+                component,
+                componentIndex,
+                updateComponentProperty,
+              })
+            }
             fullWidth
           >
             Send to Back
@@ -244,7 +213,14 @@ export default function SpeechTextPropertiesComponent({
           <Button
             style={{ fontSize: "0.50rem" }}
             variant="outlined"
-            onClick={handleBringToFront}
+            onClick={() =>
+              handleBringToFront({
+                currentScene,
+                component,
+                componentIndex,
+                updateComponentProperty,
+              })
+            }
             fullWidth
           >
             Bring to Front
