@@ -25,6 +25,8 @@ import {
 import styles from "../CanvasSideBar.module.scss";
 import CustomInputLabelStyles from "features/authoring/CanvasSideBar/CustomPropertyInputStyles/CustomInputLabelStyles";
 import useStyles from "./TextPropertiesComponent.styles";
+import ColourPickerComponent from "../../components/ColourPickerComponent";
+import { ensureRgbObject } from "../../../../utils/colourUtils";
 
 const CustomInputLabel = CustomInputLabelStyles()(InputLabel);
 const sizes = [6, 8, 9, 10, 11, 12, 14, 16, 18, 20, 24, 30, 36, 42, 48, 60, 72];
@@ -114,18 +116,14 @@ export default function SpeechTextPropertiesComponent({
       </div>
       <FormControl fullWidth className={styles.componentProperty}>
         <CustomInputLabel shrink>Text Colour</CustomInputLabel>
-        <Select
-          className={styles.selectInput}
-          value={component.color}
-          onChange={(event) =>
-            updateComponentProperty(componentIndex, "color", event.target.value)
-          }
-        >
-          <MenuItem value="black">Black</MenuItem>
-          <MenuItem value="green">Green</MenuItem>
-          <MenuItem value="red">Red</MenuItem>
-          <MenuItem value="white">White</MenuItem>
-        </Select>
+        <div style={{ marginTop: 8 }}>
+          <ColourPickerComponent
+            value={ensureRgbObject(component.colour)}
+            onChange={(colour) =>
+              updateComponentProperty(componentIndex, "colour", colour.rgb)
+            }
+          />
+        </div>
       </FormControl>
 
       <FormControl fullWidth className={styles.componentProperty}>

@@ -23,12 +23,17 @@ import styles from "../CanvasSideBar.module.scss";
 import CustomCheckBoxStyles from "features/authoring/CanvasSideBar/CustomPropertyInputStyles/CustomCheckBoxStyles";
 import CustomInputLabelStyles from "features/authoring/CanvasSideBar/CustomPropertyInputStyles/CustomInputLabelStyles";
 import useStyles from "./TextPropertiesComponent.styles";
+
 import {
   handleSendToBack,
   handleBringToFront,
   handleMoveBackward,
   handleMoveForward,
 } from "./utils/zAxisUtils";
+
+import ColourPickerComponent from "../../components/ColourPickerComponent";
+import { ensureRgbObject } from "../../../../utils/colourUtils";
+
 
 const CustomInputLabel = CustomInputLabelStyles()(InputLabel);
 const CustomCheckBox = CustomCheckBoxStyles()(Checkbox);
@@ -118,18 +123,14 @@ export default function TextPropertiesComponent({ component, componentIndex }) {
       </div>
       <FormControl fullWidth className={styles.componentProperty}>
         <CustomInputLabel shrink>Text Colour</CustomInputLabel>
-        <Select
-          className={styles.selectInput}
-          value={component.color}
-          onChange={(event) =>
-            updateComponentProperty(componentIndex, "color", event.target.value)
-          }
-        >
-          <MenuItem value="black">Black</MenuItem>
-          <MenuItem value="green">Green</MenuItem>
-          <MenuItem value="red">Red</MenuItem>
-          <MenuItem value="white">White</MenuItem>
-        </Select>
+        <div style={{ marginTop: 8 }}>
+          <ColourPickerComponent
+            value={ensureRgbObject(component.colour)}
+            onChange={(colour) =>
+              updateComponentProperty(componentIndex, "colour", colour.rgb)
+            }
+          />
+        </div>
       </FormControl>
       <FormControl fullWidth className={styles.componentProperty}>
         <FormControlLabel
@@ -146,7 +147,7 @@ export default function TextPropertiesComponent({ component, componentIndex }) {
               }
             />
           }
-          label="Include border"
+          label="Show Background"
         />
       </FormControl>
 

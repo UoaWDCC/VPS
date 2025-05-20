@@ -15,12 +15,17 @@ import SceneContext from "context/SceneContext";
 import CustomInputLabelStyles from "features/authoring/CanvasSideBar/CustomPropertyInputStyles/CustomInputLabelStyles";
 import CustomTextFieldStyles from "features/authoring/CanvasSideBar/CustomPropertyInputStyles/CustomTextFieldStyles";
 import CustomCheckBoxStyles from "features/authoring/CanvasSideBar/CustomPropertyInputStyles/CustomCheckBoxStyles";
+
 import {
   handleSendToBack,
   handleBringToFront,
   handleMoveBackward,
   handleMoveForward,
 } from "./utils/zAxisUtils";
+
+import ColourPickerComponent from "../../components/ColourPickerComponent";
+import { ensureRgbObject } from "../../../../utils/colourUtils";
+
 
 import styles from "../CanvasSideBar.module.scss";
 
@@ -120,20 +125,14 @@ export default function ButtonPropertiesComponent({
       </FormControl>
       <FormControl fullWidth className={styles.componentProperty}>
         <CustomInputLabel shrink>Colour</CustomInputLabel>
-        <Select
-          className={styles.selectInput}
-          value={component.colour}
-          onChange={(event) =>
-            updateComponentProperty(
-              componentIndex,
-              "colour",
-              event.target.value
-            )
-          }
-        >
-          <MenuItem value="white">White</MenuItem>
-          <MenuItem value="teal">Teal</MenuItem>
-        </Select>
+        <div style={{ marginTop: 8 }}>
+          <ColourPickerComponent
+            value={ensureRgbObject(component.colour)}
+            onChange={(colour) =>
+              updateComponentProperty(componentIndex, "colour", colour.rgb)
+            }
+          />
+        </div>
       </FormControl>
       <FormControl fullWidth className={styles.componentProperty}>
         <CustomInputLabel shrink>Linked Scene</CustomInputLabel>
