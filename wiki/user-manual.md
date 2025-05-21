@@ -1,6 +1,5 @@
 # User Manual
 
-
 ## Login
 
 On entering the default [website url](https://vps-uoa.netlify.app), users will be prompted to login using a google account.
@@ -55,7 +54,7 @@ The page contains all the scenes created within a scenario.
 (9) This button allows the user to share the current scenario. Clicking will present a share modal.
 
 ![Share Modal](images/shareModal.png)
-*Share Modal*
+_Share Modal_
 
 <br>
 
@@ -90,7 +89,7 @@ This page is used for editing the components within a scenario.
 Leaving the page without saving will prompt the user to save their changes or discard them.
 
 ![Save Modal](images/saveModal.png)
-*Save Modal*
+_Save Modal_
 <br>
 
 ### Image component
@@ -104,16 +103,17 @@ Clicking on the image icon tool bar presents two options.
 (2) The second option presents a file explorer, where users can upload their own images to the canvas.
 
 ![Image Modal](images/imageModal.png)
-*Image Modal*
+_Image Modal_
 
 <br>
 
 ![Image File Explorer](images/imageFileExplorer.png)
-*Image File Explorer*
+_Image File Explorer_
 
 <br>
 
 ### Text Component
+
 This component is used to display text on the canvas.
 
 ![Text Component](images/textComponent.png)
@@ -131,6 +131,7 @@ This component is used to display text on the canvas.
 <br>
 
 ### Button Component
+
 This component is used to transition to different scenes.
 
 ![Button Component](images/buttonComponent.png)
@@ -146,6 +147,7 @@ This component is used to transition to different scenes.
 <br>
 
 ### Audio Component
+
 This component is used to play sound on a scenes. Once the scene loads the audio component will start playing.
 
 ![Audio Component](images/audioComponent.png)
@@ -157,14 +159,11 @@ This component is used to play sound on a scenes. Once the scene loads the audio
 <br>
 
 ## Resizing and Dragging Components
-All components can be dragged and resized. Clicking on an component will select that component. Selected components are outlined with a resizable box. Dragging on dots of the resizeable box will resize the component according to your new cursor position. Dragging the component will cause the component to change positions acccording to your new cursor position. 
+
+All components can be dragged and resized. Clicking on an component will select that component. Selected components are outlined with a resizable box. Dragging on dots of the resizeable box will resize the component according to your new cursor position. Dragging the component will cause the component to change positions acccording to your new cursor position.
 
 ![Component Select](images/componentSelect.png)
 
 ## Deleting Components
+
 Selected components can be deleted by pressing the "Backspace" or "Delete" key.
-
-
-
-
-

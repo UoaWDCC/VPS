@@ -25,5 +25,4 @@ const retrieveImage = async (imageId) => {
   return Image.findOne({ id: imageId });
 };
 
-
 export { createImage, retrieveImageList, retrieveImage };

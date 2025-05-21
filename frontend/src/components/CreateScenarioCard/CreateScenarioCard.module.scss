@@ -10,9 +10,7 @@
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   visibility: "visible";
   opacity: 1;
-  transition:
-    visibility 0s,
-    opacity 0.5s linear;
+  transition: visibility 0s, opacity 0.5s linear;
   z-index: 2;
   display: flex;
   width: 30%;

@@ -13,7 +13,7 @@ const HTTP_OK = 200;
 // add an image to the database
 router.post("/", async (req, res) => {
   const { images } = req.body; // expects: [{ id, url, fileName, uploadedAt }, ...]
-  
+
   if (!Array.isArray(images) || images.length === 0) {
     return res.status(400).json({ error: "No images provided" });
   }
@@ -53,6 +53,5 @@ router.get("/:imageId", async (req, res) => {
     res.status(500).json({ error: "Server error" });
   }
 });
-
 
 export default router;
