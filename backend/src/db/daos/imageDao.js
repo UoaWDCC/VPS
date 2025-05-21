@@ -13,7 +13,7 @@ const createImage = async ({ id, url, fileName, uploadedAt }) => {
  * @returns list of database image objects
  */
 const retrieveImageList = async () => {
-  return Image.find().sort({ url: 1 });
+  return Image.find().sort({ url: 1 }).lean();
 };
 
 /**
@@ -22,7 +22,7 @@ const retrieveImageList = async () => {
  * @returns database image object
  */
 const retrieveImage = async (imageId) => {
-  return Image.findOne({ id: imageId });
+  return Image.findOne({ id: imageId }).lean();
 };
 
 export { createImage, retrieveImageList, retrieveImage };
