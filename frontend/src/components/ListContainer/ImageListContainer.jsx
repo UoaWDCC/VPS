@@ -5,7 +5,11 @@ import ImageListItem from "@material-ui/core/ImageListItem";
 /**
  * Component used to display images in a list format.
  */
-export default function ImageListContainer({ data, onItemSelected, selectedId }) {
+export default function ImageListContainer({
+  data,
+  onItemSelected,
+  selectedId,
+}) {
   const rowHeight = 150;
 
   const onItemClick = (item) => {

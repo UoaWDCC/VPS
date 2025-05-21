@@ -11,7 +11,6 @@ import { db } from "../../../../firebase/firebase.js";
 import { getAuth } from "firebase/auth";
 import { query, where } from "firebase/firestore";
 
-
 /**
  * This component is a modal that displays the default images for users to select.
  * @component
@@ -25,7 +24,6 @@ export default function ChooseBackgroundModal({ isShowing, hide }) {
 
   useEffect(() => {
     const fetchImages = async () => {
-      
       try {
         const auth = getAuth();
         const user = auth.currentUser;
@@ -71,8 +69,6 @@ export default function ChooseBackgroundModal({ isShowing, hide }) {
     closeDialogues();
     addImage(currentScene, setCurrentScene, selectedImage);
   }
-  
-  
 
   const saveButton = (
     <Button
@@ -92,12 +88,11 @@ export default function ChooseBackgroundModal({ isShowing, hide }) {
       hide={closeDialogues}
       dialogueAction={saveButton}
     >
-    <ImageListContainer
-      data={images}
-      selectedId={selectedImage?.id}
-      onItemSelected={setSelectedImage}
-    />
-
+      <ImageListContainer
+        data={images}
+        selectedId={selectedImage?.id}
+        onItemSelected={setSelectedImage}
+      />
     </ModalDialogue>
   );
 }

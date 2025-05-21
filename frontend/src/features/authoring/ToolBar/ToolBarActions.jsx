@@ -1,5 +1,5 @@
 import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
-import { v4 as uuidv4 } from 'uuid';
+import { v4 as uuidv4 } from "uuid";
 import { getFirestore, collection, addDoc, setDoc } from "firebase/firestore";
 import { getAuth } from "firebase/auth";
 
@@ -133,7 +133,6 @@ function addImage(currentScene, setCurrentScene, image) {
   addComponent(newImage, currentScene, setCurrentScene);
 }
 
-
 /**
  * Uploads an image to Firebase, saves the metadata to Firestore,
  * and adds the image to the current scene.
@@ -143,11 +142,14 @@ function addImage(currentScene, setCurrentScene, image) {
  * @param {File} fileObject
  * @param {string} url (temporary blob URL)
  */
-export async function addFirebaseImage(currentScene, setCurrentScene, fileObject) {
+export async function addFirebaseImage(
+  currentScene,
+  setCurrentScene,
+  fileObject
+) {
   try {
-
-    const auth = getAuth();            // 🔑 get auth
-    const user = auth.currentUser;     // 🔑 get the logged-in user
+    const auth = getAuth(); // 🔑 get auth
+    const user = auth.currentUser; // 🔑 get the logged-in user
     if (!user) {
       console.error("User not logged in");
       return;
@@ -167,22 +169,22 @@ export async function addFirebaseImage(currentScene, setCurrentScene, fileObject
     });
     await setDoc(docRef, { id: docRef.id }, { merge: true });
     console.log("Image metadata saved with ID:", docRef.id);
-    console.log("Image uploaded at:", downloadURL);    
+    console.log("Image uploaded at:", downloadURL);
 
     await fetch("http://localhost:3000/api/image", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        images: [{
-          id: docRef.id,
-          url: downloadURL,
-          fileName: fileObject.name,
-          uploadedAt: new Date().toISOString(),
-        }],
+        images: [
+          {
+            id: docRef.id,
+            url: downloadURL,
+            fileName: fileObject.name,
+            uploadedAt: new Date().toISOString(),
+          },
+        ],
       }),
     });
-    
-
 
     // Add image to scene
     const newImage = {
