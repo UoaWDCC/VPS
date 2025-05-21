@@ -22,7 +22,7 @@ router.post("/", async (req, res) => {
     await Promise.all(images.map(createImage));
     res.status(HTTP_OK).send();
   } catch (err) {
-    console.error("Error saving images:", err);
+    console.error("Error saving images:", err.message);
     res.status(500).json({ error: "Failed to save images" });
   }
 });
@@ -49,7 +49,7 @@ router.get("/:imageId", async (req, res) => {
     }
     res.status(HTTP_OK).json(image);
   } catch (err) {
-    console.error("Error fetching image:", err);
+    console.error("Error fetching image:", err.message);
     res.status(500).json({ error: "Server error" });
   }
 });
