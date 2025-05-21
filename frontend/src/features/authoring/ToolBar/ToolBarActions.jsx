@@ -143,7 +143,7 @@ function addImage(currentScene, setCurrentScene, image) {
  * @param {File} fileObject
  * @param {string} url (temporary blob URL)
  */
-export async function addFirebaseImage(currentScene, setCurrentScene, fileObject, url) {
+export async function addFirebaseImage(currentScene, setCurrentScene, fileObject) {
   try {
 
     const auth = getAuth();            // 🔑 get auth
