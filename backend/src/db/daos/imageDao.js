@@ -4,8 +4,8 @@ import Image from "../models/image.js";
  * Creates and persists an image object with a url into the database
  * @param {String} url link to the image
  */
-const createImage = async (url) => {
-  return new Image({ url }).save();
+const createImage = async ({ id, url, fileName, uploadedAt }) => {
+  return new Image({ id, url, fileName, uploadedAt }).save();
 };
 
 /**
@@ -22,7 +22,8 @@ const retrieveImageList = async () => {
  * @returns database image object
  */
 const retrieveImage = async (imageId) => {
-  return Image.findById(imageId);
+  return Image.findOne({ id: imageId });
 };
+
 
 export { createImage, retrieveImageList, retrieveImage };

@@ -1,6 +1,7 @@
 import { initializeApp } from "firebase/app";
 import { getAuth, GoogleAuthProvider } from "firebase/auth";
 import { getStorage } from "firebase/storage";
+import { getFirestore } from "firebase/firestore";
 
 // Initialising FirebaseApp with the credentials given in .env file
 const app = initializeApp({
@@ -15,5 +16,6 @@ const app = initializeApp({
 const auth = getAuth(app);
 const googleProvider = new GoogleAuthProvider();
 const storage = getStorage(app);
+const db = getFirestore(app);
 
-export { auth, googleProvider, storage };
+export { auth, googleProvider, storage, db }; 
