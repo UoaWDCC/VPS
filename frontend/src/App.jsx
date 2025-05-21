@@ -14,6 +14,7 @@ import { ScenePage } from "./features/sceneSelection/SceneSelectionPage";
 import theme from "./theme/App.theme";
 
 import { Toaster } from "react-hot-toast";
+import { ContextMenuPortal } from "./components/ContextMenu/portal";
 
 const TOAST_OFFSET = 25;
 
@@ -33,6 +34,8 @@ export default function App() {
           right: TOAST_OFFSET,
         }}
       />
+
+      <ContextMenuPortal />
 
       {/* Routes */}
       <ThemeProvider theme={theme}>
