@@ -36,7 +36,7 @@ describe("Image API tests", () => {
     app.use("/", routes);
 
     // Add safe error handler to avoid circular JSON errors
-    app.use((err, req, res, next) => {
+    app.use((err, res) => {
       console.error("Unhandled Express error:", err.message);
       res.status(500).json({ error: "Internal Server Error" });
     });
@@ -65,15 +65,15 @@ describe("Image API tests", () => {
           id: "img1",
           url: "https://example.com/image1.jpg",
           fileName: "image1.jpg",
-          uploadedAt: new Date().toISOString()
+          uploadedAt: new Date().toISOString(),
         },
         {
           id: "img2",
           url: "https://example.com/image2.jpg",
           fileName: "image2.jpg",
-          uploadedAt: new Date().toISOString()
-        }
-      ]
+          uploadedAt: new Date().toISOString(),
+        },
+      ],
     };
 
     const response = await axios.post(
@@ -112,12 +112,12 @@ describe("Image API tests", () => {
   it("GET/image: retrieves a specific image in the database", async () => {
     const image1 = {
       id: "img1",
-      url: "https://example.com/image1.jpg"
+      url: "https://example.com/image1.jpg",
     };
 
     const image2 = {
       id: "img2",
-      url: "https://example.com/image2.jpg"
+      url: "https://example.com/image2.jpg",
     };
 
     await Image.create([image1, image2]);
