@@ -14,8 +14,7 @@ import validScenarioId from "../../middleware/validScenarioId.js";
 const router = Router();
 
 const HTTP_OK = 200;
-const HTTP_CONFLICT = 409;
-const HTTP_NO_CONTENT = 204;
+const HTTP_BAD_REQUEST = 400;
 const HTTP_NOT_FOUND = 404;
 
 // get the groups assigned to a scenario
@@ -63,39 +62,32 @@ router.post("/:scenarioId", async (req, res) => {
   await updateRoleList(scenarioId, roleList);
 
   // validation
-  groupList.forEach((userList) => {
+  for (const userList of groupList) {
     if (!userList) {
-      res.status(HTTP_NO_CONTENT).send("No content");
+      return res.status(HTTP_BAD_REQUEST).send("No user list found");
     }
 
     const roles = [];
-    userList.forEach((user) => {
-      if (!user.email) {
-        res.status(HTTP_NO_CONTENT).send("No content");
-      }
-      if (!user.name) {
-        res.status(HTTP_NO_CONTENT).send("No content");
-      }
-      if (!user.role) {
-        res.status(HTTP_NO_CONTENT).send("No content");
-      }
-      if (!user.group) {
-        res.status(HTTP_NO_CONTENT).send("No content");
+    for (const user of userList) {
+      if (!user.email || !user.name || !user.role || !user.group) {
+        return res
+          .status(HTTP_BAD_REQUEST)
+          .send("All users must have a name, email, role and group");
       }
 
       const role = user.role.toLowerCase();
       if (roles.includes(role)) {
-        res
-          .status(HTTP_CONFLICT)
-          .send("Conflict - Duplicate roles in the same group!");
+        return res
+          .status(HTTP_BAD_REQUEST)
+          .send("All students must have different roles in a group");
       }
       roles.push(role);
-    });
+    }
 
     if (roles.length !== roleList.length) {
-      res.status(HTTP_CONFLICT).send("Conflict - Different number of roles!");
+      return res.status(HTTP_BAD_REQUEST).send("Each group must use all roles");
     }
-  });
+  }
 
   await Group.deleteMany({ scenarioId });
 
@@ -107,7 +99,7 @@ router.post("/:scenarioId", async (req, res) => {
 
   await Promise.all(promises);
 
-  res.status(HTTP_OK).json(output);
+  return res.status(HTTP_OK).json(output);
 });
 
 router.get("/:scenarioId/roleList", async (req, res) => {
