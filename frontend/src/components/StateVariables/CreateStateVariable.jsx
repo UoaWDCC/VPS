@@ -12,6 +12,7 @@ import { useState, useEffect, useContext } from "react";
 import StateTypes from "./StateTypes";
 import { api } from "../../util/api";
 import AuthenticationContext from "../../context/AuthenticationContext";
+import Toast from "../Toast";
 
 const DEFAULT_STATE_TYPE = StateTypes.STRING;
 
@@ -50,6 +51,17 @@ const CreateStateVariable = ({ scenarioId, setStateVariables }) => {
     setValue(getDefaultValue(type));
   }, [type]);
 
+  // Toast stuff
+  const [isToastShowing, setIsToastShowing] = useState(false);
+  const [toastText, setToastText] = useState("");
+  const [toastType, setToastType] = useState("");
+
+  const showToast = (text, type) => {
+    setToastText(text);
+    setToastType(type);
+    setIsToastShowing(true);
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
     const newStateVariable = {
@@ -62,15 +74,15 @@ const CreateStateVariable = ({ scenarioId, setStateVariables }) => {
         newStateVariable,
       })
       .then((response) => {
-        console.log("State variable created successfully", response.data);
         setStateVariables(response.data);
+        showToast("State variable created successfully", "success");
         // Reset name and value fields (but not type)
         setName("");
         setValue(getDefaultValue(getDefaultValue(type)));
       })
       .catch((error) => {
-        console.error("Error creating state variable", error);
-        // TODO toast error
+        console.error("Error creating state variable:", error);
+        showToast("Error creating state variable", "error");
       });
   };
 
@@ -98,7 +110,7 @@ const CreateStateVariable = ({ scenarioId, setStateVariables }) => {
         </FormControl>
 
         <FormControl style={{ width: "250px" }} margin="normal">
-          <InputLabel id="variable-type-label">Type</InputLabel>
+          <InputLabel>Type</InputLabel>
           <Select
             value={type}
             onChange={(e) => setType(e.target.value)}
@@ -150,6 +162,12 @@ const CreateStateVariable = ({ scenarioId, setStateVariables }) => {
           Create
         </Button>
       </FormGroup>
+      <Toast
+        open={isToastShowing}
+        setOpen={setIsToastShowing}
+        message={toastText}
+        severity={toastType}
+      />
     </form>
   );
 };
