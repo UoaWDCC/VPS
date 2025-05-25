@@ -59,7 +59,7 @@ const StateVariableMenu = ({ show, setShow }) => {
         {stateVariables.map((stateVariable) => (
             <Box key={stateVariable.id} sx={{ margin: "10px 0" }}>
             <Typography variant="subtitle1">
-              {stateVariable.name}: {stateVariable.value}
+              {stateVariable.name}: {stateVariable.value.toString()}
             </Typography>
           </Box>
         ))}
