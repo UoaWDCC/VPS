@@ -1,5 +1,9 @@
 import { Box, Button, Modal, Typography } from "@material-ui/core";
 import CreateStateVariable from "./CreateStateVariable";
+import ScenarioContext from "../../context/ScenarioContext";
+import { useParams } from "react-router-dom/cjs/react-router-dom.min";
+import { useContext } from "react";
+import { useEffect, useState } from "react";
 
 const style = {
   position: "absolute",
@@ -25,11 +29,40 @@ const style = {
  * )
  */
 const StateVariableMenu = ({ show, setShow }) => {
+  const { scenarioId } = useParams();
+
+  const [stateVariables, setStateVariables] = useState([]);
+  const { currentScenario, reFetch } = useContext(ScenarioContext);
+
+  // Refetch scenario info when component is closed
+  useEffect(() => {
+    if (!show) {
+      reFetch();
+    }
+  }, [show]);
+
+  if (currentScenario && currentScenario.stateVariables) {
+    const stateVariableList = [];
+    currentScenario.stateVariables.map((stateVariable) => {
+      if (stateVariable) {
+        stateVariableList.push(stateVariable);
+      }
+    });
+    setStateVariables(stateVariableList);
+  }
+
   return (
     <Modal open={show} onClose={() => setShow(false)}>
       <Box sx={style}>
         <Typography variant="h5">State Variable Menu</Typography>
-        <CreateStateVariable />
+        <CreateStateVariable scenarioId={scenarioId} setStateVariables={setStateVariables} />
+        {stateVariables.map((stateVariable) => (
+            <Box key={stateVariable.id} sx={{ margin: "10px 0" }}>
+            <Typography variant="subtitle1">
+              {stateVariable.name}: {stateVariable.value}
+            </Typography>
+          </Box>
+        ))}
         <Button
           variant="contained"
           color="primary"

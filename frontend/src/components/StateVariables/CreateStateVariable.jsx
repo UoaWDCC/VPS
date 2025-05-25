@@ -8,8 +8,10 @@ import {
   TextField,
   Typography,
 } from "@material-ui/core";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import StateTypes from "./StateTypes";
+import { api } from "../../util/api";
+import AuthenticationContext from "../../context/AuthenticationContext";
 
 const DEFAULT_STATE_TYPE = StateTypes.STRING;
 
@@ -35,24 +37,40 @@ export const getDefaultValue = (type) => {
  *  <CreateStateVariable />
  * )
  */
-const CreateStateVariable = () => {
+const CreateStateVariable = ({ scenarioId, setStateVariables }) => {
+  const { user } = useContext(AuthenticationContext);
+
+  // Info for the new state variable
   const [name, setName] = useState("");
   const [type, setType] = useState(DEFAULT_STATE_TYPE);
   const [value, setValue] = useState(getDefaultValue(DEFAULT_STATE_TYPE));
 
-  // Update value upon type change
+  // Reset to default value upon type change
   useEffect(() => {
     setValue(getDefaultValue(type));
   }, [type]);
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log({
-      name,
-      type,
-      value,
+    const newStateVariable = {
+        name,
+        type,
+        value,
+    }
+    api.post(user, `/api/scenario/${scenarioId}/stateVariables`, {
+      newStateVariable,
+    })
+    .then((response) => {
+      console.log("State variable created successfully", response.data);
+      setStateVariables(response.data);
+      // Reset name and value fields (but not type)
+      setName("");
+      setValue(getDefaultValue(DEFAULT_STATE_TYPE));
+    })
+    .catch((error) => {
+      console.error("Error creating state variable", error);
+      // TODO toast error
     });
-    // TODO: Create the state variable
   };
 
   return (
