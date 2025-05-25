@@ -55,9 +55,12 @@ const StateVariableMenu = ({ show, setShow }) => {
     <Modal open={show} onClose={() => setShow(false)}>
       <Box sx={style}>
         <Typography variant="h5">State Variable Menu</Typography>
-        <CreateStateVariable scenarioId={scenarioId} setStateVariables={setStateVariables} />
+        <CreateStateVariable
+          scenarioId={scenarioId}
+          setStateVariables={setStateVariables}
+        />
         {stateVariables.map((stateVariable) => (
-            <Box key={stateVariable.id} sx={{ margin: "10px 0" }}>
+          <Box key={stateVariable.id} sx={{ margin: "10px 0" }}>
             <Typography variant="subtitle1">
               {stateVariable.name}: {stateVariable.value.toString()}
             </Typography>

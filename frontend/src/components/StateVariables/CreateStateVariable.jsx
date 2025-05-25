@@ -53,24 +53,25 @@ const CreateStateVariable = ({ scenarioId, setStateVariables }) => {
   const handleSubmit = (e) => {
     e.preventDefault();
     const newStateVariable = {
-        name,
-        type,
-        value,
-    }
-    api.post(user, `/api/scenario/${scenarioId}/stateVariables`, {
-      newStateVariable,
-    })
-    .then((response) => {
-      console.log("State variable created successfully", response.data);
-      setStateVariables(response.data);
-      // Reset name and value fields (but not type)
-      setName("");
-      setValue(getDefaultValue(getDefaultValue(type)));
-    })
-    .catch((error) => {
-      console.error("Error creating state variable", error);
-      // TODO toast error
-    });
+      name,
+      type,
+      value,
+    };
+    api
+      .post(user, `/api/scenario/${scenarioId}/stateVariables`, {
+        newStateVariable,
+      })
+      .then((response) => {
+        console.log("State variable created successfully", response.data);
+        setStateVariables(response.data);
+        // Reset name and value fields (but not type)
+        setName("");
+        setValue(getDefaultValue(getDefaultValue(type)));
+      })
+      .catch((error) => {
+        console.error("Error creating state variable", error);
+        // TODO toast error
+      });
   };
 
   return (
@@ -126,7 +127,13 @@ const CreateStateVariable = ({ scenarioId, setStateVariables }) => {
             <TextField
               value={value}
               label={`Initial Value`}
-              onChange={(e) => setValue(type === StateTypes.NUMBER ? parseInt(e.target.value) : e.target.value)}
+              onChange={(e) =>
+                setValue(
+                  type === StateTypes.NUMBER
+                    ? parseInt(e.target.value)
+                    : e.target.value
+                )
+              }
               required
               type={type === StateTypes.NUMBER ? "number" : "text"}
             />
