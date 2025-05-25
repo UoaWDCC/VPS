@@ -67,7 +67,7 @@ const toolBarData = [
         component: <OpenStateVariableMenu />,
       },
     ],
-  }
+  },
 ];
 
 export default toolBarData;
