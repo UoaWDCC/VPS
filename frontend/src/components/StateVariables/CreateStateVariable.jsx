@@ -65,7 +65,7 @@ const CreateStateVariable = ({ scenarioId, setStateVariables }) => {
       setStateVariables(response.data);
       // Reset name and value fields (but not type)
       setName("");
-      setValue(getDefaultValue(DEFAULT_STATE_TYPE));
+      setValue(getDefaultValue(getDefaultValue(type)));
     })
     .catch((error) => {
       console.error("Error creating state variable", error);
@@ -126,7 +126,7 @@ const CreateStateVariable = ({ scenarioId, setStateVariables }) => {
             <TextField
               value={value}
               label={`Initial Value`}
-              onChange={(e) => setValue(e.target.value)}
+              onChange={(e) => setValue(type === StateTypes.NUMBER ? parseInt(e.target.value) : e.target.value)}
               required
               type={type === StateTypes.NUMBER ? "number" : "text"}
             />
