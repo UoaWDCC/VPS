@@ -142,7 +142,7 @@ const CreateStateVariable = ({ scenarioId, setStateVariables }) => {
               onChange={(e) =>
                 setValue(
                   type === StateTypes.NUMBER
-                    ? parseInt(e.target.value)
+                    ? Number(e.target.value)
                     : e.target.value
                 )
               }
