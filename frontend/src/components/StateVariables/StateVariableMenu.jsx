@@ -32,24 +32,6 @@ const StateVariableMenu = ({ show, setShow }) => {
   const { scenarioId } = useParams();
 
   const [stateVariables, setStateVariables] = useState([]);
-  const { currentScenario, reFetch } = useContext(ScenarioContext);
-
-  // Refetch scenario info when component is closed
-  useEffect(() => {
-    if (!show) {
-      reFetch();
-    }
-  }, [show]);
-
-  if (currentScenario && currentScenario.stateVariables) {
-    const stateVariableList = [];
-    currentScenario.stateVariables.map((stateVariable) => {
-      if (stateVariable) {
-        stateVariableList.push(stateVariable);
-      }
-    });
-    setStateVariables(stateVariableList);
-  }
 
   return (
     <Modal open={show} onClose={() => setShow(false)}>
