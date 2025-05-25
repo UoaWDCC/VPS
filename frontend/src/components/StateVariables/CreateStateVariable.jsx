@@ -78,7 +78,7 @@ const CreateStateVariable = ({ scenarioId, setStateVariables }) => {
         showToast("State variable created successfully", "success");
         // Reset name and value fields (but not type)
         setName("");
-        setValue(getDefaultValue(getDefaultValue(type)));
+        setValue(getDefaultValue(type));
       })
       .catch((error) => {
         console.error("Error creating state variable:", error);
