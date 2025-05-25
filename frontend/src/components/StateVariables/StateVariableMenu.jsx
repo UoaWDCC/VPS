@@ -1,9 +1,7 @@
 import { Box, Button, Modal, Typography } from "@material-ui/core";
 import CreateStateVariable from "./CreateStateVariable";
-import ScenarioContext from "../../context/ScenarioContext";
 import { useParams } from "react-router-dom/cjs/react-router-dom.min";
-import { useContext } from "react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 const style = {
   position: "absolute",
