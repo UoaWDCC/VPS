@@ -12,7 +12,7 @@ import { useState, useEffect, useContext } from "react";
 import StateTypes from "./StateTypes";
 import { api } from "../../util/api";
 import AuthenticationContext from "../../context/AuthenticationContext";
-import Toast from "../Toast";
+import toast from "react-hot-toast";
 
 const DEFAULT_STATE_TYPE = StateTypes.STRING;
 
@@ -51,17 +51,6 @@ const CreateStateVariable = ({ scenarioId, setStateVariables }) => {
     setValue(getDefaultValue(type));
   }, [type]);
 
-  // Toast stuff
-  const [isToastShowing, setIsToastShowing] = useState(false);
-  const [toastText, setToastText] = useState("");
-  const [toastType, setToastType] = useState("");
-
-  const showToast = (text, type) => {
-    setToastText(text);
-    setToastType(type);
-    setIsToastShowing(true);
-  };
-
   const handleSubmit = (e) => {
     e.preventDefault();
     const newStateVariable = {
@@ -75,14 +64,14 @@ const CreateStateVariable = ({ scenarioId, setStateVariables }) => {
       })
       .then((response) => {
         setStateVariables(response.data);
-        showToast("State variable created successfully", "success");
+        toast.success('State variable created successfully');
         // Reset name and value fields (but not type)
         setName("");
         setValue(getDefaultValue(type));
       })
       .catch((error) => {
         console.error("Error creating state variable:", error);
-        showToast("Error creating state variable", "error");
+        toast.error("Error creating state variable");
       });
   };
 
@@ -162,12 +151,6 @@ const CreateStateVariable = ({ scenarioId, setStateVariables }) => {
           Create
         </Button>
       </FormGroup>
-      <Toast
-        open={isToastShowing}
-        setOpen={setIsToastShowing}
-        message={toastText}
-        severity={toastType}
-      />
     </form>
   );
 };
