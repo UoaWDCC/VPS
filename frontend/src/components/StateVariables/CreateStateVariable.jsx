@@ -64,7 +64,7 @@ const CreateStateVariable = ({ scenarioId, setStateVariables }) => {
       })
       .then((response) => {
         setStateVariables(response.data);
-        toast.success('State variable created successfully');
+        toast.success("State variable created successfully");
         // Reset name and value fields (but not type)
         setName("");
         setValue(getDefaultValue(type));
