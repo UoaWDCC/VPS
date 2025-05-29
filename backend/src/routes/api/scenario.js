@@ -5,6 +5,7 @@ import validScenarioId from "../../middleware/validScenarioId.js";
 
 import {
   createScenario,
+  createStateVariable,
   deleteScenario,
   retrieveScenario,
   retrieveScenarioList,
@@ -81,6 +82,17 @@ router.delete("/:scenarioId", async (req, res) => {
   } else {
     res.sendStatus(HTTP_NOT_FOUND);
   }
+});
+
+// Update the state variables of a scenario
+router.post("/:scenarioId/stateVariables", async (req, res) => {
+  const { newStateVariable } = req.body;
+  let updatedStateVariables = await createStateVariable(
+    req.params.scenarioId,
+    newStateVariable
+  );
+
+  res.status(HTTP_OK).json(updatedStateVariables);
 });
 
 export default router;
