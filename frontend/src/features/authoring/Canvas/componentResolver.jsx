@@ -6,20 +6,26 @@ import FirebaseImageComponent from "../components/FirebaseImageComponent";
 import ImageComponent from "../components/ImageComponent";
 import SpeechTextComponent from "../components/SpeechTextComponent";
 import TextComponent from "../components/TextComponent";
-import { 
-  handleSendToBack, 
-  handleBringToFront, 
-  handleMoveBackward, 
-  handleMoveForward 
+import {
+  handleSendToBack,
+  handleBringToFront,
+  handleMoveBackward,
+  handleMoveForward,
 } from "../CanvasSideBar/ComponentProperties/ZAxis";
 import { handle } from "../../../components/ContextMenu/portal";
 
-const SceneMenu = ({ updateComponentProperty, currentScene, component, componentIndex }) => {
+const SceneMenu = ({
+  updateComponentProperty,
+  currentScene,
+  component,
+  componentIndex,
+}) => {
   const handleSendToBackClick = () => {
     handleSendToBack({
       currentScene,
       component,
-      updateComponentProperty: (_, property, value) => updateComponentProperty(componentIndex, property, value)
+      updateComponentProperty: (_, property, value) =>
+        updateComponentProperty(componentIndex, property, value),
     });
   };
 
@@ -27,21 +33,24 @@ const SceneMenu = ({ updateComponentProperty, currentScene, component, component
     handleBringToFront({
       currentScene,
       component,
-      updateComponentProperty: (_, property, value) => updateComponentProperty(componentIndex, property, value)
+      updateComponentProperty: (_, property, value) =>
+        updateComponentProperty(componentIndex, property, value),
     });
   };
 
   const handleMoveBackwardClick = () => {
     handleMoveBackward({
       component,
-      updateComponentProperty: (_, property, value) => updateComponentProperty(componentIndex, property, value)
+      updateComponentProperty: (_, property, value) =>
+        updateComponentProperty(componentIndex, property, value),
     });
   };
 
   const handleMoveForwardClick = () => {
     handleMoveForward({
       component,
-      updateComponentProperty: (_, property, value) => updateComponentProperty(componentIndex, property, value)
+      updateComponentProperty: (_, property, value) =>
+        updateComponentProperty(componentIndex, property, value),
     });
   };
 
@@ -67,11 +76,17 @@ const SceneMenu = ({ updateComponentProperty, currentScene, component, component
   );
 };
 
-const ComponentWrapper = ({ component, index, onClick, currentScene, updateComponentProperty }) => {
+const ComponentWrapper = ({
+  component,
+  index,
+  onClick,
+  currentScene,
+  updateComponentProperty,
+}) => {
   const menu = (
-    <SceneMenu 
-      updateComponentProperty={updateComponentProperty} 
-      currentScene={currentScene} 
+    <SceneMenu
+      updateComponentProperty={updateComponentProperty}
+      currentScene={currentScene}
       component={component}
       componentIndex={index}
     />
@@ -82,11 +97,7 @@ const ComponentWrapper = ({ component, index, onClick, currentScene, updateCompo
       case "BUTTON":
       case "RESET_BUTTON":
         return (
-          <ButtonComponent
-            id={index}
-            onClick={onClick}
-            component={component}
-          />
+          <ButtonComponent id={index} onClick={onClick} component={component} />
         );
       case "SPEECHTEXT":
         return (
@@ -98,19 +109,11 @@ const ComponentWrapper = ({ component, index, onClick, currentScene, updateCompo
         );
       case "TEXT":
         return (
-          <TextComponent
-            id={index}
-            onClick={onClick}
-            component={component}
-          />
+          <TextComponent id={index} onClick={onClick} component={component} />
         );
       case "IMAGE":
         return (
-          <ImageComponent
-            id={index}
-            onClick={onClick}
-            component={component}
-          />
+          <ImageComponent id={index} onClick={onClick} component={component} />
         );
       case "FIREBASEIMAGE":
         return (

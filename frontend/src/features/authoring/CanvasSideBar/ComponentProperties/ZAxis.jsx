@@ -1,4 +1,17 @@
-import React from 'react'
+import React from "react";
+import {
+  Button,
+  FormControl,
+  MenuItem,
+  Select,
+  Typography,
+} from "@material-ui/core";
+import { useContext } from "react";
+import SceneContext from "context/SceneContext";
+import CustomInputLabelStyles from "../CustomPropertyInputStyles/CustomInputLabelStyles";
+import styles from "../CanvasSideBar.module.scss";
+
+const CustomInputLabel = CustomInputLabelStyles()(Typography);
 
 /**
  * Utility functions for handling Z-axis positioning of components
@@ -15,22 +28,22 @@ export const handleSendToBack = ({
   console.log("start");
   console.log("currentScene:", currentScene);
   console.log("component:", component);
-  
+
   if (!currentScene || !currentScene.components) {
     console.log("early return: no scene or components");
     return;
   }
 
   console.log("all components:", currentScene.components);
-  
+
   const zPositions = currentScene.components
-    .filter(c => c.id !== component.id) // Exclude current component
-    .map(c => {
+    .filter((c) => c.id !== component.id) // Exclude current component
+    .map((c) => {
       console.log("component z:", c.id, c.zPosition);
       return c.zPosition;
     })
-    .filter(z => typeof z === "number" && !isNaN(z));
-  
+    .filter((z) => typeof z === "number" && !isNaN(z));
+
   console.log("zPositions (excluding current):", zPositions);
 
   // If no other components have z-positions, set to 0
@@ -49,7 +62,7 @@ export const handleSendToBack = ({
     console.log("component already at or below minZ, no change needed");
     return;
   }
-  
+
   console.log("updating zPosition to:", minZ - 1);
   updateComponentProperty(null, "zPosition", minZ - 1);
   console.log("end");
@@ -66,9 +79,9 @@ export const handleBringToFront = ({
   if (!currentScene || !currentScene.components) return;
 
   const zPositions = currentScene.components
-    .filter(c => c.id !== component.id) // Exclude current component
-    .map(c => c.zPosition)
-    .filter(z => typeof z === "number" && !isNaN(z));
+    .filter((c) => c.id !== component.id) // Exclude current component
+    .map((c) => c.zPosition)
+    .filter((z) => typeof z === "number" && !isNaN(z));
 
   // If no other components have z-positions, set to 0
   if (zPositions.length === 0) {
@@ -89,10 +102,7 @@ export const handleBringToFront = ({
 /**
  * Moves a component one step backward in the Z-axis
  */
-export const handleMoveBackward = ({
-  component,
-  updateComponentProperty,
-}) => {
+export const handleMoveBackward = ({ component, updateComponentProperty }) => {
   const currentZ = component?.zPosition ?? 0;
   updateComponentProperty(null, "zPosition", currentZ - 1);
 };
@@ -100,17 +110,17 @@ export const handleMoveBackward = ({
 /**
  * Moves a component one step forward in the Z-axis
  */
-export const handleMoveForward = ({
-  component,
-  updateComponentProperty,
-}) => {
+export const handleMoveForward = ({ component, updateComponentProperty }) => {
   const currentZ = component?.zPosition ?? 0;
   updateComponentProperty(null, "zPosition", currentZ + 1);
 };
 
-const ZAxis = () => {
+const ZAxis = ({ component, componentIndex }) => {
+  const { scenes, updateComponentProperty, currentScene } =
+    useContext(SceneContext);
+
   return (
-      <>
+    <>
       <FormControl fullWidth className={styles.componentProperty}>
         <CustomInputLabel shrink>Linked Scene</CustomInputLabel>
         <Select
@@ -164,7 +174,8 @@ const ZAxis = () => {
             onClick={() =>
               handleMoveBackward({
                 component,
-                updateComponentProperty,
+                updateComponentProperty: (_, property, value) =>
+                  updateComponentProperty(componentIndex, property, value),
               })
             }
           >
@@ -176,7 +187,8 @@ const ZAxis = () => {
             onClick={() =>
               handleMoveForward({
                 component,
-                updateComponentProperty,
+                updateComponentProperty: (_, property, value) =>
+                  updateComponentProperty(componentIndex, property, value),
               })
             }
           >
@@ -189,7 +201,8 @@ const ZAxis = () => {
               handleSendToBack({
                 currentScene,
                 component,
-                updateComponentProperty,
+                updateComponentProperty: (_, property, value) =>
+                  updateComponentProperty(componentIndex, property, value),
               })
             }
             fullWidth
@@ -203,7 +216,8 @@ const ZAxis = () => {
               handleBringToFront({
                 currentScene,
                 component,
-                updateComponentProperty,
+                updateComponentProperty: (_, property, value) =>
+                  updateComponentProperty(componentIndex, property, value),
               })
             }
             fullWidth
@@ -214,6 +228,6 @@ const ZAxis = () => {
       </FormControl>
     </>
   );
-}
+};
 
-export default ZAxis
+export default ZAxis;
