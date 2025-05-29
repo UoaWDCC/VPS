@@ -12,30 +12,47 @@ export const handleSendToBack = ({
   component,
   updateComponentProperty,
 }) => {
-    console.log("start");
-  if (!currentScene || !currentScene.components) return;
-
-  const zPositions = currentScene.components
-    .map((c) => c.zPosition)
-    .filter((z) => typeof z === "number");
-
-  if (zPositions.length === 0 && (component?.zPosition ?? 0) === 0) {
+  console.log("start");
+  console.log("currentScene:", currentScene);
+  console.log("component:", component);
+  
+  if (!currentScene || !currentScene.components) {
+    console.log("early return: no scene or components");
     return;
   }
 
-  const minZ = zPositions.length > 0 ? Math.min(...zPositions) : 0;
+  console.log("all components:", currentScene.components);
+  
+  const zPositions = currentScene.components
+    .filter(c => c.id !== component.id) // Exclude current component
+    .map(c => {
+      console.log("component z:", c.id, c.zPosition);
+      return c.zPosition;
+    })
+    .filter(z => typeof z === "number" && !isNaN(z));
+  
+  console.log("zPositions (excluding current):", zPositions);
 
-  if ((component?.zPosition ?? 0) === minZ) {
-    if (zPositions.length > 0 || (component?.zPosition ?? 0) < 0) {
-      return;
-    }
+  // If no other components have z-positions, set to 0
+  if (zPositions.length === 0) {
+    console.log("no other components with z-positions, setting to 0");
+    updateComponentProperty(null, "zPosition", 0);
+    return;
   }
-  if ((component?.zPosition ?? 0) < minZ) {
+
+  const minZ = Math.min(...zPositions);
+  console.log("minZ from other components:", minZ);
+  console.log("current component zPosition:", component?.zPosition ?? 0);
+
+  // If current component is already at or below minZ, no need to change
+  if ((component?.zPosition ?? 0) <= minZ) {
+    console.log("component already at or below minZ, no change needed");
     return;
   }
   
-  updateComponentProperty(component.id, "zPosition", minZ - 1);
-    console.log("end");
+  console.log("updating zPosition to:", minZ - 1);
+  updateComponentProperty(null, "zPosition", minZ - 1);
+  console.log("end");
 };
 
 /**
@@ -44,26 +61,29 @@ export const handleSendToBack = ({
 export const handleBringToFront = ({
   currentScene,
   component,
-  componentIndex,
   updateComponentProperty,
 }) => {
   if (!currentScene || !currentScene.components) return;
 
   const zPositions = currentScene.components
-    .map((c) => c.zPosition)
-    .filter((z) => typeof z === "number");
+    .filter(c => c.id !== component.id) // Exclude current component
+    .map(c => c.zPosition)
+    .filter(z => typeof z === "number" && !isNaN(z));
 
-  const maxZ = zPositions.length > 0 ? Math.max(...zPositions) : 0;
-
-  if ((component?.zPosition ?? 0) === maxZ) {
-    if (zPositions.length > 0 || (component?.zPosition ?? 0) > 0) {
-      return;
-    }
-  }
-  if ((component?.zPosition ?? 0) > maxZ) {
+  // If no other components have z-positions, set to 0
+  if (zPositions.length === 0) {
+    updateComponentProperty(null, "zPosition", 0);
     return;
   }
-  updateComponentProperty(componentIndex, "zPosition", maxZ + 1);
+
+  const maxZ = Math.max(...zPositions);
+
+  // If current component is already at or above maxZ, no need to change
+  if ((component?.zPosition ?? 0) >= maxZ) {
+    return;
+  }
+
+  updateComponentProperty(null, "zPosition", maxZ + 1);
 };
 
 /**
@@ -71,14 +91,10 @@ export const handleBringToFront = ({
  */
 export const handleMoveBackward = ({
   component,
-  componentIndex,
   updateComponentProperty,
 }) => {
-  updateComponentProperty(
-    componentIndex,
-    "zPosition",
-    (component?.zPosition ?? 0) - 1
-  );
+  const currentZ = component?.zPosition ?? 0;
+  updateComponentProperty(null, "zPosition", currentZ - 1);
 };
 
 /**
@@ -86,14 +102,10 @@ export const handleMoveBackward = ({
  */
 export const handleMoveForward = ({
   component,
-  componentIndex,
   updateComponentProperty,
 }) => {
-  updateComponentProperty(
-    componentIndex,
-    "zPosition",
-    (component?.zPosition ?? 0) + 1
-  );
+  const currentZ = component?.zPosition ?? 0;
+  updateComponentProperty(null, "zPosition", currentZ + 1);
 };
 
 const ZAxis = () => {
@@ -152,7 +164,6 @@ const ZAxis = () => {
             onClick={() =>
               handleMoveBackward({
                 component,
-                componentIndex,
                 updateComponentProperty,
               })
             }
@@ -165,7 +176,6 @@ const ZAxis = () => {
             onClick={() =>
               handleMoveForward({
                 component,
-                componentIndex,
                 updateComponentProperty,
               })
             }
@@ -179,7 +189,6 @@ const ZAxis = () => {
               handleSendToBack({
                 currentScene,
                 component,
-                componentIndex,
                 updateComponentProperty,
               })
             }
@@ -194,7 +203,6 @@ const ZAxis = () => {
               handleBringToFront({
                 currentScene,
                 component,
-                componentIndex,
                 updateComponentProperty,
               })
             }

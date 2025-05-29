@@ -6,107 +6,138 @@ import FirebaseImageComponent from "../components/FirebaseImageComponent";
 import ImageComponent from "../components/ImageComponent";
 import SpeechTextComponent from "../components/SpeechTextComponent";
 import TextComponent from "../components/TextComponent";
-import SceneContext from "../../../context/SceneContext";
-import { handleSendToBack } from "../CanvasSideBar/ComponentProperties/ZAxis";
-import { useContext } from "react";
+import { 
+  handleSendToBack, 
+  handleBringToFront, 
+  handleMoveBackward, 
+  handleMoveForward 
+} from "../CanvasSideBar/ComponentProperties/ZAxis";
 import { handle } from "../../../components/ContextMenu/portal";
 
+const SceneMenu = ({ updateComponentProperty, currentScene, component, componentIndex }) => {
+  const handleSendToBackClick = () => {
+    handleSendToBack({
+      currentScene,
+      component,
+      updateComponentProperty: (_, property, value) => updateComponentProperty(componentIndex, property, value)
+    });
+  };
 
+  const handleBringToFrontClick = () => {
+    handleBringToFront({
+      currentScene,
+      component,
+      updateComponentProperty: (_, property, value) => updateComponentProperty(componentIndex, property, value)
+    });
+  };
 
+  const handleMoveBackwardClick = () => {
+    handleMoveBackward({
+      component,
+      updateComponentProperty: (_, property, value) => updateComponentProperty(componentIndex, property, value)
+    });
+  };
 
-const SceneMenu = ({ updateComponentProperty, currentScene, component }) => {
+  const handleMoveForwardClick = () => {
+    handleMoveForward({
+      component,
+      updateComponentProperty: (_, property, value) => updateComponentProperty(componentIndex, property, value)
+    });
+  };
+
   return (
     <Paper>
       <MenuList>
         <MenuItem>Duplicate</MenuItem>
-        <MenuItem onClick={() => handle(handleSendToBack, { currentScene, component, updateComponentProperty })}>Send To Back</MenuItem>
+        <MenuItem onClick={handle(handleSendToBackClick)}>
+          Send To Back
+        </MenuItem>
+        <MenuItem onClick={handle(handleBringToFrontClick)}>
+          Bring To Front
+        </MenuItem>
+        <MenuItem onClick={handle(handleMoveBackwardClick)}>
+          Move Backward
+        </MenuItem>
+        <MenuItem onClick={handle(handleMoveForwardClick)}>
+          Move Forward
+        </MenuItem>
         <MenuItem>Delete</MenuItem>
       </MenuList>
     </Paper>
   );
 };
 
-/**
- * This function returns the appropriate React component for a scene component object when editing
- *
- * @example
- * {currentScene?.components?.map((component, index) =>
- *   componentResolver(component, index, selectElement)
- * )}
- */
-export default function componentResolver(component, index, onClick) {
-  const { currentScene, updateComponentProperty } = useContext(SceneContext);
+const ComponentWrapper = ({ component, index, onClick, currentScene, updateComponentProperty }) => {
+  const menu = (
+    <SceneMenu 
+      updateComponentProperty={updateComponentProperty} 
+      currentScene={currentScene} 
+      component={component}
+      componentIndex={index}
+    />
+  );
 
-  switch (component.type) {
-    // ADD NEW COMPONENT TYPES HERE
-    case "BUTTON":
-      return (
-        <ButtonComponent
-          key={component.id}
-          id={index}
-          onClick={onClick}
-          component={component}
-        />
-      );
-    case "RESET_BUTTON":
-      return (
-        <ButtonComponent
-          key={component.id}
-          id={index}
-          onClick={onClick}
-          component={component}
-        />
-      );
-    case "SPEECHTEXT":
-      return (
-        <SpeechTextComponent
-          key={component.id}
-          id={index}
-          onClick={onClick}
-          component={component}
-        />
-      );
-    case "TEXT":
-      return (
-        <RightContextMenu menu={SceneMenu({ updateComponentProperty, currentScene, component })}>
-          <TextComponent
-            key={component.id}
+  const renderComponent = () => {
+    switch (component.type) {
+      case "BUTTON":
+      case "RESET_BUTTON":
+        return (
+          <ButtonComponent
             id={index}
             onClick={onClick}
             component={component}
           />
-        </RightContextMenu>
-      );
-    case "IMAGE":
-      return (
-        <ImageComponent
-          key={component.id}
-          id={index}
-          onClick={onClick}
-          component={component}
-        />
-      );
-    case "FIREBASEIMAGE":
-      return (
-        <FirebaseImageComponent
-          key={component.id}
-          id={index}
-          onClick={onClick}
-          component={component}
-        />
-      );
-    case "FIREBASEAUDIO":
-      return (
-        <FirebaseAudioComponent
-          key={component.id}
-          id={index}
-          onClick={onClick}
-          component={component}
-        />
-      );
-    default:
-      break;
-  }
+        );
+      case "SPEECHTEXT":
+        return (
+          <SpeechTextComponent
+            id={index}
+            onClick={onClick}
+            component={component}
+          />
+        );
+      case "TEXT":
+        return (
+          <TextComponent
+            id={index}
+            onClick={onClick}
+            component={component}
+          />
+        );
+      case "IMAGE":
+        return (
+          <ImageComponent
+            id={index}
+            onClick={onClick}
+            component={component}
+          />
+        );
+      case "FIREBASEIMAGE":
+        return (
+          <FirebaseImageComponent
+            id={index}
+            onClick={onClick}
+            component={component}
+          />
+        );
+      case "FIREBASEAUDIO":
+        return (
+          <FirebaseAudioComponent
+            id={index}
+            onClick={onClick}
+            component={component}
+          />
+        );
+      default:
+        return <div />;
+    }
+  };
 
-  return <div />;
-}
+  return (
+    <RightContextMenu key={component.id} menu={menu}>
+      {renderComponent()}
+    </RightContextMenu>
+  );
+};
+
+export default ComponentWrapper;
