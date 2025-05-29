@@ -40,7 +40,7 @@ export default function SideBar() {
     await usePost(
       `/api/scenario/${newScenario._id}/scene`,
       {
-        name: `Scene 0`,
+        name: `Scene 1`,
       },
       getUserIdToken
     );

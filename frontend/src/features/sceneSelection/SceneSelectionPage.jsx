@@ -118,7 +118,7 @@ export function SceneSelectionPage() {
     const newScene = await usePost(
       `/api/scenario/${scenarioId}/scene`,
       {
-        name: `Scene ${scenes.length}`,
+        name: `Scene ${scenes.length + 1}`,
       },
       getUserIdToken
     );
