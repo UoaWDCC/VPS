@@ -4,7 +4,7 @@ import Moveable from "react-moveable";
 import AuthoringToolContext from "../../../context/AuthoringToolContext";
 import SceneContext from "../../../context/SceneContext";
 import styles from "./Canvas.module.scss";
-import componentResolver from "./componentResolver";
+import ComponentWrapper from "./componentResolver";
 
 /**
  * This component represents the editable version of the screen that is shown when a scene is played.
@@ -44,7 +44,12 @@ export default function Canvas() {
 
     document.addEventListener("keydown", keyDown);
     document.addEventListener("keyup", keyUp);
-  }, []);
+
+    return () => {
+      document.removeEventListener("keydown", keyDown);
+      document.removeEventListener("keyup", keyUp);
+    };
+  }, [setShiftPressed, deleteElement]);
 
   return (
     <>
@@ -104,9 +109,16 @@ export default function Canvas() {
 
       <div className={styles.canvasContainer}>
         <div id="canvas" className={styles.canvas} onClick={clearElement}>
-          {currentScene?.components?.map((component, index) =>
-            componentResolver(component, index, selectElement)
-          )}
+          {currentScene?.components?.map((component, index) => (
+            <ComponentWrapper
+              key={component.id}
+              component={component}
+              index={index}
+              onClick={selectElement}
+              currentScene={currentScene}
+              updateComponentProperty={updateComponentProperty}
+            />
+          ))}
         </div>
       </div>
     </>
