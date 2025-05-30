@@ -43,7 +43,7 @@ export default function ToolBar() {
                     key={tool.title}
                     onClick={menuOnClick}
                   >
-                    {tool.icon} <p>Add {tool.title}</p>
+                    {tool.icon} <p>{tool.title}</p>
                     {tool.dropdown && <ArrowDropDownIcon fontSize="small" />}
                   </Button>
                 </Tooltip>
