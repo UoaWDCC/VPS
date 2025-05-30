@@ -8,9 +8,7 @@
     "contributors:add": "all-contributors add",
     "contributors:generate": "all-contributors generate"
   },
-  "dependencies": {
-    "react-color": "^2.19.3"
-  },
+  "dependencies": {},
   "devDependencies": {
     "all-contributors-cli": "^6.20.0",
     "concurrently": "^9.1.2"
