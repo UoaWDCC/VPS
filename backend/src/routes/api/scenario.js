@@ -7,6 +7,7 @@ import {
   createScenario,
   createStateVariable,
   deleteScenario,
+  getStateVariables,
   retrieveScenario,
   retrieveScenarioList,
   updateDurations,
@@ -82,6 +83,12 @@ router.delete("/:scenarioId", async (req, res) => {
   } else {
     res.sendStatus(HTTP_NOT_FOUND);
   }
+});
+
+// Get the state variables of a scenario
+router.get("/:scenarioId/stateVariables", async (req, res) => {
+  const scenario = await getStateVariables(req.params.scenarioId);
+  res.status(HTTP_OK).json(scenario);
 });
 
 // Update the state variables of a scenario

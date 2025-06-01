@@ -161,6 +161,16 @@ const deleteScenario = async (scenarioId) => {
 };
 
 /**
+ * Gets the state variables for a scenario
+ * @param {String} sceneId MongoDB ID of scene
+ * @returns state variables for the scenario
+ */
+const getStateVariables = async (scenarioId) => {
+  const scenario = await Scenario.findById(scenarioId);
+  return scenario.stateVariables || [];
+};
+
+/**
  * Creates a new state variable for a scenario
  * @param {String} sceneId MongoDB ID of scene
  * @param {updatedStateVariables: Array} stateVariable new state variable to be added
@@ -188,5 +198,6 @@ export {
   updateDurations,
   updateRoleList,
   updateScenario,
+  getStateVariables,
   createStateVariable,
 };
