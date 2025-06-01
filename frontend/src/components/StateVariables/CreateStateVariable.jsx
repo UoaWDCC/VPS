@@ -1,4 +1,5 @@
 import {
+  Box,
   Button,
   FormControl,
   FormGroup,
@@ -6,7 +7,6 @@ import {
   MenuItem,
   Select,
   TextField,
-  Typography,
 } from "@material-ui/core";
 import { useState, useEffect, useContext } from "react";
 import StateTypes from "./StateTypes";
@@ -76,16 +76,7 @@ const CreateStateVariable = ({ scenarioId, setStateVariables }) => {
   };
 
   return (
-    <form
-      style={{
-        backgroundColor: "#f9f9f9",
-        padding: "20px",
-        borderRadius: "8px",
-        maxWidth: "100%",
-        boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
-      }}
-    >
-      <Typography variant="subtitle1">Create State Variable</Typography>
+    <form>
       <FormGroup
         style={{ flexDirection: "row", justifyContent: "space-between" }}
       >
@@ -140,16 +131,16 @@ const CreateStateVariable = ({ scenarioId, setStateVariables }) => {
             />
           )}
         </FormControl>
-
-        <Button
-          type="submit"
-          variant="contained"
-          color="primary"
-          style={{ height: "40px" }}
-          onClick={handleSubmit}
-        >
-          Create
-        </Button>
+        <Box alignSelf="center">
+          <Button
+            type="submit"
+            variant="contained"
+            color="primary"
+            onClick={handleSubmit}
+          >
+            Create
+          </Button>
+        </Box>
       </FormGroup>
     </form>
   );
