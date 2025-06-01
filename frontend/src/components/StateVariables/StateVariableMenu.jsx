@@ -1,7 +1,8 @@
 import { Box, Button, Modal, Typography } from "@material-ui/core";
 import CreateStateVariable from "./CreateStateVariable";
 import { useParams } from "react-router-dom/cjs/react-router-dom.min";
-import { useState } from "react";
+import ScenarioContext from "context/ScenarioContext";
+import { useContext } from "react";
 
 const style = {
   position: "absolute",
@@ -29,7 +30,7 @@ const style = {
 const StateVariableMenu = ({ show, setShow }) => {
   const { scenarioId } = useParams();
 
-  const [stateVariables, setStateVariables] = useState([]);
+  const { stateVariables, setStateVariables } = useContext(ScenarioContext);
 
   return (
     <Modal open={show} onClose={() => setShow(false)}>
