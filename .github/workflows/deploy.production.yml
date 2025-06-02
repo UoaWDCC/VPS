@@ -1,6 +1,9 @@
 name: Fly Deploy Production
 
-on: [workflow_dispatch]
+on:
+  workflow_dispatch:
+  push:
+    branches: [ production ]
 
 jobs:
   deploy-web:
