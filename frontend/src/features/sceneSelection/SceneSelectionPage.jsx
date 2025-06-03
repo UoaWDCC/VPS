@@ -115,18 +115,15 @@ export function SceneSelectionPage() {
 
   /** called when the Add card is clicked */
   async function createNewScene() {
-    const newScene = await usePost(
+    await usePost(
       `/api/scenario/${scenarioId}/scene`,
       {
         name: `Scene ${scenes.length + 1}`,
       },
+
       getUserIdToken
     );
-
-    setCurrentScene(newScene);
-    history.push({
-      pathname: `${url}/scene/${newScene._id}`,
-    });
+    reFetch();
   }
 
   /** called when Edit button is clicked */
