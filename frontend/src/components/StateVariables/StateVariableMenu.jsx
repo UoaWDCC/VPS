@@ -87,7 +87,11 @@ const StateVariableMenu = ({ show, setShow }) => {
         >
           {stateVariables.map((stateVariable) => (
             <Box key={stateVariable.name} sx={{ margin: "5px 0" }}>
-              <EditStateVariable stateVariable={stateVariable} />
+              <EditStateVariable
+                stateVariable={stateVariable}
+                setStateVariables={setStateVariables}
+                scenarioId={scenarioId}
+              />
             </Box>
           ))}
         </Box>
