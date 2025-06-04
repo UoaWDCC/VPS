@@ -12,6 +12,7 @@ import {
   retrieveScenarioList,
   updateDurations,
   updateScenario,
+  editStateVariable,
   deleteStateVariable,
 } from "../../db/daos/scenarioDao.js";
 
@@ -97,6 +98,19 @@ router.post("/:scenarioId/stateVariables", async (req, res) => {
   const { newStateVariable } = req.body;
   let updatedStateVariables = await createStateVariable(
     req.params.scenarioId,
+    newStateVariable
+  );
+
+  res.status(HTTP_OK).json(updatedStateVariables);
+});
+
+// Edit a state variable for a scenario
+router.put("/:scenarioId/stateVariables", async (req, res) => {
+  const { originalName, newStateVariable } = req.body;
+  console.log(originalName + " " + newStateVariable);
+  let updatedStateVariables = await editStateVariable(
+    req.params.scenarioId,
+    originalName,
     newStateVariable
   );
 

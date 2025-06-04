@@ -173,7 +173,7 @@ const getStateVariables = async (scenarioId) => {
 /**
  * Creates a new state variable for a scenario
  * @param {String} sceneId MongoDB ID of scene
- * @param {updatedStateVariables: Array} stateVariable new state variable to be added
+ * @param {Object} stateVariable new state variable to be added
  * @returns updated state variables for the scenario
  */
 const createStateVariable = async (scenarioId, stateVariable) => {
@@ -181,6 +181,39 @@ const createStateVariable = async (scenarioId, stateVariable) => {
   const scenario = await Scenario.findById(scenarioId);
   try {
     scenario.stateVariables.push(stateVariable);
+    await scenario.save();
+    return scenario.stateVariables;
+  } catch {
+    return scenario.stateVariables;
+  }
+};
+
+/**
+ * Edits a state variable for a scenario
+ * @param {String} scenarioId MongoDB ID of scenario
+ * @param {String} originalName name of the original state variable
+ * @param {Object} newStateVariable state variable to replace previous
+ * @returns updated state variables for the scenario
+ */
+const editStateVariable = async (
+  scenarioId,
+  originalName,
+  newStateVariable
+) => {
+  // TODO Add validation for state variable
+  // (e.g. if name has changed, it should not conflict with existing names)
+  const scenario = await Scenario.findById(scenarioId);
+  try {
+    scenario.stateVariables = scenario.stateVariables.map((state) => {
+      console.log(state.name);
+      console.log(originalName);
+      if (state.name === originalName) {
+        console.log("match detected, now replacing " + originalName);
+        return newStateVariable;
+      } else {
+        return state;
+      }
+    });
     await scenario.save();
     return scenario.stateVariables;
   } catch {
@@ -219,5 +252,6 @@ export {
   updateScenario,
   getStateVariables,
   createStateVariable,
+  editStateVariable,
   deleteStateVariable,
 };
