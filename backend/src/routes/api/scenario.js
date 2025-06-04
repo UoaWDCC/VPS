@@ -12,6 +12,7 @@ import {
   retrieveScenarioList,
   updateDurations,
   updateScenario,
+  deleteStateVariable,
 } from "../../db/daos/scenarioDao.js";
 
 import { retrieveAssignedScenarioList } from "../../db/daos/userDao.js";
@@ -91,7 +92,7 @@ router.get("/:scenarioId/stateVariables", async (req, res) => {
   res.status(HTTP_OK).json(scenario);
 });
 
-// Update the state variables of a scenario
+// Create a new state variable for a scenario
 router.post("/:scenarioId/stateVariables", async (req, res) => {
   const { newStateVariable } = req.body;
   let updatedStateVariables = await createStateVariable(
@@ -101,5 +102,17 @@ router.post("/:scenarioId/stateVariables", async (req, res) => {
 
   res.status(HTTP_OK).json(updatedStateVariables);
 });
+
+// Delete a state variable from a scenario
+router.delete(
+  "/:scenarioId/stateVariables/:stateVariableName",
+  async (req, res) => {
+    let updatedStateVariables = await deleteStateVariable(
+      req.params.scenarioId,
+      req.params.stateVariableName
+    );
+    res.status(HTTP_OK).json(updatedStateVariables);
+  }
+);
 
 export default router;

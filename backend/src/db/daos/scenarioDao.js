@@ -188,6 +188,25 @@ const createStateVariable = async (scenarioId, stateVariable) => {
   }
 };
 
+/**
+ * Deletes a state variable from a scenario
+ * @param {String} scenarioId MongoDB ID of scenario
+ * @param {String} stateVariableName name of the state variable to be deleted
+ * @returns updated state variables for the scenario
+ */
+const deleteStateVariable = async (scenarioId, stateVariableName) => {
+  const scenario = await Scenario.findById(scenarioId);
+  try {
+    scenario.stateVariables = scenario.stateVariables.filter(
+      (state) => state.name !== stateVariableName
+    );
+    await scenario.save();
+    return scenario.stateVariables;
+  } catch {
+    return scenario.stateVariables;
+  }
+};
+
 export {
   createScenario,
   deleteScenario,
@@ -200,4 +219,5 @@ export {
   updateScenario,
   getStateVariables,
   createStateVariable,
+  deleteStateVariable,
 };
