@@ -56,11 +56,7 @@ const CreateStateVariable = ({ scenarioId, setStateVariables }) => {
 
   return (
     <form>
-      <Grid
-        container
-        alignItems="center"
-        justifyContent="space-between"
-      >
+      <Grid container alignItems="center" justifyContent="space-between">
         <Grid item xs>
           <StateVariableForm
             name={name}
