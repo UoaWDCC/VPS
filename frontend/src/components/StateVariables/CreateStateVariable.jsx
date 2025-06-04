@@ -1,33 +1,12 @@
-import {
-  Box,
-  Button,
-  FormControl,
-  FormGroup,
-  InputLabel,
-  MenuItem,
-  Select,
-  TextField,
-} from "@material-ui/core";
+import { Button, Grid } from "@material-ui/core";
 import { useState, useEffect, useContext } from "react";
-import StateTypes from "./StateTypes";
+import { StateTypes, getDefaultValue } from "./StateTypes";
 import { api } from "../../util/api";
 import AuthenticationContext from "../../context/AuthenticationContext";
 import toast from "react-hot-toast";
+import StateVariableForm from "./StateVariableForm";
 
 const DEFAULT_STATE_TYPE = StateTypes.STRING;
-
-export const getDefaultValue = (type) => {
-  switch (type) {
-    case StateTypes.STRING:
-      return "";
-    case StateTypes.NUMBER:
-      return 0;
-    case StateTypes.BOOLEAN:
-      return false;
-    default:
-      return "";
-  }
-};
 
 /**
  * Component used for creating state variables
@@ -77,61 +56,22 @@ const CreateStateVariable = ({ scenarioId, setStateVariables }) => {
 
   return (
     <form>
-      <FormGroup
-        style={{ flexDirection: "row", justifyContent: "space-between" }}
+      <Grid
+        container
+        alignItems="center"
+        justifyContent="space-between"
       >
-        <FormControl style={{ width: "250px" }} margin="normal">
-          <TextField
-            label="Name"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            required
+        <Grid item xs>
+          <StateVariableForm
+            name={name}
+            type={type}
+            value={value}
+            setName={setName}
+            setType={setType}
+            setValue={setValue}
           />
-        </FormControl>
-
-        <FormControl style={{ width: "250px" }} margin="normal">
-          <InputLabel>Type</InputLabel>
-          <Select
-            value={type}
-            onChange={(e) => setType(e.target.value)}
-            required
-          >
-            <MenuItem value={StateTypes.STRING}>String</MenuItem>
-            <MenuItem value={StateTypes.NUMBER}>Number</MenuItem>
-            <MenuItem value={StateTypes.BOOLEAN}>Boolean</MenuItem>
-          </Select>
-        </FormControl>
-
-        <FormControl style={{ width: "250px" }} margin="normal">
-          {type === StateTypes.BOOLEAN ? (
-            <>
-              <InputLabel>Initial Value</InputLabel>
-              <Select
-                value={value}
-                onChange={(e) => setValue(e.target.value)}
-                required
-              >
-                <MenuItem value={true}>True</MenuItem>
-                <MenuItem value={false}>False</MenuItem>
-              </Select>
-            </>
-          ) : (
-            <TextField
-              value={value}
-              label={`Initial Value`}
-              onChange={(e) =>
-                setValue(
-                  type === StateTypes.NUMBER
-                    ? Number(e.target.value)
-                    : e.target.value
-                )
-              }
-              required
-              type={type === StateTypes.NUMBER ? "number" : "text"}
-            />
-          )}
-        </FormControl>
-        <Box alignSelf="center">
+        </Grid>
+        <Grid item>
           <Button
             type="submit"
             variant="contained"
@@ -140,8 +80,8 @@ const CreateStateVariable = ({ scenarioId, setStateVariables }) => {
           >
             Create
           </Button>
-        </Box>
-      </FormGroup>
+        </Grid>
+      </Grid>
     </form>
   );
 };

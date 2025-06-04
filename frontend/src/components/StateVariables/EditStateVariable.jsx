@@ -2,9 +2,10 @@ import { Box, Grid, IconButton, Tooltip, Card } from "@material-ui/core";
 import SaveIcon from "@material-ui/icons/Save";
 import DeleteIcon from "@material-ui/icons/Delete";
 import { api } from "../../util/api";
-import { useContext } from "react";
+import { useContext, useState } from "react";
 import AuthenticationContext from "../../context/AuthenticationContext";
 import toast from "react-hot-toast";
+import StateVariableForm from "./StateVariableForm";
 
 const EditStateVariable = ({
   stateVariable,
@@ -13,6 +14,10 @@ const EditStateVariable = ({
 }) => {
   const { user } = useContext(AuthenticationContext);
   const { name, type, value } = stateVariable;
+
+  const [newName, setNewName] = useState(name);
+  const [newType, setNewType] = useState(type);
+  const [newValue, setNewValue] = useState(value);
 
   const deleteStateVariable = () => {
     api
@@ -28,18 +33,16 @@ const EditStateVariable = ({
   };
 
   return (
-    <Card variant="outlined" style={{ padding: 16, marginBottom: 12 }}>
+    <Card variant="outlined" style={{ padding: "12px 25px", marginBottom: 12 }}>
       <Grid container alignItems="center" spacing={2}>
-        <Grid item>
-          <strong>Name:</strong> {name}
-        </Grid>
-        <Grid item>
-          <strong>Type:</strong> {type}
-        </Grid>
-        <Grid item>
-          <strong>Value:</strong>{" "}
-          {typeof value === "boolean" ? value.toString() : value}
-        </Grid>
+        <StateVariableForm
+          name={newName}
+          type={newType}
+          value={newValue}
+          setName={setNewName}
+          setType={setNewType}
+          setValue={setNewValue}
+        />
         <Box ml="auto" display="flex" alignItems="center">
           <Tooltip title="Save">
             <IconButton color="primary" onClick={() => {}}>
