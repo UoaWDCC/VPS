@@ -117,7 +117,10 @@ export function SceneSelectionPage() {
   async function createNewScene() {
     await usePost(
       `/api/scenario/${scenarioId}/scene`,
-      { name: `Scene ${scenes.length}` },
+      {
+        name: `Scene ${scenes.length + 1}`,
+      },
+
       getUserIdToken
     );
     reFetch();
