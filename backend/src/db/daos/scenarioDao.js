@@ -160,6 +160,24 @@ const deleteScenario = async (scenarioId) => {
   }
 };
 
+/**
+ * Creates a new state variable for a scenario
+ * @param {String} sceneId MongoDB ID of scene
+ * @param {updatedStateVariables: Array} stateVariable new state variable to be added
+ * @returns updated state variables for the scenario
+ */
+const createStateVariable = async (scenarioId, stateVariable) => {
+  // TODO Add validation for state variable (e.g. name should be unique)
+  const scenario = await Scenario.findById(scenarioId);
+  try {
+    scenario.stateVariables.push(stateVariable);
+    await scenario.save();
+    return scenario.stateVariables;
+  } catch {
+    return scenario.stateVariables;
+  }
+};
+
 export {
   createScenario,
   deleteScenario,
@@ -170,4 +188,5 @@ export {
   updateDurations,
   updateRoleList,
   updateScenario,
+  createStateVariable,
 };
