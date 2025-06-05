@@ -107,7 +107,6 @@ router.post("/:scenarioId/stateVariables", async (req, res) => {
 // Edit a state variable for a scenario
 router.put("/:scenarioId/stateVariables", async (req, res) => {
   const { originalName, newStateVariable } = req.body;
-  console.log(originalName + " " + newStateVariable);
   let updatedStateVariables = await editStateVariable(
     req.params.scenarioId,
     originalName,

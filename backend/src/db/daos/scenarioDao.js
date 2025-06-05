@@ -205,10 +205,7 @@ const editStateVariable = async (
   const scenario = await Scenario.findById(scenarioId);
   try {
     scenario.stateVariables = scenario.stateVariables.map((state) => {
-      console.log(state.name);
-      console.log(originalName);
       if (state.name === originalName) {
-        console.log("match detected, now replacing " + originalName);
         return newStateVariable;
       } else {
         return state;
