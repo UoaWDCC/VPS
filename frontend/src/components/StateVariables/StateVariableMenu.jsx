@@ -37,7 +37,7 @@ const mainStyle = {
 const StateVariableMenu = ({ show, setShow }) => {
   const { scenarioId } = useParams();
 
-  const { stateVariables, setStateVariables } = useContext(ScenarioContext);
+  const { stateVariables } = useContext(ScenarioContext);
 
   return (
     <Modal open={show} onClose={() => setShow(false)}>
@@ -67,10 +67,7 @@ const StateVariableMenu = ({ show, setShow }) => {
             borderRadius: "5px",
           }}
         >
-          <CreateStateVariable
-            scenarioId={scenarioId}
-            setStateVariables={setStateVariables}
-          />
+          <CreateStateVariable scenarioId={scenarioId} />
         </Box>
         <Typography variant="subtitle1">Current State Variables</Typography>
         <Box
@@ -89,7 +86,6 @@ const StateVariableMenu = ({ show, setShow }) => {
             <Box key={stateVariable.name} sx={{ margin: "5px 0" }}>
               <EditStateVariable
                 stateVariable={stateVariable}
-                setStateVariables={setStateVariables}
                 scenarioId={scenarioId}
               />
             </Box>

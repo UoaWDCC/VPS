@@ -5,6 +5,7 @@ import { api } from "../../util/api";
 import AuthenticationContext from "../../context/AuthenticationContext";
 import toast from "react-hot-toast";
 import StateVariableForm from "./StateVariableForm";
+import ScenarioContext from "../../context/ScenarioContext";
 
 const DEFAULT_STATE_TYPE = StateTypes.STRING;
 
@@ -17,8 +18,9 @@ const DEFAULT_STATE_TYPE = StateTypes.STRING;
  *  <CreateStateVariable />
  * )
  */
-const CreateStateVariable = ({ scenarioId, setStateVariables }) => {
+const CreateStateVariable = ({ scenarioId }) => {
   const { user } = useContext(AuthenticationContext);
+  const { setStateVariables } = useContext(ScenarioContext);
 
   // Info for the new state variable
   const [name, setName] = useState("");

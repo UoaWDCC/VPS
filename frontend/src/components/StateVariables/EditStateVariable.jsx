@@ -7,13 +7,15 @@ import { useContext, useState } from "react";
 import AuthenticationContext from "../../context/AuthenticationContext";
 import toast from "react-hot-toast";
 import StateVariableForm from "./StateVariableForm";
+import ScenarioContext from "../../context/ScenarioContext";
 
 const EditStateVariable = ({
   stateVariable,
-  setStateVariables,
   scenarioId,
 }) => {
   const { user } = useContext(AuthenticationContext);
+  const { setStateVariables } = useContext(ScenarioContext);
+
   const { name, type, value } = stateVariable;
 
   const [newName, setNewName] = useState(name);
