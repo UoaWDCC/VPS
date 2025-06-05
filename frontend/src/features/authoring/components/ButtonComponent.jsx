@@ -13,6 +13,15 @@ import useStyles from "./components.styles";
 export default function ButtonComponent({ id, onClick, component }) {
   const styles = useStyles(component);
 
+  const buttonStyles = {
+    zIndex: component?.zPosition || 0,
+    backgroundColor:
+      component.variant === "contained"
+        ? `rgba(${component.colour.r}, ${component.colour.g}, ${component.colour.b}, ${component.colour.a})`
+        : "transparent",
+    color: "#0080a7",
+  };
+
   return (
     // <Button
     //   style={{ zIndex: component?.zPosition || 0 }}
@@ -28,7 +37,7 @@ export default function ButtonComponent({ id, onClick, component }) {
       className={`btn ${component.variant} ${component.colour} ${styles.defaultComponentStyling}`}
       id={id}
       onClick={onClick}
-      style={{ zIndex: component?.zPosition || 0 }}
+      style={buttonStyles}
     >
       {component.text}
     </button>
