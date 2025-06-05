@@ -9,10 +9,7 @@ import toast from "react-hot-toast";
 import StateVariableForm from "./StateVariableForm";
 import ScenarioContext from "../../context/ScenarioContext";
 
-const EditStateVariable = ({
-  stateVariable,
-  scenarioId,
-}) => {
+const EditStateVariable = ({ stateVariable, scenarioId }) => {
   const { user } = useContext(AuthenticationContext);
   const { setStateVariables } = useContext(ScenarioContext);
 

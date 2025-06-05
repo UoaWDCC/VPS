@@ -18,7 +18,11 @@ const StateVariableForm = ({
 }) => {
   return (
     <FormGroup
-      style={{ width: "85%", flexDirection: "row", justifyContent: "space-between" }}
+      style={{
+        width: "85%",
+        flexDirection: "row",
+        justifyContent: "space-between",
+      }}
     >
       <FormControl style={{ width: "250px" }} margin="normal">
         <TextField
