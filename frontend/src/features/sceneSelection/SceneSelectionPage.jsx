@@ -27,6 +27,7 @@ import {
   usePut,
 } from "../../hooks/crudHooks";
 import AuthoringToolPage from "../authoring/AuthoringToolPage";
+import ManageResourcesPage from "../resources/ManageResourcesPage";
 
 // !! this should be handled by the backend instead
 function generateUID() {
@@ -176,6 +177,13 @@ export function SceneSelectionPage() {
     });
   }
 
+  /** called when Resources button is clicked */
+  function manageResources() {
+    history.push({
+      pathname: `${url}/manage-resources`,
+    });
+  }
+
   /** called when user unfocuses from a scene name */
   async function changeSceneName({ target }) {
     // Prevents user from changing scene name to empty string or one of only spaces
@@ -217,6 +225,9 @@ export function SceneSelectionPage() {
         ) : (
           ""
         )}
+        <button className="btn vps w-[100px]" onClick={manageResources}>
+          Resources
+        </button>
         <button className="btn vps w-[100px]" onClick={manageGroups}>
           Groups
         </button>
@@ -295,6 +306,7 @@ export function ScenePage() {
       <Route exact path={path} component={SceneSelectionPage} />
       <AuthoringToolContextProvider>
         <Route path={`${path}/scene/:sceneId`} component={AuthoringToolPage} />
+        <Route path={`${path}/manage-resources`} component={ManageResourcesPage} />
       </AuthoringToolContextProvider>
     </Switch>
   );
