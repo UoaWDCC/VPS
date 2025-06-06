@@ -1,4 +1,5 @@
 import useStyles from "./components.styles";
+import useScaledFontSize from "../../../hooks/useScaledFontSize";
 
 /**
  * This component represents a button scene component
@@ -13,6 +14,9 @@ import useStyles from "./components.styles";
 export default function ButtonComponent({ id, onClick, component }) {
   const styles = useStyles(component);
 
+  const baseFontSize = component.fontSize || 16;
+  const scaledFontSize = useScaledFontSize(baseFontSize);
+
   const buttonStyles = {
     zIndex: component?.zPosition || 0,
     backgroundColor:
@@ -20,6 +24,7 @@ export default function ButtonComponent({ id, onClick, component }) {
         ? `rgba(${component.colour.r}, ${component.colour.g}, ${component.colour.b}, ${component.colour.a})`
         : "transparent",
     color: "#0080a7",
+    fontSize: `${scaledFontSize}px`,
   };
 
   return (
