@@ -1,5 +1,6 @@
 import { MenuItem } from "@material-ui/core";
 import AttachFileIcon from "@material-ui/icons/AttachFile";
+import Tooltip from "@material-ui/core/Tooltip";
 import { useContext, useRef } from "react";
 import SceneContext from "context/SceneContext";
 import styles from "../ToolBar.module.scss";
@@ -28,15 +29,21 @@ export default function UploadImage() {
         style={{ display: "none" }}
         onChange={handleFileInput}
       />
-      <MenuItem
-        className={styles.menuItem}
-        color="default"
-        variant="contained"
-        onClick={() => inputFile.current.click()}
+      <Tooltip
+        title="Upload an image from your computer"
+        placement="right"
+        arrow
       >
-        <AttachFileIcon />
-        &nbsp;&nbsp;Upload Image
-      </MenuItem>
+        <MenuItem
+          className={styles.menuItem}
+          color="default"
+          variant="contained"
+          onClick={() => inputFile.current.click()}
+        >
+          <AttachFileIcon />
+          &nbsp;&nbsp;Upload Image
+        </MenuItem>
+      </Tooltip>
     </div>
   );
 }
