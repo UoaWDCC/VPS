@@ -33,23 +33,21 @@ function UploadAudio() {
         style={{ display: "none" }}
         onChange={handleFileInput}
       />
-            <Tooltip
-              title="Upload an audio file from your device"
-              placement="right"
-              arrow
-            >
-      <MenuItem
-        className={styles.menuItem}
-        color="default"
-        variant="contained"
-        onClick={() => inputFile.current.click()}
+      <Tooltip
+        title="Upload an audio file from your device"
+        placement="right"
+        arrow
       >
-        
-        <AttachFileIcon />
-        &nbsp;&nbsp;Upload Audio
-      </MenuItem>
+        <MenuItem
+          className={styles.menuItem}
+          color="default"
+          variant="contained"
+          onClick={() => inputFile.current.click()}
+        >
+          <AttachFileIcon />
+          &nbsp;&nbsp;Upload Audio
+        </MenuItem>
       </Tooltip>
-      
     </div>
   );
 }
