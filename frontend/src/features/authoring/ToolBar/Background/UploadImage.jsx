@@ -30,7 +30,7 @@ export default function UploadImage() {
         onChange={handleFileInput}
       />
       <Tooltip
-        title="Upload an image from your computer"
+        title="Upload an image file from your device"
         placement="right"
         arrow
       >
