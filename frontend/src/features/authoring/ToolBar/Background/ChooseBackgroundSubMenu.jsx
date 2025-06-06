@@ -1,5 +1,6 @@
 import { MenuItem } from "@material-ui/core";
 import CloudQueueIcon from "@material-ui/icons/CloudQueue";
+import Tooltip from "@material-ui/core/Tooltip";
 import styles from "../ToolBar.module.scss";
 import ChooseBackgroundModal from "./ChooseBackgroundModal";
 import useChooseBackgroundModal from "./useChooseBackgroundModal";
@@ -13,10 +14,16 @@ function ChooseBackgroundSubMenu() {
   const { isShowing, hide, show } = useChooseBackgroundModal();
   return (
     <>
-      <MenuItem className={styles.menuItem} onClick={show}>
-        <CloudQueueIcon fontSize="medium" />
-        &nbsp;&nbsp;Choose Image
-      </MenuItem>
+      <Tooltip
+        title="Choose an image that is already uploaded"
+        placement="right"
+        arrow
+      >
+        <MenuItem className={styles.menuItem} onClick={show}>
+          <CloudQueueIcon fontSize="medium" />
+          &nbsp;&nbsp;Choose Image
+        </MenuItem>
+      </Tooltip>
       <ChooseBackgroundModal isShowing={isShowing} hide={hide} />
     </>
   );
