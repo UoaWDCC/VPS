@@ -4,6 +4,7 @@ import { useGet } from "../hooks/crudHooks";
 import useLocalStorage from "../hooks/useLocalStorage";
 import AuthenticationContext from "./AuthenticationContext";
 import ScenarioContext from "./ScenarioContext";
+import { api } from "../util/api";
 
 /**
  * This is a Context Provider made with the React Context API
@@ -18,6 +19,7 @@ export default function ScenarioContextProvider({ children }) {
   const [scenarios, setScenarios] = useState();
   const [assignedScenarios, setAssignedScenarios] = useState();
   const [roleList, setRoleList] = useState();
+  const [stateVariables, setStateVariables] = useState();
 
   const { reFetch } = useGet(`api/scenario`, setScenarios, true, !user);
   const { reFetch: reFetch2 } = useGet(
@@ -43,6 +45,21 @@ export default function ScenarioContextProvider({ children }) {
     }
   }, [user]);
 
+  useEffect(() => {
+    if (currentScenario?._id && user) {
+      api
+        .get(user, `api/scenario/${currentScenario._id}/stateVariables`)
+        .then((res) => {
+          setStateVariables(res.data);
+        })
+        .catch((error) => {
+          console.error("Error fetching state variables:", error);
+        });
+    } else {
+      setStateVariables([]);
+    }
+  }, [currentScenario, user]);
+
   return (
     <ScenarioContext.Provider
       value={{
@@ -55,6 +72,8 @@ export default function ScenarioContextProvider({ children }) {
         currentScenario,
         setCurrentScenario,
         roleList,
+        stateVariables,
+        setStateVariables,
       }}
     >
       {children}
