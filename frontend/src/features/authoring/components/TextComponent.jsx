@@ -3,6 +3,7 @@ import AuthoringToolContext from "context/AuthoringToolContext";
 import { useContext } from "react";
 import useStyles from "./components.styles";
 import { toRgbaString } from "../../../utils/colourUtils";
+import useScaledFontSize from "../../../hooks/useScaledFontSize";
 
 /**
  * This component represents a text scene component
@@ -21,9 +22,13 @@ export default function TextComponent({ id, onClick, component }) {
   const context = useContext(AuthoringToolContext);
   const textRef = context?.propertiesRefs?.text;
 
+  const baseFontSize = component.fontSize || 16;
+  const scaledFontSize = useScaledFontSize(baseFontSize);
+
   const textStyles = {
     zIndex: component?.zPosition || 0,
     color: toRgbaString(component.colour),
+    fontSize: `${scaledFontSize}px`,
   };
 
   return (
