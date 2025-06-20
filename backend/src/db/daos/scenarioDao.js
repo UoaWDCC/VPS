@@ -204,13 +204,13 @@ const editStateVariable = async (
   // (e.g. if name has changed, it should not conflict with existing names)
   const scenario = await Scenario.findById(scenarioId);
   try {
-    scenario.stateVariables = scenario.stateVariables.map((state) => {
-      if (state.name === originalName) {
-        return newStateVariable;
-      } else {
-        return state;
+    for (let i = 0; i < scenario.stateVariables.length; i++) {
+      if (originalName === scenario.stateVariables[i].name) {
+        scenario.stateVariables[i] = newStateVariable;
+        break;
       }
-    });
+    }
+
     await scenario.save();
     return scenario.stateVariables;
   } catch {
