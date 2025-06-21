@@ -49,9 +49,6 @@ export default function ManageGroupsPage() {
   // File input is a hidden input element that is activated via a click handler
   // This allows us to have an UI button that acts like a file <input> element.
   const fileInputRef = useRef(null);
-  const upload = () => {
-    fileInputRef.current.click();
-  };
 
   const handleFileUpload = (event) => {
     // TODO: add csv file upload handling here!
@@ -117,49 +114,6 @@ export default function ManageGroupsPage() {
     });
   };
 
-  const convertToCSV = (data) => {
-    const headers = "email,name,role,group number,playable link\n";
-    let csv = headers;
-
-    data.forEach((row) => {
-      let email = "";
-      let name = "";
-      let role = "";
-      let group = "";
-      const playableLink = `https://vps.wdcc.co.nz/play/${scenarioId}`;
-
-      const entries = Object.entries(row);
-
-      entries.forEach(([key, value]) => {
-        if (key === "email") {
-          email = value;
-        } else if (key === "name") {
-          name = value;
-        } else if (key === "role") {
-          role = value;
-        } else if (key === "group") {
-          group = value;
-        }
-      });
-
-      csv += `${email},${name},${role},${group},${playableLink}\n`;
-    });
-
-    return csv;
-  };
-
-  const download = () => {
-    const csv = convertToCSV(users);
-    const blob = new Blob([csv], { type: "text/csv" });
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "groups_data.csv";
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    window.URL.revokeObjectURL(url);
-  };
   // Toast close handler
   const handleToastDismiss = (_, reason) => {
     if (reason === "clickaway") {
@@ -178,20 +132,6 @@ export default function ManageGroupsPage() {
           style={{ display: "none" }}
           onChange={handleFileUpload}
         />
-        <button className="btn vps w-[100px]" onClick={upload}>
-          Upload
-        </button>
-        <button className="btn vps w-[100px]" onClick={download}>
-          Download
-        </button>
-        <a
-          href="https://firebasestorage.googleapis.com/v0/b/virtual-patient-simulator.appspot.com/o/_manual-uploads%2Ftesting_group.xlsx?alt=media&token=a9c61c46-c317-4c8c-b8b8-ba049f8c9ff3"
-          download
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <button className="btn vps w-[200px]">Download Sample</button>
-        </a>
       </TopBar>
 
       <GroupsTable data={users} />
