@@ -32,7 +32,9 @@ router.get("/", async (req, res) => {
     res.status(HTTP_OK).json(images);
   } catch (err) {
     console.error("Failed to retrieve image list:", err);
-    res.status(HTTP_SERVER_ERROR).json({ error: "Failed to retrieve image list." });
+    res
+      .status(HTTP_SERVER_ERROR)
+      .json({ error: "Failed to retrieve image list." });
   }
 });
 
@@ -41,7 +43,9 @@ router.get("/:imageId", async (req, res) => {
   const { imageId } = req.params;
 
   if (!mongoose.Types.ObjectId.isValid(imageId)) {
-    return res.status(HTTP_BAD_REQUEST).json({ error: "Invalid image ID format." });
+    return res
+      .status(HTTP_BAD_REQUEST)
+      .json({ error: "Invalid image ID format." });
   }
 
   try {
