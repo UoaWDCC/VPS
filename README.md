@@ -1,9 +1,9 @@
 # Virtual Patient Simulator (VPS)
-
 ![GitHub contributors from allcontributors.org](https://img.shields.io/github/all-contributors/UoaWDCC/VPS?style=for-the-badge&color=orange)
 ![GitHub commit activity (branch)](https://img.shields.io/github/commit-activity/t/UoaWDCC/VPS/master?style=for-the-badge)
 ![GitHub Issues or Pull Requests](https://img.shields.io/github/issues-pr-closed-raw/UoaWDCC/VPS?style=for-the-badge)
 ![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/UoaWDCC/VPS/deploy.staging.yml?style=for-the-badge)
+
 
 This project aims to provide Medical and Health Science students at the University of Auckland with a tool that supports interactive and immersive education through virtual patient scenarios.
 
@@ -49,7 +49,7 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
     </tr>
     <tr>
       <td align="center" valign="top" width="16.66%"><a href="https://github.com/sbeen56"><img src="https://avatars.githubusercontent.com/u/161543207?v=4?s=100" width="100px;" alt="sbeen56"/><br /><sub><b>sbeen56</b></sub></a><br /><a href="https://github.com/UoaWDCC/VPS/commits?author=sbeen56" title="Code">💻</a></td>
-      <td align="center" valign="top" width="16.66%"><a href="https://github.com/Kot6603"><img src="https://avatars.githubusercontent.com/u/89110272?v=4?s=100" width="100px;" alt="Koutaro Yumiba"/><br /><sub><b>Koutaro Yumiba</b></sub></a><br /><a href="https://github.com/UoaWDCC/VPS/commits?author=Kot6603" title="Code">💻</a></td>
+      <td align="center" valign="top" width="16.66%"><a href="https://github.com/koutaroyumiba"><img src="https://avatars.githubusercontent.com/u/89110272?v=4?s=100" width="100px;" alt="Koutaro Yumiba"/><br /><sub><b>Koutaro Yumiba</b></sub></a><br /><a href="https://github.com/UoaWDCC/VPS/commits?author=koutaroyumiba" title="Code">💻</a></td>
       <td align="center" valign="top" width="16.66%"><a href="https://github.com/xche529"><img src="https://avatars.githubusercontent.com/u/126313171?v=4?s=100" width="100px;" alt="Tommy Chen"/><br /><sub><b>Tommy Chen</b></sub></a><br /><a href="https://github.com/UoaWDCC/VPS/commits?author=xche529" title="Code">💻</a></td>
       <td align="center" valign="top" width="16.66%"><a href="https://github.com/codecreator127"><img src="https://avatars.githubusercontent.com/u/120153300?v=4?s=100" width="100px;" alt="John Lin"/><br /><sub><b>John Lin</b></sub></a><br /><a href="https://github.com/UoaWDCC/VPS/commits?author=codecreator127" title="Code">💻</a></td>
       <td align="center" valign="top" width="16.66%"><a href="https://github.com/jacobmathew105"><img src="https://avatars.githubusercontent.com/u/136278107?v=4?s=100" width="100px;" alt="jacobmathew105"/><br /><sub><b>jacobmathew105</b></sub></a><br /><a href="https://github.com/UoaWDCC/VPS/commits?author=jacobmathew105" title="Code">💻</a></td>
@@ -84,13 +84,9 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
       <td align="center" valign="top" width="16.66%"><a href="https://github.com/oorjagandhi"><img src="https://avatars.githubusercontent.com/u/72714597?v=4?s=100" width="100px;" alt="Oorja Gandhi"/><br /><sub><b>Oorja Gandhi</b></sub></a><br /><a href="https://github.com/UoaWDCC/VPS/commits?author=oorjagandhi" title="Code">💻</a></td>
       <td align="center" valign="top" width="16.66%"><a href="https://github.com/Richman-Tan"><img src="https://avatars.githubusercontent.com/u/160602954?v=4?s=100" width="100px;" alt="rtan654"/><br /><sub><b>rtan654</b></sub></a><br /><a href="https://github.com/UoaWDCC/VPS/commits?author=Richman-Tan" title="Code">💻</a></td>
       <td align="center" valign="top" width="16.66%"><a href="https://github.com/RLee64"><img src="https://avatars.githubusercontent.com/u/159082701?v=4?s=100" width="100px;" alt="Rayen Lee"/><br /><sub><b>Rayen Lee</b></sub></a><br /><a href="https://github.com/UoaWDCC/VPS/commits?author=RLee64" title="Code">💻</a></td>
-      <td align="center" valign="top" width="16.66%"><a href="https://github.com/becky-n"><img src="https://avatars.githubusercontent.com/u/51529481?v=4?s=100" width="100px;" alt="Becky Ngan"/><br /><sub><b>Becky Ngan</b></sub></a><br /><a href="#projectManagement-becky-n" title="Project Management">📆</a></td>
+      <td align="center" valign="top" width="16.66%"><a href="https://github.com/becky-n"><img src="https://avatars.githubusercontent.com/u/51529481?v=4?s=100" width="100px;" alt="Becky "/><br /><sub><b>Becky Ngan</b></sub></a><br /><a href="#projectManagement-becky-n" title="Project Management">📆</a></td>
       <td align="center" valign="top" width="16.66%"><a href="https://github.com/hazikchaudhry"><img src="https://avatars.githubusercontent.com/u/99319319?v=4?s=100" width="100px;" alt="Hazik Chaudhry"/><br /><sub><b>Hazik Chaudhry</b></sub></a><br /><a href="https://github.com/UoaWDCC/VPS/commits?author=hazikchaudhry" title="Code">💻</a> <a href="#design-hazikchaudhry" title="Design">🎨</a></td>
-    </tr>
-    <tr>
       <td align="center" valign="top" width="16.66%"><a href="https://github.com/mshi672"><img src="https://avatars.githubusercontent.com/u/162376891?v=4?s=100" width="100px;" alt="mshi672"/><br /><sub><b>mshi672</b></sub></a><br /><a href="https://github.com/UoaWDCC/VPS/commits?author=mshi672" title="Code">💻</a> <a href="#design-mshi672" title="Design">🎨</a></td>
-      <td align="center" valign="top" width="16.66%"><a href="https://github.com/IceBear-2000"><img src="https://avatars.githubusercontent.com/u/160542881?v=4?s=100" width="100px;" alt="IceBear-2000"/><br /><sub><b>IceBear-2000</b></sub></a><br /><a href="https://github.com/UoaWDCC/VPS/commits?author=IceBear-2000" title="Code">💻</a> <a href="#design-IceBear-2000" title="Design">🎨</a></td>
-      <td align="center" valign="top" width="16.66%"><a href="https://github.com/R4H3N"><img src="https://avatars.githubusercontent.com/u/126861359?v=4?s=100" width="100px;" alt="Rohan Dhingra"/><br /><sub><b>Rohan Dhingra</b></sub></a><br /><a href="https://github.com/UoaWDCC/VPS/commits?author=R4H3N" title="Code">💻</a></td>
     </tr>
   </tbody>
 </table>
