@@ -6,6 +6,7 @@ import { useParams } from "react-router-dom";
 import ScreenContainer from "../../components/ScreenContainer/ScreenContainer";
 import TopBar from "../../components/TopBar/TopBar";
 import AuthenticationContext from "../../context/AuthenticationContext";
+import { getAuth } from "firebase/auth";
 
 export default function ManageResourcesPage() {
   const { VpsUser } = useContext(AuthenticationContext);
@@ -38,14 +39,29 @@ export default function ManageResourcesPage() {
         const { data } = results;
 
         try {
+          const auth = getAuth();
+          const user = auth.currentUser;
+
+          if (!user) {
+            showToast("You must be logged in to upload.", "error");
+            return;
+          }
+
+          const idToken = await user.getIdToken();
+
           const response = await axios.post(
-            `/api/resource/${scenarioId}`,
-            data
+            `/api/resources/${scenarioId}`,
+            data,
+            {
+              headers: {
+                Authorization: `Bearer ${idToken}`,
+              },
+            }
           );
 
           showToast("Successfully uploaded resources!");
         } catch (error) {
-          const msg = error?.response?.data || "Unknown error";
+          const msg = error?.response?.data || error.message || "Unknown error";
           showToast(`Error uploading: ${msg}`, "error");
         }
       },
