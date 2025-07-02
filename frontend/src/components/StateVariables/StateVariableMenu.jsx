@@ -1,18 +1,26 @@
-import { Box, Button, Modal, Typography } from "@material-ui/core";
+import { Box, Modal, Typography } from "@material-ui/core";
 import CreateStateVariable from "./CreateStateVariable";
 import { useParams } from "react-router-dom/cjs/react-router-dom.min";
-import { useState } from "react";
+import ScenarioContext from "context/ScenarioContext";
+import { useContext } from "react";
+import EditStateVariable from "./EditStateVariable";
+import CloseIcon from "@mui/icons-material/Close";
+import { IconButton } from "@mui/material";
 
-const style = {
+const mainStyle = {
   position: "absolute",
   top: "50%",
   left: "50%",
   transform: "translate(-50%, -50%)",
-  width: "75vw",
-  height: "75vh",
+  width: "85vw",
+  height: "85vh",
   bgcolor: "background.paper",
   boxShadow: 24,
-  p: 4,
+  borderRadius: "10px",
+  p: 5,
+  display: "flex",
+  flexDirection: "column",
+  gap: "10px",
 };
 
 /**
@@ -29,30 +37,60 @@ const style = {
 const StateVariableMenu = ({ show, setShow }) => {
   const { scenarioId } = useParams();
 
-  const [stateVariables, setStateVariables] = useState([]);
+  const { stateVariables } = useContext(ScenarioContext);
 
   return (
     <Modal open={show} onClose={() => setShow(false)}>
-      <Box sx={style}>
-        <Typography variant="h5">State Variable Menu</Typography>
-        <CreateStateVariable
-          scenarioId={scenarioId}
-          setStateVariables={setStateVariables}
-        />
-        {stateVariables.map((stateVariable) => (
-          <Box key={stateVariable.id} sx={{ margin: "10px 0" }}>
-            <Typography variant="subtitle1">
-              {stateVariable.name}: {stateVariable.value.toString()}
-            </Typography>
-          </Box>
-        ))}
-        <Button
-          variant="contained"
-          color="primary"
-          onClick={() => setShow(false)}
+      <Box sx={mainStyle}>
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+          }}
         >
-          Close
-        </Button>
+          <Typography variant="h5">
+            <Box component="span" sx={{ fontWeight: "bold" }}>
+              State Variable Menu
+            </Box>
+          </Typography>
+          <IconButton onClick={() => setShow(false)}>
+            <CloseIcon />
+          </IconButton>
+        </Box>
+        <Typography variant="subtitle1">Create State Variable</Typography>
+        <Box
+          sx={{
+            marginBottom: "20px",
+            padding: "15px 20px",
+            border: "1px solid #ccc",
+            borderRadius: "5px",
+          }}
+        >
+          <CreateStateVariable scenarioId={scenarioId} />
+        </Box>
+        <Typography variant="subtitle1">Current State Variables</Typography>
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            overflow: "hidden",
+            overflowY: "scroll",
+            height: "50%",
+            padding: "15px 20px",
+            border: "1px solid #ccc",
+            borderRadius: "5px",
+          }}
+        >
+          {stateVariables.map((stateVariable) => (
+            <Box key={stateVariable.name} sx={{ margin: "5px 0" }}>
+              <EditStateVariable
+                stateVariable={stateVariable}
+                scenarioId={scenarioId}
+              />
+            </Box>
+          ))}
+        </Box>
       </Box>
     </Modal>
   );

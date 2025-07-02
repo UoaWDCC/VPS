@@ -1,33 +1,13 @@
-import {
-  Button,
-  FormControl,
-  FormGroup,
-  InputLabel,
-  MenuItem,
-  Select,
-  TextField,
-  Typography,
-} from "@material-ui/core";
+import { Button, Grid } from "@material-ui/core";
 import { useState, useEffect, useContext } from "react";
-import StateTypes from "./StateTypes";
+import { StateTypes, getDefaultValue } from "./StateTypes";
 import { api } from "../../util/api";
 import AuthenticationContext from "../../context/AuthenticationContext";
 import toast from "react-hot-toast";
+import StateVariableForm from "./StateVariableForm";
+import ScenarioContext from "../../context/ScenarioContext";
 
 const DEFAULT_STATE_TYPE = StateTypes.STRING;
-
-export const getDefaultValue = (type) => {
-  switch (type) {
-    case StateTypes.STRING:
-      return "";
-    case StateTypes.NUMBER:
-      return 0;
-    case StateTypes.BOOLEAN:
-      return false;
-    default:
-      return "";
-  }
-};
 
 /**
  * Component used for creating state variables
@@ -38,8 +18,9 @@ export const getDefaultValue = (type) => {
  *  <CreateStateVariable />
  * )
  */
-const CreateStateVariable = ({ scenarioId, setStateVariables }) => {
+const CreateStateVariable = ({ scenarioId }) => {
   const { user } = useContext(AuthenticationContext);
+  const { setStateVariables } = useContext(ScenarioContext);
 
   // Info for the new state variable
   const [name, setName] = useState("");
@@ -76,81 +57,29 @@ const CreateStateVariable = ({ scenarioId, setStateVariables }) => {
   };
 
   return (
-    <form
-      style={{
-        backgroundColor: "#f9f9f9",
-        padding: "20px",
-        borderRadius: "8px",
-        maxWidth: "100%",
-        boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
-      }}
-    >
-      <Typography variant="subtitle1">Create State Variable</Typography>
-      <FormGroup
-        style={{ flexDirection: "row", justifyContent: "space-between" }}
-      >
-        <FormControl style={{ width: "250px" }} margin="normal">
-          <TextField
-            label="Name"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            required
+    <form>
+      <Grid container alignItems="center" justifyContent="space-between">
+        <Grid item xs>
+          <StateVariableForm
+            name={name}
+            type={type}
+            value={value}
+            setName={setName}
+            setType={setType}
+            setValue={setValue}
           />
-        </FormControl>
-
-        <FormControl style={{ width: "250px" }} margin="normal">
-          <InputLabel>Type</InputLabel>
-          <Select
-            value={type}
-            onChange={(e) => setType(e.target.value)}
-            required
+        </Grid>
+        <Grid item>
+          <Button
+            type="submit"
+            variant="contained"
+            color="primary"
+            onClick={handleSubmit}
           >
-            <MenuItem value={StateTypes.STRING}>String</MenuItem>
-            <MenuItem value={StateTypes.NUMBER}>Number</MenuItem>
-            <MenuItem value={StateTypes.BOOLEAN}>Boolean</MenuItem>
-          </Select>
-        </FormControl>
-
-        <FormControl style={{ width: "250px" }} margin="normal">
-          {type === StateTypes.BOOLEAN ? (
-            <>
-              <InputLabel>Initial Value</InputLabel>
-              <Select
-                value={value}
-                onChange={(e) => setValue(e.target.value)}
-                required
-              >
-                <MenuItem value={true}>True</MenuItem>
-                <MenuItem value={false}>False</MenuItem>
-              </Select>
-            </>
-          ) : (
-            <TextField
-              value={value}
-              label={`Initial Value`}
-              onChange={(e) =>
-                setValue(
-                  type === StateTypes.NUMBER
-                    ? Number(e.target.value)
-                    : e.target.value
-                )
-              }
-              required
-              type={type === StateTypes.NUMBER ? "number" : "text"}
-            />
-          )}
-        </FormControl>
-
-        <Button
-          type="submit"
-          variant="contained"
-          color="primary"
-          style={{ height: "40px" }}
-          onClick={handleSubmit}
-        >
-          Create
-        </Button>
-      </FormGroup>
+            Create
+          </Button>
+        </Grid>
+      </Grid>
     </form>
   );
 };
