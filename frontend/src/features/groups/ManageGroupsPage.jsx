@@ -160,7 +160,6 @@ export default function ManageGroupsPage() {
     document.body.removeChild(a);
     window.URL.revokeObjectURL(url);
   };
-
   // Toast close handler
   const handleToastDismiss = (_, reason) => {
     if (reason === "clickaway") {
@@ -185,6 +184,14 @@ export default function ManageGroupsPage() {
         <button className="btn vps w-[100px]" onClick={download}>
           Download
         </button>
+        <a
+          href="https://firebasestorage.googleapis.com/v0/b/virtual-patient-simulator.appspot.com/o/_manual-uploads%2Ftesting_group.xlsx?alt=media&token=a9c61c46-c317-4c8c-b8b8-ba049f8c9ff3"
+          download
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          <button className="btn vps w-[200px]">Download Sample</button>
+        </a>
       </TopBar>
 
       <GroupsTable data={users} />

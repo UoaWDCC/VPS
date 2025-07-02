@@ -5,11 +5,15 @@ import validScenarioId from "../../middleware/validScenarioId.js";
 
 import {
   createScenario,
+  createStateVariable,
   deleteScenario,
+  getStateVariables,
   retrieveScenario,
   retrieveScenarioList,
   updateDurations,
   updateScenario,
+  editStateVariable,
+  deleteStateVariable,
 } from "../../db/daos/scenarioDao.js";
 
 import { retrieveAssignedScenarioList } from "../../db/daos/userDao.js";
@@ -82,5 +86,46 @@ router.delete("/:scenarioId", async (req, res) => {
     res.sendStatus(HTTP_NOT_FOUND);
   }
 });
+
+// Get the state variables of a scenario
+router.get("/:scenarioId/stateVariables", async (req, res) => {
+  const scenario = await getStateVariables(req.params.scenarioId);
+  res.status(HTTP_OK).json(scenario);
+});
+
+// Create a new state variable for a scenario
+router.post("/:scenarioId/stateVariables", async (req, res) => {
+  const { newStateVariable } = req.body;
+  let updatedStateVariables = await createStateVariable(
+    req.params.scenarioId,
+    newStateVariable
+  );
+
+  res.status(HTTP_OK).json(updatedStateVariables);
+});
+
+// Edit a state variable for a scenario
+router.put("/:scenarioId/stateVariables", async (req, res) => {
+  const { originalName, newStateVariable } = req.body;
+  let updatedStateVariables = await editStateVariable(
+    req.params.scenarioId,
+    originalName,
+    newStateVariable
+  );
+
+  res.status(HTTP_OK).json(updatedStateVariables);
+});
+
+// Delete a state variable from a scenario
+router.delete(
+  "/:scenarioId/stateVariables/:stateVariableName",
+  async (req, res) => {
+    let updatedStateVariables = await deleteStateVariable(
+      req.params.scenarioId,
+      req.params.stateVariableName
+    );
+    res.status(HTTP_OK).json(updatedStateVariables);
+  }
+);
 
 export default router;

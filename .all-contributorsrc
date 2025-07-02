@@ -374,6 +374,15 @@
       ]
     },
     {
+      "login": "becky-n",
+      "name": "Becky Ngan",
+      "avatar_url": "https://avatars.githubusercontent.com/u/51529481?v=4",
+      "profile": "https://github.com/becky-n",
+      "contributions": [
+        "projectManagement"
+      ]
+    },
+    {
       "login": "hazikchaudhry",
       "name": "Hazik Chaudhry",
       "avatar_url": "https://avatars.githubusercontent.com/u/99319319?v=4",
@@ -382,7 +391,7 @@
         "code",
         "design"
       ]
-    },  
+    },
     {
       "login": "mshi672",
       "name": "mshi672",
@@ -391,6 +400,25 @@
       "contributions": [
         "code",
         "design"
+      ]
+    },
+    {
+      "login": "IceBear-2000",
+      "name": "IceBear-2000",
+      "avatar_url": "https://avatars.githubusercontent.com/u/160542881?v=4",
+      "profile": "https://github.com/IceBear-2000",
+      "contributions": [
+        "code",
+        "design"
+      ]
+    },
+    {
+      "login": "R4H3N",
+      "name": "Rohan Dhingra",
+      "avatar_url": "https://avatars.githubusercontent.com/u/126861359?v=4",
+      "profile": "https://github.com/R4H3N",
+      "contributions": [
+        "code"
       ]
     }
   ],

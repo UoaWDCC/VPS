@@ -4,6 +4,7 @@ import AuthoringToolContext from "context/AuthoringToolContext";
 import { useContext, useState } from "react";
 import useStyles from "./components.styles";
 import { toRgbaString } from "../../../utils/colourUtils";
+import useScaledFontSize from "../../../hooks/useScaledFontSize";
 
 const borderWidth = 3.429; // px
 
@@ -62,6 +63,12 @@ export default function SpeechTextComponent({ id, onClick, component }) {
     },
   }[arrowLocation];
 
+  const baseFontSize = component.fontSize || 16;
+  const scaledFontSize = useScaledFontSize(baseFontSize);
+
+  const baseArrowSize = 25;
+  const scaledArrowSize = useScaledFontSize(baseArrowSize);
+
   return (
     <div
       className={defaultComponentStyling}
@@ -79,6 +86,7 @@ export default function SpeechTextComponent({ id, onClick, component }) {
         borderWidth={borderWidth}
         setArrowWidth={setArrowWidth}
         arrowLocation={arrowLocation}
+        size={scaledArrowSize}
       />
 
       <Typography
@@ -90,6 +98,7 @@ export default function SpeechTextComponent({ id, onClick, component }) {
             arrowLocationStyles.squareCorner
           ),
           color: colour,
+          fontSize: `${scaledFontSize}px`,
         }}
         className={speechTextComponentStyles}
       >

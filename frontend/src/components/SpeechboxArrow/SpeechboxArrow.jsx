@@ -5,9 +5,10 @@ const SpeechTextboxArrow = React.memo(function SpeechTextboxArrow({
   borderWidth,
   setArrowWidth,
   arrowLocation,
+  size = 25,
 }) {
-  const arrowHeight = 25; // px
-  const arrowWidth = 25; // px
+  const arrowHeight = size; // px
+  const arrowWidth = size; // px
 
   /**
    * The angle being calculated here is the one that is opposite the horizontal or vertical line in the arrow/triangle
@@ -49,7 +50,7 @@ const SpeechTextboxArrow = React.memo(function SpeechTextboxArrow({
   const borderTriangleHeight = calculateBorderTriangleHeight();
   useEffect(() => {
     setArrowWidth(borderTriangleWidth);
-  }, []);
+  }, [borderTriangleWidth]);
 
   const diffStyles = {
     top: { margin: "marginBottom", rotation: 0, align: "flex-end" },
