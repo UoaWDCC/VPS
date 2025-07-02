@@ -177,3 +177,23 @@ router.put("/:resourceId", async (req, res) => {
 });
 
 export default router;
+
+/**
+ * @route POST /:scenarioId
+ * @desc Upload resource data (e.g. from CSV)
+ * @param {string} req.params.scenarioId - The scenario to associate resources with
+ * @returns {Object} 200 - Upload result
+ */
+router.post(
+  "/:scenarioId",
+  handle(async (req, res) => {
+    const { scenarioId } = req.params;
+    const resources = req.body;
+
+    console.log(`Uploading resources for scenario ${scenarioId}`, resources);
+
+    // TODO: save resources to DB, associate with scenarioId
+    // For now, just send success response
+    return res.status(HTTP_OK).json({ message: "Resources uploaded successfully" });
+  })
+);
