@@ -40,7 +40,7 @@ export default function ManageResourcesPage() {
         try {
           const response = await axios.post(
             `/api/resource/${scenarioId}`,
-            data 
+            data
           );
 
           showToast("Successfully uploaded resources!");
