@@ -306,7 +306,10 @@ export function ScenePage() {
       <Route exact path={path} component={SceneSelectionPage} />
       <AuthoringToolContextProvider>
         <Route path={`${path}/scene/:sceneId`} component={AuthoringToolPage} />
-        <Route path={`${path}/manage-resources`} component={ManageResourcesPage} />
+        <Route
+          path={`${path}/manage-resources`}
+          component={ManageResourcesPage}
+        />
       </AuthoringToolContextProvider>
     </Switch>
   );
