@@ -19,6 +19,7 @@ import ColourPickerComponent from "../../components/ColourPickerComponent";
 import { ensureRgbObject } from "../../../../utils/colourUtils";
 
 import styles from "../CanvasSideBar.module.scss";
+import StateOperationMenu from "../../../../components/StateVariables/StateOperationMenu";
 
 const CustomTextField = CustomTextFieldStyles()(TextField);
 const CustomInputLabel = CustomInputLabelStyles()(InputLabel);
@@ -261,6 +262,7 @@ export default function ButtonPropertiesComponent({
           }}
         />
       </FormControl>
+      <StateOperationMenu />
     </>
   );
 }
