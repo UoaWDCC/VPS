@@ -1,25 +1,16 @@
-import { Button, Typography } from "@material-ui/core";
+import { Typography } from "@material-ui/core";
 import { useState } from "react";
-import StateOperationForm from "./StateOperationForm";
+import CreateStateOperation from "./CreateStateOperation";
 
 const StateOperationMenu = () => {
   const [stateOperations, setStateOperations] = useState([]);
 
-  const addOperation = () => {
-    setStateOperations([...stateOperations, {}]);
-  };
-
   return (
     <div>
-      <Typography variant="subtitle1" style={{ marginTop: "30px" }}>
+      <Typography variant="subtitle1" style={{ marginTop: "30px", marginBottom: "20px" }}>
         State Variables
       </Typography>
-      <Button onClick={addOperation}>New Operation</Button>
-      <div style={{ marginTop: "16px" }}>
-        {stateOperations.map((stateOperator, index) => (
-          <StateOperationForm key={index} stateOperator={stateOperator} />
-        ))}
-      </div>
+      <CreateStateOperation />
     </div>
   );
 };
