@@ -1,10 +1,8 @@
 import { Typography } from "@material-ui/core";
-import { useState } from "react";
 import CreateStateOperation from "./CreateStateOperation";
 import EditStateOperation from "./EditStateOperation";
 
 const StateOperationMenu = ({ component, componentIndex }) => {
-  const [stateOperations, setStateOperations] = useState(component.stateOperations || []);
 
   return (
     <div>
@@ -15,14 +13,16 @@ const StateOperationMenu = ({ component, componentIndex }) => {
         State Variables
       </Typography>
       <CreateStateOperation
+        component={component}
         componentIndex={componentIndex}
-        stateOperations={stateOperations}
-        setStateOperations={setStateOperations}
       />
-      {stateOperations.map((stateOperation) => (
+      {component.stateOperations && component.stateOperations.map((stateOperation, operationIndex) => (
         <EditStateOperation
+          componentIndex={componentIndex}
+          component={component}
+          operationIndex={operationIndex}
           stateOperation={stateOperation}
-          key={stateOperation}
+          key={operationIndex}
         />
       ))}
     </div>

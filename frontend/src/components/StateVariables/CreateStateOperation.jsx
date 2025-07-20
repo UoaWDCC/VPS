@@ -12,21 +12,17 @@ import ScenarioContext from "context/ScenarioContext";
 import SceneContext from "context/SceneContext";
 import StateOperationForm from "./StateOperationForm";
 
-const CreateStateOperation = ({
-  componentIndex,
-  stateOperations,
-  setStateOperations,
-}) => {
+const CreateStateOperation = ({ component, componentIndex }) => {
   const { stateVariables } = useContext(ScenarioContext);
   const { updateComponentProperty } = useContext(SceneContext);
 
-  const [selectedState, setSelectedState] = useState("");
+  const [selectedState, setSelectedState] = useState();
   const [operation, setOperation] = useState();
   const [value, setValue] = useState();
 
   const handleSubmit = () => {
     const newStateOperations = [
-      ...stateOperations,
+      ...(component.stateOperations || []),
       {
         name: selectedState.name,
         operation,
@@ -38,7 +34,10 @@ const CreateStateOperation = ({
       "stateOperations",
       newStateOperations
     );
-    setStateOperations(newStateOperations);
+
+    setSelectedState();
+    setOperation();
+    setValue();
   };
 
   if (stateVariables && stateVariables.length == 0) {
@@ -63,13 +62,15 @@ const CreateStateOperation = ({
     >
       <FormControl>
         <InputLabel>Name</InputLabel>
-        <Select>
+        <Select
+          value={selectedState && selectedState.name}
+          onChange={(e) => {
+            setSelectedState(e.target.value);
+          }}
+          required
+        >
           {stateVariables.map((stateVariable) => (
-            <MenuItem
-              key={stateVariable.name}
-              value={stateVariable.name}
-              onClick={() => setSelectedState(stateVariable)}
-            >
+            <MenuItem key={stateVariable.name} value={stateVariable}>
               {stateVariable.name}
             </MenuItem>
           ))}
