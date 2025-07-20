@@ -115,7 +115,7 @@ export default function TextPropertiesComponent({ component, componentIndex }) {
       </div>
       <FormControl fullWidth className={styles.componentProperty}>
         <CustomInputLabel shrink>Text Colour</CustomInputLabel>
-        <div style={{ marginTop: 8 }}>
+        <div style={{ marginTop: 8, paddingTop: 10 }}>
           <ColourPickerComponent
             value={ensureRgbObject(component.colour)}
             onChange={(colour) =>

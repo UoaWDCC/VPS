@@ -19,6 +19,7 @@ export default function ColourPickerComponent({
     cursor: "pointer",
     border: "1px solid #ddd",
     background: rgbaString,
+    
   };
 
   const popoverStyle = {
