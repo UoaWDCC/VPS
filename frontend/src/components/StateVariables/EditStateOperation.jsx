@@ -5,6 +5,12 @@ import StateOperationForm from "./StateOperationForm";
 import ScenarioContext from "../../context/ScenarioContext";
 import SceneContext from "../../context/SceneContext";
 
+/**
+ * Component used for editing state operations
+ * State operations are used to manipulate state variables while playing through a scenario
+ *
+ * @component
+ */
 const EditStateOperation = ({
   componentIndex,
   component,

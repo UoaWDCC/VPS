@@ -13,6 +13,12 @@ import SceneContext from "context/SceneContext";
 import StateOperationForm from "./StateOperationForm";
 import { getDefaultValue } from "./StateTypes";
 
+/**
+ * Component used for creating state operations
+ * State operations are used to manipulate state variables while playing through a scenario
+ *
+ * @component
+ */
 const CreateStateOperation = ({ component, componentIndex }) => {
   const { stateVariables } = useContext(ScenarioContext);
   const { updateComponentProperty } = useContext(SceneContext);

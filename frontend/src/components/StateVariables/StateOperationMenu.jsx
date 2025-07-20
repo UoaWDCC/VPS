@@ -2,6 +2,11 @@ import { Typography } from "@material-ui/core";
 import CreateStateOperation from "./CreateStateOperation";
 import EditStateOperation from "./EditStateOperation";
 
+/**
+ * Component that houses state operation interface (methods for creating and editing)
+ *
+ * @component
+ */
 const StateOperationMenu = ({ component, componentIndex }) => {
   return (
     <div>
@@ -9,7 +14,7 @@ const StateOperationMenu = ({ component, componentIndex }) => {
         variant="subtitle1"
         style={{ marginTop: "30px", marginBottom: "20px" }}
       >
-        State Variables
+        State Operations
       </Typography>
       <CreateStateOperation
         component={component}

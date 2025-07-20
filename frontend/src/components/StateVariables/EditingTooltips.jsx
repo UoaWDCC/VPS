@@ -3,6 +3,11 @@ import ReplayIcon from "@mui/icons-material/Replay";
 import SaveIcon from "@material-ui/icons/Save";
 import DeleteIcon from "@material-ui/icons/Delete";
 
+/**
+ * Tooltips used when editing state variables or state operations
+ *
+ * @component
+ */
 const EditingTooltips = ({ onReset, onSave, onDelete }) => {
   return (
     <>

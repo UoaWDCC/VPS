@@ -9,6 +9,11 @@ import {
 import { validOperations } from "./Operations";
 import { StateTypes } from "./StateTypes";
 
+/**
+ * Component with fields shared in both creating and editing state operations
+ *
+ * @component
+ */
 const StateOperationForm = ({
   selectedState,
   operation,
