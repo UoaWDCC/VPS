@@ -11,7 +11,7 @@ import { useContext, useState } from "react";
 import ScenarioContext from "context/ScenarioContext";
 import StateOperationForm from "./StateOperationForm";
 
-const CreateStateOperation = () => {
+const CreateStateOperation = ({ stateOperations, setStateOperations }) => {
   const { stateVariables } = useContext(ScenarioContext);
 
   const [selectedState, setSelectedState] = useState("");
@@ -19,13 +19,18 @@ const CreateStateOperation = () => {
   const [value, setValue] = useState();
 
   const handleSubmit = () => {
-    console.log("submit")
-  }
+    const newStateOperation = {
+      name: selectedState.name,
+      operation,
+      value,
+    };
+    setStateOperations([ ...stateOperations, newStateOperation ]);
+  };
 
   if (stateVariables && stateVariables.length == 0) {
     return (
       <Typography variant="body2">
-        No state variables found, create some in the state variable menu.
+        No state variables found, create some in the state variable menu
       </Typography>
     );
   }
@@ -58,6 +63,7 @@ const CreateStateOperation = () => {
       </FormControl>
       <StateOperationForm
         selectedState={selectedState}
+        operation={operation}
         setOperation={setOperation}
         value={value}
         setValue={setValue}

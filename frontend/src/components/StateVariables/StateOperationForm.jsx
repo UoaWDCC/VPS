@@ -11,6 +11,7 @@ import { StateTypes } from "./StateTypes";
 
 const StateOperationForm = ({
   selectedState,
+  operation,
   setOperation,
   value,
   setValue,
@@ -28,14 +29,16 @@ const StateOperationForm = ({
       </Typography>
       <FormControl>
         <InputLabel>Operation</InputLabel>
-        <Select>
-          {validOperations[selectedState.type].map((operation) => (
-            <MenuItem
-              key={operation}
-              value={operation}
-              onClick={() => setOperation(operation)}
-            >
-              {operation.charAt(0).toUpperCase() + operation.slice(1)}
+        <Select
+          value={operation}
+          onChange={(e) => {
+            setOperation(e.target.value);
+          }}
+          required
+        >
+          {validOperations[selectedState.type].map((validOperation) => (
+            <MenuItem key={validOperation} value={validOperation}>
+              {validOperation.charAt(0).toUpperCase() + validOperation.slice(1)}
             </MenuItem>
           ))}
         </Select>
