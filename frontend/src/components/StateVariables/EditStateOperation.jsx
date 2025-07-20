@@ -21,7 +21,9 @@ const EditStateOperation = ({
   const [newOperation, setNewOperation] = useState(stateOperation.operation);
   const [newValue, setNewValue] = useState(stateOperation.value);
 
-  const editing = newOperation !== stateOperation.operation || newValue !== stateOperation.value;
+  const editing =
+    newOperation !== stateOperation.operation ||
+    newValue !== stateOperation.value;
 
   const resetStateOperation = () => {
     setNewOperation(stateOperation.operation);
@@ -29,10 +31,11 @@ const EditStateOperation = ({
   };
 
   const editStateOperation = () => {
-    const newStateOperations = component.stateOperations.map((operation, index) =>
-      index === operationIndex
-        ? { ...operation, operation: newOperation, value: newValue }
-        : operation
+    const newStateOperations = component.stateOperations.map(
+      (operation, index) =>
+        index === operationIndex
+          ? { ...operation, operation: newOperation, value: newValue }
+          : operation
     );
     updateComponentProperty(
       componentIndex,
@@ -77,7 +80,11 @@ const EditStateOperation = ({
         setValue={setNewValue}
       />
       <Box width="100%" display="flex" justifyContent="space-between">
-        <EditingTooltips onReset={resetStateOperation} onSave={editStateOperation} onDelete={deleteStateOperation} />
+        <EditingTooltips
+          onReset={resetStateOperation}
+          onSave={editStateOperation}
+          onDelete={deleteStateOperation}
+        />
       </Box>
     </FormGroup>
   );

@@ -3,7 +3,6 @@ import CreateStateOperation from "./CreateStateOperation";
 import EditStateOperation from "./EditStateOperation";
 
 const StateOperationMenu = ({ component, componentIndex }) => {
-
   return (
     <div>
       <Typography
@@ -16,15 +15,16 @@ const StateOperationMenu = ({ component, componentIndex }) => {
         component={component}
         componentIndex={componentIndex}
       />
-      {component.stateOperations && component.stateOperations.map((stateOperation, operationIndex) => (
-        <EditStateOperation
-          componentIndex={componentIndex}
-          component={component}
-          operationIndex={operationIndex}
-          stateOperation={stateOperation}
-          key={operationIndex}
-        />
-      ))}
+      {component.stateOperations &&
+        component.stateOperations.map((stateOperation, operationIndex) => (
+          <EditStateOperation
+            componentIndex={componentIndex}
+            component={component}
+            operationIndex={operationIndex}
+            stateOperation={stateOperation}
+            key={operationIndex}
+          />
+        ))}
     </div>
   );
 };

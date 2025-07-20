@@ -11,14 +11,15 @@ import { useContext, useState } from "react";
 import ScenarioContext from "context/ScenarioContext";
 import SceneContext from "context/SceneContext";
 import StateOperationForm from "./StateOperationForm";
+import { getDefaultValue } from "./StateTypes";
 
 const CreateStateOperation = ({ component, componentIndex }) => {
   const { stateVariables } = useContext(ScenarioContext);
   const { updateComponentProperty } = useContext(SceneContext);
 
-  const [selectedState, setSelectedState] = useState();
-  const [operation, setOperation] = useState();
-  const [value, setValue] = useState();
+  const [selectedState, setSelectedState] = useState("");
+  const [operation, setOperation] = useState("");
+  const [value, setValue] = useState("");
 
   const handleSubmit = () => {
     const newStateOperations = [
@@ -63,9 +64,12 @@ const CreateStateOperation = ({ component, componentIndex }) => {
       <FormControl>
         <InputLabel>Name</InputLabel>
         <Select
-          value={selectedState && selectedState.name}
+          value={selectedState}
           onChange={(e) => {
-            setSelectedState(e.target.value);
+            const newSelectedState = e.target.value;
+            setSelectedState(newSelectedState);
+            setOperation("");
+            setValue(getDefaultValue(newSelectedState.type));
           }}
           required
         >
