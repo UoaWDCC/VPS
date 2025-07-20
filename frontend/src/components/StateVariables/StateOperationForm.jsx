@@ -1,4 +1,5 @@
 import {
+  Box,
   FormControl,
   FormGroup,
   InputLabel,
@@ -11,6 +12,7 @@ import { useContext, useState } from "react";
 import ScenarioContext from "context/ScenarioContext";
 import { validOperations } from "./Operations";
 import { StateTypes } from "./StateTypes";
+import EditingTooltips from "./EditingTooltips";
 
 const StateOperationForm = () => {
   const { stateVariables } = useContext(ScenarioContext);
@@ -98,6 +100,9 @@ const StateOperationForm = () => {
               </FormControl>
             </>
           )}
+          <Box width="100%" display="flex" justifyContent="space-between">
+            <EditingTooltips />
+          </Box>
         </>
       ) : (
         <Typography variant="body2">
