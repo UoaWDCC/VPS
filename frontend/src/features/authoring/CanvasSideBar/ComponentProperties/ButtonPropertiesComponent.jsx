@@ -262,7 +262,10 @@ export default function ButtonPropertiesComponent({
           }}
         />
       </FormControl>
-      <StateOperationMenu />
+      <StateOperationMenu
+        component={component}
+        componentIndex={componentIndex}
+      />
     </>
   );
 }

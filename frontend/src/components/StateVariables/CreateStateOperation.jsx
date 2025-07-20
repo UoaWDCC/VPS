@@ -9,22 +9,36 @@ import {
 } from "@material-ui/core";
 import { useContext, useState } from "react";
 import ScenarioContext from "context/ScenarioContext";
+import SceneContext from "context/SceneContext";
 import StateOperationForm from "./StateOperationForm";
 
-const CreateStateOperation = ({ stateOperations, setStateOperations }) => {
+const CreateStateOperation = ({
+  componentIndex,
+  stateOperations,
+  setStateOperations,
+}) => {
   const { stateVariables } = useContext(ScenarioContext);
+  const { updateComponentProperty } = useContext(SceneContext);
 
   const [selectedState, setSelectedState] = useState("");
   const [operation, setOperation] = useState();
   const [value, setValue] = useState();
 
   const handleSubmit = () => {
-    const newStateOperation = {
-      name: selectedState.name,
-      operation,
-      value,
-    };
-    setStateOperations([ ...stateOperations, newStateOperation ]);
+    const newStateOperations = [
+      ...stateOperations,
+      {
+        name: selectedState.name,
+        operation,
+        value,
+      },
+    ];
+    updateComponentProperty(
+      componentIndex,
+      "stateOperations",
+      newStateOperations
+    );
+    setStateOperations(newStateOperations);
   };
 
   if (stateVariables && stateVariables.length == 0) {
