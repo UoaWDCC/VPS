@@ -19,7 +19,9 @@ const HelpButton = (props) => {
   return (
     <>
       <button
-        className={`btn btn-outline btn-primary cursor-pointer gap-2 ${isSidebar ? "w-full" : ""}`}
+        className={`btn btn-outline btn-primary cursor-pointer gap-2 ${
+          isSidebar ? "w-full" : ""
+        }`}
         onClick={handleOpen}
       >
         <HelpIcon />
