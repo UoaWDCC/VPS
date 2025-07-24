@@ -15,7 +15,6 @@ export default function ManageResourcesPage() {
     return (
       <ScreenContainer vertical>
         <TopBar back="/">
-
           <h1 className="text-2xl">Manage Resources</h1>
         </TopBar>
         <div className="flex flex-col items-center justify-center h-full">
@@ -25,7 +24,6 @@ export default function ManageResourcesPage() {
       </ScreenContainer>
     );
   }
-
 
   const { scenarioId } = useParams();
 

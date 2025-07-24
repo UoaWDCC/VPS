@@ -194,6 +194,8 @@ router.post(
 
     // TODO: save resources to DB, associate with scenarioId
     // For now, just send success response
-    return res.status(HTTP_OK).json({ message: "Resources uploaded successfully" });
+    return res
+      .status(HTTP_OK)
+      .json({ message: "Resources uploaded successfully" });
   })
 );
