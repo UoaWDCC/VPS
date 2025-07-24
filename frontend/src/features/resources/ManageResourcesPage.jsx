@@ -10,6 +10,23 @@ import { getAuth } from "firebase/auth";
 
 export default function ManageResourcesPage() {
   const { VpsUser } = useContext(AuthenticationContext);
+
+  if (!VpsUser) {
+    return (
+      <ScreenContainer vertical>
+        <TopBar back="/">
+
+          <h1 className="text-2xl">Manage Resources</h1>
+        </TopBar>
+        <div className="flex flex-col items-center justify-center h-full">
+          <p className="text-lg">You must be logged in to manage resources.</p>
+          <p className="text-lg">Please log in to continue.</p>
+        </div>
+      </ScreenContainer>
+    );
+  }
+
+
   const { scenarioId } = useParams();
 
   const fileInputRef = useRef(null);
@@ -58,6 +75,10 @@ export default function ManageResourcesPage() {
               },
             }
           );
+
+          if (response.status !== 200) {
+            throw new Error("Failed to upload resources");
+          }
 
           showToast("Successfully uploaded resources!");
         } catch (error) {
