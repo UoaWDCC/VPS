@@ -20,9 +20,43 @@ const EditStateOperation = ({
   const { stateVariables } = useContext(ScenarioContext);
   const { updateComponentProperty } = useContext(SceneContext);
 
+  // Try to find by ID first (new format), then fallback to name (legacy format)
   const stateVariable = stateVariables.find(
-    (variable) => variable.name === stateOperation.name
+    (variable) => 
+      (stateOperation.stateVariableId && variable.id === stateOperation.stateVariableId) ||
+      (!stateOperation.stateVariableId && variable.name === stateOperation.name)
   );
+
+  // Handle case where state variable is not found
+  if (!stateVariable) {
+    return (
+      <FormGroup
+        style={{
+          marginBottom: "30px",
+          display: "flex",
+          flexDirection: "column",
+          gap: "10px",
+          background: "#ffebee",
+          padding: "16px",
+          borderRadius: "8px",
+          border: "2px solid #f44336",
+        }}
+      >
+        <Typography variant="subtitle1" fontWeight="bold" color="error">
+          State Variable Not Found
+        </Typography>
+        <Typography variant="body2" color="error">
+          The state variable "{stateOperation.displayName || stateOperation.name}" no longer exists.
+        </Typography>
+        <Box width="100%" display="flex" justifyContent="flex-end">
+          <EditingTooltips
+            onDelete={deleteStateOperation}
+            showOnlyDelete={true}
+          />
+        </Box>
+      </FormGroup>
+    );
+  }
 
   const [newOperation, setNewOperation] = useState(stateOperation.operation);
   const [newValue, setNewValue] = useState(stateOperation.value);
@@ -75,9 +109,9 @@ const EditStateOperation = ({
         borderColor: editing ? "#ffa600" : "transparent",
       }}
     >
-      <Typography variant="subtitle1" fontWeight="bold">
-        {stateOperation.name}
-      </Typography>
+        <Typography variant="subtitle1" fontWeight="bold">
+          {stateOperation.displayName || stateOperation.name}
+        </Typography>
       <StateOperationForm
         selectedState={stateVariable}
         operation={newOperation}

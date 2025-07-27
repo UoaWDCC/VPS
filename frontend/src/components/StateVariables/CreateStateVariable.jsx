@@ -6,6 +6,7 @@ import AuthenticationContext from "../../context/AuthenticationContext";
 import toast from "react-hot-toast";
 import StateVariableForm from "./StateVariableForm";
 import ScenarioContext from "../../context/ScenarioContext";
+import { v4 as uuidv4 } from 'uuid';
 
 const DEFAULT_STATE_TYPE = StateTypes.STRING;
 
@@ -35,6 +36,7 @@ const CreateStateVariable = ({ scenarioId }) => {
   const handleSubmit = (e) => {
     e.preventDefault();
     const newStateVariable = {
+      id: uuidv4(),
       name,
       type,
       value,

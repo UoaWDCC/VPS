@@ -8,19 +8,23 @@ import DeleteIcon from "@material-ui/icons/Delete";
  *
  * @component
  */
-const EditingTooltips = ({ onReset, onSave, onDelete }) => {
+const EditingTooltips = ({ onReset, onSave, onDelete, showOnlyDelete = false }) => {
   return (
     <>
-      <Tooltip title="Reset">
-        <IconButton color="default" onClick={onReset}>
-          <ReplayIcon />
-        </IconButton>
-      </Tooltip>
-      <Tooltip title="Save">
-        <IconButton color="primary" onClick={onSave}>
-          <SaveIcon />
-        </IconButton>
-      </Tooltip>
+      {!showOnlyDelete && (
+        <>
+          <Tooltip title="Reset">
+            <IconButton color="default" onClick={onReset}>
+              <ReplayIcon />
+            </IconButton>
+          </Tooltip>
+          <Tooltip title="Save">
+            <IconButton color="primary" onClick={onSave}>
+              <SaveIcon />
+            </IconButton>
+          </Tooltip>
+        </>
+      )}
       <Tooltip title="Delete">
         <IconButton color="secondary" onClick={onDelete}>
           <DeleteIcon />

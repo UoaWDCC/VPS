@@ -23,15 +23,21 @@ const CreateStateOperation = ({ component, componentIndex }) => {
   const { stateVariables } = useContext(ScenarioContext);
   const { updateComponentProperty } = useContext(SceneContext);
 
-  const [selectedState, setSelectedState] = useState("");
+  const [selectedState, setSelectedState] = useState(null);
   const [operation, setOperation] = useState("");
   const [value, setValue] = useState("");
 
   const handleSubmit = () => {
+    // Validate that all required fields are filled
+    if (!selectedState || !selectedState.id || !operation) {
+      return;
+    }
+
     const newStateOperations = [
       ...(component.stateOperations || []),
       {
-        name: selectedState.name,
+        stateVariableId: selectedState.id,
+        displayName: selectedState.name,
         operation,
         value,
       },
@@ -42,9 +48,9 @@ const CreateStateOperation = ({ component, componentIndex }) => {
       newStateOperations
     );
 
-    setSelectedState();
-    setOperation();
-    setValue();
+    setSelectedState(null);
+    setOperation("");
+    setValue("");
   };
 
   if (stateVariables && stateVariables.length == 0) {
@@ -80,7 +86,7 @@ const CreateStateOperation = ({ component, componentIndex }) => {
           required
         >
           {stateVariables.map((stateVariable) => (
-            <MenuItem key={stateVariable.name} value={stateVariable}>
+            <MenuItem key={stateVariable.id || stateVariable.name} value={stateVariable}>
               {stateVariable.name}
             </MenuItem>
           ))}
@@ -98,6 +104,7 @@ const CreateStateOperation = ({ component, componentIndex }) => {
         variant="contained"
         color="primary"
         onClick={handleSubmit}
+        disabled={!selectedState || !operation}
       >
         Create
       </Button>

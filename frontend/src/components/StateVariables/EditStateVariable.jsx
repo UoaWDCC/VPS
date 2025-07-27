@@ -27,6 +27,7 @@ const EditStateVariable = ({ stateVariable, scenarioId }) => {
 
   const editStateVariable = () => {
     const newStateVariable = {
+      id: stateVariable.id, // Preserve the UUID
       name: newName,
       type: newType,
       value: newValue,
@@ -47,8 +48,10 @@ const EditStateVariable = ({ stateVariable, scenarioId }) => {
   };
 
   const deleteStateVariable = () => {
+    // Use ID if available (new format), otherwise fall back to name (legacy format)
+    const identifier = stateVariable.id || name;
     api
-      .delete(user, `api/scenario/${scenarioId}/stateVariables/${name}`)
+      .delete(user, `api/scenario/${scenarioId}/stateVariables/${identifier}`)
       .then((res) => {
         setStateVariables(res.data);
         toast.success("State variable deleted successfully!");
