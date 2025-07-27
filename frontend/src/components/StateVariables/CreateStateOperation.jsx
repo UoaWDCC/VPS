@@ -86,7 +86,10 @@ const CreateStateOperation = ({ component, componentIndex }) => {
           required
         >
           {stateVariables.map((stateVariable) => (
-            <MenuItem key={stateVariable.id || stateVariable.name} value={stateVariable}>
+            <MenuItem
+              key={stateVariable.id || stateVariable.name}
+              value={stateVariable}
+            >
               {stateVariable.name}
             </MenuItem>
           ))}

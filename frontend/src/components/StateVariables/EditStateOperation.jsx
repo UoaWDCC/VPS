@@ -34,8 +34,9 @@ const EditStateOperation = ({
 
   // Try to find by ID first (new format), then fallback to name (legacy format)
   const stateVariable = stateVariables.find(
-    (variable) => 
-      (stateOperation.stateVariableId && variable.id === stateOperation.stateVariableId) ||
+    (variable) =>
+      (stateOperation.stateVariableId &&
+        variable.id === stateOperation.stateVariableId) ||
       (!stateOperation.stateVariableId && variable.name === stateOperation.name)
   );
 
@@ -58,7 +59,8 @@ const EditStateOperation = ({
           State Variable Not Found
         </Typography>
         <Typography variant="body2" color="error">
-          The state variable "{stateOperation.displayName || stateOperation.name}" no longer exists.
+          The state variable &quot;
+          {stateOperation.displayName || stateOperation.name}&quot; no longer exists.
         </Typography>
         <Box width="100%" display="flex" justifyContent="flex-end">
           <EditingTooltips
@@ -110,9 +112,9 @@ const EditStateOperation = ({
         borderColor: editing ? "#ffa600" : "transparent",
       }}
     >
-        <Typography variant="subtitle1" fontWeight="bold">
-          {stateVariable.name}
-        </Typography>
+      <Typography variant="subtitle1" fontWeight="bold">
+        {stateVariable.name}
+      </Typography>
       <StateOperationForm
         selectedState={stateVariable}
         operation={newOperation}

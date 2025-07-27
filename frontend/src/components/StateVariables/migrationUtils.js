@@ -1,4 +1,4 @@
-import { v4 as uuidv4 } from 'uuid';
+import { v4 as uuidv4 } from "uuid";
 
 /**
  * Ensures that all state variables have UUIDs for backward compatibility
@@ -7,13 +7,13 @@ import { v4 as uuidv4 } from 'uuid';
  */
 export const ensureStateVariableUUIDs = (stateVariables) => {
   if (!stateVariables) return [];
-  
-  return stateVariables.map(variable => {
+
+  return stateVariables.map((variable) => {
     // If the variable doesn't have an ID, generate one
     if (!variable.id) {
       return {
         ...variable,
-        id: uuidv4()
+        id: uuidv4(),
       };
     }
     return variable;
@@ -28,26 +28,28 @@ export const ensureStateVariableUUIDs = (stateVariables) => {
  */
 export const migrateStateOperations = (stateOperations, stateVariables) => {
   if (!stateOperations || !stateVariables) return stateOperations || [];
-  
-  return stateOperations.map(operation => {
+
+  return stateOperations.map((operation) => {
     // If operation already has stateVariableId, it's already migrated
     if (operation.stateVariableId) {
       return operation;
     }
-    
+
     // Find the state variable by name and get its ID
-    const stateVariable = stateVariables.find(variable => variable.name === operation.name);
-    
+    const stateVariable = stateVariables.find(
+      (variable) => variable.name === operation.name
+    );
+
     if (stateVariable) {
       return {
         ...operation,
         stateVariableId: stateVariable.id,
         displayName: operation.name, // Preserve original name for display
         // Remove the old name property to avoid confusion
-        name: undefined
+        name: undefined,
       };
     }
-    
+
     // If we can't find the state variable, keep the operation as-is for now
     return operation;
   });

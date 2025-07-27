@@ -8,7 +8,12 @@ import DeleteIcon from "@material-ui/icons/Delete";
  *
  * @component
  */
-const EditingTooltips = ({ onReset, onSave, onDelete, showOnlyDelete = false }) => {
+const EditingTooltips = ({
+  onReset,
+  onSave,
+  onDelete,
+  showOnlyDelete = false,
+}) => {
   return (
     <>
       {!showOnlyDelete && (
