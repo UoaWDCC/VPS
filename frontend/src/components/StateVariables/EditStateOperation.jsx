@@ -20,6 +20,18 @@ const EditStateOperation = ({
   const { stateVariables } = useContext(ScenarioContext);
   const { updateComponentProperty } = useContext(SceneContext);
 
+  // Define deleteStateOperation function early so it can be used in error handling
+  const deleteStateOperation = () => {
+    const newStateOperations = component.stateOperations.filter(
+      (_, index) => index !== operationIndex
+    );
+    updateComponentProperty(
+      componentIndex,
+      "stateOperations",
+      newStateOperations
+    );
+  };
+
   // Try to find by ID first (new format), then fallback to name (legacy format)
   const stateVariable = stateVariables.find(
     (variable) => 
@@ -84,17 +96,6 @@ const EditStateOperation = ({
     );
   };
 
-  const deleteStateOperation = () => {
-    const newStateOperations = component.stateOperations.filter(
-      (_, index) => index !== operationIndex
-    );
-    updateComponentProperty(
-      componentIndex,
-      "stateOperations",
-      newStateOperations
-    );
-  };
-
   return (
     <FormGroup
       style={{
@@ -110,7 +111,7 @@ const EditStateOperation = ({
       }}
     >
         <Typography variant="subtitle1" fontWeight="bold">
-          {stateOperation.displayName || stateOperation.name}
+          {stateVariable.name}
         </Typography>
       <StateOperationForm
         selectedState={stateVariable}

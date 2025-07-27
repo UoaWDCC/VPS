@@ -5,11 +5,14 @@ import AuthenticationContext from "../../context/AuthenticationContext";
 import toast from "react-hot-toast";
 import StateVariableForm from "./StateVariableForm";
 import ScenarioContext from "../../context/ScenarioContext";
+import SceneContext from "../../context/SceneContext";
 import EditingTooltips from "./EditingTooltips";
 
 const EditStateVariable = ({ stateVariable, scenarioId }) => {
   const { user } = useContext(AuthenticationContext);
   const { setStateVariables } = useContext(ScenarioContext);
+  const sceneContext = useContext(SceneContext);
+  const { scenes, setScenes } = sceneContext || { scenes: [], setScenes: () => {} };
 
   const { name, type, value } = stateVariable;
 
@@ -47,19 +50,62 @@ const EditStateVariable = ({ stateVariable, scenarioId }) => {
       });
   };
 
-  const deleteStateVariable = () => {
+  const deleteStateVariable = async () => {
     // Use ID if available (new format), otherwise fall back to name (legacy format)
     const identifier = stateVariable.id || name;
-    api
-      .delete(user, `api/scenario/${scenarioId}/stateVariables/${identifier}`)
-      .then((res) => {
-        setStateVariables(res.data);
+    
+    try {
+      // Delete the state variable from the backend
+      const res = await api.delete(user, `api/scenario/${scenarioId}/stateVariables/${identifier}`);
+      setStateVariables(res.data);
+      
+      // Clean up all state operations that reference this deleted state variable
+      // Only do this if we have access to scenes (SceneContext is available)
+      if (scenes && scenes.length > 0 && setScenes) {
+        const updatedScenes = scenes.map(scene => ({
+          ...scene,
+          components: scene.components.map(component => {
+            if (!component.stateOperations) return component;
+            
+            // Filter out state operations that reference the deleted state variable
+            const filteredOperations = component.stateOperations.filter(operation => {
+              // Check both UUID and name references
+              const referencesDeletedVariable = 
+                (operation.stateVariableId && operation.stateVariableId === stateVariable.id) ||
+                (!operation.stateVariableId && operation.name === name);
+              
+              return !referencesDeletedVariable;
+            });
+            
+            return {
+              ...component,
+              stateOperations: filteredOperations
+            };
+          })
+        }));
+        
+        // Update each scene in the backend
+        const updatePromises = updatedScenes.map(scene => 
+          api.put(user, `api/scenario/${scenarioId}/scene/${scene._id}`, {
+            name: scene.name,
+            components: scene.components,
+            time: scene.time
+          })
+        );
+        
+        await Promise.all(updatePromises);
+        
+        // Update the local state
+        setScenes(updatedScenes);
+        
+        toast.success("State variable deleted and removed from all components!");
+      } else {
         toast.success("State variable deleted successfully!");
-      })
-      .catch((error) => {
-        console.error("Error deleting state variable:", error);
-        toast.error("Failed to delete state variable.");
-      });
+      }
+    } catch (error) {
+      console.error("Error deleting state variable:", error);
+      toast.error("Failed to delete state variable.");
+    }
   };
 
   return (
