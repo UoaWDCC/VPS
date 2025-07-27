@@ -60,7 +60,8 @@ const EditStateOperation = ({
         </Typography>
         <Typography variant="body2" color="error">
           The state variable &quot;
-          {stateOperation.displayName || stateOperation.name}&quot; no longer exists.
+          {stateOperation.displayName || stateOperation.name}&quot; no longer
+          exists.
         </Typography>
         <Box width="100%" display="flex" justifyContent="flex-end">
           <EditingTooltips

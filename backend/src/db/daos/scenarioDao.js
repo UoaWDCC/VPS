@@ -206,9 +206,12 @@ const editStateVariable = async (
   try {
     for (let i = 0; i < scenario.stateVariables.length; i++) {
       // Try to match by ID first (new format), then by name (legacy format)
-      const match = (newStateVariable.id && scenario.stateVariables[i].id === newStateVariable.id) ||
-                   (!newStateVariable.id && originalName === scenario.stateVariables[i].name);
-      
+      const match =
+        (newStateVariable.id &&
+          scenario.stateVariables[i].id === newStateVariable.id) ||
+        (!newStateVariable.id &&
+          originalName === scenario.stateVariables[i].name);
+
       if (match) {
         scenario.stateVariables[i] = newStateVariable;
         break;
@@ -232,7 +235,9 @@ const deleteStateVariable = async (scenarioId, stateVariableIdentifier) => {
   const scenario = await Scenario.findById(scenarioId);
   try {
     scenario.stateVariables = scenario.stateVariables.filter(
-      (state) => state.name !== stateVariableIdentifier && state.id !== stateVariableIdentifier
+      (state) =>
+        state.name !== stateVariableIdentifier &&
+        state.id !== stateVariableIdentifier
     );
     await scenario.save();
     return scenario.stateVariables;
