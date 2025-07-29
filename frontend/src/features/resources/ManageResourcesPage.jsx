@@ -77,10 +77,9 @@ export default function ManageResourcesPage() {
           );
 
           console.log("Backend response:", response.data);
-          
+
           showToast(`Successfully uploaded ${data.length} resources!`);
           console.log(`Successfully uploaded ${data.length} resources!`);
-          
         } catch (error) {
           const msg = error?.response?.data || error.message || "Unknown error";
           showToast(`Error uploading: ${msg}`, "error");

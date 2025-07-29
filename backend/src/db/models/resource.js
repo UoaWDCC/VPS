@@ -30,7 +30,6 @@ const resourceSchema = new Schema({
   },
 });
 
-
 const Resource = mongoose.model("Resource", resourceSchema, "resources");
 
 export default Resource;
