@@ -10,6 +10,7 @@ import {
   removeFlag,
   getAllVisibleResources,
   updateResourceById,
+  bulkCreateResources,
 } from "../../db/daos/resourcesDao.js";
 
 const router = Router();
@@ -64,6 +65,19 @@ router.get("/:resourceId", async (req, res) => {
     return res.status(HTTP_NOT_FOUND).send("Not Found");
   }
   return res.status(HTTP_OK).json(resource);
+});
+
+// resources.js
+import Resource from "../../db/models/resource.js"; // make sure this is imported
+
+router.get("/scenario/:scenarioId", async (req, res) => {
+  const { scenarioId } = req.params;
+  try {
+    const resources = await Resource.find({ scenarioId });
+    return res.status(200).json(resources);
+  } catch (err) {
+    return res.status(500).json({ error: err.message });
+  }
 });
 
 /**
@@ -190,12 +204,22 @@ router.post(
     const { scenarioId } = req.params;
     const resources = req.body;
 
-    console.log(`Uploading resources for scenario ${scenarioId}`, resources);
+    if (!Array.isArray(resources) || resources.length === 0) {
+      return res
+        .status(HTTP_BAD_REQUEST)
+        .json("Invalid or empty resource list");
+    }
 
-    // TODO: save resources to DB, associate with scenarioId
-    // For now, just send success response
-    return res
-      .status(HTTP_OK)
-      .json({ message: "Resources uploaded successfully" });
+    try {
+      const saved = await bulkCreateResources(scenarioId, resources);
+      return res
+        .status(HTTP_OK)
+        .json({ message: `Successfully uploaded ${saved.length} resources.` });
+    } catch (err) {
+      console.error("Failed to upload resources:", err);
+      return res
+        .status(HTTP_INTERNAL_SERVER_ERROR)
+        .json({ error: err.message });
+    }
   })
 );

@@ -53,6 +53,8 @@ export default function ManageResourcesPage() {
       complete: async (results) => {
         const { data } = results;
 
+        console.log("Parsed CSV data:", data);
+
         try {
           const auth = getAuth();
           const user = auth.currentUser;
@@ -74,11 +76,11 @@ export default function ManageResourcesPage() {
             }
           );
 
-          if (response.status !== 200) {
-            throw new Error("Failed to upload resources");
-          }
-
-          showToast("Successfully uploaded resources!");
+          console.log("Backend response:", response.data);
+          
+          showToast(`Successfully uploaded ${data.length} resources!`);
+          console.log(`Successfully uploaded ${data.length} resources!`);
+          
         } catch (error) {
           const msg = error?.response?.data || error.message || "Unknown error";
           showToast(`Error uploading: ${msg}`, "error");
