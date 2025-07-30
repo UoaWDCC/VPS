@@ -1,13 +1,11 @@
-import { Box, Grid, IconButton, Tooltip, Card } from "@material-ui/core";
-import ReplayIcon from "@mui/icons-material/Replay";
-import SaveIcon from "@material-ui/icons/Save";
-import DeleteIcon from "@material-ui/icons/Delete";
+import { Box, Grid, Card } from "@material-ui/core";
 import { api } from "../../util/api";
 import { useContext, useState } from "react";
 import AuthenticationContext from "../../context/AuthenticationContext";
 import toast from "react-hot-toast";
 import StateVariableForm from "./StateVariableForm";
 import ScenarioContext from "../../context/ScenarioContext";
+import EditingTooltips from "./EditingTooltips";
 
 const EditStateVariable = ({ stateVariable, scenarioId }) => {
   const { user } = useContext(AuthenticationContext);
@@ -80,21 +78,11 @@ const EditStateVariable = ({ stateVariable, scenarioId }) => {
           setValue={setNewValue}
         />
         <Box ml="auto" display="flex" alignItems="center">
-          <Tooltip title="Reset">
-            <IconButton color="default" onClick={resetFields}>
-              <ReplayIcon />
-            </IconButton>
-          </Tooltip>
-          <Tooltip title="Save">
-            <IconButton color="primary" onClick={editStateVariable}>
-              <SaveIcon />
-            </IconButton>
-          </Tooltip>
-          <Tooltip title="Delete">
-            <IconButton color="secondary" onClick={deleteStateVariable}>
-              <DeleteIcon />
-            </IconButton>
-          </Tooltip>
+          <EditingTooltips
+            onReset={resetFields}
+            onSave={editStateVariable}
+            onDelete={deleteStateVariable}
+          />
         </Box>
       </Grid>
     </Card>
