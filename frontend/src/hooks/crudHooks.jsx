@@ -265,7 +265,6 @@ export function useGet(url, setData, requireAuth = true, skipRequest = false) {
     let isMounted = true;
 
     async function fetchData() {
-      let hasError = false;
       setLoading(true);
 
       let config = {};
@@ -305,14 +304,11 @@ export function useGet(url, setData, requireAuth = true, skipRequest = false) {
               }
             } else {
               console.log(`Token refresh failed for ${url}`);
-              hasError = isRealError(err);
             }
           } catch (retryError) {
             console.log(`Retry request failed for ${url}:`, retryError);
-            hasError = isRealError(retryError);
           }
         } else {
-          hasError = isRealError(err);
         }
       }
 
