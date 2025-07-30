@@ -72,7 +72,7 @@ async function sendRequest(
     } else {
       res = await axios[method](url, requestBody, getConfig(token));
     }
-    
+
     setResponse(res.data);
     if (callBack) {
       callBack(res.data);
@@ -85,9 +85,16 @@ async function sendRequest(
         if (newToken) {
           let retryRes;
           if (method === "get" || method === "delete") {
-            retryRes = await axios[method](url, getConfig(newToken, requestBody));
+            retryRes = await axios[method](
+              url,
+              getConfig(newToken, requestBody)
+            );
           } else {
-            retryRes = await axios[method](url, requestBody, getConfig(newToken));
+            retryRes = await axios[method](
+              url,
+              requestBody,
+              getConfig(newToken)
+            );
           }
           setResponse(retryRes.data);
           if (callBack) {
@@ -284,15 +291,21 @@ export function useGet(url, setData, requireAuth = true, skipRequest = false) {
           setData(response.data);
         }
       } catch (err) {
-        console.log(`Request failed for ${url}:`, err.response?.status, err.message);
-        
+        console.log(
+          `Request failed for ${url}:`,
+          err.response?.status,
+          err.message
+        );
+
         // If we get a 401 and have a user object, try to refresh the token
         if (err.response?.status === 401 && user && requireAuth) {
           console.log(`Attempting token refresh for ${url}`);
           try {
             const newToken = await refreshToken(user);
             if (newToken) {
-              console.log(`Token refresh successful for ${url}, retrying request`);
+              console.log(
+                `Token refresh successful for ${url}, retrying request`
+              );
               const retryConfig = {
                 headers: {
                   Authorization: `Bearer ${newToken}`,
@@ -308,7 +321,6 @@ export function useGet(url, setData, requireAuth = true, skipRequest = false) {
           } catch (retryError) {
             console.log(`Retry request failed for ${url}:`, retryError);
           }
-        } else {
         }
       }
 

@@ -43,14 +43,14 @@ export default function ScenarioContextProvider({ children }) {
       setScenarios(null);
       setAssignedScenarios(null);
       setRoleList(null);
-      
+
       // Add a small delay to ensure token is properly refreshed
       const timeoutId = setTimeout(() => {
         reFetch();
         reFetch2();
         reFetch3();
       }, 100);
-      
+
       return () => clearTimeout(timeoutId);
     }
   }, [user]);
@@ -63,7 +63,7 @@ export default function ScenarioContextProvider({ children }) {
         if (!scenarios) reFetch();
         if (!assignedScenarios) reFetch2();
       }, 1000);
-      
+
       return () => clearTimeout(retryTimeoutId);
     }
   }, [user, scenarios, assignedScenarios]);
