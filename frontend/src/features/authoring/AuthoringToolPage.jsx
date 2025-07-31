@@ -54,20 +54,12 @@ export default function AuthoringToolPage() {
   }, [currentScene]);
 
   useEffect(() => {
-    // checks if currentScene exists and has an ID. If not, stop early
     if (!currentScene || !currentScene._id) return;
-    // don't autosave right after the page loads the first time
     if (firstTimeRender) return;
-    /** if there is already a timer running (user is still editing), cancel it so
-     * we start a fresh one after each change. This way, we wait 2 seconds after
-     * the user stops editing before autosaving
-     */
     if (autosaveTimeout.current) clearTimeout(autosaveTimeout.current);
-    // start a new timer that waits 2 seconds before running saveScene()
     autosaveTimeout.current = setTimeout(() => {
       saveScene(true);
     }, 2000);
-    // cancel timer if component changes or is removed
     return () => clearTimeout(autosaveTimeout.current);
   }, [currentScene]);
 
