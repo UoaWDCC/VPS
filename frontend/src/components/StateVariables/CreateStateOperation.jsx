@@ -23,7 +23,7 @@ const CreateStateOperation = ({ component, componentIndex }) => {
   const { stateVariables } = useContext(ScenarioContext);
   const { updateComponentProperty } = useContext(SceneContext);
 
-  const [selectedState, setSelectedState] = useState(null);
+  const [selectedState, setSelectedState] = useState("");
   const [operation, setOperation] = useState("");
   const [value, setValue] = useState("");
 
@@ -48,7 +48,7 @@ const CreateStateOperation = ({ component, componentIndex }) => {
       newStateOperations
     );
 
-    setSelectedState(null);
+    setSelectedState("");
     setOperation("");
     setValue("");
   };
