@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useState, useRef } from "react";
 import { useParams } from "react-router-dom";
 import HelpButton from "components/HelpButton";
 import ScreenContainer from "components/ScreenContainer/ScreenContainer";
@@ -33,6 +33,7 @@ export default function AuthoringToolPage() {
   const { getUserIdToken } = useContext(AuthenticationContext);
   const [firstTimeRender, setFirstTimeRender] = useState(true);
   const [saveButtonText, setSaveButtonText] = useState("Save");
+  const autosaveTimeout = useRef(null);
 
   useGet(
     `/api/scenario/${currentScenario?._id}/scene/full/${currentScene?._id}`,
@@ -52,9 +53,22 @@ export default function AuthoringToolPage() {
     }
   }, [currentScene]);
 
+  useEffect(() => {
+    if (!currentScene || !currentScene._id) return;
+    if (firstTimeRender) return;
+    if (autosaveTimeout.current) clearTimeout(autosaveTimeout.current);
+    autosaveTimeout.current = setTimeout(() => {
+      saveScene(true);
+    }, 2000);
+    return () => clearTimeout(autosaveTimeout.current);
+  }, [currentScene]);
+
   /** used to save the scene, as a helper function */
-  async function saveScene() {
-    setSelect(null);
+  async function saveScene(isAuto = false) {
+    if (!isAuto) {
+      // only clear selection on manual save
+      setSelect(null);
+    }
     await uploadFiles(
       currentScene?.components,
       currentScene?.endImage,

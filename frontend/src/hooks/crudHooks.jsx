@@ -41,9 +41,13 @@ async function getToken(user, authLoading, authError) {
 }
 
 async function refreshToken(user) {
-  const userToken = await user.refreshAuthToken();
-  if (userToken) {
-    return userToken;
+  try {
+    const userToken = await user.getIdToken(true);
+    if (userToken) {
+      return userToken;
+    }
+  } catch (error) {
+    console.error("Failed to refresh token:", error);
   }
   return false;
 }
@@ -56,7 +60,8 @@ async function sendRequest(
   url,
   requestBody,
   callBack,
-  method
+  method,
+  user = null
 ) {
   setError(null);
   setLoading(true);
@@ -67,24 +72,51 @@ async function sendRequest(
     } else {
       res = await axios[method](url, requestBody, getConfig(token));
     }
-    if (res.status === 401) {
-      token = await refreshToken();
-      if (token) {
-        if (method === "get" || method === "delete") {
-          res = await axios[method](url, getConfig(token, requestBody));
-        } else {
-          res = await axios[method](url, requestBody, getConfig(token));
-        }
-      }
-    }
+
     setResponse(res.data);
     if (callBack) {
       callBack(res.data);
     }
   } catch (e) {
-    setError(e.response);
-    if (callBack) {
-      callBack(null, e.response);
+    // Try to refresh the token if we get a 401
+    if (e.response?.status === 401 && user) {
+      try {
+        const newToken = await refreshToken(user);
+        if (newToken) {
+          let retryRes;
+          if (method === "get" || method === "delete") {
+            retryRes = await axios[method](
+              url,
+              getConfig(newToken, requestBody)
+            );
+          } else {
+            retryRes = await axios[method](
+              url,
+              requestBody,
+              getConfig(newToken)
+            );
+          }
+          setResponse(retryRes.data);
+          if (callBack) {
+            callBack(retryRes.data);
+          }
+        } else {
+          setError(e.response);
+          if (callBack) {
+            callBack(null, e.response);
+          }
+        }
+      } catch (retryError) {
+        setError(retryError.response || retryError);
+        if (callBack) {
+          callBack(null, retryError.response || retryError);
+        }
+      }
+    } else {
+      setError(e.response);
+      if (callBack) {
+        callBack(null, e.response);
+      }
     }
   } finally {
     setLoading(false);
@@ -112,7 +144,8 @@ export function useAuthPost(url, callBack) {
         url,
         requestBody,
         callBack,
-        "post"
+        "post",
+        user
       );
     }
   };
@@ -140,7 +173,8 @@ export function useAuthGet(url, callBack) {
         url,
         requestBody,
         callBack,
-        "get"
+        "get",
+        user
       );
     }
   };
@@ -171,7 +205,8 @@ export function useAuthDelete(url, callBack) {
         url,
         requestBody,
         callBack,
-        "delete"
+        "delete",
+        user
       );
     }
   };
@@ -199,7 +234,8 @@ export function useAuthPut(url, callBack) {
         url,
         requestBody,
         callBack,
-        "put"
+        "put",
+        user
       );
     }
   };
@@ -226,7 +262,7 @@ if (import.meta.env.VITE_SERVER_URL === undefined) {
 export function useGet(url, setData, requireAuth = true, skipRequest = false) {
   const [isLoading, setLoading] = useState(false);
   const [version, setVersion] = useState(0);
-  const { getUserIdToken } = useContext(AuthenticationContext);
+  const { getUserIdToken, user } = useContext(AuthenticationContext);
 
   function reFetch() {
     setVersion(version + 1);
@@ -236,7 +272,6 @@ export function useGet(url, setData, requireAuth = true, skipRequest = false) {
     let isMounted = true;
 
     async function fetchData() {
-      let hasError = false;
       setLoading(true);
 
       let config = {};
@@ -250,12 +285,43 @@ export function useGet(url, setData, requireAuth = true, skipRequest = false) {
         };
       }
 
-      const response = await axios.get(url, config).catch((err) => {
-        hasError = isRealError(err);
-      });
+      try {
+        const response = await axios.get(url, config);
+        if (isMounted) {
+          setData(response.data);
+        }
+      } catch (err) {
+        console.log(
+          `Request failed for ${url}:`,
+          err.response?.status,
+          err.message
+        );
 
-      if (!hasError && isMounted) {
-        setData(response.data);
+        // If we get a 401 and have a user object, try to refresh the token
+        if (err.response?.status === 401 && user && requireAuth) {
+          console.log(`Attempting token refresh for ${url}`);
+          try {
+            const newToken = await refreshToken(user);
+            if (newToken) {
+              console.log(
+                `Token refresh successful for ${url}, retrying request`
+              );
+              const retryConfig = {
+                headers: {
+                  Authorization: `Bearer ${newToken}`,
+                },
+              };
+              const retryResponse = await axios.get(url, retryConfig);
+              if (isMounted) {
+                setData(retryResponse.data);
+              }
+            } else {
+              console.log(`Token refresh failed for ${url}`);
+            }
+          } catch (retryError) {
+            console.log(`Retry request failed for ${url}:`, retryError);
+          }
+        }
       }
 
       setLoading(false);
