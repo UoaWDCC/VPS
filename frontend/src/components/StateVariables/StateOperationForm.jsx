@@ -72,6 +72,10 @@ const StateOperationForm = ({
                   : e.target.value
               )
             }
+            onKeyDown={(e) => {
+              // stops browser shortcuts from messing with typing
+              e.stopPropagation();
+            }}
             required
             type={selectedState.type === StateTypes.NUMBER ? "number" : "text"}
           />
