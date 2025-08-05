@@ -168,7 +168,7 @@ const setUserStateVariables = async (userId, scenarioId, stateVariables) => {
     }
     return user;
   } catch (error) {
-    throw new Error("Error inititating state variables:", error);
+    throw new Error(`Error initiating state variables: ${error.message}`);
   }
 };
 
