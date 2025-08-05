@@ -1,3 +1,5 @@
+import { getStateVariables } from "../../../db/daos/scenarioDao.js";
+import { setUserStateVariables } from "../../../db/daos/userDao.js";
 import Scene from "../../../db/models/scene.js";
 import User from "../../../db/models/user.js";
 
@@ -36,6 +38,12 @@ const addSceneToPath = async (userId, scenarioId, currentSceneId, sceneId) => {
   return STATUS.OK;
 };
 
+// Initiates state variables for a user
+const initiateStateVariables = async (userId, scenarioId) => {
+  const stateVariables = await getStateVariables(scenarioId);
+  setUserStateVariables(userId, scenarioId, stateVariables);
+};
+
 export const userNavigate = async (req) => {
   const { uid, currentScene, nextScene } = req.body;
   const { scenarioId } = req.params;
@@ -49,6 +57,7 @@ export const userNavigate = async (req) => {
     const [, scenes] = await Promise.all([
       addSceneToPath(user._id, scenarioId, null, firstSceneId),
       getConnectedScenes(firstSceneId),
+      initiateStateVariables(user._id, scenarioId),
     ]);
     return { status: STATUS.OK, json: scenes };
   }
