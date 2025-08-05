@@ -5,6 +5,7 @@ import useLocalStorage from "../hooks/useLocalStorage";
 import AuthenticationContext from "./AuthenticationContext";
 import ScenarioContext from "./ScenarioContext";
 import { api } from "../util/api";
+import { ensureStateVariableUUIDs } from "../components/StateVariables/migrationUtils";
 
 /**
  * This is a Context Provider made with the React Context API
@@ -50,7 +51,9 @@ export default function ScenarioContextProvider({ children }) {
       api
         .get(user, `api/scenario/${currentScenario._id}/stateVariables`)
         .then((res) => {
-          setStateVariables(res.data);
+          // Ensure all state variables have UUIDs for backward compatibility
+          const stateVariablesWithUUIDs = ensureStateVariableUUIDs(res.data);
+          setStateVariables(stateVariablesWithUUIDs);
         })
         .catch((error) => {
           console.error("Error fetching state variables:", error);

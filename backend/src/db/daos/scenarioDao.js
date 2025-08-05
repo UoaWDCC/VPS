@@ -1,5 +1,6 @@
 import Scenario from "../models/scenario.js";
 import Scene from "../models/scene.js";
+import { v4 as uuidv4 } from "uuid";
 
 /**
  * Creates a scenario in the database
@@ -180,7 +181,12 @@ const createStateVariable = async (scenarioId, stateVariable) => {
   // TODO Add validation for state variable (e.g. name should be unique)
   const scenario = await Scenario.findById(scenarioId);
   try {
-    scenario.stateVariables.push(stateVariable);
+    // Generate uuid on the backend
+    const stateVariableWithId = {
+      ...stateVariable,
+      id: uuidv4(),
+    };
+    scenario.stateVariables.push(stateVariableWithId);
     await scenario.save();
     return scenario.stateVariables;
   } catch {
@@ -191,7 +197,7 @@ const createStateVariable = async (scenarioId, stateVariable) => {
 /**
  * Edits a state variable for a scenario
  * @param {String} scenarioId MongoDB ID of scenario
- * @param {String} originalName name of the original state variable
+ * @param {String} originalName name of the original state variable (legacy support)
  * @param {Object} newStateVariable state variable to replace previous
  * @returns updated state variables for the scenario
  */
@@ -205,7 +211,14 @@ const editStateVariable = async (
   const scenario = await Scenario.findById(scenarioId);
   try {
     for (let i = 0; i < scenario.stateVariables.length; i++) {
-      if (originalName === scenario.stateVariables[i].name) {
+      // Try to match by ID first (new format), then by name (legacy format)
+      const match =
+        (newStateVariable.id &&
+          scenario.stateVariables[i].id === newStateVariable.id) ||
+        (!newStateVariable.id &&
+          originalName === scenario.stateVariables[i].name);
+
+      if (match) {
         scenario.stateVariables[i] = newStateVariable;
         break;
       }
@@ -221,14 +234,16 @@ const editStateVariable = async (
 /**
  * Deletes a state variable from a scenario
  * @param {String} scenarioId MongoDB ID of scenario
- * @param {String} stateVariableName name of the state variable to be deleted
+ * @param {String} stateVariableIdentifier name or ID of the state variable to be deleted
  * @returns updated state variables for the scenario
  */
-const deleteStateVariable = async (scenarioId, stateVariableName) => {
+const deleteStateVariable = async (scenarioId, stateVariableIdentifier) => {
   const scenario = await Scenario.findById(scenarioId);
   try {
     scenario.stateVariables = scenario.stateVariables.filter(
-      (state) => state.name !== stateVariableName
+      (state) =>
+        state.name !== stateVariableIdentifier &&
+        state.id !== stateVariableIdentifier
     );
     await scenario.save();
     return scenario.stateVariables;

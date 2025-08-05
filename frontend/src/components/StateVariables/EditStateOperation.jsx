@@ -20,9 +20,58 @@ const EditStateOperation = ({
   const { stateVariables } = useContext(ScenarioContext);
   const { updateComponentProperty } = useContext(SceneContext);
 
+  // Define deleteStateOperation function early so it can be used in error handling
+  const deleteStateOperation = () => {
+    const newStateOperations = component.stateOperations.filter(
+      (_, index) => index !== operationIndex
+    );
+    updateComponentProperty(
+      componentIndex,
+      "stateOperations",
+      newStateOperations
+    );
+  };
+
+  // Try to find by ID first (new format), then fallback to name (legacy format)
   const stateVariable = stateVariables.find(
-    (variable) => variable.name === stateOperation.name
+    (variable) =>
+      (stateOperation.stateVariableId &&
+        variable.id === stateOperation.stateVariableId) ||
+      (!stateOperation.stateVariableId && variable.name === stateOperation.name)
   );
+
+  // Handle case where state variable is not found
+  if (!stateVariable) {
+    return (
+      <FormGroup
+        style={{
+          marginBottom: "30px",
+          display: "flex",
+          flexDirection: "column",
+          gap: "10px",
+          background: "#ffebee",
+          padding: "16px",
+          borderRadius: "8px",
+          border: "2px solid #f44336",
+        }}
+      >
+        <Typography variant="subtitle1" fontWeight="bold" color="error">
+          State Variable Not Found
+        </Typography>
+        <Typography variant="body2" color="error">
+          The state variable &quot;
+          {stateOperation.displayName || stateOperation.name}&quot; no longer
+          exists.
+        </Typography>
+        <Box width="100%" display="flex" justifyContent="flex-end">
+          <EditingTooltips
+            onDelete={deleteStateOperation}
+            showOnlyDelete={true}
+          />
+        </Box>
+      </FormGroup>
+    );
+  }
 
   const [newOperation, setNewOperation] = useState(stateOperation.operation);
   const [newValue, setNewValue] = useState(stateOperation.value);
@@ -50,17 +99,6 @@ const EditStateOperation = ({
     );
   };
 
-  const deleteStateOperation = () => {
-    const newStateOperations = component.stateOperations.filter(
-      (_, index) => index !== operationIndex
-    );
-    updateComponentProperty(
-      componentIndex,
-      "stateOperations",
-      newStateOperations
-    );
-  };
-
   return (
     <FormGroup
       style={{
@@ -76,7 +114,7 @@ const EditStateOperation = ({
       }}
     >
       <Typography variant="subtitle1" fontWeight="bold">
-        {stateOperation.name}
+        {stateVariable.name}
       </Typography>
       <StateOperationForm
         selectedState={stateVariable}
