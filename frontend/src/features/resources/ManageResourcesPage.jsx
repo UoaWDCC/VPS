@@ -1,7 +1,7 @@
 import { getAuth } from "firebase/auth";
 import axios from "axios";
 import Papa from "papaparse";
-import { useEffect, useRef, useState } from "react"; 
+import { useEffect, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
 import toast from "react-hot-toast";
 import ScreenContainer from "../../components/ScreenContainer/ScreenContainer";
@@ -10,7 +10,7 @@ import TopBar from "../../components/TopBar/TopBar";
 export default function ManageResourcesPage() {
   const { scenarioId } = useParams();
   const fileInputRef = useRef(null);
-  const [resources, setResources] = useState([]); 
+  const [resources, setResources] = useState([]);
 
   useEffect(() => {
     const fetchResources = async () => {
