@@ -1,6 +1,7 @@
 import { Router } from "express";
 import auth from "../../middleware/firebaseAuth.js";
 import { handle } from "../../util/error.js";
+import Resource from "../../db/models/resource.js";
 
 import {
   createResource,
@@ -24,6 +25,16 @@ const HTTP_INTERNAL_SERVER_ERROR = 500;
 
 // Apply auth middleware to all routes below this point
 router.use(auth);
+
+router.get("/scenario/:scenarioId", async (req, res) => {
+  const { scenarioId } = req.params;
+  try {
+    const resources = await Resource.find({ scenarioId });
+    return res.status(200).json(resources);
+  } catch (err) {
+    return res.status(500).json({ error: err.message });
+  }
+});
 
 /**
  * @route POST /
@@ -65,19 +76,6 @@ router.get("/:resourceId", async (req, res) => {
     return res.status(HTTP_NOT_FOUND).send("Not Found");
   }
   return res.status(HTTP_OK).json(resource);
-});
-
-// resources.js
-import Resource from "../../db/models/resource.js"; // make sure this is imported
-
-router.get("/scenario/:scenarioId", async (req, res) => {
-  const { scenarioId } = req.params;
-  try {
-    const resources = await Resource.find({ scenarioId });
-    return res.status(200).json(resources);
-  } catch (err) {
-    return res.status(500).json({ error: err.message });
-  }
 });
 
 /**
@@ -162,7 +160,6 @@ router.delete("/group/:groupId/:flag", async (req, res) => {
  * @returns {string} 404 - Not Found if the resource does not exist.
  * @returns {string} 500 - Internal Server Error if an unexpected error occurs.
  */
-
 router.put("/:resourceId", async (req, res) => {
   const { resourceId } = req.params;
   const { name, type, content, requiredFlags } = req.body;
@@ -189,8 +186,6 @@ router.put("/:resourceId", async (req, res) => {
     return res.status(HTTP_INTERNAL_SERVER_ERROR).send("Internal Server Error");
   }
 });
-
-export default router;
 
 /**
  * @route POST /:scenarioId
@@ -223,3 +218,5 @@ router.post(
     }
   })
 );
+
+export default router;

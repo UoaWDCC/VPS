@@ -1,43 +1,53 @@
-import { Alert, Snackbar } from "@mui/material";
+import { getAuth } from "firebase/auth";
 import axios from "axios";
 import Papa from "papaparse";
-import { useContext, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react"; 
 import { useParams } from "react-router-dom";
+import toast from "react-hot-toast";
 import ScreenContainer from "../../components/ScreenContainer/ScreenContainer";
 import TopBar from "../../components/TopBar/TopBar";
-import AuthenticationContext from "../../context/AuthenticationContext";
-import { getAuth } from "firebase/auth";
 
 export default function ManageResourcesPage() {
-  const { VpsUser } = useContext(AuthenticationContext);
-
-  if (!VpsUser) {
-    return (
-      <ScreenContainer vertical>
-        <TopBar back="/">
-          <h1 className="text-2xl">Manage Resources</h1>
-        </TopBar>
-        <div className="flex flex-col items-center justify-center h-full">
-          <p className="text-lg">You must be logged in to manage resources.</p>
-          <p className="text-lg">Please log in to continue.</p>
-        </div>
-      </ScreenContainer>
-    );
-  }
-
   const { scenarioId } = useParams();
-
   const fileInputRef = useRef(null);
+  const [resources, setResources] = useState([]); 
 
-  const [isToastShowing, setIsToastShowing] = useState(false);
-  const [toastText, setToastText] = useState("");
-  const [toastType, setToastType] = useState("success");
+  useEffect(() => {
+    const fetchResources = async () => {
+      try {
+        const auth = getAuth();
+        const user = auth.currentUser;
 
-  const showToast = (text, type = "success") => {
-    setToastText(text);
-    setToastType(type);
-    setIsToastShowing(true);
-  };
+        if (!user) {
+          toast.error("You must be logged in to view resources.");
+          return;
+        }
+
+        const idToken = await user.getIdToken();
+
+        const response = await fetch(
+          `http://localhost:3000/api/resources/scenario/${scenarioId}`,
+          {
+            headers: {
+              Authorization: `Bearer ${idToken}`,
+            },
+          }
+        );
+
+        if (!response.ok) {
+          const errorText = await response.text();
+          throw new Error(errorText || "Failed to fetch resources.");
+        }
+
+        const data = await response.json();
+        setResources(data);
+      } catch (error) {
+        toast.error("Error fetching resources: " + error.message);
+      }
+    };
+
+    fetchResources();
+  }, [scenarioId]);
 
   const upload = () => {
     fileInputRef.current?.click();
@@ -52,7 +62,6 @@ export default function ManageResourcesPage() {
       skipEmptyLines: true,
       complete: async (results) => {
         const { data } = results;
-
         console.log("Parsed CSV data:", data);
 
         try {
@@ -60,7 +69,7 @@ export default function ManageResourcesPage() {
           const user = auth.currentUser;
 
           if (!user) {
-            showToast("You must be logged in to upload.", "error");
+            toast.error("You must be logged in to upload.");
             return;
           }
 
@@ -77,20 +86,16 @@ export default function ManageResourcesPage() {
           );
 
           console.log("Backend response:", response.data);
+          toast.success(`Successfully uploaded ${data.length} resources!`);
 
-          showToast(`Successfully uploaded ${data.length} resources!`);
-          console.log(`Successfully uploaded ${data.length} resources!`);
+          // re-fetch resources after upload
+          setResources((prev) => [...prev, ...data]);
         } catch (error) {
           const msg = error?.response?.data || error.message || "Unknown error";
-          showToast(`Error uploading: ${msg}`, "error");
+          toast.error(`Error uploading: ${msg}`);
         }
       },
     });
-  };
-
-  const handleToastDismiss = (_, reason) => {
-    if (reason === "clickaway") return;
-    setIsToastShowing(false);
   };
 
   return (
@@ -108,22 +113,21 @@ export default function ManageResourcesPage() {
         </button>
       </TopBar>
 
-      {/* TODO: Add content here */}
-
-      <Snackbar
-        open={isToastShowing}
-        autoHideDuration={5000}
-        onClose={handleToastDismiss}
-        anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
-      >
-        <Alert
-          onClose={handleToastDismiss}
-          severity={toastType}
-          sx={{ width: "100%" }}
-        >
-          {toastText}
-        </Alert>
-      </Snackbar>
+      {/* TO DO */}
+      <div className="p-4">
+        <h2 className="text-xl font-semibold mb-2">Uploaded Resources</h2>
+        {resources.length === 0 ? (
+          <p>No resources uploaded yet.</p>
+        ) : (
+          <ul className="space-y-2">
+            {resources.map((resource, idx) => (
+              <li key={idx} className="border p-2 rounded">
+                {JSON.stringify(resource)}
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
     </ScreenContainer>
   );
 }
