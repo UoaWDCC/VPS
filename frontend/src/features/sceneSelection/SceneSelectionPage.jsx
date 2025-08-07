@@ -28,11 +28,11 @@ import {
 } from "../../hooks/crudHooks";
 import AuthoringToolPage from "../authoring/AuthoringToolPage";
 
-import { 
-  generateUniqueSceneName, 
-  isSceneNameDuplicate, 
-  generateDuplicateSceneName 
-} from '../../utils/sceneUtils';
+import {
+  generateUniqueSceneName,
+  isSceneNameDuplicate,
+  generateDuplicateSceneName,
+} from "../../utils/sceneUtils";
 
 // !! this should be handled by the backend instead
 function generateUID() {
@@ -122,7 +122,7 @@ export function SceneSelectionPage() {
   /** called when the Add card is clicked */
   async function createNewScene() {
     const uniqueName = generateUniqueSceneName(scenes, "Scene");
-    
+
     await usePost(
       `/api/scenario/${scenarioId}/scene`,
       {
@@ -158,7 +158,7 @@ export function SceneSelectionPage() {
   /** called when Duplicate button is clicked */
   async function duplicateScene() {
     const duplicateName = generateDuplicateSceneName(currentScene.name, scenes);
-    
+
     await usePost(
       `/api/scenario/${scenarioId}/scene/duplicate/${currentScene._id}`,
       { name: duplicateName },
@@ -188,25 +188,27 @@ export function SceneSelectionPage() {
   /** called when user unfocuses from a scene name */
   async function changeSceneName({ target }) {
     const newName = target.value.trim();
-    
+
     // check for empty name
     if (newName === "" || newName === null) {
       target.value = currentScene.name;
       setInvalidNameId(currentScene._id);
       return;
     }
-    
+
     // check for duplicate name and auto-generate unique name
     let finalName = newName;
     if (isSceneNameDuplicate(newName, scenes, currentScene._id)) {
       finalName = generateUniqueSceneName(scenes, newName);
       target.value = finalName;
-      alert(`Scene name "${newName}" already exists. Changed to "${finalName}".`);
+      alert(
+        `Scene name "${newName}" already exists. Changed to "${finalName}".`
+      );
     }
-    
+
     //  we get here the name is valid
     setInvalidNameId("");
-    
+
     await usePut(
       `/api/scenario/${scenarioId}/scene/${currentScene._id}`,
       {
