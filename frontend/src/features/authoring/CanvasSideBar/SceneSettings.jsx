@@ -14,6 +14,7 @@ import { withStyles } from "@material-ui/core/styles";
 import { useContext, useState, useEffect } from "react";
 import ScenarioContext from "context/ScenarioContext";
 import SceneContext from "context/SceneContext";
+import { isSceneNameDuplicate, generateUniqueSceneName } from '../../../utils/sceneUtils';
 
 import styles from "./CanvasSideBar.module.scss";
 import CustomInputLabelStyles from "./CustomPropertyInputStyles/CustomInputLabelStyles";
@@ -43,6 +44,7 @@ export default function SceneSettings() {
   const { currentScene, setCurrentScene } = useContext(SceneContext);
   const { roleList } = useContext(ScenarioContext);
   const [selectedRoles, setSelectedRoles] = useState([]);
+  const [originalSceneName, setOriginalSceneName] = useState('');
 
   const [checked, setChecked] = useState([]);
   const [allChecked, setAllChecked] = useState(false);
@@ -50,6 +52,9 @@ export default function SceneSettings() {
   useEffect(() => {
     if (currentScene.roles) {
       setSelectedRoles(currentScene.roles);
+    }
+    if (currentScene?.name) {
+      setOriginalSceneName(currentScene.name);
     }
     if (roleList) {
       const initialCheckedState = roleList.map((role) =>
@@ -86,6 +91,33 @@ export default function SceneSettings() {
       getUserIdToken
     );
   }
+
+  const saveSceneName = async (newName) => {
+    // Check for duplicates and auto-fix
+    let finalName = newName.trim();
+    if (isSceneNameDuplicate(finalName, scenes, currentScene._id)) {
+      finalName = generateUniqueSceneName(scenes, finalName);
+      alert(`Scene name "${newName}" already exists. Changed to "${finalName}".`);
+      // Update the local state with the corrected name
+      setCurrentScene({
+        ...currentScene,
+        name: finalName,
+      });
+    }
+
+    // Update the original name tracker
+    setOriginalSceneName(finalName);
+
+    // Save to backend
+    await usePut(
+      `/api/scenario/${scenarioId}/scene/${currentScene._id}`,
+      {
+        name: finalName,
+        components: currentScene.components,
+      },
+      getUserIdToken
+    );
+  };
 
   const handleCheckboxChange = (index) => {
     const newChecked = [...checked];
@@ -134,6 +166,12 @@ export default function SceneSettings() {
                 ...currentScene,
                 name: event.target.value,
               });
+            }}
+            onBlur={(event) => {
+              const currentValue = event.target.value.trim();
+              if (currentValue !== originalSceneName) {
+                saveSceneName(currentValue);
+              }
             }}
           />
           {/* input for scene roles */}

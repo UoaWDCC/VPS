@@ -28,6 +28,12 @@ import {
 } from "../../hooks/crudHooks";
 import AuthoringToolPage from "../authoring/AuthoringToolPage";
 
+import { 
+  generateUniqueSceneName, 
+  isSceneNameDuplicate, 
+  generateDuplicateSceneName 
+} from '../../utils/sceneUtils';
+
 // !! this should be handled by the backend instead
 function generateUID() {
   const charSet =
@@ -115,12 +121,13 @@ export function SceneSelectionPage() {
 
   /** called when the Add card is clicked */
   async function createNewScene() {
+    const uniqueName = generateUniqueSceneName(scenes, "Scene");
+    
     await usePost(
       `/api/scenario/${scenarioId}/scene`,
       {
-        name: `Scene ${scenes.length + 1}`,
+        name: uniqueName,
       },
-
       getUserIdToken
     );
     reFetch();
@@ -150,9 +157,11 @@ export function SceneSelectionPage() {
 
   /** called when Duplicate button is clicked */
   async function duplicateScene() {
+    const duplicateName = generateDuplicateSceneName(currentScene.name, scenes);
+    
     await usePost(
       `/api/scenario/${scenarioId}/scene/duplicate/${currentScene._id}`,
-      {},
+      { name: duplicateName },
       getUserIdToken
     );
     reFetch();
@@ -178,21 +187,30 @@ export function SceneSelectionPage() {
 
   /** called when user unfocuses from a scene name */
   async function changeSceneName({ target }) {
-    // Prevents user from changing scene name to empty string or one of only spaces
-    if (
-      target.value === "" ||
-      target.value === null ||
-      target.value.trim() === ""
-    ) {
+    const newName = target.value.trim();
+    
+    // check for empty name
+    if (newName === "" || newName === null) {
       target.value = currentScene.name;
       setInvalidNameId(currentScene._id);
-    } else {
-      setInvalidNameId("");
+      return;
     }
+    
+    // check for duplicate name and auto-generate unique name
+    let finalName = newName;
+    if (isSceneNameDuplicate(newName, scenes, currentScene._id)) {
+      finalName = generateUniqueSceneName(scenes, newName);
+      target.value = finalName;
+      alert(`Scene name "${newName}" already exists. Changed to "${finalName}".`);
+    }
+    
+    //  we get here the name is valid
+    setInvalidNameId("");
+    
     await usePut(
       `/api/scenario/${scenarioId}/scene/${currentScene._id}`,
       {
-        name: target.value,
+        name: finalName,
         components: currentScene.components,
       },
       getUserIdToken
