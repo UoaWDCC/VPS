@@ -14,6 +14,10 @@ import { withStyles } from "@material-ui/core/styles";
 import { useContext, useState, useEffect } from "react";
 import ScenarioContext from "context/ScenarioContext";
 import SceneContext from "context/SceneContext";
+import {
+  isSceneNameDuplicate,
+  generateUniqueSceneName,
+} from "../../../utils/sceneUtils";
 
 import styles from "./CanvasSideBar.module.scss";
 import CustomInputLabelStyles from "./CustomPropertyInputStyles/CustomInputLabelStyles";
@@ -40,9 +44,11 @@ const CustomTextField = withStyles({
  * @component
  */
 export default function SceneSettings() {
-  const { currentScene, setCurrentScene } = useContext(SceneContext);
+  const { currentScene, setCurrentScene, scenes, reFetch } =
+    useContext(SceneContext);
   const { roleList } = useContext(ScenarioContext);
   const [selectedRoles, setSelectedRoles] = useState([]);
+  const [originalSceneName, setOriginalSceneName] = useState("");
 
   const [checked, setChecked] = useState([]);
   const [allChecked, setAllChecked] = useState(false);
@@ -50,6 +56,9 @@ export default function SceneSettings() {
   useEffect(() => {
     if (currentScene.roles) {
       setSelectedRoles(currentScene.roles);
+    }
+    if (currentScene?.name) {
+      setOriginalSceneName(currentScene.name);
     }
     if (roleList) {
       const initialCheckedState = roleList.map((role) =>
@@ -66,7 +75,6 @@ export default function SceneSettings() {
   }, [roleList, currentScene]);
 
   const { scenarioId } = useParams();
-  const { scenes } = useContext(SceneContext);
   const { getUserIdToken } = useContext(AuthenticationContext);
   async function saveRoles(newRoles) {
     const updatedScenes = scenes.map(({ _id, name, roles: oldRoles }) => {
@@ -86,6 +94,57 @@ export default function SceneSettings() {
       getUserIdToken
     );
   }
+
+  const saveSceneName = async (newName) => {
+    // Check for empty name first
+    if (!newName || newName.trim() === "") {
+      alert("Scene name cannot be empty.");
+      setCurrentScene({
+        ...currentScene,
+        name: originalSceneName,
+      });
+      return;
+    }
+
+    // Check for duplicates and auto-fix
+    let finalName = newName.trim();
+
+    console.log("Checking duplicate for:", finalName);
+    console.log("Current scene ID:", currentScene._id);
+    console.log(
+      "All scenes:",
+      scenes.map((s) => ({ id: s._id, name: s.name }))
+    );
+
+    if (isSceneNameDuplicate(finalName, scenes, currentScene._id)) {
+      console.log("Duplicate found, generating unique name...");
+      finalName = generateUniqueSceneName(scenes, finalName);
+      alert(
+        `Scene name "${newName}" already exists. Changed to "${finalName}".`
+      );
+      // Update the local state with the corrected name
+      setCurrentScene({
+        ...currentScene,
+        name: finalName,
+      });
+    }
+
+    // Update the original name tracker
+    setOriginalSceneName(finalName);
+
+    // Save to backend
+    await usePut(
+      `/api/scenario/${scenarioId}/scene/${currentScene._id}`,
+      {
+        name: finalName,
+        components: currentScene.components,
+      },
+      getUserIdToken
+    );
+
+    // Refresh the scenes data
+    reFetch();
+  };
 
   const handleCheckboxChange = (index) => {
     const newChecked = [...checked];
@@ -134,6 +193,11 @@ export default function SceneSettings() {
                 ...currentScene,
                 name: event.target.value,
               });
+            }}
+            onBlur={(event) => {
+              const currentValue = event.target.value.trim();
+
+              saveSceneName(currentValue);
             }}
           />
           {/* input for scene roles */}
