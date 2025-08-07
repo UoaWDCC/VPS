@@ -144,6 +144,34 @@ const fetchScene = async (email, scenarioId) => {
   return (user && user.paths && user.paths.get(scenarioId)[0]) || null;
 };
 
+/**
+ * Sets the state variables for a given user and scenario
+ * @param {String} userId
+ * @param {String} scenarioId
+ * @param {Object} stateVariables
+ * @returns updated user object
+ */
+const setUserStateVariables = async (userId, scenarioId, stateVariables) => {
+  try {
+    const user = await User.findOneAndUpdate(
+      { _id: userId },
+      {
+        $set: {
+          [`stateVariables.${scenarioId}`]: stateVariables,
+        },
+      },
+      { new: true }
+    );
+
+    if (!user) {
+      throw new Error("User not found");
+    }
+    return user;
+  } catch (error) {
+    throw new Error(`Error initiating state variables: ${error.message}`);
+  }
+};
+
 export {
   retrieveAllUser,
   createUser,
@@ -155,4 +183,5 @@ export {
   assignScenarioToUsers,
   retrieveAssignedScenarioList,
   fetchScene,
+  setUserStateVariables,
 };

@@ -20,8 +20,27 @@ export default function AuthenticationContextProvider({ children }) {
    */
   async function getUserIdToken() {
     if (user) {
-      const token = await user.getIdToken();
-      return token;
+      try {
+        // Try to get token without forcing refresh
+        const token = await user.getIdToken(false);
+        return token;
+      } catch (error) {
+        console.error("Failed to get ID token:", error);
+        // Try to refresh the token if getting it failed
+        try {
+          const refreshedToken = await user.getIdToken(true);
+          return refreshedToken;
+        } catch (refreshError) {
+          console.error("Failed to refresh ID token:", refreshError);
+          // Last resort -> try signing out and redirecting to login
+          try {
+            await auth.signOut();
+          } catch (signOutError) {
+            console.error("Failed to sign out:", signOutError);
+          }
+          return null;
+        }
+      }
     }
 
     return null;

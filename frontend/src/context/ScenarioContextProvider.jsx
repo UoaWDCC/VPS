@@ -5,6 +5,7 @@ import useLocalStorage from "../hooks/useLocalStorage";
 import AuthenticationContext from "./AuthenticationContext";
 import ScenarioContext from "./ScenarioContext";
 import { api } from "../util/api";
+import { ensureStateVariableUUIDs } from "../components/StateVariables/migrationUtils";
 
 /**
  * This is a Context Provider made with the React Context API
@@ -39,18 +40,43 @@ export default function ScenarioContextProvider({ children }) {
   // We may load before the auth is ready, refetch if we did.
   useEffect(() => {
     if (user) {
-      reFetch();
-      reFetch2();
-      reFetch3();
+      // Clear existing scenarios state before refetching to ensure fresh data
+      setScenarios(null);
+      setAssignedScenarios(null);
+      setRoleList(null);
+
+      // Add a small delay to ensure token is properly refreshed
+      const timeoutId = setTimeout(() => {
+        reFetch();
+        reFetch2();
+        reFetch3();
+      }, 100);
+
+      return () => clearTimeout(timeoutId);
     }
   }, [user]);
+
+  // Additional effect to handle scenarios not loading after authentication
+  useEffect(() => {
+    if (user && (!scenarios || !assignedScenarios)) {
+      // If user is available but scenarios haven't loaded, retry after a delay
+      const retryTimeoutId = setTimeout(() => {
+        if (!scenarios) reFetch();
+        if (!assignedScenarios) reFetch2();
+      }, 1000);
+
+      return () => clearTimeout(retryTimeoutId);
+    }
+  }, [user, scenarios, assignedScenarios]);
 
   useEffect(() => {
     if (currentScenario?._id && user) {
       api
         .get(user, `api/scenario/${currentScenario._id}/stateVariables`)
         .then((res) => {
-          setStateVariables(res.data);
+          // Ensure all state variables have UUIDs for backward compatibility
+          const stateVariablesWithUUIDs = ensureStateVariableUUIDs(res.data);
+          setStateVariables(stateVariablesWithUUIDs);
         })
         .catch((error) => {
           console.error("Error fetching state variables:", error);

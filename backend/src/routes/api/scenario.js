@@ -118,11 +118,11 @@ router.put("/:scenarioId/stateVariables", async (req, res) => {
 
 // Delete a state variable from a scenario
 router.delete(
-  "/:scenarioId/stateVariables/:stateVariableName",
+  "/:scenarioId/stateVariables/:stateVariableIdentifier",
   async (req, res) => {
     let updatedStateVariables = await deleteStateVariable(
       req.params.scenarioId,
-      req.params.stateVariableName
+      req.params.stateVariableIdentifier
     );
     res.status(HTTP_OK).json(updatedStateVariables);
   }

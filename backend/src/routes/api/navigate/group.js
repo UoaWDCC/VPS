@@ -6,6 +6,8 @@ import Note from "../../../db/models/note.js";
 import Resource from "../../../db/models/resource.js";
 import { HttpError } from "../../../util/error.js";
 import STATUS from "../../../util/status.js";
+import { getStateVariables } from "../../../db/daos/scenarioDao.js";
+import { setGroupStateVariables } from "../../../db/daos/groupDao.js";
 
 const createInvalidError = (roles) =>
   new HttpError("Invalid role to access this scene", STATUS.FORBIDDEN, {
@@ -140,6 +142,12 @@ const removeFlagsFromGroup = async (groupId, flags) => {
   }
 };
 
+// Initiates state variables for a group
+const initiateStateVariables = async (groupId, scenarioId) => {
+  const stateVariables = await getStateVariables(scenarioId);
+  setGroupStateVariables(groupId, stateVariables);
+};
+
 export const groupNavigate = async (req) => {
   const { uid, currentScene, nextScene, addFlags, removeFlags } = req.body;
 
@@ -154,6 +162,7 @@ export const groupNavigate = async (req) => {
       addFlagsToGroup(group._id, addFlags),
       removeFlagsFromGroup(group._id, removeFlags),
       getConnectedScenes(firstSceneId, role),
+      initiateStateVariables(group._id, group.scenarioId),
     ]);
     return { status: STATUS.OK, json: scenes };
   }

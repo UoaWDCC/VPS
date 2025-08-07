@@ -30,6 +30,12 @@ const userSchema = new Schema({
     of: [String],
     default: {},
   },
+  // Map of scenarioId to state variables
+  stateVariables: {
+    type: Map,
+    of: Schema.Types.Mixed,
+    default: {},
+  },
 });
 
 const User = mongoose.model("model", userSchema, "users");
