@@ -14,6 +14,7 @@ export default function PlayScenarioCanvas({
   reset,
   setAddFlags,
   setRemoveFlags,
+  setComponentId,
 }) {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -66,6 +67,7 @@ export default function PlayScenarioCanvas({
           case "BUTTON":
             action = () => {
               if (component.nextScene) {
+                setComponentId(component.id);
                 incrementor(component.nextScene);
                 setFlags(component);
               }

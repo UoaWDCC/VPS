@@ -18,7 +18,8 @@ const navigate = async (
   currentScene,
   nextScene,
   addFlags,
-  removeFlags
+  removeFlags,
+  componentId
 ) => {
   console.log("navigating");
 
@@ -30,7 +31,7 @@ const navigate = async (
       "Content-Type": "application/json",
       Authorization: `Bearer ${token}`,
     },
-    data: { currentScene, nextScene, addFlags, removeFlags },
+    data: { currentScene, nextScene, addFlags, removeFlags, componentId },
   };
   const res = await axios.request(config);
   res.data.scenes.forEach((scene) => sceneCache.set(scene._id, scene));
@@ -51,6 +52,8 @@ export default function PlayScenarioPage() {
 
   const [addFlags, setAddFlags] = useState([]);
   const [removeFlags, setRemoveFlags] = useState([]);
+
+  const [componentId, setComponentId] = useState(null);
 
   const reload = () => {
     setPrevious(null);
@@ -80,7 +83,8 @@ export default function PlayScenarioPage() {
           previous,
           sceneId,
           addFlags,
-          removeFlags
+          removeFlags,
+          componentId
         );
         if (!sceneId)
           history.replace(`/play/${scenarioId}/singleplayer/${newSceneId}`);
@@ -124,6 +128,7 @@ export default function PlayScenarioPage() {
       reset={reset}
       setAddFlags={setAddFlags}
       setRemoveFlags={setRemoveFlags}
+      setComponentId={setComponentId}
     />
   );
 }
