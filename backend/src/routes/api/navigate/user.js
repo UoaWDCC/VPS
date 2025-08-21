@@ -4,6 +4,7 @@ import Scene from "../../../db/models/scene.js";
 import User from "../../../db/models/user.js";
 
 import { HttpError } from "../../../util/error.js";
+import { applyStateOperations } from "../../../util/statevariables/stateOperations.js";
 import STATUS from "../../../util/status.js";
 
 import { getScenarioFirstScene, getSimpleScene } from "./group.js";
@@ -44,11 +45,41 @@ const initiateStateVariables = async (userId, scenarioId) => {
   setUserStateVariables(userId, scenarioId, stateVariables);
 };
 
+// Updates state variables for a user
+export const updateStateVariables = async (
+  user,
+  scenarioId,
+  scene,
+  componentId
+) => {
+  const component = scene.components.find((c) => c.id === componentId);
+
+  if (!component) {
+    throw new HttpError("Component does not exist", STATUS.BAD_REQUEST);
+  }
+
+  if (!component.stateOperations) {
+    return;
+  }
+
+  const stateOperations = component.stateOperations;
+
+  const stateVariables = applyStateOperations(
+    user.stateVariables[scenarioId],
+    stateOperations
+  );
+
+  setUserStateVariables(user._id, scenarioId, stateVariables);
+};
+
 export const userNavigate = async (req) => {
-  const { uid, currentScene, nextScene } = req.body;
+  const { uid, currentScene, nextScene, componentId } = req.body;
   const { scenarioId } = req.params;
 
-  const user = await User.findOne({ uid }, { paths: 1, _id: 1 }).lean();
+  const user = await User.findOne(
+    { uid },
+    { paths: 1, _id: 1, stateVariables: 1 }
+  ).lean();
   const path = user.paths[scenarioId];
 
   // the first time the user  is navigating
@@ -82,6 +113,7 @@ export const userNavigate = async (req) => {
 
   const [, scenes] = await Promise.all([
     addSceneToPath(user._id, scenarioId, currentScene, nextScene),
+    updateStateVariables(user, scenarioId, scene, componentId),
     getConnectedScenes(nextScene, false),
   ]);
 
