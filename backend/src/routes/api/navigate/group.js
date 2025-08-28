@@ -8,6 +8,7 @@ import { HttpError } from "../../../util/error.js";
 import STATUS from "../../../util/status.js";
 import { getStateVariables } from "../../../db/daos/scenarioDao.js";
 import { setGroupStateVariables } from "../../../db/daos/groupDao.js";
+import { applyStateOperations } from "../../../util/statevariables/stateOperations.js";
 
 const createInvalidError = (roles) =>
   new HttpError("Invalid role to access this scene", STATUS.FORBIDDEN, {
@@ -60,7 +61,7 @@ const getGroupByIdAndUser = async (groupId, uid) => {
   const { email } = await User.findOne({ uid }, { email: 1 }).lean();
   const group = await Group.findOne(
     { _id: groupId, users: { $elemMatch: { email } } },
-    { "users.$": 1, scenarioId: 1, path: 1 }
+    { "users.$": 1, scenarioId: 1, path: 1, stateVariables: 1 }
   ).lean();
   if (!group)
     throw new HttpError(
@@ -148,8 +149,31 @@ const initiateStateVariables = async (groupId, scenarioId) => {
   setGroupStateVariables(groupId, stateVariables);
 };
 
+// Updates state variables for a group
+export const updateStateVariables = async (group, scene, componentId) => {
+  const component = scene.components.find((c) => c.id === componentId);
+
+  if (!component) {
+    throw new HttpError("Component does not exist", STATUS.BAD_REQUEST);
+  }
+
+  if (!component.stateOperations) {
+    return;
+  }
+
+  const stateOperations = component.stateOperations;
+
+  const stateVariables = applyStateOperations(
+    group.stateVariables,
+    stateOperations
+  );
+
+  setGroupStateVariables(group._id, stateVariables);
+};
+
 export const groupNavigate = async (req) => {
-  const { uid, currentScene, nextScene, addFlags, removeFlags } = req.body;
+  const { uid, currentScene, nextScene, addFlags, removeFlags, componentId } =
+    req.body;
 
   const group = await getGroupByIdAndUser(req.params.groupId, uid);
   const { role } = group.users[0];
@@ -189,6 +213,7 @@ export const groupNavigate = async (req) => {
     addSceneToPath(group._id, currentScene, nextScene),
     addFlagsToGroup(group._id, addFlags),
     removeFlagsFromGroup(group._id, removeFlags),
+    updateStateVariables(group, scene, componentId),
     getConnectedScenes(nextScene, role, false),
   ]);
 
