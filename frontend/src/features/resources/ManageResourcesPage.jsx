@@ -33,14 +33,22 @@ export default function ManageResourcesPage() {
           return;
         }
         const idToken = await user.getIdToken();
-        const response = await fetch(`http://localhost:3000/api/resources/scenario/${scenarioId}`, {
-          headers: { Authorization: `Bearer ${idToken}` },
-        });
-        if (!response.ok) throw new Error((await response.text()) || "Failed to fetch resources.");
+        const response = await fetch(
+          `http://localhost:3000/api/resources/scenario/${scenarioId}`,
+          {
+            headers: { Authorization: `Bearer ${idToken}` },
+          }
+        );
+        if (!response.ok)
+          throw new Error(
+            (await response.text()) || "Failed to fetch resources."
+          );
         const data = await response.json();
         setResources(data);
       } catch (err) {
-        toast.error("Error fetching resources: " + (err?.message || String(err)));
+        toast.error(
+          "Error fetching resources: " + (err?.message || String(err))
+        );
       }
     })();
   }, [scenarioId]);
@@ -109,7 +117,14 @@ export default function ManageResourcesPage() {
     const out = [];
     for (const g of groups) {
       for (const c of g.children) {
-        for (const f of c.files) out.push({ ...f, groupId: g.id, childId: c.id, groupName: g.name, childName: c.name });
+        for (const f of c.files)
+          out.push({
+            ...f,
+            groupId: g.id,
+            childId: c.id,
+            groupName: g.name,
+            childName: c.name,
+          });
       }
     }
     return out;
@@ -118,7 +133,11 @@ export default function ManageResourcesPage() {
   const filteredFiles = useMemo(() => {
     if (!filter) return allFiles;
     const q = filter.toLowerCase();
-    return allFiles.filter((f) => f.name.toLowerCase().includes(q) || `${f.groupName}/${f.childName}`.toLowerCase().includes(q));
+    return allFiles.filter(
+      (f) =>
+        f.name.toLowerCase().includes(q) ||
+        `${f.groupName}/${f.childName}`.toLowerCase().includes(q)
+    );
   }, [allFiles, filter]);
 
   function addFilesTo(childId, files) {
@@ -151,7 +170,10 @@ export default function ManageResourcesPage() {
     setGroups((prev) =>
       prev.map((g) => ({
         ...g,
-        children: g.children.map((c) => ({ ...c, files: c.files.filter((f) => f.id !== fileId) })),
+        children: g.children.map((c) => ({
+          ...c,
+          files: c.files.filter((f) => f.id !== fileId),
+        })),
       }))
     );
     if (selectedFile?.id === fileId) setSelectedFile(null);
@@ -162,7 +184,13 @@ export default function ManageResourcesPage() {
       {/* ==== TopBar keeps your existing header area ==== */}
       <TopBar back={`/scenario/${scenarioId}`}>
         {/* CSV bulk importer (unchanged) */}
-        <input type="file" ref={csvInputRef} accept=".csv" className="hidden" onChange={handleCsvUpload} />
+        <input
+          type="file"
+          ref={csvInputRef}
+          accept=".csv"
+          className="hidden"
+          onChange={handleCsvUpload}
+        />
         <button className="btn vps w-[100px]" onClick={triggerCsvUpload}>
           Upload CSV
         </button>
@@ -202,7 +230,11 @@ export default function ManageResourcesPage() {
           <div className="card-body gap-4">
             <div className="flex items-center justify-between">
               <h2 className="card-title">Collections</h2>
-              <AddGroup onAdd={(name) => setGroups((g) => [...g, { id: uid(), name, children: [] }])} />
+              <AddGroup
+                onAdd={(name) =>
+                  setGroups((g) => [...g, { id: uid(), name, children: [] }])
+                }
+              />
             </div>
 
             <ul className="menu bg-base-100 rounded-box w-full">
@@ -211,24 +243,54 @@ export default function ManageResourcesPage() {
                   <details>
                     <summary className="flex items-center gap-2">
                       <span className="font-medium">{group.name}</span>
-                      <AddChild onAdd={(name) => setGroups((prev) => prev.map((g) => (g.id === group.id ? { ...g, children: [...g.children, { id: uid(), name, files: [] }] } : g)))} />
+                      <AddChild
+                        onAdd={(name) =>
+                          setGroups((prev) =>
+                            prev.map((g) =>
+                              g.id === group.id
+                                ? {
+                                    ...g,
+                                    children: [
+                                      ...g.children,
+                                      { id: uid(), name, files: [] },
+                                    ],
+                                  }
+                                : g
+                            )
+                          )
+                        }
+                      />
                     </summary>
                     <ul>
-                      {group.children.length === 0 && <li className="opacity-60 p-2">No sub-items yet</li>}
+                      {group.children.length === 0 && (
+                        <li className="opacity-60 p-2">No sub-items yet</li>
+                      )}
                       {group.children.map((child) => (
                         <li key={child.id}>
                           <div className="flex items-center justify-between pr-2">
                             <span>{child.name}</span>
-                            <UploadButton onFiles={(files) => addFilesTo(child.id, files)} />
+                            <UploadButton
+                              onFiles={(files) => addFilesTo(child.id, files)}
+                            />
                           </div>
                           {child.files.length > 0 && (
                             <ul className="ml-2 border-l border-base-300">
                               {child.files.map((f) => (
-                                <li key={f.id} className="flex items-center gap-1">
-                                  <button className="btn btn-ghost btn-xs justify-start" onClick={() => setSelectedFile(f)}>
+                                <li
+                                  key={f.id}
+                                  className="flex items-center gap-1"
+                                >
+                                  <button
+                                    className="btn btn-ghost btn-xs justify-start"
+                                    onClick={() => setSelectedFile(f)}
+                                  >
                                     {f.name}
                                   </button>
-                                  <button className="btn btn-ghost btn-xs text-error" onClick={() => removeFile(f.id)} title="Remove">
+                                  <button
+                                    className="btn btn-ghost btn-xs text-error"
+                                    onClick={() => removeFile(f.id)}
+                                    title="Remove"
+                                  >
                                     ✕
                                   </button>
                                 </li>
@@ -250,7 +312,13 @@ export default function ManageResourcesPage() {
           <div className="card-body gap-4">
             <div className="flex items-center gap-2">
               <h2 className="card-title flex-1">Files</h2>
-              <input type="text" placeholder="Search files..." className="input input-bordered input-sm w-full max-w-xs" value={filter} onChange={(e) => setFilter(e.target.value)} />
+              <input
+                type="text"
+                placeholder="Search files..."
+                className="input input-bordered input-sm w-full max-w-xs"
+                value={filter}
+                onChange={(e) => setFilter(e.target.value)}
+              />
             </div>
 
             {filteredFiles.length === 0 ? (
@@ -272,14 +340,26 @@ export default function ManageResourcesPage() {
                     {filteredFiles.map((f) => (
                       <tr key={f.id}>
                         <td>
-                          <button className="link" onClick={() => setSelectedFile(f)}>
+                          <button
+                            className="link"
+                            onClick={() => setSelectedFile(f)}
+                          >
                             {f.name}
                           </button>
                         </td>
-                        <td className="text-xs opacity-70">{f.groupName} / {f.childName}</td>
-                        <td className="text-right text-xs">{formatBytes(f.size)}</td>
+                        <td className="text-xs opacity-70">
+                          {f.groupName} / {f.childName}
+                        </td>
+                        <td className="text-right text-xs">
+                          {formatBytes(f.size)}
+                        </td>
                         <td className="text-right">
-                          <button className="btn btn-ghost btn-xs text-error" onClick={() => removeFile(f.id)}>Delete</button>
+                          <button
+                            className="btn btn-ghost btn-xs text-error"
+                            onClick={() => removeFile(f.id)}
+                          >
+                            Delete
+                          </button>
                         </td>
                       </tr>
                     ))}
@@ -303,12 +383,24 @@ function UploadButton({ onFiles, multiple = true, className = "" }) {
   const inputRef = useRef(null);
   return (
     <>
-      <input ref={inputRef} type="file" multiple={multiple} className="hidden" onChange={(e) => {
-        const files = Array.from(e.target.files || []);
-        if (files.length) onFiles(files);
-        e.target.value = ""; // allow re-select
-      }} />
-      <button className={`btn btn-ghost btn-xs ${className}`} onClick={() => inputRef.current?.click()} title="Add files">＋</button>
+      <input
+        ref={inputRef}
+        type="file"
+        multiple={multiple}
+        className="hidden"
+        onChange={(e) => {
+          const files = Array.from(e.target.files || []);
+          if (files.length) onFiles(files);
+          e.target.value = ""; // allow re-select
+        }}
+      />
+      <button
+        className={`btn btn-ghost btn-xs ${className}`}
+        onClick={() => inputRef.current?.click()}
+        title="Add files"
+      >
+        ＋
+      </button>
     </>
   );
 }
@@ -318,21 +410,37 @@ function AddGroup({ onAdd }) {
   const [name, setName] = useState("");
   return (
     <div className="dropdown dropdown-end">
-      <button className="btn btn-sm" onClick={() => setOpen((v) => !v)}>New group</button>
+      <button className="btn btn-sm" onClick={() => setOpen((v) => !v)}>
+        New group
+      </button>
       {open && (
         <div className="dropdown-content z-[1] bg-base-100 rounded-box p-3 w-64 shadow">
           <label className="form-control w-full">
             <span className="label-text">Group name</span>
-            <input className="input input-bordered input-sm" value={name} onChange={(e) => setName(e.target.value)} />
+            <input
+              className="input input-bordered input-sm"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+            />
           </label>
           <div className="mt-3 flex justify-end gap-2">
-            <button className="btn btn-ghost btn-sm" onClick={() => setOpen(false)}>Cancel</button>
-            <button className="btn btn-primary btn-sm" onClick={() => {
-              if (!name.trim()) return;
-              onAdd(name.trim());
-              setName("");
-              setOpen(false);
-            }}>Add</button>
+            <button
+              className="btn btn-ghost btn-sm"
+              onClick={() => setOpen(false)}
+            >
+              Cancel
+            </button>
+            <button
+              className="btn btn-primary btn-sm"
+              onClick={() => {
+                if (!name.trim()) return;
+                onAdd(name.trim());
+                setName("");
+                setOpen(false);
+              }}
+            >
+              Add
+            </button>
           </div>
         </div>
       )}
@@ -345,21 +453,41 @@ function AddChild({ onAdd }) {
   const [name, setName] = useState("");
   return (
     <div className="dropdown dropdown-end">
-      <button className="btn btn-ghost btn-xs" onClick={() => setOpen((v) => !v)} title="Add sub-item">＋</button>
+      <button
+        className="btn btn-ghost btn-xs"
+        onClick={() => setOpen((v) => !v)}
+        title="Add sub-item"
+      >
+        ＋
+      </button>
       {open && (
         <div className="dropdown-content z-[1] bg-base-100 rounded-box p-3 w-60 shadow">
           <label className="form-control w-full">
             <span className="label-text">Sub-item name</span>
-            <input className="input input-bordered input-sm" value={name} onChange={(e) => setName(e.target.value)} />
+            <input
+              className="input input-bordered input-sm"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+            />
           </label>
           <div className="mt-3 flex justify-end gap-2">
-            <button className="btn btn-ghost btn-sm" onClick={() => setOpen(false)}>Cancel</button>
-            <button className="btn btn-primary btn-sm" onClick={() => {
-              if (!name.trim()) return;
-              onAdd(name.trim());
-              setName("");
-              setOpen(false);
-            }}>Add</button>
+            <button
+              className="btn btn-ghost btn-sm"
+              onClick={() => setOpen(false)}
+            >
+              Cancel
+            </button>
+            <button
+              className="btn btn-primary btn-sm"
+              onClick={() => {
+                if (!name.trim()) return;
+                onAdd(name.trim());
+                setName("");
+                setOpen(false);
+              }}
+            >
+              Add
+            </button>
           </div>
         </div>
       )}
@@ -372,11 +500,15 @@ function Preview({ file }) {
     return (
       <div className="prose max-w-none opacity-70">
         <h3>Preview</h3>
-        <p>Select a file to preview. Images are shown inline. Text is rendered below. For other files, a download link appears.</p>
+        <p>
+          Select a file to preview. Images are shown inline. Text is rendered
+          below. For other files, a download link appears.
+        </p>
       </div>
     );
   const isImage = file.type.startsWith("image/");
-  const isText = file.type.startsWith("text/") || /json|xml|csv/.test(file.type);
+  const isText =
+    file.type.startsWith("text/") || /json|xml|csv/.test(file.type);
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between">
@@ -386,11 +518,17 @@ function Preview({ file }) {
         </a>
       </div>
       {isImage ? (
-        <img src={file.url} alt={file.name} className="rounded-xl max-h-80 object-contain" />
+        <img
+          src={file.url}
+          alt={file.name}
+          className="rounded-xl max-h-80 object-contain"
+        />
       ) : isText ? (
         <TextFileView file={file.file} />
       ) : (
-        <div className="alert"><span>Preview not supported. You can download the file instead.</span></div>
+        <div className="alert">
+          <span>Preview not supported. You can download the file instead.</span>
+        </div>
       )}
     </div>
   );
@@ -405,13 +543,17 @@ function TextFileView({ file }) {
     reader.readAsText(file);
     return () => reader.abort?.();
   }, [file]);
-  return <pre className="mockup-code whitespace-pre-wrap text-xs max-h-80 overflow-auto p-4">{text}</pre>;
+  return (
+    <pre className="mockup-code whitespace-pre-wrap text-xs max-h-80 overflow-auto p-4">
+      {text}
+    </pre>
+  );
 }
 
 function formatBytes(bytes) {
   if (!+bytes) return "0 B";
   const k = 1024;
-  const sizes = ["B", "KB", "MB", "GB", "TB"]; 
+  const sizes = ["B", "KB", "MB", "GB", "TB"];
   const i = Math.floor(Math.log(bytes) / Math.log(k));
   return `${(bytes / Math.pow(k, i)).toFixed(2)} ${sizes[i]}`;
 }
