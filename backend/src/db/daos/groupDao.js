@@ -35,4 +35,32 @@ const createGroup = async (scenarioId, userList) => {
   return dbGroup;
 };
 
-export { getGroup, getCurrentScene, createGroup, getGroupByScenarioId };
+/**
+ * Sets the state variables for a group
+ * @param {String} groupId MongoDB ID of group
+ * @param {Object} stateVariables Object containing state variables
+ * @returns updated group object with state variables set
+ */
+const setGroupStateVariables = async (groupId, stateVariables) => {
+  try {
+    const group = await Group.findOneAndUpdate(
+      { _id: groupId },
+      { $set: { stateVariables } },
+      { new: true }
+    );
+    if (!group) {
+      throw new Error("Group not found");
+    }
+    return group;
+  } catch (error) {
+    throw new Error(`Error initiating state variables: ${error.message}`);
+  }
+};
+
+export {
+  getGroup,
+  getCurrentScene,
+  createGroup,
+  getGroupByScenarioId,
+  setGroupStateVariables,
+};

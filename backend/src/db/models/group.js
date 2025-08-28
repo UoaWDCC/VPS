@@ -17,6 +17,7 @@ const groupSchema = new Schema({
     type: String,
   },
   currentFlags: [String],
+  stateVariables: [Schema.Types.Mixed],
 });
 
 const Group = mongoose.model("Group", groupSchema, "groups");

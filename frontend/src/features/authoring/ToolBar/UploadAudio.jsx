@@ -1,5 +1,6 @@
 import { MenuItem } from "@material-ui/core";
 import AttachFileIcon from "@material-ui/icons/AttachFile";
+import Tooltip from "@material-ui/core/Tooltip";
 import { useContext, useRef } from "react";
 import SceneContext from "context/SceneContext";
 import ToolbarContext from "context/ToolbarContext";
@@ -32,15 +33,17 @@ function UploadAudio() {
         style={{ display: "none" }}
         onChange={handleFileInput}
       />
-      <MenuItem
-        className={styles.menuItem}
-        color="default"
-        variant="contained"
-        onClick={() => inputFile.current.click()}
-      >
-        <AttachFileIcon />
-        &nbsp;&nbsp;Upload Audio
-      </MenuItem>
+      <Tooltip title="Upload an audio file" placement="right" arrow>
+        <MenuItem
+          className={styles.menuItem}
+          color="default"
+          variant="contained"
+          onClick={() => inputFile.current.click()}
+        >
+          <AttachFileIcon />
+          &nbsp;&nbsp;Upload Audio
+        </MenuItem>
+      </Tooltip>
     </div>
   );
 }

@@ -1,17 +1,21 @@
-import { Box, Grid, IconButton, Tooltip, Card } from "@material-ui/core";
-import ReplayIcon from "@mui/icons-material/Replay";
-import SaveIcon from "@material-ui/icons/Save";
-import DeleteIcon from "@material-ui/icons/Delete";
+import { Box, Grid, Card } from "@material-ui/core";
 import { api } from "../../util/api";
 import { useContext, useState } from "react";
 import AuthenticationContext from "../../context/AuthenticationContext";
 import toast from "react-hot-toast";
 import StateVariableForm from "./StateVariableForm";
 import ScenarioContext from "../../context/ScenarioContext";
+import SceneContext from "../../context/SceneContext";
+import EditingTooltips from "./EditingTooltips";
 
 const EditStateVariable = ({ stateVariable, scenarioId }) => {
   const { user } = useContext(AuthenticationContext);
   const { setStateVariables } = useContext(ScenarioContext);
+  const sceneContext = useContext(SceneContext);
+  const { scenes, setScenes } = sceneContext || {
+    scenes: [],
+    setScenes: () => {},
+  };
 
   const { name, type, value } = stateVariable;
 
@@ -29,6 +33,7 @@ const EditStateVariable = ({ stateVariable, scenarioId }) => {
 
   const editStateVariable = () => {
     const newStateVariable = {
+      id: stateVariable.id, // Preserve the UUID
       name: newName,
       type: newType,
       value: newValue,
@@ -48,17 +53,70 @@ const EditStateVariable = ({ stateVariable, scenarioId }) => {
       });
   };
 
-  const deleteStateVariable = () => {
-    api
-      .delete(user, `api/scenario/${scenarioId}/stateVariables/${name}`)
-      .then((res) => {
-        setStateVariables(res.data);
+  const deleteStateVariable = async () => {
+    // Use ID if available (new format), otherwise fall back to name (legacy format)
+    const identifier = stateVariable.id || name;
+
+    try {
+      // Delete the state variable from the backend
+      const res = await api.delete(
+        user,
+        `api/scenario/${scenarioId}/stateVariables/${identifier}`
+      );
+      setStateVariables(res.data);
+
+      // Clean up all state operations that reference this deleted state variable
+      // Only do this if we have access to scenes (SceneContext is available)
+      if (scenes && scenes.length > 0 && setScenes) {
+        const updatedScenes = scenes.map((scene) => ({
+          ...scene,
+          components: scene.components.map((component) => {
+            if (!component.stateOperations) return component;
+
+            // Filter out state operations that reference the deleted state variable
+            const filteredOperations = component.stateOperations.filter(
+              (operation) => {
+                // Check both UUID and name references
+                const referencesDeletedVariable =
+                  (operation.stateVariableId &&
+                    operation.stateVariableId === stateVariable.id) ||
+                  (!operation.stateVariableId && operation.name === name);
+
+                return !referencesDeletedVariable;
+              }
+            );
+
+            return {
+              ...component,
+              stateOperations: filteredOperations,
+            };
+          }),
+        }));
+
+        // Update each scene in the backend
+        const updatePromises = updatedScenes.map((scene) =>
+          api.put(user, `api/scenario/${scenarioId}/scene/${scene._id}`, {
+            name: scene.name,
+            components: scene.components,
+            time: scene.time,
+          })
+        );
+
+        await Promise.all(updatePromises);
+
+        // Update the local state
+        setScenes(updatedScenes);
+
+        toast.success(
+          "State variable deleted and removed from all components!"
+        );
+      } else {
         toast.success("State variable deleted successfully!");
-      })
-      .catch((error) => {
-        console.error("Error deleting state variable:", error);
-        toast.error("Failed to delete state variable.");
-      });
+      }
+    } catch (error) {
+      console.error("Error deleting state variable:", error);
+      toast.error("Failed to delete state variable.");
+    }
   };
 
   return (
@@ -80,21 +138,11 @@ const EditStateVariable = ({ stateVariable, scenarioId }) => {
           setValue={setNewValue}
         />
         <Box ml="auto" display="flex" alignItems="center">
-          <Tooltip title="Reset">
-            <IconButton color="default" onClick={resetFields}>
-              <ReplayIcon />
-            </IconButton>
-          </Tooltip>
-          <Tooltip title="Save">
-            <IconButton color="primary" onClick={editStateVariable}>
-              <SaveIcon />
-            </IconButton>
-          </Tooltip>
-          <Tooltip title="Delete">
-            <IconButton color="secondary" onClick={deleteStateVariable}>
-              <DeleteIcon />
-            </IconButton>
-          </Tooltip>
+          <EditingTooltips
+            onReset={resetFields}
+            onSave={editStateVariable}
+            onDelete={deleteStateVariable}
+          />
         </Box>
       </Grid>
     </Card>

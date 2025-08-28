@@ -29,6 +29,10 @@ const StateVariableForm = ({
           label="Name"
           value={name}
           onChange={(e) => setName(e.target.value)}
+          onKeyDown={(e) => {
+            // stops browser shortcuts from messing with typing
+            e.stopPropagation();
+          }}
           required
         />
       </FormControl>
@@ -74,6 +78,10 @@ const StateVariableForm = ({
                   : e.target.value
               )
             }
+            onKeyDown={(e) => {
+              //  stops browser shortcuts from messing with typing
+              e.stopPropagation();
+            }}
             required
             type={type === StateTypes.NUMBER ? "number" : "text"}
           />
