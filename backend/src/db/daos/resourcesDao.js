@@ -76,6 +76,45 @@ const removeFlag = async (groupId, flag) => {
   return group.currentFlags;
 };
 
+const bulkCreateResources = async (scenarioId, resources) => {
+  if (!Array.isArray(resources)) {
+    throw new Error("Resource list must be an array");
+  }
+
+  // Optional: delete previous resources for the scenario
+  await Resource.deleteMany({ scenarioId });
+
+  const enrichedResources = resources.map((r) => {
+    const base = {
+      name: r.name || "",
+      requiredFlags: r.requiredFlags || [],
+      scenarioId,
+    };
+
+    // Determine type and content
+    if (r.type === "text") {
+      return {
+        ...base,
+        type: "text",
+        textContent: r.content || "",
+        imageContent: "",
+      };
+    } else if (r.type === "image") {
+      return {
+        ...base,
+        type: "image",
+        textContent: "",
+        imageContent: r.content || "",
+      };
+    } else {
+      throw new Error(`Unsupported resource type: ${r.type}`);
+    }
+  });
+
+  // Insert all resources at once
+  return await Resource.insertMany(enrichedResources);
+};
+
 const updateResourceById = async (
   resourceId,
   name,
@@ -110,4 +149,5 @@ export {
   removeFlag,
   getAllVisibleResources,
   updateResourceById,
+  bulkCreateResources,
 };
