@@ -2,6 +2,7 @@ import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { v4 as uuidv4 } from "uuid";
 import { getFirestore, collection, addDoc, setDoc } from "firebase/firestore";
 import { getAuth } from "firebase/auth";
+import { api, handleGeneric } from "../../../util/api.js";
 
 const storage = getStorage();
 const db = getFirestore();
@@ -11,11 +12,10 @@ const db = getFirestore();
  * @param {function} setCurrentScene
  */
 function addComponent(component, currentScene, setCurrentScene) {
-  const updatedComponents = currentScene.components;
+  // avoid mutating currentScene.components directly
+  const updatedComponents = [...(currentScene.components || []), component];
 
   console.log(component);
-
-  updatedComponents.push(component);
 
   setCurrentScene({
     ...currentScene,
@@ -135,12 +135,11 @@ function addImage(currentScene, setCurrentScene, image) {
 
 /**
  * Uploads an image to Firebase, saves the metadata to Firestore,
- * and adds the image to the current scene.
+ * notifies the backend, and adds the image to the current scene.
  *
  * @param {object} currentScene
  * @param {function} setCurrentScene
  * @param {File} fileObject
- * @param {string} url (temporary blob URL)
  */
 export async function addFirebaseImage(
   currentScene,
@@ -161,9 +160,10 @@ export async function addFirebaseImage(
     const downloadURL = await getDownloadURL(snapshot.ref);
 
     // Save image URL and metadata in Firestore
+    const uploadedAt = new Date().toISOString();
     const docRef = await addDoc(collection(db, "uploadedImages"), {
       url: downloadURL,
-      uploadedAt: new Date().toISOString(),
+      uploadedAt,
       fileName: fileObject.name,
       uid: user.uid,
     });
@@ -171,26 +171,28 @@ export async function addFirebaseImage(
     console.log("Image metadata saved with ID:", docRef.id);
     console.log("Image uploaded at:", downloadURL);
 
-    await fetch("http://localhost:3000/api/image", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
+    // Notify your backend using centralized axios client (auth handled)
+    try {
+      await api.post(user, "/api/image", {
         images: [
           {
             id: docRef.id,
             url: downloadURL,
             fileName: fileObject.name,
-            uploadedAt: new Date().toISOString(),
+            uploadedAt,
           },
         ],
-      }),
-    });
+      });
+    } catch (err) {
+      // toast + log via shared handler
+      handleGeneric(err);
+    }
 
     // Add image to scene
     const newImage = {
       type: "FIREBASEIMAGE",
       fileObject,
-      url: downloadURL, // Use permanent URL now
+      url: downloadURL, // permanent URL
       left: 0, // as percentage
       top: 0, // as percentage
       height: "auto",
