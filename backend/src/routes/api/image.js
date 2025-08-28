@@ -15,6 +15,7 @@ const HTTP_SERVER_ERROR = 500;
 
 // Add images to the database
 router.post("/", async (req, res) => {
+
   try {
     const { urls } = req.body;
     await Promise.all(urls.map(createImage));
@@ -22,6 +23,20 @@ router.post("/", async (req, res) => {
   } catch (err) {
     console.error("Failed to create images:", err);
     res.status(HTTP_SERVER_ERROR).json({ error: "Failed to create images." });
+
+  const { images } = req.body; // expects: [{ id, url, fileName, uploadedAt }, ...]
+
+  if (!Array.isArray(images) || images.length === 0) {
+    return res.status(400).json({ error: "No images provided" });
+  }
+
+  try {
+    await Promise.all(images.map(createImage));
+    res.status(HTTP_OK).send();
+  } catch (err) {
+    console.error("Error saving images:", err.message);
+    res.status(500).json({ error: "Failed to save images" });
+
   }
 });
 
@@ -42,14 +57,20 @@ router.get("/", async (req, res) => {
 router.get("/:imageId", async (req, res) => {
   const { imageId } = req.params;
 
+
   if (!mongoose.Types.ObjectId.isValid(imageId)) {
     return res
       .status(HTTP_BAD_REQUEST)
       .json({ error: "Invalid image ID format." });
+
+  if (!imageId || imageId === "undefined") {
+    return res.status(400).json({ error: "Invalid or missing image ID" });
+
   }
 
   try {
     const image = await retrieveImage(imageId);
+
 
     if (!image) {
       return res.status(HTTP_NOT_FOUND).json({ error: "Image not found." });
@@ -59,6 +80,14 @@ router.get("/:imageId", async (req, res) => {
   } catch (err) {
     console.error("Failed to retrieve image:", err);
     res.status(HTTP_SERVER_ERROR).json({ error: "Failed to retrieve image." });
+
+    if (!image) {
+      return res.status(404).json({ error: "Image not found" });
+    }
+    res.status(HTTP_OK).json(image);
+  } catch (err) {
+    console.error("Error fetching image:", err.message);
+    res.status(500).json({ error: "Server error" });
   }
 });
 
