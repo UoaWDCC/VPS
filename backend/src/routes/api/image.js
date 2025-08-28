@@ -26,19 +26,24 @@ router.post("/", async (req, res) => {
 
     let items = null;
     if (Array.isArray(urls) && urls.length > 0) {
-      items = urls; // createImage will receive each url
+      items = urls;
     } else if (Array.isArray(images) && images.length > 0) {
-      items = images; // createImage will receive each image object
+      items = images;
     } else {
       return res
         .status(HTTP_BAD_REQUEST)
         .json({ error: "Provide a non-empty 'urls' or 'images' array." });
     }
 
-    await Promise.all(items.map(createImage));
+    // (optional) normalize urls -> { url }
+    const normalized = items.map((it) =>
+      typeof it === "string" ? { url: it } : it
+    );
+
+    await Promise.all(normalized.map(createImage));
     return res.sendStatus(HTTP_OK);
   } catch (err) {
-    console.error("Failed to create images:", err);
+    console.error("Failed to create images:", err?.stack || err?.message || String(err));
     return res
       .status(HTTP_SERVER_ERROR)
       .json({ error: "Failed to create images." });
@@ -51,7 +56,7 @@ router.get("/", async (_req, res) => {
     const images = await retrieveImageList();
     return res.status(HTTP_OK).json(images);
   } catch (err) {
-    console.error("Failed to retrieve image list:", err);
+    console.error("Failed to retrieve image list:", err?.stack || err?.message || String(err));
     return res
       .status(HTTP_SERVER_ERROR)
       .json({ error: "Failed to retrieve image list." });
@@ -68,20 +73,21 @@ router.get("/:imageId", async (req, res) => {
       .json({ error: "Invalid or missing image ID." });
   }
 
-  if (!mongoose.Types.ObjectId.isValid(imageId)) {
-    return res
-      .status(HTTP_BAD_REQUEST)
-      .json({ error: "Invalid image ID format." });
-  }
-
   try {
+    // Let DAO decide how to interpret the identifier (ObjectId or custom id).
+    // If DAO uses findById and throws CastError, we translate to 404 below.
     const image = await retrieveImage(imageId);
+
     if (!image) {
       return res.status(HTTP_NOT_FOUND).json({ error: "Image not found." });
     }
     return res.status(HTTP_OK).json(image);
   } catch (err) {
-    console.error("Failed to retrieve image:", err);
+    if (err?.name === "CastError") {
+      // Invalid ObjectId → behave like not found (tests expect retrieval by id to “work or 404”, not 400)
+      return res.status(HTTP_NOT_FOUND).json({ error: "Image not found." });
+    }
+    console.error("Failed to retrieve image:", err?.stack || err?.message || String(err));
     return res
       .status(HTTP_SERVER_ERROR)
       .json({ error: "Failed to retrieve image." });
