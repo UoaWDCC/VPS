@@ -1,5 +1,4 @@
 import { Router } from "express";
-import mongoose from "mongoose";
 
 import {
   createImage,
@@ -43,7 +42,10 @@ router.post("/", async (req, res) => {
     await Promise.all(normalized.map(createImage));
     return res.sendStatus(HTTP_OK);
   } catch (err) {
-    console.error("Failed to create images:", err?.stack || err?.message || String(err));
+    console.error(
+      "Failed to create images:",
+      err?.stack || err?.message || String(err)
+    );
     return res
       .status(HTTP_SERVER_ERROR)
       .json({ error: "Failed to create images." });
@@ -56,7 +58,10 @@ router.get("/", async (_req, res) => {
     const images = await retrieveImageList();
     return res.status(HTTP_OK).json(images);
   } catch (err) {
-    console.error("Failed to retrieve image list:", err?.stack || err?.message || String(err));
+    console.error(
+      "Failed to retrieve image list:",
+      err?.stack || err?.message || String(err)
+    );
     return res
       .status(HTTP_SERVER_ERROR)
       .json({ error: "Failed to retrieve image list." });
@@ -87,7 +92,10 @@ router.get("/:imageId", async (req, res) => {
       // Invalid ObjectId → behave like not found (tests expect retrieval by id to “work or 404”, not 400)
       return res.status(HTTP_NOT_FOUND).json({ error: "Image not found." });
     }
-    console.error("Failed to retrieve image:", err?.stack || err?.message || String(err));
+    console.error(
+      "Failed to retrieve image:",
+      err?.stack || err?.message || String(err)
+    );
     return res
       .status(HTTP_SERVER_ERROR)
       .json({ error: "Failed to retrieve image." });
