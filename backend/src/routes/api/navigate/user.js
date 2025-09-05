@@ -1,4 +1,5 @@
 import { getStateVariables } from "../../../db/daos/scenarioDao.js";
+import { getComponent } from "../../../db/daos/sceneDao.js";
 import { setUserStateVariables } from "../../../db/daos/userDao.js";
 import Scene from "../../../db/models/scene.js";
 import User from "../../../db/models/user.js";
@@ -37,16 +38,6 @@ const addSceneToPath = async (userId, scenarioId, currentSceneId, sceneId) => {
   user.markModified("paths");
   await user.save();
   return STATUS.OK;
-};
-
-const getComponent = (scene, componentId) => {
-  const component = scene.components.find((c) => c.id === componentId);
-
-  if (!component) {
-    throw new HttpError("Component does not exist", STATUS.BAD_REQUEST);
-  }
-
-  return component;
 };
 
 // Initiates state variables for a user
@@ -103,8 +94,7 @@ export const userNavigate = async (req) => {
   if (path[0] !== currentScene)
     throw new HttpError("Scene mismatch has occured", STATUS.CONFLICT);
 
-  const scene = await getSimpleScene(currentScene);
-  const component = getComponent(scene, componentId);
+  const component = await getComponent(currentScene, componentId);
 
   // if the button does not lead to another scene or component does not exist, stay in the current scene
   const nextScene = component?.nextScene || currentScene;
