@@ -43,21 +43,17 @@ const navigate = async (
 export default function PlayScenarioPage() {
   const { user, loading, error: authError } = useContext(AuthenticationContext);
 
-  const { scenarioId, sceneId } = useParams();
+  const { scenarioId } = useParams();
   const history = useHistory();
 
+  const [sceneId, setSceneId] = useState(null);
   const [addFlags, setAddFlags] = useState([]);
   const [removeFlags, setRemoveFlags] = useState([]);
-
-  const reload = () => {
-    history.replace(`/play/${scenarioId}/singleplayer`);
-    onSceneChange();
-  };
 
   const handleError = (error) => {
     if (!error) return;
     if (error.status === 409) {
-      reload();
+      onSceneChange();
       toast.success(
         "A move from somewhere else was made, but you're back on track!"
       );
@@ -76,7 +72,9 @@ export default function PlayScenarioPage() {
         removeFlags,
         componentId
       );
-      history.replace(`/play/${scenarioId}/singleplayer/${newSceneId}`);
+      if (!sceneId) {
+        setSceneId(newSceneId);
+      }
     } catch (e) {
       handleError(e?.response?.data);
     }
@@ -87,16 +85,18 @@ export default function PlayScenarioPage() {
   }, []);
 
   const buttonPressed = async (component) => {
-    if (component.nextScene) {
-      if (!sceneCache.has(component.nextScene)) return;
-      history.replace(
-        `/play/${scenarioId}/singleplayer/${component.nextScene}`
-      );
+    const currentSceneId = sceneId;
+    const nextSceneId = component.nextScene;
+    if (nextSceneId) {
+      if (!sceneCache.has(nextSceneId)) return;
 
-      if (sceneCache.get(sceneId)?.error) handleError(sceneCache.get(sceneId));
+      if (sceneCache.get(nextSceneId)?.error)
+        handleError(sceneCache.get(nextSceneId));
+
+      setSceneId(nextSceneId);
     }
 
-    onSceneChange(component.id);
+    onSceneChange(component.id, currentSceneId);
   };
 
   const reset = async () => {
@@ -110,7 +110,7 @@ export default function PlayScenarioPage() {
       return;
     }
 
-    reload();
+    onSceneChange();
   };
 
   if (loading) return <LoadingPage text="Loading Scene..." />;
