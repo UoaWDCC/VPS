@@ -6,8 +6,7 @@ import {
   TextField,
   Typography,
 } from "@material-ui/core";
-import { validOperations } from "./Operations";
-import { StateTypes } from "./StateTypes";
+import { stateTypes, validOperations } from "./stateTypes";
 
 /**
  * Component with fields shared in both creating and editing state operations
@@ -49,7 +48,7 @@ const StateOperationForm = ({
         </Select>
       </FormControl>
       <FormControl>
-        {selectedState.type === StateTypes.BOOLEAN ? (
+        {selectedState.type === stateTypes.BOOLEAN ? (
           <>
             <InputLabel>Value</InputLabel>
             <Select
@@ -67,7 +66,7 @@ const StateOperationForm = ({
             label={`Value`}
             onChange={(e) =>
               setValue(
-                selectedState.type === StateTypes.NUMBER
+                selectedState.type === stateTypes.NUMBER
                   ? Number(e.target.value)
                   : e.target.value
               )
@@ -77,7 +76,7 @@ const StateOperationForm = ({
               e.stopPropagation();
             }}
             required
-            type={selectedState.type === StateTypes.NUMBER ? "number" : "text"}
+            type={selectedState.type === stateTypes.NUMBER ? "number" : "text"}
           />
         )}
       </FormControl>

@@ -11,7 +11,7 @@ import { useContext, useState } from "react";
 import ScenarioContext from "context/ScenarioContext";
 import SceneContext from "context/SceneContext";
 import StateOperationForm from "./StateOperationForm";
-import { getDefaultValue } from "./StateTypes";
+import { getDefaultValue } from "./stateTypes";
 
 /**
  * Component used for creating state operations

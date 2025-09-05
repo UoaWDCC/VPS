@@ -21,7 +21,9 @@ const navigate = async (
   currentScene,
   nextScene,
   addFlags,
-  removeFlags
+  removeFlags,
+
+  componentId
 ) => {
   const token = await user.getIdToken();
   const config = {
@@ -31,7 +33,7 @@ const navigate = async (
       "Content-Type": "application/json",
       Authorization: `Bearer ${token}`,
     },
-    data: { currentScene, nextScene, addFlags, removeFlags },
+    data: { currentScene, nextScene, addFlags, removeFlags, componentId },
   };
   const res = await axios.request(config);
   res.data.scenes.forEach((scene) => sceneCache.set(scene._id, scene));
@@ -68,6 +70,7 @@ export default function PlayScenarioPageMulti({ group }) {
   const [previous, setPrevious] = useState(null);
   const [addFlags, setAddFlags] = useState([]);
   const [removeFlags, setRemoveFlags] = useState([]);
+  const [componentId, setComponentId] = useState([]);
   const [resources, setResources] = useState([]);
 
   const reload = () => {
@@ -101,7 +104,8 @@ export default function PlayScenarioPageMulti({ group }) {
           previous,
           sceneId,
           addFlags,
-          removeFlags
+          removeFlags,
+          componentId
         );
         const newResources = await getResources(user, group._id);
         setResources(newResources);
@@ -150,6 +154,7 @@ export default function PlayScenarioPageMulti({ group }) {
         reset={reset}
         setAddFlags={setAddFlags}
         setRemoveFlags={setRemoveFlags}
+        setComponentId={setComponentId}
       />
       <PlayPageSideButton
         setNoteOpen={setNoteOpen}
