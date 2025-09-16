@@ -1,4 +1,4 @@
-import { useContext, useState, useEffect } from "react";
+import { useContext, useEffect, useState } from "react";
 import { useParams, useHistory } from "react-router-dom";
 import axios from "axios";
 import toast from "react-hot-toast";
@@ -16,13 +16,10 @@ const navigate = async (
   user,
   scenarioId,
   currentScene,
-  nextScene,
   addFlags,
   removeFlags,
   componentId
 ) => {
-  console.log("navigating");
-
   const token = await user.getIdToken();
   const config = {
     method: "post",
@@ -31,7 +28,7 @@ const navigate = async (
       "Content-Type": "application/json",
       Authorization: `Bearer ${token}`,
     },
-    data: { currentScene, nextScene, addFlags, removeFlags, componentId },
+    data: { currentScene, addFlags, removeFlags, componentId },
   };
   const res = await axios.request(config);
   res.data.scenes.forEach((scene) => sceneCache.set(scene._id, scene));
@@ -46,24 +43,17 @@ const navigate = async (
 export default function PlayScenarioPage() {
   const { user, loading, error: authError } = useContext(AuthenticationContext);
 
-  const { scenarioId, sceneId } = useParams();
+  const { scenarioId } = useParams();
   const history = useHistory();
-  const [previous, setPrevious] = useState(null);
 
+  const [sceneId, setSceneId] = useState(null);
   const [addFlags, setAddFlags] = useState([]);
   const [removeFlags, setRemoveFlags] = useState([]);
-
-  const [componentId, setComponentId] = useState(null);
-
-  const reload = () => {
-    setPrevious(null);
-    history.replace(`/play/${scenarioId}/singleplayer`);
-  };
 
   const handleError = (error) => {
     if (!error) return;
     if (error.status === 409) {
-      reload();
+      onSceneChange();
       toast.success(
         "A move from somewhere else was made, but you're back on track!"
       );
@@ -72,28 +62,42 @@ export default function PlayScenarioPage() {
     }
   };
 
-  useEffect(() => {
-    const onSceneChange = async () => {
-      if (sceneId && !previous) return;
-      if (sceneCache.get(sceneId)?.error) handleError(sceneCache.get(sceneId));
-      try {
-        const newSceneId = await navigate(
-          user,
-          scenarioId,
-          previous,
-          sceneId,
-          addFlags,
-          removeFlags,
-          componentId
-        );
-        if (!sceneId)
-          history.replace(`/play/${scenarioId}/singleplayer/${newSceneId}`);
-      } catch (e) {
-        handleError(e?.response?.data);
+  const onSceneChange = async (componentId) => {
+    try {
+      const newSceneId = await navigate(
+        user,
+        scenarioId,
+        sceneId,
+        addFlags,
+        removeFlags,
+        componentId
+      );
+      if (!sceneId) {
+        setSceneId(newSceneId);
       }
-    };
+    } catch (e) {
+      handleError(e?.response?.data);
+    }
+  };
+
+  useEffect(() => {
     onSceneChange();
-  }, [sceneId]);
+  }, []);
+
+  const buttonPressed = async (component) => {
+    const currentSceneId = sceneId;
+    const nextSceneId = component.nextScene;
+    if (nextSceneId) {
+      if (!sceneCache.has(nextSceneId)) return;
+
+      if (sceneCache.get(nextSceneId)?.error)
+        handleError(sceneCache.get(nextSceneId));
+
+      setSceneId(nextSceneId);
+    }
+
+    onSceneChange(component.id, currentSceneId);
+  };
 
   const reset = async () => {
     const res = await usePost(
@@ -106,7 +110,7 @@ export default function PlayScenarioPage() {
       return;
     }
 
-    reload();
+    onSceneChange();
   };
 
   if (loading) return <LoadingPage text="Loading Scene..." />;
@@ -115,20 +119,13 @@ export default function PlayScenarioPage() {
   const currScene = sceneCache.get(sceneId);
   if (!currScene) return <LoadingPage text="Loading Scene..." />;
 
-  const incrementor = (id) => {
-    if (!sceneCache.has(id)) return;
-    setPrevious(sceneId);
-    history.replace(`/play/${scenarioId}/singleplayer/${id}`);
-  };
-
   return (
     <PlayScenarioCanvas
       scene={currScene}
-      incrementor={incrementor}
       reset={reset}
       setAddFlags={setAddFlags}
       setRemoveFlags={setRemoveFlags}
-      setComponentId={setComponentId}
+      buttonPressed={buttonPressed}
     />
   );
 }
