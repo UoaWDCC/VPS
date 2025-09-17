@@ -8,9 +8,12 @@
     "contributors:add": "all-contributors add",
     "contributors:generate": "all-contributors generate"
   },
-  "dependencies": {},
+  "dependencies": {
+    "react-router-dom": "^7.9.1"
+  },
   "devDependencies": {
-    "all-contributors-cli": "^6.20.0",
-    "concurrently": "^9.1.2"
+    "all-contributors-cli": "^3.1.1",
+    "concurrently": "^9.1.2",
+    "daisyui": "^5.1.12"
   }
 }

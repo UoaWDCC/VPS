@@ -172,9 +172,7 @@ export const groupNavigate = async (req) => {
     const scenes = await getConnectedScenes(group.path[0], role);
     return { status: STATUS.OK, json: scenes };
   }
-
   // the user is navigating from one scene to another
-
   if (group.path[0] !== currentScene)
     throw new HttpError("Scene mismatch has occured", STATUS.CONFLICT);
 
