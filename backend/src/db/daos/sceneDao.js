@@ -34,7 +34,13 @@ const retrieveSceneList = async (scenarioId) => {
     "tag",
   ]);
 
-  return dbScenes;
+  const orderedScenes = dbScenario.scenes
+    .map((sceneId) =>
+      dbScenes.find((scene) => scene._id.toString() === sceneId.toString())
+    )
+    .filter(Boolean);
+
+  return orderedScenes;
 };
 
 /**
@@ -171,6 +177,22 @@ const getComponent = async (sceneId, componentId) => {
   return component;
 };
 
+/**
+ * Updates the order of scenes in a scenario
+ * @param {String} scenarioId MongoDB ID of scenario
+ * @param {String[]} sceneIds Array of scene IDs in the new order
+ * @returns {Promise<Object>} updated scenario object
+ */
+const updateSceneOrder = async (scenarioId, sceneIds) => {
+  const updatedScenario = await Scenario.findOneAndUpdate(
+    { _id: scenarioId },
+    { scenes: sceneIds },
+    { new: true }
+  );
+
+  return updatedScenario;
+};
+
 export {
   createScene,
   retrieveSceneList,
@@ -180,4 +202,5 @@ export {
   duplicateScene,
   incrementVisisted,
   getComponent,
+  updateSceneOrder,
 };
