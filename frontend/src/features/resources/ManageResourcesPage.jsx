@@ -13,7 +13,7 @@ export default function ManageResourcesPage() {
   const { scenarioId } = useParams();
 
   const csvInputRef = useRef(null);
-  const [resources, setResources] = useState([]);
+  const [setResources] = useState([]);
 
   useEffect(() => {
     let cancelled = false;
@@ -45,7 +45,6 @@ export default function ManageResourcesPage() {
     };
   }, [scenarioId]);
 
-  const triggerCsvUpload = () => csvInputRef.current?.click();
 
   const handleCsvUpload = (event) => {
     const file = event.target.files?.[0];
