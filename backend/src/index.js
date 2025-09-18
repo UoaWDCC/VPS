@@ -32,7 +32,7 @@ app.use(errorHandler);
 const __dirname = dirname(fileURLToPath(import.meta.url));
 app.use(express.static(join(__dirname, "../public")));
 
-// Prod banner (you can also serve your frontend build here if needed)
+// Prod banner
 if (process.env.NODE_ENV === "production") {
   console.log("Running in production!");
 }

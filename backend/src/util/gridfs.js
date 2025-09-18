@@ -23,7 +23,12 @@ export function bufferToStream(buffer) {
   return readable;
 }
 
-export async function uploadBufferToGridFS({ filename, contentType, buffer, metadata = {} }) {
+export async function uploadBufferToGridFS({
+  filename,
+  contentType,
+  buffer,
+  metadata = {},
+}) {
   const gfs = getBucket();
   const uploadStream = gfs.openUploadStream(filename, {
     contentType,
@@ -38,13 +43,23 @@ export async function uploadBufferToGridFS({ filename, contentType, buffer, meta
 }
 
 /** Stream a GridFS file to an Express response */
-export function streamGridFsToResponse({ fileId, res, contentType, filename, disposition = "inline" }) {
+export function streamGridFsToResponse({
+  fileId,
+  res,
+  contentType,
+  filename,
+  disposition = "inline",
+}) {
   const gfs = getBucket();
   res.setHeader("Content-Type", contentType || "application/octet-stream");
-  res.setHeader("Content-Disposition", `${disposition}; filename="${encodeURIComponent(filename)}"`);
+  res.setHeader(
+    "Content-Disposition",
+    `${disposition}; filename="${encodeURIComponent(filename)}"`
+  );
   const stream = gfs.openDownloadStream(new ObjectId(fileId));
   stream.on("error", (err) => {
-    if (err.code === "ENOENT") return res.status(404).json({ error: "File not found" });
+    if (err.code === "ENOENT")
+      return res.status(404).json({ error: "File not found" });
     return res.status(500).json({ error: "Failed to stream file" });
   });
   stream.pipe(res);

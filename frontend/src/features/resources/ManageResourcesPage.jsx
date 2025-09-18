@@ -9,7 +9,6 @@ import TopBar from "../../components/TopBar/TopBar";
 import AddGroup from "./components/AddGroup";
 import AddChild from "./components/AddChild";
 
-//
 export default function ManageResourcesPage() {
   const { scenarioId } = useParams();
 
@@ -26,13 +25,18 @@ export default function ManageResourcesPage() {
           return;
         }
         const idToken = await user.getIdToken();
-        const { data } = await axios.get(`/api/resources/scenario/${scenarioId}`, {
-          headers: { Authorization: `Bearer ${idToken}` },
-        });
+        const { data } = await axios.get(
+          `/api/resources/scenario/${scenarioId}`,
+          {
+            headers: { Authorization: `Bearer ${idToken}` },
+          }
+        );
         if (!cancelled) setResources(data);
       } catch (err) {
         if (!cancelled) {
-          toast.error("Error fetching resources: " + (err?.message || String(err)));
+          toast.error(
+            "Error fetching resources: " + (err?.message || String(err))
+          );
         }
       }
     })();
@@ -61,7 +65,10 @@ export default function ManageResourcesPage() {
             headers: { Authorization: `Bearer ${idToken}` },
           });
           toast.success(`Successfully uploaded ${data.length} resources!`);
-          setResources((prev) => [...prev, ...(Array.isArray(res.data) ? res.data : [])]);
+          setResources((prev) => [
+            ...prev,
+            ...(Array.isArray(res.data) ? res.data : []),
+          ]);
         } catch (error) {
           const msg = error?.response?.data || error.message || "Unknown error";
           toast.error(`Error uploading: ${msg}`);
@@ -87,9 +94,12 @@ export default function ManageResourcesPage() {
           return;
         }
         const idToken = await user.getIdToken();
-        const { data } = await axios.get(`/api/collections/tree/${scenarioId}`, {
-          headers: { Authorization: `Bearer ${idToken}` },
-        });
+        const { data } = await axios.get(
+          `/api/collections/tree/${scenarioId}`,
+          {
+            headers: { Authorization: `Bearer ${idToken}` },
+          }
+        );
 
         // Normalise server data to your existing UI shape
         const normalized =
@@ -211,7 +221,12 @@ export default function ManageResourcesPage() {
             ? {
                 ...g,
                 children: g.children.map((c) =>
-                  c.id === childId ? { ...c, files: [...normalizedUploaded, ...(c.files || [])] } : c
+                  c.id === childId
+                    ? {
+                        ...c,
+                        files: [...normalizedUploaded, ...(c.files || [])],
+                      }
+                    : c
                 ),
               }
             : g
@@ -293,9 +308,19 @@ export default function ManageResourcesPage() {
                       { headers: { Authorization: `Bearer ${idToken}` } }
                     );
                     // Append empty group
-                    setGroups((g) => [...g, { id: data._id, name: data.name, order: data.order ?? 0, children: [] }]);
+                    setGroups((g) => [
+                      ...g,
+                      {
+                        id: data._id,
+                        name: data.name,
+                        order: data.order ?? 0,
+                        children: [],
+                      },
+                    ]);
                   } catch (e) {
-                    toast.error(e?.response?.data?.error || "Failed to create group");
+                    toast.error(
+                      e?.response?.data?.error || "Failed to create group"
+                    );
                   }
                 }}
               />
@@ -311,25 +336,39 @@ export default function ManageResourcesPage() {
                         onAdd={async (name) => {
                           try {
                             const user = getAuth().currentUser;
-                            if (!user) return toast.error("You must be logged in.");
+                            if (!user)
+                              return toast.error("You must be logged in.");
                             const idToken = await user.getIdToken();
                             const { data } = await axios.post(
                               "/api/collections/children",
                               { scenarioId, groupId: group.id, name },
-                              { headers: { Authorization: `Bearer ${idToken}` } }
+                              {
+                                headers: { Authorization: `Bearer ${idToken}` },
+                              }
                             );
                             setGroups((prev) =>
                               prev.map((g) =>
                                 g.id === group.id
                                   ? {
                                       ...g,
-                                      children: [...g.children, { id: data._id, name: data.name, order: data.order ?? 0, files: [] }],
+                                      children: [
+                                        ...g.children,
+                                        {
+                                          id: data._id,
+                                          name: data.name,
+                                          order: data.order ?? 0,
+                                          files: [],
+                                        },
+                                      ],
                                     }
                                   : g
                               )
                             );
                           } catch (e) {
-                            toast.error(e?.response?.data?.error || "Failed to create child");
+                            toast.error(
+                              e?.response?.data?.error ||
+                                "Failed to create child"
+                            );
                           }
                         }}
                       />
@@ -343,16 +382,29 @@ export default function ManageResourcesPage() {
                         <li key={child.id}>
                           <div className="flex items-center justify-between pr-2">
                             <span>{child.name}</span>
-                            <UploadButton onFiles={(files) => addFilesTo(child.id, files)} />
+                            <UploadButton
+                              onFiles={(files) => addFilesTo(child.id, files)}
+                            />
                           </div>
 
                           {child.files.length > 0 && (
                             <ul className="ml-2 border-l border-base-300">
                               {child.files.map((f) => (
-                                <li key={f.id} className="flex items-center gap-1">
+                                <li
+                                  key={f.id}
+                                  className="flex items-center gap-1"
+                                >
                                   <button
                                     className="btn btn-ghost btn-xs justify-start"
-                                    onClick={() => setSelectedFile({ ...f, groupId: group.id, childId: child.id, groupName: group.name, childName: child.name })}
+                                    onClick={() =>
+                                      setSelectedFile({
+                                        ...f,
+                                        groupId: group.id,
+                                        childId: child.id,
+                                        groupName: group.name,
+                                        childName: child.name,
+                                      })
+                                    }
                                   >
                                     {f.name}
                                   </button>
@@ -410,16 +462,24 @@ export default function ManageResourcesPage() {
                     {filteredFiles.map((f) => (
                       <tr key={f.id}>
                         <td>
-                          <button className="link" onClick={() => setSelectedFile(f)}>
+                          <button
+                            className="link"
+                            onClick={() => setSelectedFile(f)}
+                          >
                             {f.name}
                           </button>
                         </td>
                         <td className="text-xs opacity-70">
                           {f.groupName} / {f.childName}
                         </td>
-                        <td className="text-right text-xs">{formatBytes(f.size)}</td>
+                        <td className="text-right text-xs">
+                          {formatBytes(f.size)}
+                        </td>
                         <td className="text-right">
-                          <button className="btn btn-ghost btn-xs text-error" onClick={() => removeFile(f.id)}>
+                          <button
+                            className="btn btn-ghost btn-xs text-error"
+                            onClick={() => removeFile(f.id)}
+                          >
                             Delete
                           </button>
                         </td>
@@ -498,7 +558,8 @@ function Preview({ file, makeDownloadUrl }) {
         setText(null);
         return;
       }
-      const isText = file.type?.startsWith("text/") || /json|xml|csv/.test(file.type || "");
+      const isText =
+        file.type?.startsWith("text/") || /json|xml|csv/.test(file.type || "");
       if (!isText) {
         setText(null);
         return;

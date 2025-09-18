@@ -1,11 +1,15 @@
 import { Router } from "express";
 import mongoose from "mongoose";
 import multer from "multer";
-import auth from "../../middleware/firebaseAuth.js"; 
+import auth from "../../middleware/firebaseAuth.js";
 import CollectionGroup from "../../db/models/CollectionGroup.js";
 import CollectionChild from "../../db/models/CollectionChild.js";
 import StoredFile from "../../db/models/StoredFile.js";
-import { uploadBufferToGridFS, streamGridFsToResponse, deleteGridFsById } from "../../util/gridfs.js";
+import {
+  uploadBufferToGridFS,
+  streamGridFsToResponse,
+  deleteGridFsById,
+} from "../../util/gridfs.js";
 
 const router = Router();
 
@@ -22,9 +26,11 @@ router.use(auth);
 // Configurable constraints
 const MAX_FILE_SIZE_MB = parseInt(process.env.MAX_FILE_SIZE_MB || "50", 10);
 const ALLOWED_MIME_SET = new Set(
-  (process.env.ALLOWED_MIME_LIST ||
+  (
+    process.env.ALLOWED_MIME_LIST ||
     // sane defaults for docs/images/text
-    "image/png,image/jpeg,image/webp,application/pdf,text/plain,text/csv,application/json,text/markdown")
+    "image/png,image/jpeg,image/webp,application/pdf,text/plain,text/csv,application/json,text/markdown"
+  )
     .split(",")
     .map((s) => s.trim())
 );
@@ -52,7 +58,10 @@ async function assertHierarchy({ scenarioId, groupId, childId }) {
     throw new Error("groupId does not belong to scenarioId");
   }
   if (!child) throw new Error("Child not found");
-  if (String(child.groupId) !== String(groupId) || String(child.scenarioId) !== String(scenarioId)) {
+  if (
+    String(child.groupId) !== String(groupId) ||
+    String(child.scenarioId) !== String(scenarioId)
+  ) {
     throw new Error("childId does not belong to groupId/scenarioId");
   }
 }
@@ -63,7 +72,9 @@ router.post("/upload", upload.array("files"), async (req, res) => {
   try {
     const { scenarioId, groupId, childId } = req.body;
     if (!scenarioId || !groupId || !childId) {
-      return res.status(400).json({ error: "scenarioId, groupId, childId are required" });
+      return res
+        .status(400)
+        .json({ error: "scenarioId, groupId, childId are required" });
     }
     if (!req.files || req.files.length === 0) {
       return res.status(400).json({ error: "No files uploaded" });
@@ -73,7 +84,11 @@ router.post("/upload", upload.array("files"), async (req, res) => {
     const groupObjId = new mongoose.Types.ObjectId(groupId);
     const childObjId = new mongoose.Types.ObjectId(childId);
 
-    await assertHierarchy({ scenarioId: scenarioObjId, groupId: groupObjId, childId: childObjId });
+    await assertHierarchy({
+      scenarioId: scenarioObjId,
+      groupId: groupObjId,
+      childId: childObjId,
+    });
 
     const uploaderUid = req.user?.uid || "unknown";
 
@@ -109,7 +124,9 @@ router.post("/upload", upload.array("files"), async (req, res) => {
       return res.status(415).json({ error: err.message });
     }
     if (err.message && err.message.includes("File too large")) {
-      return res.status(413).json({ error: `File exceeds ${MAX_FILE_SIZE_MB} MB` });
+      return res
+        .status(413)
+        .json({ error: `File exceeds ${MAX_FILE_SIZE_MB} MB` });
     }
     return res.status(500).json({ error: err.message || "Upload failed" });
   }

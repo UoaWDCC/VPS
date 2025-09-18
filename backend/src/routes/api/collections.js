@@ -1,6 +1,6 @@
 import { Router } from "express";
 import mongoose from "mongoose";
-import auth from "../../middleware/firebaseAuth.js"; 
+import auth from "../../middleware/firebaseAuth.js";
 import CollectionGroup from "../../db/models/CollectionGroup.js";
 import CollectionChild from "../../db/models/CollectionChild.js";
 import StoredFile from "../../db/models/StoredFile.js";
@@ -22,7 +22,10 @@ router.use(auth);
 router.post("/groups", async (req, res) => {
   try {
     const { scenarioId, name, order = 0 } = req.body;
-    if (!scenarioId || !name) return res.status(400).json({ error: "scenarioId and name are required" });
+    if (!scenarioId || !name)
+      return res
+        .status(400)
+        .json({ error: "scenarioId and name are required" });
 
     const group = await CollectionGroup.create({
       scenarioId: new mongoose.Types.ObjectId(scenarioId),
@@ -41,14 +44,18 @@ router.post("/children", async (req, res) => {
   try {
     const { scenarioId, groupId, name, order = 0 } = req.body;
     if (!scenarioId || !groupId || !name) {
-      return res.status(400).json({ error: "scenarioId, groupId and name are required" });
+      return res
+        .status(400)
+        .json({ error: "scenarioId, groupId and name are required" });
     }
 
     // Validate group belongs to scenario
     const group = await CollectionGroup.findById(groupId);
     if (!group) return res.status(404).json({ error: "Group not found" });
     if (String(group.scenarioId) !== String(scenarioId)) {
-      return res.status(400).json({ error: "groupId does not belong to scenarioId" });
+      return res
+        .status(400)
+        .json({ error: "groupId does not belong to scenarioId" });
     }
 
     const child = await CollectionChild.create({
@@ -71,9 +78,15 @@ router.get("/tree/:scenarioId", async (req, res) => {
     const scenarioObjId = new mongoose.Types.ObjectId(scenarioId);
 
     const [groups, children, files] = await Promise.all([
-      CollectionGroup.find({ scenarioId: scenarioObjId }).sort({ order: 1, name: 1 }).lean(),
-      CollectionChild.find({ scenarioId: scenarioObjId }).sort({ groupId: 1, order: 1, name: 1 }).lean(),
-      StoredFile.find({ scenarioId: scenarioObjId }).sort({ createdAt: -1 }).lean(),
+      CollectionGroup.find({ scenarioId: scenarioObjId })
+        .sort({ order: 1, name: 1 })
+        .lean(),
+      CollectionChild.find({ scenarioId: scenarioObjId })
+        .sort({ groupId: 1, order: 1, name: 1 })
+        .lean(),
+      StoredFile.find({ scenarioId: scenarioObjId })
+        .sort({ createdAt: -1 })
+        .lean(),
     ]);
 
     // index children by groupId

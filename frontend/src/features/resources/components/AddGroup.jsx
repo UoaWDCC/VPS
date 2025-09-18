@@ -7,7 +7,7 @@ function AddGroup({ onAdd }) {
 
   return (
     <div className="dropdown dropdown-end">
-      <button className="btn btn-sm" onClick={() => setOpen(v => !v)}>
+      <button className="btn btn-sm" onClick={() => setOpen((v) => !v)}>
         New group
       </button>
       {open && (
@@ -21,7 +21,10 @@ function AddGroup({ onAdd }) {
             />
           </label>
           <div className="mt-3 flex justify-end gap-2">
-            <button className="btn btn-ghost btn-sm" onClick={() => setOpen(false)}>
+            <button
+              className="btn btn-ghost btn-sm"
+              onClick={() => setOpen(false)}
+            >
               Cancel
             </button>
             <button

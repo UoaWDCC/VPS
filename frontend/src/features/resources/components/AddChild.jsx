@@ -9,7 +9,7 @@ function AddChild({ onAdd }) {
     <div className="dropdown dropdown-end">
       <button
         className="btn btn-ghost btn-xs"
-        onClick={() => setOpen(v => !v)}
+        onClick={() => setOpen((v) => !v)}
         title="Add sub-item"
       >
         ＋
@@ -25,7 +25,10 @@ function AddChild({ onAdd }) {
             />
           </label>
           <div className="mt-3 flex justify-end gap-2">
-            <button className="btn btn-ghost btn-sm" onClick={() => setOpen(false)}>
+            <button
+              className="btn btn-ghost btn-sm"
+              onClick={() => setOpen(false)}
+            >
               Cancel
             </button>
             <button

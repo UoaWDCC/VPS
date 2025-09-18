@@ -12,13 +12,23 @@ const StoredFileSchema = new Schema(
     size: { type: Number, required: true },
     type: { type: String, required: true },
 
-    gridFsId: { type: Types.ObjectId, required: true, unique: true, index: true },
+    gridFsId: {
+      type: Types.ObjectId,
+      required: true,
+      unique: true,
+      index: true,
+    },
     createdAt: { type: Date, default: Date.now },
   },
   { versionKey: false }
 );
 
 // Query patterns you'll use often
-StoredFileSchema.index({ scenarioId: 1, groupId: 1, childId: 1, createdAt: -1 });
+StoredFileSchema.index({
+  scenarioId: 1,
+  groupId: 1,
+  childId: 1,
+  createdAt: -1,
+});
 
 export default model("StoredFile", StoredFileSchema);
