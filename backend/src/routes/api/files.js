@@ -21,14 +21,34 @@ router.use((req, _res, next) => {
   next();
 });
 
+router.get("/download/:fileId", async (req, res) => {
+  try {
+    const { fileId } = req.params;
+    const meta = await StoredFile.findById(fileId).lean();
+    if (!meta) return res.status(404).json({ error: "File not found" });
+
+    // Optional: avoid caching auth-related redirects/stale tokens.
+    res.setHeader("Cache-Control", "no-store");
+
+    return streamGridFsToResponse({
+      fileId: meta.gridFsId,
+      res,
+      contentType: meta.type,
+      filename: meta.name,
+      disposition: "inline",
+    });
+  } catch (err) {
+    return res.status(500).json({ error: err.message });
+  }
+});
+
+// Everything below requires auth
 router.use(auth);
 
-// Configurable constraints
 const MAX_FILE_SIZE_MB = parseInt(process.env.MAX_FILE_SIZE_MB || "50", 10);
 const ALLOWED_MIME_SET = new Set(
   (
     process.env.ALLOWED_MIME_LIST ||
-    // sane defaults for docs/images/text
     "image/png,image/jpeg,image/webp,application/pdf,text/plain,text/csv,application/json,text/markdown"
   )
     .split(",")
@@ -47,7 +67,6 @@ const upload = multer({
   },
 });
 
-// Ensure the group/child mapping is valid for the scenario
 async function assertHierarchy({ scenarioId, groupId, childId }) {
   const [group, child] = await Promise.all([
     CollectionGroup.findById(groupId),
@@ -67,7 +86,6 @@ async function assertHierarchy({ scenarioId, groupId, childId }) {
 }
 
 // POST /api/files/upload (multipart)
-// fields: scenarioId, groupId, childId; files: one or many ("files")
 router.post("/upload", upload.array("files"), async (req, res) => {
   try {
     const { scenarioId, groupId, childId } = req.body;
@@ -111,7 +129,6 @@ router.post("/upload", upload.array("files"), async (req, res) => {
         gridFsId,
       });
 
-      // don't return gridFsId to client
       const ret = doc.toObject();
       delete ret.gridFsId;
       results.push(ret);
@@ -119,7 +136,6 @@ router.post("/upload", upload.array("files"), async (req, res) => {
 
     return res.status(201).json({ files: results });
   } catch (err) {
-    // Multer size/type errors come as generic Error
     if (err.message && err.message.startsWith("Unsupported file type")) {
       return res.status(415).json({ error: err.message });
     }
@@ -129,26 +145,6 @@ router.post("/upload", upload.array("files"), async (req, res) => {
         .json({ error: `File exceeds ${MAX_FILE_SIZE_MB} MB` });
     }
     return res.status(500).json({ error: err.message || "Upload failed" });
-  }
-});
-
-// GET /api/files/download/:fileId  (streams the file)
-// supports ?token=ID_TOKEN query for <img> and <a> tags
-router.get("/download/:fileId", async (req, res) => {
-  try {
-    const { fileId } = req.params;
-    const meta = await StoredFile.findById(fileId).lean();
-    if (!meta) return res.status(404).json({ error: "File not found" });
-
-    return streamGridFsToResponse({
-      fileId: meta.gridFsId,
-      res,
-      contentType: meta.type,
-      filename: meta.name,
-      disposition: "inline",
-    });
-  } catch (err) {
-    return res.status(500).json({ error: err.message });
   }
 });
 

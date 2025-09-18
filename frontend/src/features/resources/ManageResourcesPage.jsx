@@ -525,6 +525,54 @@ function UploadButton({ onFiles, multiple = true, className = "" }) {
   );
 }
 
+function ImgWithAuth({ file }) {
+  const [src, setSrc] = useState(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    let objectUrl = null;
+
+    (async () => {
+      if (!file) return;
+      try {
+        const user = getAuth().currentUser;
+        const token = await user.getIdToken();
+        const resp = await fetch(`/api/files/download/${file.id}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+        const blob = await resp.blob();
+        objectUrl = URL.createObjectURL(blob);
+        if (!cancelled) setSrc(objectUrl);
+      } catch (err) {
+        console.error("image fetch failed", err);
+        if (!cancelled) setSrc(null);
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+      if (objectUrl) URL.revokeObjectURL(objectUrl);
+    };
+  }, [file]);
+
+  if (!src) {
+    return (
+      <div className="alert">
+        <span>Failed to load image preview.</span>
+      </div>
+    );
+  }
+
+  return (
+    <img
+      src={src}
+      alt={file.name}
+      className="rounded-xl max-h-80 object-contain"
+    />
+  );
+}
+
 /** Preview that pulls from backend download URL (with token) TO DO BROKEN*/
 function Preview({ file, makeDownloadUrl }) {
   const [downloadUrl, setDownloadUrl] = useState(null);
@@ -600,12 +648,8 @@ function Preview({ file, makeDownloadUrl }) {
         )}
       </div>
 
-      {isImage && downloadUrl ? (
-        <img
-          src={downloadUrl}
-          alt={file.name}
-          className="rounded-xl max-h-80 object-contain"
-        />
+      {isImage ? (
+        <ImgWithAuth file={file} />
       ) : text != null ? (
         <pre className="mockup-code whitespace-pre-wrap text-xs max-h-80 overflow-auto p-4">
           {text}
