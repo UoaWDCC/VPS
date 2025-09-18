@@ -1,9 +1,11 @@
 import { getStateVariables } from "../../../db/daos/scenarioDao.js";
+import { getComponent } from "../../../db/daos/sceneDao.js";
 import { setUserStateVariables } from "../../../db/daos/userDao.js";
 import Scene from "../../../db/models/scene.js";
 import User from "../../../db/models/user.js";
 
 import { HttpError } from "../../../util/error.js";
+import { applyStateOperations } from "../../../util/statevariables/stateOperations.js";
 import STATUS from "../../../util/status.js";
 
 import { getScenarioFirstScene, getSimpleScene } from "./group.js";
@@ -44,11 +46,30 @@ const initiateStateVariables = async (userId, scenarioId) => {
   setUserStateVariables(userId, scenarioId, stateVariables);
 };
 
+// Updates state variables for a user
+export const updateStateVariables = async (user, scenarioId, component) => {
+  if (!component.stateOperations) {
+    return;
+  }
+
+  const stateOperations = component.stateOperations;
+
+  const stateVariables = applyStateOperations(
+    user.stateVariables[scenarioId],
+    stateOperations
+  );
+
+  setUserStateVariables(user._id, scenarioId, stateVariables);
+};
+
 export const userNavigate = async (req) => {
-  const { uid, currentScene, nextScene } = req.body;
+  const { uid, currentScene, componentId } = req.body;
   const { scenarioId } = req.params;
 
-  const user = await User.findOne({ uid }, { paths: 1, _id: 1 }).lean();
+  const user = await User.findOne(
+    { uid },
+    { paths: 1, _id: 1, stateVariables: 1 }
+  ).lean();
   const path = user.paths[scenarioId];
 
   // the first time the user  is navigating
@@ -63,7 +84,7 @@ export const userNavigate = async (req) => {
   }
 
   // the first time the user is navigating in their session
-  if (!currentScene || !nextScene) {
+  if (!currentScene) {
     const scenes = await getConnectedScenes(path[0]);
     return { status: STATUS.OK, json: scenes };
   }
@@ -73,17 +94,16 @@ export const userNavigate = async (req) => {
   if (path[0] !== currentScene)
     throw new HttpError("Scene mismatch has occured", STATUS.CONFLICT);
 
-  const scene = await getSimpleScene(currentScene);
-  const connectedIds = scene.components
-    .filter((c) => c.type === "BUTTON")
-    .map((b) => b.nextScene);
-  if (!connectedIds.includes(nextScene))
-    throw new HttpError("Invalid scene transition", STATUS.FORBIDDEN);
+  const component = await getComponent(currentScene, componentId);
 
+  // if the button does not lead to another scene or component does not exist, stay in the current scene
+  const nextScene = component?.nextScene || currentScene;
   const [, scenes] = await Promise.all([
     addSceneToPath(user._id, scenarioId, currentScene, nextScene),
     getConnectedScenes(nextScene, false),
   ]);
+
+  await updateStateVariables(user, scenarioId, component);
 
   return { status: STATUS.OK, json: scenes };
 };

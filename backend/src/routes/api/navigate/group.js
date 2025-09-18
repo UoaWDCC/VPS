@@ -8,6 +8,8 @@ import { HttpError } from "../../../util/error.js";
 import STATUS from "../../../util/status.js";
 import { getStateVariables } from "../../../db/daos/scenarioDao.js";
 import { setGroupStateVariables } from "../../../db/daos/groupDao.js";
+import { applyStateOperations } from "../../../util/statevariables/stateOperations.js";
+import { getComponent } from "../../../db/daos/sceneDao.js";
 
 const createInvalidError = (roles) =>
   new HttpError("Invalid role to access this scene", STATUS.FORBIDDEN, {
@@ -60,7 +62,7 @@ const getGroupByIdAndUser = async (groupId, uid) => {
   const { email } = await User.findOne({ uid }, { email: 1 }).lean();
   const group = await Group.findOne(
     { _id: groupId, users: { $elemMatch: { email } } },
-    { "users.$": 1, scenarioId: 1, path: 1 }
+    { "users.$": 1, scenarioId: 1, path: 1, stateVariables: 1 }
   ).lean();
   if (!group)
     throw new HttpError(
@@ -148,8 +150,24 @@ const initiateStateVariables = async (groupId, scenarioId) => {
   setGroupStateVariables(groupId, stateVariables);
 };
 
+// Updates state variables for a group
+export const updateStateVariables = async (group, component) => {
+  if (!component.stateOperations) {
+    return;
+  }
+
+  const stateOperations = component.stateOperations;
+
+  const stateVariables = applyStateOperations(
+    group.stateVariables,
+    stateOperations
+  );
+
+  setGroupStateVariables(group._id, stateVariables);
+};
+
 export const groupNavigate = async (req) => {
-  const { uid, currentScene, nextScene, addFlags, removeFlags } = req.body;
+  const { uid, currentScene, addFlags, removeFlags, componentId } = req.body;
 
   const group = await getGroupByIdAndUser(req.params.groupId, uid);
   const { role } = group.users[0];
@@ -168,7 +186,7 @@ export const groupNavigate = async (req) => {
   }
 
   // the first time the user is navigating in their session
-  if (!currentScene || !nextScene) {
+  if (!currentScene) {
     const scenes = await getConnectedScenes(group.path[0], role);
     return { status: STATUS.OK, json: scenes };
   }
@@ -178,12 +196,13 @@ export const groupNavigate = async (req) => {
   if (group.path[0] !== currentScene)
     throw new HttpError("Scene mismatch has occured", STATUS.CONFLICT);
 
-  const scene = await getSceneConsideringRole(currentScene, role);
-  const connectedIds = scene.components
-    .filter((c) => c.type === "BUTTON")
-    .map((b) => b.nextScene);
-  if (!connectedIds.includes(nextScene))
-    throw new HttpError("Invalid scene transition", STATUS.FORBIDDEN);
+  // Validate that the user is allowed to move to this scene
+  await getSceneConsideringRole(currentScene, role);
+
+  const component = await getComponent(currentScene, componentId);
+
+  // if the button does not lead to another scene or component does not exist, stay in the current scene
+  const nextScene = component?.nextScene || currentScene;
 
   const [, , , scenes] = await Promise.all([
     addSceneToPath(group._id, currentScene, nextScene),
@@ -191,6 +210,8 @@ export const groupNavigate = async (req) => {
     removeFlagsFromGroup(group._id, removeFlags),
     getConnectedScenes(nextScene, role, false),
   ]);
+
+  await updateStateVariables(group, component);
 
   return { status: STATUS.OK, json: scenes };
 };

@@ -1,13 +1,13 @@
 import { Button, Grid } from "@material-ui/core";
 import { useState, useEffect, useContext } from "react";
-import { StateTypes, getDefaultValue } from "./StateTypes";
+import { stateTypes, getDefaultValue } from "./stateTypes";
 import { api } from "../../util/api";
 import AuthenticationContext from "../../context/AuthenticationContext";
 import toast from "react-hot-toast";
 import StateVariableForm from "./StateVariableForm";
 import ScenarioContext from "../../context/ScenarioContext";
 
-const DEFAULT_STATE_TYPE = StateTypes.STRING;
+const DEFAULT_STATE_TYPE = stateTypes.STRING;
 
 /**
  * Component used for creating state variables
