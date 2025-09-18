@@ -3,15 +3,31 @@ import mongoose from "mongoose";
 const { Schema } = mongoose;
 
 const resourceSchema = new Schema({
+  scenarioId: {
+    type: String,
+    required: true,
+  },
   name: {
     type: String,
     required: true,
   },
-  textContent: [String],
+  type: {
+    type: String,
+    enum: ["text", "image"],
+    required: true,
+  },
+  textContent: {
+    type: String,
+    default: "",
+  },
   imageContent: {
     type: String,
+    default: "",
   },
-  requiredFlags: [String],
+  requiredFlags: {
+    type: [String],
+    default: [],
+  },
 });
 
 const Resource = mongoose.model("Resource", resourceSchema, "resources");

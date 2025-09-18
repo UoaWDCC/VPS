@@ -1,6 +1,7 @@
 import { Router } from "express";
 import auth from "../../middleware/firebaseAuth.js";
 import { handle } from "../../util/error.js";
+import Resource from "../../db/models/resource.js";
 
 import {
   createResource,
@@ -10,6 +11,7 @@ import {
   removeFlag,
   getAllVisibleResources,
   updateResourceById,
+  bulkCreateResources,
 } from "../../db/daos/resourcesDao.js";
 
 const router = Router();
@@ -23,6 +25,16 @@ const HTTP_INTERNAL_SERVER_ERROR = 500;
 
 // Apply auth middleware to all routes below this point
 router.use(auth);
+
+router.get("/scenario/:scenarioId", async (req, res) => {
+  const { scenarioId } = req.params;
+  try {
+    const resources = await Resource.find({ scenarioId });
+    return res.status(200).json(resources);
+  } catch (err) {
+    return res.status(500).json({ error: err.message });
+  }
+});
 
 /**
  * @route POST /
@@ -148,7 +160,6 @@ router.delete("/group/:groupId/:flag", async (req, res) => {
  * @returns {string} 404 - Not Found if the resource does not exist.
  * @returns {string} 500 - Internal Server Error if an unexpected error occurs.
  */
-
 router.put("/:resourceId", async (req, res) => {
   const { resourceId } = req.params;
   const { name, type, content, requiredFlags } = req.body;
@@ -175,5 +186,37 @@ router.put("/:resourceId", async (req, res) => {
     return res.status(HTTP_INTERNAL_SERVER_ERROR).send("Internal Server Error");
   }
 });
+
+/**
+ * @route POST /:scenarioId
+ * @desc Upload resource data (e.g. from CSV)
+ * @param {string} req.params.scenarioId - The scenario to associate resources with
+ * @returns {Object} 200 - Upload result
+ */
+router.post(
+  "/:scenarioId",
+  handle(async (req, res) => {
+    const { scenarioId } = req.params;
+    const resources = req.body;
+
+    if (!Array.isArray(resources) || resources.length === 0) {
+      return res
+        .status(HTTP_BAD_REQUEST)
+        .json("Invalid or empty resource list");
+    }
+
+    try {
+      const saved = await bulkCreateResources(scenarioId, resources);
+      return res
+        .status(HTTP_OK)
+        .json({ message: `Successfully uploaded ${saved.length} resources.` });
+    } catch (err) {
+      console.error("Failed to upload resources:", err);
+      return res
+        .status(HTTP_INTERNAL_SERVER_ERROR)
+        .json({ error: err.message });
+    }
+  })
+);
 
 export default router;
