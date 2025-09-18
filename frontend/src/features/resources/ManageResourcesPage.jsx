@@ -45,7 +45,6 @@ export default function ManageResourcesPage() {
     };
   }, [scenarioId]);
 
-
   const handleCsvUpload = (event) => {
     const file = event.target.files?.[0];
     if (!file) return;
