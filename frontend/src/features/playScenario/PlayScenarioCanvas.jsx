@@ -10,11 +10,10 @@ import componentResolver from "./componentResolver";
 
 export default function PlayScenarioCanvas({
   scene,
-  incrementor,
+  buttonPressed,
   reset,
   setAddFlags,
   setRemoveFlags,
-  setComponentId,
 }) {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -58,19 +57,15 @@ export default function PlayScenarioCanvas({
   return (
     <div className="bg-white" style={{ width: "100vw", height: "100vh" }}>
       {scene.components?.map((component, index) => {
-        let action = () =>
-          component.nextScene && incrementor(component.nextScene);
+        let action = () => component.nextScene && buttonPressed(component);
         switch (component.type) {
           case "RESET_BUTTON":
             action = handleResetClick;
             break;
           case "BUTTON":
             action = () => {
-              if (component.nextScene) {
-                setComponentId(component.id);
-                incrementor(component.nextScene);
-                setFlags(component);
-              }
+              buttonPressed(component);
+              setFlags(component);
             };
             break;
           default:

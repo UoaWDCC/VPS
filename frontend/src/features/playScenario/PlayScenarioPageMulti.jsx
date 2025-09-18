@@ -19,7 +19,6 @@ const navigate = async (
   user,
   groupId,
   currentScene,
-  nextScene,
   addFlags,
   removeFlags,
 
@@ -33,7 +32,7 @@ const navigate = async (
       "Content-Type": "application/json",
       Authorization: `Bearer ${token}`,
     },
-    data: { currentScene, nextScene, addFlags, removeFlags, componentId },
+    data: { currentScene, addFlags, removeFlags, componentId },
   };
   const res = await axios.request(config);
   res.data.scenes.forEach((scene) => sceneCache.set(scene._id, scene));
@@ -63,25 +62,20 @@ const getResources = async (user, groupId) => {
 export default function PlayScenarioPageMulti({ group }) {
   const { user, loading, error: authError } = useContext(AuthenticationContext);
 
-  const { scenarioId, sceneId } = useParams();
+  const { scenarioId } = useParams();
   const history = useHistory();
+
+  const [sceneId, setSceneId] = useState(null);
   const [resourcesOpen, setResourcesOpen] = useState(false);
   const [noteOpen, setNoteOpen] = useState(false);
-  const [previous, setPrevious] = useState(null);
   const [addFlags, setAddFlags] = useState([]);
   const [removeFlags, setRemoveFlags] = useState([]);
-  const [componentId, setComponentId] = useState([]);
   const [resources, setResources] = useState([]);
-
-  const reload = () => {
-    setPrevious(null);
-    history.replace(`/play/${scenarioId}/multiplayer`);
-  };
 
   const handleError = (error) => {
     if (!error) return;
     if (error.status === 409) {
-      reload();
+      onSceneChange();
       toast.success(
         "Someone else made a move first, but you're back on track!"
       );
@@ -93,30 +87,43 @@ export default function PlayScenarioPageMulti({ group }) {
     }
   };
 
-  useEffect(() => {
-    const onSceneChange = async () => {
-      if (sceneId && !previous) return;
-      if (sceneCache.get(sceneId)?.error) handleError(sceneCache.get(sceneId));
-      try {
-        const newSceneId = await navigate(
-          user,
-          group._id,
-          previous,
-          sceneId,
-          addFlags,
-          removeFlags,
-          componentId
-        );
-        const newResources = await getResources(user, group._id);
-        setResources(newResources);
-        if (!sceneId)
-          history.replace(`/play/${scenarioId}/multiplayer/${newSceneId}`);
-      } catch (e) {
-        handleError(e?.response?.data);
+  const onSceneChange = async (componentId) => {
+    try {
+      const newSceneId = await navigate(
+        user,
+        group._id,
+        sceneId,
+        addFlags,
+        removeFlags,
+        componentId
+      );
+      const newResources = await getResources(user, group._id);
+      setResources(newResources);
+      if (!sceneId) {
+        setSceneId(newSceneId);
       }
-    };
+    } catch (e) {
+      handleError(e?.response?.data);
+    }
+  };
+
+  useEffect(() => {
     onSceneChange();
-  }, [sceneId]);
+  }, []);
+
+  const buttonPressed = async (component) => {
+    const currentSceneId = sceneId;
+    const nextSceneId = component.nextScene;
+    if (nextSceneId) {
+      if (!sceneCache.has(nextSceneId)) return;
+
+      if (sceneCache.get(nextSceneId)?.error)
+        handleError(sceneCache.get(nextSceneId));
+
+      setSceneId(nextSceneId);
+    }
+    onSceneChange(component.id, currentSceneId);
+  };
 
   const reset = async () => {
     try {
@@ -128,7 +135,7 @@ export default function PlayScenarioPageMulti({ group }) {
 
       setAddFlags([]);
       setRemoveFlags([]);
-      reload();
+      onSceneChange();
     } catch (error) {
       console.error("Error during reset:", error);
     }
@@ -142,7 +149,6 @@ export default function PlayScenarioPageMulti({ group }) {
 
   const incrementor = (id) => {
     if (!sceneCache.has(id)) return;
-    setPrevious(sceneId);
     history.replace(`/play/${scenarioId}/multiplayer/${id}`);
   };
 
@@ -154,7 +160,7 @@ export default function PlayScenarioPageMulti({ group }) {
         reset={reset}
         setAddFlags={setAddFlags}
         setRemoveFlags={setRemoveFlags}
-        setComponentId={setComponentId}
+        buttonPressed={buttonPressed}
       />
       <PlayPageSideButton
         setNoteOpen={setNoteOpen}
