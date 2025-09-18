@@ -1,5 +1,5 @@
 import { Box, FormGroup, Typography } from "@material-ui/core";
-import { useContext, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import EditingTooltips from "./EditingTooltips";
 import StateOperationForm from "./StateOperationForm";
 import ScenarioContext from "../../context/ScenarioContext";
@@ -75,6 +75,11 @@ const EditStateOperation = ({
 
   const [newOperation, setNewOperation] = useState(stateOperation.operation);
   const [newValue, setNewValue] = useState(stateOperation.value);
+
+  useEffect(() => {
+    setNewOperation(stateOperation.operation);
+    setNewValue(stateOperation.value);
+  }, [stateOperation]);
 
   const editing =
     newOperation !== stateOperation.operation ||
