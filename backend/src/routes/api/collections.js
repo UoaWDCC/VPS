@@ -102,8 +102,11 @@ router.get("/tree/:scenarioId", async (req, res) => {
     for (const f of files) {
       const key = String(f.childId);
       if (!filesByChild.has(key)) filesByChild.set(key, []);
-      // don't expose gridFsId to client
-      const { gridFsId, ...safe } = f;
+
+      // omit gridFsId without creating an unused variable
+      const safe = { ...f };
+      delete safe.gridFsId;
+
       filesByChild.get(key).push(safe);
     }
 
