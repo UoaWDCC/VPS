@@ -35,3 +35,51 @@
     border: 3px solid #cfcfcf;
   }
 }
+
+.sceneListItem {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  padding: 4px;
+  border-radius: 4px;
+  gap: 8px;
+  cursor: grab;
+
+  &:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+  }
+
+  &:active {
+    cursor: grabbing;
+    background-color: rgba(0, 0, 0, 0.1);
+  }
+}
+
+.dragHandle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  cursor: grab;
+
+  &:active {
+    cursor: grabbing;
+  }
+}
+
+.dragIcon {
+  font-size: 20px;
+  color: #777;
+  line-height: 1;
+  user-select: none;
+}
+
+.dropIndicator {
+  height: 2px;
+  background-color: #035084;
+  width: 90%;
+  margin: 0 auto;
+  border-radius: 1px;
+  position: relative;
+}

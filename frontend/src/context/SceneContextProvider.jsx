@@ -30,6 +30,12 @@ export default function SceneContextProvider({ children }) {
     reFetch();
   }, [user]);
 
+  useEffect(() => {
+    if (currentScenario) {
+      reFetch();
+    }
+  }, [currentScenario?._id]);
+
   /**
    * monitorChange variable is used to determine
    * whether or not the current sceneContext is monitoring a scene for changes.
