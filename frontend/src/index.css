@@ -13,87 +13,79 @@
   /* Utopia Fluid Type */
   /* @link https://utopia.fyi/type/calculator?c=1024,14,1.125,1600,16,1.125,6,2,&s=0.75|0.5|0.25,1.5|2|3|4|6,s-l&g=s,l,xl,12 */
   /* Step -2: 11.0617px → 12.642px */
-  --step--2: clamp(0.6914rem, 0.5158rem + 0.2743vw, 0.7901rem);
+  --text--2: clamp(0.6914rem, 0.5158rem + 0.2743vw, 0.7901rem);
   /* Step -1: 12.4444px → 14.2222px */
-  --step--1: clamp(0.7778rem, 0.5802rem + 0.3086vw, 0.8889rem);
+  --text--1: clamp(0.7778rem, 0.5802rem + 0.3086vw, 0.8889rem);
   /* Step 0: 14px → 16px */
-  --step-0: clamp(0.875rem, 0.6528rem + 0.3472vw, 1rem);
+  --text-s: clamp(0.875rem, 0.6528rem + 0.3472vw, 1rem);
   /* Step 1: 15.75px → 18px */
-  --step-1: clamp(0.9844rem, 0.7344rem + 0.3906vw, 1.125rem);
+  --text-m: clamp(0.9844rem, 0.7344rem + 0.3906vw, 1.125rem);
   /* Step 2: 17.7188px → 20.25px */
-  --step-2: clamp(1.1074rem, 0.8262rem + 0.4395vw, 1.2656rem);
+  --text-l: clamp(1.1074rem, 0.8262rem + 0.4395vw, 1.2656rem);
   /* Step 3: 19.9336px → 22.7813px */
-  --step-3: clamp(1.2458rem, 0.9294rem + 0.4944vw, 1.4238rem);
+  --text-3: clamp(1.2458rem, 0.9294rem + 0.4944vw, 1.4238rem);
   /* Step 4: 22.4253px → 25.6289px */
-  --step-4: clamp(1.4016rem, 1.0456rem + 0.5562vw, 1.6018rem);
+  --text-4: clamp(1.4016rem, 1.0456rem + 0.5562vw, 1.6018rem);
   /* Step 5: 25.2285px → 28.8325px */
-  --step-5: clamp(1.5768rem, 1.1763rem + 0.6257vw, 1.802rem);
+  --text-5: clamp(1.5768rem, 1.1763rem + 0.6257vw, 1.802rem);
   /* Step 6: 28.382px → 32.4366px */
-  --step-6: clamp(1.7739rem, 1.3234rem + 0.7039vw, 2.0273rem);
+  --text-xl: clamp(1.7739rem, 1.3234rem + 0.7039vw, 2.0273rem);
 
   /* Utopia Fluid Space */
   /* @link https://utopia.fyi/space/calculator?c=1024,14,1.125,1600,16,1.25,5,2,&s=0.75|0.5|0.25,1.5|2|3|4|6|8|11|14,s-l|2xl-3xl|3xl-4xl&g=s,l,xl,12 */
   /* Space 3xs: 4px → 4px */
-  --space-3xs: clamp(0.25rem, 0.25rem + 0vw, 0.25rem);
+  --spacing-3xs: clamp(0.25rem, 0.25rem + 0vw, 0.25rem);
   /* Space 2xs: 7px → 8px */
-  --space-2xs: clamp(0.4375rem, 0.3264rem + 0.1736vw, 0.5rem);
+  --spacing-2xs: clamp(0.4375rem, 0.3264rem + 0.1736vw, 0.5rem);
   /* Space xs: 11px → 12px */
-  --space-xs: clamp(0.6875rem, 0.5764rem + 0.1736vw, 0.75rem);
+  --spacing-xs: clamp(0.6875rem, 0.5764rem + 0.1736vw, 0.75rem);
   /* Space s: 14px → 16px */
-  --space-s: clamp(0.875rem, 0.6528rem + 0.3472vw, 1rem);
+  --spacing-s: clamp(0.875rem, 0.6528rem + 0.3472vw, 1rem);
   /* Space m: 21px → 24px */
-  --space-m: clamp(1.3125rem, 0.9792rem + 0.5208vw, 1.5rem);
+  --spacing-m: clamp(1.3125rem, 0.9792rem + 0.5208vw, 1.5rem);
   /* Space l: 28px → 32px */
-  --space-l: clamp(1.75rem, 1.3056rem + 0.6944vw, 2rem);
+  --spacing-l: clamp(1.75rem, 1.3056rem + 0.6944vw, 2rem);
   /* Space xl: 42px → 48px */
-  --space-xl: clamp(2.625rem, 1.9583rem + 1.0417vw, 3rem);
+  --spacing-xl: clamp(2.625rem, 1.9583rem + 1.0417vw, 3rem);
   /* Space 2xl: 56px → 64px */
-  --space-2xl: clamp(3.5rem, 2.6111rem + 1.3889vw, 4rem);
+  --spacing-2xl: clamp(3.5rem, 2.6111rem + 1.3889vw, 4rem);
   /* Space 3xl: 84px → 96px */
-  --space-3xl: clamp(5.25rem, 3.9167rem + 2.0833vw, 6rem);
+  --spacing-3xl: clamp(5.25rem, 3.9167rem + 2.0833vw, 6rem);
   /* Space 4xl: 112px → 128px */
-  --space-4xl: clamp(7rem, 5.2222rem + 2.7778vw, 8rem);
+  --spacing-4xl: clamp(7rem, 5.2222rem + 2.7778vw, 8rem);
   /* Space 5xl: 154px → 176px */
-  --space-5xl: clamp(9.625rem, 7.1806rem + 3.8194vw, 11rem);
+  --spacing-5xl: clamp(9.625rem, 7.1806rem + 3.8194vw, 11rem);
   /* Space 6xl: 196px → 224px */
-  --space-6xl: clamp(12.25rem, 9.1389rem + 4.8611vw, 14rem);
+  --spacing-6xl: clamp(12.25rem, 9.1389rem + 4.8611vw, 14rem);
 
   /* One-up pairs */
   /* Space 3xs-2xs: 4px → 8px */
-  --space-3xs-2xs: clamp(0.25rem, -0.1944rem + 0.6944vw, 0.5rem);
+  --spacing-3xs-2xs: clamp(0.25rem, -0.1944rem + 0.6944vw, 0.5rem);
   /* Space 2xs-xs: 7px → 12px */
-  --space-2xs-xs: clamp(0.4375rem, -0.1181rem + 0.8681vw, 0.75rem);
+  --spacing-2xs-xs: clamp(0.4375rem, -0.1181rem + 0.8681vw, 0.75rem);
   /* Space xs-s: 11px → 16px */
-  --space-xs-s: clamp(0.6875rem, 0.1319rem + 0.8681vw, 1rem);
+  --spacing-xs-s: clamp(0.6875rem, 0.1319rem + 0.8681vw, 1rem);
   /* Space s-m: 14px → 24px */
-  --space-s-m: clamp(0.875rem, -0.2361rem + 1.7361vw, 1.5rem);
+  --spacing-s-m: clamp(0.875rem, -0.2361rem + 1.7361vw, 1.5rem);
   /* Space m-l: 21px → 32px */
-  --space-m-l: clamp(1.3125rem, 0.0903rem + 1.9097vw, 2rem);
+  --spacing-m-l: clamp(1.3125rem, 0.0903rem + 1.9097vw, 2rem);
   /* Space l-xl: 28px → 48px */
-  --space-l-xl: clamp(1.75rem, -0.4722rem + 3.4722vw, 3rem);
+  --spacing-l-xl: clamp(1.75rem, -0.4722rem + 3.4722vw, 3rem);
   /* Space xl-2xl: 42px → 64px */
-  --space-xl-2xl: clamp(2.625rem, 0.1806rem + 3.8194vw, 4rem);
+  --spacing-xl-2xl: clamp(2.625rem, 0.1806rem + 3.8194vw, 4rem);
   /* Space 2xl-3xl: 56px → 96px */
-  --space-2xl-3xl: clamp(3.5rem, -0.9444rem + 6.9444vw, 6rem);
+  --spacing-2xl-3xl: clamp(3.5rem, -0.9444rem + 6.9444vw, 6rem);
   /* Space 3xl-4xl: 84px → 128px */
-  --space-3xl-4xl: clamp(5.25rem, 0.3611rem + 7.6389vw, 8rem);
+  --spacing-3xl-4xl: clamp(5.25rem, 0.3611rem + 7.6389vw, 8rem);
   /* Space 4xl-5xl: 112px → 176px */
-  --space-4xl-5xl: clamp(7rem, -0.1111rem + 11.1111vw, 11rem);
+  --spacing-4xl-5xl: clamp(7rem, -0.1111rem + 11.1111vw, 11rem);
   /* Space 5xl-6xl: 154px → 224px */
-  --space-5xl-6xl: clamp(9.625rem, 1.8472rem + 12.1528vw, 14rem);
-
-  /* Custom pairs */
-  /* Space s-l: 14px → 32px */
-  --space-s-l: clamp(0.875rem, -1.125rem + 3.125vw, 2rem);
-  /* Space 2xl-3xl: 56px → 96px */
-  --space-2xl-3xl: clamp(3.5rem, -0.9444rem + 6.9444vw, 6rem);
-  /* Space 3xl-4xl: 84px → 128px */
-  --space-3xl-4xl: clamp(5.25rem, 0.3611rem + 7.6389vw, 8rem);
+  --spacing-5xl-6xl: clamp(9.625rem, 1.8472rem + 12.1528vw, 14rem);
 
   /* Utopia Fluid Grid */
   /* @link https://utopia.fyi/grid/calculator?c=1024,14,1.125,1600,16,1.25,5,2,&s=0.75|0.5|0.25,1.5|2|3|4|6,s-l&g=l,l,2xl,12 */
   --grid-max-width: 74.00rem;
-  --grid-gutter: var(--space-l-l, clamp(1.75rem, 0.15rem + 2.5vw, 2rem));
+  --grid-gutter: var(--spacing-l-l, clamp(1.75rem, 0.15rem + 2.5vw, 2rem));
   --grid-columns: 12;
 }
 
