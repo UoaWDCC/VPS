@@ -129,6 +129,18 @@ export default function SideBar() {
               </button>
             </li>
             <li>
+              {/* Need to add the stuff to check user role */}
+              <button
+                className="btn vps font-mono"
+                disabled={!currentScenario}
+                onClick={()=>{
+                  history.push(`/dashboard/${currentScenario._id}`)
+                }}
+              >
+                <span className="min-w-12">Dashboard</span>
+              </button>
+            </li>
+            <li>
               <DeleteModal
                 onDelete={deleteScenario}
                 currentScenario={currentScenario}
