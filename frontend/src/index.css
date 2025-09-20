@@ -4,7 +4,7 @@
 @theme {
   --font-ibm: "IBMPlexSans", sans-serif;
   --font-dm: "DMSans", sans-serif;
-  
+
   --color-black: #000000;
   --color-white: #ffffff;
   --color-grey: #898989;
@@ -84,7 +84,7 @@
 
   /* Utopia Fluid Grid */
   /* @link https://utopia.fyi/grid/calculator?c=1024,14,1.125,1600,16,1.25,5,2,&s=0.75|0.5|0.25,1.5|2|3|4|6,s-l&g=l,l,2xl,12 */
-  --grid-max-width: 74.00rem;
+  --grid-max-width: 74rem;
   --grid-gutter: var(--spacing-l-l, clamp(1.75rem, 0.15rem + 2.5vw, 2rem));
   --grid-columns: 12;
 }
