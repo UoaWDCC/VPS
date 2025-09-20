@@ -133,8 +133,8 @@ export default function SideBar() {
               <button
                 className="btn vps font-mono"
                 disabled={!currentScenario}
-                onClick={()=>{
-                  history.push(`/dashboard/${currentScenario._id}`)
+                onClick={() => {
+                  history.push(`/dashboard/${currentScenario._id}`);
                 }}
               >
                 <span className="min-w-12">Dashboard</span>

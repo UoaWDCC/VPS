@@ -14,10 +14,7 @@ import styles from "../../../components/TopBar/TopBar.module.scss";
  *   </TopBar>
  * )
  */
-export default function DashTopBar({
-  back = "/",
-  children = [],
-}) {
+export default function DashTopBar({ back = "/", children = [] }) {
   const history = useHistory();
 
   /**
@@ -28,15 +25,16 @@ export default function DashTopBar({
     <>
       <div className={styles.topBar}>
         <ul className={styles.leftTopBarList}>
-          <li className={styles.listItem}>(
-              <button
-                className="btn vps w-[100px]"
-                onClick={() => {
-                  history.push(back);
-                }}
-              >
-                Back
-              </button>
+          <li className={styles.listItem}>
+            (
+            <button
+              className="btn vps w-[100px]"
+              onClick={() => {
+                history.push(back);
+              }}
+            >
+              Back
+            </button>
             )
           </li>
         </ul>

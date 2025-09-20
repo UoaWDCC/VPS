@@ -56,21 +56,19 @@ export default function App() {
                 </ScenarioContextProvider>
               </ProtectedRoute>
 
-
-              <ProtectedRoute exact path="/dashboard/:scenarioId" >
+              <ProtectedRoute exact path="/dashboard/:scenarioId">
                 <ScenarioContextProvider>
                   <Dashboard />
                 </ScenarioContextProvider>
               </ProtectedRoute>
 
-              <ProtectedRoute path="/dashboard/:scenarioId/view-group/:groupId" >
+              <ProtectedRoute path="/dashboard/:scenarioId/view-group/:groupId">
                 <ScenarioContextProvider>
-                    <SceneContextProvider>
-                      <ViewGroupPage/>
-                    </SceneContextProvider>
+                  <SceneContextProvider>
+                    <ViewGroupPage />
+                  </SceneContextProvider>
                 </ScenarioContextProvider>
               </ProtectedRoute>
-
 
               <ScenarioContextProvider>
                 <Switch>
@@ -84,9 +82,6 @@ export default function App() {
                   </ProtectedRoute>
                 </Switch>
               </ScenarioContextProvider>
-
-              
-
 
               {/* Default path if nothing matches */}
               <ProtectedRoute path="/">

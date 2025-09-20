@@ -59,7 +59,7 @@ export function SceneSelectionPage() {
     true,
     !(user && (!currentScenario || currentScenario?._id != scenarioId))
   );
-  
+
   // File input is a hidden input element that is activated via a click handler
   // This allows us to have an UI button that acts like a file <input> element.
   const fileInputRef = useRef(null);
