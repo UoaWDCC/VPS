@@ -1,0 +1,229 @@
+
+
+/* App Container */
+.app-container {
+  background-color: black;
+  display: flex;
+  height: 100vh;
+  color: white;
+}
+
+/* Sidebar Styles */
+.sidebar {
+  width: 27%;
+  background-color: black;
+  display: flex;
+  flex-direction: column;
+}
+
+.sidebar-spacer {
+  flex: 1;
+  min-height: 20vh;
+}
+
+/* Search Styles */
+.search-container {
+  background-color: transparent;
+  padding: 0 2.5% 2vh;
+}
+
+.search-input-wrapper {
+  background-color: transparent;
+  gap: 1vw;
+  padding-left: 2vw;
+  display: flex;
+  align-items: center;
+  flex-direction: row-reverse;
+}
+
+.search-input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: white;
+  font-size: clamp(12px, 1.2vw, 16px);
+}
+
+.search-input::placeholder {
+  color: #9ca3af;
+}
+
+.search-icon {
+  height: clamp(16px, 1.5vw, 20px);
+  width: clamp(16px, 1.5vw, 20px);
+  opacity: 0.5;
+  flex-shrink: 0;
+  stroke: currentColor;
+  stroke-width: 2.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  fill: none;
+}
+
+/* Scenario List Styles */
+.scenario-list {
+  overflow-y: auto;
+  padding-left: 3vw;
+}
+
+.scenario-item {
+  padding: 2% 3%;
+  margin: 1px 0;
+  border-radius: 3px;
+  cursor: pointer;
+  color: grey;
+  font-size: clamp(12px, 1.1vw, 15px);
+}
+
+.scenario-item:hover {
+  background-color: #111;
+  color: white;
+}
+
+.scenario-item.selected {
+  color: white;
+}
+
+/* Main Content Styles */
+.main-content {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.scenario-detail {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+}
+
+.scenario-header {
+  text-align: left;
+  padding-bottom: 4vh;
+  padding-left: 8vw;
+  padding-top: 8vh;
+  padding-right: 4vw;
+}
+
+.scenario-title {
+  font-size: clamp(24px, 3vw, 36px);
+  font-weight: 300;
+  margin-bottom: 4vh;
+  color: white;
+}
+
+.scenario-meta {
+  display: flex;
+  justify-content: flex-start;
+  gap: 4vw;
+}
+
+.meta-item {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.meta-label {
+  font-size: clamp(10px, 0.9vw, 12px);
+  color: rgba(255, 255, 255, 0.6);
+  margin-bottom: 1vh;
+}
+
+.meta-value {
+  font-size: clamp(12px, 1.1vw, 14px);
+  color: white;
+}
+
+.scenario-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 0 4vw 4vh 8vw;
+}
+
+.scenario-image-wrapper {
+  width: 100%;
+  max-width: 45vw;
+  max-height: 30vh;
+  margin-bottom: 4vh;
+}
+
+.scenario-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  background-color: #1f2937;
+  border: 1px solid #374151;
+}
+
+.scenario-description {
+  width: 100%;
+  max-width: 45vw;
+  padding-top: 6vh;
+}
+
+.description-title {
+  font-size: clamp(16px, 1.8vw, 22px);
+  font-weight: 500;
+  color: white;
+  text-align: left;
+  margin-bottom: 2vh;
+}
+
+.description-content {
+  display: flex;
+  align-items: center;
+  gap: 3vw;
+}
+
+.description-text {
+  font-size: clamp(12px, 1.2vw, 16px);
+  line-height: 1.6;
+  color: rgba(255, 255, 255, 0.8);
+  text-align: left;
+  flex: 1;
+}
+
+.play-button-wrapper {
+  flex-shrink: 0;
+}
+
+/* Back Button Styles */
+.back-button {
+  position: absolute;
+  top: 2vh;
+  left: 2vw;
+  background: none;
+  border: none;
+  color: #888;
+  cursor: pointer;
+  padding: 2vh 2vw;
+  font-size: clamp(12px, 1.2vw, 16px);
+}
+
+.back-button:hover {
+  color: white;
+}
+
+/* Welcome Message Styles */
+.welcome-message {
+  text-align: center;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.welcome-title {
+  font-size: clamp(20px, 2.5vw, 32px);
+  margin-bottom: 2vh;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.welcome-text {
+  font-size: clamp(14px, 1.4vw, 18px);
+  color: rgba(255, 255, 255, 0.6);
+}
