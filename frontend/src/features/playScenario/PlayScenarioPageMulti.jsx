@@ -11,6 +11,7 @@ import NotesDisplayCard from "./modals/NotesModal/NotesModal";
 import ResourcesModal from "./modals/ResourcesModal/ResourcesModal";
 import PlayPageSideButton from "./components/PlayPageSideButton/PlayPageSideButton";
 import PlayScenarioCanvas from "./PlayScenarioCanvas";
+import { applyStateOperations } from "../../components/StateVariables/stateOperations";
 
 const sceneCache = new Map();
 
@@ -36,7 +37,11 @@ const navigate = async (
   };
   const res = await axios.request(config);
   res.data.scenes.forEach((scene) => sceneCache.set(scene._id, scene));
-  return res.data.active;
+  return {
+    newSceneId: res.data.active,
+    stateVariables: res.data.stateVariables,
+    newStateVersion: res.data.stateVersion,
+  };
 };
 
 // returns resources in the scene
@@ -66,11 +71,15 @@ export default function PlayScenarioPageMulti({ group }) {
   const history = useHistory();
 
   const [sceneId, setSceneId] = useState(null);
+  const [stateVariables, setStateVariables] = useState([]);
+  const [stateVersion, setStateVersion] = useState(0);
   const [resourcesOpen, setResourcesOpen] = useState(false);
   const [noteOpen, setNoteOpen] = useState(false);
   const [addFlags, setAddFlags] = useState([]);
   const [removeFlags, setRemoveFlags] = useState([]);
   const [resources, setResources] = useState([]);
+
+  const currScene = sceneCache.get(sceneId);
 
   const handleError = (error) => {
     if (!error) return;
@@ -88,8 +97,22 @@ export default function PlayScenarioPageMulti({ group }) {
   };
 
   const onSceneChange = async (componentId) => {
+    if (componentId) {
+      // Apply state operations if any
+      // Find the component by id in the components array
+      const component = currScene?.components?.find(
+        (comp) => comp.id === componentId
+      );
+      const stateOperations = component?.stateOperations;
+      if (stateOperations) {
+        setStateVersion(stateVersion + 1);
+        setStateVariables(
+          applyStateOperations(stateVariables, stateOperations)
+        );
+      }
+    }
     try {
-      const newSceneId = await navigate(
+      const { newSceneId, stateVariables, newStateVersion } = await navigate(
         user,
         group._id,
         sceneId,
@@ -99,6 +122,12 @@ export default function PlayScenarioPageMulti({ group }) {
       );
       const newResources = await getResources(user, group._id);
       setResources(newResources);
+
+      // Updates state variables if there is a desync
+      if (stateVersion < newStateVersion) {
+        setStateVariables(stateVariables);
+        setStateVersion(newStateVersion);
+      }
       if (!sceneId) {
         setSceneId(newSceneId);
       }
@@ -144,7 +173,6 @@ export default function PlayScenarioPageMulti({ group }) {
   if (loading) return <LoadingPage text="Loading Scene..." />;
   if (authError) return <></>;
 
-  const currScene = sceneCache.get(sceneId);
   if (!currScene || !group) return <LoadingPage text="Loading Scene..." />;
 
   const incrementor = (id) => {

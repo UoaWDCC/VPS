@@ -170,7 +170,7 @@ export function SceneSelectionPage() {
 
   /** Calls backend end point to switch to the lecturer's dashboard */
   function openDashboard() {
-    history.push("/dashboard");
+    history.push("/dashboard/");
   }
 
   /** called when Play button is clicked */

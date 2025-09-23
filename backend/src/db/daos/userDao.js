@@ -159,6 +159,9 @@ const setUserStateVariables = async (userId, scenarioId, stateVariables) => {
         $set: {
           [`stateVariables.${scenarioId}`]: stateVariables,
         },
+        $inc: {
+          [`stateVersions.${scenarioId}`]: 1,
+        },
       },
       { new: true }
     );
@@ -166,9 +169,13 @@ const setUserStateVariables = async (userId, scenarioId, stateVariables) => {
     if (!user) {
       throw new Error("User not found");
     }
-    return user;
+
+    return [
+      user.stateVariables.get(scenarioId),
+      user.stateVersions.get(scenarioId),
+    ];
   } catch (error) {
-    throw new Error(`Error initiating state variables: ${error.message}`);
+    throw new Error(`Error updating state variables: ${error.message}`);
   }
 };
 

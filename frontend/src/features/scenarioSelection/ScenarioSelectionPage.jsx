@@ -43,7 +43,7 @@ export default function ScenarioSelectionPage() {
 
   /** Calls backend end point to switch to the lecturer's dashboard */
   function openDashboard() {
-    history.push("/dashboard");
+    history.push(`/dashboard/${currentScenario._id}`);
   }
 
   /** Calls backend end point to delete a scenario. */
@@ -125,7 +125,9 @@ export default function ScenarioSelectionPage() {
               Dashboard
             </MenuItem>
           ) : (
-            ""
+            <MenuItem onClick={openDashboard} disabled={!currentScenario}>
+              Dashboard
+            </MenuItem>
           )}
         </ContextMenu>
 

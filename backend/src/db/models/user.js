@@ -36,6 +36,12 @@ const userSchema = new Schema({
     of: Schema.Types.Mixed,
     default: {},
   },
+  // Map of scenarioId to state version id
+  stateVersions: {
+    type: Map,
+    of: { type: Number, default: 0 },
+    default: {},
+  },
 });
 
 const User = mongoose.model("model", userSchema, "users");

@@ -10,13 +10,18 @@ import LoginPage from "./features/login/LoginPage/LoginPage";
 import ManageGroupsPage from "./features/groups/ManageGroupsPage";
 import PlayScenarioResolver from "./features/playScenario/PlayScenarioResolver";
 import ScenarioSelectionPage from "./features/scenarioSelection/ScenarioSelectionPage";
+
 import ScenarioInfo from "./features/scenarioInfo/ScenarioInfo";
 import PlayPage from "./features/play/PlayPage";
+
+import Dashboard from "./features/dashboard/Dashboard";
+
 import { ScenePage } from "./features/sceneSelection/SceneSelectionPage";
 import theme from "./theme/App.theme";
 
 import { Toaster } from "react-hot-toast";
 import { ContextMenuPortal } from "./components/ContextMenu/portal";
+import ViewGroupPage from "./features/dashboard/ViewGroup";
 
 const TOAST_OFFSET = 25;
 
@@ -70,6 +75,20 @@ export default function App() {
                 </ScenarioContextProvider>
               </ProtectedRoute>
 
+              <ProtectedRoute exact path="/dashboard/:scenarioId">
+                <ScenarioContextProvider>
+                  <Dashboard />
+                </ScenarioContextProvider>
+              </ProtectedRoute>
+
+              <ProtectedRoute path="/dashboard/:scenarioId/view-group/:groupId">
+                <ScenarioContextProvider>
+                  <SceneContextProvider>
+                    <ViewGroupPage />
+                  </SceneContextProvider>
+                </ScenarioContextProvider>
+              </ProtectedRoute>
+
               <ScenarioContextProvider>
                 <Switch>
                   <ProtectedRoute index path="/scenario/:scenarioId">
@@ -82,15 +101,6 @@ export default function App() {
                   </ProtectedRoute>
                 </Switch>
               </ScenarioContextProvider>
-
-              {/* <ProtectedRoute
-                path="/dashboard"
-                accessLevelReq={AccessLevel.STAFF}
-              >
-                <ScenarioContextProvider>
-                  <DashboardPage />
-                </ScenarioContextProvider>
-              </ProtectedRoute> */}
 
               {/* Default path if nothing matches */}
               <ProtectedRoute path="/">

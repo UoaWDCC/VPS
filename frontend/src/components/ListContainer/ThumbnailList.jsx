@@ -69,7 +69,7 @@ export default function ThumbnailList({
   return (
     <>
       <div className={styles.scenarioListContainer}>
-        <ImageList rowHeight={210} gap={30}>
+        <ImageList rowHeight={210} gap={30} key={-2}>
           {addCard ? (
             <ImageListItem
               className="min-w-72 max-w-80 min-h-48"
@@ -80,10 +80,10 @@ export default function ThumbnailList({
             </ImageListItem>
           ) : null}
           {data && data.length > 0
-            ? data.map((item) => (
+            ? data.map((item, index) => (
                 <ImageListItem
                   className="min-w-72 max-w-80 min-h-48"
-                  key={item._id}
+                  key={item._id + index}
                   cols={1}
                   onClick={(event) => onItemClick(event, item)}
                   onContextMenu={() => onItemRightClick(item)}
