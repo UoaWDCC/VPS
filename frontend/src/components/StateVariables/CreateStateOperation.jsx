@@ -12,6 +12,7 @@ import ScenarioContext from "context/ScenarioContext";
 import SceneContext from "context/SceneContext";
 import StateOperationForm from "./StateOperationForm";
 import { getDefaultValue } from "./stateTypes";
+import { modifyComponentProp } from "../../features/authoring/scene/operations/component";
 
 /**
  * Component used for creating state operations
@@ -19,7 +20,7 @@ import { getDefaultValue } from "./stateTypes";
  *
  * @component
  */
-const CreateStateOperation = ({ component, componentIndex }) => {
+const CreateStateOperation = ({ component }) => {
   const { stateVariables } = useContext(ScenarioContext);
   const { updateComponentProperty } = useContext(SceneContext);
 
@@ -42,18 +43,14 @@ const CreateStateOperation = ({ component, componentIndex }) => {
         value,
       },
     ];
-    updateComponentProperty(
-      componentIndex,
-      "stateOperations",
-      newStateOperations
-    );
+    modifyComponentProp(component.id, "stateOperations", newStateOperations);
 
     setSelectedState("");
     setOperation("");
     setValue("");
   };
 
-  if (stateVariables && stateVariables.length == 0) {
+  if (stateVariables && !stateVariables.length) {
     return (
       <Typography variant="body2">
         No state variables found, create some in the state variable menu

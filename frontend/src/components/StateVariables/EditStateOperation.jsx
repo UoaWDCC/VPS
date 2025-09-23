@@ -11,12 +11,7 @@ import SceneContext from "../../context/SceneContext";
  *
  * @component
  */
-const EditStateOperation = ({
-  componentIndex,
-  component,
-  operationIndex,
-  stateOperation,
-}) => {
+const EditStateOperation = ({ component, operationIndex, stateOperation }) => {
   const { stateVariables } = useContext(ScenarioContext);
   const { updateComponentProperty } = useContext(SceneContext);
 
@@ -26,7 +21,7 @@ const EditStateOperation = ({
       (_, index) => index !== operationIndex
     );
     updateComponentProperty(
-      componentIndex,
+      component.id,
       "stateOperations",
       newStateOperations
     );
@@ -98,7 +93,7 @@ const EditStateOperation = ({
           : operation
     );
     updateComponentProperty(
-      componentIndex,
+      component.id,
       "stateOperations",
       newStateOperations
     );

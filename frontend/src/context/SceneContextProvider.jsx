@@ -12,7 +12,9 @@ import SceneContext from "./SceneContext";
 export default function SceneContextProvider({ children }) {
   const { currentScenario } = useContext(ScenarioContext);
   const { user } = useContext(AuthenticationContext);
+
   const [scenes, setScenes] = useState([]);
+
   const [currentScene, setCurrentScene] = useLocalStorage("currentScene", null);
   const [monitorChange, setMonitorChange] = useState(false);
   const [hasChange, setHasChange] = useState(false);
@@ -61,9 +63,9 @@ export default function SceneContextProvider({ children }) {
     currentSceneRef.current = currentScene;
   }, [currentScene]);
 
-  function updateComponentProperty(componentIndex, property, newValue) {
+  function updateComponentProperty(id, property, newValue) {
     const updatedComponents = currentScene.components;
-    updatedComponents[componentIndex][property] = newValue;
+    updatedComponents[id][property] = newValue;
     currentSceneRef.current = currentScene;
     setCurrentScene({
       ...currentScene,

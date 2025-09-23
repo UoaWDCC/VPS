@@ -64,6 +64,7 @@ const updateScene = async (sceneId, updatedScene) => {
   // makes sure when we update components is not null
   if (updatedScene.components) {
     const prevDbScene = await Scene.findById(sceneId);
+
     // if previous firebase image component no longer exists, try to delete file from firebase storage
     prevDbScene.components.forEach((c) => {
       if (c.type === "FIREBASEIMAGE" || c.type === "FIREBASEAUDIO") {
@@ -73,6 +74,7 @@ const updateScene = async (sceneId, updatedScene) => {
         }
       }
     });
+
     const dbScene = await Scene.findOneAndUpdate(
       { _id: sceneId },
       updatedScene,
@@ -80,6 +82,9 @@ const updateScene = async (sceneId, updatedScene) => {
         new: true,
       }
     );
+
+    console.log(updatedScene);
+    console.log(dbScene);
     return dbScene;
   }
 
@@ -97,6 +102,7 @@ const updateScene = async (sceneId, updatedScene) => {
   dbScene = await Scene.updateOne({ _id: sceneId }, updatedScene, {
     new: true,
   });
+  console.log(dbScene);
   return dbScene;
 };
 

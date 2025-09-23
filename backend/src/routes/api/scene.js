@@ -64,6 +64,7 @@ router.post("/", async (req, res) => {
 
   res.status(HTTP_OK).json(scene);
 });
+
 // update the roles
 router.put("/roles", async (req, res) => {
   const updatedRoles = req.body;
