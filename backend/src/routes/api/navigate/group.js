@@ -148,22 +148,25 @@ const removeFlagsFromGroup = async (groupId, flags) => {
 const initiateStateVariables = async (groupId, scenarioId) => {
   const stateVariables = await getStateVariables(scenarioId);
   setGroupStateVariables(groupId, stateVariables);
+  return stateVariables;
 };
 
 // Updates state variables for a group
 export const updateStateVariables = async (group, component) => {
+  const stateVariables = group.stateVariables;
   if (!component.stateOperations) {
-    return;
+    return stateVariables;
   }
 
   const stateOperations = component.stateOperations;
 
-  const stateVariables = applyStateOperations(
+  const newStateVariables = applyStateOperations(
     group.stateVariables,
     stateOperations
   );
 
-  setGroupStateVariables(group._id, stateVariables);
+  setGroupStateVariables(group._id, newStateVariables);
+  return newStateVariables;
 };
 
 export const groupNavigate = async (req) => {
@@ -175,20 +178,21 @@ export const groupNavigate = async (req) => {
   // the first time any user in the group is navigating
   if (!group.path.length) {
     const firstSceneId = await getScenarioFirstScene(group.scenarioId);
-    const [, , , scenes] = await Promise.all([
+    const [, , , scenes, stateVariables] = await Promise.all([
       addSceneToPath(group._id, null, firstSceneId),
       addFlagsToGroup(group._id, addFlags),
       removeFlagsFromGroup(group._id, removeFlags),
       getConnectedScenes(firstSceneId, role),
       initiateStateVariables(group._id, group.scenarioId),
     ]);
-    return { status: STATUS.OK, json: scenes };
+    return { status: STATUS.OK, json: { ...scenes, stateVariables } };
   }
 
   // the first time the user is navigating in their session
   if (!currentScene) {
     const scenes = await getConnectedScenes(group.path[0], role);
-    return { status: STATUS.OK, json: scenes };
+    const stateVariables = group.stateVariables;
+    return { status: STATUS.OK, json: { ...scenes, stateVariables } };
   }
 
   // the user is navigating from one scene to another
@@ -204,16 +208,15 @@ export const groupNavigate = async (req) => {
   // if the button does not lead to another scene or component does not exist, stay in the current scene
   const nextScene = component?.nextScene || currentScene;
 
-  const [, , , scenes] = await Promise.all([
+  const [, , , scenes, stateVariables] = await Promise.all([
     addSceneToPath(group._id, currentScene, nextScene),
     addFlagsToGroup(group._id, addFlags),
     removeFlagsFromGroup(group._id, removeFlags),
     getConnectedScenes(nextScene, role, false),
+    updateStateVariables(group, component),
   ]);
 
-  await updateStateVariables(group, component);
-
-  return { status: STATUS.OK, json: scenes };
+  return { status: STATUS.OK, json: { ...scenes, stateVariables } };
 };
 
 export const groupReset = async (req) => {
