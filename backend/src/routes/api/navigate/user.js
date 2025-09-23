@@ -43,26 +43,21 @@ const addSceneToPath = async (userId, scenarioId, currentSceneId, sceneId) => {
 // Initiates state variables for a user
 const initiateStateVariables = async (userId, scenarioId) => {
   const stateVariables = await getStateVariables(scenarioId);
-  setUserStateVariables(userId, scenarioId, stateVariables);
-  return stateVariables;
+  return await setUserStateVariables(userId, scenarioId, stateVariables);
 };
 
-// Updates state variables for a user
-export const updateStateVariables = async (user, scenarioId, component) => {
-  const stateVariables = user.stateVariables[scenarioId];
+// Update state variables for a user
+const updateStateVariables = async (user, scenarioId, component) => {
+  // If no update necessary, just return existing data
+
   if (!component.stateOperations) {
-    return stateVariables;
+    return [user.stateVariables[scenarioId], user.stateVersions[scenarioId]];
   }
-
-  const stateOperations = component.stateOperations;
-
-  const newStateVariables = applyStateOperations(
+  const stateVariables = applyStateOperations(
     user.stateVariables[scenarioId],
-    stateOperations
+    component.stateOperations
   );
-
-  setUserStateVariables(user._id, scenarioId, newStateVariables);
-  return newStateVariables;
+  return await setUserStateVariables(user._id, scenarioId, stateVariables);
 };
 
 export const userNavigate = async (req) => {
@@ -71,26 +66,33 @@ export const userNavigate = async (req) => {
 
   const user = await User.findOne(
     { uid },
-    { paths: 1, _id: 1, stateVariables: 1 }
+    { paths: 1, _id: 1, stateVariables: 1, stateVersions: 1 }
   ).lean();
   const path = user.paths[scenarioId];
 
   // the first time the user  is navigating
   if (!path) {
     const firstSceneId = await getScenarioFirstScene(scenarioId);
-    const [, scenes, stateVariables] = await Promise.all([
+    const [, scenes, [stateVariables, stateVersion]] = await Promise.all([
       addSceneToPath(user._id, scenarioId, null, firstSceneId),
       getConnectedScenes(firstSceneId),
       initiateStateVariables(user._id, scenarioId),
     ]);
-    return { status: STATUS.OK, json: { ...scenes, stateVariables } };
+    return {
+      status: STATUS.OK,
+      json: { ...scenes, stateVariables, stateVersion },
+    };
   }
 
   // the first time the user is navigating in their session
   if (!currentScene) {
     const scenes = await getConnectedScenes(path[0]);
     const stateVariables = user.stateVariables[scenarioId];
-    return { status: STATUS.OK, json: { ...scenes, stateVariables } };
+    const stateVersion = user.stateVersions[scenarioId];
+    return {
+      status: STATUS.OK,
+      json: { ...scenes, stateVariables, stateVersion },
+    };
   }
 
   // the user is navigating from one scene to another
@@ -102,13 +104,16 @@ export const userNavigate = async (req) => {
 
   // if the button does not lead to another scene or component does not exist, stay in the current scene
   const nextScene = component?.nextScene || currentScene;
-  const [, scenes, stateVariables] = await Promise.all([
+  const [, scenes, [stateVariables, stateVersion]] = await Promise.all([
     addSceneToPath(user._id, scenarioId, currentScene, nextScene),
     getConnectedScenes(nextScene, false),
     updateStateVariables(user, scenarioId, component),
   ]);
 
-  return { status: STATUS.OK, json: { ...scenes, stateVariables } };
+  return {
+    status: STATUS.OK,
+    json: { ...scenes, stateVariables, stateVersion },
+  };
 };
 
 export const userReset = async (req) => {

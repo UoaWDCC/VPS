@@ -36,6 +36,7 @@ const navigate = async (
   return {
     newSceneId: res.data.active,
     stateVariables: res.data.stateVariables,
+    newStateVersion: res.data.stateVersion,
   };
 };
 
@@ -52,6 +53,7 @@ export default function PlayScenarioPage() {
 
   const [sceneId, setSceneId] = useState(null);
   const [stateVariables, setStateVariables] = useState([]);
+  const [stateVersion, setStateVersion] = useState(0);
   const [addFlags, setAddFlags] = useState([]);
   const [removeFlags, setRemoveFlags] = useState([]);
 
@@ -60,6 +62,10 @@ export default function PlayScenarioPage() {
   useEffect(() => {
     console.log(stateVariables);
   }, [stateVariables]);
+
+  useEffect(() => {
+    console.log(stateVersion);
+  }, [stateVersion]);
 
   const handleError = (error) => {
     if (!error) return;
@@ -82,6 +88,7 @@ export default function PlayScenarioPage() {
       );
       const stateOperations = component?.stateOperations;
       if (stateOperations) {
+        setStateVersion(stateVersion + 1);
         setStateVariables(
           applyStateOperations(stateVariables, stateOperations)
         );
@@ -89,7 +96,7 @@ export default function PlayScenarioPage() {
     }
 
     try {
-      const { newSceneId, stateVariables } = await navigate(
+      const { newSceneId, stateVariables, newStateVersion } = await navigate(
         user,
         scenarioId,
         sceneId,
@@ -98,8 +105,9 @@ export default function PlayScenarioPage() {
         componentId
       );
       // TODO implement state tracker
-      if (true) {
+      if (stateVersion !== newStateVersion) {
         setStateVariables(stateVariables);
+        setStateVersion(newStateVersion);
       }
       if (!sceneId) {
         setSceneId(newSceneId);
