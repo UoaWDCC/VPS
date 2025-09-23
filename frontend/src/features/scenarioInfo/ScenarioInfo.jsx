@@ -1,22 +1,33 @@
 import { useState, useEffect, useContext } from 'react'
+import { useHistory, useLocation } from 'react-router-dom'
 import './scenarioInfo.css'
 import DiamondPlayButton from './components/DiamondPlayButton'
 import GradientLine from './components/GradientLine'
 import Thumbnail from '../authoring/components/Thumbnail'
 import ScenarioContext from '../../context/ScenarioContext'
-import AuthenticationContext from '../../context/AuthenticationContext'
 
 function ScenarioInfo() {
   const [selectedScenario, setSelectedScenario] = useState(null)
   const [searchTerm, setSearchTerm] = useState('')
+  const history = useHistory()
+  const location = useLocation()
   const scenarioContext = useContext(ScenarioContext)
-  const { VpsUser } = useContext(AuthenticationContext)
   
-
   const scenarios = scenarioContext?.scenarios || []
-  
-  
-  const username = VpsUser?.name || VpsUser?.displayName || 'Unknown User'
+  const username = 'Admin'
+
+  // Get scenario ID from URL parameters
+  useEffect(() => {
+    const searchParams = new URLSearchParams(location.search)
+    const scenarioId = searchParams.get('id')
+    
+    if (scenarioId && scenarios.length > 0) {
+      const scenario = scenarios.find(s => s._id === scenarioId)
+      if (scenario) {
+        setSelectedScenario(scenario)
+      }
+    }
+  }, [location.search, scenarios])
 
   const filteredScenarios = scenarios.filter(scenario =>
     scenario.name.toLowerCase().includes(searchTerm.toLowerCase())
@@ -24,6 +35,15 @@ function ScenarioInfo() {
 
   const handleScenarioSelect = (scenario) => {
     setSelectedScenario(scenario)
+    history.replace(`/scenario-info?id=${scenario._id}`)
+  }
+
+  const handlePlayScenario = (scenario) => {
+    console.log('Starting scenario:', scenario.name)
+  }
+
+  const handleBackToPlay = () => {
+    history.push('/play-page')
   }
 
   return (
@@ -32,7 +52,7 @@ function ScenarioInfo() {
       {/* Back Button */}
         <button 
           className="back-button absolute bg-transparent border-none text-gray-500 cursor-pointer hover:text-white transition-colors"
-          onClick={() => setSelectedScenario(null)}
+          onClick={selectedScenario ? () => setSelectedScenario(null) : handleBackToPlay}
         >
           ← Back
         </button>
@@ -133,7 +153,7 @@ function ScenarioInfo() {
                   <div className="play-button-wrapper flex-shrink-0">
                     <DiamondPlayButton 
                       size={80}
-                      onClick={() => console.log('Starting scenario:', selectedScenario.name)}
+                      onClick={() => handlePlayScenario(selectedScenario)}
                     />
                   </div>
                 </div>

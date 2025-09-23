@@ -11,6 +11,7 @@ import ManageGroupsPage from "./features/groups/ManageGroupsPage";
 import PlayScenarioResolver from "./features/playScenario/PlayScenarioResolver";
 import ScenarioSelectionPage from "./features/scenarioSelection/ScenarioSelectionPage";
 import ScenarioInfo from "./features/scenarioInfo/ScenarioInfo";
+import PlayPage from "./features/play/PlayPage";
 import { ScenePage } from "./features/sceneSelection/SceneSelectionPage";
 import theme from "./theme/App.theme";
 
@@ -46,12 +47,20 @@ export default function App() {
               <Route exact path="/login" component={LoginPage} />
 
               <ProtectedRoute path="/play/:scenarioId">
-                <PlayScenarioResolver />
+              
+                  <PlayScenarioResolver />
+        
               </ProtectedRoute>
               
               <ProtectedRoute path="/scenario-info">
                 <ScenarioContextProvider>
                   <ScenarioInfo />
+                </ScenarioContextProvider>
+              </ProtectedRoute>
+
+              <ProtectedRoute path="/play-page">
+                <ScenarioContextProvider>
+                  <PlayPage />
                 </ScenarioContextProvider>
               </ProtectedRoute>
 

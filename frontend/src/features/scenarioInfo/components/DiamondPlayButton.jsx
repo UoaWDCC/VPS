@@ -1,13 +1,14 @@
 import React from 'react';
 import './DiamondPlayButton.css';
 
-const DiamondPlayButton = ({ size = 80 }) => {
+const DiamondPlayButton = ({ size = 80, onClick }) => {
   // Make size responsive to viewport
   const responsiveSize = `clamp(60px, ${size * 0.06}vw, ${size}px)`;
   
   return (
     <div
       className="diamond-play-button"
+      onClick={onClick}
       style={{ 
         width: responsiveSize, 
         height: responsiveSize,
