@@ -24,6 +24,7 @@
     "@mui/x-data-grid": "^5.17.5",
     "@xyflow/react": "^12.8.4",
     "axios": "^0.21.1",
+    "beautiful-react-diagrams": "^0.5.1",
     "elkjs": "^0.10.0",
     "firebase": "^9.0.2",
     "material-ui-image": "^3.3.2",
@@ -37,6 +38,7 @@
     "react-hot-toast": "^2.4.1",
     "react-moveable": "0.29.0",
     "react-router-dom": "^5.2.0",
+    "styled-components": "^6.1.19",
     "uuid": "^10.0.0"
   },
   "devDependencies": {
