@@ -1,9 +1,7 @@
-import './GradientLine.css';
+import "./GradientLine.css";
 
-const GradientLine = ({ }) => {
-  return (
-    <div className="gradient-line" />
-  );
+const GradientLine = () => {
+  return <div className="gradient-line" />;
 };
 
 export default GradientLine;

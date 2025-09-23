@@ -135,14 +135,14 @@ export default function ScenarioSelectionPage() {
         <div className="w-full h-full px-10 py-10 overflow-x-hidden overflow-y-scroll flex flex-col gap-10">
           <div className="flex justify-between items-center mb-4">
             <h1 className="text-3xl font-mona font-bold">Scenarios</h1>
-            <button 
-              onClick={() => history.push('/play-page')}
+            <button
+              onClick={() => history.push("/play-page")}
               className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium"
             >
               Go to Play Page
             </button>
           </div>
-          
+
           {/* List of scenarios created by the logged-in user */}
           {userScenarios && (
             <div>

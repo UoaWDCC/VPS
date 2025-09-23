@@ -52,11 +52,9 @@ export default function App() {
               <Route exact path="/login" component={LoginPage} />
 
               <ProtectedRoute path="/play/:scenarioId">
-              
-                  <PlayScenarioResolver />
-        
+                <PlayScenarioResolver />
               </ProtectedRoute>
-              
+
               <ProtectedRoute path="/scenario-info">
                 <ScenarioContextProvider>
                   <ScenarioInfo />

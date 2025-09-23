@@ -10,10 +10,12 @@
 .gradient-line {
   width: 1px;
   height: 100vh;
-  background: linear-gradient(to bottom, 
-    transparent 0%, 
-    #ffffff 50%, 
-    transparent 100%);
+  background: linear-gradient(
+    to bottom,
+    transparent 0%,
+    #ffffff 50%,
+    transparent 100%
+  );
 }
 
 .gradient-line-scrollbar {

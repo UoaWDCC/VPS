@@ -23,7 +23,7 @@
   gap: 0.5rem;
   background: transparent;
   border: none;
-  color: #9CA3AF;
+  color: #9ca3af;
   cursor: pointer;
   padding: 0.5rem 1rem;
   border-radius: 6px;
@@ -52,7 +52,7 @@
 .nav-btn {
   background: transparent;
   border: none;
-  color: #9CA3AF;
+  color: #9ca3af;
   cursor: pointer;
   padding: 1rem 1.5rem;
   font-size: 16px;
@@ -70,7 +70,7 @@
 }
 
 .nav-btn-active::after {
-  content: '';
+  content: "";
   position: absolute;
   bottom: 0;
   left: 0;
@@ -167,7 +167,9 @@
   background-color: transparent;
   overflow: hidden;
   cursor: pointer;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
   display: flex;
   flex-direction: column;
 }
@@ -230,12 +232,12 @@
   .play-container {
     padding: 0 4vw;
   }
-  
+
   .scenarios-grid {
     grid-template-columns: repeat(2, 1fr);
     gap: 5vw 4vw;
   }
-  
+
   .search-container-play {
     max-width: 80vw;
   }
@@ -246,7 +248,7 @@
     grid-template-columns: 1fr;
     gap: 6vw;
   }
-  
+
   .search-container-play {
     max-width: 100%;
   }

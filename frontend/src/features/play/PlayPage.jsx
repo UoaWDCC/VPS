@@ -1,44 +1,40 @@
-import { useState, useContext } from 'react'
-import { useHistory } from 'react-router-dom'
-import './playPage.css'
-import HorizontalGradientLine from './components/HorizontalGradientLine'
-import Thumbnail from '../authoring/components/Thumbnail'
-import ScenarioContext from '../../context/ScenarioContext'
-import AuthenticationContext from '../../context/AuthenticationContext'
+import { useState, useContext } from "react";
+import { useHistory } from "react-router-dom";
+import "./playPage.css";
+import HorizontalGradientLine from "./components/HorizontalGradientLine";
+import Thumbnail from "../authoring/components/Thumbnail";
+import ScenarioContext from "../../context/ScenarioContext";
 
 function PlayPage() {
-  const [searchTerm, setSearchTerm] = useState('')
-  const history = useHistory()
-  const scenarioContext = useContext(ScenarioContext)
-  const { VpsUser } = useContext(AuthenticationContext)
-  
-  
-  const scenarios = scenarioContext?.scenarios || []
-  
-  
-  const username = VpsUser?.name || VpsUser?.displayName || 'Unknown User'
+  const [searchTerm, setSearchTerm] = useState("");
+  const history = useHistory();
+  const scenarioContext = useContext(ScenarioContext);
 
-  const filteredScenarios = scenarios.filter(scenario =>
+  const scenarios = scenarioContext?.scenarios || [];
+
+  const filteredScenarios = scenarios.filter((scenario) =>
     scenario.name.toLowerCase().includes(searchTerm.toLowerCase())
-  )
+  );
 
   const handleScenarioPlay = (scenario) => {
-    
-    history.push(`/scenario-info?id=${scenario._id}`)
-  }
+    history.push(`/scenario-info?id=${scenario._id}`);
+  };
 
   return (
     <div className="play-container" data-theme="dark">
-      
       {/* Top Navigation Bar */}
       <div className="top-nav-bar">
         <div className="nav-left">
-          <button 
-            className="logout-btn"
-            onClick={() => history.push('/')}
-          >
-            <svg className="logout-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-              <path fill="currentColor" d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.59L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"/>
+          <button className="logout-btn" onClick={() => history.push("/")}>
+            <svg
+              className="logout-icon"
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+            >
+              <path
+                fill="currentColor"
+                d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.59L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"
+              />
             </svg>
             <span>Logout</span>
           </button>
@@ -58,7 +54,11 @@ function PlayPage() {
       <div className="search-section">
         <div className="search-container-play">
           <label className="search-input-wrapper-play flex items-center">
-            <svg className="search-icon-play" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <svg
+              className="search-icon-play"
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+            >
               <g
                 strokeLinejoin="round"
                 strokeLinecap="round"
@@ -70,8 +70,8 @@ function PlayPage() {
                 <path d="m21 21-4.3-4.3"></path>
               </g>
             </svg>
-            <input 
-              type="search" 
+            <input
+              type="search"
               placeholder="Search scenario"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
@@ -99,7 +99,7 @@ function PlayPage() {
             <div className="scenario-card-thumbnail">
               <Thumbnail components={scenario.thumbnail?.components || []} />
             </div>
-            
+
             {/* Scenario Name */}
             <div className="scenario-card-name">
               <p className="scenario-name-text">{scenario.name}</p>
@@ -108,7 +108,7 @@ function PlayPage() {
         ))}
       </div>
     </div>
-  )
+  );
 }
 
-export default PlayPage
+export default PlayPage;
