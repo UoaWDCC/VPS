@@ -1,12 +1,11 @@
 import { useContext, useEffect } from "react";
 import { useHistory, useLocation } from "react-router-dom";
 import AuthenticationContext from "context/AuthenticationContext";
-import LoadingPage from "features/status/LoadingPage";
-import styles from "./LoginPage.module.scss";
 import GoogleIcon from "./GoogleIcon";
-
+import LoadingPage from "features/status/LoadingPage";
 import toast from "react-hot-toast";
 import axios from "axios";
+import styles from "./LoginPage.module.scss";
 
 const handleSignIn = async (user) => {
   const token = await user.getIdToken();
@@ -24,15 +23,9 @@ const handleSignIn = async (user) => {
   return axios.request(config);
 };
 
-/**
- * Container for the login page. Redirects logged-in users to main page and allows users to sign up using Google.
- *
- * @container
- */
 export default function LoginPage() {
-  const { user, loading, isSigningIn, signInUsingGoogle, signOut } = useContext(
-    AuthenticationContext
-  );
+  const { user, loading, isSigningIn, signInUsingGoogle, signOut } =
+    useContext(AuthenticationContext);
   const history = useHistory();
   const location = useLocation();
 
@@ -56,69 +49,67 @@ export default function LoginPage() {
   }, [user]);
 
   return (
-    <div className="w-full h-full flex flex-col items-center p-10 graph-paper">
-      {/* Main title + subtitle */}
-      <div className="flex flex-col justify-end items-center basis-[60%] gap-5 text-center font-mona">
-        <h1 className={`font-semibold text-6xl text-uoa-blue`}>
-          Virtual Patient Simulator
-        </h1>
-        <p className="text-slate-600 max-w-[65rem]">
-          This tool aims to provide Medical and Health Science students at the
-          University of Auckland with a tool that supports interactive and
-          immersive education through virtual patient scenarios.
-        </p>
+    <div className="min-h-screen flex flex-col">
+      {/* Top whitespace */}
+      <div style={{ height: "var(--spacing-2xl-3xl)" }} />
 
-        <button
-          className="btn btn-outline mt-16 cursor-pointer"
-          disabled={loading || isSigningIn}
-          onClick={() => {
-            if (!loading && !user) {
-              signInUsingGoogle();
-            } else {
-              <LoadingPage text="logging in..." />;
-            }
-          }}
+      {/* Main container */}
+      <div
+        className="u-container u-grid flex-grow w-full"
+      >
+        {/* Grid container for left/right split */}
+        <div
+          className="u-grid w-full flex-grow"
+          style={{ gridTemplateColumns: "636fr 304fr", height: "100%" }}
         >
-          {loading || isSigningIn ? (
-            <>
-              <span className="loading loading-spinner"></span> Check the popup!
-            </>
-          ) : (
-            <>
-              <GoogleIcon /> Sign In with Google
-            </>
-          )}
-        </button>
-        <p className="font-light font-mona text-xs text-slate-400">
-          Make sure to use your <b>university account</b>.
-        </p>
+          {/* Left container */}
+          <div className="flex flex-col justify-between h-full">
+            {/* Top-left text */}
+            <div 
+            className="text-left font-ibm" 
+            style={{ 
+              fontSize: "clamp(92px, 5vw, 105px)", 
+              lineHeight: "clamp(102px, 5.5vw, 115px)" 
+            }}
+            >
+              <div>Virtual</div>
+              <div>Patient</div>
+              <div>Simulator</div>
+            </div>
+
+            {/* Bottom-left text */}
+            <div className="text-left font-ibm text-s" style={{ color: "var(--color-grey)" }}>
+              <div>Crafted by many hands,</div>
+              <div>across many teams,</div>
+              <div>over many years at WDCC.</div>
+            </div>
+          </div>
+
+          {/* Right container */}
+          <div className="flex flex-col justify-between h-full">
+            {/* Centered diamond button */}
+            <div className="flex-grow flex justify-center items-center">
+            <button
+              className="btn vps-diamond"
+              onClick={() => {
+                if (!loading && !user) {
+                  signInUsingGoogle();
+                }
+              }}
+            >
+              <span>LOG IN</span>
+            </button>
+            </div>
+
+            {/* Bottom-aligned text */}
+            <div className="font-ibm text-s text-center">Please use your university account.</div>
+          </div>
+        </div>
       </div>
 
-      {/* credits */}
-      <div className="w-full font-mona font-light text-xs tracking-wider text-slate-400 flex-grow flex justify-center items-end text-center">
-        <p>
-          Crafted by many hands, across many teams, over many years at{" "}
-          <a
-            className={`font-bold ${styles.gradient} `}
-            href="https://wdcc.co.nz/"
-            target="_blank"
-            rel="noreferrer"
-          >
-            WDCC
-          </a>
-          .
-        </p>
-      </div>
-
-      {/* Hidden on small screens. UoA is not *that* important in this... */}
-      <a href="https://www.auckland.ac.nz" target="_blank" rel="noreferrer">
-        <img
-          draggable="false"
-          src="uoa-logo-filled.png"
-          alt="University of Auckland Logo"
-          className="w-10 right-7 bottom-7 fixed md:block hidden"
-        />
-      </a>
+      {/* Bottom whitespace */}
+      <div style={{ height: "var(--spacing-3xl-4xl)" }} />
     </div>
   );
 }
+

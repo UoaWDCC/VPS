@@ -158,6 +158,47 @@ body,
   @apply bg-primary text-secondary hover:opacity-85;
 }
 
+.btn.vps-diamond {
+  box-sizing: border-box;
+  /* Size from Utopia token: 4xl */
+  width: var(--spacing-4xl);
+  height: var(--spacing-4xl);
+  border-radius: 2px;
+
+  /* Diamond shape via rotation */
+  transform: rotate(45deg);
+
+  /* Center the text inside */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  /* Outline */
+  border: none;
+  outline: 1px solid var(--color-grey);
+
+  /* Background transparent (optional) */
+  background-color: transparent;
+
+  /* Text color and font */
+  color: var(--color-secondary);
+  font-family: var(--font-dm);
+  font-size: var(--text-4);
+
+  /* Smooth hover transition */
+  transition: box-shadow 5s ease, transform 5s ease;
+}
+
+/* Rotate text back to normal inside the diamond */
+.btn.vps-diamond span {
+  transform: rotate(-45deg);
+}
+
+/* Hover effect: drop-shadow */
+.btn.vps-diamond:hover {
+  box-shadow: 0 0 32px 8px rgba(255, 255, 255, 0.15);
+}
+
 .btn.important {
   @apply bg-error border-error text-primary hover:opacity-85;
 }
