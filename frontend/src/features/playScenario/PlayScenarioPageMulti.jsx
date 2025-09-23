@@ -81,14 +81,6 @@ export default function PlayScenarioPageMulti({ group }) {
 
   const currScene = sceneCache.get(sceneId);
 
-  useEffect(() => {
-    console.log(stateVariables);
-  }, [stateVariables]);
-
-  useEffect(() => {
-    console.log(stateVersion);
-  }, [stateVersion]);
-
   const handleError = (error) => {
     if (!error) return;
     if (error.status === 409) {
