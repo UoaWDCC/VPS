@@ -44,22 +44,25 @@ const addSceneToPath = async (userId, scenarioId, currentSceneId, sceneId) => {
 const initiateStateVariables = async (userId, scenarioId) => {
   const stateVariables = await getStateVariables(scenarioId);
   setUserStateVariables(userId, scenarioId, stateVariables);
+  return stateVariables;
 };
 
 // Updates state variables for a user
 export const updateStateVariables = async (user, scenarioId, component) => {
+  const stateVariables = user.stateVariables[scenarioId];
   if (!component.stateOperations) {
-    return;
+    return stateVariables;
   }
 
   const stateOperations = component.stateOperations;
 
-  const stateVariables = applyStateOperations(
+  const newStateVariables = applyStateOperations(
     user.stateVariables[scenarioId],
     stateOperations
   );
 
-  setUserStateVariables(user._id, scenarioId, stateVariables);
+  setUserStateVariables(user._id, scenarioId, newStateVariables);
+  return newStateVariables;
 };
 
 export const userNavigate = async (req) => {
@@ -75,18 +78,19 @@ export const userNavigate = async (req) => {
   // the first time the user  is navigating
   if (!path) {
     const firstSceneId = await getScenarioFirstScene(scenarioId);
-    const [, scenes] = await Promise.all([
+    const [, scenes, stateVariables] = await Promise.all([
       addSceneToPath(user._id, scenarioId, null, firstSceneId),
       getConnectedScenes(firstSceneId),
       initiateStateVariables(user._id, scenarioId),
     ]);
-    return { status: STATUS.OK, json: scenes };
+    return { status: STATUS.OK, json: { ...scenes, stateVariables } };
   }
 
   // the first time the user is navigating in their session
   if (!currentScene) {
     const scenes = await getConnectedScenes(path[0]);
-    return { status: STATUS.OK, json: scenes };
+    const stateVariables = user.stateVariables[scenarioId];
+    return { status: STATUS.OK, json: { ...scenes, stateVariables } };
   }
 
   // the user is navigating from one scene to another
@@ -98,14 +102,13 @@ export const userNavigate = async (req) => {
 
   // if the button does not lead to another scene or component does not exist, stay in the current scene
   const nextScene = component?.nextScene || currentScene;
-  const [, scenes] = await Promise.all([
+  const [, scenes, stateVariables] = await Promise.all([
     addSceneToPath(user._id, scenarioId, currentScene, nextScene),
     getConnectedScenes(nextScene, false),
+    updateStateVariables(user, scenarioId, component),
   ]);
 
-  await updateStateVariables(user, scenarioId, component);
-
-  return { status: STATUS.OK, json: scenes };
+  return { status: STATUS.OK, json: { ...scenes, stateVariables } };
 };
 
 export const userReset = async (req) => {
