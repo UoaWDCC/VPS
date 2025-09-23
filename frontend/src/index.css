@@ -186,7 +186,9 @@ body,
   font-size: var(--text-4);
 
   /* Smooth hover transition */
-  transition: box-shadow 5s ease, transform 5s ease;
+  transition:
+    box-shadow 5s ease,
+    transform 5s ease;
 }
 
 /* Rotate text back to normal inside the diamond */

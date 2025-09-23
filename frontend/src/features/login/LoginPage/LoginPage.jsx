@@ -22,8 +22,9 @@ const handleSignIn = async (user) => {
 };
 
 export default function LoginPage() {
-  const { user, loading, signInUsingGoogle, signOut } =
-    useContext(AuthenticationContext);
+  const { user, loading, signInUsingGoogle, signOut } = useContext(
+    AuthenticationContext
+  );
   const history = useHistory();
   const location = useLocation();
 
@@ -52,9 +53,7 @@ export default function LoginPage() {
       <div style={{ height: "var(--spacing-2xl-3xl)" }} />
 
       {/* Main container */}
-      <div
-        className="u-container u-grid flex-grow w-full"
-      >
+      <div className="u-container u-grid flex-grow w-full">
         {/* Grid container for left/right split */}
         <div
           className="u-grid w-full flex-grow"
@@ -63,12 +62,12 @@ export default function LoginPage() {
           {/* Left container */}
           <div className="flex flex-col justify-between h-full">
             {/* Top-left text */}
-            <div 
-            className="text-left font-ibm" 
-            style={{ 
-              fontSize: "clamp(92px, 5vw, 105px)", 
-              lineHeight: "clamp(102px, 5.5vw, 115px)" 
-            }}
+            <div
+              className="text-left font-ibm"
+              style={{
+                fontSize: "clamp(92px, 5vw, 105px)",
+                lineHeight: "clamp(102px, 5.5vw, 115px)",
+              }}
             >
               <div>Virtual</div>
               <div>Patient</div>
@@ -76,7 +75,10 @@ export default function LoginPage() {
             </div>
 
             {/* Bottom-left text */}
-            <div className="text-left font-ibm text-s" style={{ color: "var(--color-grey)" }}>
+            <div
+              className="text-left font-ibm text-s"
+              style={{ color: "var(--color-grey)" }}
+            >
               <div>Crafted by many hands,</div>
               <div>across many teams,</div>
               <div>
@@ -98,20 +100,22 @@ export default function LoginPage() {
           <div className="flex flex-col justify-between h-full">
             {/* Centered diamond button */}
             <div className="flex-grow flex justify-center items-center">
-            <button
-              className="btn vps-diamond"
-              onClick={() => {
-                if (!loading && !user) {
-                  signInUsingGoogle();
-                }
-              }}
-            >
-              <span>LOG IN</span>
-            </button>
+              <button
+                className="btn vps-diamond"
+                onClick={() => {
+                  if (!loading && !user) {
+                    signInUsingGoogle();
+                  }
+                }}
+              >
+                <span>LOG IN</span>
+              </button>
             </div>
 
             {/* Bottom-aligned text */}
-            <div className="font-ibm text-s text-center">Please use your university account.</div>
+            <div className="font-ibm text-s text-center">
+              Please use your university account.
+            </div>
           </div>
         </div>
       </div>
@@ -121,4 +125,3 @@ export default function LoginPage() {
     </div>
   );
 }
-
