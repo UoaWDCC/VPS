@@ -173,6 +173,8 @@ export function getVisualPosition(cursor: VisualCursor, blocks: VisualBlock[]) {
   const line = block?.lines[cursor.lineI];
   const span = line?.spans[cursor.spanI];
 
+  if (!span) return null;
+
   const x = line.x + span.x + span.charOffsets[cursor.charI];
   const y = block.y + line.y;
 

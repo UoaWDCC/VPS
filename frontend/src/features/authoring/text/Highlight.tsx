@@ -7,6 +7,7 @@ import type {
   VisualSpan,
 } from "./types";
 import useEditorStore from "../stores/editor";
+import useVisualScene from "../stores/visual";
 
 interface HighlightProps {
   color?: string;
@@ -39,6 +40,7 @@ function generateHighlightSegment(
 
 function Highlight({ blocks, bounds, color }: HighlightProps) {
   const selection = useEditorStore(state => state.visualSelection);
+  const selected = useEditorStore(state => state.selected);
   if (!selection.start || !selection.end) return null;
 
   let { start, end } = normalizeSelectionVisual(selection);
@@ -50,6 +52,7 @@ function Highlight({ blocks, bounds, color }: HighlightProps) {
 
   start ??= { blockI: 0, lineI: 0, spanI: 0, charI: 0 };
   if (!end) {
+    const blocks = useVisualScene.getState().components[selected!].document.blocks;
     const blockI = blocks.length - 1;
     const lineI = blocks[blockI].lines.length - 1;
     const spanI = blocks[blockI].lines[lineI].spans.length - 1;
@@ -60,7 +63,7 @@ function Highlight({ blocks, bounds, color }: HighlightProps) {
   const highlights = [];
 
   for (let i = start.blockI; i <= end.blockI; i++) {
-    const block = blocks[i];
+    const block = useVisualScene.getState().components[selected!].document.blocks[i];
     const isStartBlock = i === start.blockI;
     for (let j = isStartBlock ? start.lineI : 0; j < block.lines.length; j++) {
       const line = block.lines[j];

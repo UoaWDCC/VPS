@@ -4,6 +4,7 @@ import { getVisualPosition } from "./cursor";
 import useEditorStore from "../stores/editor";
 import type { VisualBlock } from "./types";
 import shallow from "zustand/shallow";
+import useVisualScene from "../stores/visual";
 
 function Cursor({
   blocks,
@@ -13,15 +14,18 @@ function Cursor({
   bounds: RelativeBounds;
 }) {
   const selection = useEditorStore(state => state.visualSelection);
+  const selected = useEditorStore(state => state.selected);
 
   const { start, end } = selection;
   if (start == null || (end && !shallow(start, end))) return null;
 
-  const relativePosition = getVisualPosition(start, blocks);
+  const relativePosition = getVisualPosition(start, useVisualScene.getState().components[selected!].document.blocks);
   if (!relativePosition) return null;
 
+  console.log(relativePosition);
+
   const position = add(relativePosition, bounds);
-  const block = blocks[start.blockI];
+  const block = useVisualScene.getState().components[selected!].document.blocks[start.blockI];
   const line = block.lines[start.lineI];
 
   const box = {
