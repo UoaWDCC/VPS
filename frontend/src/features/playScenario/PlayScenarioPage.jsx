@@ -8,6 +8,7 @@ import { usePost } from "hooks/crudHooks";
 
 import LoadingPage from "../status/LoadingPage";
 import PlayScenarioCanvas from "./PlayScenarioCanvas";
+import { applyStateOperations } from "../../components/StateVariables/stateOperations";
 
 const sceneCache = new Map();
 
@@ -32,7 +33,11 @@ const navigate = async (
   };
   const res = await axios.request(config);
   res.data.scenes.forEach((scene) => sceneCache.set(scene._id, scene));
-  return res.data.active;
+  return {
+    newSceneId: res.data.active,
+    stateVariables: res.data.stateVariables,
+    newStateVersion: res.data.stateVersion,
+  };
 };
 
 /**
@@ -47,8 +52,12 @@ export default function PlayScenarioPage() {
   const history = useHistory();
 
   const [sceneId, setSceneId] = useState(null);
+  const [stateVariables, setStateVariables] = useState([]);
+  const [stateVersion, setStateVersion] = useState(0);
   const [addFlags, setAddFlags] = useState([]);
   const [removeFlags, setRemoveFlags] = useState([]);
+
+  const currScene = sceneCache.get(sceneId);
 
   const handleError = (error) => {
     if (!error) return;
@@ -63,8 +72,23 @@ export default function PlayScenarioPage() {
   };
 
   const onSceneChange = async (componentId) => {
+    if (componentId) {
+      // Apply state operations if any
+      // Find the component by id in the components array
+      const component = currScene?.components?.find(
+        (comp) => comp.id === componentId
+      );
+      const stateOperations = component?.stateOperations;
+      if (stateOperations) {
+        setStateVersion(stateVersion + 1);
+        setStateVariables(
+          applyStateOperations(stateVariables, stateOperations)
+        );
+      }
+    }
+
     try {
-      const newSceneId = await navigate(
+      const { newSceneId, stateVariables, newStateVersion } = await navigate(
         user,
         scenarioId,
         sceneId,
@@ -72,6 +96,12 @@ export default function PlayScenarioPage() {
         removeFlags,
         componentId
       );
+
+      // Updates state variables if there is a desync
+      if (stateVersion < newStateVersion) {
+        setStateVariables(stateVariables);
+        setStateVersion(newStateVersion);
+      }
       if (!sceneId) {
         setSceneId(newSceneId);
       }
@@ -116,7 +146,6 @@ export default function PlayScenarioPage() {
   if (loading) return <LoadingPage text="Loading Scene..." />;
   if (authError) return <></>;
 
-  const currScene = sceneCache.get(sceneId);
   if (!currScene) return <LoadingPage text="Loading Scene..." />;
 
   return (
