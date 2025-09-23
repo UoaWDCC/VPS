@@ -6,9 +6,6 @@ import {
   Checkbox,
   Typography,
 } from "@material-ui/core";
-import { useParams } from "react-router-dom";
-import { usePut } from "hooks/crudHooks";
-import AuthenticationContext from "context/AuthenticationContext";
 import TextField from "@material-ui/core/TextField";
 import { withStyles } from "@material-ui/core/styles";
 import { useContext, useState, useEffect } from "react";
@@ -22,6 +19,10 @@ import {
 import styles from "./CanvasSideBar.module.scss";
 import CustomInputLabelStyles from "./CustomPropertyInputStyles/CustomInputLabelStyles";
 import CustomCheckBoxStyles from "./CustomPropertyInputStyles/CustomCheckBoxStyles";
+import useVisualScene from "../stores/visual";
+import { modifyComponentProp } from "../scene/operations/component";
+import { modifySceneProp } from "../scene/operations/modifiers";
+import shallow from "zustand/shallow";
 
 const CustomInputLabel = CustomInputLabelStyles()(InputLabel);
 const CustomCheckBox = CustomCheckBoxStyles()(Checkbox);
@@ -44,139 +45,56 @@ const CustomTextField = withStyles({
  * @component
  */
 export default function SceneSettings() {
-  const { currentScene, setCurrentScene, scenes, reFetch } =
-    useContext(SceneContext);
+  const { scenes } = useContext(SceneContext);
   const { roleList } = useContext(ScenarioContext);
-  const [selectedRoles, setSelectedRoles] = useState([]);
-  const [originalSceneName, setOriginalSceneName] = useState("");
 
-  const [checked, setChecked] = useState([]);
-  const [allChecked, setAllChecked] = useState(false);
+  const name = useVisualScene(scene => scene.name);
+  const roles = useVisualScene(scene => scene.roles);
+
+  const [selectedRoles, setSelectedRoles] = useState(roles ?? []);
+  const [sceneName, setSceneName] = useState(name ?? "");
 
   useEffect(() => {
-    if (currentScene.roles) {
-      setSelectedRoles(currentScene.roles);
-    }
-    if (currentScene?.name) {
-      setOriginalSceneName(currentScene.name);
-    }
-    if (roleList) {
-      const initialCheckedState = roleList.map((role) =>
-        (currentScene.roles || []).includes(role)
-      );
-      setChecked(initialCheckedState);
+    if (!name || name === sceneName) return;
+    setSceneName(name);
+  }, [name]);
 
-      // Initialize allChecked state
-      const initialAllCheckedState = initialCheckedState.every(
-        (check) => check
-      );
-      setAllChecked(initialAllCheckedState);
-    }
-  }, [roleList, currentScene]);
+  useEffect(() => {
+    if (!roleList || !roles) return;
+    const selected = roleList.filter(role => roles.includes(role));
+    if (!shallow(selected, selectedRoles)) setSelectedRoles(selected);
+  }, [roleList, roles]);
 
-  const { scenarioId } = useParams();
-  const { getUserIdToken } = useContext(AuthenticationContext);
-  async function saveRoles(newRoles) {
-    const updatedScenes = scenes.map(({ _id, name, roles: oldRoles }) => {
-      if (_id === currentScene._id) {
-        const roles = newRoles || oldRoles;
-        return {
-          _id,
-          name,
-          roles,
-        };
-      }
-      return { _id, name, roles: oldRoles };
-    });
-    await usePut(
-      `/api/scenario/${scenarioId}/scene/roles`,
-      updatedScenes,
-      getUserIdToken
-    );
+  function saveSceneRoles(roles) {
+    modifySceneProp("roles", roles);
   }
 
-  const saveSceneName = async (newName) => {
-    // Check for empty name first
-    if (!newName || newName.trim() === "") {
+  function saveSceneName(name) {
+    if (!name?.length) {
       alert("Scene name cannot be empty.");
-      setCurrentScene({
-        ...currentScene,
-        name: originalSceneName,
-      });
       return;
     }
 
-    // Check for duplicates and auto-fix
-    let finalName = newName.trim();
-
-    console.log("Checking duplicate for:", finalName);
-    console.log("Current scene ID:", currentScene._id);
-    console.log(
-      "All scenes:",
-      scenes.map((s) => ({ id: s._id, name: s.name }))
-    );
-
-    if (isSceneNameDuplicate(finalName, scenes, currentScene._id)) {
-      console.log("Duplicate found, generating unique name...");
-      finalName = generateUniqueSceneName(scenes, finalName);
-      alert(
-        `Scene name "${newName}" already exists. Changed to "${finalName}".`
-      );
-      // Update the local state with the corrected name
-      setCurrentScene({
-        ...currentScene,
-        name: finalName,
-      });
+    let final = name;
+    const { id: sceneId } = useVisualScene.getState();
+    if (isSceneNameDuplicate(name, scenes, sceneId)) {
+      console.log("duplicate found, generating unique name...");
+      const unique = generateUniqueSceneName(scenes, name);
+      alert(`"${name}" already exists, renamed to "${unique}".`);
+      final = unique;
     }
 
-    // Update the original name tracker
-    setOriginalSceneName(finalName);
-
-    // Save to backend
-    await usePut(
-      `/api/scenario/${scenarioId}/scene/${currentScene._id}`,
-      {
-        name: finalName,
-        components: currentScene.components,
-      },
-      getUserIdToken
-    );
-
-    // Refresh the scenes data
-    reFetch();
+    modifySceneProp("name", final);
   };
 
-  const handleCheckboxChange = (index) => {
-    const newChecked = [...checked];
-    newChecked[index] = !checked[index];
-    setChecked(newChecked);
+  function changeSceneName(e) {
+    setSceneName(e.target.value);
+  }
 
-    const isAllChecked = newChecked.every((isChecked) => isChecked);
-    setAllChecked(isAllChecked);
-
-    const updatedSelectedRoles = newChecked.reduce((acc, isChecked, idx) => {
-      if (isChecked) {
-        acc.push(roleList[idx]);
-      }
-      return acc;
-    }, []);
-    setSelectedRoles(updatedSelectedRoles);
-    saveRoles(updatedSelectedRoles);
-  };
-
-  const handleAllToggle = () => {
-    const newAllChecked = !allChecked;
-    setAllChecked(newAllChecked);
-
-    const newChecked = newAllChecked
-      ? new Array(roleList.length).fill(true)
-      : new Array(roleList.length).fill(false);
-    setChecked(newChecked);
-
-    const newSelectedRoles = newAllChecked ? roleList : [];
-    setSelectedRoles(newSelectedRoles);
-    saveRoles(newSelectedRoles);
-  };
+  function toggleRole(role, val) {
+    if (val) setSelectedRoles(prev => [...prev, role]);
+    else setSelectedRoles(prev => prev.filter(r => r !== role))
+  }
 
   return (
     <>
@@ -186,19 +104,10 @@ export default function SceneSettings() {
           {/* input for scene name */}
           <CustomTextField
             label="Scene Name"
-            value={currentScene?.name}
+            value={sceneName}
             fullWidth
-            onChange={(event) => {
-              setCurrentScene({
-                ...currentScene,
-                name: event.target.value,
-              });
-            }}
-            onBlur={(event) => {
-              const currentValue = event.target.value.trim();
-
-              saveSceneName(currentValue);
-            }}
+            onChange={changeSceneName}
+            onBlur={() => saveSceneName(sceneName.trim())}
           />
           {/* input for scene roles */}
           <FormControl fullWidth className={styles.formControl}>
@@ -210,30 +119,17 @@ export default function SceneSettings() {
               }}
               multiple
               value={selectedRoles}
-              onChange={(event) => setSelectedRoles(event.target.value)}
-              renderValue={(selected) =>
-                selected.length === roleList.length
-                  ? "All"
-                  : selected.join(", ")
-              }
+              onBlur={() => saveSceneRoles(selectedRoles)}
+              renderValue={(selected) => selected.join(", ")}
             >
-              {roleList && roleList.length > 0 ? (
+              {roleList?.length ? (
                 <div style={{ display: "flex", flexDirection: "column" }}>
-                  <FormControlLabel
-                    control={
-                      <CustomCheckBox
-                        checked={allChecked}
-                        onChange={handleAllToggle}
-                      />
-                    }
-                    label="All"
-                  />
                   {roleList.map((role, index) => (
                     <FormControlLabel
                       control={
                         <CustomCheckBox
-                          checked={checked[index]}
-                          onChange={() => handleCheckboxChange(index)}
+                          checked={selectedRoles?.includes(role)}
+                          onChange={(_, val) => toggleRole(role, val)}
                         />
                       }
                       label={role}

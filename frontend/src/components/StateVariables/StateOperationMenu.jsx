@@ -2,12 +2,12 @@ import { Typography } from "@material-ui/core";
 import CreateStateOperation from "./CreateStateOperation";
 import EditStateOperation from "./EditStateOperation";
 
-/**
+/*
  * Component that houses state operation interface (methods for creating and editing)
  *
  * @component
  */
-const StateOperationMenu = ({ component, componentIndex }) => {
+const StateOperationMenu = ({ component }) => {
   return (
     <div>
       <Typography
@@ -16,14 +16,10 @@ const StateOperationMenu = ({ component, componentIndex }) => {
       >
         State Operations
       </Typography>
-      <CreateStateOperation
-        component={component}
-        componentIndex={componentIndex}
-      />
+      <CreateStateOperation component={component} />
       {component.stateOperations &&
         component.stateOperations.map((stateOperation, operationIndex) => (
           <EditStateOperation
-            componentIndex={componentIndex}
             component={component}
             operationIndex={operationIndex}
             stateOperation={stateOperation}

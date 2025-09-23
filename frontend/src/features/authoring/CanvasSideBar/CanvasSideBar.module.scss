@@ -1,7 +1,6 @@
 .sideBar {
-  flex: 1 1 auto;
   width: 18.5vw;
-  background-color: #ffffff;
+  background-color: #000000;
   filter: drop-shadow(-2.5px 0 5px rgba(0, 0, 0, 0.1));
   display: flex;
   flex-direction: column;
@@ -24,6 +23,10 @@
         font-weight: 500;
         letter-spacing: 1px;
         color: #999999;
+      }
+
+      p, h6 {
+        color: black !important;
       }
     }
 

@@ -13,7 +13,7 @@ import { getScenarioFirstScene, getSimpleScene } from "./group.js";
 const getConnectedScenes = async (sceneID, active = true) => {
   const scene = await getSimpleScene(sceneID);
   const connectedIds = scene.components
-    .filter((c) => c.type === "BUTTON")
+    .filter((c) => c.clickable)
     .map((b) => b.nextScene)
     .filter(Boolean);
   const connected = await Scene.find(

@@ -6,13 +6,16 @@
   flex-direction: column;
 
   position: relative;
-  z-index: 10;
 
   overflow-y: auto;
   overflow-x: hidden;
   gap: 1rem;
   align-items: flex-start;
   justify-content: stretch;
+
+  p {
+    color: black !important;
+  }
 
   .sceneButton {
     border: 3px solid transparent;

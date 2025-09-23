@@ -1,33 +1,32 @@
 import { useContext } from "react";
-import AuthoringToolContext from "context/AuthoringToolContext";
 import SceneContext from "context/SceneContext";
-import componentPropertiesResolver from "./componentPropertiesResolver";
 
 import styles from "./CanvasSideBar.module.scss";
+import useVisualScene from "../stores/visual";
+import useEditorStore from "../stores/editor";
+import { getComponent } from "../scene/scene";
+import ButtonPropertiesComponent from "./ComponentProperties/ButtonPropertiesComponent";
 
 /**
  * This component displays the properties the selected scene component
  * @component
  */
 export default function ComponentProperties() {
-  const { select } = useContext(AuthoringToolContext);
-  const { currentScene } = useContext(SceneContext);
+  const selected = useEditorStore((state) => state.selected);
+
+  const component = selected ? getComponent(selected) : null;
 
   return (
     <>
       <div className={styles.componentPropertiesContainer}>
         <h1 className={styles.sideBarHeader}>Properties</h1>
-        <div
-          className={`${styles.sideBarBody} ${
-            select === null ? styles.empty : ""
-          }`}
-        >
-          {select === null ? (
+        <div className={`${styles.sideBarBody}`}>
+          {!component?.clickable ? (
             <p className={styles.noComponentSelectedText}>
               No component selected
             </p>
           ) : (
-            componentPropertiesResolver(currentScene.components[select], select)
+            <ButtonPropertiesComponent component={component} />
           )}
         </div>
       </div>

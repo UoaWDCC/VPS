@@ -1,7 +1,6 @@
-import ComponentProperties from "features/authoring/CanvasSideBar/ComponentProperties";
-import SceneSettings from "features/authoring/CanvasSideBar/SceneSettings";
-
 import styles from "./CanvasSideBar.module.scss";
+import ComponentProperties from "./ComponentProperties";
+import SceneSettings from "./SceneSettings";
 
 /**
  * This component displays the properties of scene components in a sidebar

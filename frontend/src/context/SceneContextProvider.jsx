@@ -4,86 +4,125 @@ import useLocalStorage from "../hooks/useLocalStorage";
 import AuthenticationContext from "./AuthenticationContext";
 import ScenarioContext from "./ScenarioContext";
 import SceneContext from "./SceneContext";
+import { useParams } from "react-router-dom";
+import { api } from "../util/api";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import LoadingPage from "../features/status/LoadingPage";
+import GenericErrorPage from "../features/status/GenericErrorPage";
+import toast from "react-hot-toast";
+import useVisualScene from "../features/authoring/stores/visual";
+import { getScene } from "../features/authoring/scene/scene";
+
+async function getAllScenes(user, id) {
+  const res = await api.get(user, `api/scenario/${id}/scene/all`)
+  return res.data.filter(Boolean);
+}
+
+function updateScenes(user, id, sceneIds) {
+  api.put(
+    user,
+    `/api/scenario/${id}/scene/reorder`,
+    { sceneIds });
+}
+
+function deleteScene(user, scenarioId, sceneId) {
+  api.delete(user, `/api/scenario/${scenarioId}/scene/${sceneId}`);
+};
+
+async function saveScene(user, scenarioId, scene) {
+  const components = Object.values(scene.components);
+  await api.put(user, `/api/scenario/${scenarioId}/scene/${scene._id}`, { ...scene, components });
+}
 
 /**
  * This is a Context Provider made with the React Context API
  * SceneContextProvider allows access to scene info and the refetch function
  */
 export default function SceneContextProvider({ children }) {
-  const { currentScenario } = useContext(ScenarioContext);
+  const { setCurrentScenario } = useContext(ScenarioContext);
   const { user } = useContext(AuthenticationContext);
-  const [scenes, setScenes] = useState([]);
-  const [currentScene, setCurrentScene] = useLocalStorage("currentScene", null);
-  const [monitorChange, setMonitorChange] = useState(false);
-  const [hasChange, setHasChange] = useState(false);
+  const { scenarioId } = useParams();
 
-  const currentSceneRef = useRef(currentScene);
+  const queryClient = useQueryClient();
 
-  const { reFetch } = useGet(
-    `api/scenario/${currentScenario?._id}/scene/all`,
-    setScenes,
-    true,
-    !currentScenario
-  );
+  // TODO: this is disgusting
+  const scenarioQuery = useQuery({
+    queryKey: ["scenario", scenarioId],
+    queryFn: () => api.get(user, `api/scenario/${scenarioId}`).then(r => r.data),
+    enabled: !!scenarioId,
+    onSuccess: (data) => setCurrentScenario(data),
+  });
 
-  useEffect(() => {
-    reFetch();
-  }, [user]);
+  const scenesQuery = useQuery({
+    queryKey: ["scenes", scenarioId],
+    queryFn: () => getAllScenes(user, scenarioId),
+    enabled: !!scenarioId
+  });
 
-  useEffect(() => {
-    if (currentScenario) {
-      reFetch();
+  const reorderMutation = useMutation({
+    mutationFn: (ids) => updateScenes(user, scenarioId, ids),
+    onMutate: async (ids) => {
+      await queryClient.cancelQueries(["scenes", scenarioId]);
+      queryClient.setQueryData(["scenes", scenarioId], prev => {
+        return ids.map(id => prev.find(s => s._id === id));
+      });
+    },
+    onError: (_err, _updates, context) => {
+      toast.error("Something went wrong updating the scenes, your last changes weren't saved");
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries(["scenes", scenarioId]);
     }
-  }, [currentScenario?._id]);
+  });
 
-  /**
-   * monitorChange variable is used to determine
-   * whether or not the current sceneContext is monitoring a scene for changes.
-   * This variable is needed so that we only monitor for changes when in AuthoringTool Page
-   * If monitorChange changes to True -> We are in AuthoringTool Page and we start to monitor
-   * If monitorChange changes to Flase -> Changes has been persisted to the database or discarded
-   * (without monitorChange, sceneSelection will update currentScene too)
-   */
-  useEffect(() => {
-    if (!monitorChange) {
-      setHasChange(false);
+  const deleteMutation = useMutation({
+    mutationFn: (id) => deleteScene(user, scenarioId, id),
+    onMutate: async (id) => {
+      await queryClient.cancelQueries(["scenes", scenarioId]);
+      queryClient.setQueryData(["scenes", scenarioId], prev => prev ? prev.filter(s => s._id !== id) : []);
+    },
+    onError: (_err, _updates, context) => {
+      toast.error("Something went wrong updating the scenes, your last changes weren't saved");
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries(["scenes", scenarioId]);
     }
-  }, [monitorChange]);
+  });
 
-  /**
-   * currentScene is changed when new components are added
-   * When changes are monitored and currentScene is updated, update the ref to point to the new currentScene object
-   */
-  useEffect(() => {
-    if (monitorChange) {
-      setHasChange(true);
+  const saveSceneMutation = useMutation({
+    mutationFn: (scene) => saveScene(user, scenarioId, scene),
+    onMutate: async (scene) => {
+      await queryClient.cancelQueries(["scenes", scenarioId]);
+      queryClient.setQueryData(["scenes", scenarioId], prev => {
+        const index = prev.findIndex(s => s._id === scene._id);
+        return index === -1 ? prev : prev.toSpliced(index, 1, scene);
+      })
+    },
+    onError: (_err, _updates, context) => {
+      toast.error("Something went wrong updating the scenes, your last changes weren't saved");
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries(["scenes", scenarioId]);
     }
-    currentSceneRef.current = currentScene;
-  }, [currentScene]);
+  })
 
-  function updateComponentProperty(componentIndex, property, newValue) {
-    const updatedComponents = currentScene.components;
-    updatedComponents[componentIndex][property] = newValue;
-    currentSceneRef.current = currentScene;
-    setCurrentScene({
-      ...currentScene,
-      components: updatedComponents,
-    });
+  if (scenesQuery.isLoading) {
+    return <LoadingPage text="Getting scenes..." />;
+  }
+
+  if (scenesQuery.isError) {
+    console.error(scenesQuery.error);
+    return <GenericErrorPage />;
   }
 
   return (
     <SceneContext.Provider
       value={{
-        scenes,
-        setScenes,
-        reFetch,
-        currentScene,
-        setCurrentScene,
-        hasChange,
-        setHasChange,
-        setMonitorChange,
-        currentSceneRef,
-        updateComponentProperty,
+        scenes: scenesQuery.data,
+        reorderScenes: reorderMutation.mutate,
+        saveScene: saveSceneMutation.mutate,
+        deleteScene: deleteMutation.mutate,
+        reFetch: scenesQuery.refetch,
       }}
     >
       {children}

@@ -24,8 +24,13 @@ import {
   verticalListSortingStrategy,
   arrayMove,
 } from "@dnd-kit/sortable";
+import { arrayToObject } from "../scene/util";
+import useEditorStore from "../stores/editor";
+import { replace } from "../scene/operations/modifiers";
+import { getScene } from "../scene/scene";
+import useVisualScene from "../stores/visual";
 
-const SceneMenu = ({ id, deleteScene, duplicateScene }) => {
+const SceneMenu = ({ id, duplicateScene, deleteScene }) => {
   return (
     <Paper>
       <MenuList>
@@ -36,19 +41,16 @@ const SceneMenu = ({ id, deleteScene, duplicateScene }) => {
   );
 };
 
-const SceneNavigator = ({ saveScene }) => {
-  const [thumbnails, setThumbnails] = useState(null);
-  const {
-    scenes,
-    currentScene,
-    currentSceneRef,
-    setCurrentScene,
-    reFetch,
-    setScenes,
-  } = useContext(SceneContext);
+const SceneNavigator = () => {
+  const { user } = useContext(AuthenticationContext);
+  const { scenes, saveScene, reFetch, reorderScenes, deleteScene } = useContext(SceneContext);
+
+  const activeScene = useVisualScene(store => store.id);
+
   const { scenarioId } = useParams();
   const history = useHistory();
-  const { user } = useContext(AuthenticationContext);
+
+  const [thumbnails, setThumbnails] = useState(null);
   const [activeId, setActiveId] = useState(null);
   const [dropIndicator, setDropIndicator] = useState({
     show: false,
@@ -63,13 +65,6 @@ const SceneNavigator = ({ saveScene }) => {
     }),
     useSensor(KeyboardSensor)
   );
-
-  const deleteScene = async (id) => {
-    api
-      .delete(user, `/api/scenario/${scenarioId}/scene/${id}`)
-      .then(reFetch)
-      .catch(handleGeneric);
-  };
 
   const duplicateScene = async (id) => {
     api
@@ -87,24 +82,8 @@ const SceneNavigator = ({ saveScene }) => {
       .catch(handleGeneric);
   };
 
-  const updateSceneOrder = async (newScenes) => {
-    setScenes(newScenes);
-
-    const sceneIds = newScenes.map((scene) => scene._id);
-
-    try {
-      const result = await api.put(
-        user,
-        `/api/scenario/${scenarioId}/scene/reorder`,
-        { sceneIds }
-      );
-
-      console.log("Scene order updated successfully:", result.data);
-    } catch (error) {
-      console.error("Failed to update scene order:", error);
-
-      reFetch();
-    }
+  const updateSceneOrder = (reordered) => {
+    reorderScenes(reordered);
   };
 
   const handleDragStart = (event) => {
@@ -125,11 +104,8 @@ const SceneNavigator = ({ saveScene }) => {
 
       let indicatorIndex = overIndex;
 
-      if (activeIndex < overIndex) {
-        indicatorIndex = overIndex;
-      } else if (activeIndex > overIndex) {
-        indicatorIndex = overIndex;
-      }
+      if (activeIndex < overIndex) indicatorIndex = overIndex;
+      else if (activeIndex > overIndex) indicatorIndex = overIndex;
 
       setDropIndicator({ show: true, index: indicatorIndex });
     } else {
@@ -143,72 +119,68 @@ const SceneNavigator = ({ saveScene }) => {
 
     const { active, over } = event;
 
-    if (!over || active.id === over.id) {
-      return;
-    }
+    if (!over || active.id === over.id) return;
 
     const activeIndex = scenes.findIndex((scene) => scene._id === active.id);
     const overIndex = scenes.findIndex((scene) => scene._id === over.id);
 
-    if (activeIndex === overIndex) {
-      return;
-    }
+    if (activeIndex === overIndex) return;
 
-    const newScenes = arrayMove(scenes, activeIndex, overIndex);
-
-    updateSceneOrder(newScenes);
+    const reordered = arrayMove(scenes.map(s => s._id), activeIndex, overIndex);
+    updateSceneOrder(reordered);
   };
+
+  function switchScene(scene) {
+    if (scene._id === activeScene) return;
+
+    saveScene(structuredClone(getScene()));
+    useEditorStore.getState().clear();
+    replace(scene);
+
+    const pathname = `/scenario/${scenarioId}/scene/${scene._id}`;
+    history.push({ pathname });
+  }
+
+  function ThumbWrapper({ scene, index }) {
+    const isActive = scene._id === activeScene;
+    return (
+      <RightContextMenu
+        menu={SceneMenu({
+          id: scene._id,
+          deleteScene,
+          duplicateScene,
+        })}
+      >
+        <div className="flex items-center gap-2.5">
+          <p className="w-4">{index + 1}</p>
+          <button
+            type="button"
+            onClick={() => switchScene(scene)}
+            className={styles.sceneButton}
+            style={isActive ? { border: "3px solid #035084" } : null}
+            key={scene._id}
+          >
+            <Thumbnail components={scene.components} />
+          </button>
+        </div>
+      </RightContextMenu>
+    )
+  }
 
   useEffect(() => {
     if (!scenes?.length) return;
 
-    setThumbnails(
-      scenes.map((scene, index) => ({
-        sceneId: scene._id,
-        sceneListItem: (
-          <RightContextMenu
-            menu={SceneMenu({
-              id: scene._id,
-              deleteScene,
-              duplicateScene,
-            })}
-          >
-            <div className="flex items-center gap-2.5">
-              <p className="w-4">{index + 1}</p>
-              <button
-                type="button"
-                onClick={() => {
-                  if (currentSceneRef.current._id === scene._id) return;
+    const thumbs = scenes.map((scene, index) => ({
+      sceneId: scene._id,
+      item: <ThumbWrapper scene={scene} index={index} />,
+    }));
 
-                  saveScene();
-                  setCurrentScene(scene);
-
-                  history.push({
-                    pathname: `/scenario/${scenarioId}/scene/${scene._id}`,
-                  });
-                }}
-                className={styles.sceneButton}
-                style={
-                  currentScene._id === scene._id
-                    ? {
-                        border: "3px solid #035084",
-                      }
-                    : null
-                }
-                key={scene._id}
-              >
-                <Thumbnail components={scene.components} />
-              </button>
-            </div>
-          </RightContextMenu>
-        ),
-      }))
-    );
-  }, [scenes, currentScene]);
+    setThumbnails(thumbs);
+  }, [scenes, activeScene]);
 
   return (
     thumbnails && (
-      <div style={{ display: "flex", position: "relative" }}>
+      <div className="flex relative">
         <DndContext
           sensors={sensors}
           collisionDetection={closestCenter}
@@ -222,13 +194,13 @@ const SceneNavigator = ({ saveScene }) => {
           >
             <ul className={styles.sceneNavigator}>
               {thumbnails.map(
-                ({ sceneListItem: thumbnail, sceneId }, index) => (
+                ({ sceneId, item }, index) => (
                   <React.Fragment key={`scene-item-${sceneId}`}>
                     {dropIndicator.show && dropIndicator.index === index && (
                       <div className={styles.dropIndicator} />
                     )}
                     <SceneListItem
-                      thumbnail={thumbnail}
+                      thumbnail={item}
                       sceneId={sceneId}
                       key={sceneId}
                     />

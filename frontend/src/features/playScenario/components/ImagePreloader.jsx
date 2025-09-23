@@ -7,32 +7,15 @@ function ImagePreloader({ scene }) {
   return (
     <div key={scene._id}>
       {scene?.components.map((component) => {
-        if (component.type === "FIREBASEIMAGE") {
+        if (component.type === "image") {
           return (
             <PreloadFirebaseImage component={component} key={component.id} />
-          );
-        }
-        if (component.type === "IMAGE") {
-          return (
-            <PreloadGoogleDriveImage component={component} key={component.id} />
           );
         }
         return null;
       })}
     </div>
   );
-}
-
-/**
- * This component preloads images from google drive
- */
-function PreloadGoogleDriveImage({ component }) {
-  const img = new Image();
-  function setImage(image) {
-    img.src = image.url;
-  }
-  useGet(`/api/image/${component.imageId}`, setImage, false);
-  return null;
 }
 
 /**

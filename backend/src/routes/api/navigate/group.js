@@ -75,7 +75,7 @@ const getGroupByIdAndUser = async (groupId, uid) => {
 const getConnectedScenes = async (sceneID, role, active = true) => {
   const scene = await getSceneConsideringRole(sceneID, role);
   const connectedIds = scene.components
-    .filter((c) => c.type === "BUTTON")
+    .filter((c) => c.clickable)
     .map((b) => b.nextScene)
     .filter(Boolean);
   const connectedScenes = await Scene.find(
