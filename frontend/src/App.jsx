@@ -10,7 +10,12 @@ import LoginPage from "./features/login/LoginPage/LoginPage";
 import ManageGroupsPage from "./features/groups/ManageGroupsPage";
 import PlayScenarioResolver from "./features/playScenario/PlayScenarioResolver";
 import ScenarioSelectionPage from "./features/scenarioSelection/ScenarioSelectionPage";
+
+import ScenarioInfo from "./features/scenarioInfo/ScenarioInfo";
+import PlayPage from "./features/play/PlayPage";
+
 import Dashboard from "./features/dashboard/Dashboard";
+
 import { ScenePage } from "./features/sceneSelection/SceneSelectionPage";
 import theme from "./theme/App.theme";
 
@@ -48,6 +53,18 @@ export default function App() {
 
               <ProtectedRoute path="/play/:scenarioId">
                 <PlayScenarioResolver />
+              </ProtectedRoute>
+
+              <ProtectedRoute path="/scenario-info">
+                <ScenarioContextProvider>
+                  <ScenarioInfo />
+                </ScenarioContextProvider>
+              </ProtectedRoute>
+
+              <ProtectedRoute path="/play-page">
+                <ScenarioContextProvider>
+                  <PlayPage />
+                </ScenarioContextProvider>
               </ProtectedRoute>
 
               <ProtectedRoute exact path="/">
