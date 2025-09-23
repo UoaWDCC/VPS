@@ -1,11 +1,9 @@
 import { useContext, useEffect } from "react";
 import { useHistory, useLocation } from "react-router-dom";
 import AuthenticationContext from "context/AuthenticationContext";
-import GoogleIcon from "./GoogleIcon";
-import LoadingPage from "features/status/LoadingPage";
+
 import toast from "react-hot-toast";
 import axios from "axios";
-import styles from "./LoginPage.module.scss";
 
 const handleSignIn = async (user) => {
   const token = await user.getIdToken();
@@ -24,7 +22,7 @@ const handleSignIn = async (user) => {
 };
 
 export default function LoginPage() {
-  const { user, loading, isSigningIn, signInUsingGoogle, signOut } =
+  const { user, loading, signInUsingGoogle, signOut } =
     useContext(AuthenticationContext);
   const history = useHistory();
   const location = useLocation();
@@ -81,7 +79,18 @@ export default function LoginPage() {
             <div className="text-left font-ibm text-s" style={{ color: "var(--color-grey)" }}>
               <div>Crafted by many hands,</div>
               <div>across many teams,</div>
-              <div>over many years at WDCC.</div>
+              <div>
+                over many years at{" "}
+                <a
+                  className="underline decoration-1 underline-offset-2 hover:text-white"
+                  href="https://wdcc.co.nz/"
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  WDCC
+                </a>
+                .
+              </div>
             </div>
           </div>
 
