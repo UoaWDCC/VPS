@@ -24,6 +24,8 @@ import {
   verticalListSortingStrategy,
   arrayMove,
 } from "@dnd-kit/sortable";
+import { arrayToObject } from "../scene/util";
+import useEditorStore from "../stores/editor";
 
 const SceneMenu = ({ id, deleteScene, duplicateScene }) => {
   return (
@@ -182,6 +184,11 @@ const SceneNavigator = ({ saveScene }) => {
 
                   saveScene();
                   setCurrentScene(scene);
+
+                  useEditorStore.getState().setSelected(null);
+                  useEditorStore
+                    .getState()
+                    .setSelection({ start: null, end: null });
 
                   history.push({
                     pathname: `/scenario/${scenarioId}/scene/${scene._id}`,

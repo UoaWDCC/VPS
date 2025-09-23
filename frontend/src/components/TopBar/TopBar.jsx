@@ -6,6 +6,7 @@ import AuthoringToolContext from "../../context/AuthoringToolContext";
 import ScenarioContext from "../../context/ScenarioContext";
 import SceneContext from "../../context/SceneContext";
 import styles from "./TopBar.module.scss";
+import useEditorStore from "../../features/authoring/stores/editor";
 
 /**
  * Component used for navigation and executing actions located at the top of the screen.
@@ -38,11 +39,10 @@ export default function TopBar({
    * Function for changing variables to their appropriate states when the back button is pressed.
    */
   function handleLeaveAuthoringTool() {
-    if (setSelect) {
-      /** Deselect any components */
-      setSelect(null);
-    }
+    useEditorStore.getState().setSelected(null);
+    useEditorStore.getState().setSelection({ start: null, end: null });
 
+    // hb: i have no clue what this is for
     if (!hasChange) {
       setMonitorChange(false);
       history.push(`/scenario/${currentScenario._id}`);

@@ -14,6 +14,10 @@
   align-items: flex-start;
   justify-content: stretch;
 
+  p {
+    color: black !important;
+  }
+
   .sceneButton {
     border: 3px solid transparent;
     width: 160px;
