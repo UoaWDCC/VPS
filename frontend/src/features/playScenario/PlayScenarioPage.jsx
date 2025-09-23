@@ -98,7 +98,7 @@ export default function PlayScenarioPage() {
       );
 
       // Updates state variables if there is a desync
-      if (stateVersion !== newStateVersion) {
+      if (stateVersion < newStateVersion) {
         setStateVariables(stateVariables);
         setStateVersion(newStateVersion);
       }
