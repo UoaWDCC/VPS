@@ -13,7 +13,7 @@ export default function ManageResourcesPage() {
   const { scenarioId } = useParams();
 
   const csvInputRef = useRef(null);
-  const [resources, setResources] = useState([]);
+  const [setResources] = useState([]);
 
   useEffect(() => {
     let cancelled = false;
