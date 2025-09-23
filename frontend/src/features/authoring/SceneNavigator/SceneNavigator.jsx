@@ -29,7 +29,7 @@ const SceneMenu = ({ id, deleteScene, duplicateScene }) => {
   return (
     <Paper>
       <MenuList>
-        <MenuItem onClick={handle(duplicateScene, id)}>Duplicate</MenuItem>
+        <MenuItem onClick={handle(duplicateScene, id)}>Duplicate 123</MenuItem>
         <MenuItem onClick={handle(deleteScene, id)}>Delete</MenuItem>
       </MenuList>
     </Paper>
