@@ -49,7 +49,9 @@ const TestTable = ({ groupInfo, rowClick }) => {
         <TableContainer>
           <Table
             className={
-              mode== "groups" ? "sm:min-w-[80vw] lg:min-w-[90vw]" : "sm:min-w-[80vw] lg:min-w-[40vw]"
+              mode == "groups"
+                ? "sm:min-w-[80vw] lg:min-w-[90vw]"
+                : "sm:min-w-[80vw] lg:min-w-[40vw]"
             }
           >
             <TableHead>
