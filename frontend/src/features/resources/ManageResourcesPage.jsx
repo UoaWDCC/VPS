@@ -13,7 +13,7 @@ export default function ManageResourcesPage() {
   const { scenarioId } = useParams();
 
   const csvInputRef = useRef(null);
-  const [setResources] = useState([]);
+  const [resources, setResources] = useState([]);
 
   useEffect(() => {
     let cancelled = false;
@@ -44,6 +44,8 @@ export default function ManageResourcesPage() {
       cancelled = true;
     };
   }, [scenarioId]);
+
+  const triggerCsvUpload = () => csvInputRef.current?.click();
 
   const handleCsvUpload = (event) => {
     const file = event.target.files?.[0];
@@ -77,7 +79,7 @@ export default function ManageResourcesPage() {
     });
   };
 
-  const [groups, setGroups] = useState([]);
+  const [groups, setGroups] = useState([]); // { id, name, order, children:[{ id, name, order, files:[...] }] }
   const [selectedFile, setSelectedFile] = useState(null);
   const [filter, setFilter] = useState("");
 
@@ -99,7 +101,6 @@ export default function ManageResourcesPage() {
           }
         );
 
-        // Normalise server data to your existing UI shape
         const normalized =
           (data || []).map((g) => ({
             id: g._id,
@@ -166,7 +167,7 @@ export default function ManageResourcesPage() {
     );
   }, [allFiles, filter]);
 
-  // Build a download URL that carries the Firebase token in the query (so <img>, <a> work)
+  // Build a download URL with Firebase token as query
   async function makeDownloadUrl(fileId) {
     const user = getAuth().currentUser;
     const token = await user.getIdToken();
@@ -204,7 +205,6 @@ export default function ManageResourcesPage() {
       const uploaded = data?.files || [];
       if (!uploaded.length) return;
 
-      // Normalise uploaded files to UI shape and merge to the top of the list
       const normalizedUploaded = uploaded.map((f) => ({
         id: f._id,
         name: f.name,
@@ -238,7 +238,6 @@ export default function ManageResourcesPage() {
     }
   }
 
-  // Delete file both server & local state
   async function removeFile(fileId) {
     try {
       const user = getAuth().currentUser;
@@ -269,6 +268,70 @@ export default function ManageResourcesPage() {
     }
   }
 
+  async function deleteChild(childId, groupId) {
+    const ok = window.confirm(
+      "Delete this child and ALL of its files? This cannot be undone."
+    );
+    if (!ok) return;
+    try {
+      const user = getAuth().currentUser;
+      if (!user) {
+        toast.error("You must be logged in to delete.");
+        return;
+      }
+      const idToken = await user.getIdToken();
+      await axios.delete(`/api/collections/children/${childId}`, {
+        headers: { Authorization: `Bearer ${idToken}` },
+      });
+
+      setGroups((prev) =>
+        prev.map((g) =>
+          g.id === groupId
+            ? { ...g, children: g.children.filter((c) => c.id !== childId) }
+            : g
+        )
+      );
+
+      // Clear preview if it pointed to a file under this child
+      if (selectedFile && selectedFile.childId === childId)
+        setSelectedFile(null);
+
+      toast.success("Child deleted");
+    } catch (err) {
+      console.error(err);
+      toast.error(err?.response?.data?.error || "Failed to delete child");
+    }
+  }
+
+  async function deleteGroup(groupId) {
+    const ok = window.confirm(
+      "Delete this group and ALL of its children and files? This cannot be undone."
+    );
+    if (!ok) return;
+    try {
+      const user = getAuth().currentUser;
+      if (!user) {
+        toast.error("You must be logged in to delete.");
+        return;
+      }
+      const idToken = await user.getIdToken();
+      await axios.delete(`/api/collections/groups/${groupId}`, {
+        headers: { Authorization: `Bearer ${idToken}` },
+      });
+
+      setGroups((prev) => prev.filter((g) => g.id !== groupId));
+
+      // Clear preview if it belonged to this group
+      if (selectedFile && selectedFile.groupId === groupId)
+        setSelectedFile(null);
+
+      toast.success("Group deleted");
+    } catch (err) {
+      console.error(err);
+      toast.error(err?.response?.data?.error || "Failed to delete group");
+    }
+  }
+
   return (
     <ScreenContainer vertical>
       <TopBar back={`/scenario/${scenarioId}`}>
@@ -279,9 +342,9 @@ export default function ManageResourcesPage() {
           className="hidden"
           onChange={handleCsvUpload}
         />
-        {/* <button className="btn vps w-[100px]" onClick={triggerCsvUpload}>
+        <button className="btn vps w-[100px]" onClick={triggerCsvUpload}>
           Upload CSV
-        </button> */}
+        </button>
       </TopBar>
 
       <section className="p-4">
@@ -289,10 +352,9 @@ export default function ManageResourcesPage() {
       </section>
 
       <div className="container mx-auto p-4 grid grid-cols-1 lg:grid-cols-2 gap-4">
-        {/* Left: Collections */}
         <div className="card bg-base-100 shadow-md">
           <div className="card-body gap-4">
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between gap-2">
               <h2 className="card-title">Collections</h2>
               <AddGroup
                 onAdd={async (name) => {
@@ -305,7 +367,6 @@ export default function ManageResourcesPage() {
                       { scenarioId, name },
                       { headers: { Authorization: `Bearer ${idToken}` } }
                     );
-                    // Append empty group
                     setGroups((g) => [
                       ...g,
                       {
@@ -330,6 +391,20 @@ export default function ManageResourcesPage() {
                   <details>
                     <summary className="flex items-center gap-2">
                       <span className="font-medium">{group.name}</span>
+
+                      {/* Delete group button */}
+                      <button
+                        className="btn btn-ghost btn-xs text-error"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          deleteGroup(group.id);
+                        }}
+                        title="Delete group (cascade)"
+                      >
+                        x
+                      </button>
+
                       <AddChild
                         onAdd={async (name) => {
                           try {
@@ -371,6 +446,7 @@ export default function ManageResourcesPage() {
                         }}
                       />
                     </summary>
+
                     <ul>
                       {group.children.length === 0 && (
                         <li className="opacity-60 p-2">No sub-items yet</li>
@@ -378,11 +454,23 @@ export default function ManageResourcesPage() {
 
                       {group.children.map((child) => (
                         <li key={child.id}>
-                          <div className="flex items-center justify-between pr-2">
+                          <div className="flex items-center justify-between pr-2 gap-2">
                             <span>{child.name}</span>
-                            <UploadButton
-                              onFiles={(files) => addFilesTo(child.id, files)}
-                            />
+                            <div className="flex items-center gap-1">
+                              {/* Upload to child */}
+                              <UploadButton
+                                onFiles={(files) => addFilesTo(child.id, files)}
+                              />
+
+                              {/* Delete child button */}
+                              <button
+                                className="btn btn-ghost btn-xs text-error"
+                                onClick={() => deleteChild(child.id, group.id)}
+                                title="Delete child (cascade)"
+                              >
+                                x
+                              </button>
+                            </div>
                           </div>
 
                           {child.files.length > 0 && (
@@ -409,7 +497,7 @@ export default function ManageResourcesPage() {
                                   <button
                                     className="btn btn-ghost btn-xs text-error"
                                     onClick={() => removeFile(f.id)}
-                                    title="Remove"
+                                    title="Remove file"
                                   >
                                     ✕
                                   </button>
@@ -427,7 +515,6 @@ export default function ManageResourcesPage() {
           </div>
         </div>
 
-        {/* Right: Files + Preview */}
         <div className="card bg-base-100 shadow-md">
           <div className="card-body gap-4">
             <div className="flex items-center gap-2">
@@ -498,7 +585,6 @@ export default function ManageResourcesPage() {
   );
 }
 
-/** Small "+" upload control */
 function UploadButton({ onFiles, multiple = true, className = "" }) {
   const inputRef = useRef(null);
   return (
@@ -525,55 +611,6 @@ function UploadButton({ onFiles, multiple = true, className = "" }) {
   );
 }
 
-function ImgWithAuth({ file }) {
-  const [src, setSrc] = useState(null);
-
-  useEffect(() => {
-    let cancelled = false;
-    let objectUrl = null;
-
-    (async () => {
-      if (!file) return;
-      try {
-        const user = getAuth().currentUser;
-        const token = await user.getIdToken();
-        const resp = await fetch(`/api/files/download/${file.id}`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
-        const blob = await resp.blob();
-        objectUrl = URL.createObjectURL(blob);
-        if (!cancelled) setSrc(objectUrl);
-      } catch (err) {
-        console.error("image fetch failed", err);
-        if (!cancelled) setSrc(null);
-      }
-    })();
-
-    return () => {
-      cancelled = true;
-      if (objectUrl) URL.revokeObjectURL(objectUrl);
-    };
-  }, [file]);
-
-  if (!src) {
-    return (
-      <div className="alert">
-        <span>Failed to load image preview.</span>
-      </div>
-    );
-  }
-
-  return (
-    <img
-      src={src}
-      alt={file.name}
-      className="rounded-xl max-h-80 object-contain"
-    />
-  );
-}
-
-/** Preview that pulls from backend download URL (with token) TO DO BROKEN*/
 function Preview({ file, makeDownloadUrl }) {
   const [downloadUrl, setDownloadUrl] = useState(null);
   const [text, setText] = useState(null);
@@ -648,8 +685,12 @@ function Preview({ file, makeDownloadUrl }) {
         )}
       </div>
 
-      {isImage ? (
-        <ImgWithAuth file={file} />
+      {isImage && downloadUrl ? (
+        <img
+          src={downloadUrl}
+          alt={file.name}
+          className="rounded-xl max-h-80 object-contain"
+        />
       ) : text != null ? (
         <pre className="mockup-code whitespace-pre-wrap text-xs max-h-80 overflow-auto p-4">
           {text}
