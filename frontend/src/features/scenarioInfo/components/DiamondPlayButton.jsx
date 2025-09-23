@@ -41,7 +41,7 @@ const DiamondPlayButton = ({ size = 80 }) => {
           color: 'white',
           fontWeight: 'bold',
           letterSpacing: '0.05em',
-          transition: 'all 0.3s ease-out',
+          transition: 'all 0.2s ease-out',
           pointerEvents: 'none'
         }}
       >

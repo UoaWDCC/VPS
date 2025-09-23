@@ -50,7 +50,9 @@ export default function App() {
               </ProtectedRoute>
               
               <ProtectedRoute path="/scenario-info">
-                <ScenarioInfo />
+                <ScenarioContextProvider>
+                  <ScenarioInfo />
+                </ScenarioContextProvider>
               </ProtectedRoute>
 
               <ProtectedRoute exact path="/">

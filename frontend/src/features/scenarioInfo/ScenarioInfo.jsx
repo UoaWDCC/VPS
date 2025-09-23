@@ -1,36 +1,25 @@
-import { useState } from 'react'
+import { useState, useEffect, useContext } from 'react'
 import './scenarioInfo.css'
 import DiamondPlayButton from './components/DiamondPlayButton'
 import GradientLine from './components/GradientLine'
+import Thumbnail from '../authoring/components/Thumbnail'
+import ScenarioContext from '../../context/ScenarioContext'
+import AuthenticationContext from '../../context/AuthenticationContext'
 
 function ScenarioInfo() {
   const [selectedScenario, setSelectedScenario] = useState(null)
   const [searchTerm, setSearchTerm] = useState('')
+  const scenarioContext = useContext(ScenarioContext)
+  const { VpsUser } = useContext(AuthenticationContext)
+  
 
-  const scenarios = [
-    'Annual Eye Screen for Patient with Diabetes',
-    'Psychosis',
-    'Altered level of consciousness',
-    'Chronic Limb Pain',
-    'Blisters',
-    'Dislocated Joint',
-    'Haemoptysis and abnormal chest...',
-    'Fracture',
-    'Groin Lump',
-    'Haemochromatosis',
-    'Gradual deterioration in visual ac...',
-    'Hand Injury',
-    'Headache',
-    'Heavy Menstrual Periods',
-    'Hip fracture',
-    'Hypercalcaemia and Back Pain',
-    'Lymphadenopathy and splenomeg...',
-    'Menopause',
-    'Musculoskeletal Lump'
-  ]
+  const scenarios = scenarioContext?.scenarios || []
+  
+  
+  const username = VpsUser?.name || VpsUser?.displayName || 'Unknown User'
 
   const filteredScenarios = scenarios.filter(scenario =>
-    scenario.toLowerCase().includes(searchTerm.toLowerCase())
+    scenario.name.toLowerCase().includes(searchTerm.toLowerCase())
   )
 
   const handleScenarioSelect = (scenario) => {
@@ -82,13 +71,13 @@ function ScenarioInfo() {
         
         {/* Scenario List */}
         <div className="scenario-list">
-          {filteredScenarios.map((scenario, index) => (
+          {filteredScenarios.map((scenario) => (
             <div
-              key={index}
-              className={`scenario-item ${scenario === selectedScenario ? 'selected' : ''}`}
+              key={scenario._id}
+              className={`scenario-item ${scenario._id === selectedScenario?._id ? 'selected' : ''}`}
               onClick={() => handleScenarioSelect(scenario)}
             >
-              {scenario}
+              {scenario.name}
             </div>
           ))}
         </div>
@@ -105,13 +94,13 @@ function ScenarioInfo() {
           <div className="scenario-detail w-full h-full flex flex-col overflow-y-auto">
             {/* Scenario Header */}
             <div className="scenario-header text-left">
-              <h1 className="scenario-title text-white font-light">{selectedScenario}</h1>
+              <h1 className="scenario-title text-white font-light">{selectedScenario.name}</h1>
               
               {/* Scenario Meta */}
               <div className="scenario-meta flex justify-start">
                 <div className="meta-item flex flex-col items-start">
                   <span className="meta-label text-white/60">Created By</span>
-                  <span className="meta-value text-white">Nataly</span>
+                  <span className="meta-value text-white">{username}</span>
                 </div>
                 <div className="meta-item flex flex-col items-start">
                   <span className="meta-label text-white/60">Mode</span>
@@ -126,13 +115,11 @@ function ScenarioInfo() {
 
             {/* Scenario Content */}
             <div className="scenario-content flex-1 flex flex-col items-start">
-              {/* Scenario Image */}
-              <div className="scenario-image-wrapper w-full">
-                <img 
-                  src="src/assets/sc.png" 
-                  alt="Medical scenario environment"
-                  className="scenario-image w-full h-full object-cover border border-gray-600"
-                />
+              {/* Scenario Thumbnail */}
+              <div className="scenario-thumbnail-wrapper w-full">
+                <div className="scenario-thumbnail border border-gray-600 bg-white rounded-lg overflow-hidden">
+                  <Thumbnail components={selectedScenario.thumbnail?.components || []} />
+                </div>
               </div>
 
               {/* Scenario Description */}
@@ -140,15 +127,13 @@ function ScenarioInfo() {
                 <h3 className="description-title text-white font-medium text-left">Description</h3>
                 <div className="description-content flex items-center">
                   <p className="description-text text-white/80 text-left leading-relaxed flex-1">
-                    A NZ European man with diabetes of 15 years duration presents for an eye screen. 
-                    He is blind in one eye following unsuccessful surgery for diabetic eye disease and 
-                    now presents with pre-proliferative retinopathy in his remaining eye.
+                    Testing scenario - This is a sample scenario for testing the VPS application functionality.
                   </p>
                   
                   <div className="play-button-wrapper flex-shrink-0">
                     <DiamondPlayButton 
                       size={80}
-                      onClick={() => console.log('Starting scenario:', selectedScenario)}
+                      onClick={() => console.log('Starting scenario:', selectedScenario.name)}
                     />
                   </div>
                 </div>
