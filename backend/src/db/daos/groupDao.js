@@ -45,13 +45,16 @@ const setGroupStateVariables = async (groupId, stateVariables) => {
   try {
     const group = await Group.findOneAndUpdate(
       { _id: groupId },
-      { $set: { stateVariables } },
+      {
+        $set: { stateVariables },
+        $inc: { stateVersion: 1 },
+      },
       { new: true }
     );
     if (!group) {
       throw new Error("Group not found");
     }
-    return group;
+    return [group.stateVariables, group.stateVersion];
   } catch (error) {
     throw new Error(`Error initiating state variables: ${error.message}`);
   }

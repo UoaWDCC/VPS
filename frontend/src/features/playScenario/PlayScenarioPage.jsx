@@ -96,7 +96,8 @@ export default function PlayScenarioPage() {
         removeFlags,
         componentId
       );
-      // TODO implement state tracker
+
+      // Updates state variables if there is a desync
       if (stateVersion !== newStateVersion) {
         setStateVariables(stateVariables);
         setStateVersion(newStateVersion);

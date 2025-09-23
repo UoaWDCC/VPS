@@ -18,6 +18,10 @@ const groupSchema = new Schema({
   },
   currentFlags: [String],
   stateVariables: [Schema.Types.Mixed],
+  stateVersion: {
+    type: Number,
+    default: 0,
+  },
 });
 
 const Group = mongoose.model("Group", groupSchema, "groups");

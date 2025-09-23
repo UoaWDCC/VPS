@@ -40,6 +40,7 @@ const navigate = async (
   return {
     newSceneId: res.data.active,
     stateVariables: res.data.stateVariables,
+    newStateVersion: res.data.stateVersion,
   };
 };
 
@@ -71,6 +72,7 @@ export default function PlayScenarioPageMulti({ group }) {
 
   const [sceneId, setSceneId] = useState(null);
   const [stateVariables, setStateVariables] = useState([]);
+  const [stateVersion, setStateVersion] = useState(0);
   const [resourcesOpen, setResourcesOpen] = useState(false);
   const [noteOpen, setNoteOpen] = useState(false);
   const [addFlags, setAddFlags] = useState([]);
@@ -82,6 +84,10 @@ export default function PlayScenarioPageMulti({ group }) {
   useEffect(() => {
     console.log(stateVariables);
   }, [stateVariables]);
+
+  useEffect(() => {
+    console.log(stateVersion);
+  }, [stateVersion]);
 
   const handleError = (error) => {
     if (!error) return;
@@ -107,13 +113,14 @@ export default function PlayScenarioPageMulti({ group }) {
       );
       const stateOperations = component?.stateOperations;
       if (stateOperations) {
+        setStateVersion(stateVersion + 1);
         setStateVariables(
           applyStateOperations(stateVariables, stateOperations)
         );
       }
     }
     try {
-      const { newSceneId, stateVariables } = await navigate(
+      const { newSceneId, stateVariables, newStateVersion } = await navigate(
         user,
         group._id,
         sceneId,
@@ -123,9 +130,11 @@ export default function PlayScenarioPageMulti({ group }) {
       );
       const newResources = await getResources(user, group._id);
       setResources(newResources);
-      // TODO implement state tracker
-      if (true) {
+
+      // Updates state variables if there is a desync
+      if (stateVersion !== newStateVersion) {
         setStateVariables(stateVariables);
+        setStateVersion(newStateVersion);
       }
       if (!sceneId) {
         setSceneId(newSceneId);
