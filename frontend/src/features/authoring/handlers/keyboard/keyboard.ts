@@ -3,7 +3,7 @@ import { bringForward, bringToFront, duplicateComponent, modifyComponentProp, se
 import { remove } from "../../scene/operations/modifiers";
 import useEditorStore from "../../stores/editor";
 import type { Vec2 } from "../../types";
-import { add, addScalar, translate } from "../../util";
+import { translate } from "../../util";
 import { handleTextMode } from "./text";
 
 export function handleGlobal(e: KeyboardEvent) {
