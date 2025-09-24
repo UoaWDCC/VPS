@@ -1,6 +1,7 @@
-import { arrayToObject, getObject } from "./util";
+import { getObject } from "./util";
 
 let scene = {
+  _id: "tester-tester",
   components: {
     "123123": {
       id: "123123",
@@ -167,6 +168,10 @@ window.scene = scene;
 
 export function getScene() {
   return scene;
+}
+
+export function getSceneId() {
+  return scene._id;
 }
 
 export function setScene(newScene: Record<string, any>) {

@@ -35,6 +35,8 @@ interface EditorState {
     setMode: (mode: Mode[]) => void;
     addMode: (mode: Mode) => void;
     removeMode: (mode: Mode) => void;
+
+    clear: () => void;
 }
 
 type Dynamic<T> = (arg: T | ((prev: T) => T)) => void;
@@ -81,6 +83,12 @@ const useEditorStore = create<EditorState>((set) => ({
     addMode: (arg) => set(state => ({ mode: [...state.mode, arg] })),
     removeMode: (arg) => set(state => ({ mode: state.mode.filter((x: Mode) => x !== arg) })),
 
+    clear: () => set({
+        selected: null,
+        selection: { start: null, end: null },
+        visualSelection: { start: null, end: null },
+        mode: ["normal"],
+    }),
 }))
 
 export default useEditorStore;

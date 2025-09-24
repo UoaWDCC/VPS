@@ -6,7 +6,6 @@ import HelpButton from "components/HelpButton";
 import ScreenContainer from "components/ScreenContainer/ScreenContainer";
 import TopBar from "components/TopBar/TopBar";
 import AuthenticationContext from "context/AuthenticationContext";
-import AuthoringToolContext from "context/AuthoringToolContext";
 import ScenarioContext from "context/ScenarioContext";
 import SceneContext from "context/SceneContext";
 import ToolbarContextProvider from "context/ToolbarContextProvider";
@@ -29,47 +28,31 @@ import { arrayToObject } from "./scene/util";
  * @container
  */
 export default function AuthoringToolPage() {
-  const { scenarioId, sceneId } = useParams();
-  const {
-    currentScene,
-    setCurrentScene,
-    setMonitorChange,
-    setHasChange,
-    reFetch,
-  } = useContext(SceneContext);
+  const { currentScene } = useContext(SceneContext);
   const { currentScenario } = useContext(ScenarioContext);
-  const { setSelect } = useContext(AuthoringToolContext);
   const { getUserIdToken } = useContext(AuthenticationContext);
-  const [firstTimeRender, setFirstTimeRender] = useState(true);
+
   const [saveButtonText, setSaveButtonText] = useState("Save");
+
   const autosaveTimeout = useRef(null);
 
-  const setComponents = useVisualScene((state) => state.setComponents);
+  // NOTE: 15 renders on initial page load last i checked
+  console.log("authoring page render");
 
   useEffect(() => {
-    // hb: i have no clue what these are for
-    if (firstTimeRender) {
-      setFirstTimeRender(false);
-    } else {
-      setMonitorChange(true);
-    }
-
     // TODO: this is hacky, but it works for now
     console.log(currentScene);
     setScene({
       ...currentScene,
       components: arrayToObject(currentScene?.components),
     });
-    setComponents(buildVisualScene(getScene()));
-  }, [currentScene, setComponents]);
+    const { setVisualScene } = useVisualScene.getState();
+    setVisualScene(buildVisualScene(getScene()));
+  }, [currentScene]);
 
   useEffect(() => {
-    if (!currentScene || !currentScene._id) return;
-    if (firstTimeRender) return;
-    if (autosaveTimeout.current) clearTimeout(autosaveTimeout.current);
-    autosaveTimeout.current = setTimeout(() => {
-      saveScene(true);
-    }, 2000);
+    if (!currentScene?._id) return;
+    autosaveTimeout.current = setTimeout(saveScene, 5000);
     return () => clearTimeout(autosaveTimeout.current);
   }, [currentScene]);
 
@@ -88,57 +71,36 @@ export default function AuthoringToolPage() {
   }, []);
 
   /** used to save the scene, as a helper function */
-  async function saveScene(isAuto = false) {
-    if (!isAuto) {
-      // only clear selection on manual save
-      setSelect(null);
-    }
-    await uploadFiles(
-      currentScene?.components,
-      currentScene?.endImage,
-      currentScenario._id,
-      currentScene._id
-    );
+  async function saveScene() {
+    const components = Object.values(getScene().components);
+    console.log("attempting save", currentScene._id, components);
     await usePut(
-      `/api/scenario/${scenarioId}/scene/${sceneId}`,
+      `/api/scenario/${currentScenario._id}/scene/${currentScene._id}`,
       {
         name: currentScene.name,
         time: currentScene.time,
-        components: Object.values(getScene().components),
+        components,
       },
       getUserIdToken
     );
-    setHasChange(false);
-    reFetch();
+    console.log("save completed");
   }
 
   /** called when save button is clicked */
   async function save() {
+    setSaveButtonText("Saving");
     await saveScene();
-    setSaveButtonText("Saved!");
-    setTimeout(() => {
-      setSaveButtonText("Save");
-    }, 1800);
-  }
-
-  /** called when save and close button is clicked */
-  async function savePlusClose() {
-    await save();
-    /* redirects user to the scenario page */
-    window.location.href = `/scenario/${currentScenario?._id}`;
+    setSaveButtonText("Saved");
+    setTimeout(() => { setSaveButtonText("Save") }, 1800);
   }
 
   return (
     <>
       <ScreenContainer vertical>
         <TopBar back={`/scenario/${currentScenario?._id}`} confirmModal>
-          <button className="btn vps w-[150px]" onClick={save}>
+          <button className="btn vps" onClick={save}>
             {saveButtonText}
           </button>
-          <button className="btn vps w-[150px]" onClick={savePlusClose}>
-            Save & Close
-          </button>
-          <HelpButton />
         </TopBar>
         <Topbar />
         <div className="flex h-full overflow-hidden">

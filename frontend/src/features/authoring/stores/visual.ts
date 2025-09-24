@@ -7,7 +7,11 @@ type VisualComponents = Record<string, VisualComponent>;
 
 interface VisualSceneState {
     components: Record<string, any>;
+    id: string | null;
+    name: string | null;
+    roles: string[] | null;
 
+    setVisualScene: (scene: { id: string, components: VisualComponents }) => void;
     setComponents: (components: VisualComponents) => void;
     updateComponent: (component: VisualComponent) => void;
     deleteComponent: (id: string) => void;
@@ -15,7 +19,11 @@ interface VisualSceneState {
 
 const useVisualScene = create<VisualSceneState>((set) => ({
     components: {},
+    id: null,
+    name: null,
+    roles: null,
 
+    setVisualScene: scene => set({ ...scene }),
     setComponents: components => set({ components }),
     updateComponent: (component) => set(state => ({ components: { ...state.components, [component.id]: component } })),
     deleteComponent: (id) => set(state => {

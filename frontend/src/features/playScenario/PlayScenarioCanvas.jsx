@@ -54,7 +54,7 @@ export default function PlayScenarioCanvas({
   //   setIsModalOpen(false);
   // };
 
-  const components = Object.values(buildVisualScene(scene))
+  const components = Object.values(buildVisualScene(scene).components)
     .sort((a, b) => a.zIndex - b.zIndex)
     .map((c) => {
       const resolved = resolve(c);

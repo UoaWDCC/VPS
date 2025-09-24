@@ -15,7 +15,7 @@ export default function SceneContextProvider({ children }) {
 
   const [scenes, setScenes] = useState([]);
 
-  const [currentScene, setCurrentScene] = useLocalStorage("currentScene", null);
+  const [currentScene, setCurrentScene] = useLocalStorage(null);
   const [monitorChange, setMonitorChange] = useState(false);
   const [hasChange, setHasChange] = useState(false);
 
