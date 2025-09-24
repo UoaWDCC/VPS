@@ -402,7 +402,7 @@ export default function ManageResourcesPage() {
                         }}
                         title="Delete group (cascade)"
                       >
-                        x
+                        ✕
                       </button>
 
                       <AddChild
@@ -468,7 +468,7 @@ export default function ManageResourcesPage() {
                                 onClick={() => deleteChild(child.id, group.id)}
                                 title="Delete child (cascade)"
                               >
-                                x
+                                ✕
                               </button>
                             </div>
                           </div>
