@@ -10,11 +10,18 @@ import ManageGroupsPage from "./features/groups/ManageGroupsPage";
 import PlayScenarioResolver from "./features/playScenario/PlayScenarioResolver";
 import PlayLandingPage from "./features/playScenario/PlayLandingPage"; // Import PlayLandingPage
 import ScenarioSelectionPage from "./features/scenarioSelection/ScenarioSelectionPage";
+
+import ScenarioInfo from "./features/scenarioInfo/ScenarioInfo";
+import PlayPage from "./features/play/PlayPage";
+
+import Dashboard from "./features/dashboard/Dashboard";
+
 import { ScenePage } from "./features/sceneSelection/SceneSelectionPage";
 import theme from "./theme/App.theme";
 
 import { Toaster } from "react-hot-toast";
 import { ContextMenuPortal } from "./components/ContextMenu/portal";
+import ViewGroupPage from "./features/dashboard/ViewGroup";
 
 const TOAST_OFFSET = 25;
 
@@ -52,9 +59,35 @@ export default function App() {
                 <PlayScenarioResolver />
               </ProtectedRoute>
 
+              <ProtectedRoute path="/scenario-info">
+                <ScenarioContextProvider>
+                  <ScenarioInfo />
+                </ScenarioContextProvider>
+              </ProtectedRoute>
+
+              <ProtectedRoute path="/play-page">
+                <ScenarioContextProvider>
+                  <PlayPage />
+                </ScenarioContextProvider>
+              </ProtectedRoute>
+
               <ProtectedRoute exact path="/">
                 <ScenarioContextProvider>
                   <ScenarioSelectionPage />
+                </ScenarioContextProvider>
+              </ProtectedRoute>
+
+              <ProtectedRoute exact path="/dashboard/:scenarioId">
+                <ScenarioContextProvider>
+                  <Dashboard />
+                </ScenarioContextProvider>
+              </ProtectedRoute>
+
+              <ProtectedRoute path="/dashboard/:scenarioId/view-group/:groupId">
+                <ScenarioContextProvider>
+                  <SceneContextProvider>
+                    <ViewGroupPage />
+                  </SceneContextProvider>
                 </ScenarioContextProvider>
               </ProtectedRoute>
 

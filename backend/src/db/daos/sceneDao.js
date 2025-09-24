@@ -1,6 +1,8 @@
 import Scene from "../models/scene.js";
 import Scenario from "../models/scenario.js";
 import { tryDeleteFile, updateFileMetadata } from "../../firebase/storage.js";
+import { HttpError } from "../../util/error.js";
+import status from "../../util/status.js";
 
 /**
  * Creates a scene in the database, and updates its parent scenario to contain the scene
@@ -32,7 +34,13 @@ const retrieveSceneList = async (scenarioId) => {
     "tag",
   ]);
 
-  return dbScenes;
+  const orderedScenes = dbScenario.scenes
+    .map((sceneId) =>
+      dbScenes.find((scene) => scene._id.toString() === sceneId.toString())
+    )
+    .filter(Boolean);
+
+  return orderedScenes;
 };
 
 /**
@@ -152,6 +160,39 @@ const incrementVisisted = async (sceneId) => {
   await Scene.updateOne({ _id: sceneId }, { visited: countVisited + 1 });
 };
 
+/**
+ * Retrieves component from scene based on ID
+ * @param {String} sceneId
+ * @param {String} componentId
+ * @returns component
+ */
+const getComponent = async (sceneId, componentId) => {
+  const dbScene = await Scene.findById(sceneId);
+  const component = dbScene.components.find((c) => c.id === componentId);
+
+  if (!component) {
+    throw new HttpError("Component does not exist", status.BAD_REQUEST);
+  }
+
+  return component;
+};
+
+/**
+ * Updates the order of scenes in a scenario
+ * @param {String} scenarioId MongoDB ID of scenario
+ * @param {String[]} sceneIds Array of scene IDs in the new order
+ * @returns {Promise<Object>} updated scenario object
+ */
+const updateSceneOrder = async (scenarioId, sceneIds) => {
+  const updatedScenario = await Scenario.findOneAndUpdate(
+    { _id: scenarioId },
+    { scenes: sceneIds },
+    { new: true }
+  );
+
+  return updatedScenario;
+};
+
 export {
   createScene,
   retrieveSceneList,
@@ -160,4 +201,6 @@ export {
   updateScene,
   duplicateScene,
   incrementVisisted,
+  getComponent,
+  updateSceneOrder,
 };

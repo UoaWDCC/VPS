@@ -8,6 +8,8 @@ import { HttpError } from "../../../util/error.js";
 import STATUS from "../../../util/status.js";
 import { getStateVariables } from "../../../db/daos/scenarioDao.js";
 import { setGroupStateVariables } from "../../../db/daos/groupDao.js";
+import { applyStateOperations } from "../../../util/statevariables/stateOperations.js";
+import { getComponent } from "../../../db/daos/sceneDao.js";
 
 const createInvalidError = (roles) =>
   new HttpError("Invalid role to access this scene", STATUS.FORBIDDEN, {
@@ -60,7 +62,7 @@ const getGroupByIdAndUser = async (groupId, uid) => {
   const { email } = await User.findOne({ uid }, { email: 1 }).lean();
   const group = await Group.findOne(
     { _id: groupId, users: { $elemMatch: { email } } },
-    { "users.$": 1, scenarioId: 1, path: 1 }
+    { "users.$": 1, scenarioId: 1, path: 1, stateVariables: 1, stateVersion: 1 }
   ).lean();
   if (!group)
     throw new HttpError(
@@ -145,11 +147,25 @@ const removeFlagsFromGroup = async (groupId, flags) => {
 // Initiates state variables for a group
 const initiateStateVariables = async (groupId, scenarioId) => {
   const stateVariables = await getStateVariables(scenarioId);
-  setGroupStateVariables(groupId, stateVariables);
+  return await setGroupStateVariables(groupId, stateVariables);
+};
+
+// Updates state variables for a group
+const updateStateVariables = async (group, component) => {
+  // If no update necessary, just return existing data
+  if (!component.stateOperations) {
+    return [group.stateVariables, group.stateVersion];
+  }
+  const stateVariables = applyStateOperations(
+    group.stateVariables,
+    component.stateOperations
+  );
+
+  return await setGroupStateVariables(group._id, stateVariables);
 };
 
 export const groupNavigate = async (req) => {
-  const { uid, currentScene, nextScene, addFlags, removeFlags } = req.body;
+  const { uid, currentScene, addFlags, removeFlags, componentId } = req.body;
 
   const group = await getGroupByIdAndUser(req.params.groupId, uid);
   const { role } = group.users[0];
@@ -157,40 +173,53 @@ export const groupNavigate = async (req) => {
   // the first time any user in the group is navigating
   if (!group.path.length) {
     const firstSceneId = await getScenarioFirstScene(group.scenarioId);
-    const [, , , scenes] = await Promise.all([
+    const [, , , scenes, [stateVariables, stateVersion]] = await Promise.all([
       addSceneToPath(group._id, null, firstSceneId),
       addFlagsToGroup(group._id, addFlags),
       removeFlagsFromGroup(group._id, removeFlags),
       getConnectedScenes(firstSceneId, role),
       initiateStateVariables(group._id, group.scenarioId),
     ]);
-    return { status: STATUS.OK, json: scenes };
+    return {
+      status: STATUS.OK,
+      json: { ...scenes, stateVariables, stateVersion },
+    };
   }
 
   // the first time the user is navigating in their session
-  if (!currentScene || !nextScene) {
+  if (!currentScene) {
     const scenes = await getConnectedScenes(group.path[0], role);
-    return { status: STATUS.OK, json: scenes };
+    const stateVariables = group.stateVariables;
+    const stateVersion = group.stateVersion;
+    return {
+      status: STATUS.OK,
+      json: { ...scenes, stateVariables, stateVersion },
+    };
   }
   // the user is navigating from one scene to another
   if (group.path[0] !== currentScene)
     throw new HttpError("Scene mismatch has occured", STATUS.CONFLICT);
 
-  const scene = await getSceneConsideringRole(currentScene, role);
-  const connectedIds = scene.components
-    .filter((c) => c.type === "BUTTON")
-    .map((b) => b.nextScene);
-  if (!connectedIds.includes(nextScene))
-    throw new HttpError("Invalid scene transition", STATUS.FORBIDDEN);
+  // Validate that the user is allowed to move to this scene
+  await getSceneConsideringRole(currentScene, role);
 
-  const [, , , scenes] = await Promise.all([
+  const component = await getComponent(currentScene, componentId);
+
+  // if the button does not lead to another scene or component does not exist, stay in the current scene
+  const nextScene = component?.nextScene || currentScene;
+
+  const [, , , scenes, [stateVariables, stateVersion]] = await Promise.all([
     addSceneToPath(group._id, currentScene, nextScene),
     addFlagsToGroup(group._id, addFlags),
     removeFlagsFromGroup(group._id, removeFlags),
     getConnectedScenes(nextScene, role, false),
+    updateStateVariables(group, component),
   ]);
 
-  return { status: STATUS.OK, json: scenes };
+  return {
+    status: STATUS.OK,
+    json: { ...scenes, stateVariables, stateVersion },
+  };
 };
 
 export const groupReset = async (req) => {

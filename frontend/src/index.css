@@ -2,21 +2,116 @@
 @plugin "daisyui";
 
 @theme {
-  --font-mona: "MonaSans", sans-serif;
-  --color-uoa-blue: #035084;
-  --color-main: #f8fafc;
+  --font-ibm: "IBMPlexSans", sans-serif;
+  --font-dm: "DMSans", sans-serif;
+
+  --color-black: #000000;
+  --color-white: #ffffff;
+  --color-grey: #898989;
+  --color-offwhite: #fafafa;
+
+  /* Utopia Fluid Type */
+  /* @link https://utopia.fyi/type/calculator?c=1024,14,1.125,1600,16,1.125,6,2,&s=0.75|0.5|0.25,1.5|2|3|4|6,s-l&g=s,l,xl,12 */
+  /* Step -2: 11.0617px → 12.642px */
+  --text--2: clamp(0.6914rem, 0.5158rem + 0.2743vw, 0.7901rem);
+  /* Step -1: 12.4444px → 14.2222px */
+  --text--1: clamp(0.7778rem, 0.5802rem + 0.3086vw, 0.8889rem);
+  /* Step 0: 14px → 16px */
+  --text-s: clamp(0.875rem, 0.6528rem + 0.3472vw, 1rem);
+  /* Step 1: 15.75px → 18px */
+  --text-m: clamp(0.9844rem, 0.7344rem + 0.3906vw, 1.125rem);
+  /* Step 2: 17.7188px → 20.25px */
+  --text-l: clamp(1.1074rem, 0.8262rem + 0.4395vw, 1.2656rem);
+  /* Step 3: 19.9336px → 22.7813px */
+  --text-3: clamp(1.2458rem, 0.9294rem + 0.4944vw, 1.4238rem);
+  /* Step 4: 22.4253px → 25.6289px */
+  --text-4: clamp(1.4016rem, 1.0456rem + 0.5562vw, 1.6018rem);
+  /* Step 5: 25.2285px → 28.8325px */
+  --text-5: clamp(1.5768rem, 1.1763rem + 0.6257vw, 1.802rem);
+  /* Step 6: 28.382px → 32.4366px */
+  --text-xl: clamp(1.7739rem, 1.3234rem + 0.7039vw, 2.0273rem);
+
+  /* Utopia Fluid Space */
+  /* @link https://utopia.fyi/space/calculator?c=1024,14,1.125,1600,16,1.25,5,2,&s=0.75|0.5|0.25,1.5|2|3|4|6|8|11|14,s-l|2xl-3xl|3xl-4xl&g=s,l,xl,12 */
+  /* Space 3xs: 4px → 4px */
+  --spacing-3xs: clamp(0.25rem, 0.25rem + 0vw, 0.25rem);
+  /* Space 2xs: 7px → 8px */
+  --spacing-2xs: clamp(0.4375rem, 0.3264rem + 0.1736vw, 0.5rem);
+  /* Space xs: 11px → 12px */
+  --spacing-xs: clamp(0.6875rem, 0.5764rem + 0.1736vw, 0.75rem);
+  /* Space s: 14px → 16px */
+  --spacing-s: clamp(0.875rem, 0.6528rem + 0.3472vw, 1rem);
+  /* Space m: 21px → 24px */
+  --spacing-m: clamp(1.3125rem, 0.9792rem + 0.5208vw, 1.5rem);
+  /* Space l: 28px → 32px */
+  --spacing-l: clamp(1.75rem, 1.3056rem + 0.6944vw, 2rem);
+  /* Space xl: 42px → 48px */
+  --spacing-xl: clamp(2.625rem, 1.9583rem + 1.0417vw, 3rem);
+  /* Space 2xl: 56px → 64px */
+  --spacing-2xl: clamp(3.5rem, 2.6111rem + 1.3889vw, 4rem);
+  /* Space 3xl: 84px → 96px */
+  --spacing-3xl: clamp(5.25rem, 3.9167rem + 2.0833vw, 6rem);
+  /* Space 4xl: 112px → 128px */
+  --spacing-4xl: clamp(7rem, 5.2222rem + 2.7778vw, 8rem);
+  /* Space 5xl: 154px → 176px */
+  --spacing-5xl: clamp(9.625rem, 7.1806rem + 3.8194vw, 11rem);
+  /* Space 6xl: 196px → 224px */
+  --spacing-6xl: clamp(12.25rem, 9.1389rem + 4.8611vw, 14rem);
+
+  /* One-up pairs */
+  /* Space 3xs-2xs: 4px → 8px */
+  --spacing-3xs-2xs: clamp(0.25rem, -0.1944rem + 0.6944vw, 0.5rem);
+  /* Space 2xs-xs: 7px → 12px */
+  --spacing-2xs-xs: clamp(0.4375rem, -0.1181rem + 0.8681vw, 0.75rem);
+  /* Space xs-s: 11px → 16px */
+  --spacing-xs-s: clamp(0.6875rem, 0.1319rem + 0.8681vw, 1rem);
+  /* Space s-m: 14px → 24px */
+  --spacing-s-m: clamp(0.875rem, -0.2361rem + 1.7361vw, 1.5rem);
+  /* Space m-l: 21px → 32px */
+  --spacing-m-l: clamp(1.3125rem, 0.0903rem + 1.9097vw, 2rem);
+  /* Space l-xl: 28px → 48px */
+  --spacing-l-xl: clamp(1.75rem, -0.4722rem + 3.4722vw, 3rem);
+  /* Space xl-2xl: 42px → 64px */
+  --spacing-xl-2xl: clamp(2.625rem, 0.1806rem + 3.8194vw, 4rem);
+  /* Space 2xl-3xl: 56px → 96px */
+  --spacing-2xl-3xl: clamp(3.5rem, -0.9444rem + 6.9444vw, 6rem);
+  /* Space 3xl-4xl: 84px → 128px */
+  --spacing-3xl-4xl: clamp(5.25rem, 0.3611rem + 7.6389vw, 8rem);
+  /* Space 4xl-5xl: 112px → 176px */
+  --spacing-4xl-5xl: clamp(7rem, -0.1111rem + 11.1111vw, 11rem);
+  /* Space 5xl-6xl: 154px → 224px */
+  --spacing-5xl-6xl: clamp(9.625rem, 1.8472rem + 12.1528vw, 14rem);
+
+  /* Utopia Fluid Grid */
+  /* @link https://utopia.fyi/grid/calculator?c=1024,14,1.125,1600,16,1.25,5,2,&s=0.75|0.5|0.25,1.5|2|3|4|6,s-l&g=l,l,2xl,12 */
+  --grid-max-width: 74rem;
+  --grid-gutter: var(--spacing-l-l, clamp(1.75rem, 0.15rem + 2.5vw, 2rem));
+  --grid-columns: 12;
 }
 
 @plugin "daisyui/theme" {
-  name: "vps";
+  name: "vps-light";
   default: false;
   prefersdark: false;
   color-scheme: light;
 
-  --color-base-100: #f8fafc;
-  --color-base-content: #035084;
-  --color-primary: #fafafa;
-  --color-secondary: #035084;
+  --color-base-100: var(--color-offwhite);
+  --color-base-content: var(--color-black);
+  --color-primary: var(--color-grey);
+  --color-secondary: var(--color-black);
+  --color-error: #c13216;
+}
+
+@plugin "daisyui/theme" {
+  name: "vps-dark";
+  default: true;
+  prefersdark: true;
+  color-scheme: dark;
+
+  --color-base-100: var(--color-black);
+  --color-base-content: var(--color-white);
+  --color-primary: var(--color-grey);
+  --color-secondary: var(--color-white);
   --color-error: #c13216;
 }
 
@@ -26,22 +121,84 @@
   src: url("/fonts/MonaSans.woff2") format("woff2");
 }
 
+/* DM Sans - licensed under SIL Open Font License, Version 1.1. See https://openfontlicense.org */
+@font-face {
+  font-family: "DMSans";
+  src: url("/fonts/DMSans-Regular.woff2") format("woff2");
+}
+
+/* IBM Plex Sans - licensed under SIL Open Font License, Version 1.1. See https://openfontlicense.org */
+@font-face {
+  font-family: "IBMPlexSans";
+  src: url("/fonts/IBMPlexSans-Regular.woff2") format("woff2");
+}
+
 /* Pass down viewport width/height to children */
 html,
 body,
 #root {
   width: 100%;
   height: 100%;
-  @apply bg-main;
+  background-color: var(--color-base-100);
 }
 
-.graph-paper {
-  @apply bg-main;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'%3E%3Cg fill-rule='evenodd'%3E%3Cg fill='%23e2e8f0' fill-opacity='0.4'%3E%3Cpath opacity='.5' d='M96 95h4v1h-4v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4H0v-1h15v-9H0v-1h15v-9H0v-1h15v-9H0v-1h15v-9H0v-1h15v-9H0v-1h15v-9H0v-1h15v-9H0v-1h15v-9H0v-1h15V0h1v15h9V0h1v15h9V0h1v15h9V0h1v15h9V0h1v15h9V0h1v15h9V0h1v15h9V0h1v15h9V0h1v15h4v1h-4v9h4v1h-4v9h4v1h-4v9h4v1h-4v9h4v1h-4v9h4v1h-4v9h4v1h-4v9h4v1h-4v9zm-1 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-9-10h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm9-10v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-9-10h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm9-10v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-9-10h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm9-10v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-9-10h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9z'/%3E%3Cpath d='M6 5V0H5v5H0v1h5v94h1V6h94V5H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+/* Utopia Grid Styles */
+.u-container {
+  max-width: var(--grid-max-width);
+  padding-inline: var(--grid-gutter);
+  margin-inline: auto;
+}
+
+.u-grid {
+  display: grid;
+  gap: var(--grid-gutter);
 }
 
 .btn.vps {
   @apply bg-primary text-secondary hover:opacity-85;
+}
+
+.btn.vps-diamond {
+  box-sizing: border-box;
+  /* Size from Utopia token: 4xl */
+  width: var(--spacing-4xl);
+  height: var(--spacing-4xl);
+  border-radius: 2px;
+
+  /* Diamond shape via rotation */
+  transform: rotate(45deg);
+
+  /* Center the text inside */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  /* Outline */
+  border: none;
+  outline: 1px solid var(--color-grey);
+
+  /* Background transparent (optional) */
+  background-color: transparent;
+
+  /* Text color and font */
+  color: var(--color-secondary);
+  font-family: var(--font-dm);
+  font-size: var(--text-4);
+
+  /* Smooth hover transition */
+  transition:
+    box-shadow 5s ease,
+    transform 5s ease;
+}
+
+/* Rotate text back to normal inside the diamond */
+.btn.vps-diamond span {
+  transform: rotate(-45deg);
+}
+
+/* Hover effect: drop-shadow */
+.btn.vps-diamond:hover {
+  box-shadow: 0 0 32px 8px rgba(255, 255, 255, 0.15);
 }
 
 .btn.important {

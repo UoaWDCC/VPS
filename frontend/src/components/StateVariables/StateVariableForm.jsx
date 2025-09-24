@@ -6,7 +6,7 @@ import {
   Select,
   TextField,
 } from "@material-ui/core";
-import { StateTypes, getDefaultValue } from "./StateTypes";
+import { stateTypes, getDefaultValue } from "./stateTypes";
 
 const StateVariableForm = ({
   name,
@@ -48,14 +48,14 @@ const StateVariableForm = ({
           }}
           required
         >
-          <MenuItem value={StateTypes.STRING}>String</MenuItem>
-          <MenuItem value={StateTypes.NUMBER}>Number</MenuItem>
-          <MenuItem value={StateTypes.BOOLEAN}>Boolean</MenuItem>
+          <MenuItem value={stateTypes.STRING}>String</MenuItem>
+          <MenuItem value={stateTypes.NUMBER}>Number</MenuItem>
+          <MenuItem value={stateTypes.BOOLEAN}>Boolean</MenuItem>
         </Select>
       </FormControl>
 
       <FormControl style={{ width: "250px" }} margin="normal">
-        {type === StateTypes.BOOLEAN ? (
+        {type === stateTypes.BOOLEAN ? (
           <>
             <InputLabel>Initial Value</InputLabel>
             <Select
@@ -73,7 +73,7 @@ const StateVariableForm = ({
             label={`Initial Value`}
             onChange={(e) =>
               setValue(
-                type === StateTypes.NUMBER
+                type === stateTypes.NUMBER
                   ? Number(e.target.value)
                   : e.target.value
               )
@@ -83,7 +83,7 @@ const StateVariableForm = ({
               e.stopPropagation();
             }}
             required
-            type={type === StateTypes.NUMBER ? "number" : "text"}
+            type={type === stateTypes.NUMBER ? "number" : "text"}
           />
         )}
       </FormControl>

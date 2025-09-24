@@ -8,6 +8,7 @@ import {
   retrieveScene,
   retrieveSceneList,
   updateScene,
+  updateSceneOrder,
 } from "../../db/daos/sceneDao.js";
 import auth from "../../middleware/firebaseAuth.js";
 import scenarioAuth from "../../middleware/scenarioAuth.js";
@@ -74,6 +75,21 @@ router.put("/roles", async (req, res) => {
   );
 
   res.status(HTTP_OK).json(updatedRoles);
+});
+
+// Update the order of scenes in a scenario
+router.put("/reorder", async (req, res) => {
+  const { sceneIds } = req.body;
+
+  if (!Array.isArray(sceneIds)) {
+    return res.status(400).json({ error: "sceneIds must be an array" });
+  }
+
+  const updatedScenario = await updateSceneOrder(
+    req.params.scenarioId,
+    sceneIds
+  );
+  res.status(HTTP_OK).json(updatedScenario);
 });
 
 // Update a scene

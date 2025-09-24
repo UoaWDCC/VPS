@@ -35,6 +35,12 @@ describe("Image API tests", () => {
     app.use(express.json());
     app.use("/", routes);
 
+    // Add safe error handler to avoid circular JSON errors
+    app.use((err, res) => {
+      console.error("Unhandled Express error:", err.message);
+      res.status(500).json({ error: "Internal Server Error" });
+    });
+
     server = app.listen(0);
     port = server.address().port;
   });
@@ -54,11 +60,22 @@ describe("Image API tests", () => {
 
   it("creates images in the database", async () => {
     const body = {
-      urls: [
-        "https://drive.google.com/uc?export=view&id=1IExv9SGZq_KFFGOxBzhz_OfO6UAWLL5z",
-        "https://drive.google.com/uc?export=view&id=1uRyrBAvCZf2dPHXR0TjsPVncU_rz0vuZ",
+      images: [
+        {
+          id: "img1",
+          url: "https://example.com/image1.jpg",
+          fileName: "image1.jpg",
+          uploadedAt: new Date().toISOString(),
+        },
+        {
+          id: "img2",
+          url: "https://example.com/image2.jpg",
+          fileName: "image2.jpg",
+          uploadedAt: new Date().toISOString(),
+        },
       ],
     };
+
     const response = await axios.post(
       `http://localhost:${port}/api/image/`,
       body
@@ -69,8 +86,8 @@ describe("Image API tests", () => {
     const dbImages = await Image.find().sort({ url: 1 });
 
     expect(dbImages).toHaveLength(2);
-    expect(dbImages[0].url).toEqual(body.urls[0]);
-    expect(dbImages[1].url).toEqual(body.urls[1]);
+    expect(dbImages[0].url).toEqual(body.images[0].url);
+    expect(dbImages[1].url).toEqual(body.images[1].url);
   });
 
   it("GET/image: retrieves all images in the database", async () => {
@@ -94,19 +111,19 @@ describe("Image API tests", () => {
 
   it("GET/image: retrieves a specific image in the database", async () => {
     const image1 = {
-      _id: new mongoose.mongo.ObjectId("000000000000000000000001"),
-      url: "https://drive.google.com/uc?export=view&id=1IExv9SGZq_KFFGOxBzhz_OfO6UAWLL5z",
+      id: "img1",
+      url: "https://example.com/image1.jpg",
     };
 
     const image2 = {
-      _id: new mongoose.mongo.ObjectId("000000000000000000000002"),
-      url: "https://drive.google.com/uc?export=view&id=1uRyrBAvCZf2dPHXR0TjsPVncU_rz0vuZ",
+      id: "img2",
+      url: "https://example.com/image2.jpg",
     };
 
     await Image.create([image1, image2]);
 
     const response = await axios.get(
-      `http://localhost:${port}/api/image/${image2._id}`
+      `http://localhost:${port}/api/image/${image2.id}`
     );
     expect(response.status).toBe(HTTP_OK);
 
