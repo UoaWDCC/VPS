@@ -1,9 +1,14 @@
 import { v4 } from "uuid";
-import { buildVisualComponent } from "../../pipeline";
+import { buildVisualComponent, buildVisualScene } from "../../pipeline";
 import useVisualScene from "../../stores/visual";
 import { updateHistory } from "../history";
-import { getComponent, getScene } from "../scene";
-import type { Component } from "../../types";
+import { getComponent, getScene, setScene } from "../scene";
+import type { Component, Scene } from "../../types";
+
+export function replace(scene: Scene) {
+  setScene(scene);
+  useVisualScene.getState().setVisualScene(buildVisualScene(scene));
+}
 
 // wrapper for state mutating functions, will capture both state and operation
 export function modify<A extends [string, ...any[]], R>(fn: (...args: A) => R) {

@@ -7,7 +7,7 @@ export function buildVisualScene(modelScene: Scene) {
     for (const component of Object.values(modelScene.components)) {
         visualComponents[component.id] = buildVisualComponent(component);
     }
-    return visualComponents;
+    return { ...modelScene, id: modelScene._id, components: visualComponents };
 }
 
 function pad(verts: Vec2[], amount: number) {

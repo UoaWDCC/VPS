@@ -2,7 +2,6 @@ import { useContext, useState } from "react";
 import { useHistory } from "react-router-dom";
 
 import BackModal from "../../features/authoring/components/BackModal/BackModal";
-import AuthoringToolContext from "../../context/AuthoringToolContext";
 import ScenarioContext from "../../context/ScenarioContext";
 import SceneContext from "../../context/SceneContext";
 import styles from "./TopBar.module.scss";
@@ -29,18 +28,13 @@ export default function TopBar({
   const [showModal, setShowModal] = useState(false);
   const { hasChange, setMonitorChange } = useContext(SceneContext);
   const { currentScenario } = useContext(ScenarioContext);
-  let setSelect;
-  if (confirmModal) {
-    setSelect = useContext(AuthoringToolContext).setSelect;
-  }
   const history = useHistory();
 
   /**
    * Function for changing variables to their appropriate states when the back button is pressed.
    */
   function handleLeaveAuthoringTool() {
-    useEditorStore.getState().setSelected(null);
-    useEditorStore.getState().setSelection({ start: null, end: null });
+    useEditorStore.getState().clear();
 
     // hb: i have no clue what this is for
     if (!hasChange) {

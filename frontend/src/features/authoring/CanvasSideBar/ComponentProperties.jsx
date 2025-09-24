@@ -1,5 +1,4 @@
 import { useContext } from "react";
-import AuthoringToolContext from "context/AuthoringToolContext";
 import SceneContext from "context/SceneContext";
 
 import styles from "./CanvasSideBar.module.scss";

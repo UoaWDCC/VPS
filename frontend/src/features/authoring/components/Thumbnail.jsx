@@ -21,7 +21,7 @@ function resolve(component) {
 }
 
 const Thumbnail = ({ components }) => {
-  const visual = buildVisualScene({ components });
+  const { components: visual } = buildVisualScene({ components });
   const visualComponents = Object.values(visual)
     .sort((a, b) => a.zIndex - b.zIndex)
     .map(resolve);

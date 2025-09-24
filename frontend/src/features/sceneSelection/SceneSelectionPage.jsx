@@ -15,7 +15,6 @@ import ScreenContainer from "../../components/ScreenContainer/ScreenContainer";
 import ShareModal from "../../components/ShareModal/ShareModal";
 import TopBar from "../../components/TopBar/TopBar";
 import AuthenticationContext from "../../context/AuthenticationContext";
-import AuthoringToolContextProvider from "../../context/AuthoringToolContextProvider";
 import ScenarioContext from "../../context/ScenarioContext";
 import SceneContext from "../../context/SceneContext";
 import AccessLevel from "../../enums/route.access.level";
@@ -324,13 +323,11 @@ export function ScenePage() {
   return (
     <Switch>
       <Route exact path={path} component={SceneSelectionPage} />
-      <AuthoringToolContextProvider>
-        <Route path={`${path}/scene/:sceneId`} component={AuthoringToolPage} />
-        <Route
-          path={`${path}/manage-resources`}
-          component={ManageResourcesPage}
-        />
-      </AuthoringToolContextProvider>
+      <Route path={`${path}/scene/:sceneId`} component={AuthoringToolPage} />
+      <Route
+        path={`${path}/manage-resources`}
+        component={ManageResourcesPage}
+      />
     </Switch>
   );
 }
