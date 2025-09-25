@@ -1,0 +1,41 @@
+/* Transparent big plus card */
+.create-card {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.create-thumbnail {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: transparent !important; /* 🔥 transparent box */
+  border: 2px dashed #9ca3af; /* subtle border to show it's clickable */
+  color: #9ca3af;
+  font-size: clamp(48px, 6vw, 96px);
+  font-weight: 300;
+  transition: all 0.2s ease;
+}
+
+.create-thumbnail:hover {
+  border-color: white;   /* brighten border on hover */
+  color: white;          /* brighten + sign */
+}
+
+.create-plus {
+  font-size: inherit;
+  line-height: 1;
+}
+
+
+.section-block {
+  margin-bottom: 6vh;
+}
+
+.section-header {
+  font-size: clamp(20px, 2vw, 28px);
+  font-weight: 400;
+  margin-bottom: 2vh;
+  color: white;
+  text-align: left; 
+}

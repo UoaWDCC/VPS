@@ -8,20 +8,17 @@ import "./styles/style.scss";
 import LoginPage from "./features/login/LoginPage/LoginPage";
 import ManageGroupsPage from "./features/groups/ManageGroupsPage";
 import PlayScenarioResolver from "./features/playScenario/PlayScenarioResolver";
-import PlayLandingPage from "./features/playScenario/PlayLandingPage"; // Import PlayLandingPage
+import PlayLandingPage from "./features/playScenario/PlayLandingPage";
 import ScenarioSelectionPage from "./features/scenarioSelection/ScenarioSelectionPage";
-
 import ScenarioInfo from "./features/scenarioInfo/ScenarioInfo";
 import PlayPage from "./features/play/PlayPage";
-
 import Dashboard from "./features/dashboard/Dashboard";
-
 import { ScenePage } from "./features/sceneSelection/SceneSelectionPage";
 import theme from "./theme/App.theme";
-
 import { Toaster } from "react-hot-toast";
 import { ContextMenuPortal } from "./components/ContextMenu/portal";
 import ViewGroupPage from "./features/dashboard/ViewGroup";
+import CreateLandingPage from "./features/create/CreateLandingPage"; // Verify this path
 
 const TOAST_OFFSET = 25;
 
@@ -49,10 +46,14 @@ export default function App() {
         <AuthenticationContextProvider>
           <BrowserRouter>
             <Switch>
+              {/* Public Route */}
               <Route exact path="/login" component={LoginPage} />
-              
+
+              {/* Protected Routes */}
               <ProtectedRoute exact path="/play">
-                <PlayLandingPage />
+                <ScenarioContextProvider>
+                  <PlayLandingPage />
+                </ScenarioContextProvider>
               </ProtectedRoute>
 
               <ProtectedRoute path="/play/:scenarioId">
@@ -91,21 +92,29 @@ export default function App() {
                 </ScenarioContextProvider>
               </ProtectedRoute>
 
-              <ScenarioContextProvider>
-                <Switch>
-                  <ProtectedRoute index path="/scenario/:scenarioId">
-                    <SceneContextProvider>
-                      <ScenePage />
-                    </SceneContextProvider>
-                    <ProtectedRoute path="/scenario/:scenarioId/manage-groups">
-                      <ManageGroupsPage />
-                    </ProtectedRoute>
-                  </ProtectedRoute>
-                </Switch>
-              </ScenarioContextProvider>
+              <ProtectedRoute path="/scenario/:scenarioId">
+                <ScenarioContextProvider>
+                  <SceneContextProvider>
+                    <ScenePage />
+                  </SceneContextProvider>
+                </ScenarioContextProvider>
+              </ProtectedRoute>
 
-              {/* Default path if nothing matches */}
-              <ProtectedRoute path="/">
+              <ProtectedRoute path="/scenario/:scenarioId/manage-groups">
+                <ScenarioContextProvider>
+                  <ManageGroupsPage />
+                </ScenarioContextProvider>
+              </ProtectedRoute>
+
+              {/* New Create Landing Page Route */}
+              <ProtectedRoute exact path="/create">
+                <ScenarioContextProvider>
+                  <CreateLandingPage />
+                </ScenarioContextProvider>
+              </ProtectedRoute>
+
+              {/* Default Route (Fallback) */}
+              <ProtectedRoute path="*">
                 <ScenarioContextProvider>
                   <ScenarioSelectionPage />
                 </ScenarioContextProvider>

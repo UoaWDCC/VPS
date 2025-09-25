@@ -6,20 +6,19 @@ import AuthenticationContext from "../../context/AuthenticationContext";
 import ScenarioContext from "../../context/ScenarioContext";
 import AccessLevel from "../../enums/route.access.level";
 import { useDelete } from "../../hooks/crudHooks";
-import HorizontalGradientLine from "./components/HorizontalGradientLine";
+import HorizontalGradientLine from "../create/components/HorizontalGradientLine";
 import Thumbnail from "../authoring/components/Thumbnail";
-import "./PlayLandingPage.css";
+import "../playScenario/PlayLandingPage.css"; 
+import "./CreateLandingPage.css"; // custom styles
 
-export default function PlayLandingPage() {
+export default function CreateLandingPage() {
   const {
     scenarios: userScenarios,
     reFetch,
-    assignedScenarios,
-    reFetch2,
     currentScenario,
     setCurrentScenario,
   } = useContext(ScenarioContext);
-  const { user, getUserIdToken, VpsUser } = useContext(AuthenticationContext);
+  const { getUserIdToken, VpsUser } = useContext(AuthenticationContext);
   const history = useHistory();
 
   const [search, setSearch] = useState("");
@@ -27,17 +26,9 @@ export default function PlayLandingPage() {
 
   useEffect(() => {
     reFetch();
-    reFetch2();
   }, []);
 
-  const allScenarios = [
-    ...(userScenarios || []),
-    ...(assignedScenarios || []).filter(
-      (as) => !userScenarios.some((us) => us._id === as._id)
-    ),
-  ];
-
-  const filteredScenarios = allScenarios.filter((scenario) =>
+  const filteredScenarios = (userScenarios || []).filter((scenario) =>
     scenario.name.toLowerCase().includes(search.toLowerCase())
   );
 
@@ -47,16 +38,13 @@ export default function PlayLandingPage() {
     setContextMenuPosition({ x: event.clientX, y: event.clientY });
   };
 
-  const openDashboard = () => {
-    history.push("/dashboard");
-  };
-
   const deleteScenario = async () => {
     await useDelete(`/api/scenario/${currentScenario._id}`, getUserIdToken);
     setCurrentScenario(null);
     reFetch();
-    reFetch2();
   };
+
+  const handleCreate = () => history.push("/scenario/new");
 
   const playScenario = () => {
     if (currentScenario) {
@@ -70,13 +58,7 @@ export default function PlayLandingPage() {
     }
   };
 
-  const handleCreate = () => {
-    history.push("/create"); // Navigates to CreateLandingPage at /create
-  };
-
-  const handleScenarioPlay = (scenario) => {
-    history.push(`/scenario-info?id=${scenario._id}`);
-  };
+  const openDashboard = () => history.push("/dashboard");
 
   return (
     <div className="play-container" data-theme="dark">
@@ -98,53 +80,86 @@ export default function PlayLandingPage() {
           </button>
         </div>
         <div className="nav-right">
-          <button className="nav-btn nav-btn-active">Play</button>
-          <button className="nav-btn" onClick={handleCreate}>
-            Create & Edit 
+          <button className="nav-btn" onClick={() => history.push("/play")}>
+            Play
           </button>
+          <button className="nav-btn nav-btn-active">Create</button>
         </div>
       </div>
 
-      {/* Header */}
-      <div className="play-header">
-        <h1 className="play-title">Play</h1>
-      </div>
 
-      {/* Search Section */}
-      <div className="search-section">
-        <div className="search-container-play">
-          <label className="search-input-wrapper-play">
-            <svg
-              className="search-icon-play"
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 24 24"
-            >
-              <g
-                strokeLinejoin="round"
-                strokeLinecap="round"
-                strokeWidth="2.5"
-                fill="none"
-                stroke="currentColor"
-              >
-                <circle cx="11" cy="11" r="8"></circle>
-                <path d="m21 21-4.3-4.3"></path>
-              </g>
-            </svg>
-            <input
-              type="search"
-              placeholder="Search scenario"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="search-input-play"
-              required
-            />
-          </label>
+      {/* Create Section */}
+      <div className="section-block">
+        <h2 className="section-header">Create</h2>
+        <div className="scenarios-grid">
+          <div className="scenario-card create-card" onClick={handleCreate}>
+            <div className="scenario-card-thumbnail create-thumbnail">
+              <span className="create-plus">+</span>
+            </div>
+          </div>
         </div>
       </div>
+
 
       {/* Gradient Line */}
       <div className="gradient-line-container-play">
         <HorizontalGradientLine />
+      </div>
+      
+      {/* Edit Section */}
+      <div className="section-block">
+        <h2 className="section-header">Edit</h2>
+
+        {/* Search Section */}
+        <div className="search-section">
+          <div className="search-container-play">
+            <label className="search-input-wrapper-play">
+              <svg
+                className="search-icon-play"
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+              >
+                <g
+                  strokeLinejoin="round"
+                  strokeLinecap="round"
+                  strokeWidth="2.5"
+                  fill="none"
+                  stroke="currentColor"
+                >
+                  <circle cx="11" cy="11" r="8"></circle>
+                  <path d="m21 21-4.3-4.3"></path>
+                </g>
+              </svg>
+              <input
+                type="search"
+                placeholder="Search scenario"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="search-input-play"
+                required
+              />
+            </label>
+          </div>
+        </div>
+
+        {/* Scenarios Grid */}
+        <div className="scenarios-grid">
+          {filteredScenarios.map((scenario) => (
+            <div
+              key={scenario._id}
+              className="scenario-card"
+              onClick={() => history.push(`/scenario-info?id=${scenario._id}`)}
+              onContextMenu={(e) => handleContextMenu(e, scenario)}
+            >
+              <div className="scenario-card-thumbnail">
+                <Thumbnail components={scenario.thumbnail?.components || []} />
+              </div>
+              <div className="scenario-card-name">
+                <p className="scenario-name-text">{scenario.name}</p>
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
 
       {/* Context Menu */}
@@ -167,25 +182,6 @@ export default function PlayLandingPage() {
           </MenuItem>
         )}
       </ContextMenu>
-
-      {/* Scenarios Grid */}
-      <div className="scenarios-grid">
-        {filteredScenarios.map((scenario) => (
-          <div
-            key={scenario._id}
-            className="scenario-card"
-            onClick={() => handleScenarioPlay(scenario)}
-            onContextMenu={(e) => handleContextMenu(e, scenario)}
-          >
-            <div className="scenario-card-thumbnail">
-              <Thumbnail components={scenario.thumbnail?.components || []} />
-            </div>
-            <div className="scenario-card-name">
-              <p className="scenario-name-text">{scenario.name}</p>
-            </div>
-          </div>
-        ))}
-      </div>
     </div>
   );
 }
