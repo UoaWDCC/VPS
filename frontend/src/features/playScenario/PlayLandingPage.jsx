@@ -102,6 +102,9 @@ export default function PlayLandingPage() {
           <button className="nav-btn" onClick={handleCreate}>
             Create & Edit 
           </button>
+          <button className="nav-btn" onClick={openDashboard}>
+            Dashboard
+          </button>
         </div>
       </div>
 
@@ -113,38 +116,33 @@ export default function PlayLandingPage() {
       {/* Search Section */}
       <div className="search-section">
         <div className="search-container-play">
-          <label className="search-input-wrapper-play">
-            <svg
-              className="search-icon-play"
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 24 24"
-            >
-              <g
-                strokeLinejoin="round"
-                strokeLinecap="round"
-                strokeWidth="2.5"
-                fill="none"
-                stroke="currentColor"
-              >
-                <circle cx="11" cy="11" r="8"></circle>
-                <path d="m21 21-4.3-4.3"></path>
-              </g>
-            </svg>
-            <input
-              type="search"
-              placeholder="Search scenario"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="search-input-play"
-              required
-            />
-          </label>
+      <label className="search-input-wrapper-play">
+        <svg
+          className="search-icon-play"
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 24 24"
+        >
+          <g
+            strokeLinejoin="round"
+            strokeLinecap="round"
+            strokeWidth="2.5"
+            fill="none"
+            stroke="currentColor"
+          >
+            <circle cx="11" cy="11" r="8"></circle>
+            <path d="m21 21-4.3-4.3"></path>
+          </g>
+        </svg>
+        <input
+          type="search"
+          placeholder="Search scenario"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className="search-input-play"
+          required
+        />
+      </label>
         </div>
-      </div>
-
-      {/* Gradient Line */}
-      <div className="gradient-line-container-play">
-        <HorizontalGradientLine />
       </div>
 
       {/* Context Menu */}

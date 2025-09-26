@@ -1,4 +1,20 @@
-/* Transparent big plus card */
+
+
+
+.top-nav-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  background-color: black;
+  padding: 1rem 2rem;
+  display: flex;
+  align-items: center;
+  z-index: 1000;
+}
+
+
+
 .create-card {
   display: flex;
   align-items: center;
@@ -38,4 +54,75 @@
   margin-bottom: 2vh;
   color: white;
   text-align: left; 
+}
+
+.createScenarioCard {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: rgb(255, 255, 255);
+  border: 5px solid #515151;
+  padding: 20px;
+  border-radius: none; /* edit */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  visibility: "visible";
+  opacity: 1;
+  transition:
+    visibility 0s,
+    opacity 0.5s linear;
+  z-index: 2;
+  display: flex;
+  width: 30%;
+  flex-direction: column;
+  align-items: center;
+}
+
+.overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 200vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 1;
+}
+
+
+
+
+.selectable-card {
+  border: 2px dashed #ffffff;
+  transform: scale(1.03);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.selectable-card:hover {
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+.dashboard-selection-message {
+  text-align: center;
+  color: #ffffff;
+  font-weight: 500;
+  padding: 1rem 0;
+  font-size: 1rem;
+  background-color: rgba(255, 255, 255, 0.05);
+  margin-bottom: 2vh;
+  border-radius: 6px;
+}
+
+
+.selectable-card {
+  border: 2px dashed #ffffff;
+  transition: border 0.2s ease;
+}
+
+.dashboard-selection-message {
+  color: #ffffff;
+  text-align: center;
+  margin: 1rem 0;
+  font-weight: 500;
+  font-size: 16px;
 }
