@@ -1,7 +1,6 @@
 import {
   BringToFront,
   Diameter,
-  ImageIcon,
   MessageSquare,
   Redo,
   SendToBack,
@@ -18,9 +17,9 @@ import { getComponent } from "../scene/scene";
 import { redo, undo } from "../scene/history";
 import { bringToFront, sendToBack } from "../scene/operations/component";
 import { remove } from "../scene/operations/modifiers";
-import { useRef, useState } from "react";
-import { addFirebaseImage } from "../ToolBar/ToolBarActions";
+import { useState } from "react";
 import StateVariableMenu from "../../../components/StateVariables/StateVariableMenu";
+import ImageCreateMenu from "../images";
 
 function Topbar() {
   const selected = useEditorStore(state => state.selected);
@@ -34,8 +33,6 @@ function Topbar() {
     setShowSVMenu(prev => !prev);
   }
 
-  const fileInputRef = useRef<HTMLInputElement | null>(null);
-
   function removeComponent() {
     if (!selected) return;
     remove(selected);
@@ -45,15 +42,6 @@ function Topbar() {
   const switchCreate = (type: string) => {
     setMode(["create"]);
     setCreateType(type);
-  };
-
-  const handleFileClick = () => {
-    fileInputRef.current?.click();
-  };
-
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file) addFirebaseImage(file);
   };
 
   const component = selected ? getComponent(selected) : null;
@@ -79,20 +67,7 @@ function Topbar() {
         |
 
         {/* element creation */}
-        <details className="dropdown z-100">
-          <summary className="button"><ImageIcon size={16} /></summary>
-          <ul className="menu dropdown-content bg-base-100 rounded-box z-1 w-52 p-2 shadow-sm">
-            <li><a onClick={handleFileClick}>Upload Image</a></li>
-          </ul>
-        </details>
-
-        <input
-          ref={fileInputRef}
-          type="file"
-          className="hidden"
-          onChange={handleFileChange}
-        />
-
+        <ImageCreateMenu />
         <button className="button" onClick={() => switchCreate("box")}>
           <VectorSquare size={16} />
         </button>
