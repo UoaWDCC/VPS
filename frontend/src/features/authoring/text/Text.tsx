@@ -51,14 +51,13 @@ function Text(doc: VisualDocument) {
   return (
     <g className="select-none">
       {isSelected && <Highlight
-        color="blue"
-        blocks={doc.blocks}
+        color="#4997ff80"
         bounds={bounds}
       />}
       <g className="select-none" transform={transformation}>
         {buildGroups(doc)}
       </g>
-      {isSelected && <Cursor blocks={doc.blocks} bounds={bounds} />}
+      {isSelected && <Cursor bounds={bounds} />}
       <Rectangle
         bounds={selectionArea}
         rotationOrigin={center}
