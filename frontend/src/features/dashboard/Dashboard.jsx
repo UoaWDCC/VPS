@@ -37,7 +37,7 @@ export default function Dashboard() {
     // Placeholder here, needs an update for when the group completes a scenario it sets a var in the database, probs alr exist but will implement this later
     const groupsCompleted = 0;
     return (
-      <div className="grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         <div className="bg-white col-auto border rounded-xl p-2 text-center">
           <h3 className="text-xl font-mona font-bold">Groups</h3>
           <p className="text-lg">{totalGroups}</p>
@@ -50,14 +50,9 @@ export default function Dashboard() {
           <h3 className="text-xl font-mona font-bold ">Started</h3>
           <p className="text-lg">{groupsStarted}</p>
         </div>
-        <div className="bg-green-300 col-auto border rounded-xl p-2 text-center">
-          <h3 className="text-xl font-mona font-bold">Completed</h3>
-          <p className="text-lg">{groupsCompleted}</p>
-        </div>
       </div>
     );
   };
-  // Is it better to just show a loading screen instead of conditionally rendering the content to stop it flashing?
   /**
    * Is it better to just show a loading screen instead of conditionally rendering the content to stop it
    * flashing?
