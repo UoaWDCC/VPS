@@ -150,8 +150,14 @@ export function objectDiff(a: Record<any, any>, b: Record<any, any>) {
   return diff;
 }
 
-export function filterComponent(component: Component) {
-  const filtered = { ...component, bounds: undefined, document: undefined, "data-id": component.id } as Record<string, any>;
-  delete filtered.zIndex; // we have to explicitly delete this one or we get a warning
+export function filterComponent(component: Record<string, any>) {
+  const filtered = {
+    "data-id": component.id,
+    strokeWidth: component.strokeWidth,
+    stroke: component.stroke,
+    fill: component.fill,
+    preserveAspectRatio: component.preserveAspectRatio,
+    href: component.href,
+  };
   return filtered;
 }

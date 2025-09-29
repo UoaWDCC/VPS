@@ -22,8 +22,6 @@ function Cursor({
   const relativePosition = getVisualPosition(start, useVisualScene.getState().components[selected!].document.blocks);
   if (!relativePosition) return null;
 
-  console.log(relativePosition);
-
   const position = add(relativePosition, bounds);
   const block = useVisualScene.getState().components[selected!].document.blocks[start.blockI];
   const line = block.lines[start.lineI];

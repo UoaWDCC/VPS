@@ -22,45 +22,41 @@ import { getScene, setScene } from "./scene/scene";
 import { handleGlobal } from "./handlers/keyboard/keyboard";
 import { copy, cut, paste } from "./handlers/keyboard/clipboard";
 import { arrayToObject } from "./scene/util";
+import useEditorStore from "./stores/editor";
+import { useHistory } from "react-router-dom";
+import { replace } from "./scene/operations/modifiers";
+import { api } from "../../util/api";
 
 /**
  * This page allows the user to edit a scene.
  * @container
  */
 export default function AuthoringToolPage() {
-  const { currentScene } = useContext(SceneContext);
-  const { currentScenario } = useContext(ScenarioContext);
-  const { getUserIdToken } = useContext(AuthenticationContext);
+  const { scenes, saveScene } = useContext(SceneContext);
+  const { user } = useContext(AuthenticationContext);
+  const { scenarioId } = useParams();
+
+  const sceneId = useVisualScene(scene => scene.id);
+
+  const history = useHistory();
 
   const [saveButtonText, setSaveButtonText] = useState("Save");
 
-  const autosaveTimeout = useRef(null);
-
-  // NOTE: 15 renders on initial page load last i checked
-  console.log("authoring page render");
-
   useEffect(() => {
-    // TODO: this is hacky, but it works for now
-    console.log(currentScene);
-    setScene({
-      ...currentScene,
-      components: arrayToObject(currentScene?.components),
-    });
-    const { setVisualScene } = useVisualScene.getState();
-    setVisualScene(buildVisualScene(getScene()));
-  }, [currentScene]);
+    if (!sceneId) return;
+    const autosave = setInterval(save, 10000);
+    return () => clearInterval(autosave);
+  }, [sceneId]);
 
+  // NOTE: we always start at the first scene, could possibly store it in localstorage
   useEffect(() => {
-    if (!currentScene?._id) return;
-    autosaveTimeout.current = setTimeout(saveScene, 5000);
-    return () => clearTimeout(autosaveTimeout.current);
-  }, [currentScene]);
+    replace(scenes[0]);
 
-  useEffect(() => {
     document.addEventListener("copy", copy);
     document.addEventListener("cut", cut);
     document.addEventListener("paste", paste);
     document.addEventListener("keydown", handleGlobal);
+    useEditorStore.getState().clear();
 
     return () => {
       document.removeEventListener("copy", copy);
@@ -70,41 +66,47 @@ export default function AuthoringToolPage() {
     };
   }, []);
 
-  /** used to save the scene, as a helper function */
-  async function saveScene() {
-    const components = Object.values(getScene().components);
-    console.log("attempting save", currentScene._id, components);
-    await usePut(
-      `/api/scenario/${currentScenario._id}/scene/${currentScene._id}`,
-      {
-        name: currentScene.name,
-        time: currentScene.time,
-        components,
-      },
-      getUserIdToken
-    );
-    console.log("save completed");
+
+  function playScenario() {
+    window.open(`/play/${scenarioId}`, "_blank");
+  }
+
+  function manageGroups() {
+    history.push(`/scenario/${scenarioId}/manage-groups`);
+  }
+
+  function manageResources() {
+    history.push(`/scenario/${scenarioId}/manage-resources`);
   }
 
   /** called when save button is clicked */
   async function save() {
     setSaveButtonText("Saving");
-    await saveScene();
+    await saveScene(structuredClone(getScene()));
     setSaveButtonText("Saved");
-    setTimeout(() => { setSaveButtonText("Save") }, 1800);
+    setTimeout(() => setSaveButtonText("Save"), 2000);
   }
 
   return (
     <>
       <ScreenContainer vertical>
-        <TopBar back={`/scenario/${currentScenario?._id}`} confirmModal>
+        <TopBar back="/">
+          <button className="btn ps w-[100px]" onClick={manageResources}>
+            Resources
+          </button>
+          <button className="btn vps w-[100px]" onClick={manageGroups}>
+            Groups
+          </button>
+          <button className="btn vps w-[100px]" onClick={playScenario}>
+            Play
+          </button>
           <button className="btn vps" onClick={save}>
             {saveButtonText}
           </button>
         </TopBar>
         <Topbar />
         <div className="flex h-full overflow-hidden">
-          <SceneNavigator saveScene={saveScene} />
+          <SceneNavigator />
           <Canvas />
           <CanvasSideBar />
         </div>

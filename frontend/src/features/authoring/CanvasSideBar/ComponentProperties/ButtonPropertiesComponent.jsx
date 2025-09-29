@@ -27,6 +27,10 @@ const CustomInputLabel = CustomInputLabelStyles()(InputLabel);
 export default function ButtonPropertiesComponent({ component }) {
   const { scenes, updateComponentProperty } = useContext(SceneContext);
 
+  function saveLink(e) {
+    modifyComponentProp(component.id, "nextScene", e.target.value)
+  }
+
   return (
     <>
       <FormControl fullWidth className={styles.componentProperty}>
@@ -34,21 +38,17 @@ export default function ButtonPropertiesComponent({ component }) {
         <Select
           className={styles.selectInput}
           value={component.nextScene}
-          onChange={(e) =>
-            modifyComponentProp(component.id, "nextScene", e.target.value)
-          }
+          onChange={saveLink}
           displayEmpty
         >
           <MenuItem value="">
             <em>None</em>
           </MenuItem>
-          {scenes.map((scene) => {
-            return (
-              <MenuItem key={scene._id} value={scene._id}>
-                {scene.name}
-              </MenuItem>
-            );
-          })}
+          {scenes.map((scene) => (
+            <MenuItem key={scene._id} value={scene._id}>
+              {scene.name}
+            </MenuItem>
+          ))}
         </Select>
       </FormControl>
 

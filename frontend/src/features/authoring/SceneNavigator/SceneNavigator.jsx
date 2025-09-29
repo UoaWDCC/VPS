@@ -30,7 +30,7 @@ import { replace } from "../scene/operations/modifiers";
 import { getScene } from "../scene/scene";
 import useVisualScene from "../stores/visual";
 
-const SceneMenu = ({ id, deleteScene, duplicateScene }) => {
+const SceneMenu = ({ id, duplicateScene, deleteScene }) => {
   return (
     <Paper>
       <MenuList>
@@ -41,9 +41,9 @@ const SceneMenu = ({ id, deleteScene, duplicateScene }) => {
   );
 };
 
-const SceneNavigator = ({ saveScene }) => {
+const SceneNavigator = () => {
   const { user } = useContext(AuthenticationContext);
-  const { scenes, reFetch, setScenes } = useContext(SceneContext);
+  const { scenes, saveScene, reFetch, reorderScenes, deleteScene } = useContext(SceneContext);
 
   const activeScene = useVisualScene(store => store.id);
 
@@ -66,13 +66,6 @@ const SceneNavigator = ({ saveScene }) => {
     useSensor(KeyboardSensor)
   );
 
-  const deleteScene = async (id) => {
-    api
-      .delete(user, `/api/scenario/${scenarioId}/scene/${id}`)
-      .then(reFetch)
-      .catch(handleGeneric);
-  };
-
   const duplicateScene = async (id) => {
     api
       .post(user, `/api/scenario/${scenarioId}/scene/duplicate/${id}`, {})
@@ -89,24 +82,8 @@ const SceneNavigator = ({ saveScene }) => {
       .catch(handleGeneric);
   };
 
-  const updateSceneOrder = async (newScenes) => {
-    setScenes(newScenes);
-
-    const sceneIds = newScenes.map((scene) => scene._id);
-
-    try {
-      const result = await api.put(
-        user,
-        `/api/scenario/${scenarioId}/scene/reorder`,
-        { sceneIds }
-      );
-
-      console.log("Scene order updated successfully:", result.data);
-    } catch (error) {
-      console.error("Failed to update scene order:", error);
-
-      reFetch();
-    }
+  const updateSceneOrder = (reordered) => {
+    reorderScenes(reordered);
   };
 
   const handleDragStart = (event) => {
@@ -149,15 +126,15 @@ const SceneNavigator = ({ saveScene }) => {
 
     if (activeIndex === overIndex) return;
 
-    const newScenes = arrayMove(scenes, activeIndex, overIndex);
-    updateSceneOrder(newScenes);
+    const reordered = arrayMove(scenes.map(s => s._id), activeIndex, overIndex);
+    updateSceneOrder(reordered);
   };
 
   function switchScene(scene) {
     if (scene._id === activeScene) return;
 
+    saveScene(structuredClone(getScene()));
     useEditorStore.getState().clear();
-    saveScene();
     replace(scene);
 
     const pathname = `/scenario/${scenarioId}/scene/${scene._id}`;

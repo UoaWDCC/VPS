@@ -67,10 +67,10 @@ const updateScene = async (sceneId, updatedScene) => {
 
     // if previous firebase image component no longer exists, try to delete file from firebase storage
     prevDbScene.components.forEach((c) => {
-      if (c.type === "FIREBASEIMAGE" || c.type === "FIREBASEAUDIO") {
+      if (c.type === "image" || c.type === "FIREBASEAUDIO") {
         // checks for non-existance in new components array
         if (!updatedScene.components.some((newC) => newC.id === c.id)) {
-          tryDeleteFile(c.url);
+          tryDeleteFile(c.href);
         }
       }
     });
@@ -78,13 +78,9 @@ const updateScene = async (sceneId, updatedScene) => {
     const dbScene = await Scene.findOneAndUpdate(
       { _id: sceneId },
       updatedScene,
-      {
-        new: true,
-      }
+      { new: true }
     );
 
-    console.log(updatedScene);
-    console.log(dbScene);
     return dbScene;
   }
 

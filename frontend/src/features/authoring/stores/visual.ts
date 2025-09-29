@@ -5,7 +5,7 @@ type VisualComponent = Component;
 
 type VisualComponents = Record<string, VisualComponent>;
 
-interface VisualSceneState {
+export interface VisualSceneState {
     components: Record<string, any>;
     id: string | null;
     name: string | null;

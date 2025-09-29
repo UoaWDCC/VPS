@@ -22,8 +22,12 @@ import theme from "./theme/App.theme";
 import { Toaster } from "react-hot-toast";
 import { ContextMenuPortal } from "./components/ContextMenu/portal";
 import ViewGroupPage from "./features/dashboard/ViewGroup";
+import ManageResourcesPage from "./features/resources/ManageResourcesPage";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
 const TOAST_OFFSET = 25;
+
+const queryClient = new QueryClient()
 
 export default function App() {
   return (
@@ -47,67 +51,67 @@ export default function App() {
       {/* Routes */}
       <ThemeProvider theme={theme}>
         <AuthenticationContextProvider>
-          <BrowserRouter>
-            <Switch>
-              <Route exact path="/login" component={LoginPage} />
+          <QueryClientProvider client={queryClient}>
+            <BrowserRouter>
+              <Switch>
 
-              <ProtectedRoute path="/play/:scenarioId">
-                <PlayScenarioResolver />
-              </ProtectedRoute>
+                <Route exact path="/login" component={LoginPage} />
 
-              <ProtectedRoute path="/scenario-info">
-                <ScenarioContextProvider>
-                  <ScenarioInfo />
-                </ScenarioContextProvider>
-              </ProtectedRoute>
+                <ProtectedRoute exact path="/">
+                  <ScenarioContextProvider>
+                    <ScenarioSelectionPage />
+                  </ScenarioContextProvider>
+                </ProtectedRoute>
 
-              <ProtectedRoute path="/play-page">
-                <ScenarioContextProvider>
-                  <PlayPage />
-                </ScenarioContextProvider>
-              </ProtectedRoute>
+                <ProtectedRoute path="/scenario-info">
+                  <ScenarioContextProvider>
+                    <ScenarioInfo />
+                  </ScenarioContextProvider>
+                </ProtectedRoute>
 
-              <ProtectedRoute exact path="/">
-                <ScenarioContextProvider>
-                  <ScenarioSelectionPage />
-                </ScenarioContextProvider>
-              </ProtectedRoute>
+                <ProtectedRoute path="/play/:scenarioId">
+                  <PlayScenarioResolver />
+                </ProtectedRoute>
 
-              <ProtectedRoute exact path="/dashboard/:scenarioId">
-                <ScenarioContextProvider>
-                  <Dashboard />
-                </ScenarioContextProvider>
-              </ProtectedRoute>
+                <ProtectedRoute path="/play-page">
+                  <ScenarioContextProvider>
+                    <PlayPage />
+                  </ScenarioContextProvider>
+                </ProtectedRoute>
 
-              <ProtectedRoute path="/dashboard/:scenarioId/view-group/:groupId">
-                <ScenarioContextProvider>
-                  <SceneContextProvider>
-                    <ViewGroupPage />
-                  </SceneContextProvider>
-                </ScenarioContextProvider>
-              </ProtectedRoute>
+                <ProtectedRoute exact path="/dashboard/:scenarioId">
+                  <ScenarioContextProvider>
+                    <Dashboard />
+                  </ScenarioContextProvider>
+                </ProtectedRoute>
 
-              <ScenarioContextProvider>
-                <Switch>
-                  <ProtectedRoute index path="/scenario/:scenarioId">
+                <ProtectedRoute path="/dashboard/:scenarioId/view-group/:groupId">
+                  <ScenarioContextProvider>
                     <SceneContextProvider>
-                      <ScenePage />
+                      <ViewGroupPage />
                     </SceneContextProvider>
+                  </ScenarioContextProvider>
+                </ProtectedRoute>
+
+                <ScenarioContextProvider>
+                  <Switch>
+                    <ProtectedRoute path="/scenario/:scenarioId/manage-resources">
+                      <ManageResourcesPage />
+                    </ProtectedRoute>
                     <ProtectedRoute path="/scenario/:scenarioId/manage-groups">
                       <ManageGroupsPage />
                     </ProtectedRoute>
-                  </ProtectedRoute>
-                </Switch>
-              </ScenarioContextProvider>
-
-              {/* Default path if nothing matches */}
-              <ProtectedRoute path="/">
-                <ScenarioContextProvider>
-                  <ScenarioSelectionPage />
+                    <ProtectedRoute index path="/scenario/:scenarioId">
+                      <SceneContextProvider>
+                        <ScenePage />
+                      </SceneContextProvider>
+                    </ProtectedRoute>
+                  </Switch>
                 </ScenarioContextProvider>
-              </ProtectedRoute>
-            </Switch>
-          </BrowserRouter>
+
+              </Switch>
+            </BrowserRouter>
+          </QueryClientProvider>
         </AuthenticationContextProvider>
       </ThemeProvider>
     </>

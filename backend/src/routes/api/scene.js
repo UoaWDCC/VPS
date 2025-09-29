@@ -95,12 +95,13 @@ router.put("/reorder", async (req, res) => {
 
 // Update a scene
 router.put("/:sceneId", async (req, res) => {
-  const { name, components, time } = req.body;
+  const { name, components, roles, time } = req.body;
 
   const scene = await updateScene(req.params.sceneId, {
     name,
     components,
     time,
+    roles
   });
 
   res.status(HTTP_OK).json(scene);

@@ -17,7 +17,8 @@ const componentMap = {
 
 function resolve(component) {
   const Fc = componentMap[component.type];
-  if (component) return <Fc key={component.id} {...component} />;
+  if (Fc) return <Fc key={component.id} {...component} />;
+  return null;
 }
 
 const Thumbnail = ({ components }) => {

@@ -1500,6 +1500,19 @@
     lightningcss "^1.29.1"
     tailwindcss "4.0.7"
 
+"@tanstack/query-core@4.41.0":
+  version "4.41.0"
+  resolved "https://registry.yarnpkg.com/@tanstack/query-core/-/query-core-4.41.0.tgz#8e559e53b663e4dc99ee55f256acdf38249d8cd9"
+  integrity sha512-193R4Jp9hjvlij6LryxrB5Mpbffd2L9PeWh3KlIy/hJV4SkBOfiQZ+jc5qAZLDCrdbkA5FjGj+UoDYw6TcNnyA==
+
+"@tanstack/react-query@4":
+  version "4.41.0"
+  resolved "https://registry.yarnpkg.com/@tanstack/react-query/-/react-query-4.41.0.tgz#58beffba97093d1ca4c44cdf4912074559498933"
+  integrity sha512-4/euCZAv8zeaB5P/nQiySzB0JHM3tiraU9KjSvSlJAX7oIE9uPDZlHCkDg/bHYNXewzvsg0FtOMq0VUq8XMMOQ==
+  dependencies:
+    "@tanstack/query-core" "4.41.0"
+    use-sync-external-store "^1.2.0"
+
 "@types/babel__core@^7.20.5":
   version "7.20.5"
   resolved "https://registry.yarnpkg.com/@types/babel__core/-/babel__core-7.20.5.tgz#3df15f27ba85319caa07ba08d0721889bb39c017"
@@ -4931,7 +4944,7 @@ uri-js@^4.2.2:
   dependencies:
     punycode "^2.1.0"
 
-use-sync-external-store@^1.2.2:
+use-sync-external-store@^1.2.0, use-sync-external-store@^1.2.2:
   version "1.5.0"
   resolved "https://registry.yarnpkg.com/use-sync-external-store/-/use-sync-external-store-1.5.0.tgz#55122e2a3edd2a6c106174c27485e0fd59bcfca0"
   integrity sha512-Rb46I4cGGVBmjamjphe8L/UnvJD+uPPtTkNvX5mZgqdbavhI4EbgIWJiIHXJ8bc/i9EQGPRh4DwEURJ552Do0A==
