@@ -2,7 +2,6 @@ import type { RelativeBounds } from "../types";
 import { expandToPath } from "../util";
 import { normalizeSelectionVisual } from "./cursor";
 import type {
-  VisualBlock,
   VisualCursor,
   VisualSpan,
 } from "./types";
@@ -11,7 +10,6 @@ import useVisualScene from "../stores/visual";
 
 interface HighlightProps {
   color?: string;
-  blocks: VisualBlock[];
   bounds: RelativeBounds;
 }
 
@@ -38,7 +36,7 @@ function generateHighlightSegment(
   return { x: span.x, width: span.width };
 }
 
-function Highlight({ blocks, bounds, color }: HighlightProps) {
+function Highlight({ bounds, color }: HighlightProps) {
   const selection = useEditorStore(state => state.visualSelection);
   const selected = useEditorStore(state => state.selected);
   if (!selection.start || !selection.end) return null;
