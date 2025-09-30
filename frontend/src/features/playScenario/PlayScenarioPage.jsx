@@ -155,6 +155,7 @@ export default function PlayScenarioPage() {
       setAddFlags={setAddFlags}
       setRemoveFlags={setRemoveFlags}
       buttonPressed={buttonPressed}
+      stateVariables={stateVariables}
     />
   );
 }

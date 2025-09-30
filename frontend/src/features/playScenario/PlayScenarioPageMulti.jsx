@@ -189,6 +189,7 @@ export default function PlayScenarioPageMulti({ group }) {
         setAddFlags={setAddFlags}
         setRemoveFlags={setRemoveFlags}
         buttonPressed={buttonPressed}
+        stateVariables={stateVariables}
       />
       <PlayPageSideButton
         setNoteOpen={setNoteOpen}

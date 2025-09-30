@@ -22,6 +22,73 @@ function resolve(component) {
   if (component) return <Fc key={component.id} {...component} />;
 }
 
+function injectStateVariables(scene, stateVariables) {
+  if (!stateVariables) return scene;
+
+  const varMap = new Map(stateVariables.map((v) => [v.name, v.value]));
+  const regex = /\$\$(.*?)\$\$/g;
+
+  return {
+    ...scene,
+    components: Object.fromEntries(
+      Object.entries(scene.components).map(([id, component]) => {
+        if (component.type !== "textbox") return [id, component];
+
+        const newBlocks = component.document.blocks.map((block) => {
+          const newSpans = [];
+
+          for (const span of block.spans) {
+            const pieces = [];
+            let lastIndex = 0;
+            let match;
+
+            while ((match = regex.exec(span.text)) !== null) {
+              if (match.index > lastIndex) {
+                pieces.push(span.text.slice(lastIndex, match.index));
+              }
+              const variableName = match[1];
+              if (varMap.has(variableName)) {
+                pieces.push(String(varMap.get(variableName)));
+              } else {
+                pieces.push(match[0]);
+              }
+              lastIndex = regex.lastIndex;
+            }
+
+            if (lastIndex < span.text.length) {
+              pieces.push(span.text.slice(lastIndex));
+            }
+
+            regex.lastIndex = 0;
+
+            // Only add non-empty pieces
+            for (const text of pieces) {
+              if (text !== "") {
+                newSpans.push({ text });
+              }
+            }
+
+            // Fallback: if substitution produced no visible text, preserve the original
+            if (pieces.length === 0) {
+              newSpans.push(span);
+            }
+          }
+
+          return { ...block, spans: newSpans };
+        });
+
+        return [
+          id,
+          {
+            ...component,
+            document: { ...component.document, blocks: newBlocks },
+          },
+        ];
+      })
+    ),
+  };
+}
+
 /**
  * This component displays the scene components on the screen when playing a scenario
  *
@@ -34,6 +101,7 @@ export default function PlayScenarioCanvas({
   reset,
   setAddFlags,
   setRemoveFlags,
+  stateVariables,
 }) {
   // const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -54,7 +122,9 @@ export default function PlayScenarioCanvas({
   //   setIsModalOpen(false);
   // };
 
-  const components = Object.values(buildVisualScene(scene).components)
+  const sceneToRender = injectStateVariables(scene, stateVariables);
+
+  const components = Object.values(buildVisualScene(sceneToRender).components)
     .sort((a, b) => a.zIndex - b.zIndex)
     .map((c) => {
       const resolved = resolve(c);
