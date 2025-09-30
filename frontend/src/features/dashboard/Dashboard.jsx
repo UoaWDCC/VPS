@@ -35,7 +35,6 @@ export default function Dashboard() {
       (group) => group.path.length != 0
     ).length;
     // Placeholder here, needs an update for when the group completes a scenario it sets a var in the database, probs alr exist but will implement this later
-    const groupsCompleted = 0;
     return (
       <div className="grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         <div className="bg-white col-auto border rounded-xl p-2 text-center">

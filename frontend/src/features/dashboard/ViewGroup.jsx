@@ -10,7 +10,6 @@ import { MarkerType, ReactFlowProvider } from "@xyflow/react";
 import ScenarioGraph from "./components/Graph";
 import TestTable from "./components/Table";
 import { Skeleton } from "@mui/material";
-
 import Table from "@material-ui/core/Table";
 import TableBody from "@material-ui/core/TableBody";
 import TableCell from "@material-ui/core/TableCell";
