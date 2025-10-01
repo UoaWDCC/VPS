@@ -9,10 +9,10 @@ import { usePost } from "hooks/crudHooks";
 import LoadingPage from "../status/LoadingPage";
 import PlayScenarioCanvas from "./PlayScenarioCanvas";
 import { applyStateOperations } from "../../components/StateVariables/stateOperations";
+import ResourcesPanel from "./components/ResourcesPanel";
 
 const sceneCache = new Map();
 
-// returns the scene id that we should switch to
 const navigate = async (
   user,
   scenarioId,
@@ -47,7 +47,6 @@ const navigate = async (
  */
 export default function PlayScenarioPage() {
   const { user, loading, error: authError } = useContext(AuthenticationContext);
-
   const { scenarioId } = useParams();
   const history = useHistory();
 
@@ -56,6 +55,8 @@ export default function PlayScenarioPage() {
   const [stateVersion, setStateVersion] = useState(0);
   const [addFlags, setAddFlags] = useState([]);
   const [removeFlags, setRemoveFlags] = useState([]);
+
+  const [resourcesOpen, setResourcesOpen] = useState(false); 
 
   const currScene = sceneCache.get(sceneId);
 
@@ -73,8 +74,6 @@ export default function PlayScenarioPage() {
 
   const onSceneChange = async (componentId) => {
     if (componentId) {
-      // Apply state operations if any
-      // Find the component by id in the components array
       const component = currScene?.components?.find(
         (comp) => comp.id === componentId
       );
@@ -97,7 +96,6 @@ export default function PlayScenarioPage() {
         componentId
       );
 
-      // Updates state variables if there is a desync
       if (stateVersion < newStateVersion) {
         setStateVariables(stateVariables);
         setStateVersion(newStateVersion);
@@ -145,16 +143,32 @@ export default function PlayScenarioPage() {
 
   if (loading) return <LoadingPage text="Loading Scene..." />;
   if (authError) return <></>;
-
   if (!currScene) return <LoadingPage text="Loading Scene..." />;
 
   return (
-    <PlayScenarioCanvas
-      scene={currScene}
-      reset={reset}
-      setAddFlags={setAddFlags}
-      setRemoveFlags={setRemoveFlags}
-      buttonPressed={buttonPressed}
-    />
+    <div className="w-full h-full relative">
+      <PlayScenarioCanvas
+        scene={currScene}
+        reset={reset}
+        setAddFlags={setAddFlags}
+        setRemoveFlags={setRemoveFlags}
+        buttonPressed={buttonPressed}
+      />
+      <div className="absolute top-2 right-2 z-30 flex items-center gap-2">
+        <button
+          className="btn btn-sm"
+          onClick={() => setResourcesOpen(true)}
+          aria-label="Open resources"
+        >
+          Resources
+        </button>
+      </div>
+
+      <ResourcesPanel
+        scenarioId={scenarioId}
+        open={resourcesOpen}
+        onClose={() => setResourcesOpen(false)}
+      />
+    </div>
   );
 }
