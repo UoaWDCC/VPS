@@ -71,7 +71,9 @@ export default function ResourcesPanel({ scenarioId, open, onClose }) {
       }
     } catch (err) {
       console.error(err);
-      setError(err?.response?.data?.error || err.message || "Failed to load resources");
+      setError(
+        err?.response?.data?.error || err.message || "Failed to load resources"
+      );
       toast.error("Failed to load resources");
       setLoading(false);
     }
@@ -79,7 +81,6 @@ export default function ResourcesPanel({ scenarioId, open, onClose }) {
 
   useEffect(() => {
     if (open && scenarioId) fetchTree();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, scenarioId]);
 
   // Filtered tree for search
@@ -121,7 +122,9 @@ export default function ResourcesPanel({ scenarioId, open, onClose }) {
     <>
       <div
         className={`fixed inset-0 z-50 bg-black/90 transition-opacity ${
-          open ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
+          open
+            ? "opacity-100 pointer-events-auto"
+            : "opacity-0 pointer-events-none"
         }`}
         onClick={onClose}
         aria-hidden="true"
@@ -129,7 +132,9 @@ export default function ResourcesPanel({ scenarioId, open, onClose }) {
 
       <div
         className={`fixed inset-0 z-50 flex items-center justify-center transition-all ${
-          open ? "opacity-100 scale-100 pointer-events-auto" : "opacity-0 scale-95 pointer-events-none"
+          open
+            ? "opacity-100 scale-100 pointer-events-auto"
+            : "opacity-0 scale-95 pointer-events-none"
         }`}
         role="dialog"
         aria-modal="true"
@@ -143,7 +148,11 @@ export default function ResourcesPanel({ scenarioId, open, onClose }) {
         >
           <div className="sticky top-0 z-10 bg-base-100 border-b border-base-300 p-3 flex items-center gap-2">
             <h2 className="text-lg font-semibold flex-1">Resources</h2>
-            <button className="btn btn-ghost btn-sm" onClick={onClose} aria-label="Close">
+            <button
+              className="btn btn-ghost btn-sm"
+              onClick={onClose}
+              aria-label="Close"
+            >
               ✕
             </button>
           </div>
@@ -174,7 +183,9 @@ export default function ResourcesPanel({ scenarioId, open, onClose }) {
               <div className="h-full flex items-center justify-center">
                 <div className="text-center opacity-70">
                   <p>No resources available for this scenario.</p>
-                  <p className="text-sm">Ask the author to upload files in the authoring UI.</p>
+                  <p className="text-sm">
+                    Ask the author to upload files in the authoring UI.
+                  </p>
                 </div>
               </div>
             ) : (
@@ -188,7 +199,10 @@ export default function ResourcesPanel({ scenarioId, open, onClose }) {
                   />
                 </div>
                 <div className="overflow-auto border border-base-200 rounded-lg">
-                  <ResourcePreview file={selectedFile} getDownloadUrl={getDownloadUrl} />
+                  <ResourcePreview
+                    file={selectedFile}
+                    getDownloadUrl={getDownloadUrl}
+                  />
                 </div>
               </div>
             )}
@@ -222,7 +236,14 @@ function findFileById(tree, id) {
   for (const g of tree) {
     for (const c of g.children || []) {
       for (const f of c.files || []) {
-        if (f.id === id) return { ...f, groupId: g.id, groupName: g.name, childId: c.id, childName: c.name };
+        if (f.id === id)
+          return {
+            ...f,
+            groupId: g.id,
+            groupName: g.name,
+            childId: c.id,
+            childName: c.name,
+          };
       }
     }
   }
