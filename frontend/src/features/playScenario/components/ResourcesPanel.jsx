@@ -120,7 +120,7 @@ export default function ResourcesPanel({ scenarioId, open, onClose }) {
   return (
     <>
       <div
-        className={`fixed inset-0 z-50 bg-black/60 transition-opacity ${
+        className={`fixed inset-0 z-50 bg-black/90 transition-opacity ${
           open ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
         }`}
         onClick={onClose}
@@ -128,7 +128,7 @@ export default function ResourcesPanel({ scenarioId, open, onClose }) {
       />
 
       <div
-        className={`fixed inset-0 z-50 flex items-center justify-center p-2 md:p-6 transition-all ${
+        className={`fixed inset-0 z-50 flex items-center justify-center transition-all ${
           open ? "opacity-100 scale-100 pointer-events-auto" : "opacity-0 scale-95 pointer-events-none"
         }`}
         role="dialog"
@@ -138,7 +138,7 @@ export default function ResourcesPanel({ scenarioId, open, onClose }) {
       >
         <div
           ref={dialogRef}
-          className="bg-base-100 rounded-xl shadow-2xl w-full h-full md:h-[90vh] md:w-[min(1200px,95vw)] overflow-hidden border border-base-300"
+          className="shadow-2xl w-full h-full overflow-hidden"
           onClick={stopPropagation}
         >
           <div className="sticky top-0 z-10 bg-base-100 border-b border-base-300 p-3 flex items-center gap-2">
