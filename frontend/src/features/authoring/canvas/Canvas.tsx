@@ -12,7 +12,7 @@ import useVisualScene from "../stores/visual";
 import { handleMouseDownGlobal, handleMouseMoveGlobal, handleMouseUpGlobal } from "../handlers/pointer/pointer";
 
 const componentMap: Record<string, React.FC<any>> = {
-  textbox: TextBox,
+  textbox: (props) => <TextBox {...props} editable={true} />,
   speech: Speech,
   ellipse: Ellipse,
   box: Box,
@@ -22,7 +22,8 @@ const componentMap: Record<string, React.FC<any>> = {
 
 function resolve(component: Component) {
   const Fc = componentMap[component.type];
-  if (component) return <Fc key={component.id} {...component} />;
+  if (Fc) return <Fc key={component.id} {...component} />;
+  return null;
 }
 
 function Canvas() {

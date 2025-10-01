@@ -127,7 +127,6 @@ export const modifyComponentProp = modify((id: string, prop: string, val: any) =
   const component = getComponent(id);
   if (!component) return;
 
-  console.log(component, prop, val);
   const [object, key] = getObject(prop, component);
   if (typeof val === "function") object[key] = val(object[key]);
   else if (typeof val === "object" && !Array.isArray(val))

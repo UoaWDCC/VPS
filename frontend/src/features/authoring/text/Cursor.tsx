@@ -9,19 +9,19 @@ import { getStyleForSelection } from "../scene/operations/text";
 function Cursor({ bounds }: { bounds: RelativeBounds }) {
   const visualSelection = useEditorStore(state => state.visualSelection);
   const modelSelection = useEditorStore(state => state.selection);
-  const selected = useEditorStore(state => state.selected);
 
-  if (!selected) return null;
+  const { selected } = useEditorStore.getState();
+  const { components } = useVisualScene.getState();
+  const { blocks } = components[selected!].document;
 
   const { start, end } = visualSelection;
   if (start == null || (end && !shallow(start, end))) return null;
 
-  const relativePosition = getVisualPosition(start, useVisualScene.getState().components[selected!].document.blocks);
+  const relativePosition = getVisualPosition(start, blocks);
   if (!relativePosition) return null;
 
   const position = add(relativePosition, bounds);
-  const block = useVisualScene.getState().components[selected!].document.blocks[start.blockI];
-  const line = block.lines[start.lineI];
+  const line = blocks[start.blockI].lines[start.lineI];
 
   const box = {
     x: position.x,
@@ -35,8 +35,8 @@ function Cursor({ bounds }: { bounds: RelativeBounds }) {
     y: bounds.y + bounds.height / 2,
   };
   const path = expandToPath({ ...box, origin });
-  const color = getStyleForSelection(selected, modelSelection)?.textColor;
-  return <path d={path} fill={color ?? "#ffffff"} />;
+  const color = getStyleForSelection(selected!, modelSelection)?.textColor;
+  return <path d={path} fill={color ?? "#000000"} />;
 }
 
 export default Cursor;

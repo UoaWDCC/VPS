@@ -57,3 +57,7 @@ export interface VisualSelection {
   start: VisualCursor | null;
   end: VisualCursor | null;
 }
+
+export type Definite<T> = {
+  [K in keyof T]: NonNullable<T[K]>;
+};

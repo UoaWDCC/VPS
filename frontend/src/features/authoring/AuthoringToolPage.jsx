@@ -27,6 +27,13 @@ import { useHistory } from "react-router-dom";
 import { replace } from "./scene/operations/modifiers";
 import { api } from "../../util/api";
 
+const listeners = [
+  ["copy", copy],
+  ["cut", cut],
+  ["paste", paste],
+  ["keydown", handleGlobal],
+];
+
 /**
  * This page allows the user to edit a scene.
  * @container
@@ -51,18 +58,12 @@ export default function AuthoringToolPage() {
   // NOTE: we always start at the first scene, could possibly store it in localstorage
   useEffect(() => {
     replace(scenes[0]);
-
-    document.addEventListener("copy", copy);
-    document.addEventListener("cut", cut);
-    document.addEventListener("paste", paste);
-    document.addEventListener("keydown", handleGlobal);
     useEditorStore.getState().clear();
 
+    listeners.forEach(([event, fn]) => document.addEventListener(event, fn));
+
     return () => {
-      document.removeEventListener("copy", copy);
-      document.removeEventListener("cut", cut);
-      document.removeEventListener("paste", paste);
-      document.removeEventListener("keydown", handleGlobal);
+      listeners.forEach(([event, fn]) => document.removeEventListener(event, fn));
     };
   }, []);
 
