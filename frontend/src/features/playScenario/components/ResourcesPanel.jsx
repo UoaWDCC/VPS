@@ -15,6 +15,10 @@ export default function ResourcesPanel({ scenarioId, open, onClose }) {
   const [selectedFileId, setSelectedFileId] = useState(null);
   const [selectedFile, setSelectedFile] = useState(null);
 
+  // Expanded state for tree persistence
+  const [openGroups, setOpenGroups] = useState(() => new Set());
+  const [openChildren, setOpenChildren] = useState(() => new Set());
+
   const dialogRef = useRef(null);
 
   // Close on Escape
@@ -115,6 +119,38 @@ export default function ResourcesPanel({ scenarioId, open, onClose }) {
     fetchTree();
   }
 
+  const toggleGroup = (gid) => {
+    setOpenGroups((prev) => {
+      const next = new Set(prev);
+      if (next.has(gid)) next.delete(gid);
+      else next.add(gid);
+      return next;
+    });
+  };
+
+  const toggleChild = (cid) => {
+    setOpenChildren((prev) => {
+      const next = new Set(prev);
+      if (next.has(cid)) next.delete(cid);
+      else next.add(cid);
+      return next;
+    });
+  };
+
+  const expandAll = () => {
+    const allGroups = new Set(tree.map((g) => g.id));
+    const allChildren = new Set(
+      tree.flatMap((g) => (g.children || []).map((c) => c.id))
+    );
+    setOpenGroups(allGroups);
+    setOpenChildren(allChildren);
+  };
+
+  const collapseAll = () => {
+    setOpenGroups(new Set());
+    setOpenChildren(new Set());
+  };
+
   // Prevent closing when clicking inside the dialog
   const stopPropagation = (e) => e.stopPropagation();
 
@@ -159,13 +195,31 @@ export default function ResourcesPanel({ scenarioId, open, onClose }) {
 
           {/* Search */}
           <div className="p-3 border-b border-base-200">
-            <input
-              type="text"
-              className="input input-bordered input-sm w-full"
-              placeholder="Search files or path (e.g. 'design/wireframes')"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-            />
+            <div className="flex gap-2 mb-2">
+              <input
+                type="text"
+                className="input input-bordered input-sm flex-1"
+                placeholder="Search files or path (e.g. 'design/wireframes')"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+              />
+              <button
+                className="btn btn-ghost btn-sm"
+                onClick={expandAll}
+                title="Expand all"
+                disabled={loading || !tree.length}
+              >
+                ⬇
+              </button>
+              <button
+                className="btn btn-ghost btn-sm"
+                onClick={collapseAll}
+                title="Collapse all"
+                disabled={loading || !tree.length}
+              >
+                ⬆
+              </button>
+            </div>
           </div>
           <div className="p-3 h-[calc(100%-112px)] overflow-hidden">
             {loading ? (
@@ -196,6 +250,10 @@ export default function ResourcesPanel({ scenarioId, open, onClose }) {
                     search={search}
                     onSelectFile={handleSelectFile}
                     selectedFileId={selectedFileId}
+                    openGroups={openGroups}
+                    openChildren={openChildren}
+                    toggleGroup={toggleGroup}
+                    toggleChild={toggleChild}
                   />
                 </div>
                 <div className="overflow-auto border border-base-200 rounded-lg">

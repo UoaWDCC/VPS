@@ -1,43 +1,27 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo } from "react";
 
 export default function ResourceTree({
   tree,
   search,
   onSelectFile,
   selectedFileId,
+  openGroups,
+  openChildren,
+  toggleGroup,
+  toggleChild,
 }) {
-  // Expanded state per group/child
-  const [openGroups, setOpenGroups] = useState(() => new Set());
-  const [openChildren, setOpenChildren] = useState(() => new Set());
-
-  // Automatically.expand when searching
+  // Automatically expand when searching
   useEffect(() => {
     if (search.trim()) {
       const allG = new Set(tree.map((g) => g.id));
       const allC = new Set(
         tree.flatMap((g) => (g.children || []).map((c) => c.id))
       );
-      setOpenGroups(allG);
-      setOpenChildren(allC);
+      // Update parent state when auto-expanding for search
+      allG.forEach((gid) => !openGroups.has(gid) && toggleGroup(gid));
+      allC.forEach((cid) => !openChildren.has(cid) && toggleChild(cid));
     }
-  }, [search, tree]);
-
-  const toggleGroup = (gid) => {
-    setOpenGroups((prev) => {
-      const next = new Set(prev);
-      if (next.has(gid)) next.delete(gid);
-      else next.add(gid);
-      return next;
-    });
-  };
-  const toggleChild = (cid) => {
-    setOpenChildren((prev) => {
-      const next = new Set(prev);
-      if (next.has(cid)) next.delete(cid);
-      else next.add(cid);
-      return next;
-    });
-  };
+  }, [search, tree, openGroups, openChildren, toggleGroup, toggleChild]);
 
   const totalFiles = useMemo(
     () =>
