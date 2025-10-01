@@ -1,6 +1,11 @@
 import React, { useEffect, useMemo, useState } from "react";
 
-export default function ResourceTree({ tree, search, onSelectFile, selectedFileId }) {
+export default function ResourceTree({
+  tree,
+  search,
+  onSelectFile,
+  selectedFileId,
+}) {
   // Expanded state per group/child
   const [openGroups, setOpenGroups] = useState(() => new Set());
   const [openChildren, setOpenChildren] = useState(() => new Set());
@@ -9,7 +14,9 @@ export default function ResourceTree({ tree, search, onSelectFile, selectedFileI
   useEffect(() => {
     if (search.trim()) {
       const allG = new Set(tree.map((g) => g.id));
-      const allC = new Set(tree.flatMap((g) => (g.children || []).map((c) => c.id)));
+      const allC = new Set(
+        tree.flatMap((g) => (g.children || []).map((c) => c.id))
+      );
       setOpenGroups(allG);
       setOpenChildren(allC);
     }
@@ -33,13 +40,21 @@ export default function ResourceTree({ tree, search, onSelectFile, selectedFileI
   };
 
   const totalFiles = useMemo(
-    () => tree.reduce((sum, g) => sum + (g.children || []).reduce((s, c) => s + (c.files || []).length, 0), 0),
+    () =>
+      tree.reduce(
+        (sum, g) =>
+          sum +
+          (g.children || []).reduce((s, c) => s + (c.files || []).length, 0),
+        0
+      ),
     [tree]
   );
 
   return (
     <div className="p-2">
-      <div className="px-2 pb-2 text-xs opacity-70">{totalFiles} file{totalFiles !== 1 ? "s" : ""}</div>
+      <div className="px-2 pb-2 text-xs opacity-70">
+        {totalFiles} file{totalFiles !== 1 ? "s" : ""}
+      </div>
       <ul className="menu w-full">
         {tree.map((group) => (
           <li key={group.id} className="mb-1">
@@ -49,7 +64,9 @@ export default function ResourceTree({ tree, search, onSelectFile, selectedFileI
               aria-expanded={openGroups.has(group.id)}
             >
               <span className="font-medium truncate">{group.name}</span>
-              <span className="text-xs opacity-70">{openGroups.has(group.id) ? "▾" : "▸"}</span>
+              <span className="text-xs opacity-70">
+                {openGroups.has(group.id) ? "▾" : "▸"}
+              </span>
             </button>
 
             {openGroups.has(group.id) && (
@@ -63,7 +80,8 @@ export default function ResourceTree({ tree, search, onSelectFile, selectedFileI
                     >
                       <span className="truncate">{child.name}</span>
                       <span className="text-xs opacity-70">
-                        {(child.files || []).length} {openChildren.has(child.id) ? "▾" : "▸"}
+                        {(child.files || []).length}{" "}
+                        {openChildren.has(child.id) ? "▾" : "▸"}
                       </span>
                     </button>
 
@@ -75,7 +93,15 @@ export default function ResourceTree({ tree, search, onSelectFile, selectedFileI
                               className={`flex w-full items-center justify-between px-2 py-1 rounded hover:bg-base-200 text-left ${
                                 selectedFileId === f.id ? "bg-base-200" : ""
                               }`}
-                              onClick={() => onSelectFile({ ...f, groupId: group.id, groupName: group.name, childId: child.id, childName: child.name })}
+                              onClick={() =>
+                                onSelectFile({
+                                  ...f,
+                                  groupId: group.id,
+                                  groupName: group.name,
+                                  childId: child.id,
+                                  childName: child.name,
+                                })
+                              }
                               title={`${group.name}/${child.name}/${f.name}`}
                             >
                               <span className="truncate">{f.name}</span>

@@ -56,7 +56,7 @@ export default function PlayScenarioPage() {
   const [addFlags, setAddFlags] = useState([]);
   const [removeFlags, setRemoveFlags] = useState([]);
 
-  const [resourcesOpen, setResourcesOpen] = useState(false); 
+  const [resourcesOpen, setResourcesOpen] = useState(false);
 
   const currScene = sceneCache.get(sceneId);
 
