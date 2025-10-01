@@ -74,10 +74,13 @@ export const deleteSelection = modify((id: string, sel: ModelSelection) => {
   const startBlock = blocks[start.blockI];
   const endBlock = blocks[end.blockI];
 
-  const newSpans = [
+  let newSpans = [
     ...startBlock.spans.slice(0, start.charI > 0 ? start.spanI + 1 : 0),
     ...endBlock.spans.slice(end.charI > 0 ? end.spanI + 1 : 0),
   ];
+
+  // occurs if the selection perfectly aligns across block boundaries
+  if (!newSpans.length) newSpans = [{ text: "", style: startBlock.spans[0].style }];
 
   const newBlock = { spans: newSpans, style: startBlock.style };
   blocks.splice(start.blockI, end.blockI - start.blockI + 1, newBlock);
@@ -272,6 +275,10 @@ function isolateSelection(id: string, sel: ModelSelection) {
 
 function normaliseDocument(doc: ModelDocument, cursor: ModelCursor) {
   const newCursor = { ...cursor };
+
+  if (!doc.blocks[0].spans.length) {
+    doc.blocks[0].spans.push({ text: "", style: {} });
+  }
 
   for (let i = 0; i < doc.blocks.length; i++) {
     const block = doc.blocks[i];

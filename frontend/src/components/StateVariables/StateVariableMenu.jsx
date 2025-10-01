@@ -39,6 +39,8 @@ const StateVariableMenu = ({ show, setShow }) => {
 
   const { stateVariables } = useContext(ScenarioContext);
 
+  if (!stateVariables) return null;
+
   return (
     <Modal open={show} onClose={() => setShow(false)}>
       <Box sx={mainStyle}>
