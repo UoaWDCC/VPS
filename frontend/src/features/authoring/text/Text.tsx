@@ -21,10 +21,10 @@ function buildGroups(doc: VisualDocument) {
   ));
 }
 
-function Text(doc: VisualDocument) {
-  const selected = useEditorStore(state => state.selected);
+function Text({ doc, editable }: { doc: VisualDocument, editable?: boolean }) {
+  const selected = useEditorStore(state => editable ? state.selected : null);
 
-  const isSelected = selected === doc.id;
+  const isSelected = editable && selected === doc.id;
 
   const { bounds } = doc;
   const center = {

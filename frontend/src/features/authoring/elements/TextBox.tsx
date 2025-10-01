@@ -2,11 +2,15 @@ import Text from "../text/Text";
 import type { TextBoxComponent } from "../types";
 import Box from "./Box";
 
-function TextBox(component: TextBoxComponent) {
+interface TextBoxProps extends TextBoxComponent {
+  editable: boolean;
+}
+
+function TextBox(props: TextBoxProps) {
   return (
     <g>
-      <Box {...component} type="box" />
-      <Text {...component.document} />
+      <Box {...props} type="box" />
+      <Text doc={props.document} editable={props.editable} />
     </g>
   );
 }

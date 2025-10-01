@@ -2,66 +2,66 @@ import type { RelativeBounds } from "../types";
 import { expandToPath } from "../util";
 import { normalizeSelectionVisual } from "./cursor";
 import type {
+  Definite,
+  VisualBlock,
   VisualCursor,
+  VisualSelection,
   VisualSpan,
 } from "./types";
 import useEditorStore from "../stores/editor";
 import useVisualScene from "../stores/visual";
 
 interface HighlightProps {
-  color?: string;
+  color: string;
   bounds: RelativeBounds;
 }
 
-function generateHighlightSegment(
-  start: VisualCursor,
-  end: VisualCursor,
-  span: VisualSpan,
-  isStart: boolean,
-  isEnd: boolean,
-) {
-  if (isStart && isEnd) {
-    const x = span.charOffsets[start.charI];
-    const width = span.charOffsets[end.charI] - x;
-    return { x: span.x + x, width };
-  }
-  if (isStart) {
-    const x = span.charOffsets[start.charI];
-    return { x: span.x + x, width: span.width - x };
-  }
-  if (isEnd) {
-    const width = span.charOffsets[end.charI];
-    return { x: span.x, width };
-  }
-  return { x: span.x, width: span.width };
+function isValidSelection(selection: VisualSelection, blocks: VisualBlock[]) {
+  const { start, end } = selection;
+  if (!start || !end) return false;
+
+  const isValidPos = (pos: VisualCursor): boolean => {
+    if (pos.blockI < 0 || pos.blockI >= blocks.length) return false;
+    const block = blocks[pos.blockI];
+    if (pos.lineI < 0 || pos.lineI >= block.lines.length) return false;
+    const line = block.lines[pos.lineI];
+    if (pos.spanI < 0 || pos.spanI >= line.spans.length) return false;
+    const span = line.spans[pos.spanI];
+    if (pos.charI < 0 || pos.charI > span.text.length) return false;
+    return true;
+  };
+
+  if (!isValidPos(start) || !isValidPos(end)) return false;
+  return true;
 }
 
-function Highlight({ bounds, color }: HighlightProps) {
-  const selection = useEditorStore(state => state.visualSelection);
-  const selected = useEditorStore(state => state.selected);
-  if (!selection.start || !selection.end) return null;
+function genSeg(sel: Definite<VisualSelection>, span: VisualSpan, isStart: boolean, isEnd: boolean) {
+  let x = span.x, width = span.width;
+  if (isStart && isEnd) {
+    x += span.charOffsets[sel.start.charI];
+    width = span.charOffsets[sel.end.charI] + span.x - x;
+  } else if (isStart) {
+    x += span.charOffsets[sel.start.charI];
+    width += span.x - x;
+  } else if (isEnd) {
+    width = span.charOffsets[sel.end.charI];
+  }
 
-  let { start, end } = normalizeSelectionVisual(selection);
+  return { x, width };
+}
+
+function genSegs(selection: Definite<VisualSelection>, blocks: VisualBlock[], bounds: RelativeBounds, color: string) {
+  const highlights = [];
+
+  const { start, end } = selection;
 
   const center = {
     x: bounds.x + bounds.width / 2,
     y: bounds.y + bounds.height / 2,
   };
 
-  start ??= { blockI: 0, lineI: 0, spanI: 0, charI: 0 };
-  if (!end) {
-    const blocks = useVisualScene.getState().components[selected!].document.blocks;
-    const blockI = blocks.length - 1;
-    const lineI = blocks[blockI].lines.length - 1;
-    const spanI = blocks[blockI].lines[lineI].spans.length - 1;
-    const charI = blocks[blockI].lines[lineI].spans[spanI].text.length - 1;
-    end = { blockI, lineI, spanI, charI };
-  }
-
-  const highlights = [];
-
   for (let i = start.blockI; i <= end.blockI; i++) {
-    const block = useVisualScene.getState().components[selected!].document.blocks[i];
+    const block = blocks[i];
     const isStartBlock = i === start.blockI;
     for (let j = isStartBlock ? start.lineI : 0; j < block.lines.length; j++) {
       const line = block.lines[j];
@@ -74,27 +74,16 @@ function Highlight({ bounds, color }: HighlightProps) {
         const isStart = isStartBlock && isStartLine && k === start.spanI;
         const isEnd = i === end.blockI && j === end.lineI && k === end.spanI;
 
-        const { x, width } = generateHighlightSegment(
-          start,
-          end,
-          line.spans[k],
-          isStart,
-          isEnd,
-        );
-        const y = bounds.y + block.y + line.y;
+        let { x, width } = genSeg(selection, line.spans[k], isStart, isEnd);
+        x += bounds.x + line.x;
+        const y = bounds.y + + line.y + block.y;
+        const rel = { x, y, width, height: line.height };
 
         highlights.push(
           <path
             key={[i, j, k].join("|")}
-            d={expandToPath({
-              x: x + line.x + bounds.x,
-              y,
-              width,
-              height: line.height,
-              origin: center,
-              rotation: bounds.rotation,
-            })}
-            fill={color ?? block.style.highlightColor}
+            d={expandToPath({ ...bounds, ...rel, origin: center })}
+            fill={color}
           />,
         );
 
@@ -103,7 +92,23 @@ function Highlight({ bounds, color }: HighlightProps) {
     }
   }
 
-  return null;
+  return highlights;
+}
+
+function Highlight({ color }: HighlightProps) {
+  const selection = useEditorStore(state => state.visualSelection);
+
+  const { selected } = useEditorStore.getState();
+  const { components } = useVisualScene.getState();
+  const { blocks, bounds } = components[selected!].document;
+
+  if (!isValidSelection(selection, blocks)) return null;
+
+  const normd = normalizeSelectionVisual(selection) as Definite<VisualSelection>;
+
+  const highlights = genSegs(normd, blocks, bounds, color);
+
+  return <>{highlights}</>;
 }
 
 export default Highlight;
