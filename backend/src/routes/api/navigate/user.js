@@ -103,12 +103,20 @@ export const userNavigate = async (req) => {
   const component = await getComponent(currentScene, componentId);
 
   // if the button does not lead to another scene or component does not exist, stay in the current scene
-  const nextScene = component?.nextScene || currentScene;
-  const [, scenes, [stateVariables, stateVersion]] = await Promise.all([
-    addSceneToPath(user._id, scenarioId, currentScene, nextScene),
-    getConnectedScenes(nextScene, false),
-    updateStateVariables(user, scenarioId, component),
-  ]);
+  let scenes = null;
+  if (component?.nextScene === currentScene) {
+    const nextScene = component.nextScene;
+    [, scenes] = await Promise.all([
+      addSceneToPath(user._id, scenarioId, currentScene, nextScene),
+      getConnectedScenes(nextScene, false),
+    ]);
+  }
+
+  const [stateVariables, stateVersion] = await updateStateVariables(
+    user,
+    scenarioId,
+    component
+  );
 
   return {
     status: STATUS.OK,
