@@ -18,6 +18,8 @@ export default function ScenarioGraph({
   inNodes,
   inEdges,
   inGPathEdges,
+  inSceneMap,
+  inGPath,
   onLoaded,
 }) {
   /**
@@ -42,6 +44,7 @@ export default function ScenarioGraph({
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
   const [sizes, setSizes] = useState({});
+  const [currentIdx, setCurrentIdx] = useState(0);
 
   // Set up initial nodes and update edges with the group path if it exists
   const [newEdges, setNewEdges] = useState([]);
@@ -91,12 +94,44 @@ export default function ScenarioGraph({
     RenderGraph();
   }, [direction]);
 
+  // Update the nodes when a new selection is made
+  useEffect(() => {
+    handleNodeHighlighting();
+  }, [currentIdx, setNodes]);
+
+  function handleNodeHighlighting() {
+    if (inGPath.length == 0) return;
+    setNodes((tempNodes) =>
+      tempNodes.map((node) => {
+        if (node.id == inSceneMap[inGPath[currentIdx]]._id) {
+          return {
+            ...node,
+            data: {
+              ...node.data,
+              isHighlighted: true,
+            },
+          };
+        }
+        return {
+          ...node,
+          data: {
+            ...node.data,
+            isHighlighted: false,
+          },
+        };
+      })
+    );
+  }
+
   const gle = async (nodes, edges, options = {}, tempSizes) => {
     const graph = {
       id: "root",
       layoutOptions: options,
       children: nodes.map((node) => ({
         ...node,
+        data: {
+          ...node.data,
+        },
       })),
       edges: edges,
     };
@@ -125,6 +160,7 @@ export default function ScenarioGraph({
         setEdges(layoutedEdges);
         fitView();
         onLoaded();
+        handleNodeHighlighting();
       }
     );
     // console.log("Updated layout")
@@ -135,7 +171,6 @@ export default function ScenarioGraph({
    *  Need to add a counter to the nodes to show how many times a group has visited that scene
    *  Could make the nodes be grayed out and only show them normally if the group has visited them, makes it easier to visualize progress
    */
-
   return (
     <div className="h-full">
       <span className="text-sm opacity-80">
@@ -202,8 +237,57 @@ export default function ScenarioGraph({
             Reset Nodes
           </button>
         </Panel>
+        <Panel position="center-right">
+          {/* <NavigatorTable sceneMap={inSceneMap} groupPath={inGPath}/> */}
+          <PathNavigator
+            sceneMap={inSceneMap}
+            groupPath={inGPath}
+            idx={currentIdx}
+            setCurrentIdx={setCurrentIdx}
+          />
+        </Panel>
         <Background />
       </ReactFlow>
     </div>
   );
 }
+
+const PathNavigator = ({ sceneMap, groupPath, idx, setCurrentIdx }) => {
+  if (groupPath.length == 0) return <></>;
+  function updateIndex(d) {
+    setCurrentIdx((prev) => {
+      const newIdx = prev + d;
+      if (newIdx < 0 || newIdx >= groupPath.length) return prev;
+      return newIdx;
+    });
+  }
+
+  return (
+    <div>
+      <div className="grid justify-items-end">
+        <p>Current Node:</p>
+        <p className="">{sceneMap[groupPath[idx]].name}</p>
+        <div>
+          <button
+            className="bg-white text-black rounded-lg px-2 hover:cursor-pointer hover:bg-gray-200 disabled:opacity-50"
+            disabled={idx == 0}
+            onClick={() => {
+              updateIndex(-1);
+            }}
+          >
+            Prev
+          </button>
+          <button
+            className="bg-white text-black rounded-lg px-2 hover:cursor-pointer hover:bg-gray-200 disabled:opacity-50"
+            disabled={idx + 1 == groupPath.length}
+            onClick={() => {
+              updateIndex(1);
+            }}
+          >
+            Next
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
