@@ -36,46 +36,121 @@ function injectStateVariables(scene, stateVariables) {
         if (component.type !== "textbox") return [id, component];
 
         const newBlocks = component.document.blocks.map((block) => {
+          const spans = block.spans ?? [];
+          if (spans.length === 0) return block;
+
+          // join all span texts for full-block regex scanning
+          const blockText = spans.map((s) => s.text ?? "").join("");
+
+          // find matches across the whole block
+          regex.lastIndex = 0;
+          const matches = [];
+          let m;
+          while ((m = regex.exec(blockText)) !== null) {
+            const variableName = m[1];
+            const replacement = varMap.has(variableName)
+              ? String(varMap.get(variableName))
+              : null;
+            matches.push({
+              start: m.index,
+              end: regex.lastIndex,
+              original: m[0],
+              replacement,
+            });
+          }
+
+          if (matches.length === 0) return block;
+
+          // map spans to absolute offsets in blockText
+          const offsets = [];
+          let acc = 0;
+          for (const s of spans) {
+            offsets.push(acc);
+            acc += (s.text ?? "").length;
+          }
+
+          function findSpanIndexAt(pos) {
+            for (let i = 0; i < spans.length; i++) {
+              const start = offsets[i];
+              const end = start + (spans[i].text ?? "").length;
+              if (pos >= start && pos < end) return i;
+            }
+            return spans.length - 1;
+          }
+
           const newSpans = [];
 
-          for (const span of block.spans) {
-            const pieces = [];
-            let lastIndex = 0;
-            let match;
-
-            while ((match = regex.exec(span.text)) !== null) {
-              if (match.index > lastIndex) {
-                pieces.push(span.text.slice(lastIndex, match.index));
-              }
-              const variableName = match[1];
-              if (varMap.has(variableName)) {
-                pieces.push(String(varMap.get(variableName)));
-              } else {
-                pieces.push(match[0]);
-              }
-              lastIndex = regex.lastIndex;
-            }
-
-            if (lastIndex < span.text.length) {
-              pieces.push(span.text.slice(lastIndex));
-            }
-
-            regex.lastIndex = 0;
-
-            // Only add non-empty pieces
-            for (const text of pieces) {
-              if (text !== "") {
-                newSpans.push({ text });
-              }
-            }
-
-            // Fallback: if substitution produced no visible text, preserve the original
-            if (pieces.length === 0) {
-              newSpans.push(span);
+          // helper: push original range [start, end) keeping styles
+          function pushOriginalRange(start, end) {
+            let p = start;
+            while (p < end) {
+              const i = findSpanIndexAt(p);
+              const spanStart = offsets[i];
+              const spanEnd = spanStart + (spans[i].text ?? "").length;
+              const overlapStart = Math.max(p, spanStart);
+              const overlapEnd = Math.min(end, spanEnd);
+              const sliceStart = overlapStart - spanStart;
+              const textSlice = (spans[i].text ?? "").slice(
+                sliceStart,
+                sliceStart + (overlapEnd - overlapStart)
+              );
+              newSpans.push({ ...spans[i], text: textSlice });
+              p = overlapEnd;
             }
           }
 
-          return { ...block, spans: newSpans };
+          // walk through matches and untouched ranges
+          let cursor = 0;
+          for (const match of matches) {
+            if (match.start > cursor) {
+              pushOriginalRange(cursor, match.start);
+            }
+
+            if (match.replacement !== null) {
+              // replacement uses leftmost style
+              const leftSpanIndex = findSpanIndexAt(match.start);
+              newSpans.push({
+                ...spans[leftSpanIndex],
+                text: match.replacement,
+              });
+            } else {
+              // keep original placeholder text
+              pushOriginalRange(match.start, match.end);
+            }
+
+            cursor = match.end;
+          }
+          if (cursor < blockText.length) {
+            pushOriginalRange(cursor, blockText.length);
+          }
+
+          // merge adjacent spans with identical style
+          function sameStyle(a, b) {
+            const aKeys = Object.keys(a)
+              .filter((k) => k !== "text")
+              .sort();
+            const bKeys = Object.keys(b)
+              .filter((k) => k !== "text")
+              .sort();
+            if (aKeys.length !== bKeys.length) return false;
+            for (let i = 0; i < aKeys.length; i++) {
+              if (aKeys[i] !== bKeys[i]) return false;
+              if (JSON.stringify(a[aKeys[i]]) !== JSON.stringify(b[bKeys[i]]))
+                return false;
+            }
+            return true;
+          }
+
+          const merged = [];
+          for (const s of newSpans) {
+            if (merged.length > 0 && sameStyle(merged[merged.length - 1], s)) {
+              merged[merged.length - 1].text += s.text;
+            } else {
+              merged.push(s);
+            }
+          }
+
+          return { ...block, spans: merged };
         });
 
         return [
