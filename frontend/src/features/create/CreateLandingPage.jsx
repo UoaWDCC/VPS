@@ -19,13 +19,14 @@ export default function CreateLandingPage() {
     currentScenario,
     setCurrentScenario,
   } = useContext(ScenarioContext);
-  const { getUserIdToken, VpsUser } = useContext(AuthenticationContext);
+  const { getUserIdToken, VpsUser, signOut } = useContext(AuthenticationContext);
   const history = useHistory();
 
   const [search, setSearch] = useState("");
   const [contextMenuPosition, setContextMenuPosition] = useState(null);
   const [showCreateModal, setShowCreateModal] = useState(false);
-  const [selectingForDashboard, setSelectingForDashboard] = useState(false);
+  const [showDashboardModal, setShowDashboardModal] = useState(false);
+  const [dashboardSearch, setDashboardSearch] = useState("");
 
   useEffect(() => {
     reFetch();
@@ -33,6 +34,10 @@ export default function CreateLandingPage() {
 
   const filteredScenarios = (userScenarios || []).filter((scenario) =>
     scenario.name.toLowerCase().includes(search.toLowerCase())
+  );
+
+  const filteredDashboardScenarios = (userScenarios || []).filter((scenario) =>
+    scenario.name.toLowerCase().includes(dashboardSearch.toLowerCase())
   );
 
   const handleContextMenu = (event, scenario) => {
@@ -61,8 +66,24 @@ export default function CreateLandingPage() {
     }
   };
 
-  const openDashboard = () => {
-     setSelectingForDashboard(true);
+  const openDashboardModal = () => {
+    setShowDashboardModal(true);
+    setDashboardSearch(""); // Reset search in modal
+  };
+
+  const selectDashboardScenario = (scenario) => {
+    setCurrentScenario(scenario); // Set the current scenario in the context
+    history.push(`/dashboard/${scenario._id}`);
+    setShowDashboardModal(false);
+  };
+
+  // Add the logout function
+  const handleLogout = async () => {
+    try {
+      await signOut();
+    } catch (error) {
+      console.error("Logout failed:", error);
+    }
   };
 
   return (
@@ -70,7 +91,8 @@ export default function CreateLandingPage() {
       {/* Top Nav */}
       <div className="top-nav-bar">
         <div className="nav-left">
-          <button className="logout-btn" onClick={() => history.push("/")}>
+          {/* Updated logout button with handleLogout */}
+          <button className="logout-btn" onClick={handleLogout}>
             <svg
               className="logout-icon"
               xmlns="http://www.w3.org/2000/svg"
@@ -89,7 +111,7 @@ export default function CreateLandingPage() {
             Play
           </button>
           <button className="nav-btn nav-btn-active">Create & Edit</button>
-          <button className="nav-btn" onClick={openDashboard}>
+          <button className="nav-btn" onClick={openDashboardModal}>
             Dashboard
           </button>
         </div>
@@ -146,17 +168,8 @@ export default function CreateLandingPage() {
           {filteredScenarios.map((scenario) => (
             <div
               key={scenario._id}
-              className={`scenario-card ${
-                selectingForDashboard ? "selectable-card" : ""
-              }`}
-              onClick={() => {
-                if (selectingForDashboard) {
-                  history.push(`/dashboard/${currentScenario._id}`);
-                  setSelectingForDashboard(false);
-                } else {
-                  history.push(`/scenario/${scenario._id}`);
-                }
-              }}
+              className="scenario-card"
+              onClick={() => history.push(`/scenario/${scenario._id}`)}
               onContextMenu={(e) => handleContextMenu(e, scenario)}
             >
               <div className="scenario-card-thumbnail">
@@ -185,7 +198,7 @@ export default function CreateLandingPage() {
           Delete
         </MenuItem>
         {VpsUser?.role === AccessLevel.STAFF && (
-          <MenuItem onClick={openDashboard} disabled={!currentScenario}>
+          <MenuItem onClick={openDashboardModal} disabled={!currentScenario}>
             Dashboard
           </MenuItem>
         )}
@@ -215,10 +228,40 @@ export default function CreateLandingPage() {
         />
       )}
 
-      {/* Dashboard Selection Message */}
-      {selectingForDashboard && (
-        <div className="dashboard-selection-message">
-          Select a scenario to open the Dashboard
+      {showDashboardModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-black-800 p-8 rounded-lg max-w-7xl w-full h-4/5 overflow-y-auto relative animate-slide-up">
+            <button
+              className="btn btn-sm btn-square absolute right-2 top-2 text-white"
+              onClick={() => setShowDashboardModal(false)}
+            >
+              ✕
+            </button>
+            <h2 className="text-2xl font mb-4 text-white">Select Scenario for Dashboard</h2>
+            <div className="form-control mb-4">
+              <input
+                type="text"
+                placeholder="Search scenario"
+                className="input input-bordered w-full bg-black text-white"
+                value={dashboardSearch}
+                onChange={(e) => setDashboardSearch(e.target.value)}
+              />
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {filteredDashboardScenarios.map((scenario) => (
+                <div
+                  key={scenario._id}
+                  className="card bg-black-700 shadow-xl cursor-pointer hover:bg-gray-800 transition-colors"
+                  onClick={() => selectDashboardScenario(scenario)}
+                >
+                  <div className="card-body">
+                    <Thumbnail components={scenario.thumbnail?.components || []} />
+                    <h3 className="card-title text-white">{scenario.name}</h3>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
       )}
     </div>
