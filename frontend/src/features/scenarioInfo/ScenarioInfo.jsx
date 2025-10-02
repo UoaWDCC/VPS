@@ -64,7 +64,7 @@ function ScenarioInfo() {
 
         {/* Search Container - Positioned above the list */}
         <div className="bg-transparent p-[2vh_2.5%] absolute top-[20vh] left-0 right-0 z-10 flex-shrink-0">
-          <label className="bg-transparent gap-[1vw] pl-[2vw] flex items-center flex-row-reverse">
+          <label className="bg-transparent gap-[1vw] pl-[2vw] flex items-center flex-row-reverse mr-15">
                         <svg
               className="h-[var(--text-m)] w-[var(--text-m)] opacity-50 flex-shrink-0 stroke-current"
               xmlns="http://www.w3.org/2000/svg"
