@@ -50,9 +50,7 @@ function ScenarioInfo() {
       {/* Back Button */}
       <button
         className="absolute z-50 bg-transparent border-none text-primary cursor-pointer hover:text-base-content transition-colors p-[var(--spacing-s)] top-[var(--spacing-l)] left-[var(--spacing-l)] font-[family-name:var(--font-dm)] text-[length:var(--text-s)]"
-        onClick={
-          selectedScenario ? () => setSelectedScenario(null) : handleBackToPlay
-        }
+        onClick={handleBackToPlay}
       >
         ← Back
       </button>
@@ -64,7 +62,7 @@ function ScenarioInfo() {
 
         {/* Search Container - Positioned above the list */}
         <div className="bg-transparent p-[2vh_2.5%] absolute top-[20vh] left-0 right-0 z-10 flex-shrink-0">
-          <label className="bg-transparent gap-[1vw] pl-[2vw] flex items-center flex-row-reverse mr-15">
+          <label className="bg-transparent gap-[1vw] pl-[3vw] flex items-center flex-row-reverse mr-10">
                         <svg
               className="h-[var(--text-m)] w-[var(--text-m)] opacity-50 flex-shrink-0 stroke-current"
               xmlns="http://www.w3.org/2000/svg"
@@ -145,8 +143,8 @@ function ScenarioInfo() {
             {/* Scenario Content */}
             <div className="flex-1 flex flex-col items-start p-[0_4vw_4vh_8vw]">
               {/* Scenario Thumbnail */}
-              <div className="w-full max-w-[45vw] max-h-[30vh] mb-[4vh]">
-                <div className="w-full h-[40vh] bg-white border border-gray-600 rounded-lg overflow-hidden flex items-center justify-center">
+              <div className="w-full max-w-[45vw] mb-[4vh]">
+                <div className="w-full aspect-video bg-white border border-gray-600 rounded-lg overflow-hidden flex items-center justify-center">
                   <Thumbnail
                     components={selectedScenario.thumbnail?.components || []}
                   />
@@ -154,11 +152,11 @@ function ScenarioInfo() {
               </div>
 
               {/* Scenario Description */}
-              <div className="w-full max-w-[45vw] pt-[8vh]">
-                <h3 className="text-[length:var(--text-m)] font-medium text-base-content text-left mb-[1vh] font-[family-name:var(--font-dm)]">
+              <div className="w-full max-w-[45vw] pt-[0.5vh]">
+                <h3 className="text-[length:var(--text-m)] text-base-content text-left mb-[1vh] font-[family-name:var(--font-dm)]">
                   Description
                 </h3>
-                <div className="flex items-center gap-[3vw]">
+                <div className="flex items-center gap-[2vw]">
                   <p className="text-[length:var(--text-s)] leading-relaxed text-base-content/80 text-left flex-1 font-[family-name:var(--font-ibm)]">
                     Testing scenario - This is a sample scenario for testing the
                     VPS application functionality.
