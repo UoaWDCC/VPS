@@ -7,14 +7,14 @@
   background-color: black;
   padding: 1rem 2rem;
   display: flex;
-  border-bottom: 2px solid; /* thickness */
+  border-bottom: 2px solid; 
   border-image: linear-gradient(
       to right,
       transparent 0%,
       rgba(255, 255, 255, 0.3) 50%,
       transparent 100%
     )
-    1; /* scale factor */
+    1; 
   z-index: 1000;
 }
 
@@ -85,7 +85,6 @@
   background: white;
 }
 
-/* Play Container */
 .play-container {
   background-color: black;
   min-height: 100vh;
