@@ -9,6 +9,7 @@ import { useDelete } from "../../hooks/crudHooks";
 import HorizontalGradientLine from "./components/HorizontalGradientLine";
 import Thumbnail from "../authoring/components/Thumbnail";
 import "./PlayLandingPage.css";
+import TopNavBar from "../../features/TopNavBar/TopNavBar";
 
 export default function PlayLandingPage() {
   const {
@@ -102,40 +103,18 @@ export default function PlayLandingPage() {
   };
 
   return (
-    <div className="play-container" data-theme="dark">
-      {/* Top Navigation Bar */}
-      <div className="top-nav-bar">
-        <div className="nav-left">
-          {/* Update the logout button to use handleLogout */}
-          <button className="logout-btn" onClick={handleLogout}>
-            <svg
-              className="logout-icon"
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 24 24"
-            >
-              <path
-                fill="currentColor"
-                d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.59L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"
-              />
-            </svg>
-            <span>Logout</span>
-          </button>
-        </div>
-        <div className="nav-right">
-          <button className="nav-btn nav-btn-active">Play</button>
-          <button className="nav-btn" onClick={handleCreate}>
-            Create & Edit 
-          </button>
-          <button className="nav-btn" onClick={openDashboardModal}>
-            Dashboard
-          </button>
-        </div>
-      </div>
+<div className="play-container" data-theme="dark">
+<TopNavBar 
+  onLogout={handleLogout}
+  onOpenDashboard={openDashboardModal}
+  onCreate={handleCreate}  // pass the handleCreate function
+  activeTab="play"
+/>
 
-      {/* Header */}
-      <div className="play-header">
-        <h1 className="play-title">Play</h1>
-      </div>
+  {/* Header */}
+  <div className="play-header">
+    <h1 className="play-title">Play</h1>
+  </div>
 
       {/* Search Section */}
       <div className="search-section">

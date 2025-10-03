@@ -9,6 +9,7 @@ import { useDelete, usePost } from "../../hooks/crudHooks";
 import HorizontalGradientLine from "../create/components/HorizontalGradientLine";
 import Thumbnail from "../authoring/components/Thumbnail";
 import CreateScenarioCard from "../../components/CreateScenarioCard/CreateScenarioCard"; 
+import TopNavBar from "../../features/TopNavBar/TopNavBar";
 import "../playScenario/PlayLandingPage.css"; 
 import "./CreateLandingPage.css"; 
 
@@ -88,36 +89,14 @@ export default function CreateLandingPage() {
 
   return (
     <div className="play-container" data-theme="dark">
-      {/* Top Nav */}
-      <div className="top-nav-bar">
-        <div className="nav-left">
-          {/* Updated logout button with handleLogout */}
-          <button className="logout-btn" onClick={handleLogout}>
-            <svg
-              className="logout-icon"
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 24 24"
-            >
-              <path
-                fill="currentColor"
-                d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.59L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"
-              />
-            </svg>
-            <span>Logout</span>
-          </button>
-        </div>
-        <div className="nav-right">
-          <button className="nav-btn" onClick={() => history.push("/play")}>
-            Play
-          </button>
-          <button className="nav-btn nav-btn-active">Create & Edit</button>
-          <button className="nav-btn" onClick={openDashboardModal}>
-            Dashboard
-          </button>
-        </div>
-      </div>
+      {/* Top Nav - Using extracted component */}
+      <TopNavBar 
+        onLogout={handleLogout}
+        onOpenDashboard={openDashboardModal}
+        activeTab="create"
+      />
 
-      {/* Create Section */}
+      {/* Rest of your component remains the same */}
       <div className="section-block">
         <h2 className="section-header">Create</h2>
         <div className="scenarios-grid">
@@ -228,65 +207,66 @@ export default function CreateLandingPage() {
         />
       )}
 
-{showDashboardModal && (
-  <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-    <div className="bg-black-800 p-8 rounded-lg max-w-7xl w-full h-4/5 overflow-y-auto relative animate-slide-up">
-      <button
-        className="btn btn-sm btn-square absolute right-2 top-2 text-white"
-        onClick={() => setShowDashboardModal(false)}
-      >
-        ✕
-      </button>
-      <h2 className="text-2xl font mb-4 text-white">Select Scenario for Dashboard</h2>
-      <div className="search-section mb-4">
-        <div className="search-container-play">
-          <label className="search-input-wrapper-play">
-            <svg
-              className="search-icon-play"
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 24 24"
+      {/* Dashboard Modal */}
+      {showDashboardModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-black-800 p-8 rounded-lg max-w-7xl w-full h-4/5 overflow-y-auto relative animate-slide-up">
+            <button
+              className="btn btn-sm btn-square absolute right-2 top-2 text-white"
+              onClick={() => setShowDashboardModal(false)}
             >
-              <g
-                strokeLinejoin="round"
-                strokeLinecap="round"
-                strokeWidth="2.5"
-                fill="none"
-                stroke="currentColor"
-              >
-                <circle cx="11" cy="11" r="8"></circle>
-                <path d="m21 21-4.3-4.3"></path>
-              </g>
-            </svg>
-            <input
-              type="search"
-              placeholder="Search scenario"
-              value={dashboardSearch}
-              onChange={(e) => setDashboardSearch(e.target.value)}
-              className="search-input-play"
-              required
-            />
-          </label>
-        </div>
-      </div>
-      <div className="scenarios-grid">
-        {filteredDashboardScenarios.map((scenario) => (
-          <div
-            key={scenario._id}
-            className="scenario-card"
-            onClick={() => selectDashboardScenario(scenario)}
-          >
-            <div className="scenario-card-thumbnail">
-              <Thumbnail components={scenario.thumbnail?.components || []} />
+              ✕
+            </button>
+            <h2 className="text-2xl font mb-4 text-white">Select Scenario for Dashboard</h2>
+            <div className="search-section mb-4">
+              <div className="search-container-play">
+                <label className="search-input-wrapper-play">
+                  <svg
+                    className="search-icon-play"
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 24 24"
+                  >
+                    <g
+                      strokeLinejoin="round"
+                      strokeLinecap="round"
+                      strokeWidth="2.5"
+                      fill="none"
+                      stroke="currentColor"
+                    >
+                      <circle cx="11" cy="11" r="8"></circle>
+                      <path d="m21 21-4.3-4.3"></path>
+                    </g>
+                  </svg>
+                  <input
+                    type="search"
+                    placeholder="Search scenario"
+                    value={dashboardSearch}
+                    onChange={(e) => setDashboardSearch(e.target.value)}
+                    className="search-input-play"
+                    required
+                  />
+                </label>
+              </div>
             </div>
-            <div className="scenario-card-name">
-              <h3 className="scenario-name-text">{scenario.name}</h3>
+            <div className="scenarios-grid">
+              {filteredDashboardScenarios.map((scenario) => (
+                <div
+                  key={scenario._id}
+                  className="scenario-card"
+                  onClick={() => selectDashboardScenario(scenario)}
+                >
+                  <div className="scenario-card-thumbnail">
+                    <Thumbnail components={scenario.thumbnail?.components || []} />
+                  </div>
+                  <div className="scenario-card-name">
+                    <h3 className="scenario-name-text">{scenario.name}</h3>
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
-        ))}
-      </div>
-    </div>
-  </div>
-)}
+        </div>
+      )}
     </div>
   );
 }
