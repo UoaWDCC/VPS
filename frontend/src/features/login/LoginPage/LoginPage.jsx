@@ -67,10 +67,8 @@ export default function LoginPage() {
               <div>
                 over many years at{" "}
                 <a
-                  className="underline decoration-1 underline-offset-2 hover:text-secondary"
-                  href="https://wdcc.co.nz/"
-                  target="_blank"
-                  rel="noreferrer"
+                  className="underline decoration-1 underline-offset-2 hover:text-white"
+                  href="/aboutus"
                 >
                   WDCC
                 </a>

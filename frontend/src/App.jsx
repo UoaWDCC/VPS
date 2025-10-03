@@ -94,11 +94,7 @@ export default function App() {
                   </ScenarioContextProvider>
                 </ProtectedRoute>
 
-                <ProtectedRoute path="/aboutus">
-                  <ScenarioContextProvider>
-                    <AboutUsPage />
-                  </ScenarioContextProvider>
-                </ProtectedRoute>
+                <Route path="/aboutus" component={AboutUsPage} />
 
                 <ProtectedRoute path="/play-page">
                   <ScenarioContextProvider>
