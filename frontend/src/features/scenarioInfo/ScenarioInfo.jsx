@@ -15,7 +15,7 @@ function ScenarioInfo() {
   const { VpsUser } = useContext(AuthenticationContext);
 
   const scenarios = scenarioContext?.scenarios || [];
-  const username = VpsUser.firebaseUserObj.displayName ||  "User";
+  const username = VpsUser.firebaseUserObj.displayName || "User";
 
   // Get scenario ID from URL and set that as the selected scenario
   useEffect(() => {
@@ -23,7 +23,7 @@ function ScenarioInfo() {
     const scenarioId = searchParams.get("id");
 
     if (scenarioId && scenarios.length > 0) {
-      const scenario = scenarios.find((s) => s. _id === scenarioId);
+      const scenario = scenarios.find((s) => s._id === scenarioId);
       if (scenario) {
         setSelectedScenario(scenario);
       }
@@ -48,7 +48,10 @@ function ScenarioInfo() {
   };
 
   return (
-    <div className="bg-base-100 text-base-content flex h-screen relative" data-theme="vps-dark">
+    <div
+      className="bg-base-100 text-base-content flex h-screen relative"
+      data-theme="vps-dark"
+    >
       {/* Back Button */}
       <button
         className="absolute z-50 bg-transparent border-none text-primary cursor-pointer hover:text-base-content transition-colors p-[var(--spacing-s)] top-[var(--spacing-l)] left-[var(--spacing-l)] font-[family-name:var(--font-dm)] text-[length:var(--text-s)]"
@@ -65,7 +68,7 @@ function ScenarioInfo() {
         {/* Search Container - Positioned above the list */}
         <div className="bg-transparent p-[2vh_2.5%] absolute top-[20vh] left-0 right-0 z-10 flex-shrink-0">
           <label className="bg-transparent gap-[1vw] pl-[3vw] flex items-center flex-row-reverse mr-10">
-                        <svg
+            <svg
               className="h-[var(--text-m)] w-[var(--text-m)] opacity-50 flex-shrink-0 stroke-current"
               xmlns="http://www.w3.org/2000/svg"
               viewBox="0 0 24 24"
@@ -98,8 +101,8 @@ function ScenarioInfo() {
             <div
               key={scenario._id}
               className={`p-[2%_3%] my-[1px] rounded-[3px] cursor-pointer transition-colors text-[length:var(--text-s)] font-[family-name:var(--font-dm)] ${
-                scenario._id === selectedScenario?._id 
-                  ? "text-base-content bg-primary/10" 
+                scenario._id === selectedScenario?._id
+                  ? "text-base-content bg-primary/10"
                   : "text-primary hover:bg-primary/5 hover:text-base-content"
               }`}
               onClick={() => handleScenarioSelect(scenario)}
@@ -128,16 +131,28 @@ function ScenarioInfo() {
               {/* Scenario Meta */}
               <div className="flex justify-start gap-[4vw]">
                 <div className="flex flex-col items-start">
-                  <span className="text-[length:var(--text--1)] text-base-content/60 mb-[1vh] font-[family-name:var(--font-ibm)]">Created By</span>
-                  <span className="text-[length:var(--text-s)] text-base-content font-[family-name:var(--font-dm)]">{username}</span>
+                  <span className="text-[length:var(--text--1)] text-base-content/60 mb-[1vh] font-[family-name:var(--font-ibm)]">
+                    Created By
+                  </span>
+                  <span className="text-[length:var(--text-s)] text-base-content font-[family-name:var(--font-dm)]">
+                    {username}
+                  </span>
                 </div>
                 <div className="flex flex-col items-start">
-                  <span className="text-[length:var(--text--1)] text-base-content/60 mb-[1vh] font-[family-name:var(--font-ibm)]">Mode</span>
-                  <span className="text-[length:var(--text-s)] text-base-content font-[family-name:var(--font-dm)]">Multiplayer</span>
+                  <span className="text-[length:var(--text--1)] text-base-content/60 mb-[1vh] font-[family-name:var(--font-ibm)]">
+                    Mode
+                  </span>
+                  <span className="text-[length:var(--text-s)] text-base-content font-[family-name:var(--font-dm)]">
+                    Multiplayer
+                  </span>
                 </div>
                 <div className="flex flex-col items-start">
-                  <span className="text-[length:var(--text--1)] text-base-content/60 mb-[1vh] font-[family-name:var(--font-ibm)]">Time Limit</span>
-                  <span className="text-[length:var(--text-s)] text-base-content font-[family-name:var(--font-dm)]">--</span>
+                  <span className="text-[length:var(--text--1)] text-base-content/60 mb-[1vh] font-[family-name:var(--font-ibm)]">
+                    Estimated Time
+                  </span>
+                  <span className="text-[length:var(--text-s)] text-base-content font-[family-name:var(--font-dm)]">
+                    --
+                  </span>
                 </div>
               </div>
             </div>
