@@ -4,6 +4,7 @@ import EditingTooltips from "./EditingTooltips";
 import StateOperationForm from "./StateOperationForm";
 import ScenarioContext from "../../context/ScenarioContext";
 import SceneContext from "../../context/SceneContext";
+import { modifyComponentProp } from "../../features/authoring/scene/operations/component";
 
 /**
  * Component used for editing state operations
@@ -13,14 +14,13 @@ import SceneContext from "../../context/SceneContext";
  */
 const EditStateOperation = ({ component, operationIndex, stateOperation }) => {
   const { stateVariables } = useContext(ScenarioContext);
-  const { updateComponentProperty } = useContext(SceneContext);
 
   // Define deleteStateOperation function early so it can be used in error handling
   const deleteStateOperation = () => {
     const newStateOperations = component.stateOperations.filter(
       (_, index) => index !== operationIndex
     );
-    updateComponentProperty(
+    modifyComponentProp(
       component.id,
       "stateOperations",
       newStateOperations
@@ -92,7 +92,7 @@ const EditStateOperation = ({ component, operationIndex, stateOperation }) => {
           ? { ...operation, operation: newOperation, value: newValue }
           : operation
     );
-    updateComponentProperty(
+    modifyComponentProp(
       component.id,
       "stateOperations",
       newStateOperations
