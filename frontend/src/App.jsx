@@ -15,6 +15,7 @@ import ScenarioInfo from "./features/scenarioInfo/ScenarioInfo";
 import PlayPage from "./features/play/PlayPage";
 
 import Dashboard from "./features/dashboard/Dashboard";
+import AboutUsPage from "./features/aboutUs/AboutUsPage";
 
 import { ScenePage } from "./features/sceneSelection/SceneSelectionPage";
 import theme from "./theme/App.theme";
@@ -77,6 +78,12 @@ export default function App() {
                   <SceneContextProvider>
                     <Dashboard />
                   </SceneContextProvider>
+                </ScenarioContextProvider>
+              </ProtectedRoute>
+
+              <ProtectedRoute path="/aboutus">
+                <ScenarioContextProvider>
+                  <AboutUsPage />
                 </ScenarioContextProvider>
               </ProtectedRoute>
 
