@@ -12,6 +12,7 @@ import AddCircleOutlineRoundedIcon from "@mui/icons-material/AddCircleOutlineRou
 import EditRoundedIcon from "@mui/icons-material/EditRounded";
 import LogoutIcon from "@mui/icons-material/Logout";
 import PlayArrowRoundedIcon from "@mui/icons-material/PlayArrowRounded";
+import GroupIcon from "@mui/icons-material/Group";
 
 /**
  * Component used for navigation and executing actions located at the left side of the screen.
@@ -156,6 +157,17 @@ export default function SideBar() {
             </li>
             <li>
               <HelpButton isSidebar />
+            </li>
+            <li>
+              <button
+                className="btn btn-outline btn-primary w-full cursor-pointer gap-2"
+                onClick={() => {
+                  history.push(`/aboutus`);
+                }}
+              >
+                <GroupIcon />
+                About Us
+              </button>
             </li>
           </ul>
         </div>
