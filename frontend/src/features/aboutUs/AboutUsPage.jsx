@@ -1,13 +1,29 @@
-import SideBar from "../../components/SideBar/SideBar";
+import { useHistory } from "react-router-dom";
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 
 const AboutUsPage = () => {
+  const history = useHistory();
   return (
     <div className="flex h-screen w-screen overflow-x-hidden">
-      <SideBar />
-      <div className="flex-1 p-8 overflow-y-auto bg-black">
-        <h1 className="text-3xl font-bold mb-8 text-center font-mono">
-          About Us
-        </h1>
+      <div className="flex-1 p-8 overflow-y-auto bg-black relative">
+        <div className="flex items-center w-full mb-8 justify-between">
+          <button
+            className="bg-white text-black px-4 py-2 rounded hover:bg-grey font-mono transition-all border border-gray-300 flex items-center gap-2"
+            onClick={() => history.goBack()}
+          >
+            <ArrowBackIcon fontSize="small" />
+            Back
+          </button>
+          <h1 className="text-3xl font-bold font-mono text-center flex-1 text-center">
+            About Us
+          </h1>
+          <div className="invisible">
+            <button className="px-4 py-2 rounded border border-gray-300 flex items-center gap-2">
+              <ArrowBackIcon fontSize="small" />
+              Back
+            </button>
+          </div>
+        </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
           {contributors.map((contributor) => (
             <div
@@ -17,7 +33,7 @@ const AboutUsPage = () => {
               <img
                 src={contributor.avatar_url}
                 alt={contributor.name}
-                className="rounded-full w-24 h-24 object-cover mb-4 border-2 border-uoa-blue"
+                className="rounded-full w-24 h-24 object-cover mb-4 border-2"
                 onError={(e) => {
                   e.target.onerror = null;
                   e.target.src = "/uoa-logo.png";
