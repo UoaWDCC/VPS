@@ -4,6 +4,7 @@ import DiamondPlayButton from "./components/DiamondPlayButton";
 import GradientLine from "./components/GradientLine";
 import Thumbnail from "../authoring/components/Thumbnail";
 import ScenarioContext from "../../context/ScenarioContext";
+import AuthenticationContext from "../../context/AuthenticationContext";
 
 function ScenarioInfo() {
   const [selectedScenario, setSelectedScenario] = useState(null);
@@ -11,17 +12,18 @@ function ScenarioInfo() {
   const history = useHistory();
   const location = useLocation();
   const scenarioContext = useContext(ScenarioContext);
+  const { VpsUser } = useContext(AuthenticationContext);
 
   const scenarios = scenarioContext?.scenarios || [];
-  const username = "Admin";
+  const username = VpsUser.firebaseUserObj.displayName ||  "User";
 
-  // Get scenario ID from URL parameters
+  // Get scenario ID from URL and set that as the selected scenario
   useEffect(() => {
     const searchParams = new URLSearchParams(location.search);
     const scenarioId = searchParams.get("id");
 
     if (scenarioId && scenarios.length > 0) {
-      const scenario = scenarios.find((s) => s._id === scenarioId);
+      const scenario = scenarios.find((s) => s. _id === scenarioId);
       if (scenario) {
         setSelectedScenario(scenario);
       }
@@ -38,7 +40,7 @@ function ScenarioInfo() {
   };
 
   const handlePlayScenario = (scenario) => {
-    console.log("Starting scenario:", scenario.name);
+    history.push(`/play/${scenario._id}`, "_blank");
   };
 
   const handleBackToPlay = () => {
