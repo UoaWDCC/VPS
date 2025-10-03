@@ -229,62 +229,64 @@ export default function CreateLandingPage() {
       )}
 
 {showDashboardModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-black-800 p-8 rounded-lg max-w-7xl w-full h-4/5 overflow-y-auto relative animate-slide-up">
-            <button
-              className="btn btn-sm btn-square absolute right-2 top-2 text-white"
-              onClick={() => setShowDashboardModal(false)}
+  <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div className="bg-black-800 p-8 rounded-lg max-w-7xl w-full h-4/5 overflow-y-auto relative animate-slide-up">
+      <button
+        className="btn btn-sm btn-square absolute right-2 top-2 text-white"
+        onClick={() => setShowDashboardModal(false)}
+      >
+        ✕
+      </button>
+      <h2 className="text-2xl font mb-4 text-white">Select Scenario for Dashboard</h2>
+      <div className="search-section mb-4">
+        <div className="search-container-play">
+          <label className="search-input-wrapper-play">
+            <svg
+              className="search-icon-play"
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
             >
-              ✕
-            </button>
-            <h2 className="text-2xl font mb-4 text-white">Select Scenario for Dashboard</h2>
-            <div className="search-section mb-4">
-              <div className="search-container-play">
-                <label className="search-input-wrapper-play">
-                  <svg
-                    className="search-icon-play"
-                    xmlns="http://www.w3.org/2000/svg"
-                    viewBox="0 0 24 24"
-                  >
-                    <g
-                      strokeLinejoin="round"
-                      strokeLinecap="round"
-                      strokeWidth="2.5"
-                      fill="none"
-                      stroke="currentColor"
-                    >
-                      <circle cx="11" cy="11" r="8"></circle>
-                      <path d="m21 21-4.3-4.3"></path>
-                    </g>
-                  </svg>
-                  <input
-                    type="search"
-                    placeholder="Search scenario"
-                    value={dashboardSearch}
-                    onChange={(e) => setDashboardSearch(e.target.value)}
-                    className="search-input-play"
-                    required
-                  />
-                </label>
-              </div>
+              <g
+                strokeLinejoin="round"
+                strokeLinecap="round"
+                strokeWidth="2.5"
+                fill="none"
+                stroke="currentColor"
+              >
+                <circle cx="11" cy="11" r="8"></circle>
+                <path d="m21 21-4.3-4.3"></path>
+              </g>
+            </svg>
+            <input
+              type="search"
+              placeholder="Search scenario"
+              value={dashboardSearch}
+              onChange={(e) => setDashboardSearch(e.target.value)}
+              className="search-input-play"
+              required
+            />
+          </label>
+        </div>
+      </div>
+      <div className="scenarios-grid">
+        {filteredDashboardScenarios.map((scenario) => (
+          <div
+            key={scenario._id}
+            className="scenario-card"
+            onClick={() => selectDashboardScenario(scenario)}
+          >
+            <div className="scenario-card-thumbnail">
+              <Thumbnail components={scenario.thumbnail?.components || []} />
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              {filteredDashboardScenarios.map((scenario) => (
-                <div
-                  key={scenario._id}
-                  className="card bg-black-700 shadow-xl cursor-pointer hover:bg-gray-800 transition-colors"
-                  onClick={() => selectDashboardScenario(scenario)}
-                >
-                  <div className="card-body">
-                    <Thumbnail components={scenario.thumbnail?.components || []} />
-                    <h3 className="card-title text-white">{scenario.name}</h3>
-                  </div>
-                </div>
-              ))}
+            <div className="scenario-card-name">
+              <h3 className="scenario-name-text">{scenario.name}</h3>
             </div>
           </div>
-        </div>
-      )}
+        ))}
+      </div>
+    </div>
+  </div>
+)}
     </div>
   );
 }
