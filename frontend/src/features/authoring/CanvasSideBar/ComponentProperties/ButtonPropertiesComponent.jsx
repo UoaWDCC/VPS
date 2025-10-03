@@ -25,7 +25,7 @@ const CustomInputLabel = CustomInputLabelStyles()(InputLabel);
  * @component
  */
 export default function ButtonPropertiesComponent({ component }) {
-  const { scenes, updateComponentProperty } = useContext(SceneContext);
+  const { scenes } = useContext(SceneContext);
 
   function saveLink(e) {
     modifyComponentProp(component.id, "nextScene", e.target.value)

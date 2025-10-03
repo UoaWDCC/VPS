@@ -22,7 +22,6 @@ import { modifyComponentProp } from "../../features/authoring/scene/operations/c
  */
 const CreateStateOperation = ({ component }) => {
   const { stateVariables } = useContext(ScenarioContext);
-  const { updateComponentProperty } = useContext(SceneContext);
 
   const [selectedState, setSelectedState] = useState("");
   const [operation, setOperation] = useState("");

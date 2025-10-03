@@ -104,7 +104,10 @@ export const createBlock = modify((id: string, cursor: ModelCursor) => {
   }
 
   // start of the block assumes document style
-  if (!oldSpans.length) oldSpans.push({ text: "", style: {} });
+  if (!oldSpans.length) {
+    const span = block.spans[cursor.spanI];
+    oldSpans.push({ text: "", style: span.style ? { ...span.style } : {} });
+  }
 
   block.spans = oldSpans;
   blocks.splice(cursor.blockI + 1, 0, { spans: newSpans, style: { ...block.style } });
@@ -273,7 +276,7 @@ function isolateSelection(id: string, sel: ModelSelection) {
   return { start, end };
 }
 
-function normaliseDocument(doc: ModelDocument, cursor: ModelCursor) {
+export function normaliseDocument(doc: ModelDocument, cursor: ModelCursor) {
   const newCursor = { ...cursor };
 
   if (!doc.blocks[0].spans.length) {
@@ -289,7 +292,7 @@ function normaliseDocument(doc: ModelDocument, cursor: ModelCursor) {
       const span = block.spans[s];
 
       // remove empty spans except for ones that are the only in a block
-      if (block.spans.length > 1 && span.text.length === 0) {
+      if (span.text.length === 0) {
         if (isCursorBlock && s < cursor.spanI) newCursor.spanI--;
         continue;
       };
@@ -309,6 +312,9 @@ function normaliseDocument(doc: ModelDocument, cursor: ModelCursor) {
       span.style = style;
       normdSpans.push(span);
     }
+
+    // if the block has no meaningful text, ensure that it keeps one empty span
+    if (normdSpans.length === 0) normdSpans.push(block.spans[0]);
 
     block.spans = normdSpans;
   }
