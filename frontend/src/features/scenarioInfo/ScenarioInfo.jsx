@@ -1,10 +1,10 @@
 import { useState, useEffect, useContext } from "react";
 import { useHistory, useLocation } from "react-router-dom";
-import "./scenarioInfo.css";
 import DiamondPlayButton from "./components/DiamondPlayButton";
 import GradientLine from "./components/GradientLine";
 import Thumbnail from "../authoring/components/Thumbnail";
 import ScenarioContext from "../../context/ScenarioContext";
+import AuthenticationContext from "../../context/AuthenticationContext";
 
 function ScenarioInfo() {
   const [selectedScenario, setSelectedScenario] = useState(null);
@@ -12,11 +12,12 @@ function ScenarioInfo() {
   const history = useHistory();
   const location = useLocation();
   const scenarioContext = useContext(ScenarioContext);
+  const { VpsUser } = useContext(AuthenticationContext);
 
   const scenarios = scenarioContext?.scenarios || [];
-  const username = "Admin";
+  const username = VpsUser.firebaseUserObj.displayName || "User";
 
-  // Get scenario ID from URL parameters
+  // Get scenario ID from URL and set that as the selected scenario
   useEffect(() => {
     const searchParams = new URLSearchParams(location.search);
     const scenarioId = searchParams.get("id");
@@ -39,7 +40,7 @@ function ScenarioInfo() {
   };
 
   const handlePlayScenario = (scenario) => {
-    console.log("Starting scenario:", scenario.name);
+    history.push(`/play/${scenario._id}`, "_blank");
   };
 
   const handleBackToPlay = () => {
@@ -47,27 +48,28 @@ function ScenarioInfo() {
   };
 
   return (
-    <div className="app-container" data-theme="dark">
+    <div
+      className="bg-base-100 text-base-content flex h-screen relative"
+      data-theme="vps-dark"
+    >
       {/* Back Button */}
       <button
-        className="back-button absolute bg-transparent border-none text-gray-500 cursor-pointer hover:text-white transition-colors"
-        onClick={
-          selectedScenario ? () => setSelectedScenario(null) : handleBackToPlay
-        }
+        className="absolute z-50 bg-transparent border-none text-primary cursor-pointer hover:text-base-content transition-colors p-[var(--spacing-s)] top-[var(--spacing-l)] left-[var(--spacing-l)] font-[family-name:var(--font-dm)] text-[length:var(--text-s)]"
+        onClick={handleBackToPlay}
       >
         ← Back
       </button>
 
       {/* Sidebar */}
-      <div className="sidebar flex flex-col">
+      <div className="w-[27%] bg-base-100 flex flex-col relative h-screen">
         {/* Spacer to push content down */}
-        <div className="sidebar-spacer"></div>
+        <div className="h-[35vh] flex-shrink-0"></div>
 
         {/* Search Container - Positioned above the list */}
-        <div className="search-container">
-          <label className="search-input-wrapper flex items-center">
+        <div className="bg-transparent p-[2vh_2.5%] absolute top-[20vh] left-0 right-0 z-10 flex-shrink-0">
+          <label className="bg-transparent gap-[1vw] pl-[3vw] flex items-center flex-row-reverse mr-10">
             <svg
-              className="search-icon"
+              className="h-[var(--text-m)] w-[var(--text-m)] opacity-50 flex-shrink-0 stroke-current"
               xmlns="http://www.w3.org/2000/svg"
               viewBox="0 0 24 24"
             >
@@ -87,18 +89,22 @@ function ScenarioInfo() {
               placeholder="Search scenario"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="search-input flex-1"
+              className="flex-1 bg-transparent border-none outline-none text-base-content text-[length:var(--text-s)] placeholder:text-primary/60 font-[family-name:var(--font-ibm)]"
               required
             />
           </label>
         </div>
 
         {/* Scenario List */}
-        <div className="scenario-list">
+        <div className="overflow-y-auto pl-[3vw] absolute top-[26vh] left-0 right-0 bottom-0 pr-[1vw]">
           {filteredScenarios.map((scenario) => (
             <div
               key={scenario._id}
-              className={`scenario-item ${scenario._id === selectedScenario?._id ? "selected" : ""}`}
+              className={`p-[2%_3%] my-[1px] rounded-[3px] cursor-pointer transition-colors text-[length:var(--text-s)] font-[family-name:var(--font-dm)] ${
+                scenario._id === selectedScenario?._id
+                  ? "text-base-content bg-primary/10"
+                  : "text-primary hover:bg-primary/5 hover:text-base-content"
+              }`}
               onClick={() => handleScenarioSelect(scenario)}
             >
               {scenario.name}
@@ -108,42 +114,54 @@ function ScenarioInfo() {
       </div>
 
       {/* Gradient Line */}
-      <div className="gradient-line-container">
+      <div className="relative">
         <GradientLine />
       </div>
 
       {/* Main Content */}
-      <div className="main-content flex-1 flex items-center justify-center">
+      <div className="flex-1 flex items-center justify-center">
         {selectedScenario ? (
-          <div className="scenario-detail w-full h-full flex flex-col overflow-y-auto">
+          <div className="w-full h-full flex flex-col overflow-y-auto">
             {/* Scenario Header */}
-            <div className="scenario-header text-left">
-              <h1 className="scenario-title text-white font-light">
+            <div className="text-left pb-[4vh] pl-[8vw] pt-[8vh] pr-[4vw]">
+              <h1 className="text-base-content font-light text-[length:var(--text-xl)] font-[family-name:var(--font-dm)] mb-[4vh]">
                 {selectedScenario.name}
               </h1>
 
               {/* Scenario Meta */}
-              <div className="scenario-meta flex justify-start">
-                <div className="meta-item flex flex-col items-start">
-                  <span className="meta-label text-white/60">Created By</span>
-                  <span className="meta-value text-white">{username}</span>
+              <div className="flex justify-start gap-[4vw]">
+                <div className="flex flex-col items-start">
+                  <span className="text-[length:var(--text--1)] text-base-content/60 mb-[1vh] font-[family-name:var(--font-ibm)]">
+                    Created By
+                  </span>
+                  <span className="text-[length:var(--text-s)] text-base-content font-[family-name:var(--font-dm)]">
+                    {username}
+                  </span>
                 </div>
-                <div className="meta-item flex flex-col items-start">
-                  <span className="meta-label text-white/60">Mode</span>
-                  <span className="meta-value text-white">Multiplayer</span>
+                <div className="flex flex-col items-start">
+                  <span className="text-[length:var(--text--1)] text-base-content/60 mb-[1vh] font-[family-name:var(--font-ibm)]">
+                    Mode
+                  </span>
+                  <span className="text-[length:var(--text-s)] text-base-content font-[family-name:var(--font-dm)]">
+                    Multiplayer
+                  </span>
                 </div>
-                <div className="meta-item flex flex-col items-start">
-                  <span className="meta-label text-white/60">Time Limit</span>
-                  <span className="meta-value text-white">--</span>
+                <div className="flex flex-col items-start">
+                  <span className="text-[length:var(--text--1)] text-base-content/60 mb-[1vh] font-[family-name:var(--font-ibm)]">
+                    Estimated Time
+                  </span>
+                  <span className="text-[length:var(--text-s)] text-base-content font-[family-name:var(--font-dm)]">
+                    --
+                  </span>
                 </div>
               </div>
             </div>
 
             {/* Scenario Content */}
-            <div className="scenario-content flex-1 flex flex-col items-start">
+            <div className="flex-1 flex flex-col items-start p-[0_4vw_4vh_8vw]">
               {/* Scenario Thumbnail */}
-              <div className="scenario-thumbnail-wrapper w-full">
-                <div className="scenario-thumbnail border border-gray-600 bg-white rounded-lg overflow-hidden">
+              <div className="w-full max-w-[45vw] mb-[4vh]">
+                <div className="w-full aspect-video bg-white border border-gray-600 rounded-lg overflow-hidden flex items-center justify-center">
                   <Thumbnail
                     components={selectedScenario.thumbnail?.components || []}
                   />
@@ -151,17 +169,17 @@ function ScenarioInfo() {
               </div>
 
               {/* Scenario Description */}
-              <div className="scenario-description">
-                <h3 className="description-title text-white font-medium text-left">
+              <div className="w-full max-w-[45vw] pt-[0.5vh]">
+                <h3 className="text-[length:var(--text-m)] text-base-content text-left mb-[1vh] font-[family-name:var(--font-dm)]">
                   Description
                 </h3>
-                <div className="description-content flex items-center">
-                  <p className="description-text text-white/80 text-left leading-relaxed flex-1">
+                <div className="flex items-center gap-[2vw]">
+                  <p className="text-[length:var(--text-s)] leading-relaxed text-base-content/80 text-left flex-1 font-[family-name:var(--font-ibm)]">
                     Testing scenario - This is a sample scenario for testing the
                     VPS application functionality.
                   </p>
 
-                  <div className="play-button-wrapper flex-shrink-0">
+                  <div className="flex-shrink-0">
                     <DiamondPlayButton
                       size={80}
                       onClick={() => handlePlayScenario(selectedScenario)}
@@ -172,11 +190,11 @@ function ScenarioInfo() {
             </div>
           </div>
         ) : (
-          <div className="welcome-message text-center text-white/60">
-            <h2 className="welcome-title text-white/80 font-medium">
+          <div className="text-center text-base-content/60">
+            <h2 className="text-[length:var(--text-4)] mb-[2vh] text-base-content/80 font-medium font-[family-name:var(--font-dm)]">
               Select a scenario to get started
             </h2>
-            <p className="welcome-text text-white/60">
+            <p className="text-[length:var(--text-m)] text-base-content/60 font-[family-name:var(--font-ibm)]">
               Choose from the medical scenarios on the left to view details and
               begin training.
             </p>
