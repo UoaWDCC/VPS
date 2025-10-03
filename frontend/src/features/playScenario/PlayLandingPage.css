@@ -129,9 +129,9 @@ h1.play-title {
   display: flex;
   align-items: center;
   flex-direction: row-reverse;
-  border: none !important; /* Explicitly remove all borders */
-  border-bottom: 1px solid #374151 !important; /* Underline only */
-  border-radius: 0 !important; /* Remove border radius */
+  border: none !important; 
+  border-bottom: 1px solid #374151 !important; 
+  border-radius: 0 !important;
 }
 
 .search-input-play {
@@ -141,6 +141,7 @@ h1.play-title {
   outline: none !important;
   color: white;
   font-size: clamp(12px, 1.2vw, 16px);
+  text-align: right;
 }
 
 .search-input-play:focus {
@@ -165,7 +166,6 @@ h1.play-title {
   fill: none;
 }
 
-/* Gradient Line */
 .gradient-line-container-play {
   padding-bottom: 4vh;
 }
@@ -193,11 +193,22 @@ h1.play-title {
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
+.create-thumbnail {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: transparent !important; /* 🔥 transparent box */
+  border: 2px dashed #9ca3af !important; /* subtle border to show it's clickable */
+  color: #9ca3af;
+  font-size: clamp(48px, 6vw, 96px);
+  font-weight: 300;
+  transition: all 0.2s ease;
+}
 
 /* Scenario Card Thumbnail */
 .scenario-card-thumbnail {
   width: 100%;
-  aspect-ratio: 1/1; /* Changed to square */
+  aspect-ratio: 16/9; /* Changed to 16:9 */
   background-color: white;
   border: 1px solid #374151;
   border-radius: none !important; /* edit */
@@ -291,5 +302,3 @@ h1.play-title {
   margin-bottom: 2vh;
   border-radius: 6px;
 }
-
-
