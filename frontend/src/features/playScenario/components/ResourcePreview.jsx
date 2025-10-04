@@ -63,6 +63,7 @@ export default function ResourcePreview({ file, getDownloadUrl }) {
   }
 
   const isImage = file.type?.startsWith("image/");
+  const isPDF = file.type === "application/pdf";
   const isText =
     file.type?.startsWith("text/") || /json|xml|csv/.test(file.type || "");
 
@@ -95,6 +96,14 @@ export default function ResourcePreview({ file, getDownloadUrl }) {
               src={url}
               alt={file.name}
               className="rounded-xl max-h-[60vh] object-contain mx-auto"
+            />
+          </div>
+        ) : isPDF && url ? (
+          <div className="w-full h-full">
+            <iframe
+              src={url}
+              title={file.name}
+              className="w-full h-full min-h-[60vh] rounded-xl border"
             />
           </div>
         ) : isText && url ? (
