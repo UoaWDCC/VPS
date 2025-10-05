@@ -1,13 +1,3 @@
-import {
-  InputLabel,
-  FormControl,
-  FormControlLabel,
-  Select,
-  Checkbox,
-  Typography,
-} from "@material-ui/core";
-import TextField from "@material-ui/core/TextField";
-import { withStyles } from "@material-ui/core/styles";
 import { useContext, useState, useEffect } from "react";
 import ScenarioContext from "context/ScenarioContext";
 import SceneContext from "context/SceneContext";
@@ -16,29 +6,10 @@ import {
   generateUniqueSceneName,
 } from "../../../utils/sceneUtils";
 
-import styles from "./CanvasSideBar.module.scss";
-import CustomInputLabelStyles from "./CustomPropertyInputStyles/CustomInputLabelStyles";
-import CustomCheckBoxStyles from "./CustomPropertyInputStyles/CustomCheckBoxStyles";
 import useVisualScene from "../stores/visual";
 import { modifyComponentProp } from "../scene/operations/component";
 import { modifySceneProp } from "../scene/operations/modifiers";
 import shallow from "zustand/shallow";
-
-const CustomInputLabel = CustomInputLabelStyles()(InputLabel);
-const CustomCheckBox = CustomCheckBoxStyles()(Checkbox);
-const CustomTextField = withStyles({
-  root: {
-    marginTop: "0.5em",
-    marginBottom: "1em",
-
-    "& label.Mui-focused": {
-      color: "#0080a7 ",
-    },
-    "& .MuiInput-underline:after": {
-      borderBottomColor: "0080a7",
-    },
-  },
-})(TextField);
 
 /**
  * This component displays the settings of a scene, such as the scene name
@@ -65,11 +36,13 @@ export default function SceneSettings() {
     if (!shallow(selected, selectedRoles)) setSelectedRoles(selected);
   }, [roleList, roles]);
 
-  function saveSceneRoles(roles) {
-    modifySceneProp("roles", roles);
+  function saveSceneRoles() {
+    modifySceneProp("roles", selectedRoles);
   }
 
-  function saveSceneName(name) {
+  function saveSceneName() {
+    const name = sceneName.trim();
+
     if (!name?.length) {
       alert("Scene name cannot be empty.");
       return;
@@ -91,62 +64,39 @@ export default function SceneSettings() {
     setSceneName(e.target.value);
   }
 
-  function toggleRole(role, val) {
-    if (val) setSelectedRoles(prev => [...prev, role]);
+  function changeRole(role, value) {
+    if (value) setSelectedRoles(prev => [...prev, role]);
     else setSelectedRoles(prev => prev.filter(r => r !== role))
   }
 
   return (
-    <>
-      <div className={styles.sceneSettingsContainer}>
-        <h1 className={styles.sideBarHeader}>Scene Settings</h1>
-        <div className={styles.sideBarBody}>
+    <div className="collapse overflow-visible collapse-arrow bg-base-300 rounded-sm text-s">
+      <input type="checkbox" />
+      <div className="collapse-title">Scene Details</div>
+      <div className="collapse-content text--1 bg-base-200">
+        <fieldset className="fieldset pt-2">
           {/* input for scene name */}
-          <CustomTextField
-            label="Scene Name"
-            value={sceneName}
-            fullWidth
-            onChange={changeSceneName}
-            onBlur={() => saveSceneName(sceneName.trim())}
-          />
+          <label className="label">Name</label>
+          <input type="text" value={sceneName} onChange={changeSceneName} onBlur={saveSceneName} className="input" placeholder="Awesome Scene" />
           {/* input for scene roles */}
-          <FormControl fullWidth className={styles.formControl}>
-            <CustomInputLabel>Scene Role(s)</CustomInputLabel>
-            <Select
-              className={styles.selectInput}
-              MenuProps={{
-                getContentAnchorEl: null,
-              }}
-              multiple
-              value={selectedRoles}
-              onBlur={() => saveSceneRoles(selectedRoles)}
-              renderValue={(selected) => selected.join(", ")}
-            >
-              {roleList?.length ? (
-                <div style={{ display: "flex", flexDirection: "column" }}>
-                  {roleList.map((role, index) => (
-                    <FormControlLabel
-                      control={
-                        <CustomCheckBox
-                          checked={selectedRoles?.includes(role)}
-                          onChange={(_, val) => toggleRole(role, val)}
-                        />
-                      }
-                      label={role}
-                      key={index}
-                    />
-                  ))}
-                </div>
-              ) : (
-                <Typography className={styles.menuItem}>
-                  This scenario currently does not accommodate roles. Please
-                  upload a CSV file first under Manage Groups.
-                </Typography>
-              )}
-            </Select>
-          </FormControl>
-        </div>
+          <label className="label">Roles</label>
+          <div className="dropdown" onBlur={saveSceneRoles}>
+            <div tabIndex={0} role="button" className="justify-start input mb-1 font-normal">
+              {selectedRoles?.join(", ") || "All"}
+            </div>
+            <ul tabIndex={0} className="dropdown-content menu bg-base-300 rounded-box z-1 w-52 p-2 shadow-sm">
+              {roleList?.map((role, i) => {
+                const active = selectedRoles.includes(role);
+                return (
+                  <li className={active ? "text-secondary" : "text-primary"} key={i}>
+                    <a onClick={() => changeRole(role, !active)}>{role}</a>
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
+        </fieldset>
       </div>
-    </>
+    </div>
   );
 }

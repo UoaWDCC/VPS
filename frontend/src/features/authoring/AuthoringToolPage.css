@@ -1,83 +1,20 @@
-body {
-  background-color: #222;
-}
-
-.actions {
-  display: flex;
-  gap: 6px;
-  padding: 5px;
-  color: white;
-  align-items: center;
-  margin-left: 20px;
-}
-
-.topbar {
-  background-color: #151515;
-  width: 100%;
-  z-index: 1;
-}
-
-.props {
-  display: flex;
-  padding: 5px;
-  flex-wrap: wrap;
-  gap: 6px;
-  color: white;
-  align-items: center;
-  margin-left: 20px;
-}
-
-.props > div {
-  display: flex;
-  color: white;
-  align-items: center;
-}
-
-.button {
-  position: relative;
-  width: 28px;
-  height: 28px;
-  border-radius: 5px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.button:hover {
-  background-color: #0f0f0f;
-}
-
-.text-input {
-  background-color: #000;
-  border-radius: 5px;
-  padding: 0 10px;
-  height: 28px;
-}
-
-.color-input {
-  position: relative;
-  width: 18px;
-  height: 18px;
-  border-bottom: 3px solid white;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.color-input span {
-  font-size: 14px;
-}
-
-.button.active {
-  background-color: #000;
-}
-
-input[type="number"]::-webkit-outer-spin-button,
-input[type="number"]::-webkit-inner-spin-button {
-  -webkit-appearance: none;
-  margin: 0;
-}
+@import "tailwindcss";
 
 input[type="number"] {
   -moz-appearance: textfield;
+}
+
+.topbar.menu li > a {
+  @apply p-1.5;
+}
+
+.topbar.menu li > a:has(> div) {
+  @apply p-1.25;
+}
+.topbar .divider {
+  @apply m-0;
+}
+
+.topbar div.dropdown:focus-within > li > a {
+  @apply bg-[var(--color-base-100)];
 }

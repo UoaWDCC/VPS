@@ -10,20 +10,20 @@ function NumberInput({ value, onChange, step = 1 }: { value: number, onChange: (
   }
 
   return (
-    <div style={{ display: "flex", gap: "5px" }}>
+    <div className="join">
+      <button className="btn btn-xs h-[28px] join-item bg-base-100 shadow-none border-none" onClick={increment}>
+        <Plus size={14} />
+      </button>
       <input
-        className="text-input"
+        className="input input-sm h-[28px] join-item w-10"
         value={value}
         onChange={(e) => onChange(Number(e.target.value))}
         type="number"
         min={1}
         max={100}
       />
-      <button className="button" onClick={increment}>
-        <Plus size={16} />
-      </button>
-      <button className="button" onClick={decrement}>
-        <Minus size={16} />
+      <button className="btn btn-xs h-[28px] join-item bg-base-100 shadow-none border-none" onClick={decrement}>
+        <Minus size={14} />
       </button>
     </div>
   );

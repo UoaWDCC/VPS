@@ -26,6 +26,7 @@ import useEditorStore from "./stores/editor";
 import { useHistory } from "react-router-dom";
 import { replace } from "./scene/operations/modifiers";
 import { api } from "../../util/api";
+import { ArrowLeftIcon, FilesIcon, PlayIcon, UsersIcon } from "lucide-react";
 
 const listeners = [
   ["copy", copy],
@@ -72,12 +73,16 @@ export default function AuthoringToolPage() {
     window.open(`/play/${scenarioId}`, "_blank");
   }
 
-  function manageGroups() {
+  function goToGroups() {
     history.push(`/scenario/${scenarioId}/manage-groups`);
   }
 
-  function manageResources() {
+  function goToResources() {
     history.push(`/scenario/${scenarioId}/manage-resources`);
+  }
+
+  function goBack() {
+    history.push("/");
   }
 
   /** called when save button is clicked */
@@ -90,28 +95,34 @@ export default function AuthoringToolPage() {
 
   return (
     <>
-      <ScreenContainer vertical>
-        <TopBar back="/">
-          <button className="btn ps w-[100px]" onClick={manageResources}>
+      <div className="font-ibm flex flex-col h-screen w-screen overflow-hidden gap-m">
+        <div className="flex pt-l px-l">
+          <button onClick={goBack} className="btn btn-phantom text-m">
+            <ArrowLeftIcon size={20} />
+            Back
+          </button>
+          <button onClick={goToResources} className="btn btn-phantom text-m ml-auto">
+            <FilesIcon size={20} />
             Resources
           </button>
-          <button className="btn vps w-[100px]" onClick={manageGroups}>
+          <button onClick={goToGroups} className="btn btn-phantom text-m">
+            <UsersIcon size={20} />
             Groups
           </button>
-          <button className="btn vps w-[100px]" onClick={playScenario}>
+          <button onClick={playScenario} className="btn btn-phantom text-m">
+            <PlayIcon size={20} />
             Play
           </button>
-          <button className="btn vps" onClick={save}>
-            {saveButtonText}
-          </button>
-        </TopBar>
-        <Topbar />
-        <div className="flex h-full overflow-hidden">
-          <SceneNavigator />
-          <Canvas />
-          <CanvasSideBar />
         </div>
-      </ScreenContainer>
+        <div className="flex flex-col gap-m px-l flex-1 min-h-0">
+          <Topbar saveText={saveButtonText} save={save} />
+          <div className="flex gap-m flex-1 min-h-0">
+            <SceneNavigator />
+            <Canvas />
+            <CanvasSideBar />
+          </div>
+        </div>
+      </div>
     </>
   );
 }

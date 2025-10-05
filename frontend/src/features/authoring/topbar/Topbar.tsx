@@ -1,14 +1,9 @@
 import {
   BringToFront,
-  Diameter,
-  MessageSquare,
-  Redo,
+  Redo2Icon,
   SendToBack,
-  Spline,
-  Trash2,
   Type,
-  Undo,
-  VectorSquare,
+  Undo2Icon,
 } from "lucide-react";
 import ShapeSection from "./ShapeSection";
 import TextSection from "./TextSection";
@@ -16,14 +11,13 @@ import useEditorStore from "../stores/editor";
 import { getComponent } from "../scene/scene";
 import { redo, undo } from "../scene/history";
 import { bringToFront, sendToBack } from "../scene/operations/component";
-import { remove } from "../scene/operations/modifiers";
 import { useState } from "react";
 import StateVariableMenu from "../../../components/StateVariables/StateVariableMenu";
 import ImageCreateMenu from "../images";
+import ShapeCreateMenu from "./ShapeCreateMenu";
 
-function Topbar() {
+function Topbar({ saveText, save }: { saveText: string, save: () => void }) {
   const selected = useEditorStore(state => state.selected);
-  const setSelected = useEditorStore(state => state.setSelected);
   const setMode = useEditorStore(state => state.setMode);
   const setCreateType = useEditorStore(state => state.setCreateType);
 
@@ -31,12 +25,6 @@ function Topbar() {
 
   function toggleSVMenu() {
     setShowSVMenu(prev => !prev);
-  }
-
-  function removeComponent() {
-    if (!selected) return;
-    remove(selected);
-    setSelected("");
   }
 
   const switchCreate = (type: string) => {
@@ -48,79 +36,45 @@ function Topbar() {
 
   return <>
     <StateVariableMenu show={showSVMenu} setShow={setShowSVMenu} />
-    <div className="topbar">
-      <div className="props" style={{ zIndex: 1 }}>
-        <button className="px-2 text-sm rounded-sm h-[28px] hover:bg-[#0f0f0f]" onClick={toggleSVMenu}>
-          <span>State Variables</span>
-        </button>
+    <ul className="topbar gap-0.5 menu menu-horizontal w-full bg-base-300 rounded-box p-1" >
+      <li className="text-xs"><a onClick={toggleSVMenu}>State Variables</a></li>
 
-        |
+      <div className="divider divider-horizontal" />
 
-        {/* undo/redo */}
-        <button className="button" onClick={undo}>
-          <Undo size={16} />
-        </button>
-        <button className="button" onClick={redo}>
-          <Redo size={16} />
-        </button>
+      <li><a onClick={undo}><Undo2Icon size={16} /></a></li>
+      <li><a onClick={redo}><Redo2Icon size={16} /></a></li>
 
-        |
+      <div className="divider divider-horizontal" />
 
-        {/* element creation */}
-        <ImageCreateMenu />
-        <button className="button" onClick={() => switchCreate("box")}>
-          <VectorSquare size={16} />
-        </button>
-        <button className="button" onClick={() => switchCreate("ellipse")}>
-          <Diameter size={16} />
-        </button>
-        <button className="button" onClick={() => switchCreate("line")}>
-          <Spline size={16} />
-        </button>
-        <button className="button" onClick={() => switchCreate("textbox")}>
-          <Type size={16} />
-        </button>
-        <button className="button" onClick={() => switchCreate("speech")}>
-          <MessageSquare size={16} />
-        </button>
+      {/* element creation */}
+      <ImageCreateMenu />
+      <li><a onClick={() => switchCreate("textbox")}><Type size={16} /></a></li>
+      <ShapeCreateMenu />
 
-        {/* element properties */}
-        {selected && (
-          <>
-            |
+      {/* element properties */}
+      {selected && (
+        <>
+          <div className="divider divider-horizontal" />
 
-            {/* remove/reorder */}
-            <button className="button" onClick={removeComponent}>
-              <Trash2 size={16} />
-            </button>
-            <button
-              className="button"
-              onClick={() => bringToFront(selected)}
-            >
-              <BringToFront size={16} />
-            </button>
-            <button
-              className="button"
-              onClick={() => sendToBack(selected)}
-            >
-              <SendToBack size={16} />
-            </button>
+          {/* reorder */}
+          <li><a onClick={() => bringToFront(selected)}><BringToFront size={16} /></a></li>
+          <li><a onClick={() => sendToBack(selected)}><SendToBack size={16} /></a></li>
 
-            {/* shape properties */}
-            {component.type !== "image" && <>
-              |
-              <ShapeSection />
-            </>}
+          {/* shape properties */}
+          {component.type !== "image" && <>
+            <div className="divider divider-horizontal" />
+            <ShapeSection />
+          </>}
 
-            {/* text content styles */}
-            {component.type === "textbox" && <>
-              |
-              <TextSection />
-            </>}
-          </>
-        )}
-      </div>
-    </div>
+          {/* text content styles */}
+          {component.type === "textbox" && <>
+            <div className="divider divider-horizontal" />
+            <TextSection />
+          </>}
+        </>
+      )}
+      <li className="ml-auto text-xs"><a onClick={save}>{saveText}</a></li>
+    </ul>
   </>;
 }
 

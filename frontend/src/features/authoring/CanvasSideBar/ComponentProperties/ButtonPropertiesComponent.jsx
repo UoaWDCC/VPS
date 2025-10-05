@@ -27,32 +27,32 @@ const CustomInputLabel = CustomInputLabelStyles()(InputLabel);
 export default function ButtonPropertiesComponent({ component }) {
   const { scenes } = useContext(SceneContext);
 
-  function saveLink(e) {
-    modifyComponentProp(component.id, "nextScene", e.target.value)
-  }
+  // function saveLink(e) {
+  //   modifyComponentProp(component.id, "nextScene", e.target.value)
+  // }
 
-  return (
-    <>
-      <FormControl fullWidth className={styles.componentProperty}>
-        <CustomInputLabel shrink>Linked Scene</CustomInputLabel>
-        <Select
-          className={styles.selectInput}
-          value={component.nextScene}
-          onChange={saveLink}
-          displayEmpty
-        >
-          <MenuItem value="">
-            <em>None</em>
-          </MenuItem>
-          {scenes.map((scene) => (
-            <MenuItem key={scene._id} value={scene._id}>
-              {scene.name}
-            </MenuItem>
-          ))}
-        </Select>
-      </FormControl>
-
-      <StateOperationMenu component={component} />
-    </>
-  );
+  // return (
+  //   <>
+  //     <FormControl fullWidth className={styles.componentProperty}>
+  //       <CustomInputLabel shrink>Linked Scene</CustomInputLabel>
+  //       <Select
+  //         className={styles.selectInput}
+  //         value={component.nextScene}
+  //         onChange={saveLink}
+  //         displayEmpty
+  //       >
+  //         <MenuItem value="">
+  //           <em>None</em>
+  //         </MenuItem>
+  //         {scenes.map((scene) => (
+  //           <MenuItem key={scene._id} value={scene._id}>
+  //             {scene.name}
+  //           </MenuItem>
+  //         ))}
+  //       </Select>
+  //     </FormControl>
+  //
+  //     <StateOperationMenu component={component} />
+  //   </>
+  // );
 }

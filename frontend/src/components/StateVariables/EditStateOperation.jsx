@@ -5,6 +5,8 @@ import StateOperationForm from "./StateOperationForm";
 import ScenarioContext from "../../context/ScenarioContext";
 import SceneContext from "../../context/SceneContext";
 import { modifyComponentProp } from "../../features/authoring/scene/operations/component";
+import SelectInput from "../../features/authoring/components/Select";
+import { stateTypes, validOperations } from "./stateTypes";
 
 /**
  * Component used for editing state operations
@@ -15,122 +17,59 @@ import { modifyComponentProp } from "../../features/authoring/scene/operations/c
 const EditStateOperation = ({ component, operationIndex, stateOperation }) => {
   const { stateVariables } = useContext(ScenarioContext);
 
-  // Define deleteStateOperation function early so it can be used in error handling
-  const deleteStateOperation = () => {
-    const newStateOperations = component.stateOperations.filter(
-      (_, index) => index !== operationIndex
-    );
-    modifyComponentProp(
-      component.id,
-      "stateOperations",
-      newStateOperations
-    );
-  };
-
-  // Try to find by ID first (new format), then fallback to name (legacy format)
-  const stateVariable = stateVariables.find(
-    (variable) =>
-      (stateOperation.stateVariableId &&
-        variable.id === stateOperation.stateVariableId) ||
-      (!stateOperation.stateVariableId && variable.name === stateOperation.name)
-  );
-
-  // Handle case where state variable is not found
-  if (!stateVariable) {
-    return (
-      <FormGroup
-        style={{
-          marginBottom: "30px",
-          display: "flex",
-          flexDirection: "column",
-          gap: "10px",
-          background: "#ffebee",
-          padding: "16px",
-          borderRadius: "8px",
-          border: "2px solid #f44336",
-        }}
-      >
-        <Typography variant="subtitle1" fontWeight="bold" color="error">
-          State Variable Not Found
-        </Typography>
-        <Typography variant="body2" color="error">
-          The state variable &quot;
-          {stateOperation.displayName || stateOperation.name}&quot; no longer
-          exists.
-        </Typography>
-        <Box width="100%" display="flex" justifyContent="flex-end">
-          <EditingTooltips
-            onDelete={deleteStateOperation}
-            showOnlyDelete={true}
-          />
-        </Box>
-      </FormGroup>
-    );
-  }
-
-  const [newOperation, setNewOperation] = useState(stateOperation.operation);
-  const [newValue, setNewValue] = useState(stateOperation.value);
+  const [operation, setOperation] = useState(stateOperation.operation)
+  const [value, setValue] = useState(stateOperation.value);
 
   useEffect(() => {
-    setNewOperation(stateOperation.operation);
-    setNewValue(stateOperation.value);
+    if (stateOperation.operation !== operation) setOperation(stateOperation.operation);
+    if (stateOperation.value !== value) setValue(stateOperation.value);
   }, [stateOperation]);
 
-  const editing =
-    newOperation !== stateOperation.operation ||
-    newValue !== stateOperation.value;
 
-  const resetStateOperation = () => {
-    setNewOperation(stateOperation.operation);
-    setNewValue(stateOperation.value);
-  };
+  const stateVariable = stateVariables.find(v => v.id === stateOperation.stateVariableId);
+  if (!stateVariable) return null;
 
-  const editStateOperation = () => {
-    const newStateOperations = component.stateOperations.map(
-      (operation, index) =>
-        index === operationIndex
-          ? { ...operation, operation: newOperation, value: newValue }
-          : operation
-    );
+  const deleteStateOperation = () => {
+    const filtered = component.stateOperations.toSpliced(operationIndex, 1);
     modifyComponentProp(
       component.id,
       "stateOperations",
-      newStateOperations
+      filtered
+    );
+  };
+
+  function editStateOperation() {
+    modifyComponentProp(
+      component.id,
+      `stateOperations.${operationIndex}`,
+      (prev) => ({ ...prev, operation, value })
     );
   };
 
   return (
-    <FormGroup
-      style={{
-        marginBottom: "30px",
-        display: "flex",
-        flexDirection: "column",
-        gap: "10px",
-        background: "#f9f9f9",
-        padding: "16px",
-        borderRadius: "8px",
-        border: "2px solid",
-        borderColor: editing ? "#ffa600" : "transparent",
-      }}
-    >
-      <Typography variant="subtitle1" fontWeight="bold">
-        {stateVariable.name}
-      </Typography>
-      <StateOperationForm
-        selectedState={stateVariable}
-        operation={newOperation}
-        setOperation={setNewOperation}
-        value={newValue}
-        setValue={setNewValue}
-      />
-      <Box width="100%" display="flex" justifyContent="space-between">
-        <EditingTooltips
-          onReset={resetStateOperation}
-          onSave={editStateOperation}
-          onDelete={deleteStateOperation}
-        />
-      </Box>
-    </FormGroup>
+    <div className="bg-base-300 mt-xs px-[1rem] py-[0.5rem]">
+      <div>
+        <span className="text--1">{stateVariable.name}</span>
+        <span className="text-xs ml-2xs text-primary">{`${stateVariable.type} operation`}</span>
+        <button className="btn btn-xs btn-phantom float-right" onClick={deleteStateOperation}>Delete</button>
+      </div>
+      <fieldset className="fieldset mt-[0.5rem]">
+        <div className="join">
+          <SelectInput values={validOperations[stateVariable.type]} value={operation} />
+          {stateVariable.type === stateTypes.BOOLEAN ?
+            <SelectInput values={[true, false]} value={value} onChange={setValue} onBlur={editStateOperation} /> :
+            <input
+              type={stateVariable.type === stateTypes.STRING ? "text" : "number"}
+              value={value}
+              onChange={e => setValue(e.target.value)}
+              placeholder="Value"
+              className="input join-item"
+              onBlur={editStateOperation}
+            />
+          }
+        </div>
+      </fieldset>
+    </div>
   );
 };
 

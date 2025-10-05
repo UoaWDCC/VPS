@@ -59,7 +59,7 @@ function Canvas() {
   return (
     <CanvasContext.Provider value={{ toSVGSpace, canvasRef }} >
       <div
-        className="mx-[2rem] flex-grow relative"
+        className="flex-grow relative"
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
         onMouseDown={handleMouseDown}
@@ -68,7 +68,7 @@ function Canvas() {
         <svg
           id="main"
           className="w-full h-full"
-          viewBox="0 0 1920 1080"
+          viewBox={`-50 -50 ${1920 + 50 * 2} ${1080 + 50 * 2}`}
           ref={canvasRef}
         >
           <rect x="0" y="0" width="1920" height="1080" fill="white" />

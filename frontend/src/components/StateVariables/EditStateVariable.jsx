@@ -14,7 +14,7 @@ const EditStateVariable = ({ stateVariable, scenarioId }) => {
   const sceneContext = useContext(SceneContext);
   const { scenes, setScenes } = sceneContext || {
     scenes: [],
-    setScenes: () => {},
+    setScenes: () => { },
   };
 
   const { name, type, value } = stateVariable;

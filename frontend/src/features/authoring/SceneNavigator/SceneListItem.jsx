@@ -1,37 +1,33 @@
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import styles from "./SceneNavigator.module.scss";
+import ContextableThumb from "./ContextableThumb";
 
-const SceneListItem = ({ sceneId, thumbnail }) => {
+const SceneListItem = ({ scene, index, active }) => {
   const {
     attributes,
     listeners,
     setNodeRef,
     transform,
-    transition,
     isDragging,
-  } = useSortable({ id: sceneId });
+    transition,
+  } = useSortable({ id: scene._id });
 
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
-    opacity: isDragging ? 0.5 : 1,
-    position: "relative",
-    zIndex: isDragging ? 999 : 1,
+    opacity: isDragging ? 0.1 : 1,
   };
 
   return (
     <li
-      key={sceneId}
-      ref={setNodeRef}
       style={style}
       className={styles.sceneListItem}
       {...attributes}
+      {...listeners}
+      ref={setNodeRef}
     >
-      <div className={styles.dragHandle} {...listeners}>
-        <span className={styles.dragIcon}>≡</span>
-      </div>
-      {thumbnail}
+      <ContextableThumb scene={scene} index={index} active={active} />
     </li>
   );
 };
