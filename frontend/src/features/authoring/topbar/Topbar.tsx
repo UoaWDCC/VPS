@@ -21,7 +21,7 @@ import { useState } from "react";
 import StateVariableMenu from "../../../components/StateVariables/StateVariableMenu";
 import ImageCreateMenu from "../images";
 
-function Topbar() {
+function Topbar({ saveText, save }: { saveText: string, save: () => void }) {
   const selected = useEditorStore(state => state.selected);
   const setSelected = useEditorStore(state => state.setSelected);
   const setMode = useEditorStore(state => state.setMode);
@@ -48,8 +48,8 @@ function Topbar() {
 
   return <>
     <StateVariableMenu show={showSVMenu} setShow={setShowSVMenu} />
-    <div className="topbar">
-      <div className="props" style={{ zIndex: 1 }}>
+    <div className="bg-[#151515] w-full rounded-sm">
+      <div className="flex wrap gap-2 text-white items-center p-1.5" style={{ zIndex: 1 }}>
         <button className="px-2 text-sm rounded-sm h-[28px] hover:bg-[#0f0f0f]" onClick={toggleSVMenu}>
           <span>State Variables</span>
         </button>
@@ -119,6 +119,9 @@ function Topbar() {
             </>}
           </>
         )}
+        <button className="ml-auto px-2 text-sm rounded-sm h-[28px] hover:bg-[#0f0f0f]" onClick={save}>
+          <span>{saveText}</span>
+        </button>
       </div>
     </div>
   </>;

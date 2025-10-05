@@ -47,7 +47,7 @@ function Overlay() {
     <svg
       id="overlay"
       className="w-full h-full absolute pointer-events-none"
-      viewBox="0 0 1920 1080"
+      viewBox={`-50 -50 ${1920 + 50 * 2} ${1080 + 50 * 2}`}
     >
       {component && (
         <>

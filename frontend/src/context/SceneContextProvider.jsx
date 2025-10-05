@@ -71,7 +71,7 @@ export default function SceneContextProvider({ children }) {
       toast.error("Something went wrong updating the scenes, your last changes weren't saved");
     },
     onSettled: () => {
-      queryClient.invalidateQueries(["scenes", scenarioId]);
+      // queryClient.invalidateQueries(["scenes", scenarioId]);
     }
   });
 

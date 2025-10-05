@@ -126,7 +126,7 @@ function ImageCreateMenu() {
     return <>
         <div className="dropdown">
             <div tabIndex={0} role="button" className="button"><ImageIcon size={16} /></div>
-            <ul tabIndex={0} className="dropdown-content menu bg-base-100 rounded-box z-1 w-52 p-2 shadow-sm top-[38px]">
+            <ul tabIndex={0} className="dropdown-content menu bg-base-300 rounded-box z-1 w-52 p-2 shadow-sm top-[38px]">
                 <li><a onClick={showFilePicker}>Upload Image</a></li>
                 <li><a onClick={showModal}>Choose Image</a></li>
             </ul>

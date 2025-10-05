@@ -38,7 +38,7 @@ export default function ButtonPropertiesComponent({ component }) {
         <Select
           className={styles.selectInput}
           value={component.nextScene}
-          onChange={saveLink}
+          // onChange={saveLink}
           displayEmpty
         >
           <MenuItem value="">

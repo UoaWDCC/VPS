@@ -109,6 +109,8 @@
   color-scheme: dark;
 
   --color-base-100: var(--color-black);
+  --color-base-200: #0d0d0d;
+  --color-base-300: #151515;
   --color-base-content: var(--color-white);
   --color-primary: var(--color-grey);
   --color-secondary: var(--color-white);
@@ -207,4 +209,12 @@ body,
 
 .btn:disabled {
   @apply disabled:opacity-30;
+}
+
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
 }
