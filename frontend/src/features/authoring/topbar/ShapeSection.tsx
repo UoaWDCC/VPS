@@ -1,10 +1,11 @@
-import { PaintBucket, Pencil } from "lucide-react";
+import { PaintBucket, Pencil, RulerIcon } from "lucide-react";
 import ChromePicker from "../wrapper/ChromePicker";
 import NumberInput from "../wrapper/NumberInput";
 import useEditorStore from "../stores/editor";
 import { useEffect, useState } from "react";
 import { getComponent } from "../scene/scene";
 import { modifyComponentProp } from "../scene/operations/component";
+import MultiInput from "../wrapper/MultiInput";
 
 interface ShapeProps {
     fill: string;
@@ -16,6 +17,8 @@ function extractProps(selected: string): ShapeProps {
     const { fill, stroke, strokeWidth } = getComponent(selected);
     return { fill, stroke, strokeWidth };
 }
+
+const widths = [1, 2, 3, 4, 8, 12, 16, 24];
 
 function ShapeSection() {
     const selected = useEditorStore(state => state.selected)!;
@@ -40,7 +43,9 @@ function ShapeSection() {
             <ChromePicker value={props.stroke} onChange={(value) => modifyProps("stroke", value)}>
                 <Pencil size={13} />
             </ChromePicker>
-            <NumberInput value={Number(props.strokeWidth)} onChange={(value) => modifyProps("strokeWidth", value)} />
+            <MultiInput value={props.strokeWidth} values={widths} onChange={(v) => modifyProps("strokeWidth", v)}>
+                <RulerIcon size={16} />
+            </MultiInput>
         </>
     )
 }

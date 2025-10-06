@@ -37,13 +37,16 @@ function TextSection() {
 
     return (
         <>
-            <FontInput value={style.fontFamily} onChange={value => modifyStyle("fontFamily", value)} />
+            <FontInput value={style.fontFamily} onChange={v => modifyStyle("fontFamily", v)} />
+
+            <div className="divider divider-horizontal" />
+
             <NumberInput
                 value={Number(style.fontSize)}
                 onChange={(value) => modifyStyle("fontSize", value)}
             />
 
-            |
+            <div className="divider divider-horizontal" />
 
             <ToggleInput
                 value={style.fontWeight}
@@ -67,7 +70,7 @@ function TextSection() {
                 enabled="underline"
                 disabled="none"
             >
-                <Underline size={17} />
+                <Underline size={16} />
             </ToggleInput>
             <ChromePicker value={style.textColor} onChange={(value) => modifyStyle("textColor", value)}>
                 <span>A</span>
@@ -76,22 +79,28 @@ function TextSection() {
                 <Highlighter size={14} />
             </ChromePicker>
 
-            |
+            <div className="divider divider-horizontal" />
 
             <MultiInput
                 value={style.alignment}
+                values={["left", "center", "right"]}
+                items={[
+                    <AlignLeft size={16} />,
+                    <AlignCenter size={16} />,
+                    <AlignRight size={16} />
+                ]}
                 onChange={(value) => modifyStyle("alignment", value)}
-                options={["left", "center", "right"]}
             >
                 <AlignLeft size={16} />
-                <AlignCenter size={16} />
-                <AlignRight size={16} />
             </MultiInput>
 
-            |
-
-            <ArrowDownNarrowWide size={18} />
-            <NumberInput value={style.lineHeight} onChange={(value) => modifyStyle("lineHeight", value)} step={0.1} />
+            <MultiInput
+                value={style.lineHeight}
+                values={[1, 1.1, 1.25, 1.5, 1.75, 2]}
+                onChange={(value) => modifyStyle("lineHeight", value)}
+            >
+                <ArrowDownNarrowWide size={16} />
+            </MultiInput>
         </>
     )
 }

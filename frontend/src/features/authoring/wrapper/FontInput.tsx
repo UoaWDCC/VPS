@@ -1,12 +1,13 @@
 function FontInput({ value, onChange }: { value: string, onChange: (value: string) => void }) {
   return (
-    <div style={{ position: "relative" }}>
+    <>
       <input
-        list="fonts"
-        className="text-input"
+        type="text"
+        className="input input-sm h-[28px] w-30"
+        placeholder="Font Name"
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        type="text"
+        list="fonts"
       />
       <datalist id="fonts">
         <option value="Arial" />
@@ -19,7 +20,7 @@ function FontInput({ value, onChange }: { value: string, onChange: (value: strin
         <option value="Courier New" />
         <option value="Helvetica" />
       </datalist>
-    </div>
+    </>
   );
 }
 

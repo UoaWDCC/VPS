@@ -96,20 +96,20 @@ export default function AuthoringToolPage() {
   return (
     <>
       <div className="flex flex-col h-screen w-screen overflow-hidden gap-m">
-        <div className="flex gap-m pt-l px-l">
-          <button onClick={goBack} className="flex gap-2xs text-m items-center text-primary hover:text-secondary">
+        <div className="flex pt-l px-l">
+          <button onClick={goBack} className="btn btn-phantom text-m">
             <ArrowLeftIcon size={20} />
             Back
           </button>
-          <button onClick={goToResources} className="ml-auto flex gap-2xs text-m items-center text-primary hover:text-secondary">
+          <button onClick={goToResources} className="btn btn-phantom text-m ml-auto">
             <FilesIcon size={20} />
             Resources
           </button>
-          <button onClick={goToGroups} className="flex gap-2xs text-m items-center text-primary hover:text-secondary">
+          <button onClick={goToGroups} className="btn btn-phantom text-m">
             <UsersIcon size={20} />
             Groups
           </button>
-          <button onClick={playScenario} className="flex gap-2xs text-m items-center text-primary hover:text-secondary">
+          <button onClick={playScenario} className="btn btn-phantom text-m">
             <PlayIcon size={20} />
             Play
           </button>

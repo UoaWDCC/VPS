@@ -38,7 +38,7 @@ const EditStateOperation = ({ component, operationIndex, stateOperation }) => {
     );
   };
 
-  const editStateOperation = () => {
+  function editStateOperation() {
     modifyComponentProp(
       component.id,
       `stateOperations.${operationIndex}`,
@@ -51,7 +51,7 @@ const EditStateOperation = ({ component, operationIndex, stateOperation }) => {
       <div>
         <span className="text--1">{stateVariable.name}</span>
         <span className="text-xs ml-2xs text-primary">{`${stateVariable.type} operation`}</span>
-        <button className="btn btn-xs btn-ghost font-normal text-primary hover:text-secondary float-right border-none shadow-none bg-transparent" onClick={deleteStateOperation}>Delete</button>
+        <button className="btn btn-xs btn-phantom float-right" onClick={deleteStateOperation}>Delete</button>
       </div>
       <fieldset className="fieldset mt-[0.5rem]">
         <div className="join">

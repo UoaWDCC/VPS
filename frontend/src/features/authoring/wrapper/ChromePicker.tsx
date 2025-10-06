@@ -21,13 +21,13 @@ function ChromePicker({
 
   return (
     <div style={{ position: "relative", display: "flex" }}>
-      <button className="button" onClick={() => setOpen(!open)}>
-        <div className="color-input" style={{ borderBottomColor: value }}>
+      <li><a className={`${open && "bg-base-100"}`} onClick={() => setOpen(!open)}>
+        <div className="relative size-[18px] border-b-3 flex justify-center items-center" style={{ borderBottomColor: value }}>
           {children}
         </div>
-      </button>
+      </a></li>
       {open && (
-        <div ref={ref} style={{ position: "absolute", top: "40px" }}>
+        <div ref={ref} className="z-1 absolute top-[40px]" >
           <Chrome color={value} onChange={(val) => onChange(val.hexa)} />
         </div>
       )}

@@ -24,7 +24,7 @@ export default function ComponentProperties({ component }) {
     if (component?.nextScene !== value) setValue(component?.nextScene);
   }, [component])
 
-  function saveLink(value) {
+  function saveLink() {
     modifyComponentProp(component.id, "nextScene", value);
   }
 
