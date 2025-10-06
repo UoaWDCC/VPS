@@ -49,39 +49,30 @@ const GroupsTable = ({ data }) => {
   }, [data]);
 
   return (
-    <>
-      <div className={classes.root}>
-        <Paper>
-          <Typography variant="h5" component="h1" className={classes.heading}>
-            Group Table
-          </Typography>
-          <TableContainer>
-            <Table className={classes.table} aria-label="simple table">
-              <TableHead>
-                <TableRow>
-                  <TableCell>Group Number</TableCell>
-                  <TableCell align="right">Name</TableCell>
-                  <TableCell align="right">Email</TableCell>
-                  <TableCell align="right">Role</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {users.map((user, index) => (
-                  <TableRow key={user.email || index}>
-                    <TableCell component="th" scope="row">
-                      {user.group}
-                    </TableCell>
-                    <TableCell align="right">{user.name}</TableCell>
-                    <TableCell align="right">{user.email}</TableCell>
-                    <TableCell align="right">{user.role}</TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </TableContainer>
-        </Paper>
-      </div>
-    </>
+    <div className="overflow-x-auto rounded-box border border-base-content/5 w-full">
+      <table className="table table-zebra">
+        {/* head */}
+        <thead>
+          <tr>
+            <th>Group Number</th>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Role</th>
+          </tr>
+        </thead>
+        <tbody>
+          {/* row 1 */}
+          {users.map((user, i) => (
+            <tr key={i}>
+              <th>{user.group}</th>
+              <td>{user.name}</td>
+              <td>{user.email}</td>
+              <td>{user.role}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
   );
 };
 

@@ -95,7 +95,7 @@ export default function AuthoringToolPage() {
 
   return (
     <>
-      <div className="flex flex-col h-screen w-screen overflow-hidden gap-m">
+      <div className="font-ibm flex flex-col h-screen w-screen overflow-hidden gap-m">
         <div className="flex pt-l px-l">
           <button onClick={goBack} className="btn btn-phantom text-m">
             <ArrowLeftIcon size={20} />

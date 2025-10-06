@@ -31,7 +31,7 @@ const CreateStateOperation = ({ component }) => {
   if (!stateVariables?.length) {
     return (
       <div className="modal-box">
-        <h3 className="font-bold text-m font-ibm">Create State Operation</h3>
+        <h3 className="font-bold text-m">Create State Operation</h3>
         <div className="text-xs">
           No state variables found, create some in the state variable menu
         </div>
@@ -76,7 +76,7 @@ const CreateStateOperation = ({ component }) => {
 
   return (
     <div className="modal-box" tabIndex={0}>
-      <h3 className="font-bold text-m font-ibm">Create State Operation</h3>
+      <h3 className="font-bold text-m">Create State Operation</h3>
       <fieldset className="fieldset mt-[0.5rem]">
         <label className="label">State Variable</label>
         <SelectInput values={stateVariables} value={selectedState} display={(s) => s.name} onChange={onVariableChange} />
