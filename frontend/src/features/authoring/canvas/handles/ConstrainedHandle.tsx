@@ -27,7 +27,7 @@ const ResizeHandle = ({ x, y }: Props) => {
       pointerEvents={mode.includes("mutation") ? "none" : "auto"}
       style={{ cursor: "crosshair" }}
     >
-      <ellipse data-handle data-type="size" data-coords={[x, y]} cx={point.x} cy={point.y} rx={5} ry={5} fill="blue" />
+      <ellipse data-handle data-type="size" data-coords={[x, y]} cx={point.x} cy={point.y} rx={7} ry={7} fill="blue" />
     </g>
   );
 };

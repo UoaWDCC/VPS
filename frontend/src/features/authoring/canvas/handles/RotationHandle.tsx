@@ -25,10 +25,10 @@ const RotationHandle = () => {
         y1={initial.y}
         x2={point.x}
         y2={point.y}
-        strokeWidth={2}
+        strokeWidth={3}
         stroke="blue"
       />
-      <ellipse data-handle data-type="rotation" data-coords={[0, 0]} cx={point.x} cy={point.y} rx={5} ry={5} fill="blue" />
+      <ellipse data-handle data-type="rotation" data-coords={[0, 0]} cx={point.x} cy={point.y} rx={7} ry={7} fill="blue" />
     </g>
   );
 };
