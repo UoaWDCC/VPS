@@ -56,9 +56,11 @@ export default function AuthoringToolPage() {
     return () => clearInterval(autosave);
   }, [sceneId]);
 
-  // NOTE: we always start at the first scene, could possibly store it in localstorage
   useEffect(() => {
-    replace(scenes[0]);
+    const activeScene = localStorage.getItem(`${scenarioId}:activeScene`);
+    if (activeScene) replace(scenes.find(s => s._id === activeScene));
+    else replace(scenes[0]);
+
     useEditorStore.getState().clear();
 
     listeners.forEach(([event, fn]) => document.addEventListener(event, fn));

@@ -46,6 +46,8 @@ function ContextableThumb({ scene, index, active }: { scene: Record<string, any>
         useEditorStore.getState().clear();
         replace(scene);
 
+        localStorage.setItem(`${scenarioId}:activeScene`, scene._id);
+
         const pathname = `/scenario/${scenarioId}/scene/${scene._id}`;
         history.push({ pathname });
     }
