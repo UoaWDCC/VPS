@@ -1,5 +1,5 @@
 import { useParams } from "react-router-dom";
-import { useState, useMemo, useContext } from "react";
+import { useState, useMemo, useContext, useEffect } from "react";
 import { useGet } from "hooks/crudHooks";
 import ScreenContainer from "../../components/ScreenContainer/ScreenContainer";
 import SceneContext from "../../context/SceneContext";
@@ -8,21 +8,10 @@ import DashTopBar from "./components/DashTopBar";
 import HelpButton from "../../components/HelpButton";
 import { MarkerType, ReactFlowProvider } from "@xyflow/react";
 import ScenarioGraph from "./components/Graph";
-import TestTable from "./components/Table";
+import DashGroupTable from "./components/DashGroupTable";
 import { Skeleton } from "@mui/material";
-import Table from "@material-ui/core/Table";
-import TableBody from "@material-ui/core/TableBody";
-import TableCell from "@material-ui/core/TableCell";
-import TableContainer from "@material-ui/core/TableContainer";
-import TableHead from "@material-ui/core/TableHead";
-import TableRow from "@material-ui/core/TableRow";
-import TableFooter from "@mui/material/TableFooter";
-import TablePagination from "@mui/material/TablePagination";
-import { Paper, Typography } from "@material-ui/core";
-import TablePaginationActions from "./components/TablePaginationAction";
-import useStyles from "./components/TableStyle";
-import TableSortLabel from "@mui/material/TableSortLabel";
-import getComparator from "./components/TableHelper";
+import StateVarTable from "./components/StateVarTable";
+import ScenarioContext from "../../context/ScenarioContext";
 /**
  * Might move this logic to it's own file, this way we can render a basic path on the dasboard as well
  * as the viewgroup page.
@@ -33,14 +22,21 @@ export default function ViewGroupPage() {
   const [groupInfo, setGroupInfo] = useState({});
   const [graphLoading, setGraphLoading] = useState(true);
   const { scenes } = useContext(SceneContext);
+  const [hasStateVar, setHasStateVar] = useState(false);
+  const { stateVariables } = useContext(ScenarioContext);
   useGet(`/api/group/retrieve/${groupId}`, setGroupInfo, true);
+
+  useEffect(() => {
+    if (!Array.isArray(stateVariables)) return;
+    if (stateVariables.length != 0) setHasStateVar(true);
+  }, [stateVariables]);
 
   const markerEnd = {
     type: MarkerType.ArrowClosed,
     wdith: 15,
     height: 15,
   };
-
+  // console.log(groupInfo)
   const { nodes, edges, groupEdges, groupPath, sceneMap } = useMemo(() => {
     var sceneMap = [];
     var groupPath = [];
@@ -145,10 +141,13 @@ export default function ViewGroupPage() {
               Viewing Group {groupInfo.users[0].group}
             </h1>
 
-            <TestTable groupInfo={groupInfo} />
-            <StateVarTable data={groupInfo.stateVariables} />
+            <DashGroupTable groupInfo={groupInfo} />
+            <StateVarTable
+              data={groupInfo.stateVariables}
+              hasStateVar={hasStateVar}
+            />
           </div>
-          <div className="w-full h-full">
+          <div className="w-full">
             <h1 className="text-3xl font-mona font-bold px-10 my-3">
               Path Overview
             </h1>
@@ -168,8 +167,7 @@ export default function ViewGroupPage() {
                 scenes.length != 0 &&
                 Array.isArray(nodes) &&
                 nodes.length > 0 &&
-                Array.isArray(edges) &&
-                edges.length > 0 && (
+                Array.isArray(edges) && (
                   <div
                     className={`h-[80%] ${graphLoading ? "opacity-0" : "opacity-100"}`}
                   >
@@ -194,142 +192,3 @@ export default function ViewGroupPage() {
     </ScreenContainer>
   );
 }
-
-const StateVarTable = ({ data }) => {
-  const classes = useStyles();
-  const [page, setPage] = useState(0);
-  const [rowsPerPage, setRowsPerPage] = useState(5);
-  const emptyRows =
-    page > 0 ? Math.max(0, (1 + page) * rowsPerPage - data.length) : 0;
-  const [order, setOrder] = useState("asc");
-  const [orderBy, setOrderBy] = useState("name");
-
-  const handleRequestSort = (property) => {
-    const isAsc = orderBy === property && order === "asc";
-    setOrder(isAsc ? "desc" : "asc");
-    setOrderBy(property);
-  };
-  const handleChangePage = (event, newPage) => {
-    setPage(newPage);
-  };
-  const handleChangeRowsPerPage = (event) => {
-    setRowsPerPage(parseInt(event.target.value, 10));
-    setPage(0);
-  };
-
-  const visibleRows = useMemo(
-    () =>
-      [...data]
-        .sort(getComparator(order, orderBy))
-        .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage),
-    [order, orderBy, page, rowsPerPage]
-  );
-
-  const PaperContainer = ({ children }) => (
-    <div className={classes.root}>
-      <Paper>
-        <Typography variant="h5" component="h1" className={classes.heading}>
-          State Variables
-        </Typography>
-        {children}
-      </Paper>
-    </div>
-  );
-  if (data.length == 0) {
-    return (
-      <PaperContainer>
-        <div>
-          State variables will show up once the group has scdtarted the
-          scenario.
-        </div>
-      </PaperContainer>
-    );
-  } else {
-    return (
-      <PaperContainer>
-        <TableContainer>
-          <Table>
-            <TableHead>
-              <TableRow>
-                <TableCell>
-                  <TableSortLabel
-                    active={orderBy === "name"}
-                    direction={orderBy === "name" ? order : "asc"}
-                    onClick={() => handleRequestSort("name")}
-                  >
-                    Name
-                  </TableSortLabel>
-                </TableCell>
-                <TableCell>
-                  <TableSortLabel
-                    active={orderBy === "type"}
-                    direction={orderBy === "type" ? order : "asc"}
-                    onClick={() => handleRequestSort("type")}
-                  >
-                    Type
-                  </TableSortLabel>
-                </TableCell>
-                <TableCell>
-                  <TableSortLabel
-                    active={orderBy === "value"}
-                    direction={orderBy === "value" ? order : "asc"}
-                    onClick={() => handleRequestSort("value")}
-                  >
-                    Value
-                  </TableSortLabel>
-                </TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {visibleRows.map((stateVar) => (
-                <TableRow key={stateVar.id}>
-                  <TableCell>{stateVar.name}</TableCell>
-                  <TableCell>{stateVar.type}</TableCell>
-                  <TableCell>
-                    {stateVar.type === "boolean"
-                      ? stateVar.value
-                        ? "True"
-                        : "False"
-                      : stateVar.value}
-                  </TableCell>
-                </TableRow>
-              ))}
-              {emptyRows > 0 && (
-                <TableRow style={{ height: 53 * emptyRows }}>
-                  <TableCell colSpan={3} />
-                </TableRow>
-              )}
-            </TableBody>
-            <TableFooter>
-              <TableRow>
-                <TablePagination
-                  rowsPerPageOptions={[
-                    5,
-                    10,
-                    25,
-                    { label: "All", value: data.length },
-                  ]}
-                  colSpan={3}
-                  count={data.length}
-                  rowsPerPage={rowsPerPage}
-                  page={page}
-                  slotProps={{
-                    select: {
-                      inputProps: {
-                        "aria-label": "rows per page",
-                      },
-                      native: true,
-                    },
-                  }}
-                  onPageChange={handleChangePage}
-                  onRowsPerPageChange={handleChangeRowsPerPage}
-                  ActionsComponent={TablePaginationActions}
-                />
-              </TableRow>
-            </TableFooter>
-          </Table>
-        </TableContainer>
-      </PaperContainer>
-    );
-  }
-};

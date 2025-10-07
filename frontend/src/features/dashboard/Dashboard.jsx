@@ -5,7 +5,7 @@ import { useState, useContext } from "react";
 import ScenarioContext from "../../context/ScenarioContext";
 import DashTopBar from "./components/DashTopBar";
 import HelpButton from "../../components/HelpButton";
-import TestTable from "./components/Table";
+import DashGroupTable from "./components/DashGroupTable";
 
 /**
  * Could maybe add some info about the scenario? Who created what time, last edited, thumbnail of the scenario and an overlay edit button * which directs you to the edit page?
@@ -36,7 +36,7 @@ export default function Dashboard() {
     ).length;
     // Placeholder here, needs an update for when the group completes a scenario it sets a var in the database, probs alr exist but will implement this later
     return (
-      <div className="grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 text-black">
         <div className="bg-white col-auto border rounded-xl p-2 text-center">
           <h3 className="text-xl font-mona font-bold">Groups</h3>
           <p className="text-lg">{totalGroups}</p>
@@ -73,7 +73,10 @@ export default function Dashboard() {
                 : `Viewing ${scenarioGroupInfo.length} Group${scenarioGroupInfo.length == 1 ? "" : "s"} for ${currentScenario.name}`}
             </h1>
             <DashGroupInfo groupData={scenarioGroupInfo} />
-            <TestTable groupInfo={scenarioGroupInfo} rowClick={viewGroup} />
+            <DashGroupTable
+              groupInfo={scenarioGroupInfo}
+              rowClick={viewGroup}
+            />
           </div>
         )}
       </ScreenContainer>
