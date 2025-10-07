@@ -10,6 +10,7 @@ import Image from "../elements/Image";
 import Line from "../elements/Line";
 import useVisualScene from "../stores/visual";
 import { handleMouseDownGlobal, handleMouseMoveGlobal, handleMouseUpGlobal } from "../handlers/pointer/pointer";
+import { handleContextGlobal } from "../handlers/pointer/context";
 
 const componentMap: Record<string, React.FC<any>> = {
   textbox: (props) => <TextBox {...props} editable={true} />,
@@ -54,6 +55,10 @@ function Canvas() {
     handleMouseDownGlobal(e, toSVGSpace(e.clientX, e.clientY));
   }
 
+  function handleContextMenu(e: React.MouseEvent) {
+    handleContextGlobal(e, toSVGSpace(e.clientX, e.clientY));
+  }
+
   const components = Object.values(scene).sort((a, b) => a.zIndex - b.zIndex).map(resolve);
 
   return (
@@ -63,6 +68,7 @@ function Canvas() {
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
         onMouseDown={handleMouseDown}
+        onContextMenu={handleContextMenu}
       >
         <Overlay />
         <svg
