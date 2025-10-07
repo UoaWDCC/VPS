@@ -1,9 +1,11 @@
+import { render } from "../../../../components/ContextMenu/portal";
 import { modifyComponentBounds } from "../../scene/operations/component";
 import useEditorStore from "../../stores/editor";
 import useVisualScene from "../../stores/visual";
 import { getRelativePosition, parseHit, syncModelSelection } from "../../text/cursor";
 import type { Vec2 } from "../../types";
 import { subtract, translate } from "../../util";
+import ComponentMenu from "./ComponentContext";
 import { handleCreateDrag, handleCreateEnd, handleCreateStart } from "./create";
 import { handleResizeDrag, handleResizeStart } from "./resize";
 
@@ -75,9 +77,10 @@ function handleComponentClick(e: React.MouseEvent, position: Vec2) {
     const scene = useVisualScene.getState().components;
 
     const target = e.target as HTMLElement;
+    const id = target.dataset.id as string;
 
     setOffset(position);
-    setSelected(target.dataset.id as string);
+    setSelected(id);
 
     const component = scene[target.dataset.id as string];
     setMutationBounds({ ...component.bounds })

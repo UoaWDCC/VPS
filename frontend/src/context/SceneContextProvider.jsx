@@ -63,7 +63,7 @@ export default function SceneContextProvider({ children }) {
     mutationFn: (ids) => updateScenes(user, scenarioId, ids),
     onMutate: async (ids) => {
       await queryClient.cancelQueries(["scenes", scenarioId]);
-      queryClient.setQueryData(["scenes", scenarioId], prev => {
+      queryClient.setQueryData(["scenes", scenarioId], (prev = []) => {
         return ids.map(id => prev.find(s => s._id === id));
       });
     },
@@ -93,7 +93,7 @@ export default function SceneContextProvider({ children }) {
     mutationFn: (scene) => saveScene(user, scenarioId, scene),
     onMutate: async (scene) => {
       await queryClient.cancelQueries(["scenes", scenarioId]);
-      queryClient.setQueryData(["scenes", scenarioId], prev => {
+      queryClient.setQueryData(["scenes", scenarioId], (prev = []) => {
         const index = prev.findIndex(s => s._id === scene._id);
         return index === -1 ? prev : prev.toSpliced(index, 1, scene);
       })
@@ -104,7 +104,7 @@ export default function SceneContextProvider({ children }) {
     onSettled: () => {
       queryClient.invalidateQueries(["scenes", scenarioId]);
     }
-  })
+  });
 
   if (scenesQuery.isLoading) {
     return <LoadingPage text="Getting scenes..." />;

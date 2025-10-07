@@ -1,7 +1,6 @@
 import { useContext } from "react";
 import RightContextMenu from "../../../components/ContextMenu/RightContextMenu";
 import { api, handleGeneric } from "../../../util/api";
-import styles from "./SceneNavigator.module.scss";
 import Thumbnail from "../components/Thumbnail";
 import AuthenticationContext from "../../../context/AuthenticationContext";
 import SceneContext from "../../../context/SceneContext";
@@ -9,18 +8,15 @@ import { useParams, useHistory } from "react-router-dom";
 import { getScene } from "../scene/scene";
 import useEditorStore from "../stores/editor";
 import { replace } from "../scene/operations/modifiers";
-import { Paper } from "@material-ui/core";
-import { MenuItem, MenuList } from "@mui/material";
 import { handle } from "../../../components/ContextMenu/portal";
+import { CopyPlusIcon, Trash2Icon } from "lucide-react";
 
 const SceneMenu = ({ id, duplicateScene, deleteScene }: { id: string, duplicateScene: (id: string) => void, deleteScene: (id: string) => void }) => {
     return (
-        <Paper>
-            <MenuList>
-                <MenuItem onClick={handle(duplicateScene, id)}>Duplicate</MenuItem>
-                <MenuItem onClick={handle(deleteScene, id)}>Delete</MenuItem>
-            </MenuList>
-        </Paper>
+        <ul className="menu bg-base-200 rounded-box w-fit">
+            <li><a onClick={handle(duplicateScene, id)}><CopyPlusIcon size={16} />Duplicate</a></li>
+            <li><a onClick={handle(deleteScene, id)}><Trash2Icon size={16} />Delete</a></li>
+        </ul>
     );
 };
 
