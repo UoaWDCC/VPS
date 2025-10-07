@@ -17,7 +17,7 @@ import getComparator from "./TableHelper";
 // Need to update this to be able to take either multiple groups or individual group (to display members per row)
 // Acutally need to update this component to make it reuseable and take in params to dynamically display thead, tdata stuff with num col etc
 
-const TestTable = ({ groupInfo, rowClick }) => {
+const DashGroupTable = ({ groupInfo, rowClick }) => {
   // Check if group info is in array (Scenario Dashboard) or object (Vewiing Group)
   // Maybe just make mode default to groups?
   let mode;
@@ -228,4 +228,4 @@ const TestTable = ({ groupInfo, rowClick }) => {
   );
 };
 
-export default TestTable;
+export default DashGroupTable;
