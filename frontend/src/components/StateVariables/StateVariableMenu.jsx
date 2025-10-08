@@ -37,8 +37,8 @@ const StateVariableMenu = ({ show, setShow }) => {
       <CreateStateVariable scenarioId={scenarioId} />
       <div className="divider" />
       <div className="flex flex-col gap-xs">
-        {stateVariables.map(variable => (
-          <EditStateVariable stateVariable={variable} scenarioId={scenarioId} />
+        {stateVariables.map((variable, i) => (
+          <EditStateVariable key={i} stateVariable={variable} scenarioId={scenarioId} />
         ))}
       </div>
     </ModalDialog>

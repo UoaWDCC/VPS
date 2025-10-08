@@ -12,6 +12,7 @@ import GenericErrorPage from "../features/status/GenericErrorPage";
 import toast from "react-hot-toast";
 import useVisualScene from "../features/authoring/stores/visual";
 import { getScene } from "../features/authoring/scene/scene";
+import { uploadFiles } from "../firebase/storage";
 
 async function getAllScenes(user, id) {
   const res = await api.get(user, `api/scenario/${id}/scene/all`)
@@ -69,9 +70,6 @@ export default function SceneContextProvider({ children }) {
     },
     onError: (_err, _updates, context) => {
       toast.error("Something went wrong updating the scenes, your last changes weren't saved");
-    },
-    onSettled: () => {
-      // queryClient.invalidateQueries(["scenes", scenarioId]);
     }
   });
 
@@ -83,9 +81,6 @@ export default function SceneContextProvider({ children }) {
     },
     onError: (_err, _updates, context) => {
       toast.error("Something went wrong updating the scenes, your last changes weren't saved");
-    },
-    onSettled: () => {
-      queryClient.invalidateQueries(["scenes", scenarioId]);
     }
   });
 
@@ -100,9 +95,6 @@ export default function SceneContextProvider({ children }) {
     },
     onError: (_err, _updates, context) => {
       toast.error("Something went wrong updating the scenes, your last changes weren't saved");
-    },
-    onSettled: () => {
-      queryClient.invalidateQueries(["scenes", scenarioId]);
     }
   });
 
