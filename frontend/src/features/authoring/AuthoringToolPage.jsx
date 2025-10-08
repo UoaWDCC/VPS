@@ -9,7 +9,6 @@ import AuthenticationContext from "context/AuthenticationContext";
 import ScenarioContext from "context/ScenarioContext";
 import SceneContext from "context/SceneContext";
 import ToolbarContextProvider from "context/ToolbarContextProvider";
-import { uploadFiles } from "../../firebase/storage";
 import { useGet, usePut } from "hooks/crudHooks";
 import CanvasSideBar from "./CanvasSideBar/CanvasSideBar";
 import SceneNavigator from "./SceneNavigator/SceneNavigator";
@@ -35,6 +34,8 @@ const listeners = [
   ["keydown", handleGlobal],
 ];
 
+const AUTOSAVE_INTERVAL = 30000; // 30 secs
+
 /**
  * This page allows the user to edit a scene.
  * @container
@@ -48,11 +49,12 @@ export default function AuthoringToolPage() {
 
   const history = useHistory();
 
-  const [saveButtonText, setSaveButtonText] = useState("Save");
+  const [saving, setSaving] = useState(false);
 
+  // autosave setup
   useEffect(() => {
     if (!sceneId) return;
-    const autosave = setInterval(save, 10000);
+    const autosave = setInterval(save, AUTOSAVE_INTERVAL);
     return () => clearInterval(autosave);
   }, [sceneId]);
 
@@ -87,12 +89,11 @@ export default function AuthoringToolPage() {
     history.push("/");
   }
 
-  /** called when save button is clicked */
   async function save() {
-    setSaveButtonText("Saving");
+    if (saving) return; // we dont want to interrupt in progress saves (usually uploading media)
+    setSaving(true);
     await saveScene(structuredClone(getScene()));
-    setSaveButtonText("Saved");
-    setTimeout(() => setSaveButtonText("Save"), 2000);
+    setTimeout(() => setSaving(false), 5000); // debounce saves
   }
 
   return (
@@ -117,7 +118,7 @@ export default function AuthoringToolPage() {
           </button>
         </div>
         <div className="flex flex-col gap-m px-l flex-1 min-h-0">
-          <Topbar saveText={saveButtonText} save={save} />
+          <Topbar saving={saving} save={save} />
           <div className="flex gap-m flex-1 min-h-0">
             <SceneNavigator />
             <Canvas />

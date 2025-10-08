@@ -1,5 +1,6 @@
 import { getComponent } from "../scene/scene";
 import useEditorStore from "../stores/editor";
+import AudioManager from "./AudioManager";
 import styles from "./CanvasSideBar.module.scss";
 import ComponentProperties from "./ComponentProperties";
 import SceneSettings from "./SceneSettings";
@@ -16,6 +17,7 @@ export default function CanvasSideBar() {
   return (
     <div className="flex pb-m flex-col w-[18vw] gap-s overflow-y-auto no-scrollbar">
       <SceneSettings />
+      <AudioManager />
       <ComponentProperties component={component} />
     </div>
   );

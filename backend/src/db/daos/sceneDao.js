@@ -65,12 +65,12 @@ const updateScene = async (sceneId, updatedScene) => {
   if (updatedScene.components) {
     const prevDbScene = await Scene.findById(sceneId);
 
-    // if previous firebase image component no longer exists, try to delete file from firebase storage
+    // if previous firebase media component no longer exists, try to delete file from firebase storage
     prevDbScene.components.forEach((c) => {
-      if (c.type === "image" || c.type === "FIREBASEAUDIO") {
+      if (c.type === "image" || c.type === "audio") {
         // checks for non-existance in new components array
         if (!updatedScene.components.some((newC) => newC.id === c.id)) {
-          tryDeleteFile(c.href);
+          tryDeleteFile(c.href ?? c.url);
         }
       }
     });
@@ -138,7 +138,7 @@ const duplicateScene = async (scenarioId, sceneId) => {
   await dbScene.save();
 
   dbScene.components.forEach((c) => {
-    if (c.type === "FIREBASEIMAGE" || c.type === "FIREBASEAUDIO") {
+    if (c.type === "image" || c.type === "audio") {
       updateFileMetadata(c.url);
     }
   });
