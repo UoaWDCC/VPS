@@ -20,8 +20,7 @@ export default function ScenarioGraph({
   inGPathEdges,
   inSceneMap,
   inGPath,
-  onLoaded,
-  className = ""
+  className = "",
 }) {
   /**
    * Adapted ELkjs code
@@ -33,19 +32,18 @@ export default function ScenarioGraph({
   const elkOptions = {
     "elk.algorithm": "layered",
     "elk.layered.spacing.nodeNodeBetweenLayers":
-    direction === "RIGHT" ? "300" : "200",
+      direction === "RIGHT" ? "300" : "200",
     "elk.spacing.nodeNode": "200",
     "elk.direction": direction,
     "org.eclipse.elk.layered.nodePlacement.bk.fixedAlignment": "BALANCED",
   };
-  
+
   const { fitView } = useReactFlow();
   const [measured, setMeasured] = useState(false);
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
   const [sizes, setSizes] = useState({});
   const [currentIdx, setCurrentIdx] = useState(0);
-  const [isLoaded, setIsLoaded] = useState(false);
 
   // Set up initial nodes and update edges with the group path if it exists
   const [newEdges, setNewEdges] = useState([]);
@@ -160,7 +158,6 @@ export default function ScenarioGraph({
         setNodes(layoutedNodes);
         setEdges(layoutedEdges);
         fitView();
-        // onLoaded();
         handleNodeHighlighting();
       }
     );
@@ -255,7 +252,7 @@ export default function ScenarioGraph({
         </Panel>
         <Background />
       </ReactFlow>
-      </div>
+    </div>
   );
 }
 

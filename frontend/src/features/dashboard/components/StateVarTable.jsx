@@ -11,7 +11,7 @@ import { Paper, Typography } from "@material-ui/core";
 import TablePaginationActions from "./TablePaginationAction";
 import useStyles from "./TableStyle";
 import TableSortLabel from "@mui/material/TableSortLabel";
-import getComparator from "./TableHelper";
+import getComparator from "../utils/TableHelper";
 
 const StateVarTable = ({ data, hasStateVar }) => {
   const classes = useStyles();

@@ -12,7 +12,7 @@ import useStyles from "./TableStyle";
 import { useMemo, useState } from "react";
 import TablePaginationActions from "./TablePaginationAction";
 import TableSortLabel from "@mui/material/TableSortLabel";
-import getComparator from "./TableHelper";
+import getComparator from "../utils/TableHelper";
 
 // Need to update this to be able to take either multiple groups or individual group (to display members per row)
 // Acutally need to update this component to make it reuseable and take in params to dynamically display thead, tdata stuff with num col etc
