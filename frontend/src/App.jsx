@@ -75,7 +75,9 @@ export default function App() {
 
               <ProtectedRoute exact path="/dashboard/:scenarioId">
                 <ScenarioContextProvider>
-                  <Dashboard />
+                  <SceneContextProvider>
+                    <Dashboard />
+                  </SceneContextProvider>
                 </ScenarioContextProvider>
               </ProtectedRoute>
 

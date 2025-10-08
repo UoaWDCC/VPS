@@ -21,30 +21,31 @@ export default function ScenarioGraph({
   inSceneMap,
   inGPath,
   onLoaded,
+  className = ""
 }) {
   /**
    * Adapted ELkjs code
    * Accessed: 10/09/2025
    * https://reactflow.dev/examples/layout/elkjs
    */
-
   const [direction, setDirection] = useState("DOWN");
   const elk = new ELK();
   const elkOptions = {
     "elk.algorithm": "layered",
     "elk.layered.spacing.nodeNodeBetweenLayers":
-      direction === "RIGHT" ? "300" : "200",
+    direction === "RIGHT" ? "300" : "200",
     "elk.spacing.nodeNode": "200",
     "elk.direction": direction,
     "org.eclipse.elk.layered.nodePlacement.bk.fixedAlignment": "BALANCED",
   };
-
+  
   const { fitView } = useReactFlow();
   const [measured, setMeasured] = useState(false);
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
   const [sizes, setSizes] = useState({});
   const [currentIdx, setCurrentIdx] = useState(0);
+  const [isLoaded, setIsLoaded] = useState(false);
 
   // Set up initial nodes and update edges with the group path if it exists
   const [newEdges, setNewEdges] = useState([]);
@@ -159,7 +160,7 @@ export default function ScenarioGraph({
         setNodes(layoutedNodes);
         setEdges(layoutedEdges);
         fitView();
-        onLoaded();
+        // onLoaded();
         handleNodeHighlighting();
       }
     );
@@ -172,10 +173,14 @@ export default function ScenarioGraph({
    *  Could make the nodes be grayed out and only show them normally if the group has visited them, makes it easier to visualize progress
    */
   return (
-    <div className="h-[700px]">
+    <div className={`${className}`}>
       <span className="text-sm opacity-80">
         NB: Node positions are not saved if moved around
       </span>
+      <br />
+      {/* {!graphLoading && nodes.length == 0 && (
+        <span className="text-error">No scenes hae been added to this scenario. Head back to the edit page and add some scenes.</span>
+      )} */}
       <ReactFlow
         className={`border`}
         nodes={nodes}
@@ -186,7 +191,6 @@ export default function ScenarioGraph({
         onEdgesChange={onEdgesChange}
         connectionLineType={ConnectionLineType.SmoothStep}
         fitView
-        // nodesDraggable={false}
         nodesConnectable={false}
         elementsSelectable={false}
       >
@@ -251,7 +255,7 @@ export default function ScenarioGraph({
         </Panel>
         <Background />
       </ReactFlow>
-    </div>
+      </div>
   );
 }
 

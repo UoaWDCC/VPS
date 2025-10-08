@@ -66,86 +66,77 @@ const DashGroupTable = ({ groupInfo, rowClick }) => {
   );
 
   return (
-    <div className={classes.root}>
-      <Paper className="overflow-x-auto">
+    <div className="">
+      <Paper className=" border border-(--color-base-content)">
         <Typography variant="h5" component="h1" className={classes.heading}>
           {mode == "groups" ? "Group Table" : "Group Members"}
         </Typography>
         <TableContainer>
-          <Table
-            stickyHeader
-            className={
-              mode == "groups"
-                ? "sm:min-w-[80vw] lg:min-w-[90vw]"
-                : "sm:min-w-[80vw] lg:min-w-[40vw]"
-            }
-          >
+          <Table sx={{ tableLayout: "auto" }} stickyHeader>
             <TableHead>
-              <TableRow>
-                {mode == "groups" ? (
-                  <>
-                    <TableCell>
-                      <TableSortLabel
-                        active={orderBy === "groupNum"}
-                        direction={orderBy === "groupNum" ? order : "asc"}
-                        onClick={() => handleRequestSort("groupNum")}
-                      >
-                        Group Number/Name
-                      </TableSortLabel>
-                    </TableCell>
-                    <TableCell>
-                      <TableSortLabel
-                        active={orderBy === "groupSize"}
-                        direction={orderBy === "groupSize" ? order : "asc"}
-                        onClick={() => handleRequestSort("groupSize")}
-                      >
-                        Number of Members
-                      </TableSortLabel>
-                    </TableCell>
-                    <TableCell>Members - [Role]</TableCell>
-                    <TableCell>
-                      <TableSortLabel
-                        active={orderBy === "groupStarted"}
-                        direction={orderBy === "groupStarted" ? order : "asc"}
-                        onClick={() => handleRequestSort("groupStarted")}
-                      >
-                        Started
-                      </TableSortLabel>
-                    </TableCell>
-                    <TableCell>View Progress</TableCell>
-                  </>
-                ) : (
-                  <>
-                    <TableCell>
-                      <TableSortLabel
-                        active={orderBy === "name"}
-                        direction={orderBy === "name" ? order : "asc"}
-                        onClick={() => handleRequestSort("name")}
-                      >
-                        Name
-                      </TableSortLabel>
-                    </TableCell>
-                    <TableCell>
-                      <TableSortLabel
-                        active={orderBy === "email"}
-                        direction={orderBy === "email" ? order : "asc"}
-                        onClick={() => handleRequestSort("email")}
-                      >
-                        Email
-                      </TableSortLabel>
-                    </TableCell>
-                    <TableCell>
-                      <TableSortLabel
-                        active={orderBy === "role"}
-                        direction={orderBy === "role" ? order : "asc"}
-                        onClick={() => handleRequestSort("role")}
-                      >
-                        Role
-                      </TableSortLabel>
-                    </TableCell>
-                  </>
-                )}
-              </TableRow>
+              {mode == "groups" ? (
+                <TableRow>
+                  <TableCell>
+                    <TableSortLabel
+                      active={orderBy === "groupNum"}
+                      direction={orderBy === "groupNum" ? order : "asc"}
+                      onClick={() => handleRequestSort("groupNum")}
+                    >
+                      Group Number/Name
+                    </TableSortLabel>
+                  </TableCell>
+                  <TableCell>
+                    <TableSortLabel
+                      active={orderBy === "groupSize"}
+                      direction={orderBy === "groupSize" ? order : "asc"}
+                      onClick={() => handleRequestSort("groupSize")}
+                    >
+                      Number of Members
+                    </TableSortLabel>
+                  </TableCell>
+                  <TableCell>Members - [Role]</TableCell>
+                  <TableCell>
+                    <TableSortLabel
+                      active={orderBy === "groupStarted"}
+                      direction={orderBy === "groupStarted" ? order : "asc"}
+                      onClick={() => handleRequestSort("groupStarted")}
+                    >
+                      Started
+                    </TableSortLabel>
+                  </TableCell>
+                  <TableCell>View Progress</TableCell>
+                </TableRow>
+              ) : (
+                <TableRow>
+                  <TableCell>
+                    <TableSortLabel
+                      active={orderBy === "name"}
+                      direction={orderBy === "name" ? order : "asc"}
+                      onClick={() => handleRequestSort("name")}
+                    >
+                      Name
+                    </TableSortLabel>
+                  </TableCell>
+                  <TableCell>
+                    <TableSortLabel
+                      active={orderBy === "email"}
+                      direction={orderBy === "email" ? order : "asc"}
+                      onClick={() => handleRequestSort("email")}
+                    >
+                      Email
+                    </TableSortLabel>
+                  </TableCell>
+                  <TableCell>
+                    <TableSortLabel
+                      active={orderBy === "role"}
+                      direction={orderBy === "role" ? order : "asc"}
+                      onClick={() => handleRequestSort("role")}
+                    >
+                      Role
+                    </TableSortLabel>
+                  </TableCell>
+                </TableRow>
+              )}
             </TableHead>
             <TableBody>
               {mode == "groups"
