@@ -1,55 +1,48 @@
-import React from "react";
+import { useEffect, useRef } from "react";
+import { createPortal } from "react-dom";
 
-/**
- * Component used to a display a model on the screen.
- *
- * @component
- * @example
- * const title = "Title"
- * const dialogueAction = { ... }
- * const isShowing = false
- * function hide() {
- *   console.log("Hidden.")
- * }
- * return (
- *   <ModalDialogue title={title} dialogueAction={dialogueAction} isShowing={isShowing} hide={hide} >
- *     { ... }
- *   </ModalDialogue>
- * )
- */
-export default function ModalDialogue({
-  title,
-  children,
-  dialogueAction,
-  isShowing,
-  hide,
-}) {
+// NOTE: this is unusual on purpose, so we get the full benefits of the native dialog element, notably esc behaviour and auto close for form buttons
+
+function ModalDialog({ title, children, open, onClose, wide = false }) {
+  const dialogRef = useRef(null);
+
+  useEffect(() => {
+    const dialog = dialogRef.current;
+    if (!dialog) return;
+
+    if (open && !dialog.open) dialog.showModal();
+    else if (!open && dialog.open) dialog.close();
+  }, [open]);
+
+  useEffect(() => {
+    const dialog = dialogRef.current;
+    if (!dialog) return;
+
+    const handleClose = (e) => {
+      onClose?.(e);
+    };
+
+    dialog.addEventListener("close", handleClose);
+    return () => dialog.removeEventListener("close", handleClose);
+  }, [onClose]);
+
+  if (!open) return null;
+
   return (
-    <div>
-      {isShowing && (
-        <dialog id="modal" className="modal modal-open">
-          <form
-            method="dialog"
-            className="modal-box relative max-w-lg flex flex-col items-center"
+    createPortal(
+      <dialog ref={dialogRef} id="modal" className="modal font-ibm">
+        <form method="dialog" className={`modal-box flex flex-col text-m max-h-8/10 ${wide ? "max-w-[64rem]" : "overflow-y-visible"}`} tabIndex={0}>
+          <button
+            className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2"
           >
-            <button
-              className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2 text-black"
-              onClick={hide}
-            >
-              ✕
-            </button>
-            <h3 className="font-bold text-lg text-center text-black">
-              {title}
-            </h3>
-            <div className="py-4 max-h-64 overflow-y-auto overflow-x-hidden text-center">
-              {children}
-            </div>
-            <div className="modal-action w-full flex justify-center">
-              {dialogueAction}
-            </div>
-          </form>
-        </dialog>
-      )}
-    </div>
+            ✕
+          </button>
+          <h3 className="font-bold text-m">{title}</h3>
+          <div className="mt-[0.5rem] min-h-0 flex-1 no-scrollbar">{children}</div>
+        </form>
+      </dialog>
+      , document.getElementById("modal-portal"))
   );
 }
+
+export default ModalDialog;

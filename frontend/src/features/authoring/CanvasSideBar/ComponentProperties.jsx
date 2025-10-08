@@ -24,8 +24,9 @@ export default function ComponentProperties({ component }) {
     if (component?.nextScene !== value) setValue(component?.nextScene);
   }, [component])
 
-  function saveLink() {
-    modifyComponentProp(component.id, "nextScene", value);
+  function saveLink(v) {
+    setValue(v);
+    modifyComponentProp(component.id, "nextScene", v);
   }
 
   if (!component?.clickable) return null;
@@ -38,7 +39,7 @@ export default function ComponentProperties({ component }) {
         <div className="collapse-content text--1 bg-base-200">
           <fieldset className="fieldset pt-2">
             <label className="label">Next Scene</label>
-            <SelectInput nullable values={scenes.map(s => s._id)} value={value} onChange={setValue} onBlur={saveLink} display={(v) => scenes.find(s => s._id === v)?.name} />
+            <SelectInput nullable values={scenes.map(s => s._id)} value={value} onChange={saveLink} display={(v) => scenes.find(s => s._id === v)?.name} />
           </fieldset>
         </div>
       </div>

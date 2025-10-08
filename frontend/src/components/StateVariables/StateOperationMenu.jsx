@@ -12,8 +12,10 @@ import SelectInput from "../../features/authoring/components/Select";
  */
 const StateOperationMenu = ({ component }) => {
 
+  const [createOpen, setCreateOpen] = useState(false);
+
   function createNew() {
-    document.getElementById('create_modal').showModal();
+    setCreateOpen(true);
   }
 
   return (
@@ -36,9 +38,7 @@ const StateOperationMenu = ({ component }) => {
           ))}
         </div>
       </div>
-      <dialog id="create_modal" className="modal">
-        <CreateStateOperation component={component} />
-      </dialog>
+      <CreateStateOperation component={component} open={createOpen} setOpen={setCreateOpen} />
     </>
   );
 };

@@ -14,6 +14,7 @@ import StateOperationForm from "./StateOperationForm";
 import { getDefaultValue, stateTypes, validOperations } from "./stateTypes";
 import { modifyComponentProp } from "../../features/authoring/scene/operations/component";
 import SelectInput from "../../features/authoring/components/Select";
+import ModalDialog from "../ModalDialogue";
 
 /**
  * Component used for creating state operations
@@ -21,7 +22,7 @@ import SelectInput from "../../features/authoring/components/Select";
  *
  * @component
  */
-const CreateStateOperation = ({ component }) => {
+const CreateStateOperation = ({ component, open, setOpen }) => {
   const { stateVariables } = useContext(ScenarioContext);
 
   const [selectedState, setSelectedState] = useState(null);
@@ -75,9 +76,12 @@ const CreateStateOperation = ({ component }) => {
   const isSubmittable = selectedState && operation && value != null;
 
   return (
-    <div className="modal-box" tabIndex={0}>
-      <h3 className="font-bold text-m">Create State Operation</h3>
-      <fieldset className="fieldset mt-[0.5rem]">
+    <ModalDialog
+      title="Create State Operation"
+      open={open}
+      onClose={() => setOpen(false)}
+    >
+      <fieldset className="fieldset">
         <label className="label">State Variable</label>
         <SelectInput values={stateVariables} value={selectedState} display={(s) => s.name} onChange={onVariableChange} />
         {selectedState ?
@@ -99,14 +103,10 @@ const CreateStateOperation = ({ component }) => {
           </>
           : null}
       </fieldset>
-      <div className="modal-action">
-        <form method="dialog" className="gap-2 flex">
-          {/* if there is a button in form, it will close the modal */}
-          <button className="btn">Cancel</button>
-          <button className={`btn ${!isSubmittable && "btn-disabled"}`} onClick={handleSubmit}>Create</button>
-        </form>
+      <div className="modal-action flex gap-2">
+        <button className={`btn ${!isSubmittable && "btn-disabled"}`} onClick={handleSubmit}>Create</button>
       </div>
-    </div>
+    </ModalDialog>
   );
 };
 
