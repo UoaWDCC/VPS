@@ -6,6 +6,7 @@ import AuthenticationContext from "../../context/AuthenticationContext";
 import toast from "react-hot-toast";
 import StateVariableForm from "./StateVariableForm";
 import ScenarioContext from "../../context/ScenarioContext";
+import SelectInput from "../../features/authoring/components/Select";
 
 const DEFAULT_STATE_TYPE = stateTypes.STRING;
 
@@ -23,7 +24,7 @@ const CreateStateVariable = ({ scenarioId }) => {
   const { setStateVariables } = useContext(ScenarioContext);
 
   // Info for the new state variable
-  const [name, setName] = useState("");
+  const [name, setName] = useState(null);
   const [type, setType] = useState(DEFAULT_STATE_TYPE);
   const [value, setValue] = useState(getDefaultValue(DEFAULT_STATE_TYPE));
 
@@ -32,13 +33,10 @@ const CreateStateVariable = ({ scenarioId }) => {
     setValue(getDefaultValue(type));
   }, [type]);
 
-  const handleSubmit = (e) => {
+  function handleSubmit(e) {
     e.preventDefault();
-    const newStateVariable = {
-      name,
-      type,
-      value,
-    };
+
+    const newStateVariable = { name, type, value };
     api
       .post(user, `/api/scenario/${scenarioId}/stateVariables`, {
         newStateVariable,
@@ -56,31 +54,49 @@ const CreateStateVariable = ({ scenarioId }) => {
       });
   };
 
+  function parseValue(e) {
+    const val = e.target.value;
+    if (type === stateTypes.NUMBER) setValue(Number(val));
+    else setValue(val);
+  }
+
+  const isSubmittable = name && type;
+
   return (
-    <form>
-      <Grid container alignItems="center" justifyContent="space-between">
-        <Grid item xs>
-          <StateVariableForm
-            name={name}
-            type={type}
-            value={value}
-            setName={setName}
-            setType={setType}
-            setValue={setValue}
+    <fieldset className="fieldset bg-base-200 border-base-300 rounded-box border p-4">
+      <legend className="fieldset-legend">New Variable</legend>
+      <div className="flex wrap gap-xs">
+        <div className="flex flex-col flex-1">
+          <label className="label mb-1">Name</label>
+          <input
+            type="text"
+            value={name ?? ""}
+            onChange={e => setName(e.target.value)}
+            placeholder="Name"
+            className="input"
           />
-        </Grid>
-        <Grid item>
-          <Button
-            type="submit"
-            variant="contained"
-            color="primary"
-            onClick={handleSubmit}
-          >
-            Create
-          </Button>
-        </Grid>
-      </Grid>
-    </form>
+        </div>
+        <div className="flex flex-col flex-1">
+          <label className="label mb-1">Type</label>
+          <SelectInput value={type} values={["string", "number", "boolean"]} onChange={setType} />
+        </div>
+        <div className="flex flex-col flex-1">
+          <label className="label mb-1">Initial Value</label>
+          {type === stateTypes.BOOLEAN ?
+            <SelectInput value={value} values={["true", "false"]} onChange={setValue} />
+            :
+            <input
+              type={type === stateTypes.NUMBER ? "number" : "text"}
+              value={value ?? ""}
+              onChange={parseValue}
+              placeholder="Value"
+              className="input"
+            />
+          }
+        </div>
+      </div>
+      <button className={`ml-auto btn btn-xs btn-phantom float-right ${!isSubmittable && "btn-disabled"}`} onClick={handleSubmit}>Create</button>
+    </fieldset>
   );
 };
 

@@ -46,6 +46,10 @@ export default function App() {
         }}
       />
 
+      {/* DialogModal container */}
+      <div id="modal-portal" className="fixed inset-0 z-[9999] pointer-events-none" />
+
+      {/* ContextMenu container */}
       <ContextMenuPortal />
 
       {/* Routes */}

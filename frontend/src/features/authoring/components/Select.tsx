@@ -7,7 +7,7 @@ interface SelectInputProps {
 }
 
 function SelectInput(
-    { values, value, display, nullable = false, onChange, ...props }: SelectInputProps) {
+    { values, value, display, nullable = false, onChange }: SelectInputProps) {
 
     const render = display ? display : (v: string) => v;
 
@@ -17,7 +17,7 @@ function SelectInput(
     }
 
     return (
-        <div className="dropdown flex-1" {...props} >
+        <div className="dropdown flex-1" >
             <div tabIndex={0} role="button" className="justify-start input mb-1 font-normal join-item w-full">
                 {value ? render(value) : "None"}
             </div>

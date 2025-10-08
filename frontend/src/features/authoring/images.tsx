@@ -10,6 +10,7 @@ import { defaults } from "./scene/operations/component";
 import type { ImageComponent } from "./types";
 import { getDownloadURL, getStorage, ref, uploadBytes } from "firebase/storage";
 import { api, handleGeneric } from "../../util/api";
+import ModalDialog from "../../components/ModalDialogue";
 
 const storage = getStorage();
 const db = getFirestore();
@@ -102,8 +103,9 @@ function ImageCreateMenu() {
     const { scenarioId } = useParams();
     const [selectedImage, setSelectedImage] = useState<Image | null>(null);
 
+    const [modalOpen, setModalOpen] = useState(false);
+
     const fileInputRef = useRef<HTMLInputElement | null>(null);
-    const dialogRef = useRef<HTMLDialogElement | null>(null);
 
     const imagesQuery = useQuery({
         queryFn: fetchImages,
@@ -116,7 +118,7 @@ function ImageCreateMenu() {
     };
 
     function showModal() {
-        dialogRef.current?.showModal();
+        setModalOpen(true);
     }
 
     function handleSubmit() {
@@ -139,23 +141,19 @@ function ImageCreateMenu() {
             onChange={handleFileChange}
         />
 
-        <dialog id="image-picker" className="modal" ref={dialogRef}>
-            <div className="modal-box">
-                <h3 className="font-bold text-lg">Select Image</h3>
-                <div className="py-2"></div>
-                <ImageListContainer
-                    data={imagesQuery.data}
-                    selectedId={selectedImage?.id}
-                    onItemSelected={setSelectedImage}
-                />
-                <div className="modal-action">
-                    <form method="dialog">
-                        <button className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
-                        <button className="btn" onClick={handleSubmit}>Add</button>
-                    </form>
-                </div>
+        <ModalDialog title="Select Image" open={modalOpen} onClose={() => setModalOpen(false)}>
+            <ImageListContainer
+                data={imagesQuery.data}
+                selectedId={selectedImage?.id}
+                onItemSelected={setSelectedImage}
+            />
+            <div className="modal-action">
+                <form method="dialog">
+                    <button className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
+                    <button className="btn" onClick={handleSubmit}>Add</button>
+                </form>
             </div>
-        </dialog>
+        </ModalDialog>
     </>;
 }
 
