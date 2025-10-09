@@ -12,7 +12,7 @@ import GenericErrorPage from "../features/status/GenericErrorPage";
 import toast from "react-hot-toast";
 import useVisualScene from "../features/authoring/stores/visual";
 import { getScene } from "../features/authoring/scene/scene";
-import { uploadFiles } from "../firebase/storage";
+import { parseMedia } from "../firebase/storage";
 
 async function getAllScenes(user, id) {
   const res = await api.get(user, `api/scenario/${id}/scene/all`)
@@ -32,7 +32,8 @@ function deleteScene(user, scenarioId, sceneId) {
 
 async function saveScene(user, scenarioId, scene) {
   const components = Object.values(scene.components);
-  await api.put(user, `/api/scenario/${scenarioId}/scene/${scene._id}`, { ...scene, components });
+  const parsed = await parseMedia(components, scenarioId, scene._id);
+  await api.put(user, `/api/scenario/${scenarioId}/scene/${scene._id}`, { ...scene, components: parsed });
 }
 
 /**

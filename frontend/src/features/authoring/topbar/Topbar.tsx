@@ -16,7 +16,7 @@ import StateVariableMenu from "../../../components/StateVariables/StateVariableM
 import ImageCreateMenu from "../images";
 import ShapeCreateMenu from "./ShapeCreateMenu";
 
-function Topbar({ saveText, save }: { saveText: string, save: () => void }) {
+function Topbar({ saving, save }: { saving: boolean, save: () => void }) {
   const selected = useEditorStore(state => state.selected);
   const setMode = useEditorStore(state => state.setMode);
   const setCreateType = useEditorStore(state => state.setCreateType);
@@ -73,7 +73,7 @@ function Topbar({ saveText, save }: { saveText: string, save: () => void }) {
           </>}
         </>
       )}
-      <li className="ml-auto text-xs"><a onClick={save}>{saveText}</a></li>
+      <li className={`ml-auto text-xs ${saving && "menu-disabled"}`}><a onClick={save}>{saving ? "Saving" : "Save"}</a></li>
     </ul>
   </>;
 }
