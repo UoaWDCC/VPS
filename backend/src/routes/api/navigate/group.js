@@ -209,7 +209,7 @@ export const groupNavigate = async (req) => {
 
   // if the button does not lead to another scene or component does not exist, stay in the current scene
   let scenes = null;
-  if (component?.nextScene === currentScene) {
+  if (component?.nextScene !== currentScene) {
     const nextScene = component.nextScene;
     [, , , scenes] = await Promise.all([
       addSceneToPath(group._id, currentScene, nextScene),
