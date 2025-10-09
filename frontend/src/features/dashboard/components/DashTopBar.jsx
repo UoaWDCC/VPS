@@ -26,7 +26,6 @@ export default function DashTopBar({ back = "/", children = [] }) {
       <div className={styles.topBar}>
         <ul className={styles.leftTopBarList}>
           <li className={styles.listItem}>
-            (
             <button
               className="btn vps w-[100px]"
               onClick={() => {
@@ -35,7 +34,6 @@ export default function DashTopBar({ back = "/", children = [] }) {
             >
               Back
             </button>
-            )
           </li>
         </ul>
         <div className={styles.rightTopBarList}>{children}</div>

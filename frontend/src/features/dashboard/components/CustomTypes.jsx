@@ -6,7 +6,7 @@ import { Badge } from "@material-ui/core";
 
 const NodeBase = ({ data }) => (
   <div
-    className={`bg-black w-40 text-center ${data.visited ? "" : "brightness-60"}`}
+    className={`bg-black w-40 text-center ${data.visited ? "" : "brightness-60"} ${data.isHighlighted ? "border-red-500 border-4" : ""}`}
   >
     <div>
       <Thumbnail components={data.components} />
