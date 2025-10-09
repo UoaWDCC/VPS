@@ -1,5 +1,5 @@
 import type { VisualDocument } from "./types";
-import Cursor from "./Cursor";
+import Cursor from "./Cursor.tsx";
 import Highlight from "./Highlight";
 import Rectangle from "../canvas/Rectangle";
 import { buildStyle } from "./build";
