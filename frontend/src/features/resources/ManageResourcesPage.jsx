@@ -371,66 +371,8 @@ export default function ManageResourcesPage() {
 
         {/* RIGHT: File list and preview */}
         <div className="card bg-base-100 shadow-md">
-          <div className="card-body gap-4">
-            <div className="flex items-center gap-2">
-              <h2 className="card-title flex-1">Files</h2>
-              <input
-                type="text"
-                placeholder="Search files..."
-                className="input input-bordered input-sm w-full max-w-xs"
-                value={filter}
-                onChange={(e) => setFilter(e.target.value)}
-              />
-            </div>
-
-            {filteredFiles.length === 0 ? (
-              <div className="alert">
-                <span>No files yet. Use the + on the left to upload.</span>
-              </div>
-            ) : (
-              <div className="overflow-auto max-h-56">
-                <table className="table table-zebra">
-                  <thead>
-                    <tr>
-                      <th>Name</th>
-                      <th>Group</th>
-                      <th className="text-right">Size</th>
-                      <th></th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {filteredFiles.map((f) => (
-                      <tr key={f.id}>
-                        <td>
-                          <button
-                            className="link"
-                            onClick={() => setSelectedFile(f)}
-                          >
-                            {f.name}
-                          </button>
-                        </td>
-                        <td className="text-xs opacity-70">{f.groupName}</td>
-                        <td className="text-right text-xs">
-                          {formatBytes(f.size)}
-                        </td>
-                        <td className="text-right">
-                          <button
-                            className="btn btn-ghost btn-xs text-error"
-                            onClick={() => removeFile(f.id)}
-                          >
-                            Delete
-                          </button>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            )}
-
-            <div className="divider my-2" />
-            <Preview file={selectedFile} makeDownloadUrl={makeDownloadUrl} />
-          </div>
+          <div className="divider my-2" />
+          <Preview file={selectedFile} makeDownloadUrl={makeDownloadUrl} />
         </div>
       </div>
     </ScreenContainer>
