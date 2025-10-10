@@ -92,7 +92,8 @@ export default function AuthoringToolPage() {
   async function save() {
     if (saving) return; // we dont want to interrupt in progress saves (usually uploading media)
     setSaving(true);
-    await saveScene(structuredClone(getScene()));
+    const clone = structuredClone(getScene());
+    await saveScene({ ...clone, components: Object.values(clone.components) });
     setTimeout(() => setSaving(false), 5000); // debounce saves
   }
 

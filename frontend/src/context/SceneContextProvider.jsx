@@ -31,7 +31,7 @@ function deleteScene(user, scenarioId, sceneId) {
 };
 
 async function saveScene(user, scenarioId, scene) {
-  const components = Object.values(scene.components);
+  const components = scene.components;
   const parsed = await parseMedia(components, scenarioId, scene._id);
   await api.put(user, `/api/scenario/${scenarioId}/scene/${scene._id}`, { ...scene, components: parsed });
 }
