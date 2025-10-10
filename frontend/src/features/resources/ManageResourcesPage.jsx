@@ -1,4 +1,4 @@
-import React, { useMemo, useRef, useState, useEffect } from "react";
+import React, { useRef, useState, useEffect } from "react";
 import { getAuth } from "firebase/auth";
 import axios from "axios";
 import Papa from "papaparse";
@@ -82,7 +82,6 @@ export default function ManageResourcesPage() {
   // Groups (each with files)
   const [groups, setGroups] = useState([]);
   const [selectedFile, setSelectedFile] = useState(null);
-  const [filter, setFilter] = useState("");
 
   // Load groups and files
   useEffect(() => {
@@ -127,29 +126,6 @@ export default function ManageResourcesPage() {
       cancelled = true;
     };
   }, [scenarioId]);
-
-  const allFiles = useMemo(() => {
-    const out = [];
-    for (const g of groups) {
-      for (const f of g.files || [])
-        out.push({
-          ...f,
-          groupId: g.id,
-          groupName: g.name,
-        });
-    }
-    return out;
-  }, [groups]);
-
-  const filteredFiles = useMemo(() => {
-    if (!filter) return allFiles;
-    const q = filter.toLowerCase();
-    return allFiles.filter(
-      (f) =>
-        f.name.toLowerCase().includes(q) ||
-        f.groupName.toLowerCase().includes(q)
-    );
-  }, [allFiles, filter]);
 
   async function makeDownloadUrl(fileId) {
     const user = getAuth().currentUser;
@@ -493,12 +469,4 @@ function Preview({ file, makeDownloadUrl }) {
       )}
     </div>
   );
-}
-
-function formatBytes(bytes) {
-  if (!+bytes) return "0 B";
-  const k = 1024;
-  const sizes = ["B", "KB", "MB", "GB", "TB"];
-  const i = Math.floor(Math.log(bytes) / Math.log(k));
-  return `${(bytes / Math.pow(k, i)).toFixed(2)} ${sizes[i]}`;
 }
