@@ -16,6 +16,11 @@ import { stateTypes, validOperations } from "./stateTypes";
 const EditStateOperation = ({ component, operationIndex, stateOperation }) => {
   const { stateVariables } = useContext(ScenarioContext);
 
+  if (!stateVariables) {
+    return null;
+  }
+  
+
   const [operation, setOperation] = useState(stateOperation.operation)
   const [value, setValue] = useState(stateOperation.value);
 
