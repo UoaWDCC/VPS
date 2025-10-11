@@ -263,7 +263,8 @@ export function useGet(url, setData, requireAuth = true, skipRequest = false) {
   const [isLoading, setLoading] = useState(false);
   const [version, setVersion] = useState(0);
   const { getUserIdToken, user } = useContext(AuthenticationContext);
-
+  // Could add a error state for the response etc to check on the frontend side
+  const [error, setError] = useState(null);
   function reFetch() {
     setVersion(version + 1);
   }
@@ -273,6 +274,7 @@ export function useGet(url, setData, requireAuth = true, skipRequest = false) {
 
     async function fetchData() {
       setLoading(true);
+      setError(null);
 
       let config = {};
       let token = null;
@@ -296,7 +298,7 @@ export function useGet(url, setData, requireAuth = true, skipRequest = false) {
           err.response?.status,
           err.message
         );
-
+        setError("fail");
         // If we get a 401 and have a user object, try to refresh the token
         if (err.response?.status === 401 && user && requireAuth) {
           console.log(`Attempting token refresh for ${url}`);
@@ -320,6 +322,7 @@ export function useGet(url, setData, requireAuth = true, skipRequest = false) {
             }
           } catch (retryError) {
             console.log(`Retry request failed for ${url}:`, retryError);
+            setError("fail");
           }
         }
       }
@@ -337,7 +340,7 @@ export function useGet(url, setData, requireAuth = true, skipRequest = false) {
     };
   }, [url, skipRequest, version]);
 
-  return { isLoading, reFetch };
+  return { isLoading, reFetch, error };
 }
 
 /**

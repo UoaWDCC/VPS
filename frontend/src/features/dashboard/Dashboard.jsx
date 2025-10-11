@@ -1,7 +1,7 @@
 import ScreenContainer from "../../components/ScreenContainer/ScreenContainer";
 import { useGet } from "hooks/crudHooks";
 import { useParams, useHistory, useRouteMatch, Switch } from "react-router-dom";
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo, useContext } from "react";
 import DashTopBar from "./components/DashTopBar";
 import HelpButton from "../../components/HelpButton";
 import DashGroupTable from "./components/table/DashGroupTable";
@@ -13,6 +13,7 @@ import CreateGraphData from "./utils/GraphHelper";
 import ScenarioGraph from "./components/ScenarioGraph";
 import ProtectedRoute from "../../firebase/ProtectedRoute";
 import ViewGroup from "./components/ViewGroup";
+import AuthenticationContext from "../../context/AuthenticationContext";
 /**
  * Could maybe add some info about the scenario? Who created what time, last edited, thumbnail of the scenario and an overlay edit button * which directs you to the edit page?
  *
@@ -24,16 +25,24 @@ export default function Dashboard() {
   const { scenarioId } = useParams();
   const history = useHistory();
   const [scenarioGroupInfo, setScenarioGroupInfo] = useState([]);
-  const [scenario, setCurrentSecnario] = useState({});
+  const [scenario, setCurrentScenario] = useState({});
   const [scenes, setScenes] = useState([]);
+<<<<<<< Updated upstream
   const [accessList, setAccessList] = useState(null);
   useGet(`api/scenario/${scenarioId}`, setCurrentSecnario);
+=======
+  const {VpsUser} = useContext(AuthenticationContext);
+  // These routes already have auth applied 
+  const {isLoading: scenarioLoading, error: errorMsg} = useGet(`api/scenario/${scenarioId}`, setCurrentScenario);
+>>>>>>> Stashed changes
   useGet(`api/scenario/${scenarioId}/scene/all`, setScenes);
+  // console.log(scenario)
 
   const { isLoading } = useGet(
     `/api/group/scenario/${scenarioId}`,
     setScenarioGroupInfo
   );
+  console.log(errorMsg)
   // Check what page we are on
   const matchViewGroup = useRouteMatch(`${path}/view-group/:groupId`);
   const backURL = matchViewGroup ? url : "/";
