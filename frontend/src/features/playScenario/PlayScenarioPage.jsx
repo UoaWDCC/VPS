@@ -32,7 +32,9 @@ const navigate = async (
     data: { currentScene, addFlags, removeFlags, componentId },
   };
   const res = await axios.request(config);
-  res.data.scenes.forEach((scene) => sceneCache.set(scene._id, scene));
+  if (res.data.scenes) {
+    res.data.scenes.forEach((scene) => sceneCache.set(scene._id, scene));
+  }
   return {
     newSceneId: res.data.active,
     stateVariables: res.data.stateVariables,
@@ -100,7 +102,7 @@ export default function PlayScenarioPage() {
         setStateVariables(stateVariables);
         setStateVersion(newStateVersion);
       }
-      if (!sceneId) {
+      if (!sceneId && newSceneId) {
         setSceneId(newSceneId);
       }
     } catch (e) {

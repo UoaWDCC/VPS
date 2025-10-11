@@ -1,12 +1,18 @@
 import ScreenContainer from "../../components/ScreenContainer/ScreenContainer";
 import { useGet } from "hooks/crudHooks";
-import { useParams, useHistory } from "react-router-dom";
-import { useState, useContext } from "react";
-import ScenarioContext from "../../context/ScenarioContext";
+import { useParams, useHistory, useRouteMatch, Switch } from "react-router-dom";
+import { useEffect, useState, useMemo } from "react";
 import DashTopBar from "./components/DashTopBar";
 import HelpButton from "../../components/HelpButton";
-import TestTable from "./components/Table";
-
+import DashGroupTable from "./components/DashGroupTable";
+import GroupsIcon from "@mui/icons-material/Groups";
+import PlayArrowIcon from "@mui/icons-material/PlayArrow";
+import HourglassEmptyIcon from "@mui/icons-material/HourglassEmpty";
+import { ReactFlowProvider } from "@xyflow/react";
+import CreateGraphData from "./utils/GraphHelper";
+import ScenarioGraph from "./components/ScenarioGraph";
+import ProtectedRoute from "../../firebase/ProtectedRoute";
+import ViewGroup from "./components/ViewGroup";
 /**
  * Could maybe add some info about the scenario? Who created what time, last edited, thumbnail of the scenario and an overlay edit button * which directs you to the edit page?
  *
@@ -14,19 +20,63 @@ import TestTable from "./components/Table";
  */
 
 export default function Dashboard() {
+  const { path, url } = useRouteMatch();
   const { scenarioId } = useParams();
   const history = useHistory();
   const [scenarioGroupInfo, setScenarioGroupInfo] = useState([]);
-  const { currentScenario } = useContext(ScenarioContext);
+  const [scenario, setCurrentSecnario] = useState({});
+  const [scenes, setScenes] = useState([]);
+  useGet(`api/scenario/${scenarioId}`, setCurrentSecnario);
+  useGet(`api/scenario/${scenarioId}/scene/all`, setScenes);
+
   const { isLoading } = useGet(
     `/api/group/scenario/${scenarioId}`,
     setScenarioGroupInfo
   );
+  // Check what page we are on
+  const matchViewGroup = useRouteMatch(`${path}/view-group/:groupId`);
+  const backURL = matchViewGroup ? url : "/";
+  const isViewGroupMode = Boolean(matchViewGroup);
+  const viewGroupId = matchViewGroup?.params.groupId || 0;
+  const [groupInfo, setGroupInfo] = useState({});
+  const [heading, setHeading] = useState("");
+  useEffect(() => {
+    setHeading(scenario.name);
+  }, [scenario]);
+  // Fetch group data if in view group mode, skips if not
+  useGet(
+    `/api/group/retrieve/${viewGroupId}`,
+    setGroupInfo,
+    true,
+    !isViewGroupMode
+  );
+
   const viewGroup = async (groupId) => {
-    history.push(`/dashboard/${scenarioId}/view-group/${groupId}`);
+    history.push(`${url}/view-group/${groupId}`);
   };
 
-  const DashGroupInfo = ({ groupData }) => {
+  // Resets the current groupInfo when the mode is not the view group mode
+  useEffect(() => {
+    if (isViewGroupMode) return;
+    setGroupInfo({});
+  }, [matchViewGroup]);
+
+  // Changes the heading depending on state of page
+  useEffect(() => {
+    if (!isViewGroupMode) {
+      setHeading(scenario.name);
+      return;
+    }
+    if (Object.keys(groupInfo).length == 0) return;
+    setHeading(`Group: ${groupInfo.users[0].name}`);
+  }, [groupInfo]);
+
+  // Create the graph data, also passes if the current group info if it's present
+  const { nodes, edges, groupEdges, groupPath, sceneMap } = useMemo(() => {
+    return CreateGraphData(scenes, groupInfo ? groupInfo : []);
+  }, [scenes, groupInfo]);
+
+  const DashGroupInfo = ({ groupData, className }) => {
     const totalGroups = groupData.length;
     const groupsNotStarted = groupData.filter(
       (group) => group.path.length == 0
@@ -34,49 +84,85 @@ export default function Dashboard() {
     const groupsStarted = groupData.filter(
       (group) => group.path.length != 0
     ).length;
-    // Placeholder here, needs an update for when the group completes a scenario it sets a var in the database, probs alr exist but will implement this later
     return (
-      <div className="grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        <div className="bg-white col-auto border rounded-xl p-2 text-center">
-          <h3 className="text-xl font-mona font-bold">Groups</h3>
-          <p className="text-lg">{totalGroups}</p>
+      <div
+        className={`${className} inline-grid lg:stats-vertical xl:stats-horizontal shadow-(--color-base-content-box-shadow) w-full`}
+      >
+        <div className="stat ">
+          <div className="stat-figure text-info">
+            <GroupsIcon />
+          </div>
+          <div className="stat-title">Total Groups</div>
+          <div className="stat-value">{totalGroups}</div>
+          <div className="stat-desc">No. of groups assigned</div>
         </div>
-        <div className="bg-gray-200 col-auto border rounded-xl p-2 text-center">
-          <h3 className="text-xl font-mona font-bold">Not Started</h3>
-          <p className="text-lg">{groupsNotStarted}</p>
+        <div className="stat">
+          <div className="stat-figure text-warning">
+            <HourglassEmptyIcon />
+          </div>
+          <div className="stat-title">Not Started</div>
+          <div className="stat-value">{groupsNotStarted}</div>
+          <div className="stat-desc">No. of groups not started</div>
         </div>
-        <div className="bg-yellow-200 col-auto border rounded-xl p-2 text-center">
-          <h3 className="text-xl font-mona font-bold ">Started</h3>
-          <p className="text-lg">{groupsStarted}</p>
+        <div className="stat">
+          <div className="stat-figure text-success">
+            <PlayArrowIcon />
+          </div>
+          <div className="stat-title">Started</div>
+          <div className="stat-value">{groupsStarted}</div>
+          <div className="stat-desc">No. of groups started</div>
         </div>
       </div>
     );
   };
-  /**
-   * Is it better to just show a loading screen instead of conditionally rendering the content to stop it
-   * flashing?
-   *
-   * Todo: Add a button to the edit page and manage groups thingy :D
-   */
+
   return (
-    <>
-      <ScreenContainer vertical>
-        <DashTopBar>
-          {/* Need to change the help button to maybe be able to pass something down like have a file of help messages which can be accessed and passed down to be page specific */}
-          <HelpButton />
-        </DashTopBar>
-        {!isLoading && (
-          <div className="w-full h-full px-10 py-7 overflow-y-scroll">
-            <h1 className="text-3xl font-mona font-bold my-3 flex items-center gap-3">
-              {scenarioGroupInfo.length == 0
-                ? `No groups assgined for ${currentScenario.name}`
-                : `Viewing ${scenarioGroupInfo.length} Group${scenarioGroupInfo.length == 1 ? "" : "s"} for ${currentScenario.name}`}
-            </h1>
-            <DashGroupInfo groupData={scenarioGroupInfo} />
-            <TestTable groupInfo={scenarioGroupInfo} rowClick={viewGroup} />
+    <ScreenContainer vertical>
+      <DashTopBar back={backURL}>
+        {/* Need to change the help button to maybe be able to pass something down like have a file of help messages which can be accessed and passed down to be page specific */}
+        <HelpButton />
+      </DashTopBar>
+      <div className="h-full px-10 py-7 overflow-y-scroll ">
+        <h1 className="text-3xl font-mona font-bold my-3 flex items-center gap-3">
+          {heading ? heading : <span className="invisible">placeholder</span>}
+        </h1>
+        <div className="flex gap-10">
+          {/* Left side coloumn */}
+          <div className="w-1/2 min-w-0">
+            <Switch>
+              <ProtectedRoute exact path={path}>
+                <DashGroupInfo
+                  className={"lg:stats-horizontal mb-10"}
+                  groupData={scenarioGroupInfo}
+                />
+                {!isLoading && (
+                  <DashGroupTable
+                    groupInfo={scenarioGroupInfo}
+                    rowClick={viewGroup}
+                  />
+                )}
+              </ProtectedRoute>
+              <ProtectedRoute path={`${path}/view-group/:groupId`}>
+                <ViewGroup />
+              </ProtectedRoute>
+            </Switch>
           </div>
-        )}
-      </ScreenContainer>
-    </>
+          {/* Right side coloum - used for graph */}
+          <div className="w-1/2 min-w-0">
+            <h3 className="text-3xl font-mona font-bold">Scenario Overview</h3>
+            <ReactFlowProvider>
+              <ScenarioGraph
+                inNodes={nodes}
+                inEdges={edges}
+                inGPathEdges={groupEdges}
+                inGPath={groupPath}
+                inSceneMap={sceneMap}
+                className="h-[700px]"
+              />
+            </ReactFlowProvider>
+          </div>
+        </div>
+      </div>
+    </ScreenContainer>
   );
 }

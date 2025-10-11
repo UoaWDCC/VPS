@@ -20,14 +20,13 @@ export default function ScenarioGraph({
   inGPathEdges,
   inSceneMap,
   inGPath,
-  onLoaded,
+  className = "",
 }) {
   /**
    * Adapted ELkjs code
    * Accessed: 10/09/2025
    * https://reactflow.dev/examples/layout/elkjs
    */
-
   const [direction, setDirection] = useState("DOWN");
   const elk = new ELK();
   const elkOptions = {
@@ -159,7 +158,6 @@ export default function ScenarioGraph({
         setNodes(layoutedNodes);
         setEdges(layoutedEdges);
         fitView();
-        onLoaded();
         handleNodeHighlighting();
       }
     );
@@ -172,10 +170,14 @@ export default function ScenarioGraph({
    *  Could make the nodes be grayed out and only show them normally if the group has visited them, makes it easier to visualize progress
    */
   return (
-    <div className="h-full">
+    <div className={`${className}`}>
       <span className="text-sm opacity-80">
         NB: Node positions are not saved if moved around
       </span>
+      <br />
+      {/* {!graphLoading && nodes.length == 0 && (
+        <span className="text-error">No scenes hae been added to this scenario. Head back to the edit page and add some scenes.</span>
+      )} */}
       <ReactFlow
         className={`border`}
         nodes={nodes}
@@ -186,13 +188,15 @@ export default function ScenarioGraph({
         onEdgesChange={onEdgesChange}
         connectionLineType={ConnectionLineType.SmoothStep}
         fitView
-        // nodesDraggable={false}
         nodesConnectable={false}
         elementsSelectable={false}
       >
-        <Controls showInteractive={true} />
+        <Controls showInteractive={true} className="" />
         <MiniMap />
-        <Panel position="top-left" className="bg-white p-2 border border-black">
+        <Panel
+          position="top-left"
+          className="bg-(--color-base-100) p-2 shadow-(--color-base-content-box-shadow)"
+        >
           <h3 className="text-lg font-bold font-mono">Legend</h3>
           <div className="flex">
             <div className="pr-3">
@@ -204,7 +208,7 @@ export default function ScenarioGraph({
                 />
               </svg>
             </div>
-            Unvisited Path
+            <p>Unvisited Path</p>
           </div>
           <div className="flex">
             <div className="pr-3">
@@ -216,12 +220,12 @@ export default function ScenarioGraph({
                 />
               </svg>
             </div>
-            Visited Path
+            <p>Visited Path</p>
           </div>
         </Panel>
         <Panel position="top-right" className="flex flex-col gap-2">
           <button
-            className="bg-white text-sm border rounded-lg py-0.5 px-1 hover:cursor-pointer"
+            className="btn btn-sm bg-(--color-base-100) hover:cursor-pointer hover:bg-(--color-primary) border-(--color-base-content)"
             onClick={() => {
               setDirection((prev) => (prev === "DOWN" ? "RIGHT" : "DOWN"));
             }}
@@ -229,7 +233,7 @@ export default function ScenarioGraph({
             Flip
           </button>
           <button
-            className="bg-white text-sm border rounded-lg py-0.5 px-1 hover:cursor-pointer"
+            className="btn btn-sm bg-(--color-base-100) hover:cursor-pointer hover:bg-(--color-primary) border-(--color-base-content)"
             onClick={() => {
               RenderGraph();
             }}
@@ -269,7 +273,7 @@ const PathNavigator = ({ sceneMap, groupPath, idx, setCurrentIdx }) => {
         <p className="">{sceneMap[groupPath[idx]].name}</p>
         <div>
           <button
-            className="bg-white text-black rounded-lg px-2 hover:cursor-pointer hover:bg-gray-200 disabled:opacity-50"
+            className="btn bg-(--color-base-100) text-(--color-base-content) mr-2 hover:bg-(--color-primary) border-(--color-base-content)"
             disabled={idx == 0}
             onClick={() => {
               updateIndex(-1);
@@ -278,7 +282,7 @@ const PathNavigator = ({ sceneMap, groupPath, idx, setCurrentIdx }) => {
             Prev
           </button>
           <button
-            className="bg-white text-black rounded-lg px-2 hover:cursor-pointer hover:bg-gray-200 disabled:opacity-50"
+            className="btn bg-(--color-base-100) text-(--color-base-content) hover:bg-(--color-primary) border-(--color-base-content)"
             disabled={idx + 1 == groupPath.length}
             onClick={() => {
               updateIndex(1);
