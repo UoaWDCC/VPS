@@ -155,6 +155,7 @@ export default function PlayScenarioPage() {
         setAddFlags={setAddFlags}
         setRemoveFlags={setRemoveFlags}
         buttonPressed={buttonPressed}
+        stateVariables={stateVariables}
       />
       <div className="absolute top-2 right-2 z-30 flex items-center gap-2">
         <button
