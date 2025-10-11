@@ -29,35 +29,40 @@ export default function TablePaginationActions(props) {
   };
 
   return (
-    <Box sx={{ flexShrink: 0, ml: 2.5 }}>
-      <IconButton
+    <div className="flex gap-0.5">
+      <button 
+      className="btn btn-xs"
         onClick={handleFirstPageButtonClick}
         disabled={page === 0}
         aria-label="first page"
+
       >
         <FirstPageIcon />
-      </IconButton>
-      <IconButton
+      </button>
+      <button
+      className="btn btn-xs"
         onClick={handleBackButtonClick}
         disabled={page === 0}
         aria-label="previous page"
       >
         <KeyboardArrowLeft />
-      </IconButton>
-      <IconButton
+      </button>
+      <button
+      className="btn btn-xs"
         onClick={handleNextButtonClick}
         disabled={page >= Math.ceil(count / rowsPerPage) - 1}
         aria-label="next page"
       >
         <KeyboardArrowRight />
-      </IconButton>
-      <IconButton
+      </button>
+      <button
+      className="btn btn-xs"
         onClick={handleLastPageButtonClick}
         disabled={page >= Math.ceil(count / rowsPerPage) - 1}
         aria-label="last page"
       >
         <LastPageIcon />
-      </IconButton>
-    </Box>
+      </button>
+    </div>
   );
 }

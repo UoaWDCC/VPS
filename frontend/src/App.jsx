@@ -66,19 +66,11 @@ export default function App() {
                 </ScenarioContextProvider>
               </ProtectedRoute>
 
-              <ProtectedRoute exact path="/">
-                <ScenarioContextProvider>
-                  <ScenarioSelectionPage />
-                </ScenarioContextProvider>
-              </ProtectedRoute>
-
-              <ProtectedRoute path="/dashboard/:scenarioId">
-                <ScenarioContextProvider>
-                  <SceneContextProvider>
+                <ProtectedRoute path="/dashboard/:scenarioId">
+                  <ScenarioContextProvider>
                     <Dashboard />
-                  </SceneContextProvider>
-                </ScenarioContextProvider>
-              </ProtectedRoute>
+                  </ScenarioContextProvider>
+                </ProtectedRoute>
 
               <ScenarioContextProvider>
                 <Switch>

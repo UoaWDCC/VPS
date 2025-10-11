@@ -4,7 +4,7 @@ import { useParams, useHistory, useRouteMatch, Switch } from "react-router-dom";
 import { useEffect, useState, useMemo } from "react";
 import DashTopBar from "./components/DashTopBar";
 import HelpButton from "../../components/HelpButton";
-import DashGroupTable from "./components/DashGroupTable";
+import DashGroupTable from "./components/table/DashGroupTable";
 import GroupsIcon from "@mui/icons-material/Groups";
 import PlayArrowIcon from "@mui/icons-material/PlayArrow";
 import HourglassEmptyIcon from "@mui/icons-material/HourglassEmpty";
@@ -26,6 +26,7 @@ export default function Dashboard() {
   const [scenarioGroupInfo, setScenarioGroupInfo] = useState([]);
   const [scenario, setCurrentSecnario] = useState({});
   const [scenes, setScenes] = useState([]);
+  const [accessList, setAccessList] = useState(null);
   useGet(`api/scenario/${scenarioId}`, setCurrentSecnario);
   useGet(`api/scenario/${scenarioId}/scene/all`, setScenes);
 
@@ -68,7 +69,7 @@ export default function Dashboard() {
       return;
     }
     if (Object.keys(groupInfo).length == 0) return;
-    setHeading(`Group: ${groupInfo.users[0].name}`);
+    setHeading(`${groupInfo.users[0].name}`);
   }, [groupInfo]);
 
   // Create the graph data, also passes if the current group info if it's present
@@ -123,7 +124,7 @@ export default function Dashboard() {
         <HelpButton />
       </DashTopBar>
       <div className="h-full px-10 py-7 overflow-y-scroll ">
-        <h1 className="text-3xl font-mona font-bold my-3 flex items-center gap-3">
+        <h1 className="text-xl font-bold">
           {heading ? heading : <span className="invisible">placeholder</span>}
         </h1>
         <div className="flex gap-10">
@@ -135,6 +136,7 @@ export default function Dashboard() {
                   className={"lg:stats-horizontal mb-10"}
                   groupData={scenarioGroupInfo}
                 />
+                <h1 className="text-xl">Groups Table</h1>
                 {!isLoading && (
                   <DashGroupTable
                     groupInfo={scenarioGroupInfo}
