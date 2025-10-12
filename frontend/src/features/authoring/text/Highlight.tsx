@@ -35,8 +35,14 @@ function isValidSelection(selection: VisualSelection, blocks: VisualBlock[]) {
   return true;
 }
 
-function genSeg(sel: Definite<VisualSelection>, span: VisualSpan, isStart: boolean, isEnd: boolean) {
-  let x = span.x, width = span.width;
+function genSeg(
+  sel: Definite<VisualSelection>,
+  span: VisualSpan,
+  isStart: boolean,
+  isEnd: boolean
+) {
+  let x = span.x,
+    width = span.width;
   if (isStart && isEnd) {
     x += span.charOffsets[sel.start.charI];
     width = span.charOffsets[sel.end.charI] + span.x - x;
@@ -50,7 +56,12 @@ function genSeg(sel: Definite<VisualSelection>, span: VisualSpan, isStart: boole
   return { x, width };
 }
 
-function genSegs(selection: Definite<VisualSelection>, blocks: VisualBlock[], bounds: RelativeBounds, color: string) {
+function genSegs(
+  selection: Definite<VisualSelection>,
+  blocks: VisualBlock[],
+  bounds: RelativeBounds,
+  color: string
+) {
   const highlights = [];
 
   const { start, end } = selection;
@@ -76,7 +87,7 @@ function genSegs(selection: Definite<VisualSelection>, blocks: VisualBlock[], bo
 
         let { x, width } = genSeg(selection, line.spans[k], isStart, isEnd);
         x += bounds.x + line.x;
-        const y = bounds.y + + line.y + block.y;
+        const y = bounds.y + +line.y + block.y;
         const rel = { x, y, width, height: line.height };
 
         highlights.push(
@@ -84,7 +95,7 @@ function genSegs(selection: Definite<VisualSelection>, blocks: VisualBlock[], bo
             key={[i, j, k].join("|")}
             d={expandToPath({ ...bounds, ...rel, origin: center })}
             fill={color}
-          />,
+          />
         );
 
         if (isEnd) return highlights;
@@ -96,7 +107,7 @@ function genSegs(selection: Definite<VisualSelection>, blocks: VisualBlock[], bo
 }
 
 function Highlight({ color }: HighlightProps) {
-  const selection = useEditorStore(state => state.visualSelection);
+  const selection = useEditorStore((state) => state.visualSelection);
 
   const { selected } = useEditorStore.getState();
   const { components } = useVisualScene.getState();
@@ -104,7 +115,9 @@ function Highlight({ color }: HighlightProps) {
 
   if (!isValidSelection(selection, blocks)) return null;
 
-  const normd = normalizeSelectionVisual(selection) as Definite<VisualSelection>;
+  const normd = normalizeSelectionVisual(
+    selection
+  ) as Definite<VisualSelection>;
 
   const highlights = genSegs(normd, blocks, bounds, color);
 

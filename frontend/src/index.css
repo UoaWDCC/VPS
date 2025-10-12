@@ -234,4 +234,3 @@ body,
 .btn.btn-phantom {
   @apply btn-ghost font-normal text-primary hover:text-secondary border-none shadow-none bg-transparent;
 }
-

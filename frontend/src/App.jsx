@@ -21,13 +21,13 @@ import theme from "./theme/App.theme";
 
 import { Toaster } from "react-hot-toast";
 import { ContextMenuPortal } from "./components/ContextMenu/portal";
-import ViewGroupPage from "./features/dashboard/ViewGroup";
+
 import ManageResourcesPage from "./features/resources/ManageResourcesPage";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
 const TOAST_OFFSET = 25;
 
-const queryClient = new QueryClient()
+const queryClient = new QueryClient();
 
 export default function App() {
   return (
@@ -47,7 +47,10 @@ export default function App() {
       />
 
       {/* DialogModal container */}
-      <div id="modal-portal" className="fixed inset-0 z-[9999] pointer-events-none" />
+      <div
+        id="modal-portal"
+        className="fixed inset-0 z-[9999] pointer-events-none"
+      />
 
       {/* ContextMenu container */}
       <ContextMenuPortal />
@@ -58,7 +61,6 @@ export default function App() {
           <QueryClientProvider client={queryClient}>
             <BrowserRouter>
               <Switch>
-
                 <Route exact path="/login" component={LoginPage} />
 
                 <ProtectedRoute exact path="/">
@@ -91,14 +93,6 @@ export default function App() {
                   </ScenarioContextProvider>
                 </ProtectedRoute>
 
-                <ProtectedRoute path="/dashboard/:scenarioId/view-group/:groupId">
-                  <ScenarioContextProvider>
-                    <SceneContextProvider>
-                      <ViewGroupPage />
-                    </SceneContextProvider>
-                  </ScenarioContextProvider>
-                </ProtectedRoute>
-
                 <ScenarioContextProvider>
                   <Switch>
                     <ProtectedRoute path="/scenario/:scenarioId/manage-resources">
@@ -114,12 +108,11 @@ export default function App() {
                     </ProtectedRoute>
                   </Switch>
                 </ScenarioContextProvider>
-
-              </Switch >
-            </BrowserRouter >
-          </QueryClientProvider >
-        </AuthenticationContextProvider >
-      </ThemeProvider >
+              </Switch>
+            </BrowserRouter>
+          </QueryClientProvider>
+        </AuthenticationContextProvider>
+      </ThemeProvider>
     </>
   );
 }

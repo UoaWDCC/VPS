@@ -1,12 +1,9 @@
-import { Box, Grid, Card } from "@material-ui/core";
 import { api } from "../../util/api";
 import { useContext, useState } from "react";
 import AuthenticationContext from "../../context/AuthenticationContext";
 import toast from "react-hot-toast";
-import StateVariableForm from "./StateVariableForm";
 import ScenarioContext from "../../context/ScenarioContext";
 import SceneContext from "../../context/SceneContext";
-import EditingTooltips from "./EditingTooltips";
 import SelectInput from "../../features/authoring/components/Select";
 import { stateTypes } from "./stateTypes";
 
@@ -16,7 +13,7 @@ const EditStateVariable = ({ stateVariable, scenarioId }) => {
   const sceneContext = useContext(SceneContext);
   const { scenes, setScenes } = sceneContext || {
     scenes: [],
-    setScenes: () => { },
+    setScenes: () => {},
   };
 
   const { name, type, value } = stateVariable;
@@ -25,14 +22,12 @@ const EditStateVariable = ({ stateVariable, scenarioId }) => {
   const [newType, setNewType] = useState(type);
   const [newValue, setNewValue] = useState(value);
 
-  const editing = name !== newName || type !== newType || value != newValue;
-
   function resetFields(e) {
     e.preventDefault();
     setNewName(name);
     setNewType(type);
     setNewValue(value);
-  };
+  }
 
   function editStateVariable(e) {
     e.preventDefault();
@@ -55,7 +50,7 @@ const EditStateVariable = ({ stateVariable, scenarioId }) => {
         console.error("Error editing state variable:", error);
         toast.error("Failed to edit state variable.");
       });
-  };
+  }
 
   async function deleteStateVariable(e) {
     e.preventDefault();
@@ -123,7 +118,7 @@ const EditStateVariable = ({ stateVariable, scenarioId }) => {
       console.error("Error deleting state variable:", error);
       toast.error("Failed to delete state variable.");
     }
-  };
+  }
 
   function parseValue(e) {
     const val = e.target.value;
@@ -133,27 +128,38 @@ const EditStateVariable = ({ stateVariable, scenarioId }) => {
 
   return (
     <>
-      <fieldset key={stateVariable.name} className="fieldset bg-base-200 border-base-300 rounded-box border p-4">
+      <fieldset
+        key={stateVariable.name}
+        className="fieldset bg-base-200 border-base-300 rounded-box border p-4"
+      >
         <div className="flex wrap gap-xs">
           <div className="flex-1 flex flex-col">
             <label className="label mb-1">Name</label>
             <input
               type="text"
               value={newName ?? ""}
-              onChange={e => setNewName(e.target.value)}
+              onChange={(e) => setNewName(e.target.value)}
               placeholder="Name"
               className="input"
             />
           </div>
           <div className="flex-1 flex flex-col">
             <label className="label mb-1">Type</label>
-            <SelectInput value={newType} values={["string", "number", "boolean"]} onChange={setNewType} />
+            <SelectInput
+              value={newType}
+              values={["string", "number", "boolean"]}
+              onChange={setNewType}
+            />
           </div>
           <div className="flex-1 flex flex-col">
             <label className="label mb-1">Initial Value</label>
-            {type === stateTypes.BOOLEAN ?
-              <SelectInput value={newValue} values={["true", "false"]} onChange={setNewValue} />
-              :
+            {type === stateTypes.BOOLEAN ? (
+              <SelectInput
+                value={newValue}
+                values={["true", "false"]}
+                onChange={setNewValue}
+              />
+            ) : (
               <input
                 type={newType === stateTypes.NUMBER ? "number" : "text"}
                 value={newValue ?? ""}
@@ -161,13 +167,25 @@ const EditStateVariable = ({ stateVariable, scenarioId }) => {
                 placeholder="Value"
                 className="input"
               />
-            }
+            )}
           </div>
         </div>
         <div className="ml-auto">
-          <button className="btn btn-xs btn-phantom" onClick={deleteStateVariable}>Delete</button>
-          <button className="btn btn-xs btn-phantom" onClick={resetFields}>Reset</button>
-          <button className="btn btn-xs btn-phantom" onClick={editStateVariable}>Save</button>
+          <button
+            className="btn btn-xs btn-phantom"
+            onClick={deleteStateVariable}
+          >
+            Delete
+          </button>
+          <button className="btn btn-xs btn-phantom" onClick={resetFields}>
+            Reset
+          </button>
+          <button
+            className="btn btn-xs btn-phantom"
+            onClick={editStateVariable}
+          >
+            Save
+          </button>
         </div>
       </fieldset>
     </>

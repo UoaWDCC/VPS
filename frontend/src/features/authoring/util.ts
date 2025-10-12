@@ -84,7 +84,7 @@ export function getBoxCenter(verts: Vec2[]) {
 }
 
 export function getRelativeBounds(
-  verts: Vec2[],
+  verts: Vec2[]
 ): Omit<RelativeBounds, "rotation"> {
   const minx = Math.min(verts[0].x, verts[1].x);
   const miny = Math.min(verts[0].y, verts[1].y);
@@ -133,10 +133,7 @@ export function expandToPath({
 export function correct(verts: Vec2[], origin: Vec2, rotation: number) {
   if (!rotation) return verts;
   const newCenter = getBoxCenter(verts);
-  const correction = subtract(
-    rotate(newCenter, origin, rotation),
-    newCenter,
-  );
+  const correction = subtract(rotate(newCenter, origin, rotation), newCenter);
   return translate(verts, correction);
 }
 

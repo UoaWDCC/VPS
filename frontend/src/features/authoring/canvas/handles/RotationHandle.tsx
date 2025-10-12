@@ -3,9 +3,9 @@ import useEditorStore from "../../stores/editor";
 import useVisualScene from "../../stores/visual";
 
 const RotationHandle = () => {
-  const selected = useEditorStore(state => state.selected)!;
-  const scene = useVisualScene(scene => scene.components);
-  const mode = useEditorStore(state => state.mode);
+  const selected = useEditorStore((state) => state.selected)!;
+  const scene = useVisualScene((scene) => scene.components);
+  const mode = useEditorStore((state) => state.mode);
 
   const bounds = scene[selected].bounds;
   const center = getBoxCenter(bounds.verts);
@@ -28,7 +28,16 @@ const RotationHandle = () => {
         strokeWidth={3}
         stroke="blue"
       />
-      <ellipse data-handle data-type="rotation" data-coords={[0, 0]} cx={point.x} cy={point.y} rx={7} ry={7} fill="blue" />
+      <ellipse
+        data-handle
+        data-type="rotation"
+        data-coords={[0, 0]}
+        cx={point.x}
+        cy={point.y}
+        rx={7}
+        ry={7}
+        fill="blue"
+      />
     </g>
   );
 };

@@ -1,5 +1,11 @@
 import type { EllipseComponent } from "../types";
-import { filterComponent, getBoxCenter, mutate, rotateMany, subtract } from "../util";
+import {
+  filterComponent,
+  getBoxCenter,
+  mutate,
+  rotateMany,
+  subtract,
+} from "../util";
 
 function Ellipse(component: EllipseComponent) {
   const bounds = component.bounds;

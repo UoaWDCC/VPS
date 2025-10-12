@@ -1,15 +1,10 @@
 import SceneContext from "context/SceneContext";
-import React, { useContext, useEffect, useState } from "react";
-import { useHistory, useParams } from "react-router-dom";
-import styles from "./SceneNavigator.module.scss";
+import React, { useContext, useState } from "react";
+import { useParams } from "react-router-dom";
 import SceneListItem from "./SceneListItem";
 import Thumbnail from "../components/Thumbnail";
-import RightContextMenu from "../../../components/ContextMenu/RightContextMenu";
-import { MenuItem, MenuList, Paper } from "@material-ui/core";
 import AuthenticationContext from "../../../context/AuthenticationContext";
-import { handle } from "../../../components/ContextMenu/portal";
 import { api, handleGeneric } from "../../../util/api";
-import DashedCard from "../../../components/DashedCard";
 import {
   DndContext,
   KeyboardSensor,
@@ -24,18 +19,11 @@ import {
   verticalListSortingStrategy,
   arrayMove,
 } from "@dnd-kit/sortable";
-import { arrayToObject } from "../scene/util";
-import useEditorStore from "../stores/editor";
-import { replace } from "../scene/operations/modifiers";
-import { getScene } from "../scene/scene";
 import useVisualScene from "../stores/visual";
-import ContextableThumb from "./ContextableThumb";
 import { PlusIcon } from "lucide-react";
 
-function ThumbOverlay({ scene, sceneIds }) {
-  return (
-    <Thumbnail components={scene.components} />
-  )
+function ThumbOverlay({ scene }) {
+  return <Thumbnail components={scene.components} />;
 }
 
 // TODO: sort out animation flickering here
@@ -44,8 +32,8 @@ const SceneNavigator = () => {
 
   const { scenarioId } = useParams();
 
-  const { scenes, saveScene, reFetch, reorderScenes } = useContext(SceneContext);
-  const activeId = useVisualScene(store => store.id);
+  const { scenes, reFetch, reorderScenes } = useContext(SceneContext);
+  const activeId = useVisualScene((store) => store.id);
 
   const [activeIdDragging, setActiveIdDragging] = useState(null);
 
@@ -56,7 +44,7 @@ const SceneNavigator = () => {
       })
       .then(reFetch)
       .catch(handleGeneric);
-  };
+  }
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -67,12 +55,14 @@ const SceneNavigator = () => {
     useSensor(KeyboardSensor)
   );
 
-  const sceneIds = scenes.map(s => s._id);
-  const activeIndexDragging = activeIdDragging ? sceneIds.indexOf(activeIdDragging) : -1;
+  const sceneIds = scenes.map((s) => s._id);
+  const activeIndexDragging = activeIdDragging
+    ? sceneIds.indexOf(activeIdDragging)
+    : -1;
 
   function handleDragStart({ active }) {
     setActiveIdDragging(active.id);
-  };
+  }
 
   function handleDragEnd({ active, over }) {
     if (!over) return;
@@ -82,10 +72,10 @@ const SceneNavigator = () => {
 
     if (oldIndex !== newIndex) {
       reorderScenes(arrayMove(sceneIds, oldIndex, newIndex));
-    };
+    }
 
     setActiveIdDragging(null);
-  };
+  }
 
   return (
     <DndContext
@@ -98,7 +88,12 @@ const SceneNavigator = () => {
         <div className="h-full overflow-y-auto no-scrollbar">
           <ul className="flex flex-col gap-s pb-m">
             {scenes.map((scene, index) => (
-              <SceneListItem scene={scene} index={index} key={scene._id} active={scene._id === activeId} />
+              <SceneListItem
+                scene={scene}
+                index={index}
+                key={scene._id}
+                active={scene._id === activeId}
+              />
             ))}
             <div className="w-full">
               <button className="float-right" onClick={addScene}>
@@ -112,11 +107,14 @@ const SceneNavigator = () => {
       </SortableContext>
       <DragOverlay dropAnimation={null}>
         {activeIdDragging ? (
-          <ThumbOverlay scene={scenes[activeIndexDragging]} sceneIds={sceneIds} />
+          <ThumbOverlay
+            scene={scenes[activeIndexDragging]}
+            sceneIds={sceneIds}
+          />
         ) : null}
       </DragOverlay>
     </DndContext>
-  )
+  );
 };
 
 export default SceneNavigator;

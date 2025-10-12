@@ -7,7 +7,7 @@ function Image(component: ImageComponent) {
   const relative = getRelativeBounds(bounds.verts);
   const scale = mutate(
     subtract(bounds.verts[1], bounds.verts[0]),
-    (val) => val / Math.abs(val),
+    (val) => val / Math.abs(val)
   );
 
   const transform = `translate(${relative.x + relative.width / 2},${relative.y + relative.height / 2}) rotate(${bounds.rotation}) scale(${scale.x},${scale.y})`;

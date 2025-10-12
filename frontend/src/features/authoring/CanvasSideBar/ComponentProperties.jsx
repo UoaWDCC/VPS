@@ -1,11 +1,5 @@
-
 import SceneContext from "context/SceneContext";
 
-import styles from "./CanvasSideBar.module.scss";
-import useVisualScene from "../stores/visual";
-import useEditorStore from "../stores/editor";
-import { getComponent } from "../scene/scene";
-import ButtonPropertiesComponent from "./ComponentProperties/ButtonPropertiesComponent";
 import { useContext, useEffect, useState } from "react";
 import { modifyComponentProp } from "../scene/operations/component";
 import StateOperationMenu from "../../../components/StateVariables/StateOperationMenu";
@@ -22,7 +16,7 @@ export default function ComponentProperties({ component }) {
 
   useEffect(() => {
     if (component?.nextScene !== value) setValue(component?.nextScene);
-  }, [component])
+  }, [component]);
 
   function saveLink(v) {
     setValue(v);
@@ -39,7 +33,13 @@ export default function ComponentProperties({ component }) {
         <div className="collapse-content text--1 bg-base-200">
           <fieldset className="fieldset pt-2">
             <label className="label">Next Scene</label>
-            <SelectInput nullable values={scenes.map(s => s._id)} value={value} onChange={saveLink} display={(v) => scenes.find(s => s._id === v)?.name} />
+            <SelectInput
+              nullable
+              values={scenes.map((s) => s._id)}
+              value={value}
+              onChange={saveLink}
+              display={(v) => scenes.find((s) => s._id === v)?.name}
+            />
           </fieldset>
         </div>
       </div>

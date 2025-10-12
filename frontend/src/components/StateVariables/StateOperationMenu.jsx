@@ -1,9 +1,7 @@
-import { Typography } from "@material-ui/core";
 import CreateStateOperation from "./CreateStateOperation";
 import EditStateOperation from "./EditStateOperation";
 import { PlusIcon } from "lucide-react";
 import { useState } from "react";
-import SelectInput from "../../features/authoring/components/Select";
 
 /*
  * Component that houses state operation interface (methods for creating and editing)
@@ -11,7 +9,6 @@ import SelectInput from "../../features/authoring/components/Select";
  * @component
  */
 const StateOperationMenu = ({ component }) => {
-
   const [createOpen, setCreateOpen] = useState(false);
 
   function createNew() {
@@ -38,7 +35,11 @@ const StateOperationMenu = ({ component }) => {
           ))}
         </div>
       </div>
-      <CreateStateOperation component={component} open={createOpen} setOpen={setCreateOpen} />
+      <CreateStateOperation
+        component={component}
+        open={createOpen}
+        setOpen={setCreateOpen}
+      />
     </>
   );
 };

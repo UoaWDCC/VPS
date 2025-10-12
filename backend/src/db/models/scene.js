@@ -28,7 +28,7 @@ const sceneSchema = new Schema({
 });
 
 // before removal of scene from the database, first attempt to delete all user-uploaded images from firebase
-sceneSchema.pre("remove", function() {
+sceneSchema.pre("remove", function () {
   this.components.forEach((c) => {
     if (c.type === "image" || c.type === "audio") {
       tryDeleteFile(c.href ?? c.url);

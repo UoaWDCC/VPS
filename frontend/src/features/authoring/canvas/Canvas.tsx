@@ -9,7 +9,11 @@ import Box from "../elements/Box";
 import Image from "../elements/Image";
 import Line from "../elements/Line";
 import useVisualScene from "../stores/visual";
-import { handleMouseDownGlobal, handleMouseMoveGlobal, handleMouseUpGlobal } from "../handlers/pointer/pointer";
+import {
+  handleMouseDownGlobal,
+  handleMouseMoveGlobal,
+  handleMouseUpGlobal,
+} from "../handlers/pointer/pointer";
 import { handleContextGlobal } from "../handlers/pointer/context";
 
 const componentMap: Record<string, React.FC<any>> = {
@@ -28,7 +32,7 @@ function resolve(component: Component) {
 }
 
 function Canvas() {
-  const scene = useVisualScene(state => state.components);
+  const scene = useVisualScene((state) => state.components);
 
   const canvasRef = useRef<SVGSVGElement | null>(null);
 
@@ -59,10 +63,12 @@ function Canvas() {
     handleContextGlobal(e, toSVGSpace(e.clientX, e.clientY));
   }
 
-  const components = Object.values(scene).sort((a, b) => a.zIndex - b.zIndex).map(resolve);
+  const components = Object.values(scene)
+    .sort((a, b) => a.zIndex - b.zIndex)
+    .map(resolve);
 
   return (
-    <CanvasContext.Provider value={{ toSVGSpace, canvasRef }} >
+    <CanvasContext.Provider value={{ toSVGSpace, canvasRef }}>
       <div
         className="flex-grow relative"
         onMouseMove={handleMouseMove}

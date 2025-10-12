@@ -3,9 +3,15 @@ type ToggleInputProps = React.PropsWithChildren<{
   onToggle: (value: string) => void;
   enabled: string;
   disabled: string;
-}>
+}>;
 
-function ToggleInput({ children, value, onToggle, enabled, disabled }: ToggleInputProps) {
+function ToggleInput({
+  children,
+  value,
+  onToggle,
+  enabled,
+  disabled,
+}: ToggleInputProps) {
   const active = value === enabled;
 
   function handleClick() {

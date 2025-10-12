@@ -31,15 +31,15 @@ function Speech(component: SpeechComponent) {
     const dir = divide(subtract(bounds.verts[1], bounds.verts[0]), dims);
     const relative = multiply(
       subtract(bounds.verts[2], getBoxCenter(bounds.verts)),
-      dir,
+      dir
     );
     const grid = clamp(
       mutate(
         addScalar(scale(divide(relative, dims), gridSize), gridSize / 2),
-        Math.floor,
+        Math.floor
       ),
       0,
-      4,
+      4
     );
     const gradient = dims.y / dims.x;
 
@@ -55,7 +55,7 @@ function Speech(component: SpeechComponent) {
     const expanded = rotateMany(
       expandBoxVerts(bounds.verts),
       center,
-      bounds.rotation,
+      bounds.rotation
     );
     const segment = getSegment();
     const tail = constructTail(segment);
@@ -72,7 +72,7 @@ function Speech(component: SpeechComponent) {
   function constructTail(seg: Segment) {
     const segSize = scale(
       subtract(bounds.verts[1], bounds.verts[0]),
-      1 / gridSize,
+      1 / gridSize
     );
     const offset = bounds.verts[0];
     const { sector, grid } = seg;
@@ -109,7 +109,7 @@ function Speech(component: SpeechComponent) {
     const verts = rotateMany(
       [tailPoints[0], bounds.verts[2], tailPoints[1]],
       center,
-      bounds.rotation,
+      bounds.rotation
     );
     return constructPartialPath(verts);
   }
@@ -120,6 +120,5 @@ function Speech(component: SpeechComponent) {
     </g>
   );
 }
-
 
 export default Speech;

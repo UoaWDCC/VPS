@@ -17,7 +17,7 @@ export const unrender = () => {
 
 // wrapper for menu item functions
 export function handle(callback, ...params) {
-  return function() {
+  return function () {
     unrender();
     callback(...params);
   };
@@ -44,7 +44,6 @@ export const ContextMenuPortal = () => {
     listener = setCurrent;
     return () => (listener = null);
   }, [setCurrent]);
-
 
   useEffect(() => {
     if (!current.menu || !menuRef.current) return;
@@ -76,7 +75,8 @@ export const ContextMenuPortal = () => {
       className="fixed inset-0 z-[9999] pointer-events-none"
     >
       {current.menu && (
-        <div ref={menuRef}
+        <div
+          ref={menuRef}
           id="context-menu-wrapper"
           style={{ top, left }}
           className="absolute pointer-events-auto"

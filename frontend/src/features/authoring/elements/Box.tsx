@@ -13,7 +13,7 @@ function Box(component: BoxComponent) {
   const verts = rotateMany(
     expandBoxVerts(bounds.verts),
     getBoxCenter(bounds.verts),
-    bounds.rotation,
+    bounds.rotation
   );
   const path = constructPath(verts);
 

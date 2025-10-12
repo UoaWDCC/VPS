@@ -14,9 +14,9 @@ export const defaults = {
     bounds: {
       verts: [
         { x: 0, y: 0 },
-        { x: 400, y: 100 }
+        { x: 400, y: 100 },
       ],
-      rotation: 0
+      rotation: 0,
     },
     document: {
       style: {},
@@ -26,8 +26,8 @@ export const defaults = {
           spans: [
             {
               style: {},
-              text: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla venenatis."
-            }
+              text: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla venenatis.",
+            },
           ],
         },
       ],
@@ -40,9 +40,9 @@ export const defaults = {
     bounds: {
       verts: [
         { x: 0, y: 0 },
-        { x: 100, y: 100 }
+        { x: 100, y: 100 },
       ],
-    }
+    },
   },
   speech: {
     type: "speech",
@@ -52,10 +52,10 @@ export const defaults = {
       verts: [
         { x: 0, y: 0 },
         { x: 400, y: 100 },
-        { x: 400, y: 120 }
+        { x: 400, y: 120 },
       ],
       rotation: 0,
-    }
+    },
   },
   box: {
     type: "box",
@@ -65,10 +65,10 @@ export const defaults = {
     bounds: {
       verts: [
         { x: 0, y: 0 },
-        { x: 100, y: 100 }
+        { x: 100, y: 100 },
       ],
       rotation: 0,
-    }
+    },
   },
   ellipse: {
     type: "ellipse",
@@ -78,10 +78,10 @@ export const defaults = {
     bounds: {
       verts: [
         { x: 0, y: 0 },
-        { x: 100, y: 100 }
+        { x: 100, y: 100 },
       ],
       rotation: 0,
-    }
+    },
   },
   image: {
     type: "image",
@@ -90,10 +90,10 @@ export const defaults = {
     bounds: {
       verts: [
         { x: 0, y: 0 },
-        { x: 100, y: 100 }
+        { x: 100, y: 100 },
       ],
       rotation: 0,
-    }
+    },
   },
 };
 
@@ -116,46 +116,57 @@ export function duplicateComponent(id: string) {
   return parseComponent(newComponent);
 }
 
-export function createComponentFromBounds(type: keyof typeof defaults, bounds: Bounds) {
+export function createComponentFromBounds(
+  type: keyof typeof defaults,
+  bounds: Bounds
+) {
   const component = structuredClone(defaults[type]);
   const dims = mutate(subtract(bounds.verts[1], bounds.verts[0]), Math.abs);
   if (dims.x > 50 && dims.y > 50) component.bounds = bounds;
   return add(component);
 }
 
-export const modifyComponentProp = modify((id: string, prop: string, val: any) => {
-  const component = getComponent(id);
-  if (!component) return;
+export const modifyComponentProp = modify(
+  (id: string, prop: string, val: any) => {
+    const component = getComponent(id);
+    if (!component) return;
 
-  const [object, key] = getObject(prop, component);
-  if (typeof val === "function") object[key] = val(object[key]);
-  else if (typeof val === "object" && !Array.isArray(val))
-    object[key] = merge(object[key], val);
-  else object[key] = val;
-});
+    const [object, key] = getObject(prop, component);
+    if (typeof val === "function") object[key] = val(object[key]);
+    else if (typeof val === "object" && !Array.isArray(val))
+      object[key] = merge(object[key], val);
+    else object[key] = val;
+  }
+);
 
 export function modifyComponentBounds(id: string, bounds: Partial<Bounds>) {
   modifyComponentProp(id, "bounds", bounds);
 }
 
 export function bringForward(id: string) {
-  modifyComponentProp(id, "zIndex", (val: number) => val + 1)
+  modifyComponentProp(id, "zIndex", (val: number) => val + 1);
 }
 
 export function sendBackward(id: string) {
-  modifyComponentProp(id, "zIndex", (val: number) => val - 1)
+  modifyComponentProp(id, "zIndex", (val: number) => val - 1);
 }
 
 export function bringToFront(id: string) {
   const components = Object.values(getScene().components) as Component[];
-  const max = components.reduce((p, c) => c.zIndex > p ? c.zIndex : p, -Infinity);
+  const max = components.reduce(
+    (p, c) => (c.zIndex > p ? c.zIndex : p),
+    -Infinity
+  );
   if (getComponentProp(id, "zIndex") === max) return;
   modifyComponentProp(id, "zIndex", max + 1);
 }
 
 export function sendToBack(id: string) {
   const components = Object.values(getScene().components) as Component[];
-  const min = components.reduce((p, c) => c.zIndex < p ? c.zIndex : p, Infinity);
+  const min = components.reduce(
+    (p, c) => (c.zIndex < p ? c.zIndex : p),
+    Infinity
+  );
   if (getComponentProp(id, "zIndex") === min) return;
   modifyComponentProp(id, "zIndex", min - 1);
 }

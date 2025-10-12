@@ -8,9 +8,9 @@ interface Props {
 }
 
 const ResizeHandle = ({ x, y }: Props) => {
-  const selected = useEditorStore(state => state.selected)!;
-  const mode = useEditorStore(state => state.mode);
-  const scene = useVisualScene(scene => scene.components);
+  const selected = useEditorStore((state) => state.selected)!;
+  const mode = useEditorStore((state) => state.mode);
+  const scene = useVisualScene((scene) => scene.components);
 
   const bounds = scene[selected].bounds;
   const verts = bounds.verts;
@@ -27,7 +27,16 @@ const ResizeHandle = ({ x, y }: Props) => {
       pointerEvents={mode.includes("mutation") ? "none" : "auto"}
       style={{ cursor: "crosshair" }}
     >
-      <ellipse data-handle data-type="size" data-coords={[x, y]} cx={point.x} cy={point.y} rx={7} ry={7} fill="blue" />
+      <ellipse
+        data-handle
+        data-type="size"
+        data-coords={[x, y]}
+        cx={point.x}
+        cy={point.y}
+        rx={7}
+        ry={7}
+        fill="blue"
+      />
     </g>
   );
 };

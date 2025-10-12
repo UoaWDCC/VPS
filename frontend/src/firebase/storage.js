@@ -3,7 +3,6 @@ import {
   uploadBytesResumable,
   updateMetadata,
   getDownloadURL,
-  deleteObject,
 } from "firebase/storage";
 import { v4 } from "uuid";
 import { storage } from "./firebase";
@@ -75,14 +74,14 @@ const uploadFile = async (file, scenarioId, sceneId) => {
  * Function to delete file from Firebase
  * @param {string} fileUrl
  */
-const deleteFile = (fileUrl) => {
-  const fileRef = ref(storage, fileUrl);
-  deleteObject(fileRef)
-    .then(() => { })
-    .catch((error) => {
-      console.log("Error to delete file:", error);
-    });
-};
+// const deleteFile = (fileUrl) => {
+//   const fileRef = ref(storage, fileUrl);
+//   deleteObject(fileRef)
+//     .then(() => {})
+//     .catch((error) => {
+//       console.log("Error to delete file:", error);
+//     });
+// };
 
 // to prevent reuploads
 const uploads = new Map();
@@ -96,7 +95,7 @@ const uploads = new Map();
  */
 export async function parseMedia(components, scenarioId, sceneId) {
   // remove uploads that no longer exist in components
-  const currentUrls = new Set(components.map(c => c.url));
+  const currentUrls = new Set(components.map((c) => c.url));
   for (const key of uploads.keys()) {
     if (!currentUrls.has(key)) {
       uploads.delete(key);
@@ -108,7 +107,11 @@ export async function parseMedia(components, scenarioId, sceneId) {
     if (component.type === "audio" && "fileObject" in component) {
       if (uploads.has(component.url)) return;
 
-      const firebaseUrl = await uploadFile(component.fileObject, scenarioId, sceneId);
+      const firebaseUrl = await uploadFile(
+        component.fileObject,
+        scenarioId,
+        sceneId
+      );
 
       uploads.set(component.url, firebaseUrl);
       component.url = firebaseUrl;
@@ -117,4 +120,4 @@ export async function parseMedia(components, scenarioId, sceneId) {
   }
 
   return components;
-};
+}

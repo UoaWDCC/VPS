@@ -7,7 +7,6 @@ import {
 } from "../../../utils/sceneUtils";
 
 import useVisualScene from "../stores/visual";
-import { modifyComponentProp } from "../scene/operations/component";
 import { modifySceneProp } from "../scene/operations/modifiers";
 import shallow from "zustand/shallow";
 
@@ -19,8 +18,8 @@ export default function SceneSettings() {
   const { scenes } = useContext(SceneContext);
   const { roleList } = useContext(ScenarioContext);
 
-  const name = useVisualScene(scene => scene.name);
-  const roles = useVisualScene(scene => scene.roles);
+  const name = useVisualScene((scene) => scene.name);
+  const roles = useVisualScene((scene) => scene.roles);
 
   const [selectedRoles, setSelectedRoles] = useState(roles ?? []);
   const [sceneName, setSceneName] = useState(name ?? "");
@@ -32,7 +31,7 @@ export default function SceneSettings() {
 
   useEffect(() => {
     if (!roleList || !roles) return;
-    const selected = roleList.filter(role => roles.includes(role));
+    const selected = roleList.filter((role) => roles.includes(role));
     if (!shallow(selected, selectedRoles)) setSelectedRoles(selected);
   }, [roleList, roles]);
 
@@ -58,15 +57,15 @@ export default function SceneSettings() {
     }
 
     modifySceneProp("name", final);
-  };
+  }
 
   function changeSceneName(e) {
     setSceneName(e.target.value);
   }
 
   function changeRole(role, value) {
-    if (value) setSelectedRoles(prev => [...prev, role]);
-    else setSelectedRoles(prev => prev.filter(r => r !== role))
+    if (value) setSelectedRoles((prev) => [...prev, role]);
+    else setSelectedRoles((prev) => prev.filter((r) => r !== role));
   }
 
   return (
@@ -77,18 +76,35 @@ export default function SceneSettings() {
         <fieldset className="fieldset pt-2">
           {/* input for scene name */}
           <label className="label">Name</label>
-          <input type="text" value={sceneName} onChange={changeSceneName} onBlur={saveSceneName} className="input" placeholder="Awesome Scene" />
+          <input
+            type="text"
+            value={sceneName}
+            onChange={changeSceneName}
+            onBlur={saveSceneName}
+            className="input"
+            placeholder="Awesome Scene"
+          />
           {/* input for scene roles */}
           <label className="label">Roles</label>
           <div className="dropdown" onBlur={saveSceneRoles}>
-            <div tabIndex={0} role="button" className="justify-start input mb-1 font-normal">
+            <div
+              tabIndex={0}
+              role="button"
+              className="justify-start input mb-1 font-normal"
+            >
               {selectedRoles?.join(", ") || "All"}
             </div>
-            <ul tabIndex={0} className="dropdown-content menu bg-base-300 rounded-box z-1 w-52 p-2 shadow-sm">
+            <ul
+              tabIndex={0}
+              className="dropdown-content menu bg-base-300 rounded-box z-1 w-52 p-2 shadow-sm"
+            >
               {roleList?.map((role, i) => {
                 const active = selectedRoles.includes(role);
                 return (
-                  <li className={active ? "text-secondary" : "text-primary"} key={i}>
+                  <li
+                    className={active ? "text-secondary" : "text-primary"}
+                    key={i}
+                  >
                     <a onClick={() => changeRole(role, !active)}>{role}</a>
                   </li>
                 );

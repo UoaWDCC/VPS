@@ -90,7 +90,7 @@ export interface ModelSpan {
   style?: Partial<SpanTextStyle>;
 }
 
-export interface BaseTextStyle extends BlockTextStyle, SpanTextStyle { }
+export interface BaseTextStyle extends BlockTextStyle, SpanTextStyle {}
 
 export interface BlockTextStyle {
   alignment: "left" | "center" | "right";

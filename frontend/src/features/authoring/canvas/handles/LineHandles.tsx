@@ -7,6 +7,6 @@ function LineHandles() {
       <ResizeHandle x={1} y={1} />
     </>
   );
-};
+}
 
 export default LineHandles;

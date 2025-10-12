@@ -1,30 +1,20 @@
 import "./AuthoringToolPage.css";
 
-import { useContext, useEffect, useState, useRef } from "react";
+import { useContext, useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import HelpButton from "components/HelpButton";
-import ScreenContainer from "components/ScreenContainer/ScreenContainer";
-import TopBar from "components/TopBar/TopBar";
-import AuthenticationContext from "context/AuthenticationContext";
-import ScenarioContext from "context/ScenarioContext";
 import SceneContext from "context/SceneContext";
-import ToolbarContextProvider from "context/ToolbarContextProvider";
-import { useGet, usePut } from "hooks/crudHooks";
 import CanvasSideBar from "./CanvasSideBar/CanvasSideBar";
 import SceneNavigator from "./SceneNavigator/SceneNavigator";
 
 import Canvas from "./canvas/Canvas";
 import Topbar from "./topbar/Topbar";
 import useVisualScene from "./stores/visual";
-import { buildVisualScene } from "./pipeline";
-import { getScene, setScene } from "./scene/scene";
+import { getScene } from "./scene/scene";
 import { handleGlobal } from "./handlers/keyboard/keyboard";
 import { copy, cut, paste } from "./handlers/keyboard/clipboard";
-import { arrayToObject } from "./scene/util";
 import useEditorStore from "./stores/editor";
 import { useHistory } from "react-router-dom";
 import { replace } from "./scene/operations/modifiers";
-import { api } from "../../util/api";
 import { ArrowLeftIcon, FilesIcon, PlayIcon, UsersIcon } from "lucide-react";
 
 const listeners = [
@@ -42,10 +32,9 @@ const AUTOSAVE_INTERVAL = 30000; // 30 secs
  */
 export default function AuthoringToolPage() {
   const { scenes, saveScene } = useContext(SceneContext);
-  const { user } = useContext(AuthenticationContext);
   const { scenarioId } = useParams();
 
-  const sceneId = useVisualScene(scene => scene.id);
+  const sceneId = useVisualScene((scene) => scene.id);
 
   const history = useHistory();
 
@@ -60,7 +49,7 @@ export default function AuthoringToolPage() {
 
   useEffect(() => {
     const activeScene = localStorage.getItem(`${scenarioId}:activeScene`);
-    if (activeScene) replace(scenes.find(s => s._id === activeScene));
+    if (activeScene) replace(scenes.find((s) => s._id === activeScene));
     else replace(scenes[0]);
 
     useEditorStore.getState().clear();
@@ -68,10 +57,11 @@ export default function AuthoringToolPage() {
     listeners.forEach(([event, fn]) => document.addEventListener(event, fn));
 
     return () => {
-      listeners.forEach(([event, fn]) => document.removeEventListener(event, fn));
+      listeners.forEach(([event, fn]) =>
+        document.removeEventListener(event, fn)
+      );
     };
   }, []);
-
 
   function playScenario() {
     window.open(`/play/${scenarioId}`, "_blank");
@@ -105,7 +95,10 @@ export default function AuthoringToolPage() {
             <ArrowLeftIcon size={20} />
             Back
           </button>
-          <button onClick={goToResources} className="btn btn-phantom text-m ml-auto">
+          <button
+            onClick={goToResources}
+            className="btn btn-phantom text-m ml-auto"
+          >
             <FilesIcon size={20} />
             Resources
           </button>

@@ -1,10 +1,8 @@
-import { Button, Grid } from "@material-ui/core";
 import { useState, useEffect, useContext } from "react";
 import { stateTypes, getDefaultValue } from "./stateTypes";
 import { api } from "../../util/api";
 import AuthenticationContext from "../../context/AuthenticationContext";
 import toast from "react-hot-toast";
-import StateVariableForm from "./StateVariableForm";
 import ScenarioContext from "../../context/ScenarioContext";
 import SelectInput from "../../features/authoring/components/Select";
 
@@ -52,7 +50,7 @@ const CreateStateVariable = ({ scenarioId }) => {
         console.error("Error creating state variable:", error);
         toast.error("Error creating state variable");
       });
-  };
+  }
 
   function parseValue(e) {
     const val = e.target.value;
@@ -71,20 +69,28 @@ const CreateStateVariable = ({ scenarioId }) => {
           <input
             type="text"
             value={name ?? ""}
-            onChange={e => setName(e.target.value)}
+            onChange={(e) => setName(e.target.value)}
             placeholder="Name"
             className="input"
           />
         </div>
         <div className="flex flex-col flex-1">
           <label className="label mb-1">Type</label>
-          <SelectInput value={type} values={["string", "number", "boolean"]} onChange={setType} />
+          <SelectInput
+            value={type}
+            values={["string", "number", "boolean"]}
+            onChange={setType}
+          />
         </div>
         <div className="flex flex-col flex-1">
           <label className="label mb-1">Initial Value</label>
-          {type === stateTypes.BOOLEAN ?
-            <SelectInput value={value} values={["true", "false"]} onChange={setValue} />
-            :
+          {type === stateTypes.BOOLEAN ? (
+            <SelectInput
+              value={value}
+              values={["true", "false"]}
+              onChange={setValue}
+            />
+          ) : (
             <input
               type={type === stateTypes.NUMBER ? "number" : "text"}
               value={value ?? ""}
@@ -92,10 +98,15 @@ const CreateStateVariable = ({ scenarioId }) => {
               placeholder="Value"
               className="input"
             />
-          }
+          )}
         </div>
       </div>
-      <button className={`ml-auto btn btn-xs btn-phantom float-right ${!isSubmittable && "btn-disabled"}`} onClick={handleSubmit}>Create</button>
+      <button
+        className={`ml-auto btn btn-xs btn-phantom float-right ${!isSubmittable && "btn-disabled"}`}
+        onClick={handleSubmit}
+      >
+        Create
+      </button>
     </fieldset>
   );
 };

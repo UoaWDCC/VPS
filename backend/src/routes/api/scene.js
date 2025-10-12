@@ -101,7 +101,7 @@ router.put("/:sceneId", async (req, res) => {
     name,
     components,
     time,
-    roles
+    roles,
   });
 
   res.status(HTTP_OK).json(scene);

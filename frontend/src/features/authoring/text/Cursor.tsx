@@ -7,8 +7,8 @@ import useVisualScene from "../stores/visual";
 import { getStyleForSelection } from "../scene/operations/text";
 
 function Cursor({ bounds }: { bounds: RelativeBounds }) {
-  const visualSelection = useEditorStore(state => state.visualSelection);
-  const modelSelection = useEditorStore(state => state.selection);
+  const visualSelection = useEditorStore((state) => state.visualSelection);
+  const modelSelection = useEditorStore((state) => state.selection);
 
   const { selected } = useEditorStore.getState();
   const { components } = useVisualScene.getState();

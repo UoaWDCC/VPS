@@ -13,14 +13,17 @@ export function replace(scene: Record<string, any>) {
   useVisualScene.getState().setVisualScene(buildVisualScene(clone as Scene));
 }
 
-export function modifySceneProp<K extends keyof VisualSceneState>(prop: K, value: VisualSceneState[K]) {
+export function modifySceneProp<K extends keyof VisualSceneState>(
+  prop: K,
+  value: VisualSceneState[K]
+) {
   getScene()[prop] = value;
   useVisualScene.setState({ [prop]: value } as Partial<VisualSceneState>);
 }
 
 // wrapper for state mutating functions, will capture both state and operation
 export function modify<A extends [string, ...any[]], R>(fn: (...args: A) => R) {
-  return function(...args: A): R {
+  return function (...args: A): R {
     const id = args[0];
     const component = getComponent(id);
 
@@ -32,7 +35,7 @@ export function modify<A extends [string, ...any[]], R>(fn: (...args: A) => R) {
     useVisualScene.getState().updateComponent(buildVisualComponent(component));
 
     return output;
-  }
+  };
 }
 
 export function remove(id: string, history = true) {
@@ -52,7 +55,9 @@ export function add(props: Record<string, any>, history = true) {
 
   if (history) updateHistory(props.id, null);
 
-  useVisualScene.getState().updateComponent(buildVisualComponent(props as Component));
+  useVisualScene
+    .getState()
+    .updateComponent(buildVisualComponent(props as Component));
 
   return props.id;
 }

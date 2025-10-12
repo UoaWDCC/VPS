@@ -9,7 +9,12 @@ function buildGroups(doc: VisualDocument) {
   return doc.blocks.map((block, i) => (
     <g key={i}>
       {block.lines.map((line, j) => (
-        <text key={j} x={line.x} y={block.y + line.y + line.baseline} style={{ whiteSpace: "pre" }}>
+        <text
+          key={j}
+          x={line.x}
+          y={block.y + line.y + line.baseline}
+          style={{ whiteSpace: "pre" }}
+        >
           {line.spans.map((span, k) => (
             <tspan key={k} style={buildStyle(span.style)}>
               {span.text}
@@ -21,8 +26,10 @@ function buildGroups(doc: VisualDocument) {
   ));
 }
 
-function Text({ doc, editable }: { doc: VisualDocument, editable?: boolean }) {
-  const selected = useEditorStore(state => editable ? state.selected : null);
+function Text({ doc, editable }: { doc: VisualDocument; editable?: boolean }) {
+  const selected = useEditorStore((state) =>
+    editable ? state.selected : null
+  );
 
   const isSelected = editable && selected === doc.id;
 
@@ -50,10 +57,7 @@ function Text({ doc, editable }: { doc: VisualDocument, editable?: boolean }) {
 
   return (
     <g className="select-none">
-      {isSelected && <Highlight
-        color="#4997ff80"
-        bounds={bounds}
-      />}
+      {isSelected && <Highlight color="#4997ff80" bounds={bounds} />}
       <g className="select-none" transform={transformation}>
         {buildGroups(doc)}
       </g>

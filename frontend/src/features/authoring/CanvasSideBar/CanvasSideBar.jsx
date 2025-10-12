@@ -1,7 +1,6 @@
 import { getComponent } from "../scene/scene";
 import useEditorStore from "../stores/editor";
 import AudioManager from "./AudioManager";
-import styles from "./CanvasSideBar.module.scss";
 import ComponentProperties from "./ComponentProperties";
 import SceneSettings from "./SceneSettings";
 
@@ -10,7 +9,7 @@ import SceneSettings from "./SceneSettings";
  * @component
  */
 export default function CanvasSideBar() {
-  const selected = useEditorStore(state => state.selected);
+  const selected = useEditorStore((state) => state.selected);
 
   const component = selected ? getComponent(selected) : null;
 

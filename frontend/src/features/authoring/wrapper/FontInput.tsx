@@ -1,4 +1,10 @@
-function FontInput({ value, onChange }: { value: string, onChange: (value: string) => void }) {
+function FontInput({
+  value,
+  onChange,
+}: {
+  value: string;
+  onChange: (value: string) => void;
+}) {
   return (
     <>
       <input

@@ -1,5 +1,3 @@
-import { useGet } from "hooks/crudHooks";
-
 /**
  * This component preloads firebase and google drive images of a scene
  */

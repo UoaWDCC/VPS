@@ -90,15 +90,20 @@ export function toVisual(cursor: ModelCursor | null, blocks: VisualBlock[]) {
   return null;
 }
 
-export function toModelSelection(selection: VisualSelection, blocks: VisualBlock[]) {
+export function toModelSelection(
+  selection: VisualSelection,
+  blocks: VisualBlock[]
+) {
   return {
     start: toModel(selection.start, blocks),
     end: toModel(selection.end, blocks),
   };
 }
 
-
-export function toVisualSelection(selection: ModelSelection, blocks: VisualBlock[]) {
+export function toVisualSelection(
+  selection: ModelSelection,
+  blocks: VisualBlock[]
+) {
   return {
     start: toVisual(selection.start, blocks),
     end: toVisual(selection.end, blocks),
@@ -108,21 +113,27 @@ export function toVisualSelection(selection: ModelSelection, blocks: VisualBlock
 export function syncModelSelection() {
   const editorState = useEditorStore.getState();
   if (!editorState.selected || !editorState.visualSelection.start) return;
-  const blocks = useVisualScene.getState().components[editorState.selected].document.blocks;
-  editorState.setSelection(toModelSelection(editorState.visualSelection, blocks))
+  const blocks =
+    useVisualScene.getState().components[editorState.selected].document.blocks;
+  editorState.setSelection(
+    toModelSelection(editorState.visualSelection, blocks)
+  );
 }
 
 export function syncVisualCursor() {
   const editorState = useEditorStore.getState();
   if (!editorState.selected || !editorState.selection.start) return;
-  const blocks = useVisualScene.getState().components[editorState.selected].document.blocks;
-  editorState.setVisualSelection(toVisualSelection(editorState.selection, blocks));
+  const blocks =
+    useVisualScene.getState().components[editorState.selected].document.blocks;
+  editorState.setVisualSelection(
+    toVisualSelection(editorState.selection, blocks)
+  );
 }
 
 // force cursor at line extreme to wrap to the start of the next line (more intuitive)
 export function normaliseVisualCursor(
   cursor: VisualCursor,
-  blocks: VisualBlock[],
+  blocks: VisualBlock[]
 ) {
   const block = blocks[cursor.blockI];
   const line = block.lines[cursor.lineI];
@@ -203,7 +214,7 @@ export function moveCursorLine(
   cursor: VisualCursor,
   desiredX: number,
   blocks: VisualBlock[],
-  direction: -1 | 1,
+  direction: -1 | 1
 ) {
   let { blockI, lineI } = cursor;
 
@@ -249,7 +260,7 @@ export function normalizeSelectionVisual(selection: VisualSelection) {
 export function moveCursorVisual(
   blocks: VisualBlock[],
   pos: VisualCursor | null,
-  amount: number,
+  amount: number
 ) {
   if (pos == null) return { blockI: 0, spanI: 0, lineI: 0, charI: 0 };
 
@@ -270,7 +281,13 @@ export function moveCursorVisual(
       ) {
         charI++;
         amount--;
-      } else if (spanI < line.spans.length - 1 && !(spanI === line.spans.length - 2 && line.spans[spanI + 1].text.length === 1)) {
+      } else if (
+        spanI < line.spans.length - 1 &&
+        !(
+          spanI === line.spans.length - 2 &&
+          line.spans[spanI + 1].text.length === 1
+        )
+      ) {
         spanI++;
         charI = 1;
         amount--;
@@ -301,8 +318,12 @@ export function moveCursorVisual(
         lineI--;
         const line = block.lines[lineI];
         const span = line.spans[line.spans.length - 1];
-        spanI = span.text.length > 1 ? line.spans.length - 1 : line.spans.length - 2;
-        charI = span.text.length > 1 ? span.text.length - 1 : line.spans[spanI].text.length;
+        spanI =
+          span.text.length > 1 ? line.spans.length - 1 : line.spans.length - 2;
+        charI =
+          span.text.length > 1
+            ? span.text.length - 1
+            : line.spans[spanI].text.length;
         amount++;
       } else if (blockI > 0) {
         blockI--;

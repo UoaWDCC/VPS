@@ -24,11 +24,11 @@ function resolve(type: Component["type"], bounds: Bounds) {
 }
 
 function Overlay() {
-  const selected = useEditorStore(state => state.selected)!;
-  const bounds = useEditorStore(state => state.mutationBounds);
-  const scene = useVisualScene(scene => scene.components);
-  const mode = useEditorStore(scene => scene.mode);
-  const createType = useEditorStore(scene => scene.createType);
+  const selected = useEditorStore((state) => state.selected)!;
+  const bounds = useEditorStore((state) => state.mutationBounds);
+  const scene = useVisualScene((scene) => scene.components);
+  const mode = useEditorStore((scene) => scene.mode);
+  const createType = useEditorStore((scene) => scene.createType);
 
   const component = scene[selected];
 
@@ -61,9 +61,10 @@ function Overlay() {
           <ResolveHandles />
         </>
       )}
-      {mode.includes("mutation") && resolve(component?.type ?? createType, bounds)}
+      {mode.includes("mutation") &&
+        resolve(component?.type ?? createType, bounds)}
     </svg>
   );
-};
+}
 
 export default Overlay;

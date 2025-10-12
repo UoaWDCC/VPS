@@ -1,11 +1,14 @@
 import axios from "axios";
-import { useGet } from "hooks/crudHooks";
 import Papa from "papaparse";
-import { useContext, useRef, useState } from "react";
+import { useContext, useRef } from "react";
 import { useParams } from "react-router-dom";
 import GroupsTable from "./GroupTable";
-import TopBar from "./TopBar";
-import { ArrowLeftIcon, DownloadIcon, FileSpreadsheetIcon, UploadIcon } from "lucide-react";
+import {
+  ArrowLeftIcon,
+  DownloadIcon,
+  FileSpreadsheetIcon,
+  UploadIcon,
+} from "lucide-react";
 import toast from "react-hot-toast";
 import { useHistory } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
@@ -26,8 +29,8 @@ function convertToCSV(data, scenarioId) {
     playableLink,
   ]);
 
-  return [headers, ...rows].map(row => row.join(",")).join("\n");
-};
+  return [headers, ...rows].map((row) => row.join(",")).join("\n");
+}
 
 async function getGroups(user, scenarioId) {
   const res = await api.get(user, `/api/group/scenario/${scenarioId}`);
@@ -62,7 +65,7 @@ export default function ManageGroupsPage() {
     return <GenericErrorPage />;
   }
 
-  const users = data.flatMap(g => g.users);
+  const users = data.flatMap((g) => g.users);
 
   function handleFileUpload(event) {
     const file = event.target.files[0];
@@ -100,25 +103,22 @@ export default function ManageGroupsPage() {
 
         // Send the parsed JSON data to the backend
         try {
-          const response = await axios.post(
-            `/api/group/${scenarioId}`,
-            jsonData
-          );
+          await axios.post(`/api/group/${scenarioId}`, jsonData);
 
-          reFetch();
+          refetch();
 
-          toast.success("Groups formed successfully!")
+          toast.success("Groups formed successfully!");
         } catch (error) {
-          toast.error("There was an error uploading the .csv data")
+          toast.error("There was an error uploading the .csv data");
           console.error("error uploading .csv data:", error.response.data);
         }
       },
     });
-  };
+  }
 
   function upload() {
     fileInputRef.current.click();
-  };
+  }
 
   function download() {
     const csv = convertToCSV(users, scenarioId);
@@ -133,14 +133,14 @@ export default function ManageGroupsPage() {
 
     document.body.removeChild(link);
     window.URL.revokeObjectURL(url);
-  };
+  }
 
   function downloadSample() {
     window.open(
       "https://firebasestorage.googleapis.com/v0/b/virtual-patient-simulator.appspot.com/o/_manual-uploads%2Ftesting_group.xlsx?alt=media&token=a9c61c46-c317-4c8c-b8b8-ba049f8c9ff3",
       "_blank",
       "noopener,noreferrer"
-    )
+    );
   }
 
   function goBack() {

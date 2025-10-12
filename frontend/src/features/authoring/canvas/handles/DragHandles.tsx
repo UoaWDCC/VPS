@@ -15,6 +15,6 @@ function DragHandles() {
       <RotationHandle />
     </>
   );
-};
+}
 
 export default DragHandles;

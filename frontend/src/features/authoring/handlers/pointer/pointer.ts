@@ -2,7 +2,11 @@ import { render } from "../../../../components/ContextMenu/portal";
 import { modifyComponentBounds } from "../../scene/operations/component";
 import useEditorStore from "../../stores/editor";
 import useVisualScene from "../../stores/visual";
-import { getRelativePosition, parseHit, syncModelSelection } from "../../text/cursor";
+import {
+  getRelativePosition,
+  parseHit,
+  syncModelSelection,
+} from "../../text/cursor";
 import type { Vec2 } from "../../types";
 import { subtract, translate } from "../../util";
 import ComponentMenu from "./ComponentContext";
@@ -10,125 +14,140 @@ import { handleCreateDrag, handleCreateEnd, handleCreateStart } from "./create";
 import { handleResizeDrag, handleResizeStart } from "./resize";
 
 export function handleMouseDownGlobal(e: React.MouseEvent, position: Vec2) {
-    const target = e.target as HTMLElement;
+  const target = e.target as HTMLElement;
 
-    const { mode, setVisualSelection, setSelection } = useEditorStore.getState();
+  const { mode, setVisualSelection, setSelection } = useEditorStore.getState();
 
-    if (mode.includes("create")) {
-        handleCreateStart(e, position);
-    } else if (target.dataset.handle) {
-        handleResizeStart(e);
-    } else if (target.dataset.type === "document") {
-        handleDocumentClick(e, position);
-    } else if (target.dataset.id) {
-        handleComponentClick(e, position);
-    } else {
-        handleCanvasClick();
-    }
+  if (mode.includes("create")) {
+    handleCreateStart(e, position);
+  } else if (target.dataset.handle) {
+    handleResizeStart(e);
+  } else if (target.dataset.type === "document") {
+    handleDocumentClick(e, position);
+  } else if (target.dataset.id) {
+    handleComponentClick(e, position);
+  } else {
+    handleCanvasClick();
+  }
 
-    if (target.dataset.type !== "document") {
-        setVisualSelection({ start: null, end: null });
-        setSelection({ start: null, end: null });
-    }
+  if (target.dataset.type !== "document") {
+    setVisualSelection({ start: null, end: null });
+    setSelection({ start: null, end: null });
+  }
 
-    useEditorStore.getState().setMouseDown(true);
+  useEditorStore.getState().setMouseDown(true);
 }
 
 export function handleMouseMoveGlobal(e: React.MouseEvent, position: Vec2) {
-    const { mode, mouseDown } = useEditorStore.getState();
+  const { mode, mouseDown } = useEditorStore.getState();
 
-    if (!mouseDown) return;
+  if (!mouseDown) return;
 
-    if (mode.includes("resize")) {
-        handleResizeDrag(e, position);
-    } else if (mode.includes("text")) {
-        handleTextSelection(e, position);
-    } else if (mode.includes("create")) {
-        handleCreateDrag(e, position);
-    } else {
-        handleComponentDrag(e, position);
-    }
+  if (mode.includes("resize")) {
+    handleResizeDrag(e, position);
+  } else if (mode.includes("text")) {
+    handleTextSelection(e, position);
+  } else if (mode.includes("create")) {
+    handleCreateDrag(e, position);
+  } else {
+    handleComponentDrag(e, position);
+  }
 }
 
 export function handleMouseUpGlobal() {
-    const { mode, setMouseDown } = useEditorStore.getState();
+  const { mode, setMouseDown } = useEditorStore.getState();
 
-    if (mode.includes("text")) {
-        syncModelSelection();
-    } else if (mode.includes("create")) {
-        handleCreateEnd();
-    } else if (mode.includes("mutation")) {
-        handleMutationEnd();
-    }
+  if (mode.includes("text")) {
+    syncModelSelection();
+  } else if (mode.includes("create")) {
+    handleCreateEnd();
+  } else if (mode.includes("mutation")) {
+    handleMutationEnd();
+  }
 
-    setMouseDown(false);
+  setMouseDown(false);
 }
 
 function handleCanvasClick() {
-    const { setSelected, setMode } = useEditorStore.getState();
-    setSelected(null);
-    setMode(["normal"]);
+  const { setSelected, setMode } = useEditorStore.getState();
+  setSelected(null);
+  setMode(["normal"]);
 }
 
 // component handlers
 
 function handleComponentClick(e: React.MouseEvent, position: Vec2) {
-    const { setSelected, setOffset, setMode, setMutationBounds } = useEditorStore.getState();
-    const scene = useVisualScene.getState().components;
+  const { setSelected, setOffset, setMode, setMutationBounds } =
+    useEditorStore.getState();
+  const scene = useVisualScene.getState().components;
 
-    const target = e.target as HTMLElement;
-    const id = target.dataset.id as string;
+  const target = e.target as HTMLElement;
+  const id = target.dataset.id as string;
 
-    setOffset(position);
-    setSelected(id);
+  setOffset(position);
+  setSelected(id);
 
-    const component = scene[target.dataset.id as string];
-    setMutationBounds({ ...component.bounds })
+  const component = scene[target.dataset.id as string];
+  setMutationBounds({ ...component.bounds });
 
-    setMode(["normal"]);
+  setMode(["normal"]);
 }
 
 function handleComponentDrag(_: React.MouseEvent, position: Vec2) {
-    const { selected, setMutationBounds, offset, setMode } = useEditorStore.getState();
-    if (!selected) return;
+  const { selected, setMutationBounds, offset, setMode } =
+    useEditorStore.getState();
+  if (!selected) return;
 
-    const component = useVisualScene.getState().components[selected];
+  const component = useVisualScene.getState().components[selected];
 
-    const verts = translate(component.bounds.verts, subtract(position, offset));
-    setMutationBounds((prev) => ({ ...prev, verts }));
-    setMode(["mutation"]);
+  const verts = translate(component.bounds.verts, subtract(position, offset));
+  setMutationBounds((prev) => ({ ...prev, verts }));
+  setMode(["mutation"]);
 }
 
 function handleMutationEnd() {
-    const { selected, mutationBounds, setMode } = useEditorStore.getState();
-    modifyComponentBounds(selected!, mutationBounds);
-    setMode(["normal"]);
+  const { selected, mutationBounds, setMode } = useEditorStore.getState();
+  modifyComponentBounds(selected!, mutationBounds);
+  setMode(["normal"]);
 }
 
 // document handlers
 
 function handleDocumentClick(e: React.MouseEvent, position: Vec2) {
-    const { setSelected, setMode, setMutationBounds, setVisualSelection, setDesiredColumn } = useEditorStore.getState();
-    const scene = useVisualScene.getState().components;
+  const {
+    setSelected,
+    setMode,
+    setMutationBounds,
+    setVisualSelection,
+    setDesiredColumn,
+  } = useEditorStore.getState();
+  const scene = useVisualScene.getState().components;
 
-    const target = e.target as HTMLElement;
-    const { document: doc } = useVisualScene.getState().components[target.dataset.id as string];
-    const cursor = parseHit(getRelativePosition(position, doc.bounds), doc.blocks);
+  const target = e.target as HTMLElement;
+  const { document: doc } =
+    useVisualScene.getState().components[target.dataset.id as string];
+  const cursor = parseHit(
+    getRelativePosition(position, doc.bounds),
+    doc.blocks
+  );
 
-    setSelected(target.dataset.id as string);
-    setMode(["text"]);
+  setSelected(target.dataset.id as string);
+  setMode(["text"]);
 
-    const component = scene[target.dataset.id as string];
-    setMutationBounds({ ...component.bounds })
+  const component = scene[target.dataset.id as string];
+  setMutationBounds({ ...component.bounds });
 
-    setDesiredColumn(null);
-    setVisualSelection({ start: cursor, end: null });
-    syncModelSelection();
+  setDesiredColumn(null);
+  setVisualSelection({ start: cursor, end: null });
+  syncModelSelection();
 }
 
 function handleTextSelection(_: React.MouseEvent, position: Vec2) {
-    const { selected, setVisualSelection } = useEditorStore.getState();
-    const { document: doc } = useVisualScene.getState().components[selected!];
-    const cursor = parseHit(getRelativePosition(position, doc.bounds), doc.blocks);
-    setVisualSelection(prev => ({ start: prev.start, end: cursor }));
+  const { selected, setVisualSelection } = useEditorStore.getState();
+  const { document: doc } = useVisualScene.getState().components[selected!];
+  const cursor = parseHit(
+    getRelativePosition(position, doc.bounds),
+    doc.blocks
+  );
+  setVisualSelection((prev) => ({ start: prev.start, end: cursor }));
 }

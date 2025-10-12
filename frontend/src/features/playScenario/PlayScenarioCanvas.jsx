@@ -1,5 +1,3 @@
-import { useState } from "react";
-import ResetConfirmationModal from "./modals/ResetConfirmationModal";
 import { buildVisualScene } from "../authoring/pipeline";
 import TextBox from "../authoring/elements/TextBox";
 import Speech from "../authoring/elements/Speech";
@@ -174,30 +172,8 @@ function injectStateVariables(scene, stateVariables) {
 export default function PlayScenarioCanvas({
   scene,
   buttonPressed,
-  reset,
-  setAddFlags,
-  setRemoveFlags,
   stateVariables,
 }) {
-  // const [isModalOpen, setIsModalOpen] = useState(false);
-
-  // const handleResetClick = () => {
-  //   setIsModalOpen(true);
-  // };
-
-  // const handleConfirmReset = async () => {
-  //   setIsModalOpen(false);
-  //   try {
-  //     await reset();
-  //   } catch (error) {
-  //     console.error("Error during reset confirmation:", error);
-  //   }
-  // };
-
-  // const handleCancelReset = () => {
-  //   setIsModalOpen(false);
-  // };
-
   const sceneToRender = injectStateVariables(scene, stateVariables);
 
   const components = Object.values(buildVisualScene(sceneToRender).components)
@@ -224,11 +200,6 @@ export default function PlayScenarioCanvas({
         <rect x="0" y="0" width="1920" height="1080" fill="white" />
         {components}
       </svg>
-      {/* <ResetConfirmationModal
-        isOpen={isModalOpen}
-        onConfirm={handleConfirmReset}
-        onClose={handleCancelReset}
-      /> */}
     </div>
   );
 }

@@ -1,16 +1,5 @@
-import {
-  Button,
-  FormControl,
-  FormGroup,
-  InputLabel,
-  MenuItem,
-  Select,
-  Typography,
-} from "@material-ui/core";
 import { useContext, useState } from "react";
 import ScenarioContext from "context/ScenarioContext";
-import SceneContext from "context/SceneContext";
-import StateOperationForm from "./StateOperationForm";
 import { getDefaultValue, stateTypes, validOperations } from "./stateTypes";
 import { modifyComponentProp } from "../../features/authoring/scene/operations/component";
 import SelectInput from "../../features/authoring/components/Select";
@@ -56,17 +45,15 @@ const CreateStateOperation = ({ component, open, setOpen }) => {
       value,
     };
 
-    modifyComponentProp(
-      component.id,
-      "stateOperations",
-      (prev) => [...(prev ?? []), newOperation]
-    );
+    modifyComponentProp(component.id, "stateOperations", (prev) => [
+      ...(prev ?? []),
+      newOperation,
+    ]);
 
     setSelectedState(null);
     setOperation(null);
     setValue(null);
   };
-
 
   function onVariableChange(variable) {
     setSelectedState(variable);
@@ -83,28 +70,49 @@ const CreateStateOperation = ({ component, open, setOpen }) => {
     >
       <fieldset className="fieldset">
         <label className="label">State Variable</label>
-        <SelectInput values={stateVariables} value={selectedState} display={(s) => s.name} onChange={onVariableChange} />
-        {selectedState ?
+        <SelectInput
+          values={stateVariables}
+          value={selectedState}
+          display={(s) => s.name}
+          onChange={onVariableChange}
+        />
+        {selectedState ? (
           <>
             <label className="label">Operation</label>
             <div className="join">
-              <SelectInput values={validOperations[selectedState.type]} value={operation} onChange={setOperation} />
-              {selectedState.type === stateTypes.BOOLEAN ?
-                <SelectInput values={[true, false]} value={value} onChange={setValue} /> :
+              <SelectInput
+                values={validOperations[selectedState.type]}
+                value={operation}
+                onChange={setOperation}
+              />
+              {selectedState.type === stateTypes.BOOLEAN ? (
+                <SelectInput
+                  values={[true, false]}
+                  value={value}
+                  onChange={setValue}
+                />
+              ) : (
                 <input
-                  type={selectedState.type === stateTypes.STRING ? "text" : "number"}
+                  type={
+                    selectedState.type === stateTypes.STRING ? "text" : "number"
+                  }
                   value={value ?? ""}
-                  onChange={e => setValue(e.target.value)}
+                  onChange={(e) => setValue(e.target.value)}
                   placeholder="Value"
                   className="input join-item"
                 />
-              }
+              )}
             </div>
           </>
-          : null}
+        ) : null}
       </fieldset>
       <div className="modal-action flex gap-2">
-        <button className={`btn ${!isSubmittable && "btn-disabled"}`} onClick={handleSubmit}>Create</button>
+        <button
+          className={`btn ${!isSubmittable && "btn-disabled"}`}
+          onClick={handleSubmit}
+        >
+          Create
+        </button>
       </div>
     </ModalDialog>
   );
