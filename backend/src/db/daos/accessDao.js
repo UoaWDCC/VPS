@@ -7,8 +7,7 @@ import Access from "../models/access.js";
  */
 const getAccessList = async(scenarioId) => {
     try{
-        const list = await Access.findOne({scnarioId: scenarioId});
-        console.log(list)
+        const list = await Access.findOne({scenarioId: scenarioId});
         if(!list) {
             throw new Error("list not found")
         }
@@ -30,7 +29,7 @@ const createAccessList = async(scenarioId, name, userId) => {
         scenarioId: scenarioId,
         name: name,
         ownerId: userId,
-        users: userId,
+        users: [userId],
     });
     await dbAccess.save();
     return dbAccess;

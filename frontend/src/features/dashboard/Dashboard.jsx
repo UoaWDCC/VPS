@@ -27,22 +27,17 @@ export default function Dashboard() {
   const [scenarioGroupInfo, setScenarioGroupInfo] = useState([]);
   const [scenario, setCurrentScenario] = useState({});
   const [scenes, setScenes] = useState([]);
-<<<<<<< Updated upstream
-  const [accessList, setAccessList] = useState(null);
-  useGet(`api/scenario/${scenarioId}`, setCurrentSecnario);
-=======
-  const {VpsUser} = useContext(AuthenticationContext);
-  // These routes already have auth applied 
-  const {isLoading: scenarioLoading, error: errorMsg} = useGet(`api/scenario/${scenarioId}`, setCurrentScenario);
->>>>>>> Stashed changes
+  // const [accessList, setAccessList] = useState(null);
+  useGet(`api/scenario/${scenarioId}`, setCurrentScenario);
   useGet(`api/scenario/${scenarioId}/scene/all`, setScenes);
   // console.log(scenario)
-
+  // useGet(`api/access/dashboard/${scenarioId}`, setAccessList);
   const { isLoading } = useGet(
     `/api/group/scenario/${scenarioId}`,
     setScenarioGroupInfo
   );
-  console.log(errorMsg)
+  console.log(scenes);
+  // console.log(accessList)
   // Check what page we are on
   const matchViewGroup = useRouteMatch(`${path}/view-group/:groupId`);
   const backURL = matchViewGroup ? url : "/";
@@ -154,7 +149,7 @@ export default function Dashboard() {
                 )}
               </ProtectedRoute>
               <ProtectedRoute path={`${path}/view-group/:groupId`}>
-                <ViewGroup />
+                <ViewGroup groupInfo={groupInfo}/>
               </ProtectedRoute>
             </Switch>
           </div>

@@ -5,12 +5,11 @@ import { useGet } from "../../../hooks/crudHooks";
 import DashGroupTable from "./table/DashGroupTable";
 import StateVarTable from "./table/StateVarTable";
 
-export default function ViewGroup() {
+export default function ViewGroup({groupInfo}) {
   const { groupId } = useParams();
-  const [groupInfo, setGroupInfo] = useState({});
   const [hasStateVar, setHasStateVar] = useState(false);
   const { stateVariables } = useContext(ScenarioContext);
-  useGet(`/api/group/retrieve/${groupId}`, setGroupInfo, true);
+  // useGet(`/api/group/retrieve/${groupId}`, setGroupInfo, true);
 
   useEffect(() => {
     if (!Array.isArray(stateVariables)) return;

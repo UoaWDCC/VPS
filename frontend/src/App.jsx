@@ -50,6 +50,12 @@ export default function App() {
             <Switch>
               <Route exact path="/login" component={LoginPage} />
 
+               <ProtectedRoute exact path="/">
+                  <ScenarioContextProvider>
+                    <ScenarioSelectionPage />
+                  </ScenarioContextProvider>
+                </ProtectedRoute>
+
               <ProtectedRoute path="/play/:scenarioId">
                 <PlayScenarioResolver />
               </ProtectedRoute>
@@ -85,12 +91,6 @@ export default function App() {
                 </Switch>
               </ScenarioContextProvider>
 
-              {/* Default path if nothing matches */}
-              <ProtectedRoute path="/">
-                <ScenarioContextProvider>
-                  <ScenarioSelectionPage />
-                </ScenarioContextProvider>
-              </ProtectedRoute>
             </Switch>
           </BrowserRouter>
         </AuthenticationContextProvider>

@@ -9,6 +9,8 @@ import group from "./group.js";
 import resource from "./resources.js";
 import navigate from "./navigate/index.js";
 import access from "./access.js"
+import dashboard from "./dashboard.js";
+
 const router = Router();
 
 router.use("/scenario", scenario);
@@ -20,5 +22,6 @@ router.use("/group", group);
 router.use("/navigate", navigate);
 router.use("/resources", resource);
 router.use("/access", access)
+router.use("/dashboard", dashboard);
 
 export default router;
