@@ -22,22 +22,22 @@ const addThumbs = async (scenarios) => {
   const scenarioData = await Promise.all(
     scenarios.map(async (scenario) => {
       if (!scenario.scenes || !scenario.scenes[0])
-        return { 
-          _id: scenario._id, 
+        return {
+          _id: scenario._id,
           name: scenario.name,
           description: scenario.description,
-          estimatedTime: scenario.estimatedTime
+          estimatedTime: scenario.estimatedTime,
         };
       const thumbnail = await Scene.findById(scenario.scenes[0], {
         components: 1,
         _id: 0,
       }).lean();
-      return { 
-        _id: scenario._id, 
-        name: scenario.name, 
+      return {
+        _id: scenario._id,
+        name: scenario.name,
         thumbnail,
         description: scenario.description,
-        estimatedTime: scenario.estimatedTime
+        estimatedTime: scenario.estimatedTime,
       };
     })
   );

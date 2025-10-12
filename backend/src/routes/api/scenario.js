@@ -93,7 +93,9 @@ router.patch("/:scenarioId/description", async (req, res) => {
 
 router.patch("/:scenarioId/estimated-time", async (req, res) => {
   const { estimatedTime } = req.body;
-  const scenario = await updateScenario(req.params.scenarioId, { estimatedTime });
+  const scenario = await updateScenario(req.params.scenarioId, {
+    estimatedTime,
+  });
   res.status(HTTP_OK).json(scenario);
 });
 
