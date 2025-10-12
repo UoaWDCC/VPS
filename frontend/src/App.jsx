@@ -21,7 +21,6 @@ import theme from "./theme/App.theme";
 
 import { Toaster } from "react-hot-toast";
 import { ContextMenuPortal } from "./components/ContextMenu/portal";
-import ViewGroupPage from "./features/dashboard/ViewGroup";
 
 const TOAST_OFFSET = 25;
 
@@ -73,16 +72,10 @@ export default function App() {
                 </ScenarioContextProvider>
               </ProtectedRoute>
 
-              <ProtectedRoute exact path="/dashboard/:scenarioId">
-                <ScenarioContextProvider>
-                  <Dashboard />
-                </ScenarioContextProvider>
-              </ProtectedRoute>
-
-              <ProtectedRoute path="/dashboard/:scenarioId/view-group/:groupId">
+              <ProtectedRoute path="/dashboard/:scenarioId">
                 <ScenarioContextProvider>
                   <SceneContextProvider>
-                    <ViewGroupPage />
+                    <Dashboard />
                   </SceneContextProvider>
                 </ScenarioContextProvider>
               </ProtectedRoute>

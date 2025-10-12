@@ -15,10 +15,8 @@ export default function ResourcesPanel({ scenarioId, open, onClose }) {
   const [selectedFileId, setSelectedFileId] = useState(null);
   const [selectedFile, setSelectedFile] = useState(null);
 
-  // Expanded state for tree persistence
+  // Expanded groups
   const [openGroups, setOpenGroups] = useState(() => new Set());
-  const [openChildren, setOpenChildren] = useState(() => new Set());
-
   const dialogRef = useRef(null);
 
   // Close on Escape
@@ -31,7 +29,6 @@ export default function ResourcesPanel({ scenarioId, open, onClose }) {
     return () => window.removeEventListener("keydown", onKey);
   }, [open, onClose]);
 
-  // Fetch tree when opened or scenario changes
   async function fetchTree() {
     try {
       setLoading(true);
@@ -47,22 +44,18 @@ export default function ResourcesPanel({ scenarioId, open, onClose }) {
         headers: { Authorization: `Bearer ${idToken}` },
       });
 
+      // ✅ Normalized: groups → files
       const normalized =
         (data || []).map((g) => ({
           id: g._id,
           name: g.name,
           order: g.order ?? 0,
-          children: (g.children || []).map((c) => ({
-            id: c._id,
-            name: c.name,
-            order: c.order ?? 0,
-            files: (c.files || []).map((f) => ({
-              id: f._id,
-              name: f.name,
-              size: f.size,
-              type: f.type,
-              createdAt: f.createdAt,
-            })),
+          files: (g.files || []).map((f) => ({
+            id: f._id,
+            name: f.name,
+            size: f.size,
+            type: f.type,
+            createdAt: f.createdAt,
           })),
         })) || [];
 
@@ -93,19 +86,13 @@ export default function ResourcesPanel({ scenarioId, open, onClose }) {
     const q = search.trim().toLowerCase();
     return tree
       .map((g) => {
-        const matchingChildren = (g.children || [])
-          .map((c) => {
-            const files = (c.files || []).filter((f) => {
-              const inName = f.name.toLowerCase().includes(q);
-              const inPath = `${g.name}/${c.name}`.toLowerCase().includes(q);
-              return inName || inPath;
-            });
-            if (files.length === 0) return null;
-            return { ...c, files };
-          })
-          .filter(Boolean);
-        if (matchingChildren.length === 0) return null;
-        return { ...g, children: matchingChildren };
+        const matchingFiles = (g.files || []).filter((f) => {
+          const inName = f.name.toLowerCase().includes(q);
+          const inPath = g.name.toLowerCase().includes(q);
+          return inName || inPath;
+        });
+        if (matchingFiles.length === 0) return null;
+        return { ...g, files: matchingFiles };
       })
       .filter(Boolean);
   }, [tree, search]);
@@ -128,30 +115,15 @@ export default function ResourcesPanel({ scenarioId, open, onClose }) {
     });
   };
 
-  const toggleChild = (cid) => {
-    setOpenChildren((prev) => {
-      const next = new Set(prev);
-      if (next.has(cid)) next.delete(cid);
-      else next.add(cid);
-      return next;
-    });
-  };
-
   const expandAll = () => {
     const allGroups = new Set(tree.map((g) => g.id));
-    const allChildren = new Set(
-      tree.flatMap((g) => (g.children || []).map((c) => c.id))
-    );
     setOpenGroups(allGroups);
-    setOpenChildren(allChildren);
   };
 
   const collapseAll = () => {
     setOpenGroups(new Set());
-    setOpenChildren(new Set());
   };
 
-  // Prevent closing when clicking inside the dialog
   const stopPropagation = (e) => e.stopPropagation();
 
   return (
@@ -199,7 +171,7 @@ export default function ResourcesPanel({ scenarioId, open, onClose }) {
               <input
                 type="text"
                 className="input input-bordered input-sm flex-1"
-                placeholder="Search files or path (e.g. 'design/wireframes')"
+                placeholder="Search files or group name"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
               />
@@ -251,9 +223,7 @@ export default function ResourcesPanel({ scenarioId, open, onClose }) {
                     onSelectFile={handleSelectFile}
                     selectedFileId={selectedFileId}
                     openGroups={openGroups}
-                    openChildren={openChildren}
                     toggleGroup={toggleGroup}
-                    toggleChild={toggleChild}
                   />
                 </div>
                 <div className="overflow-auto border border-base-200 rounded-lg">
@@ -292,17 +262,13 @@ function SkeletonBody() {
 
 function findFileById(tree, id) {
   for (const g of tree) {
-    for (const c of g.children || []) {
-      for (const f of c.files || []) {
-        if (f.id === id)
-          return {
-            ...f,
-            groupId: g.id,
-            groupName: g.name,
-            childId: c.id,
-            childName: c.name,
-          };
-      }
+    for (const f of g.files || []) {
+      if (f.id === id)
+        return {
+          ...f,
+          groupId: g.id,
+          groupName: g.name,
+        };
     }
   }
   return null;
