@@ -1,6 +1,6 @@
-const DiamondPlayButton = ({ size = 80, onClick }) => {
+const DiamondPlayButton = ({ size = 100, onClick }) => {
   // Make size responsive to viewport
-  const responsiveSize = `clamp(60px, ${size * 0.06}vw, ${size}px)`;
+  const responsiveSize = `clamp(80px, ${size * 0.06}vw, ${size}px)`;
 
   return (
     <>
