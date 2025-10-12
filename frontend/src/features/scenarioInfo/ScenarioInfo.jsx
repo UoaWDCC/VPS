@@ -10,6 +10,7 @@ import { usePatch } from "../../hooks/crudHooks";
 function ScenarioInfo() {
   const [selectedScenario, setSelectedScenario] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
+  const [editableTitle, setEditableTitle] = useState("");
   const [editableDescription, setEditableDescription] = useState("");
   const [editableEstimatedTime, setEditableEstimatedTime] = useState("");
   const [showEditModal, setShowEditModal] = useState(false);
@@ -32,6 +33,7 @@ function ScenarioInfo() {
       const scenario = scenarios.find((s) => s._id === scenarioId);
       if (scenario) {
         setSelectedScenario(scenario);
+        setEditableTitle(scenario.name || "");
         setEditableDescription(scenario.description || "");
         setEditableEstimatedTime(scenario.estimatedTime || "");
       }
@@ -44,6 +46,7 @@ function ScenarioInfo() {
 
   const handleScenarioSelect = (scenario) => {
     setSelectedScenario(scenario);
+    setEditableTitle(scenario.name || "");
     setEditableDescription(scenario.description || "");
     setEditableEstimatedTime(scenario.estimatedTime || "");
     history.replace(`/scenario-info?id=${scenario._id}`);
@@ -65,6 +68,7 @@ function ScenarioInfo() {
     setShowEditModal(false);
     
     if (selectedScenario) {
+      setEditableTitle(selectedScenario.name || "");
       setEditableDescription(selectedScenario.description || "");
       setEditableEstimatedTime(selectedScenario.estimatedTime || "");
     }
@@ -82,7 +86,14 @@ function ScenarioInfo() {
     setIsSaving(true);
 
     try {
+      // Save title
+      await usePatch(
+        `/api/scenario/${selectedScenario._id}/title`,
+        { name: editableTitle },
+        getUserIdToken
+      );
       
+      // Save description
       await usePatch(
         `/api/scenario/${selectedScenario._id}/description`,
         { description: editableDescription },
@@ -90,6 +101,7 @@ function ScenarioInfo() {
       );
 
     
+      // Save estimated time
       await usePatch(
         `/api/scenario/${selectedScenario._id}/estimated-time`,
         { estimatedTime: editableEstimatedTime },
@@ -97,17 +109,21 @@ function ScenarioInfo() {
       );
 
      
+      // Update local state
       const updatedScenario = {
         ...selectedScenario,
+        name: editableTitle,
         description: editableDescription,
         estimatedTime: editableEstimatedTime,
       };
       setSelectedScenario(updatedScenario);
 
      
+      // Refetch scenarios to sync with context
       scenarioContext?.reFetch?.();
 
     
+      // Close modal
       setShowEditModal(false);
     } catch (error) {
       console.error("Error saving scenario details:", error);
@@ -197,9 +213,17 @@ function ScenarioInfo() {
           <div className="w-full h-full flex flex-col overflow-y-auto">
             {/* Scenario Header */}
             <div className="text-left pb-[4vh] pl-[8vw] pt-[8vh] pr-[4vw]">
-              <h1 className="text-base-content font-light text-xl font-dm mb-[4vh]">
-                {selectedScenario.name}
-              </h1>
+              <div className="flex items-center justify-between mb-[4vh]">
+                <h1 className="text-base-content font-light text-xl font-dm">
+                  {selectedScenario.name}
+                </h1>
+                <button
+                  onClick={openEditModal}
+                  className="btn btn-sm btn-ghost text-base-content border border-base-content/20 hover:bg-base-content/10 hover:border-base-content/40 font-dm"
+                >
+                  Edit Details
+                </button>
+              </div>
 
               {/* Scenario Meta */}
               <div className="flex justify-start gap-[4vw]">
@@ -243,17 +267,9 @@ function ScenarioInfo() {
 
               {/* Scenario Description */}
               <div className="w-full max-w-[45vw] pt-[2vh]">
-                <div className="flex items-center justify-between mb-[1vh]">
-                  <h3 className="text-text-m text-base-content text-left font-dm">
-                    Description
-                  </h3>
-                  <button
-                    onClick={openEditModal}
-                    className="btn btn-sm btn-primary font-dm"
-                  >
-                    Edit Details
-                  </button>
-                </div>
+                <h3 className="text-text-m text-base-content text-left font-dm mb-[1vh]">
+                  Description
+                </h3>
                 <div className="flex items-start gap-[4vw] mt-[1vh]">
                   <p className="text-s leading-relaxed text-base-content/80 text-left flex-1 font-ibm pr-[2vw] min-h-[4em]">
                     {editableDescription || "No description available. Click 'Edit Details' to add one."}
@@ -293,6 +309,26 @@ function ScenarioInfo() {
               Edit Scenario Details
             </h3>
             
+            {/* Title Field */}
+            <div className="form-control mb-6">
+              <label className="label">
+                <span className="label-text text-base-content/80 font-ibm text-sm">Scenario Title</span>
+              </label>
+              <input
+                type="text"
+                value={editableTitle}
+                onChange={(e) => setEditableTitle(e.target.value)}
+                placeholder="Enter scenario title..."
+                className="input input-bordered border-primary/30 bg-base-100 text-base-content font-dm text-base w-full focus:border-primary focus:outline-none placeholder:text-base-content/40"
+                maxLength={100}
+              />
+              <label className="label">
+                <span className="label-text-alt text-base-content/50 font-ibm">
+                  {editableTitle.length}/100 characters
+                </span>
+              </label>
+            </div>
+
             {/* Description Field */}
             <div className="form-control mb-6">
               <label className="label">
@@ -345,7 +381,7 @@ function ScenarioInfo() {
               </button>
               <button
                 onClick={saveScenarioDetails}
-                className={`btn btn-primary font-dm ${isSaving ? "loading" : ""}`}
+                className={`btn btn-ghost text-base-content border border-base-content/20 hover:bg-base-content/10 hover:border-base-content/40 font-dm ${isSaving ? "loading" : ""}`}
                 disabled={isSaving}
               >
                 {isSaving ? "Saving..." : "Save Changes"}
