@@ -79,12 +79,11 @@ router.put("/:scenarioId", async (req, res) => {
   res.status(HTTP_OK).json(scenario);
 });
 
-
 router.patch("/:scenarioId", async (req, res) => {
   const { name, description, estimatedTime } = req.body;
 
-  const updates = {name, description, estimatedTime};
-  
+  const updates = { name, description, estimatedTime };
+
   const scenario = await updateScenario(req.params.scenarioId, updates);
   res.status(HTTP_OK).json(scenario);
 });

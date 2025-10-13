@@ -101,17 +101,14 @@ const retrieveRoleList = async (scenarioId) => {
 const updateScenario = async (scenarioId, updatedScenario) => {
   const scenario = await Scenario.findById(scenarioId);
 
- 
   if (updatedScenario.name?.trim()) {
     scenario.name = updatedScenario.name;
   }
 
- 
   if (updatedScenario.description !== undefined) {
     scenario.description = updatedScenario.description;
   }
 
-  
   if (updatedScenario.estimatedTime !== undefined) {
     scenario.estimatedTime = updatedScenario.estimatedTime;
   }

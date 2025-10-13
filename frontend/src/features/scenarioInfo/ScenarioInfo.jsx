@@ -51,7 +51,7 @@ function ScenarioInfo() {
   };
 
   const handlePlayScenario = (scenario) => {
-    history.push(`/play/${scenario._id}`, "_blank");
+    window.open(`/play/${scenario._id}`, "_blank");
   };
 
   const handleBackToPlay = () => {
@@ -121,16 +121,15 @@ function ScenarioInfo() {
       className="bg-base-100 text-base-content min-h-screen relative"
       data-theme="vps-dark"
     >
+      {/* Back Button */}
       <button
-        className="absolute z-50 bg-transparent border-none text-primary cursor-pointer hover:text-base-content transition-colors p-s top-l left-8 lg:left-16 xl:left-24 font-dm text-s"
+        className="absolute z-50 bg-transparent border-none text-primary cursor-pointer hover:text-base-content transition-colors p-s top-l lg:left-16 xl:left-24 font-dm text-s"
         onClick={handleBackToPlay}
       >
         ← Back
       </button>
       {/* Responsive Container optimised for 1024x768 min to 1600x900 max */}
       <div className="min-w-[1024px] max-w-[1600px] mx-auto px-8 lg:px-16 xl:px-24 h-screen flex relative">
-        {/* Back Button */}
-
         {/* Sidebar */}
         <div className="w-[27%] bg-base-100 flex flex-col relative h-screen">
           {/* Spacer to push content down */}
@@ -251,8 +250,8 @@ function ScenarioInfo() {
                   <h3 className="text-text-m text-base-content text-left font-dm mb-[1vh]">
                     Description
                   </h3>
-                  <div className="flex items-start gap-[4vw] mt-[1vh]">
-                    <p className="text-s leading-relaxed text-base-content/80 text-left flex-1 font-ibm pr-[2vw] min-h-[4em]">
+                  <div className="flex items-start gap-[2vw] mt-[1vh]">
+                    <p className="text-s leading-relaxed text-base-content/80 text-left font-ibm min-h-[4em] break-words break-all max-w-[35vw]">
                       {editableDescription ||
                         "No description available. Click 'Edit Details' to add one."}
                     </p>
@@ -328,11 +327,11 @@ function ScenarioInfo() {
                 onChange={(e) => setEditableDescription(e.target.value)}
                 placeholder="Enter scenario description..."
                 className="textarea textarea-bordered border-primary/30 bg-base-100 text-base-content h-32 font-ibm text-base w-full focus:border-primary focus:outline-none placeholder:text-base-content/40"
-                maxLength={500}
+                maxLength={250}
               />
               <label className="label">
                 <span className="label-text-alt text-base-content/50 font-ibm">
-                  {editableDescription.length}/500 characters
+                  {editableDescription.length}/250 characters
                 </span>
               </label>
             </div>
