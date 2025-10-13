@@ -79,23 +79,13 @@ router.put("/:scenarioId", async (req, res) => {
   res.status(HTTP_OK).json(scenario);
 });
 
-router.patch("/:scenarioId/title", async (req, res) => {
-  const { name } = req.body;
-  const scenario = await updateScenario(req.params.scenarioId, { name });
-  res.status(HTTP_OK).json(scenario);
-});
 
-router.patch("/:scenarioId/description", async (req, res) => {
-  const { description } = req.body;
-  const scenario = await updateScenario(req.params.scenarioId, { description });
-  res.status(HTTP_OK).json(scenario);
-});
+router.patch("/:scenarioId", async (req, res) => {
+  const { name, description, estimatedTime } = req.body;
 
-router.patch("/:scenarioId/estimated-time", async (req, res) => {
-  const { estimatedTime } = req.body;
-  const scenario = await updateScenario(req.params.scenarioId, {
-    estimatedTime,
-  });
+  const updates = {name, description, estimatedTime};
+  
+  const scenario = await updateScenario(req.params.scenarioId, updates);
   res.status(HTTP_OK).json(scenario);
 });
 

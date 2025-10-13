@@ -83,24 +83,14 @@ function ScenarioInfo() {
     setIsSaving(true);
 
     try {
-      // Save title
+      // Save all changes in a single PATCH request
       await usePatch(
-        `/api/scenario/${selectedScenario._id}/title`,
-        { name: editableTitle },
-        getUserIdToken
-      );
-
-      // Save description
-      await usePatch(
-        `/api/scenario/${selectedScenario._id}/description`,
-        { description: editableDescription },
-        getUserIdToken
-      );
-
-      // Save estimated time
-      await usePatch(
-        `/api/scenario/${selectedScenario._id}/estimated-time`,
-        { estimatedTime: editableEstimatedTime },
+        `/api/scenario/${selectedScenario._id}`,
+        {
+          name: editableTitle,
+          description: editableDescription,
+          estimatedTime: editableEstimatedTime,
+        },
         getUserIdToken
       );
 
