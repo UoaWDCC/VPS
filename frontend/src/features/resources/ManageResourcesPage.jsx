@@ -7,6 +7,7 @@ import { useParams } from "react-router-dom";
 import ScreenContainer from "../../components/ScreenContainer/ScreenContainer";
 import TopBar from "../../components/TopBar/TopBar";
 import AddGroup from "./components/AddGroup";
+import StateConditionalMenu from "../../components/StateVariables/StateConditionalMenu";
 
 export default function ManageResourcesPage() {
   const { scenarioId } = useParams();
@@ -112,9 +113,9 @@ export default function ManageResourcesPage() {
               size: f.size,
               type: f.type,
               createdAt: f.createdAt,
+              stateConditionals: f.stateConditionals,
             })),
           })) || [];
-
         if (!cancelled) setGroups(normalized);
       } catch (err) {
         console.error(err);
@@ -348,6 +349,7 @@ export default function ManageResourcesPage() {
         {/* RIGHT: File list and preview */}
         <div className="card bg-base-100 shadow-md">
           <div className="divider my-2" />
+          <StateConditionalMenu file={selectedFile} />
           <Preview file={selectedFile} makeDownloadUrl={makeDownloadUrl} />
         </div>
       </div>
