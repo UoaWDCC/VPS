@@ -65,15 +65,26 @@ router.get("/:scenarioId", async (req, res) => {
 
 // Update a scenario by a user
 router.put("/:scenarioId", async (req, res) => {
-  const { name, duration } = req.body;
+  const { name, duration, description, estimatedTime } = req.body;
   let scenario = await updateScenario(req.params.scenarioId, {
     name,
+    description,
+    estimatedTime,
   });
 
   scenario = await updateDurations(req.params.scenarioId, {
     duration,
   });
 
+  res.status(HTTP_OK).json(scenario);
+});
+
+router.patch("/:scenarioId", async (req, res) => {
+  const { name, description, estimatedTime } = req.body;
+
+  const updates = { name, description, estimatedTime };
+
+  const scenario = await updateScenario(req.params.scenarioId, updates);
   res.status(HTTP_OK).json(scenario);
 });
 
