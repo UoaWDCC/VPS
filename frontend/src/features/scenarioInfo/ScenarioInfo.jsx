@@ -246,19 +246,19 @@ function ScenarioInfo() {
                 </div>
 
                 {/* Scenario Description */}
-                <div className="w-full max-w-[45vw] pt-[2vh]">
+                <div className="w-full max-w-[45vw] pt-[2vh] relative">
                   <h3 className="text-text-m text-base-content text-left font-dm mb-[1vh]">
                     Description
                   </h3>
-                  <div className="flex items-start gap-[2vw] mt-[1vh]">
-                    <p className="text-s leading-relaxed text-base-content/80 text-left font-ibm min-h-[4em] break-words break-all max-w-[35vw]">
+                  <div className="mt-[1vh]">
+                    <p className="text-s leading-relaxed text-base-content/80 text-left font-ibm min-h-[4em] break-words break-all pr-[140px]">
                       {editableDescription ||
                         "No description available. Click 'Edit Details' to add one."}
                     </p>
 
                     {/* Play Button */}
 
-                    <div className="flex-shrink-0 ml-[2vw]">
+                    <div className="absolute top-[5vh] right-0">
                       <DiamondPlayButton
                         size={100}
                         onClick={() => handlePlayScenario(selectedScenario)}
