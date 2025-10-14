@@ -1,6 +1,7 @@
 import CreateStateConditional from "./CreateStateConditional";
 import { PlusIcon } from "lucide-react";
 import { useEffect, useState } from "react";
+import EditStateConditional from "./EditStateConditional";
 
 /**
  * Component that houses state conditional interface (methods for creating and editing)
@@ -32,18 +33,18 @@ const StateConditionalMenu = ({ file }) => {
             className="z-1"
           />
         </div>
-        {/* <div className="collapse-content text--1 bg-base-200 px-0">
+        <div className="collapse-content text--1 bg-base-200 px-0">
           {file.stateConditionals?.map(
             (stateConditional, stateConditionalIndex) => (
               <EditStateConditional
                 file={file}
-                stateConditional={stateConditional}
-                stateConditionalIndex={stateConditionalIndex}
+                conditional={stateConditional}
+                conditionalIndex={stateConditionalIndex}
                 key={stateConditionalIndex}
               />
             )
           )}
-        </div> */}
+        </div>
       </div>
       <CreateStateConditional
         fileId={file.id}
