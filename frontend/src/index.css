@@ -6,7 +6,9 @@
   --font-dm: "DMSans", sans-serif;
 
   --color-black: #000000;
+  --color-black-rgb: 0, 0, 0;
   --color-white: #ffffff;
+  --color-white-rgb: 255, 255, 255;
   --color-grey: #898989;
   --color-offwhite: #fafafa;
 
@@ -97,6 +99,8 @@
 
   --color-base-100: var(--color-offwhite);
   --color-base-content: var(--color-black);
+  --color-base-content-rgb: var(--color-black-rgb);
+  --color-base-content-box-shadow: 0 0 2px 1px rgba(var(--color-black-rgb), 0.2);
   --color-primary: var(--color-grey);
   --color-secondary: var(--color-black);
   --color-error: #c13216;
@@ -110,6 +114,8 @@
 
   --color-base-100: var(--color-black);
   --color-base-content: var(--color-white);
+  --color-base-content-rgb: var(--color-white-rgb);
+  --color-base-content-box-shadow: 0 0 2px 1px rgba(var(--color-white-rgb), 0.2);
   --color-primary: var(--color-grey);
   --color-secondary: var(--color-white);
   --color-error: #c13216;
@@ -207,4 +213,10 @@ body,
 
 .btn:disabled {
   @apply disabled:opacity-30;
+}
+
+.react-flow__controls-button {
+  background-color: var(--color-base-100) !important;
+  color: var(--color-base-content) !important;
+  box-shadow: var(--color-base-content-box-shadow);
 }

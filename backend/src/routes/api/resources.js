@@ -7,8 +7,6 @@ import {
   createResource,
   getResourceById,
   deleteResourceById,
-  addFlag,
-  removeFlag,
   getAllVisibleResources,
   updateResourceById,
   bulkCreateResources,
@@ -23,175 +21,138 @@ const HTTP_BAD_REQUEST = 400;
 const HTTP_NOT_FOUND = 404;
 const HTTP_INTERNAL_SERVER_ERROR = 500;
 
-// Apply auth middleware to all routes below this point
+// 🔒 All routes require Firebase auth
 router.use(auth);
 
+/**
+ * @route GET /scenario/:scenarioId
+ * @desc Retrieve all resources belonging to a scenario
+ */
 router.get("/scenario/:scenarioId", async (req, res) => {
   const { scenarioId } = req.params;
   try {
     const resources = await Resource.find({ scenarioId });
-    return res.status(200).json(resources);
+    return res.status(HTTP_OK).json(resources);
   } catch (err) {
-    return res.status(500).json({ error: err.message });
+    return res.status(HTTP_INTERNAL_SERVER_ERROR).json({ error: err.message });
+  }
+});
+
+/**
+ * @route GET /group/:groupId
+ * @desc Retrieve all visible resources for a group
+ */
+router.get("/group/:groupId", async (req, res) => {
+  const { groupId } = req.params;
+  if (!groupId) {
+    return res.status(HTTP_BAD_REQUEST).json({ error: "Missing groupId" });
+  }
+
+  try {
+    const resources = await getAllVisibleResources(groupId);
+    return res.status(HTTP_OK).json(resources);
+  } catch (err) {
+    return res.status(HTTP_INTERNAL_SERVER_ERROR).json({ error: err.message });
   }
 });
 
 /**
  * @route POST /
- * @desc Create a New Resource
- * @param {Object} req.body - The resource details.
- * @param {string} req.body.type - The type of the resource as text or image
- * @param {string} req.body.content - The content of the resource. as either a string or an image?
- * @param {string} req.body.name - The name of the resource.
- * @returns {Object} 201 - The newly created resource.
+ * @desc Create a new resource
  */
 router.post(
   "/",
   handle(async (req, res) => {
-    const { type, content, name, requiredFlags } = req.body;
+    const { type, content, name, scenarioId, groupId, requiredFlags } =
+      req.body;
+    if (!type || !name || !scenarioId) {
+      return res
+        .status(HTTP_BAD_REQUEST)
+        .json({ error: "Missing required fields" });
+    }
+
     const newResource = await createResource(
       type,
       content,
       name,
-      requiredFlags
+      requiredFlags,
+      {
+        scenarioId,
+        groupId,
+      }
     );
-    return res.status(HTTP_CREATED).json(newResource).send();
+    return res.status(HTTP_CREATED).json(newResource);
   })
 );
 
 /**
  * @route GET /:resourceId
- * @desc Retrieve a Specific Resource
- * @param {string} req.params.resourceId - The unique identifier of the resource.
- * @returns {Object} 200 - The resource details.
- * @returns {string} 400 - Bad Request if resourceId is not provided.
- * @returns {string} 404 - Not Found if the resource does not exist.
+ * @desc Retrieve a specific resource by ID
  */
 router.get("/:resourceId", async (req, res) => {
-  if (!req.params.resourceId) {
-    return res.status(HTTP_BAD_REQUEST).send("Bad Request");
-  }
-  const resource = await getResourceById(req.params.resourceId);
-  if (!resource) {
-    return res.status(HTTP_NOT_FOUND).send("Not Found");
-  }
-  return res.status(HTTP_OK).json(resource);
-});
+  const { resourceId } = req.params;
+  if (!resourceId)
+    return res.status(HTTP_BAD_REQUEST).send("Missing resourceId");
 
-/**
- * @route DELETE /:resourceId
- * @desc Delete a Resource
- * @param {string} req.params.resourceId - The unique identifier of the resource.
- * @returns {string} 204 - Resource deleted successfully.
- * @returns {string} 400 - Bad Request if resourceId is not provided.
- * @returns {string} 404 - Not Found if the resource does not exist.
- */
-router.delete("/:resourceId", async (req, res) => {
-  if (!req.params.resourceId) {
-    return res.status(HTTP_BAD_REQUEST).send("Bad Request");
+  try {
+    const resource = await getResourceById(resourceId);
+    if (!resource) return res.status(HTTP_NOT_FOUND).send("Not Found");
+    return res.status(HTTP_OK).json(resource);
+  } catch (err) {
+    return res.status(HTTP_INTERNAL_SERVER_ERROR).json({ error: err.message });
   }
-  const deleted = await deleteResourceById(req.params.resourceId);
-  if (!deleted) {
-    return res.status(HTTP_NOT_FOUND).send("Not Found");
-  }
-  return res.status(HTTP_NO_CONTENT).send("Resource deleted");
-});
-
-/**
- * @route GET /group/:groupId
- * @desc Retrieve All Visible Resources for a Group
- * @param {string} req.params.groupId - The unique identifier of the group.
- * @returns {Object[]} 200 - An array of visible resources for the group.
- * @returns {string} 400 - Bad Request if groupId is not provided.
- */
-router.get("/group/:groupId", async (req, res) => {
-  const { groupId } = req.params;
-  if (!groupId) {
-    return res.status(HTTP_BAD_REQUEST).send("Bad Request");
-  }
-  const resources = await getAllVisibleResources(groupId);
-  return res.status(HTTP_OK).json(resources);
-});
-
-/**
- * @route POST /group/:groupId/:flag
- * @desc Add a Flag to Group Flags
- * @param {string} req.params.groupId - The unique identifier of the group.
- * @param {string} req.params.flag - The flag to be added.
- * @returns {string[]} 200 - The updated list of flags for the group.
- * @returns {string} 400 - Bad Request if groupId or flag is not provided.
- */
-router.post("/group/:groupId/:flag", async (req, res) => {
-  const { groupId, flag } = req.params;
-  if (!groupId || !flag) {
-    return res.status(HTTP_BAD_REQUEST).send("Bad Request");
-  }
-  const flags = await addFlag(groupId, flag);
-  return res.status(HTTP_OK).json(flags);
-});
-
-/**
- * @route DELETE /group/:groupId/:flag
- * @desc Remove a Flag from Group Flags
- * @param {string} req.params.groupId - The unique identifier of the group.
- * @param {string} req.params.flag - The flag to be removed.
- * @returns {string[]} 200 - The updated list of flags for the group.
- * @returns {string} 400 - Bad Request if groupId or flag is not provided.
- */
-router.delete("/group/:groupId/:flag", async (req, res) => {
-  const { groupId, flag } = req.params;
-  if (!groupId || !flag) {
-    return res.status(HTTP_BAD_REQUEST).send("Bad Request");
-  }
-  const flags = await removeFlag(groupId, flag);
-  return res.status(HTTP_OK).json(flags);
 });
 
 /**
  * @route PUT /:resourceId
- * @desc Update a Resource
- * @param {string} req.params.resourceId - The unique identifier of the resource.
- * @param {Object} req.body - The updated resource details.
- * @param {string} req.body.type - The type of the resource.
- * @param {string} req.body.content - The content of the resource.
- * @param {string} req.body.name - The name of the resource.
- * @returns {Object} 200 - The updated resource.
- * @returns {string} 400 - Bad Request if required fields are missing.
- * @returns {string} 404 - Not Found if the resource does not exist.
- * @returns {string} 500 - Internal Server Error if an unexpected error occurs.
+ * @desc Update an existing resource
  */
 router.put("/:resourceId", async (req, res) => {
   const { resourceId } = req.params;
   const { name, type, content, requiredFlags } = req.body;
 
-  if (!content || !name || !type) {
-    return res.status(HTTP_BAD_REQUEST).send("Bad Request");
+  if (!name || !type) {
+    return res
+      .status(HTTP_BAD_REQUEST)
+      .json({ error: "Missing required fields" });
   }
 
   try {
-    const updatedResource = await updateResourceById(
+    const updated = await updateResourceById(
       resourceId,
       name,
       type,
       content,
       requiredFlags
     );
+    if (!updated) return res.status(HTTP_NOT_FOUND).send("Not Found");
+    return res.status(HTTP_OK).json(updated);
+  } catch (err) {
+    return res.status(HTTP_INTERNAL_SERVER_ERROR).json({ error: err.message });
+  }
+});
 
-    if (!updatedResource) {
-      return res.status(HTTP_NOT_FOUND).send("Not Found");
-    }
+/**
+ * @route DELETE /:resourceId
+ * @desc Delete a resource
+ */
+router.delete("/:resourceId", async (req, res) => {
+  const { resourceId } = req.params;
+  if (!resourceId)
+    return res.status(HTTP_BAD_REQUEST).send("Missing resourceId");
 
-    return res.status(HTTP_OK).json(updatedResource);
-  } catch {
-    return res.status(HTTP_INTERNAL_SERVER_ERROR).send("Internal Server Error");
+  try {
+    const deleted = await deleteResourceById(resourceId);
+    if (!deleted) return res.status(HTTP_NOT_FOUND).send("Not Found");
+    return res.status(HTTP_NO_CONTENT).send();
+  } catch (err) {
+    return res.status(HTTP_INTERNAL_SERVER_ERROR).json({ error: err.message });
   }
 });
 
 /**
  * @route POST /:scenarioId
- * @desc Upload resource data (e.g. from CSV)
- * @param {string} req.params.scenarioId - The scenario to associate resources with
- * @returns {Object} 200 - Upload result
+ * @desc Bulk upload resources (e.g. from CSV)
  */
 router.post(
   "/:scenarioId",
@@ -202,14 +163,15 @@ router.post(
     if (!Array.isArray(resources) || resources.length === 0) {
       return res
         .status(HTTP_BAD_REQUEST)
-        .json("Invalid or empty resource list");
+        .json({ error: "Invalid or empty resource list" });
     }
 
     try {
       const saved = await bulkCreateResources(scenarioId, resources);
-      return res
-        .status(HTTP_OK)
-        .json({ message: `Successfully uploaded ${saved.length} resources.` });
+      return res.status(HTTP_OK).json({
+        message: `Successfully uploaded ${saved.length} resources.`,
+        count: saved.length,
+      });
     } catch (err) {
       console.error("Failed to upload resources:", err);
       return res

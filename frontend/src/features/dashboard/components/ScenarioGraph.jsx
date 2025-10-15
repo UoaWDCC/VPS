@@ -18,14 +18,15 @@ export default function ScenarioGraph({
   inNodes,
   inEdges,
   inGPathEdges,
-  onLoaded,
+  inSceneMap,
+  inGPath,
+  className = "",
 }) {
   /**
    * Adapted ELkjs code
    * Accessed: 10/09/2025
    * https://reactflow.dev/examples/layout/elkjs
    */
-
   const [direction, setDirection] = useState("DOWN");
   const elk = new ELK();
   const elkOptions = {
@@ -42,6 +43,7 @@ export default function ScenarioGraph({
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
   const [sizes, setSizes] = useState({});
+  const [currentIdx, setCurrentIdx] = useState(0);
 
   // Set up initial nodes and update edges with the group path if it exists
   const [newEdges, setNewEdges] = useState([]);
@@ -91,12 +93,44 @@ export default function ScenarioGraph({
     RenderGraph();
   }, [direction]);
 
+  // Update the nodes when a new selection is made
+  useEffect(() => {
+    handleNodeHighlighting();
+  }, [currentIdx, setNodes]);
+
+  function handleNodeHighlighting() {
+    if (inGPath.length == 0) return;
+    setNodes((tempNodes) =>
+      tempNodes.map((node) => {
+        if (node.id == inSceneMap[inGPath[currentIdx]]._id) {
+          return {
+            ...node,
+            data: {
+              ...node.data,
+              isHighlighted: true,
+            },
+          };
+        }
+        return {
+          ...node,
+          data: {
+            ...node.data,
+            isHighlighted: false,
+          },
+        };
+      })
+    );
+  }
+
   const gle = async (nodes, edges, options = {}, tempSizes) => {
     const graph = {
       id: "root",
       layoutOptions: options,
       children: nodes.map((node) => ({
         ...node,
+        data: {
+          ...node.data,
+        },
       })),
       edges: edges,
     };
@@ -124,7 +158,7 @@ export default function ScenarioGraph({
         setNodes(layoutedNodes);
         setEdges(layoutedEdges);
         fitView();
-        onLoaded();
+        handleNodeHighlighting();
       }
     );
     // console.log("Updated layout")
@@ -135,12 +169,15 @@ export default function ScenarioGraph({
    *  Need to add a counter to the nodes to show how many times a group has visited that scene
    *  Could make the nodes be grayed out and only show them normally if the group has visited them, makes it easier to visualize progress
    */
-
   return (
-    <div className="h-full">
+    <div className={`${className}`}>
       <span className="text-sm opacity-80">
         NB: Node positions are not saved if moved around
       </span>
+      <br />
+      {/* {!graphLoading && nodes.length == 0 && (
+        <span className="text-error">No scenes hae been added to this scenario. Head back to the edit page and add some scenes.</span>
+      )} */}
       <ReactFlow
         className={`border`}
         nodes={nodes}
@@ -151,13 +188,15 @@ export default function ScenarioGraph({
         onEdgesChange={onEdgesChange}
         connectionLineType={ConnectionLineType.SmoothStep}
         fitView
-        // nodesDraggable={false}
         nodesConnectable={false}
         elementsSelectable={false}
       >
-        <Controls showInteractive={true} />
+        <Controls showInteractive={true} className="" />
         <MiniMap />
-        <Panel position="top-left" className="bg-white p-2 border border-black">
+        <Panel
+          position="top-left"
+          className="bg-(--color-base-100) p-2 shadow-(--color-base-content-box-shadow)"
+        >
           <h3 className="text-lg font-bold font-mono">Legend</h3>
           <div className="flex">
             <div className="pr-3">
@@ -169,7 +208,7 @@ export default function ScenarioGraph({
                 />
               </svg>
             </div>
-            Unvisited Path
+            <p>Unvisited Path</p>
           </div>
           <div className="flex">
             <div className="pr-3">
@@ -181,12 +220,12 @@ export default function ScenarioGraph({
                 />
               </svg>
             </div>
-            Visited Path
+            <p>Visited Path</p>
           </div>
         </Panel>
         <Panel position="top-right" className="flex flex-col gap-2">
           <button
-            className="bg-white text-sm border rounded-lg py-0.5 px-1 hover:cursor-pointer"
+            className="btn btn-sm bg-(--color-base-100) hover:cursor-pointer hover:bg-(--color-primary) border-(--color-base-content)"
             onClick={() => {
               setDirection((prev) => (prev === "DOWN" ? "RIGHT" : "DOWN"));
             }}
@@ -194,7 +233,7 @@ export default function ScenarioGraph({
             Flip
           </button>
           <button
-            className="bg-white text-sm border rounded-lg py-0.5 px-1 hover:cursor-pointer"
+            className="btn btn-sm bg-(--color-base-100) hover:cursor-pointer hover:bg-(--color-primary) border-(--color-base-content)"
             onClick={() => {
               RenderGraph();
             }}
@@ -202,8 +241,57 @@ export default function ScenarioGraph({
             Reset Nodes
           </button>
         </Panel>
+        <Panel position="center-right">
+          {/* <NavigatorTable sceneMap={inSceneMap} groupPath={inGPath}/> */}
+          <PathNavigator
+            sceneMap={inSceneMap}
+            groupPath={inGPath}
+            idx={currentIdx}
+            setCurrentIdx={setCurrentIdx}
+          />
+        </Panel>
         <Background />
       </ReactFlow>
     </div>
   );
 }
+
+const PathNavigator = ({ sceneMap, groupPath, idx, setCurrentIdx }) => {
+  if (groupPath.length == 0) return <></>;
+  function updateIndex(d) {
+    setCurrentIdx((prev) => {
+      const newIdx = prev + d;
+      if (newIdx < 0 || newIdx >= groupPath.length) return prev;
+      return newIdx;
+    });
+  }
+
+  return (
+    <div>
+      <div className="grid justify-items-end">
+        <p>Current Node:</p>
+        <p className="">{sceneMap[groupPath[idx]].name}</p>
+        <div>
+          <button
+            className="btn bg-(--color-base-100) text-(--color-base-content) mr-2 hover:bg-(--color-primary) border-(--color-base-content)"
+            disabled={idx == 0}
+            onClick={() => {
+              updateIndex(-1);
+            }}
+          >
+            Prev
+          </button>
+          <button
+            className="btn bg-(--color-base-100) text-(--color-base-content) hover:bg-(--color-primary) border-(--color-base-content)"
+            disabled={idx + 1 == groupPath.length}
+            onClick={() => {
+              updateIndex(1);
+            }}
+          >
+            Next
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
