@@ -17,7 +17,7 @@ import { ScenePage } from "./features/sceneSelection/SceneSelectionPage";
 import theme from "./theme/App.theme";
 import { Toaster } from "react-hot-toast";
 import { ContextMenuPortal } from "./components/ContextMenu/portal";
-import ViewGroupPage from "./features/dashboard/ViewGroup";
+import CreateLandingPage from "./features/create/CreateLandingPage"; // Verify this path
 
 const TOAST_OFFSET = 25;
 

@@ -1,11 +1,10 @@
-/* Top Navigation Bar */
 .top-nav-bar {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   background-color: black;
-  padding: 1rem 2rem;
+  padding: 1.5rem 1.5rem;
   display: flex;
   border-bottom: 2px solid; 
   border-image: linear-gradient(
@@ -60,7 +59,7 @@
   border: none;
   color: #9ca3af;
   cursor: pointer;
-  padding: 1rem 1.5rem;
+  padding: 1.5rem 1.5rem;
   font-size: 16px;
   font-weight: 400;
   transition: all 0.2s ease;
@@ -94,7 +93,6 @@
   padding-top: 80px; /* Add top padding for fixed nav */
 }
 
-/* Header Styles */
 .play-header {
   padding-top: 1vh;
   padding-bottom: 2vh;
@@ -112,7 +110,6 @@ h1.play-title {
 
 
 
-/* Search Section */
 .search-section {
   padding-bottom: 3vh;
 }
