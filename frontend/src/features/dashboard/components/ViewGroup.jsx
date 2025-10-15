@@ -1,15 +1,11 @@
 import { useState, useContext, useEffect } from "react";
-import { useParams } from "react-router-dom";
 import ScenarioContext from "../../../context/ScenarioContext";
-import { useGet } from "../../../hooks/crudHooks";
 import DashGroupTable from "./table/DashGroupTable";
 import StateVarTable from "./table/StateVarTable";
 
 export default function ViewGroup({groupInfo}) {
-  const { groupId } = useParams();
   const [hasStateVar, setHasStateVar] = useState(false);
   const { stateVariables } = useContext(ScenarioContext);
-  // useGet(`/api/group/retrieve/${groupId}`, setGroupInfo, true);
 
   useEffect(() => {
     if (!Array.isArray(stateVariables)) return;

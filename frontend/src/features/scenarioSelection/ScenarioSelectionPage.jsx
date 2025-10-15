@@ -1,6 +1,6 @@
 import MenuItem from "@material-ui/core/MenuItem";
 import { useContext, useEffect, useState } from "react";
-import { useHistory } from "react-router-dom";
+import { useHistory, useLocation } from "react-router-dom";
 import ContextMenu from "../../components/ContextMenu";
 import ThumbnailList from "../../components/ListContainer/ThumbnailList";
 import ScreenContainer from "../../components/ScreenContainer/ScreenContainer";
@@ -9,7 +9,7 @@ import AuthenticationContext from "../../context/AuthenticationContext";
 import ScenarioContext from "../../context/ScenarioContext";
 import AccessLevel from "../../enums/route.access.level";
 import { useDelete, usePut } from "../../hooks/crudHooks";
-
+import { toast } from "react-hot-toast";
 import MovieFilterRoundedIcon from "@mui/icons-material/MovieFilterRounded";
 import TheatersRoundedIcon from "@mui/icons-material/TheatersRounded";
 
@@ -29,6 +29,7 @@ export default function ScenarioSelectionPage() {
   } = useContext(ScenarioContext);
   const { getUserIdToken, VpsUser } = useContext(AuthenticationContext);
   const history = useHistory();
+  const location = useLocation();
 
   /** Handle right-click to open up ContextMenu */
   const [contextMenuPosition, setContextMenuPosition] = useState(null);
@@ -95,6 +96,17 @@ export default function ScenarioSelectionPage() {
       history.push(`/scenario/${currentScenario._id}`);
     }
   }
+
+  // Show the toast if included in payload when redirecting
+  useEffect(() => {
+    const payload = location.state?.toast;
+    if(payload?.message) {
+      const toastFunc = payload.type == "error" ? toast.error: toast;
+      const options = {...payload.options}
+      toastFunc(payload.message, options);
+      history.replace("/", {});
+    }
+  }, [location, history])
 
   useEffect(() => {
     setCurrentScenario(null);

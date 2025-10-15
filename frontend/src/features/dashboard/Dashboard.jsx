@@ -28,15 +28,34 @@ export default function Dashboard() {
   const [scenario, setCurrentScenario] = useState({});
   const [scenes, setScenes] = useState([]);
   // const [accessList, setAccessList] = useState(null);
-  useGet(`api/scenario/${scenarioId}`, setCurrentScenario);
-  useGet(`api/scenario/${scenarioId}/scene/all`, setScenes);
+  const [accessInfo, setAccessInfo] = useState(null)
+  const [allowed, setAllowed] = useState(false);
+
+  const {isLoading: accessLoading, error: accessError} = useGet(`api/dashboard/scenarios/${scenarioId}/access`, setAccessInfo);
+  
+  useEffect(() => {
+    if(accessLoading) return;
+
+    if(accessError == 401 || !accessInfo){
+      setAllowed(false);
+      history.replace("/", {toast: {message: "Access denied. If you believe this is an error, please contact the author of the scenario.", type:"error", options:{duration: 6000}}})
+      return;
+    }
+    if(accessInfo.allowed)
+    {
+      setAllowed(true);
+    }
+    
+  }, [accessLoading, accessError, accessInfo])
+
+  useGet(`api/dashboard/scenarios/${scenarioId}`, setCurrentScenario, true, !allowed);
+  useGet(`api/dashboard/scenarios/${scenarioId}/scenes`, setScenes, true, !allowed);
   // console.log(scenario)
   // useGet(`api/access/dashboard/${scenarioId}`, setAccessList);
   const { isLoading } = useGet(
-    `/api/group/scenario/${scenarioId}`,
-    setScenarioGroupInfo
+    `/api/dashboard/scenarios/${scenarioId}/groups`,
+    setScenarioGroupInfo, true, !allowed
   );
-  console.log(scenes);
   // console.log(accessList)
   // Check what page we are on
   const matchViewGroup = useRouteMatch(`${path}/view-group/:groupId`);
@@ -50,10 +69,10 @@ export default function Dashboard() {
   }, [scenario]);
   // Fetch group data if in view group mode, skips if not
   useGet(
-    `/api/group/retrieve/${viewGroupId}`,
+    `/api/dashboard/groups/${viewGroupId}`,
     setGroupInfo,
     true,
-    !isViewGroupMode
+    !isViewGroupMode || !allowed
   );
 
   const viewGroup = async (groupId) => {

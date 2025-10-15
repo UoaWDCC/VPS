@@ -273,6 +273,7 @@ export function useGet(url, setData, requireAuth = true, skipRequest = false) {
     let isMounted = true;
 
     async function fetchData() {
+      if(!isMounted) return;
       setLoading(true);
       setError(null);
 
@@ -289,16 +290,17 @@ export function useGet(url, setData, requireAuth = true, skipRequest = false) {
 
       try {
         const response = await axios.get(url, config);
-        if (isMounted) {
+          if(!isMounted) return;
           setData(response.data);
-        }
+        
       } catch (err) {
+        if(!isMounted) return;
         console.log(
           `Request failed for ${url}:`,
           err.response?.status,
           err.message
         );
-        setError("fail");
+        setError(err.response);
         // If we get a 401 and have a user object, try to refresh the token
         if (err.response?.status === 401 && user && requireAuth) {
           console.log(`Attempting token refresh for ${url}`);
@@ -322,7 +324,7 @@ export function useGet(url, setData, requireAuth = true, skipRequest = false) {
             }
           } catch (retryError) {
             console.log(`Retry request failed for ${url}:`, retryError);
-            setError("fail");
+            setError(retryError.response);
           }
         }
       }

@@ -2,11 +2,24 @@ import { Router } from "express";
 import { retrieveScenario } from "../../db/daos/scenarioDao.js";
 import { retrieveSceneList, retrieveScene } from "../../db/daos/sceneDao.js";
 import { getGroup, getGroupByScenarioId } from "../../db/daos/groupDao.js";
+import auth from "../../middleware/firebaseAuth.js";
+import dashboardAuth from "../../middleware/dashboardAuth.js";
 
 const router = Router();
 
+// Firebase  & dashbaord atuh
+router.use(auth);
+
 router.get("/", async(req, res) =>{
+    console.log(req.body)
     return res.status(200).json({ok: true})
+})
+router.use("/scenarios/:scenarioId", dashboardAuth);
+router.use("/groups/:groupId", dashboardAuth)
+router.use("/access", dashboardAuth);
+
+router.get("/scenarios/:scenarioId/access", async (req, res) => {
+    return res.status(200).json({allowed: true})
 })
 
 /**
@@ -55,7 +68,6 @@ router.get("/scenarios/:scenarioId/groups", async (req, res) => {
  * Old URI: /group/retrieve/:groupId
  * new URI: /groups/:groupId
  */
-
 router.get("/groups/:groupId", async (req, res)=>{
     const {groupId} = req.params;
     const group = await getGroup(groupId);
