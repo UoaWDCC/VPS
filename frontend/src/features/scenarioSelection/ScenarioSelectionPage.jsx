@@ -12,6 +12,7 @@ import { useDelete, usePut } from "../../hooks/crudHooks";
 
 import MovieFilterRoundedIcon from "@mui/icons-material/MovieFilterRounded";
 import TheatersRoundedIcon from "@mui/icons-material/TheatersRounded";
+import FabMenu from "../../components/FabMenu";
 
 /**
  * Page that shows the user's existing scenarios.
@@ -188,6 +189,7 @@ export default function ScenarioSelectionPage() {
           )}
         </div>
       </div>
+      <FabMenu />
     </ScreenContainer>
   );
 }
