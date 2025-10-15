@@ -3,7 +3,7 @@
   top: 0;
   left: 0;
   right: 0;
-  background-color: black;
+  background-color: var(--color-black);
   padding: 1rem 2rem;
   display: flex;
   align-items: center;
@@ -13,7 +13,7 @@
 .nav-btn {
   background: transparent;
   border: none;
-  color: #9ca3af;
+  color: var(--color-grey);
   cursor: pointer;
   padding: 1.5rem 1.5rem;
   font-size: 16px;
@@ -23,11 +23,11 @@
 }
 
 .nav-btn:hover {
-  color: white;
+  color: var(--color-white);
 }
 
 .nav-btn-active {
-  color: white;
+  color: var(--color-white);
 }
 
 .nav-btn-active::after {
@@ -37,9 +37,8 @@
   left: 0;
   right: 0;
   height: 2px;
-  background: white;
+  background: var(--color-white);
 }
-
 
 .create-card {
   display: flex;
@@ -52,25 +51,26 @@
   align-items: center;
   justify-content: center;
   background-color: transparent !important;
-  border: 2px dashed #9ca3af !important;
-  color: #9ca3af;
+  border: 2px dashed var(--color-grey) !important;
+  color: var(--color-grey);
   font-size: clamp(48px, 6vw, 96px);
   font-weight: 300;
   transition: all 0.2s ease;
 }
 
 .create-thumbnail:hover {
-  border-color: white;   
-  color: white;         
+  border-color: var(--color-white);
+  color: var(--color-white);
 }
+
 .search-input-play {
   text-align: left;
 }
+
 .create-plus {
   font-size: inherit;
   line-height: 1;
 }
-
 
 .section-block {
   margin-bottom: 6vh;
@@ -78,17 +78,18 @@
 
 .section-header {
   font-size: clamp(20px, 2vw, 28px);
-  font-weight: 400;
+  font-weight: 500;
+  padding-top: 2vh;
   margin-bottom: 2vh;
-  color: white;
-  text-align: left; 
+  color: var(--color-white);
+  text-align: left;
 }
 
 .scenario-card-thumbnail {
   width: 100%;
   aspect-ratio: 16/9; /* Changed to 16:9 */
-  background-color: white;
-  border: 1px solid #374151;
+  background-color: var(--color-white);
+  border: 1px solid var(--color-grey);
   border-radius: none !important; /* edit */
   overflow: hidden;
   display: flex;
@@ -97,17 +98,16 @@
   margin-bottom: 1.5vh;
 }
 
-
 .createScenarioCard {
   position: fixed;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  background-color: rgb(255, 255, 255);
-  border: 5px solid #515151;
+  background-color: var(--color-white);
+  border: 5px solid var(--color-grey);
   padding: 20px;
   border-radius: none; /* edit */
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 4px rgba(var(--color-black-rgb), 0.1);
   visibility: "visible";
   opacity: 1;
   transition:
@@ -126,47 +126,41 @@
   left: 0;
   width: 200vw;
   height: 100vh;
-  background-color: rgba(0, 0, 0, 0.5);
+  background-color: rgba(var(--color-black-rgb), 0.5);
   z-index: 1;
 }
 
-
-
-
 .selectable-card {
-  border: 2px dashed #ffffff;
+  border: 2px dashed var(--color-white);
   transform: scale(1.03);
   cursor: pointer;
   transition: all 0.2s ease;
 }
 
 .selectable-card:hover {
-  background-color: rgba(255, 255, 255, 0.05);
+  background-color: rgba(var(--color-white-rgb), 0.05);
 }
 
 .dashboard-selection-message {
   text-align: center;
-  color: #ffffff;
+  color: var(--color-white);
   font-weight: 500;
   padding: 1rem 0;
   font-size: 1rem;
-  background-color: rgba(255, 255, 255, 0.05);
+  background-color: rgba(var(--color-white-rgb), 0.05);
   margin-bottom: 2vh;
   border-radius: 6px;
 }
 
-
 .selectable-card {
-  border: 2px dashed #ffffff;
+  border: 2px dashed var(--color-white);
   transition: border 0.2s ease;
 }
 
 .dashboard-selection-message {
-  color: #ffffff;
+  color: var(--color-white);
   text-align: center;
   margin: 1rem 0;
   font-weight: 500;
   font-size: 16px;
 }
-
-

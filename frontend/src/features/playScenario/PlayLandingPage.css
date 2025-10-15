@@ -3,14 +3,14 @@
   top: 0;
   left: 0;
   right: 0;
-  background-color: black;
+  background-color: var(--color-black);
   padding: 1.5rem 1.5rem;
   display: flex;
   border-bottom: 2px solid; 
   border-image: linear-gradient(
       to right,
       transparent 0%,
-      rgba(255, 255, 255, 0.3) 50%,
+      rgba(var(--color-white-rgb), 0.3) 50%,
       transparent 100%
     )
     1; 
@@ -28,7 +28,7 @@
   gap: 0.5rem;
   background: transparent;
   border: none;
-  color: #9ca3af;
+  color: var(--color-grey);
   cursor: pointer;
   padding: 0.5rem 1rem;
   border-radius: none !important; /* edit */
@@ -37,7 +37,7 @@
 }
 
 .logout-btn:hover {
-  color: white;
+  color: var(--color-white);
 }
 
 .logout-icon {
@@ -57,7 +57,7 @@
 .nav-btn {
   background: transparent;
   border: none;
-  color: #9ca3af;
+  color: var(--color-grey);
   cursor: pointer;
   padding: 1.5rem 1.5rem;
   font-size: 16px;
@@ -67,11 +67,11 @@
 }
 
 .nav-btn:hover {
-  color: white;
+  color: var(--color-white);
 }
 
 .nav-btn-active {
-  color: white;
+  color: var(--color-white);
 }
 
 .nav-btn-active::after {
@@ -81,13 +81,13 @@
   left: 0;
   right: 0;
   height: 2px;
-  background: white;
+  background: var(--color-white);
 }
 
 .play-container {
-  background-color: black;
+  background-color: var(--color-black);
   min-height: 100vh;
-  color: white;
+  color: var(--color-white);
   position: relative;
   padding: 0 8vw;
   padding-top: 80px; /* Add top padding for fixed nav */
@@ -99,16 +99,14 @@
 }
 
 .play-header .play-title {
-  font-size: clamp(20px, 2.5vw, 32px) !important;
-  font-weight: 400;
+  font-size: clamp(20px, 2vw, 28px) !important;
+  font-weight: 500;
 }
 
 h1.play-title {   
   font-size: 24px !important;
   font-weight: 500 !important;
 }
-
-
 
 .search-section {
   padding-bottom: 3vh;
@@ -127,7 +125,7 @@ h1.play-title {
   align-items: center;
   flex-direction: row-reverse;
   border: none !important; 
-  border-bottom: 1px solid #374151 !important; 
+  border-bottom: 1px solid var(--color-grey) !important; 
   border-radius: 0 !important;
 }
 
@@ -136,7 +134,7 @@ h1.play-title {
   background: transparent;
   border: none !important;
   outline: none !important;
-  color: white;
+  color: var(--color-white);
   font-size: clamp(12px, 1.2vw, 16px);
   text-align: right;
 }
@@ -148,7 +146,7 @@ h1.play-title {
 }
 
 .search-input-play::placeholder {
-  color: #9ca3af;
+  color: var(--color-grey);
 }
 
 .search-icon-play {
@@ -188,15 +186,16 @@ h1.play-title {
 
 .scenario-card:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 4px 12px rgba(var(--color-black-rgb), 0.3);
 }
+
 .create-thumbnail {
   display: flex;
   align-items: center;
   justify-content: center;
   background-color: transparent !important; 
-  border: 2px dashed #9ca3af !important; 
-  color: #9ca3af;
+  border: 2px dashed var(--color-grey) !important; 
+  color: var(--color-grey);
   font-size: clamp(48px, 6vw, 96px);
   font-weight: 300;
   transition: all 0.2s ease;
@@ -206,8 +205,8 @@ h1.play-title {
 .scenario-card-thumbnail {
   width: 100%;
   aspect-ratio: 16/9; /* Changed to 16:9 */
-  background-color: white;
-  border: 1px solid #374151;
+  background-color: var(--color-white);
+  border: 1px solid var(--color-grey);
   border-radius: none !important; /* edit */
   overflow: hidden;
   display: flex;
@@ -223,7 +222,7 @@ h1.play-title {
 }
 
 .scenario-name-text {
-  color: white;
+  color: var(--color-white);
   font-size: clamp(12px, 1.1vw, 16px);
   font-weight: 400;
   margin: 0;
@@ -277,25 +276,24 @@ h1.play-title {
   }
 }
 
-
 .selectable-card {
-  border: 2px dashed #ffffff;
+  border: 2px dashed var(--color-white);
   transform: scale(1.03);
   cursor: pointer;
   transition: all 0.2s ease;
 }
 
 .selectable-card:hover {
-  background-color: rgba(255, 255, 255, 0.05);
+  background-color: rgba(var(--color-white-rgb), 0.05);
 }
 
 .dashboard-selection-message {
   text-align: center;
-  color: #ffffff;
+  color: var(--color-white);
   font-weight: 500;
   padding: 1rem 0;
   font-size: 1rem;
-  background-color: rgba(255, 255, 255, 0.05);
+  background-color: rgba(var(--color-white-rgb), 0.05);
   margin-bottom: 2vh;
   border-radius: 6px;
 }
