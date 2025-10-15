@@ -123,7 +123,7 @@ function ScenarioInfo() {
     >
       {/* Back Button */}
       <button
-        className="absolute z-50 bg-transparent border-none text-primary cursor-pointer hover:text-base-content transition-colors p-s top-l lg:left-16 xl:left-24 font-dm text-s"
+        className="absolute z-50 bg-transparent border-none text-primary cursor-pointer hover:text-base-content transition-colors px-8 py-6 top-0 left-0 font-dm text-s"
         onClick={handleBackToPlay}
       >
         ← Back
@@ -136,8 +136,8 @@ function ScenarioInfo() {
           <div className="h-[35vh] flex-shrink-0"></div>
 
           {/* Search Container - Positioned above the list */}
-          <div className="bg-transparent p-[2vh_2.5%] absolute top-[20vh] left-0 right-0 z-10 flex-shrink-0">
-            <label className="bg-transparent gap-[1vw] pl-[3vw] flex items-center flex-row-reverse mr-10">
+          <div className="bg-transparent px-[5%] py-[2vh] absolute top-[20vh] left-0 right-0 z-10 flex-shrink-0">
+            <label className="bg-transparent gap-[2vw] flex items-center flex-row-reverse">
               <svg
                 className="h-m w-m opacity-50 flex-shrink-0 stroke-current"
                 xmlns="http://www.w3.org/2000/svg"
@@ -163,12 +163,12 @@ function ScenarioInfo() {
                 required
               />
             </label>
-            {/* Simple line under search bar - stops before search icon */}
-            <div className="h-px bg-primary/20  mt-2 ml-[3vw] mr-[calc(theme(fontSize.m)+3vw)]"></div>
+            {/* Simple line under search bar */}
+            <div className="h-px bg-primary/20 mt-3"></div>
           </div>
 
           {/* Scenario List */}
-          <div className="overflow-y-auto pl-[3vw] absolute top-[26vh] left-0 right-0 bottom-0 pr-[1vw]">
+          <div className="overflow-y-auto px-[5%] absolute top-[28vh] left-0 right-0 bottom-0">
             {filteredScenarios.map((scenario) => (
               <div
                 key={scenario._id}
@@ -237,7 +237,7 @@ function ScenarioInfo() {
               </div>
 
               {/* Scenario Content */}
-              <div className="flex-1 flex flex-col items-start p-[0_4vw_4vh_6vw] overflow-y-auto overflow-x-hidden max-w-full">
+              <div className="flex-1 flex flex-col items-start p-[0_4vw_4vh_6vw] overflow-y-hidden overflow-x-hidden max-w-full">
                 {/* Scenario Thumbnail */}
                 <div className="w-full max-w-[45vw] mb-[3vh] flex-shrink-0">
                   <div className="w-full aspect-video bg-white border border-gray-600 rounded-lg overflow-hidden flex items-center justify-center">
@@ -259,7 +259,7 @@ function ScenarioInfo() {
                     </p>
 
                     {/* Play Button */}
-                    <div className="flex-shrink-0 ml-8">
+                    <div className="flex-shrink-0 ml-8 -mt-4">
                       <DiamondPlayButton
                         size={100}
                         onClick={() => handlePlayScenario(selectedScenario)}
