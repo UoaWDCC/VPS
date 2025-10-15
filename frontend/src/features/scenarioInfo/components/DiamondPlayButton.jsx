@@ -1,6 +1,7 @@
 const DiamondPlayButton = ({ size = 100, onClick }) => {
-  // Make size responsive to viewport
-  const responsiveSize = `clamp(80px, ${size * 0.06}vw, ${size}px)`;
+  // Make size responsive to viewport - better scaling
+  const responsiveSize = `clamp(70px, 5.5vw, 140px)`;
+  const responsiveFontSize = `clamp(10px, 0.9vw, 18px)`;
 
   return (
     <>
@@ -66,7 +67,7 @@ const DiamondPlayButton = ({ size = 100, onClick }) => {
         <div
           className="play-text"
           style={{
-            fontSize: `clamp(12px, ${size * 0.012}vw, ${size * 0.2}px)`,
+            fontSize: responsiveFontSize,
             position: "absolute",
             top: 0,
             left: 0,

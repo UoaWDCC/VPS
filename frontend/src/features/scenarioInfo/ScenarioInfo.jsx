@@ -118,7 +118,7 @@ function ScenarioInfo() {
 
   return (
     <div
-      className="bg-base-100 text-base-content min-h-screen relative"
+      className="bg-base-100 text-base-content min-h-screen relative overflow-x-hidden"
       data-theme="vps-light"
     >
       {/* Back Button */}
@@ -131,7 +131,7 @@ function ScenarioInfo() {
       {/* Responsive Container optimised for 1024x768 min to 1600x900 max */}
       <div className="min-w-[1024px] max-w-[1600px] mx-auto px-8 lg:px-16 xl:px-24 h-screen flex relative overflow-hidden">
         {/* Sidebar */}
-        <div className="w-[27%] bg-base-100 flex flex-col relative h-full overflow-hidden">
+        <div className="w-[27%] bg-base-100 flex flex-col relative h-full overflow-hidden flex-shrink-0">
           {/* Spacer to push content down */}
           <div className="h-[35vh] flex-shrink-0"></div>
 
@@ -164,7 +164,7 @@ function ScenarioInfo() {
               />
             </label>
             {/* Simple line under search bar - stops before search icon */}
-            <div className="h-px bg-primary/20 mt-2 ml-[3vw] mr-[calc(theme(fontSize.m)+3vw)]"></div>
+            <div className="h-px bg-primary/20  mt-2 ml-[3vw] mr-[calc(theme(fontSize.m)+3vw)]"></div>
           </div>
 
           {/* Scenario List */}
@@ -186,11 +186,11 @@ function ScenarioInfo() {
         </div>
 
         {/* Main Content */}
-        <div className="flex-1 flex items-center justify-center overflow-hidden">
+        <div className="flex-1 flex items-center justify-center overflow-hidden min-w-0">
           {selectedScenario ? (
             <div className="w-full h-full flex flex-col overflow-y-auto overflow-x-hidden">
               {/* Scenario Header */}
-              <div className="text-left pb-[3vh] pl-[6vw] pt-[6vh] pr-[4vw] flex-shrink-0">
+              <div className="text-left pb-[3vh] pl-[6vw] pt-[6vh] pr-[4vw] flex-shrink-0 max-w-full">
                 <div className="mb-[3vh]">
                   <div className="flex items-center gap-3 mb-[1vh]">
                     <h1 className="text-base-content font-light text-xl font-dm">
@@ -237,7 +237,7 @@ function ScenarioInfo() {
               </div>
 
               {/* Scenario Content */}
-              <div className="flex-1 flex flex-col items-start p-[0_4vw_4vh_6vw] overflow-y-auto overflow-x-hidden">
+              <div className="flex-1 flex flex-col items-start p-[0_4vw_4vh_6vw] overflow-y-auto overflow-x-hidden max-w-full">
                 {/* Scenario Thumbnail */}
                 <div className="w-full max-w-[45vw] mb-[3vh] flex-shrink-0">
                   <div className="w-full aspect-video bg-white border border-gray-600 rounded-lg overflow-hidden flex items-center justify-center">
@@ -248,18 +248,18 @@ function ScenarioInfo() {
                 </div>
 
                 {/* Scenario Description */}
-                <div className="w-full max-w-[45vw] pt-[2vh] relative flex-shrink-0">
+                <div className="w-full max-w-[50vw] pt-[2vh] relative flex-shrink-0 pb-[2vh]">
                   <h3 className="text-text-m text-base-content text-left font-dm mb-[1vh]">
                     Description
                   </h3>
-                  <div className="mt-[1vh] flex items-start gap-4">
-                    <p className="text-s leading-relaxed text-base-content/80 text-left font-ibm min-h-[4em] break-words flex-1 pr-4">
+                  <div className="mt-[1vh] flex items-start gap-6 flex-wrap">
+                    <p className="text-[clamp(0.875rem,1vw,1.125rem)] leading-relaxed text-base-content/80 text-left font-ibm min-h-[4em] break-words flex-1 max-w-[35vw] min-w-[200px]">
                       {editableDescription ||
                         "No description available. Click 'Edit Details' to add one."}
                     </p>
 
                     {/* Play Button */}
-                    <div className="flex-shrink-0 w-[6vw] min-w-[80px] max-w-[120px]">
+                    <div className="flex-shrink-0 ml-8">
                       <DiamondPlayButton
                         size={100}
                         onClick={() => handlePlayScenario(selectedScenario)}
@@ -328,11 +328,11 @@ function ScenarioInfo() {
                 onChange={(e) => setEditableDescription(e.target.value)}
                 placeholder="Enter scenario description..."
                 className="textarea textarea-bordered border-primary/30 bg-base-100 text-base-content h-32 font-ibm text-base w-full focus:border-primary focus:outline-none placeholder:text-base-content/40"
-                maxLength={250}
+                maxLength={200}
               />
               <label className="label">
                 <span className="label-text-alt text-base-content/50 font-ibm">
-                  {editableDescription.length}/250 characters
+                  {editableDescription.length}/200 characters
                 </span>
               </label>
             </div>
