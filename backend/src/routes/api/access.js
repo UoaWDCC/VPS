@@ -1,14 +1,16 @@
 import { Router } from "express";
 import { getAccessList } from "../../db/daos/accessDao.js";
-
+import auth from "../../middleware/firebaseAuth.js";
 const router = Router();
+
+router.use(auth);
 
 router.get("/", async(req, res) => {
     // res.json("test")
     return res.json("Access route");
 })
 
-router.get("/dashboard/:scenarioId", async (req, res) => {
+router.get("/users/:scenarioId", async (req, res) => {
     try {
         const {scenarioId} = req.params;
         const list = await getAccessList(scenarioId);

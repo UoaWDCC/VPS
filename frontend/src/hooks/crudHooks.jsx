@@ -264,6 +264,7 @@ export function useGet(url, setData, requireAuth = true, skipRequest = false) {
   const [version, setVersion] = useState(0);
   const { getUserIdToken, user } = useContext(AuthenticationContext);
   // Could add a error state for the response etc to check on the frontend side
+  const [res, setRes] = useState(null)
   const [error, setError] = useState(null);
   function reFetch() {
     setVersion(version + 1);
@@ -292,7 +293,7 @@ export function useGet(url, setData, requireAuth = true, skipRequest = false) {
         const response = await axios.get(url, config);
           if(!isMounted) return;
           setData(response.data);
-        
+          setRes(response)
       } catch (err) {
         if(!isMounted) return;
         console.log(
@@ -301,6 +302,7 @@ export function useGet(url, setData, requireAuth = true, skipRequest = false) {
           err.message
         );
         setError(err.response);
+        setRes(err.response)
         // If we get a 401 and have a user object, try to refresh the token
         if (err.response?.status === 401 && user && requireAuth) {
           console.log(`Attempting token refresh for ${url}`);
@@ -318,6 +320,7 @@ export function useGet(url, setData, requireAuth = true, skipRequest = false) {
               const retryResponse = await axios.get(url, retryConfig);
               if (isMounted) {
                 setData(retryResponse.data);
+                setRes(retryResponse)
               }
             } else {
               console.log(`Token refresh failed for ${url}`);
@@ -325,6 +328,7 @@ export function useGet(url, setData, requireAuth = true, skipRequest = false) {
           } catch (retryError) {
             console.log(`Retry request failed for ${url}:`, retryError);
             setError(retryError.response);
+            setData(retryError);
           }
         }
       }
@@ -342,7 +346,7 @@ export function useGet(url, setData, requireAuth = true, skipRequest = false) {
     };
   }, [url, skipRequest, version]);
 
-  return { isLoading, reFetch, error };
+  return { isLoading, reFetch, error, res };
 }
 
 /**

@@ -13,7 +13,7 @@ import CreateGraphData from "./utils/GraphHelper";
 import ScenarioGraph from "./components/ScenarioGraph";
 import ProtectedRoute from "../../firebase/ProtectedRoute";
 import ViewGroup from "./components/ViewGroup";
-import AuthenticationContext from "../../context/AuthenticationContext";
+import LoadingPage from "../status/LoadingPage";
 /**
  * Could maybe add some info about the scenario? Who created what time, last edited, thumbnail of the scenario and an overlay edit button * which directs you to the edit page?
  *
@@ -27,27 +27,40 @@ export default function Dashboard() {
   const [scenarioGroupInfo, setScenarioGroupInfo] = useState([]);
   const [scenario, setCurrentScenario] = useState({});
   const [scenes, setScenes] = useState([]);
-  // const [accessList, setAccessList] = useState(null);
+  const [accessList, setAccessList] = useState(null);
   const [accessInfo, setAccessInfo] = useState(null)
   const [allowed, setAllowed] = useState(false);
 
-  const {isLoading: accessLoading, error: accessError} = useGet(`api/dashboard/scenarios/${scenarioId}/access`, setAccessInfo);
-  
+  const {isLoading: accessLoading, error: accessError, res: accessRes} = useGet(`api/dashboard/scenarios/${scenarioId}/access`, setAccessInfo);
+  console.log(accessRes)
   useEffect(() => {
-    if(accessLoading) return;
+    if(accessLoading || !accessRes) return;
+    // Middleware deny
 
-    if(accessError == 401 || !accessInfo){
+    if(accessRes.status == 401 ){
       setAllowed(false);
       history.replace("/", {toast: {message: "Access denied. If you believe this is an error, please contact the author of the scenario.", type:"error", options:{duration: 6000}}})
       return;
     }
+
+    /**
+     * In practice this error should not occur as it's the middleware is currently running checks against an access list
+     * which would be created alongside when new scenarios are created. This error currently is in place due to an access list not existsing but will implement a check in the dashboard middleware to check for ownership against the scenario it self and not search for the access list to make it more robust and support legacy scenarios. Ideally, once this is implemented the dashboard page when there is no access list found, the author would be able to access it and it should have a button for them to create an access list, this would then allow them to add extra users for dashboard.
+     */
+    if(accessRes.status == 404){
+      setAllowed(false);
+      history.replace("/", {toast: {message: "Access List not found. Stupid error will be fixed", type:"error", options:{duration: 6000}}})
+      return;
+    }
+
     if(accessInfo.allowed)
     {
       setAllowed(true);
     }
     
-  }, [accessLoading, accessError, accessInfo])
+  }, [accessLoading, accessError, accessInfo, accessRes])
 
+  useGet(`api/access/users/${scenarioId}`, setAccessList, true, !allowed);
   useGet(`api/dashboard/scenarios/${scenarioId}`, setCurrentScenario, true, !allowed);
   useGet(`api/dashboard/scenarios/${scenarioId}/scenes`, setScenes, true, !allowed);
   // console.log(scenario)
@@ -108,6 +121,7 @@ export default function Dashboard() {
     const groupsStarted = groupData.filter(
       (group) => group.path.length != 0
     ).length;
+    
     return (
       <div
         className={`${className} inline-grid lg:stats-vertical xl:stats-horizontal shadow-(--color-base-content-box-shadow) w-full`}
@@ -140,6 +154,9 @@ export default function Dashboard() {
     );
   };
 
+  // Cheap way to block the user from seeing the dashboard page before permissions are fully checked.
+  // Could be a better way?
+ if (allowed == false) return <LoadingPage text="Checking permissions..." />;
   return (
     <ScreenContainer vertical>
       <DashTopBar back={backURL}>

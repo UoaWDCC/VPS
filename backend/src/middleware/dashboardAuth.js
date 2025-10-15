@@ -12,18 +12,18 @@ export default async function dashboardAuth(req, res, next) {
             const group = await getGroup(req.params.groupId)
             sId = group.scenarioId;
         }
-        
         const accessList = await getAccessList(sId);
         if(accessList) {
             if(accessList.users.includes(req.body.uid))
             {
                 next();
             } else {
+                console.log("Middleware unauthorized")
                 res.sendStatus(HTTP_UNAUTHORISED);
             }
         }
     } catch(err){
-        console.log("Middleware auth fail")
+        console.log("Middleware list not found")
         res.sendStatus(HTTP_NOT_FOUND);
     }
 }
