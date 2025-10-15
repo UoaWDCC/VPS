@@ -158,7 +158,7 @@
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 2.5vw 2vw;
-  padding-bottom: 6vh;
+  padding-bottom: 3vh;
   max-width: 90vw;
 }
 
@@ -185,7 +185,7 @@
   aspect-ratio: 4/3;
   background-color: white;
   border: 1px solid #374151;
-  border-radius: 8px;
+  border-radius: 0px; /*you can change this for scenario card radius preference*/
   overflow: hidden;
   display: flex;
   align-items: center;
