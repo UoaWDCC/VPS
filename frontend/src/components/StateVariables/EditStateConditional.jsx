@@ -39,7 +39,7 @@ const EditStateConditional = ({ fileId, conditional, conditionalIndex }) => {
 
   const deleteStateConditional = () => {
     api
-      .put(user, `/api/files/state-conditionals/${fileId}`, {
+      .delete(user, `/api/files/state-conditionals/${fileId}`, {
         stateConditionalIndex: conditionalIndex,
       })
       .then((res) => {
@@ -47,7 +47,7 @@ const EditStateConditional = ({ fileId, conditional, conditionalIndex }) => {
       })
       .catch((err) => {
         console.error(err);
-        toast.error("Error editing state conditional");
+        toast.error("Error deleting state conditional");
       });
   };
 

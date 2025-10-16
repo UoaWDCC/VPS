@@ -8,25 +8,19 @@ import EditStateConditional from "./EditStateConditional";
  *
  * @component
  */
-const StateConditionalMenu = ({ file }) => {
+const StateConditionalMenu = ({ file, updateFile }) => {
   if (!file) {
     return null;
   }
 
   const [createOpen, setCreateOpen] = useState(false);
-  const [conditionals, setConditionals] = useState([]);
-
-  useEffect(() => {
-    setConditionals(file.stateConditionals || []);
-    console.log(conditionals);
-  }, [file]);
 
   return (
     <>
       <div className="collapse overflow-visible collapse-arrow bg-base-300 rounded-sm text-s">
         <input type="checkbox" />
         <div className="collapse-title flex items-center justify-between">
-          State Operations
+          State Conditionals
           <PlusIcon
             size={18}
             onClick={() => setCreateOpen(true)}
@@ -41,6 +35,7 @@ const StateConditionalMenu = ({ file }) => {
                 conditional={stateConditional}
                 conditionalIndex={stateConditionalIndex}
                 key={stateConditionalIndex}
+                updateFile={updateFile}
               />
             )
           )}
@@ -50,6 +45,7 @@ const StateConditionalMenu = ({ file }) => {
         fileId={file.id}
         open={createOpen}
         setOpen={setCreateOpen}
+        updateFile={updateFile}
       />
     </>
   );

@@ -223,10 +223,7 @@ router.delete("/state-conditionals/:fileId", async (req, res) => {
       return res.status(400).json({ error: "Invalid stateConditionalIndex" });
     }
 
-    // Remove the subdocument using Mongoose's id().remove()
-    const subdocId = meta.stateConditionals[stateConditionalIndex]._id;
-    meta.stateConditionals.id(subdocId).remove();
-
+    meta.stateConditionals.splice(stateConditionalIndex, 1);
     await meta.save();
     return res.json(meta);
   } catch (err) {
