@@ -32,12 +32,12 @@ export default function Dashboard() {
   const [allowed, setAllowed] = useState(false);
 
   const {isLoading: accessLoading, error: accessError, res: accessRes} = useGet(`api/dashboard/scenarios/${scenarioId}/access`, setAccessInfo);
-  console.log(accessRes)
+  // console.log(accessRes)
   useEffect(() => {
     if(accessLoading || !accessRes) return;
     // Middleware deny
 
-    if(accessRes.status == 401 ){
+    if(accessRes.status == 401 || accessRes == null){
       setAllowed(false);
       history.replace("/", {toast: {message: "Access denied. If you believe this is an error, please contact the author of the scenario.", type:"error", options:{duration: 6000}}})
       return;
@@ -49,7 +49,7 @@ export default function Dashboard() {
      */
     if(accessRes.status == 404){
       setAllowed(false);
-      history.replace("/", {toast: {message: "Access List not found. Stupid error will be fixed", type:"error", options:{duration: 6000}}})
+      history.replace("/", {toast: {message: "Not Found", type:"error", options:{duration: 6000}}})
       return;
     }
 

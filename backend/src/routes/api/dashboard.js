@@ -13,9 +13,9 @@ router.use(auth);
 router.get("/", async(req, res) =>{
     return res.status(200).json({ok: true})
 })
+router.use("/access", dashboardAuth);
 router.use("/scenarios/:scenarioId", dashboardAuth);
 router.use("/groups/:groupId", dashboardAuth)
-router.use("/access", dashboardAuth);
 
 router.get("/scenarios/:scenarioId/access", async (req, res) => {
     return res.status(200).json({allowed: true})
@@ -27,8 +27,12 @@ router.get("/scenarios/:scenarioId/access", async (req, res) => {
  * New URI: /scenarios/:scenarioId
  */
 router.get("/scenarios/:scenarioId", async (req, res) => {
-    const scenario = await retrieveScenario(req.params.scenarioId)
-    return res.status(200).json(scenario);
+    try {
+        const scenario = await retrieveScenario(req.params.scenarioId)
+        return res.status(200).json(scenario);
+    } catch(err){
+        return res.status(err.status).json({error: err.message})
+    }
 })
 
 // Get all the scenes for a given scenario
