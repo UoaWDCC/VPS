@@ -5,8 +5,8 @@ const DiamondPlayButton = ({ size = 100, onClick }) => {
   return (
     <>
       <style>{`
-        /* Diamond Play Button Styles */
-        .diamond-play-button:hover {
+        /* Diamond login Button Styles */
+        .diamond-login-button:hover {
           transform: scale(1.1);
         }
 
@@ -22,23 +22,23 @@ const DiamondPlayButton = ({ size = 100, onClick }) => {
           transition: all 0.3s ease-out;
         }
 
-        .diamond-play-button:hover .diamond-shape {
+        .diamond-login-button:hover .diamond-shape {
           box-shadow: 0 0px 32px 8px rgba(255, 255, 255, 0.20);
           border-color: white;
           background-color: white;
         }
 
-        .diamond-play-button:active .diamond-shape {
+        .diamond-login-button:active .diamond-shape {
           transform: rotate(45deg) scale(0.95);
         }
 
-        .diamond-play-button:hover .play-text {
+        .diamond-login-button:hover .login-text {
           color: black !important;
           text-shadow: 0 0 8px rgba(255, 255, 255, 0.8);
         }
       `}</style>
       <div
-        className="diamond-play-button"
+        className="diamond-login-button"
         onClick={onClick}
         style={{
           width: responsiveSize,
@@ -59,7 +59,7 @@ const DiamondPlayButton = ({ size = 100, onClick }) => {
 
         {/* Play Text */}
         <div
-          className="play-text"
+          className="login-text"
           style={{
             fontSize: `clamp(12px, ${size * 0.012}vw, ${size * 0.2}px)`,
             position: "absolute",

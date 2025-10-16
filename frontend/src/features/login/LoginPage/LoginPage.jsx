@@ -51,7 +51,7 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen flex flex-col">
       {/* Top whitespace */}
-      <div style={{ height: "var(--spacing-2xl-3xl)" }} />
+      <div className="h-[var(--spacing-2xl-3xl)]" />
 
       {/* Main container */}
       <div className="u-container u-grid flex-grow w-full">
@@ -76,10 +76,7 @@ export default function LoginPage() {
             </div>
 
             {/* Bottom-left text */}
-            <div
-              className="text-left font-dm text-s"
-              style={{ color: "var(--color-grey)" }}
-            >
+            <div className="text-left font-dm text-s text-[var(--color-grey)]">
               <div>Crafted by many hands,</div>
               <div>across many teams,</div>
               <div>
@@ -120,7 +117,7 @@ export default function LoginPage() {
       </div>
 
       {/* Bottom whitespace */}
-      <div style={{ height: "var(--spacing-3xl-4xl)" }} />
+      <div className="h-[var(--spacing-3xl-4xl)]" />
     </div>
   );
 }
