@@ -9,6 +9,11 @@ import {
   subtract,
 } from "./util";
 
+// NOTE: used in thumbs only
+export function buildVisualComponents(components: Component[]) {
+  return components.map(buildVisualComponent);
+}
+
 export function buildVisualScene(modelScene: Scene) {
   const visualComponents = {};
   for (const component of Object.values(modelScene.components)) {

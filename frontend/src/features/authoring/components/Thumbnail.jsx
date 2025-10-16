@@ -4,7 +4,7 @@ import Image from "../elements/Image";
 import Line from "../elements/Line";
 import Speech from "../elements/Speech";
 import TextBox from "../elements/TextBox";
-import { buildVisualScene } from "../pipeline";
+import { buildVisualComponents, buildVisualScene } from "../pipeline";
 
 const componentMap = {
   textbox: TextBox,
@@ -22,8 +22,8 @@ function resolve(component) {
 }
 
 const Thumbnail = ({ components }) => {
-  const { components: visual } = buildVisualScene({ components });
-  const visualComponents = Object.values(visual)
+  const visual = buildVisualComponents(components);
+  const visualComponents = visual
     .sort((a, b) => a.zIndex - b.zIndex)
     .map(resolve);
 

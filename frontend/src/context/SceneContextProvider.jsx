@@ -88,6 +88,11 @@ export default function SceneContextProvider({ children }) {
     },
   });
 
+  function saveSceneWrapper(scene) {
+    scene.components = Object.values(scene.components);
+    saveSceneMutation.mutate(scene);
+  }
+
   const saveSceneMutation = useMutation({
     mutationFn: (scene) => saveScene(user, scenarioId, scene),
     onMutate: async (scene) => {
@@ -118,7 +123,7 @@ export default function SceneContextProvider({ children }) {
       value={{
         scenes: scenesQuery.data,
         reorderScenes: reorderMutation.mutate,
-        saveScene: saveSceneMutation.mutate,
+        saveScene: saveSceneWrapper,
         deleteScene: deleteMutation.mutate,
         reFetch: scenesQuery.refetch,
       }}
