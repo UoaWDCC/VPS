@@ -1,5 +1,6 @@
 import { useContext, useEffect } from "react";
 import { useHistory, useLocation } from "react-router-dom";
+import DiamondLoginButton from "../components/DiamondLoginButton";
 import AuthenticationContext from "context/AuthenticationContext";
 
 import toast from "react-hot-toast";
@@ -63,7 +64,7 @@ export default function LoginPage() {
           <div className="flex flex-col justify-between h-full">
             {/* Top-left text */}
             <div
-              className="text-left font-ibm"
+              className="text-left font-dm"
               style={{
                 fontSize: "clamp(92px, 5vw, 105px)",
                 lineHeight: "clamp(102px, 5.5vw, 115px)",
@@ -76,7 +77,7 @@ export default function LoginPage() {
 
             {/* Bottom-left text */}
             <div
-              className="text-left font-ibm text-s"
+              className="text-left font-dm text-s"
               style={{ color: "var(--color-grey)" }}
             >
               <div>Crafted by many hands,</div>
@@ -100,20 +101,18 @@ export default function LoginPage() {
           <div className="flex flex-col justify-between h-full">
             {/* Centered diamond button */}
             <div className="flex-grow flex justify-center items-center">
-              <button
-                className="btn vps-diamond"
+              <DiamondLoginButton
+                size={150}
                 onClick={() => {
                   if (!loading && !user) {
                     signInUsingGoogle();
                   }
                 }}
-              >
-                <span>LOG IN</span>
-              </button>
+              />
             </div>
 
             {/* Bottom-aligned text */}
-            <div className="font-ibm text-s text-center">
+            <div className="font-dm text-s text-center">
               Please use your university account.
             </div>
           </div>
