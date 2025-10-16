@@ -5,6 +5,7 @@ import Thumbnail from "../authoring/components/Thumbnail";
 import ScenarioContext from "../../context/ScenarioContext";
 import AuthenticationContext from "../../context/AuthenticationContext";
 import { usePatch } from "../../hooks/crudHooks";
+import FabMenu from "../../components/FabMenu";
 
 function ScenarioInfo() {
   const [selectedScenario, setSelectedScenario] = useState(null);
@@ -386,6 +387,7 @@ function ScenarioInfo() {
           </form>
         </dialog>
       )}
+      <FabMenu />
     </div>
   );
 }
