@@ -2,21 +2,19 @@ import EmojiPeopleIcon from "@mui/icons-material/EmojiPeople";
 import LightMode from "@mui/icons-material/LightMode";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import { useHistory } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 const FabMenu = () => {
-  useEffect(() => {
-    const html = document.documentElement;
-    html.setAttribute("data-theme", "vps-dark");
-  }, []);
   const history = useHistory();
 
   const handleThemeToggle = () => {
     const html = document.documentElement;
     if (html.getAttribute("data-theme") === "vps-dark") {
       html.setAttribute("data-theme", "vps-light");
+      localStorage.setItem("vps-theme", "vps-light");
     } else {
       html.setAttribute("data-theme", "vps-dark");
+      localStorage.setItem("vps-theme", "vps-dark");
     }
   };
 

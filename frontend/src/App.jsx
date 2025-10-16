@@ -1,4 +1,5 @@
 import { ThemeProvider } from "@material-ui/core";
+import { useEffect } from "react";
 import { BrowserRouter, Route, Switch } from "react-router-dom";
 import AuthenticationContextProvider from "./context/AuthenticationContextProvider";
 import ScenarioContextProvider from "./context/ScenarioContextProvider";
@@ -26,6 +27,16 @@ import { ContextMenuPortal } from "./components/ContextMenu/portal";
 const TOAST_OFFSET = 25;
 
 export default function App() {
+  useEffect(() => {
+    const savedTheme = localStorage.getItem("vps-theme");
+    if (savedTheme === "vps-light" || savedTheme === "vps-dark") {
+      document.documentElement.setAttribute("data-theme", savedTheme);
+    } else {
+      document.documentElement.setAttribute("data-theme", "vps-dark");
+      localStorage.setItem("vps-theme", "vps-dark");
+    }
+  }, []);
+
   return (
     <>
       {/* Toaster container */}
