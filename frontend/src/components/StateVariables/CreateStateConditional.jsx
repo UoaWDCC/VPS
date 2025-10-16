@@ -58,10 +58,6 @@ const CreateStateConditional = ({ fileId, open, setOpen }) => {
         console.error(err);
         toast.error("Error creating state conditional");
       });
-
-    setSelectedState(null);
-    setComparator(null);
-    setValue(null);
   };
 
   function onVariableChange(variable) {
@@ -73,7 +69,7 @@ const CreateStateConditional = ({ fileId, open, setOpen }) => {
 
   return (
     <ModalDialog
-      title="Create State Operation"
+      title="Create State Conditional"
       open={open}
       onClose={() => setOpen(false)}
     >

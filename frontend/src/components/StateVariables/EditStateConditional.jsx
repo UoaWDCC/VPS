@@ -1,8 +1,10 @@
 import { useContext, useEffect, useState } from "react";
 import ScenarioContext from "../../context/ScenarioContext";
 import SelectInput from "../../features/authoring/components/Select";
-import { stateTypes, validOperations } from "./stateTypes";
+import { stateTypes, validComparators } from "./stateTypes";
 import AuthenticationContext from "../../context/AuthenticationContext";
+import { api } from "../../util/api";
+import toast from "react-hot-toast";
 
 /**
  * Component used for editing state operations
@@ -21,6 +23,9 @@ const EditStateConditional = ({ fileId, conditional, conditionalIndex }) => {
   const [comparator, setComparator] = useState(conditional.comparator);
   const [value, setValue] = useState(conditional.value);
 
+  const isEditing =
+    comparator !== conditional.comparator || value !== conditional.value;
+
   useEffect(() => {
     if (conditional.comparator !== comparator)
       setComparator(conditional.operation);
@@ -32,9 +37,40 @@ const EditStateConditional = ({ fileId, conditional, conditionalIndex }) => {
   );
   if (!stateVariable) return null;
 
-  const deleteStateConditional = () => {};
+  const deleteStateConditional = () => {
+    api
+      .put(user, `/api/files/state-conditionals/${fileId}`, {
+        stateConditionalIndex: conditionalIndex,
+      })
+      .then((res) => {
+        console.log(res);
+      })
+      .catch((err) => {
+        console.error(err);
+        toast.error("Error editing state conditional");
+      });
+  };
 
-  const editStateConditional = () => {};
+  const editStateConditional = () => {
+    const stateConditional = {
+      ...conditional,
+      comparator,
+      value,
+    };
+
+    api
+      .put(user, `/api/files/state-conditionals/${fileId}`, {
+        stateConditional,
+        stateConditionalIndex: conditionalIndex,
+      })
+      .then((res) => {
+        console.log(res);
+      })
+      .catch((err) => {
+        console.error(err);
+        toast.error("Error editing state conditional");
+      });
+  };
 
   const resetFields = (e) => {
     e.preventDefault();
@@ -43,7 +79,11 @@ const EditStateConditional = ({ fileId, conditional, conditionalIndex }) => {
   };
 
   return (
-    <div className="bg-base-300 mt-xs px-[1rem] py-[0.5rem]">
+    <div
+      className={`bg-base-300 mt-xs px-[1rem] py-[0.5rem] ${
+        isEditing ? "ring-2 ring-grey" : ""
+      }`}
+    >
       <div>
         <span className="text--1">{stateVariable.name}</span>
         <span className="text-xs ml-2xs text-primary">{`${stateVariable.type} operation`}</span>
@@ -51,7 +91,7 @@ const EditStateConditional = ({ fileId, conditional, conditionalIndex }) => {
       <fieldset className="fieldset mt-[0.5rem]">
         <div className="join">
           <SelectInput
-            values={validOperations[stateVariable.type]}
+            values={validComparators[stateVariable.type]}
             value={comparator}
             onChange={setComparator}
           />
@@ -59,7 +99,7 @@ const EditStateConditional = ({ fileId, conditional, conditionalIndex }) => {
             <SelectInput
               values={[true, false]}
               value={value}
-              onChange={setValue}
+              onChange={(e) => setValue(e.target.value)}
             />
           ) : (
             <input
@@ -70,7 +110,6 @@ const EditStateConditional = ({ fileId, conditional, conditionalIndex }) => {
               onChange={(e) => setValue(e.target.value)}
               placeholder="Value"
               className="input join-item"
-              onBlur={() => saveValue(value)}
             />
           )}
         </div>

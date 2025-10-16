@@ -37,7 +37,7 @@ const StateConditionalMenu = ({ file }) => {
           {file.stateConditionals?.map(
             (stateConditional, stateConditionalIndex) => (
               <EditStateConditional
-                file={file}
+                fileId={file.id}
                 conditional={stateConditional}
                 conditionalIndex={stateConditionalIndex}
                 key={stateConditionalIndex}
