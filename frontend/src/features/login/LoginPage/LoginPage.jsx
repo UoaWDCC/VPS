@@ -76,13 +76,13 @@ export default function LoginPage() {
             </div>
 
             {/* Bottom-left text */}
-            <div className="text-left font-dm text-s text-[var(--color-grey)]">
+            <div className="text-left font-dm text-s text-[var(--color-primary)]">
               <div>Crafted by many hands,</div>
               <div>across many teams,</div>
               <div>
                 over many years at{" "}
                 <a
-                  className="underline decoration-1 underline-offset-2 hover:text-white"
+                  className="underline decoration-1 underline-offset-2 hover:text-[var(--color-secondary)]"
                   href="https://wdcc.co.nz/"
                   target="_blank"
                   rel="noreferrer"

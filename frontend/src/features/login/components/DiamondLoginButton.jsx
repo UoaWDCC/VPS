@@ -16,16 +16,17 @@ const DiamondPlayButton = ({ size = 100, onClick }) => {
           left: 0;
           right: 0;
           bottom: 0;
-          background-color: black;
-          border: 1px solid #374151;
+          background-color: var(--color-base-100);
+          border: 1px solid var(--color-primary);
           transform: rotate(45deg);
           transition: all 0.3s ease-out;
+          border-radius: 2px;
         }
 
         .diamond-login-button:hover .diamond-shape {
-          box-shadow: 0 0px 32px 8px rgba(255, 255, 255, 0.20);
-          border-color: white;
-          background-color: white;
+          box-shadow: 0 0px 32px 8px rgba(var(--color-base-content-rgb), 0.20);
+          border-color: var(--color-base-content);
+          background-color: var(--color-base-content);
         }
 
         .diamond-login-button:active .diamond-shape {
@@ -33,8 +34,8 @@ const DiamondPlayButton = ({ size = 100, onClick }) => {
         }
 
         .diamond-login-button:hover .login-text {
-          color: black !important;
-          text-shadow: 0 0 8px rgba(255, 255, 255, 0.8);
+          color: var(--color-base-100) !important;
+          text-shadow: 0 0 8px rgba(var(--color-base-content-rgb), 0.8);
         }
       `}</style>
       <div
@@ -70,8 +71,8 @@ const DiamondPlayButton = ({ size = 100, onClick }) => {
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            color: "white",
-            fontWeight: "bold",
+            color: "var(--color-base-content)",
+            fontWeight: "regular",
             letterSpacing: "0.05em",
             transition: "all 0.2s ease-out",
             pointerEvents: "none",
