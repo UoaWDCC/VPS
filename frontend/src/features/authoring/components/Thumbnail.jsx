@@ -4,7 +4,7 @@ import Image from "../elements/Image";
 import Line from "../elements/Line";
 import Speech from "../elements/Speech";
 import TextBox from "../elements/TextBox";
-import { buildVisualComponents, buildVisualScene } from "../pipeline";
+import { buildVisualComponents } from "../pipeline";
 
 const componentMap = {
   textbox: TextBox,

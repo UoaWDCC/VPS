@@ -20,17 +20,16 @@ const CreateStateOperation = ({ component, open, setOpen }) => {
 
   if (!stateVariables?.length) {
     return (
-      <div className="modal-box">
-        <h3 className="font-bold text-m">Create State Operation</h3>
-        <div className="text-xs">
-          No state variables found, create some in the state variable menu
+      <ModalDialog
+        title="Create State Operation"
+        open={open}
+        onClose={() => setOpen(false)}
+      >
+        <div className="text-s">
+          No state variables found for this scenario. You can create some in the
+          &apos;State Variables&apos; menu in the toolbar above.
         </div>
-        <div className="modal-action">
-          <form method="dialog">
-            <button className="btn">Close</button>
-          </form>
-        </div>
-      </div>
+      </ModalDialog>
     );
   }
 

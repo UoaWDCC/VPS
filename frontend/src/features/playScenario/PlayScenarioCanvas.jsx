@@ -180,7 +180,7 @@ export default function PlayScenarioCanvas({
     .sort((a, b) => a.zIndex - b.zIndex)
     .map((c) => {
       const resolved = resolve(c);
-      if (c.clickable) {
+      if (c.clickable && (c.nextScene || c.stateOperations)) {
         return (
           <g
             key={c.id}

@@ -38,7 +38,7 @@ function ModalDialog({ title, children, open, onClose, wide = false }) {
         <button className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">
           ✕
         </button>
-        <h3 className="font-bold text-m">{title}</h3>
+        <h3 className="text-l">{title}</h3>
         <div className="mt-[0.5rem] min-h-0 flex-1 no-scrollbar">
           {children}
         </div>
