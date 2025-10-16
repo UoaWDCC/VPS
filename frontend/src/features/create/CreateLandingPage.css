@@ -3,11 +3,12 @@
   top: 0;
   left: 0;
   right: 0;
-  background-color: var(--color-black);
-  padding: 1rem 2rem;
+  background-color: var(--color-base);
+  padding: 1rem 2rem; 
   display: flex;
   align-items: center;
   z-index: 1000;
+  margin-bottom: var(--spacing-xl);
 }
 
 .nav-btn {
@@ -77,10 +78,11 @@
 }
 
 .section-header {
-  font-size: clamp(20px, 2vw, 28px);
+  font-size: \var(--text-xl);
   font-weight: 500;
-  padding-top: 2vh;
-  margin-bottom: 2vh;
+  margin-top: var(--spacing-xl);  
+  padding-top: 0vh;
+  margin-bottom: \var(--spacing-l);
   color: var(--color-white);
   text-align: left;
 }

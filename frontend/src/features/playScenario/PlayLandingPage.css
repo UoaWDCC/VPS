@@ -3,7 +3,7 @@
   top: 0;
   left: 0;
   right: 0;
-  background-color: var(--color-black);
+  background-color: var(--color-base);
   padding: 1.5rem 1.5rem;
   display: flex;
   border-bottom: 2px solid; 
@@ -90,26 +90,27 @@
   color: var(--color-white);
   position: relative;
   padding: 0 8vw;
-  padding-top: 80px; /* Add top padding for fixed nav */
+  padding-top: 80px;
 }
 
 .play-header {
-  padding-top: 1vh;
-  padding-bottom: 2vh;
+  padding-top: 0vh;
+  margin-top: \var(--spacing-xl);
+  padding-bottom: \var(--spacing-l);
 }
 
+
 .play-header .play-title {
-  font-size: clamp(20px, 2vw, 28px) !important;
-  font-weight: 500;
+  font-size: \var(--text-xl); 
 }
 
 h1.play-title {   
-  font-size: 24px !important;
+  font-size: \var(--text-xl);
   font-weight: 500 !important;
 }
 
 .search-section {
-  padding-bottom: 3vh;
+  margin-bottom: \var(--spacing-m);
 }
 
 .search-container-play {
@@ -170,7 +171,7 @@ h1.play-title {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 1.5vw 1vw; /* Reduced gap */
-  padding-bottom: 3vh;
+  padding-bottom: 0vh;
   max-width: 90vw;
 }
 
