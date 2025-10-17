@@ -1,6 +1,7 @@
-const DiamondPlayButton = ({ size = 100, onClick }) => {
-  // Make size responsive to viewport
-  const responsiveSize = `clamp(80px, ${size * 0.06}vw, ${size}px)`;
+const DiamondPlayButton = ({ onClick }) => {
+  // Make size responsive to viewport - better scaling
+  const responsiveSize = `clamp(70px, 5.5vw, 140px)`;
+  const responsiveFontSize = `clamp(10px, 0.9vw, 18px)`;
 
   return (
     <>
@@ -16,25 +17,30 @@ const DiamondPlayButton = ({ size = 100, onClick }) => {
           left: 0;
           right: 0;
           bottom: 0;
-          background-color: black;
-          border: 1px solid #374151;
+          background-color: var(--color-base-100);
+          border: 1px solid var(--color-primary);
           transform: rotate(45deg);
           transition: all 0.3s ease-out;
         }
 
         .diamond-play-button:hover .diamond-shape {
-          box-shadow: 0 10px 15px -3px rgba(255, 255, 255, 0.5);
-          border-color: white;
-          background-color: white;
+          box-shadow: 0 10px 15px -3px rgba(var(--color-base-content-rgb), 0.3);
+          border-color: var(--color-base-content);
+          background-color: var(--color-base-content);
         }
 
         .diamond-play-button:active .diamond-shape {
           transform: rotate(45deg) scale(0.95);
         }
 
+        .play-text {
+          color: var(--color-base-content);
+          transition: all 0.2s ease-out;
+        }
+
         .diamond-play-button:hover .play-text {
-          color: black !important;
-          text-shadow: 0 0 8px rgba(255, 255, 255, 0.8);
+          color: var(--color-base-100) !important;
+          text-shadow: 0 0 8px rgba(var(--color-base-content-rgb), 0.3);
         }
       `}</style>
       <div
@@ -61,7 +67,7 @@ const DiamondPlayButton = ({ size = 100, onClick }) => {
         <div
           className="play-text"
           style={{
-            fontSize: `clamp(12px, ${size * 0.012}vw, ${size * 0.2}px)`,
+            fontSize: responsiveFontSize,
             position: "absolute",
             top: 0,
             left: 0,
@@ -70,10 +76,8 @@ const DiamondPlayButton = ({ size = 100, onClick }) => {
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            color: "white",
             fontWeight: "bold",
             letterSpacing: "0.05em",
-            transition: "all 0.2s ease-out",
             pointerEvents: "none",
             fontFamily: "var(--font-dm)",
           }}
