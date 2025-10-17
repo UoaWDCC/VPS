@@ -6,11 +6,11 @@ import AuthenticationContext from "../../context/AuthenticationContext";
 import ScenarioContext from "../../context/ScenarioContext";
 import AccessLevel from "../../enums/route.access.level";
 import { useDelete, usePost } from "../../hooks/crudHooks";
-import HorizontalGradientLine from "../create/components/HorizontalGradientLine";
 import Thumbnail from "../authoring/components/Thumbnail";
 import CreateScenarioCard from "../../components/CreateScenarioCard/CreateScenarioCard";
 import TopNavBar from "../../features/TopNavBar/TopNavBar";
 import "../playScenario/PlayLandingPage.css";
+import "./CreateLandingPage.css";
 import "./CreateLandingPage.css";
 
 export default function CreateLandingPage() {
