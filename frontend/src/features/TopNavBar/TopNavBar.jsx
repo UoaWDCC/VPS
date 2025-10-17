@@ -1,11 +1,11 @@
 import React from "react";
 import { useHistory } from "react-router-dom";
 
-export default function TopNavBar({ 
-  onLogout, 
+export default function TopNavBar({
+  onLogout,
   onOpenDashboard,
   onCreate, // new prop for creating
-  activeTab = "create" 
+  activeTab = "create",
 }) {
   const history = useHistory();
 
@@ -27,22 +27,19 @@ export default function TopNavBar({
         </button>
       </div>
       <div className="nav-right">
-        <button 
+        <button
           className={`nav-btn ${activeTab === "play" ? "nav-btn-active" : ""}`}
           onClick={() => history.push("/play")}
         >
           Play
         </button>
-        <button 
+        <button
           className={`nav-btn ${activeTab === "create" ? "nav-btn-active" : ""}`}
           onClick={activeTab === "create" ? undefined : onCreate} // only set onClick if not active
         >
           Create & Edit
         </button>
-        <button 
-          className="nav-btn" 
-          onClick={onOpenDashboard}
-        >
+        <button className="nav-btn" onClick={onOpenDashboard}>
           Dashboard
         </button>
       </div>

@@ -6,14 +6,14 @@
   background-color: var(--color-base);
   padding: 1.5rem 1.5rem;
   display: flex;
-  border-bottom: 2px solid; 
+  border-bottom: 2px solid;
   border-image: linear-gradient(
       to right,
       transparent 0%,
       rgba(var(--color-white-rgb), 0.3) 50%,
       transparent 100%
     )
-    1; 
+    1;
   z-index: 1000;
 }
 
@@ -99,12 +99,11 @@
   padding-bottom: \var(--spacing-l);
 }
 
-
 .play-header .play-title {
-  font-size: \var(--text-xl); 
+  font-size: \var(--text-xl);
 }
 
-h1.play-title {   
+h1.play-title {
   font-size: \var(--text-xl);
   font-weight: 500 !important;
 }
@@ -125,8 +124,8 @@ h1.play-title {
   display: flex;
   align-items: center;
   flex-direction: row-reverse;
-  border: none !important; 
-  border-bottom: 1px solid var(--color-grey) !important; 
+  border: none !important;
+  border-bottom: 1px solid var(--color-grey) !important;
   border-radius: 0 !important;
 }
 
@@ -180,7 +179,9 @@ h1.play-title {
   background-color: transparent;
   overflow: hidden;
   cursor: pointer;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
   display: flex;
   flex-direction: column;
 }
@@ -194,8 +195,8 @@ h1.play-title {
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: transparent !important; 
-  border: 2px dashed var(--color-grey) !important; 
+  background-color: transparent !important;
+  border: 2px dashed var(--color-grey) !important;
   color: var(--color-grey);
   font-size: clamp(48px, 6vw, 96px);
   font-weight: 300;

@@ -4,7 +4,7 @@
   left: 0;
   right: 0;
   background-color: var(--color-base);
-  padding: 1rem 2rem; 
+  padding: 1rem 2rem;
   display: flex;
   align-items: center;
   z-index: 1000;
@@ -80,7 +80,7 @@
 .section-header {
   font-size: \var(--text-xl);
   font-weight: 500;
-  margin-top: var(--spacing-xl);  
+  margin-top: var(--spacing-xl);
   padding-top: 0vh;
   margin-bottom: \var(--spacing-l);
   color: var(--color-white);

@@ -6,11 +6,9 @@ import { useGetSimplified } from "../hooks/crudHooks";
 import AuthenticationContext from "./AuthenticationContext";
 import toast from "react-hot-toast";
 
-
 export default function AuthenticationContextProvider({ children }) {
   const [user, loading, error] = useAuthState(auth);
-  const [isSigningIn, setIsSigningIn] = useState(false); 
-
+  const [isSigningIn, setIsSigningIn] = useState(false);
 
   async function getUserIdToken() {
     if (user) {
