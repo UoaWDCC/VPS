@@ -1,12 +1,41 @@
-import { Alert, Snackbar } from "@mui/material";
 import axios from "axios";
-import ScreenContainer from "components/ScreenContainer/ScreenContainer";
-import { useGet } from "hooks/crudHooks";
 import Papa from "papaparse";
-import { useRef, useState } from "react";
+import { useContext, useRef } from "react";
 import { useParams } from "react-router-dom";
 import GroupsTable from "./GroupTable";
-import TopBar from "./TopBar";
+import {
+  ArrowLeftIcon,
+  DownloadIcon,
+  FileSpreadsheetIcon,
+  UploadIcon,
+} from "lucide-react";
+import toast from "react-hot-toast";
+import { useHistory } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
+import { api } from "../../util/api";
+import AuthenticationContext from "../../context/AuthenticationContext";
+import GenericErrorPage from "../status/GenericErrorPage";
+import LoadingPage from "../status/LoadingPage";
+
+function convertToCSV(data, scenarioId) {
+  const headers = ["email", "name", "role", "group number", "playable link"];
+  const playableLink = `https://vps.wdcc.co.nz/play/${scenarioId}`;
+
+  const rows = data.map(({ email = "", name = "", role = "", group = "" }) => [
+    email,
+    name,
+    role,
+    group,
+    playableLink,
+  ]);
+
+  return [headers, ...rows].map((row) => row.join(",")).join("\n");
+}
+
+async function getGroups(user, scenarioId) {
+  const res = await api.get(user, `/api/group/scenario/${scenarioId}`);
+  return res.data;
+}
 
 /**
  * Page that shows the groups that the admin can manipulate
@@ -15,54 +44,35 @@ import TopBar from "./TopBar";
  */
 export default function ManageGroupsPage() {
   const { scenarioId } = useParams();
-  const [scenarioGroupInfo, setScenarioGroupInfo] = useState([]);
+  const { user } = useContext(AuthenticationContext);
 
-  const [isToastShowing, setIsToastShowing] = useState(false);
-  const [toastText, setToastText] = useState("");
-  const [toastType, setToastType] = useState("");
+  const history = useHistory();
 
-  let users = [];
+  const fileInputRef = useRef(null);
 
   // fetch groups assigned to this scenario
-  const { reFetch } = useGet(
-    `/api/group/scenario/${scenarioId}`,
-    setScenarioGroupInfo
-  );
-  console.log(scenarioGroupInfo);
-  if (scenarioGroupInfo.length) {
-    // Iterate groups and flatten to user list
-    scenarioGroupInfo.forEach((group) => {
-      if (group) {
-        users.push(...group.users);
-      }
-    });
-  } else {
-    users = [];
+  const { data, isLoading, isError, error, refetch } = useQuery({
+    queryFn: () => getGroups(user, scenarioId),
+    queryKey: ["groupData", scenarioId],
+  });
+
+  if (isLoading) {
+    return <LoadingPage text="Getting groups information..." />;
   }
 
-  const showToast = (text, type = "success") => {
-    setToastText(text);
-    setToastType(type);
-    setIsToastShowing(true);
-  };
+  if (isError) {
+    console.error(error);
+    return <GenericErrorPage />;
+  }
 
-  // File input is a hidden input element that is activated via a click handler
-  // This allows us to have an UI button that acts like a file <input> element.
-  const fileInputRef = useRef(null);
-  const upload = () => {
-    fileInputRef.current.click();
-  };
+  const users = data.flatMap((g) => g.users);
 
-  const handleFileUpload = (event) => {
-    // TODO: add csv file upload handling here!
-    console.log("File uploaded:", event.target.files[0]);
+  function handleFileUpload(event) {
     const file = event.target.files[0];
     Papa.parse(file, {
       header: true,
       skipEmptyLines: true,
       complete: async (results) => {
-        console.log(results);
-        console.log("CSV data uploaded to MongoDB.");
         const { data } = results;
 
         // Group data by 'group' field
@@ -89,126 +99,85 @@ export default function ManageGroupsPage() {
           ...new Set(data.map((user) => user.role.toLowerCase())),
         ].filter((str) => str.trim() !== "");
 
-        const jsonData = {
-          groupList,
-          roleList,
-        };
-
-        console.log("Processed JSON Data:", jsonData);
+        const jsonData = { groupList, roleList };
 
         // Send the parsed JSON data to the backend
         try {
-          const response = await axios.post(
-            `/api/group/${scenarioId}`,
-            jsonData
-          );
+          await axios.post(`/api/group/${scenarioId}`, jsonData);
 
-          reFetch();
-          console.log("CSV data uploaded to MongoDB:", response.status);
-          showToast("Successfully formed groups!");
+          refetch();
+
+          toast.success("Groups formed successfully!");
         } catch (error) {
-          console.error("Error uploading CSV data:", error.response.data);
-          showToast(
-            `Error uploading CSV data: ${error.response.data}`,
-            "error"
-          );
+          toast.error("There was an error uploading the .csv data");
+          console.error("error uploading .csv data:", error.response.data);
         }
       },
     });
-  };
+  }
 
-  const convertToCSV = (data) => {
-    const headers = "email,name,role,group number,playable link\n";
-    let csv = headers;
+  function upload() {
+    fileInputRef.current.click();
+  }
 
-    data.forEach((row) => {
-      let email = "";
-      let name = "";
-      let role = "";
-      let group = "";
-      const playableLink = `https://vps.wdcc.co.nz/play/${scenarioId}`;
-
-      const entries = Object.entries(row);
-
-      entries.forEach(([key, value]) => {
-        if (key === "email") {
-          email = value;
-        } else if (key === "name") {
-          name = value;
-        } else if (key === "role") {
-          role = value;
-        } else if (key === "group") {
-          group = value;
-        }
-      });
-
-      csv += `${email},${name},${role},${group},${playableLink}\n`;
-    });
-
-    return csv;
-  };
-
-  const download = () => {
-    const csv = convertToCSV(users);
-    const blob = new Blob([csv], { type: "text/csv" });
+  function download() {
+    const csv = convertToCSV(users, scenarioId);
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
     const url = window.URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "groups_data.csv";
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
+
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "groups_data.csv";
+    document.body.appendChild(link);
+    link.click();
+
+    document.body.removeChild(link);
     window.URL.revokeObjectURL(url);
-  };
-  // Toast close handler
-  const handleToastDismiss = (_, reason) => {
-    if (reason === "clickaway") {
-      return;
-    }
-    setIsToastShowing(false);
-  };
+  }
+
+  function downloadSample() {
+    window.open(
+      "https://firebasestorage.googleapis.com/v0/b/virtual-patient-simulator.appspot.com/o/_manual-uploads%2Ftesting_group.xlsx?alt=media&token=a9c61c46-c317-4c8c-b8b8-ba049f8c9ff3",
+      "_blank",
+      "noopener,noreferrer"
+    );
+  }
+
+  function goBack() {
+    history.push(`/scenario/${scenarioId}`);
+  }
 
   return (
-    <ScreenContainer vertical>
-      <TopBar back={`/scenario/${scenarioId}`}>
-        <input
-          type="file"
-          ref={fileInputRef}
-          accept=".csv"
-          style={{ display: "none" }}
-          onChange={handleFileUpload}
-        />
-        <button className="btn vps w-[100px]" onClick={upload}>
+    <div className="font-ibm flex flex-col h-screen w-screen overflow-hidden gap-2xl">
+      <div className="flex pt-l px-l">
+        <button onClick={goBack} className="btn btn-phantom text-m">
+          <ArrowLeftIcon size={20} />
+          Back
+        </button>
+        <button onClick={upload} className="btn btn-phantom text-m ml-auto">
+          <UploadIcon size={20} />
           Upload
         </button>
-        <button className="btn vps w-[100px]" onClick={download}>
+        <button onClick={download} className="btn btn-phantom text-m">
+          <DownloadIcon size={20} />
           Download
         </button>
-        <a
-          href="https://firebasestorage.googleapis.com/v0/b/virtual-patient-simulator.appspot.com/o/_manual-uploads%2Ftesting_group.xlsx?alt=media&token=a9c61c46-c317-4c8c-b8b8-ba049f8c9ff3"
-          download
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <button className="btn vps w-[200px]">Download Sample</button>
-        </a>
-      </TopBar>
-
-      <GroupsTable data={users} />
-      <Snackbar
-        open={isToastShowing}
-        autoHideDuration={5000}
-        onClose={handleToastDismiss}
-        anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
-      >
-        <Alert
-          onClose={handleToastDismiss}
-          severity={toastType}
-          sx={{ width: "100%" }}
-        >
-          {toastText}
-        </Alert>
-      </Snackbar>
-    </ScreenContainer>
+        <button onClick={downloadSample} className="btn btn-phantom text-m">
+          <FileSpreadsheetIcon size={20} />
+          Sample
+        </button>
+      </div>
+      <input
+        type="file"
+        ref={fileInputRef}
+        accept=".csv"
+        className="hidden"
+        onChange={handleFileUpload}
+      />
+      <div className="u-container w-full">
+        <h1 className="text-xl mb-l">Uploaded Groups</h1>
+        <GroupsTable data={users} />
+      </div>
+    </div>
   );
 }

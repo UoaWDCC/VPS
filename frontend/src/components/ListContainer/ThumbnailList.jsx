@@ -4,10 +4,10 @@ import { Box } from "@material-ui/core";
 import ImageList from "@material-ui/core/ImageList";
 import ImageListItem from "@material-ui/core/ImageListItem";
 
-import Thumbnail from "features/authoring/components/Thumbnail";
 import DashedCard from "../DashedCard";
 
 import styles from "./ThumbnailList.module.scss";
+import Thumbnail from "../../features/authoring/components/Thumbnail";
 
 /**
  * Component used to display cards in a list format for scenario and scene selection.

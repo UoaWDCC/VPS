@@ -24,7 +24,12 @@ import theme from "./theme/App.theme";
 import { Toaster } from "react-hot-toast";
 import { ContextMenuPortal } from "./components/ContextMenu/portal";
 
+import ManageResourcesPage from "./features/resources/ManageResourcesPage";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+
 const TOAST_OFFSET = 25;
+
+const queryClient = new QueryClient();
 
 export default function App() {
   useEffect(() => {
@@ -53,36 +58,38 @@ export default function App() {
         }}
       />
 
+      {/* DialogModal container */}
+      <div
+        id="modal-portal"
+        className="fixed inset-0 z-[9999] pointer-events-none"
+      />
+
+      {/* ContextMenu container */}
       <ContextMenuPortal />
 
       {/* Routes */}
       <ThemeProvider theme={theme}>
         <AuthenticationContextProvider>
-          <BrowserRouter>
-            <Switch>
-              <Route exact path="/login" component={LoginPage} />
+          <QueryClientProvider client={queryClient}>
+            <BrowserRouter>
+              <Switch>
+                <Route exact path="/login" component={LoginPage} />
 
-              <ProtectedRoute path="/play/:scenarioId">
-                <PlayScenarioResolver />
-              </ProtectedRoute>
+                <ProtectedRoute exact path="/">
+                  <ScenarioContextProvider>
+                    <ScenarioSelectionPage />
+                  </ScenarioContextProvider>
+                </ProtectedRoute>
 
-              <ProtectedRoute path="/scenario-info">
-                <ScenarioContextProvider>
-                  <ScenarioInfo />
-                </ScenarioContextProvider>
-              </ProtectedRoute>
+                <ProtectedRoute path="/scenario-info">
+                  <ScenarioContextProvider>
+                    <ScenarioInfo />
+                  </ScenarioContextProvider>
+                </ProtectedRoute>
 
-              <ProtectedRoute path="/play-page">
-                <ScenarioContextProvider>
-                  <PlayPage />
-                </ScenarioContextProvider>
-              </ProtectedRoute>
-
-              <ProtectedRoute exact path="/">
-                <ScenarioContextProvider>
-                  <ScenarioSelectionPage />
-                </ScenarioContextProvider>
-              </ProtectedRoute>
+                <ProtectedRoute path="/play/:scenarioId">
+                  <PlayScenarioResolver />
+                </ProtectedRoute>
 
               <ProtectedRoute path="/dashboard/:scenarioId">
                 <ScenarioContextProvider>
@@ -98,23 +105,36 @@ export default function App() {
                 <Switch>
                   <ProtectedRoute index path="/scenario/:scenarioId">
                     <SceneContextProvider>
-                      <ScenePage />
+                      <Dashboard />
                     </SceneContextProvider>
+                </ProtectedRoute>
+                </Switch>
+                  </ScenarioContextProvider>
+
+                <ProtectedRoute path="/play-page">
+                  <ScenarioContextProvider>
+                    <PlayPage />
+                  </ScenarioContextProvider>
+                </ProtectedRoute>
+
+                <ScenarioContextProvider>
+                  <Switch>
+                    <ProtectedRoute path="/scenario/:scenarioId/manage-resources">
+                      <ManageResourcesPage />
+                    </ProtectedRoute>
                     <ProtectedRoute path="/scenario/:scenarioId/manage-groups">
                       <ManageGroupsPage />
                     </ProtectedRoute>
-                  </ProtectedRoute>
-                </Switch>
-              </ScenarioContextProvider>
-
-              {/* Default path if nothing matches */}
-              <ProtectedRoute path="/">
-                <ScenarioContextProvider>
-                  <ScenarioSelectionPage />
+                    <ProtectedRoute index path="/scenario/:scenarioId">
+                      <SceneContextProvider>
+                        <ScenePage />
+                      </SceneContextProvider>
+                    </ProtectedRoute>
+                  </Switch>
                 </ScenarioContextProvider>
-              </ProtectedRoute>
-            </Switch>
-          </BrowserRouter>
+              </Switch>
+            </BrowserRouter>
+          </QueryClientProvider>
         </AuthenticationContextProvider>
       </ThemeProvider>
     </>

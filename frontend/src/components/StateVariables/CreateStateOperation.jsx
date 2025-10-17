@@ -1,17 +1,9 @@
-import {
-  Button,
-  FormControl,
-  FormGroup,
-  InputLabel,
-  MenuItem,
-  Select,
-  Typography,
-} from "@material-ui/core";
 import { useContext, useState } from "react";
 import ScenarioContext from "context/ScenarioContext";
-import SceneContext from "context/SceneContext";
-import StateOperationForm from "./StateOperationForm";
-import { getDefaultValue } from "./stateTypes";
+import { getDefaultValue, stateTypes, validOperations } from "./stateTypes";
+import { modifyComponentProp } from "../../features/authoring/scene/operations/component";
+import SelectInput from "../../features/authoring/components/Select";
+import ModalDialog from "../ModalDialogue";
 
 /**
  * Component used for creating state operations
@@ -19,99 +11,109 @@ import { getDefaultValue } from "./stateTypes";
  *
  * @component
  */
-const CreateStateOperation = ({ component, componentIndex }) => {
+const CreateStateOperation = ({ component, open, setOpen }) => {
   const { stateVariables } = useContext(ScenarioContext);
-  const { updateComponentProperty } = useContext(SceneContext);
 
-  const [selectedState, setSelectedState] = useState("");
-  const [operation, setOperation] = useState("");
-  const [value, setValue] = useState("");
+  const [selectedState, setSelectedState] = useState(null);
+  const [operation, setOperation] = useState(null);
+  const [value, setValue] = useState(null);
 
-  const handleSubmit = () => {
-    // Validate that all required fields are filled
-    if (!selectedState || !selectedState.id || !operation) {
-      return;
-    }
-
-    const newStateOperations = [
-      ...(component.stateOperations || []),
-      {
-        stateVariableId: selectedState.id,
-        displayName: selectedState.name,
-        operation,
-        value,
-      },
-    ];
-    updateComponentProperty(
-      componentIndex,
-      "stateOperations",
-      newStateOperations
-    );
-
-    setSelectedState("");
-    setOperation("");
-    setValue("");
-  };
-
-  if (stateVariables && stateVariables.length == 0) {
+  if (!stateVariables?.length) {
     return (
-      <Typography variant="body2">
-        No state variables found, create some in the state variable menu
-      </Typography>
+      <ModalDialog
+        title="Create State Operation"
+        open={open}
+        onClose={() => setOpen(false)}
+      >
+        <div className="text-s">
+          No state variables found for this scenario. You can create some in the
+          &apos;State Variables&apos; menu in the toolbar above.
+        </div>
+      </ModalDialog>
     );
   }
 
+  const handleSubmit = () => {
+    // Validate that all required fields are filled
+    if (!selectedState?.id || !operation) return;
+
+    const newOperation = {
+      stateVariableId: selectedState.id,
+      displayName: selectedState.name,
+      operation,
+      value,
+    };
+
+    modifyComponentProp(component.id, "stateOperations", (prev) => [
+      ...(prev ?? []),
+      newOperation,
+    ]);
+
+    setSelectedState(null);
+    setOperation(null);
+    setValue(null);
+  };
+
+  function onVariableChange(variable) {
+    setSelectedState(variable);
+    setValue(getDefaultValue(variable.type));
+  }
+
+  const isSubmittable = selectedState && operation && value != null;
+
   return (
-    <FormGroup
-      style={{
-        marginBottom: "30px",
-        display: "flex",
-        flexDirection: "column",
-        gap: "10px",
-        background: "#f9f9f9",
-        padding: "16px",
-        borderRadius: "8px",
-      }}
+    <ModalDialog
+      title="Create State Operation"
+      open={open}
+      onClose={() => setOpen(false)}
     >
-      <FormControl>
-        <InputLabel>Name</InputLabel>
-        <Select
+      <fieldset className="fieldset">
+        <label className="label">State Variable</label>
+        <SelectInput
+          values={stateVariables}
           value={selectedState}
-          onChange={(e) => {
-            const newSelectedState = e.target.value;
-            setSelectedState(newSelectedState);
-            setOperation("");
-            setValue(getDefaultValue(newSelectedState.type));
-          }}
-          required
+          display={(s) => s.name}
+          onChange={onVariableChange}
+        />
+        {selectedState ? (
+          <>
+            <label className="label">Operation</label>
+            <div className="join">
+              <SelectInput
+                values={validOperations[selectedState.type]}
+                value={operation}
+                onChange={setOperation}
+              />
+              {selectedState.type === stateTypes.BOOLEAN ? (
+                <SelectInput
+                  values={[true, false]}
+                  value={value}
+                  onChange={setValue}
+                />
+              ) : (
+                <input
+                  type={
+                    selectedState.type === stateTypes.STRING ? "text" : "number"
+                  }
+                  value={value ?? ""}
+                  onChange={(e) => setValue(e.target.value)}
+                  placeholder="Value"
+                  className="input join-item"
+                />
+              )}
+            </div>
+          </>
+        ) : null}
+      </fieldset>
+      <div className="modal-action flex gap-2">
+        <button
+          className={`btn ${!isSubmittable && "btn-disabled"}`}
+          onClick={handleSubmit}
         >
-          {stateVariables.map((stateVariable) => (
-            <MenuItem
-              key={stateVariable.id || stateVariable.name}
-              value={stateVariable}
-            >
-              {stateVariable.name}
-            </MenuItem>
-          ))}
-        </Select>
-      </FormControl>
-      <StateOperationForm
-        selectedState={selectedState}
-        operation={operation}
-        setOperation={setOperation}
-        value={value}
-        setValue={setValue}
-      />
-      <Button
-        type="submit"
-        variant="contained"
-        color="primary"
-        onClick={handleSubmit}
-        disabled={!selectedState || !operation}
-      >
-        Create
-      </Button>
-    </FormGroup>
+          Create
+        </button>
+      </div>
+    </ModalDialog>
   );
 };
 
