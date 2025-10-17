@@ -75,7 +75,7 @@ const getGroupByIdAndUser = async (groupId, uid) => {
 const getConnectedScenes = async (sceneID, role, active = true) => {
   const scene = await getSceneConsideringRole(sceneID, role);
   const connectedIds = scene.components
-    .filter((c) => c.type === "BUTTON")
+    .filter((c) => c.clickable)
     .map((b) => b.nextScene)
     .filter(Boolean);
   const connectedScenes = await Scene.find(
@@ -209,7 +209,7 @@ export const groupNavigate = async (req) => {
 
   // if the button does not lead to another scene or component does not exist, stay in the current scene
   let scenes = null;
-  if (component?.nextScene !== currentScene) {
+  if (component?.nextScene && component.nextScene !== currentScene) {
     const nextScene = component.nextScene;
     [, , , scenes] = await Promise.all([
       addSceneToPath(group._id, currentScene, nextScene),

@@ -113,6 +113,8 @@
   color-scheme: dark;
 
   --color-base-100: var(--color-black);
+  --color-base-200: #0d0d0d;
+  --color-base-300: #151515;
   --color-base-content: var(--color-white);
   --color-base-content-rgb: var(--color-white-rgb);
   --color-base-content-box-shadow: 0 0 2px 1px rgba(var(--color-white-rgb), 0.2);
@@ -219,4 +221,16 @@ body,
   background-color: var(--color-base-100) !important;
   color: var(--color-base-content) !important;
   box-shadow: var(--color-base-content-box-shadow);
+}
+
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.btn.btn-phantom {
+  @apply btn-ghost font-normal text-primary hover:text-secondary border-none shadow-none bg-transparent;
 }

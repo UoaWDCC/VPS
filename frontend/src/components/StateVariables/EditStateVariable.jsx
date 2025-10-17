@@ -1,12 +1,11 @@
-import { Box, Grid, Card } from "@material-ui/core";
 import { api } from "../../util/api";
 import { useContext, useState } from "react";
 import AuthenticationContext from "../../context/AuthenticationContext";
 import toast from "react-hot-toast";
-import StateVariableForm from "./StateVariableForm";
 import ScenarioContext from "../../context/ScenarioContext";
 import SceneContext from "../../context/SceneContext";
-import EditingTooltips from "./EditingTooltips";
+import SelectInput from "../../features/authoring/components/Select";
+import { stateTypes } from "./stateTypes";
 
 const EditStateVariable = ({ stateVariable, scenarioId }) => {
   const { user } = useContext(AuthenticationContext);
@@ -23,15 +22,15 @@ const EditStateVariable = ({ stateVariable, scenarioId }) => {
   const [newType, setNewType] = useState(type);
   const [newValue, setNewValue] = useState(value);
 
-  const editing = name !== newName || type !== newType || value != newValue;
-
-  const resetFields = () => {
+  function resetFields(e) {
+    e.preventDefault();
     setNewName(name);
     setNewType(type);
     setNewValue(value);
-  };
+  }
 
-  const editStateVariable = () => {
+  function editStateVariable(e) {
+    e.preventDefault();
     const newStateVariable = {
       id: stateVariable.id, // Preserve the UUID
       name: newName,
@@ -51,10 +50,12 @@ const EditStateVariable = ({ stateVariable, scenarioId }) => {
         console.error("Error editing state variable:", error);
         toast.error("Failed to edit state variable.");
       });
-  };
+  }
 
-  const deleteStateVariable = async () => {
-    // Use ID if available (new format), otherwise fall back to name (legacy format)
+  async function deleteStateVariable(e) {
+    e.preventDefault();
+
+    // NOTE: name is legacy support, probably safe to remove
     const identifier = stateVariable.id || name;
 
     try {
@@ -117,35 +118,77 @@ const EditStateVariable = ({ stateVariable, scenarioId }) => {
       console.error("Error deleting state variable:", error);
       toast.error("Failed to delete state variable.");
     }
-  };
+  }
+
+  function parseValue(e) {
+    const val = e.target.value;
+    if (type === stateTypes.NUMBER) setNewValue(Number(val));
+    else setNewValue(val);
+  }
 
   return (
-    <Card
-      variant="outlined"
-      style={{
-        padding: "12px 25px",
-        marginBottom: 12,
-        ...(editing && { borderColor: "#ffa600" }),
-      }}
-    >
-      <Grid container alignItems="center" spacing={2}>
-        <StateVariableForm
-          name={newName}
-          type={newType}
-          value={newValue}
-          setName={setNewName}
-          setType={setNewType}
-          setValue={setNewValue}
-        />
-        <Box ml="auto" display="flex" alignItems="center">
-          <EditingTooltips
-            onReset={resetFields}
-            onSave={editStateVariable}
-            onDelete={deleteStateVariable}
-          />
-        </Box>
-      </Grid>
-    </Card>
+    <>
+      <fieldset
+        key={stateVariable.name}
+        className="fieldset bg-base-200 border-base-300 rounded-box border p-4"
+      >
+        <div className="flex wrap gap-xs">
+          <div className="flex-1 flex flex-col">
+            <label className="label mb-1">Name</label>
+            <input
+              type="text"
+              value={newName ?? ""}
+              onChange={(e) => setNewName(e.target.value)}
+              placeholder="Name"
+              className="input"
+            />
+          </div>
+          <div className="flex-1 flex flex-col">
+            <label className="label mb-1">Type</label>
+            <SelectInput
+              value={newType}
+              values={["string", "number", "boolean"]}
+              onChange={setNewType}
+            />
+          </div>
+          <div className="flex-1 flex flex-col">
+            <label className="label mb-1">Initial Value</label>
+            {type === stateTypes.BOOLEAN ? (
+              <SelectInput
+                value={newValue}
+                values={["true", "false"]}
+                onChange={setNewValue}
+              />
+            ) : (
+              <input
+                type={newType === stateTypes.NUMBER ? "number" : "text"}
+                value={newValue ?? ""}
+                onChange={parseValue}
+                placeholder="Value"
+                className="input"
+              />
+            )}
+          </div>
+        </div>
+        <div className="ml-auto">
+          <button
+            className="btn btn-xs btn-phantom"
+            onClick={deleteStateVariable}
+          >
+            Delete
+          </button>
+          <button className="btn btn-xs btn-phantom" onClick={resetFields}>
+            Reset
+          </button>
+          <button
+            className="btn btn-xs btn-phantom"
+            onClick={editStateVariable}
+          >
+            Save
+          </button>
+        </div>
+      </fieldset>
+    </>
   );
 };
 

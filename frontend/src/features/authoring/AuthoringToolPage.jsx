@@ -1,130 +1,125 @@
-import { useContext, useEffect, useState, useRef } from "react";
+import "./AuthoringToolPage.css";
+
+import { useContext, useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import HelpButton from "components/HelpButton";
-import ScreenContainer from "components/ScreenContainer/ScreenContainer";
-import TopBar from "components/TopBar/TopBar";
-import AuthenticationContext from "context/AuthenticationContext";
-import AuthoringToolContext from "context/AuthoringToolContext";
-import ScenarioContext from "context/ScenarioContext";
 import SceneContext from "context/SceneContext";
-import ToolbarContextProvider from "context/ToolbarContextProvider";
-import { uploadFiles } from "../../firebase/storage";
-import { useGet, usePut } from "hooks/crudHooks";
-import Canvas from "./Canvas/Canvas";
 import CanvasSideBar from "./CanvasSideBar/CanvasSideBar";
 import SceneNavigator from "./SceneNavigator/SceneNavigator";
-import ToolBar from "./ToolBar/ToolBar";
+
+import Canvas from "./canvas/Canvas";
+import Topbar from "./topbar/Topbar";
+import useVisualScene from "./stores/visual";
+import { getScene } from "./scene/scene";
+import { handleGlobal } from "./handlers/keyboard/keyboard";
+import { copy, cut, paste } from "./handlers/keyboard/clipboard";
+import useEditorStore from "./stores/editor";
+import { useHistory } from "react-router-dom";
+import { replace } from "./scene/operations/modifiers";
+import { ArrowLeftIcon, FilesIcon, PlayIcon, UsersIcon } from "lucide-react";
+
+const listeners = [
+  ["copy", copy],
+  ["cut", cut],
+  ["paste", paste],
+  ["keydown", handleGlobal],
+];
+
+const AUTOSAVE_INTERVAL = 30000; // 30 secs
 
 /**
  * This page allows the user to edit a scene.
  * @container
  */
 export default function AuthoringToolPage() {
-  const { scenarioId, sceneId } = useParams();
-  const {
-    currentScene,
-    setCurrentScene,
-    setMonitorChange,
-    setHasChange,
-    reFetch,
-  } = useContext(SceneContext);
-  const { currentScenario } = useContext(ScenarioContext);
-  const { setSelect } = useContext(AuthoringToolContext);
-  const { getUserIdToken } = useContext(AuthenticationContext);
-  const [firstTimeRender, setFirstTimeRender] = useState(true);
-  const [saveButtonText, setSaveButtonText] = useState("Save");
-  const autosaveTimeout = useRef(null);
+  const { scenes, saveScene } = useContext(SceneContext);
+  const { scenarioId } = useParams();
 
-  useGet(
-    `/api/scenario/${currentScenario?._id}/scene/full/${currentScene?._id}`,
-    setCurrentScene,
-    true
-  );
+  const sceneId = useVisualScene((scene) => scene.id);
 
-  useEffect(async () => {
-    reFetch();
+  const history = useHistory();
+
+  const [saving, setSaving] = useState(false);
+
+  // autosave setup
+  useEffect(() => {
+    if (!sceneId) return;
+    const autosave = setInterval(save, AUTOSAVE_INTERVAL);
+    return () => clearInterval(autosave);
+  }, [sceneId]);
+
+  useEffect(() => {
+    const activeScene = localStorage.getItem(`${scenarioId}:activeScene`);
+    if (activeScene) replace(scenes.find((s) => s._id === activeScene));
+    else replace(scenes[0]);
+
+    useEditorStore.getState().clear();
+
+    listeners.forEach(([event, fn]) => document.addEventListener(event, fn));
+
+    return () => {
+      listeners.forEach(([event, fn]) =>
+        document.removeEventListener(event, fn)
+      );
+    };
   }, []);
 
-  useEffect(() => {
-    if (firstTimeRender) {
-      setFirstTimeRender(false);
-    } else {
-      setMonitorChange(true);
-    }
-  }, [currentScene]);
-
-  useEffect(() => {
-    if (!currentScene || !currentScene._id) return;
-    if (firstTimeRender) return;
-    if (autosaveTimeout.current) clearTimeout(autosaveTimeout.current);
-    autosaveTimeout.current = setTimeout(() => {
-      saveScene(true);
-    }, 2000);
-    return () => clearTimeout(autosaveTimeout.current);
-  }, [currentScene]);
-
-  /** used to save the scene, as a helper function */
-  async function saveScene(isAuto = false) {
-    if (!isAuto) {
-      // only clear selection on manual save
-      setSelect(null);
-    }
-    await uploadFiles(
-      currentScene?.components,
-      currentScene?.endImage,
-      currentScenario._id,
-      currentScene._id
-    );
-    await usePut(
-      `/api/scenario/${scenarioId}/scene/${sceneId}`,
-      {
-        name: currentScene.name,
-        time: currentScene.time,
-        components: currentScene?.components,
-      },
-      getUserIdToken
-    );
-    setHasChange(false);
-    reFetch();
+  function playScenario() {
+    window.open(`/play/${scenarioId}`, "_blank");
   }
 
-  /** called when save button is clicked */
+  function goToGroups() {
+    history.push(`/scenario/${scenarioId}/manage-groups`);
+  }
+
+  function goToResources() {
+    history.push(`/scenario/${scenarioId}/manage-resources`);
+  }
+
+  function goBack() {
+    history.push("/");
+  }
+
   async function save() {
-    await saveScene();
-    setSaveButtonText("Saved!");
-    setTimeout(() => {
-      setSaveButtonText("Save");
-    }, 1800);
-  }
-
-  /** called when save and close button is clicked */
-  async function savePlusClose() {
-    await save();
-    /* redirects user to the scenario page */
-    window.location.href = `/scenario/${currentScenario?._id}`;
+    if (saving) return; // we dont want to interrupt in progress saves (usually uploading media)
+    setSaving(true);
+    const clone = structuredClone(getScene());
+    await saveScene(clone);
+    setTimeout(() => setSaving(false), 5000); // debounce saves
   }
 
   return (
     <>
-      <ScreenContainer vertical>
-        <TopBar back={`/scenario/${currentScenario?._id}`} confirmModal>
-          <button className="btn vps w-[150px]" onClick={save}>
-            {saveButtonText}
+      <div className="font-ibm flex flex-col h-screen w-screen overflow-hidden gap-m">
+        <div className="flex pt-l px-l">
+          <button onClick={goBack} className="btn btn-phantom text-m">
+            <ArrowLeftIcon size={20} />
+            Back
           </button>
-          <button className="btn vps w-[150px]" onClick={savePlusClose}>
-            Save & Close
+          <button
+            onClick={goToResources}
+            className="btn btn-phantom text-m ml-auto"
+          >
+            <FilesIcon size={20} />
+            Resources
           </button>
-          <HelpButton />
-        </TopBar>
-        <ToolbarContextProvider>
-          <ToolBar />
-        </ToolbarContextProvider>
-        <div className="flex" style={{ height: "100%", overflow: "hidden" }}>
-          <SceneNavigator saveScene={saveScene} />
-          <Canvas />
-          <CanvasSideBar />
+          <button onClick={goToGroups} className="btn btn-phantom text-m">
+            <UsersIcon size={20} />
+            Groups
+          </button>
+          <button onClick={playScenario} className="btn btn-phantom text-m">
+            <PlayIcon size={20} />
+            Play
+          </button>
         </div>
-      </ScreenContainer>
+        <div className="flex flex-col gap-m px-l flex-1 min-h-0">
+          <Topbar saving={saving} save={save} />
+          <div className="flex gap-m flex-1 min-h-0">
+            <SceneNavigator />
+            <Canvas />
+            <CanvasSideBar />
+          </div>
+        </div>
+      </div>
     </>
   );
 }
