@@ -150,6 +150,27 @@ const initiateStateVariables = async (groupId, scenarioId) => {
   return await setGroupStateVariables(groupId, stateVariables);
 };
 
+// Sync state variables for a group (author may have changed state in-between playthroughs)
+const syncStateVariables = async (group) => {
+  const stateVariables = group.stateVariables;
+  const scenarioStateVariables = await getStateVariables(group.scenarioId);
+
+  const newStateVariables = scenarioStateVariables.map((scenarioVar) => {
+    const existingVar = stateVariables.find((v) => v.id === scenarioVar.id);
+
+    if (existingVar && existingVar.type === scenarioVar.type) {
+      return existingVar;
+    } else {
+      return scenarioVar;
+    }
+  });
+
+  if (JSON.stringify(newStateVariables) !== JSON.stringify(stateVariables)) {
+    return await setGroupStateVariables(group._id, newStateVariables);
+  }
+  return [stateVariables, group.stateVersions];
+};
+
 // Updates state variables for a group
 const updateStateVariables = async (group, component) => {
   // If no update necessary, just return existing data
@@ -189,8 +210,9 @@ export const groupNavigate = async (req) => {
   // the first time the user is navigating in their session
   if (!currentScene) {
     const scenes = await getConnectedScenes(group.path[0], role);
-    const stateVariables = group.stateVariables;
-    const stateVersion = group.stateVersion;
+
+    const [stateVariables, stateVersion] = await syncStateVariables(group);
+
     return {
       status: STATUS.OK,
       json: { ...scenes, stateVariables, stateVersion },
