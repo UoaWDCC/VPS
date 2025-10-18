@@ -12,7 +12,12 @@ import toast from "react-hot-toast";
  *
  * @component
  */
-const EditStateConditional = ({ fileId, conditional, conditionalIndex }) => {
+const EditStateConditional = ({
+  fileId,
+  conditional,
+  conditionalIndex,
+  updateFile,
+}) => {
   const { user } = useContext(AuthenticationContext);
   const { stateVariables } = useContext(ScenarioContext);
 
@@ -43,6 +48,7 @@ const EditStateConditional = ({ fileId, conditional, conditionalIndex }) => {
         stateConditionalIndex: conditionalIndex,
       })
       .then((res) => {
+        updateFile(res.data);
         console.log(res);
       })
       .catch((err) => {
@@ -65,6 +71,7 @@ const EditStateConditional = ({ fileId, conditional, conditionalIndex }) => {
       })
       .then((res) => {
         console.log(res);
+        updateFile(res.data);
       })
       .catch((err) => {
         console.error(err);

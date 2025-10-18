@@ -13,7 +13,7 @@ import toast from "react-hot-toast";
  *
  * @component
  */
-const CreateStateConditional = ({ fileId, open, setOpen }) => {
+const CreateStateConditional = ({ fileId, open, setOpen, updateFile }) => {
   const { user } = useContext(AuthenticationContext);
   const { stateVariables } = useContext(ScenarioContext);
 
@@ -52,7 +52,12 @@ const CreateStateConditional = ({ fileId, open, setOpen }) => {
         stateConditional,
       })
       .then((res) => {
-        console.log(res);
+        updateFile(res.data);
+        setSelectedState(null);
+        setComparator(null);
+        setValue(null);
+        setOpen(false);
+        toast.success("State conditional created!");
       })
       .catch((err) => {
         console.error(err);

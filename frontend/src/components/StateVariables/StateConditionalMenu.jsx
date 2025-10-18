@@ -1,6 +1,6 @@
 import CreateStateConditional from "./CreateStateConditional";
 import { PlusIcon } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import EditStateConditional from "./EditStateConditional";
 
 /**
@@ -34,7 +34,7 @@ const StateConditionalMenu = ({ file, updateFile }) => {
                 fileId={file.id}
                 conditional={stateConditional}
                 conditionalIndex={stateConditionalIndex}
-                key={stateConditionalIndex}
+                key={stateConditional._id}
                 updateFile={updateFile}
               />
             )

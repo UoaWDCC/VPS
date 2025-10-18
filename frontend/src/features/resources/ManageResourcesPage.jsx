@@ -237,6 +237,22 @@ export default function ManageResourcesPage() {
     }
   }
 
+  function updateFile(updatedFile) {
+    setSelectedFile(updatedFile);
+    setGroups((prev) =>
+      prev.map((g) =>
+        g.id === updatedFile.groupId
+          ? {
+              ...g,
+              files: (g.files || []).map((f) =>
+                f._id === updatedFile._id ? updatedFile : f
+              ),
+            }
+          : g
+      )
+    );
+  }
+
   return (
     <ScreenContainer vertical>
       <TopBar back={`/scenario/${scenarioId}`}>
@@ -349,7 +365,7 @@ export default function ManageResourcesPage() {
         {/* RIGHT: File list and preview */}
         <div className="card bg-base-100 shadow-md">
           <div className="divider my-2" />
-          <StateConditionalMenu file={selectedFile} />
+          <StateConditionalMenu file={selectedFile} updateFile={updateFile} />
           <Preview file={selectedFile} makeDownloadUrl={makeDownloadUrl} />
         </div>
       </div>
