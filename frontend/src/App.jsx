@@ -19,17 +19,12 @@ import { Toaster } from "react-hot-toast";
 import { ContextMenuPortal } from "./components/ContextMenu/portal";
 import CreateLandingPage from "./features/create/CreateLandingPage"; // Verify this path
 
-import ManageResourcesPage from "./features/resources/ManageResourcesPage";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-
 const TOAST_OFFSET = 25;
-
-const queryClient = new QueryClient();
 
 export default function App() {
   return (
     <>
-      {/* Toaster container */}
+      {/* Toaster container */} 
       <Toaster
         position="bottom-right"
         toastOptions={{
@@ -43,19 +38,11 @@ export default function App() {
         }}
       />
 
-      {/* DialogModal container */}
-      <div
-        id="modal-portal"
-        className="fixed inset-0 z-[9999] pointer-events-none"
-      />
-
-      {/* ContextMenu container */}
       <ContextMenuPortal />
 
       {/* Routes */}
       <ThemeProvider theme={theme}>
         <AuthenticationContextProvider>
-<<<<<<< HEAD
           <BrowserRouter>
             <Switch>
               {/* Public Route */}
@@ -71,30 +58,19 @@ export default function App() {
               <ProtectedRoute path="/play/:scenarioId">
                 <PlayScenarioResolver />
               </ProtectedRoute>
-=======
-          <QueryClientProvider client={queryClient}>
-            <BrowserRouter>
-              <Switch>
-                <Route exact path="/login" component={LoginPage} />
 
-                <ProtectedRoute exact path="/">
-                  <ScenarioContextProvider>
-                    <ScenarioSelectionPage />
-                  </ScenarioContextProvider>
-                </ProtectedRoute>
->>>>>>> origin/master
+              <ProtectedRoute path="/scenario-info">
+                <ScenarioContextProvider>
+                  <ScenarioInfo />
+                </ScenarioContextProvider>
+              </ProtectedRoute>
 
-                <ProtectedRoute path="/scenario-info">
-                  <ScenarioContextProvider>
-                    <ScenarioInfo />
-                  </ScenarioContextProvider>
-                </ProtectedRoute>
+              <ProtectedRoute path="/play-page">
+                <ScenarioContextProvider>
+                  <PlayPage />
+                </ScenarioContextProvider>
+              </ProtectedRoute>
 
-                <ProtectedRoute path="/play/:scenarioId">
-                  <PlayScenarioResolver />
-                </ProtectedRoute>
-
-<<<<<<< HEAD
               <ProtectedRoute exact path="/">
                 <ScenarioContextProvider>
                   <ScenarioSelectionPage />
@@ -134,40 +110,10 @@ export default function App() {
               <ProtectedRoute path="*">
                 <ScenarioContextProvider>
                   <ScenarioSelectionPage />
-=======
-                <ProtectedRoute path="/dashboard/:scenarioId">
-                  <ScenarioContextProvider>
-                    <SceneContextProvider>
-                      <Dashboard />
-                    </SceneContextProvider>
-                  </ScenarioContextProvider>
-                </ProtectedRoute>
-
-                <ProtectedRoute path="/play-page">
-                  <ScenarioContextProvider>
-                    <PlayPage />
-                  </ScenarioContextProvider>
-                </ProtectedRoute>
-
-                <ScenarioContextProvider>
-                  <Switch>
-                    <ProtectedRoute path="/scenario/:scenarioId/manage-resources">
-                      <ManageResourcesPage />
-                    </ProtectedRoute>
-                    <ProtectedRoute path="/scenario/:scenarioId/manage-groups">
-                      <ManageGroupsPage />
-                    </ProtectedRoute>
-                    <ProtectedRoute index path="/scenario/:scenarioId">
-                      <SceneContextProvider>
-                        <ScenePage />
-                      </SceneContextProvider>
-                    </ProtectedRoute>
-                  </Switch>
->>>>>>> origin/master
                 </ScenarioContextProvider>
-              </Switch>
-            </BrowserRouter>
-          </QueryClientProvider>
+              </ProtectedRoute>
+            </Switch>
+          </BrowserRouter>
         </AuthenticationContextProvider>
       </ThemeProvider>
     </>
