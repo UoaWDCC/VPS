@@ -24,7 +24,7 @@ const TOAST_OFFSET = 25;
 export default function App() {
   return (
     <>
-      {/* Toaster container */} 
+      {/* Toaster container */}
       <Toaster
         position="bottom-right"
         toastOptions={{
