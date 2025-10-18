@@ -15,7 +15,7 @@ router.use((req, _res, next) => {
   next();
 });
 
-// 🔒 Require Firebase auth for all routes below
+// Require Firebase auth for all routes below
 router.use(auth);
 
 /**

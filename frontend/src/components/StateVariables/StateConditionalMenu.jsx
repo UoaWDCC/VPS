@@ -28,17 +28,15 @@ const StateConditionalMenu = ({ file, updateFile }) => {
           />
         </div>
         <div className="collapse-content text--1 bg-base-200 px-0">
-          {file.stateConditionals?.map(
-            (stateConditional, stateConditionalIndex) => (
-              <EditStateConditional
-                fileId={file.id}
-                conditional={stateConditional}
-                conditionalIndex={stateConditionalIndex}
-                key={stateConditional._id}
-                updateFile={updateFile}
-              />
-            )
-          )}
+          {file.stateConditionals?.map((stateConditional) => (
+            <EditStateConditional
+              fileId={file.id}
+              conditional={stateConditional}
+              conditionalId={stateConditional._id}
+              key={stateConditional._id}
+              updateFile={updateFile}
+            />
+          ))}
         </div>
       </div>
       <CreateStateConditional

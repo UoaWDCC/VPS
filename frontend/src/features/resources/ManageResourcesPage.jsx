@@ -9,6 +9,17 @@ import TopBar from "../../components/TopBar/TopBar";
 import AddGroup from "./components/AddGroup";
 import StateConditionalMenu from "../../components/StateVariables/StateConditionalMenu";
 
+function normaliseFile(f) {
+  return {
+    id: f._id,
+    name: f.name,
+    size: f.size,
+    type: f.type,
+    createdAt: f.createdAt,
+    stateConditionals: f.stateConditionals,
+  };
+}
+
 export default function ManageResourcesPage() {
   const { scenarioId } = useParams();
 
@@ -107,14 +118,7 @@ export default function ManageResourcesPage() {
             id: g._id,
             name: g.name,
             order: g.order ?? 0,
-            files: (g.files || []).map((f) => ({
-              id: f._id,
-              name: f.name,
-              size: f.size,
-              type: f.type,
-              createdAt: f.createdAt,
-              stateConditionals: f.stateConditionals,
-            })),
+            files: (g.files || []).map((f) => normaliseFile(f)),
           })) || [];
         if (!cancelled) setGroups(normalized);
       } catch (err) {
@@ -238,14 +242,15 @@ export default function ManageResourcesPage() {
   }
 
   function updateFile(updatedFile) {
-    setSelectedFile(updatedFile);
+    const normalisedFile = normaliseFile(updatedFile);
+    setSelectedFile(normalisedFile);
     setGroups((prev) =>
       prev.map((g) =>
-        g.id === updatedFile.groupId
+        g.id === normalisedFile.groupId
           ? {
               ...g,
               files: (g.files || []).map((f) =>
-                f._id === updatedFile._id ? updatedFile : f
+                f.id === normalisedFile.id ? normalisedFile : f
               ),
             }
           : g

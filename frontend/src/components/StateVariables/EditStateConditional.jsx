@@ -15,7 +15,7 @@ import toast from "react-hot-toast";
 const EditStateConditional = ({
   fileId,
   conditional,
-  conditionalIndex,
+  conditionalId,
   updateFile,
 }) => {
   const { user } = useContext(AuthenticationContext);
@@ -44,12 +44,9 @@ const EditStateConditional = ({
 
   const deleteStateConditional = () => {
     api
-      .delete(user, `/api/files/state-conditionals/${fileId}`, {
-        stateConditionalIndex: conditionalIndex,
-      })
+      .delete(user, `/api/files/state-conditionals/${fileId}/${conditionalId}`)
       .then((res) => {
         updateFile(res.data);
-        console.log(res);
       })
       .catch((err) => {
         console.error(err);
@@ -67,10 +64,8 @@ const EditStateConditional = ({
     api
       .put(user, `/api/files/state-conditionals/${fileId}`, {
         stateConditional,
-        stateConditionalIndex: conditionalIndex,
       })
       .then((res) => {
-        console.log(res);
         updateFile(res.data);
       })
       .catch((err) => {

@@ -176,7 +176,9 @@ router.post("/state-conditionals/:fileId", async (req, res) => {
     if (!meta) return res.status(404).json({ error: "File not found" });
     meta.stateConditionals.push(stateConditional);
     await meta.save();
-    return res.json(meta);
+    const file = meta.toObject();
+    delete file.gridFdId;
+    return res.json(file);
   } catch (err) {
     return res.status(500).json({ error: err.message });
   }
@@ -189,18 +191,18 @@ router.post("/state-conditionals/:fileId", async (req, res) => {
 router.put("/state-conditionals/:fileId", async (req, res) => {
   try {
     const { fileId } = req.params;
-    const { stateConditional, stateConditionalIndex } = req.body;
+    const { stateConditional } = req.body;
     const meta = await StoredFile.findById(fileId);
     if (!meta) return res.status(404).json({ error: "File not found" });
-    if (
-      stateConditionalIndex < 0 ||
-      stateConditionalIndex >= meta.stateConditionals.length
-    ) {
-      return res.status(400).json({ error: "Invalid stateConditionalIndex" });
-    }
-    meta.stateConditionals[stateConditionalIndex] = stateConditional;
+
+    meta.stateConditionals = meta.stateConditionals.map((sc) =>
+      sc._id.toString() === stateConditional._id ? stateConditional : sc
+    );
+
     await meta.save();
-    return res.json(meta);
+    const file = meta.toObject();
+    delete file.gridFdId;
+    return res.json(file);
   } catch (err) {
     return res.status(500).json({ error: err.message });
   }
@@ -210,25 +212,31 @@ router.put("/state-conditionals/:fileId", async (req, res) => {
  * @route DELETE /api/files/state-conditionals/:fileId
  * @desc Delete a state conditional from a stored file
  */
-router.delete("/state-conditionals/:fileId", async (req, res) => {
-  try {
-    const { fileId } = req.params;
-    const { stateConditionalIndex } = req.body;
-    const meta = await StoredFile.findById(fileId);
-    if (!meta) return res.status(404).json({ error: "File not found" });
-    if (
-      stateConditionalIndex < 0 ||
-      stateConditionalIndex >= meta.stateConditionals.length
-    ) {
-      return res.status(400).json({ error: "Invalid stateConditionalIndex" });
-    }
+router.delete(
+  "/state-conditionals/:fileId/:stateConditionalId",
+  async (req, res) => {
+    try {
+      const { fileId, stateConditionalId } = req.params;
+      const meta = await StoredFile.findById(fileId);
+      if (!meta) return res.status(404).json({ error: "File not found" });
 
-    meta.stateConditionals.splice(stateConditionalIndex, 1);
-    await meta.save();
-    return res.json(meta);
-  } catch (err) {
-    return res.status(500).json({ error: err.message });
+      const originalLength = meta.stateConditionals.length;
+      meta.stateConditionals = meta.stateConditionals.filter(
+        (sc) => sc._id.toString() !== stateConditionalId
+      );
+
+      if (meta.stateConditionals.length === originalLength) {
+        return res.status(404).json({ error: "State conditional not found" });
+      }
+
+      await meta.save();
+      const file = meta.toObject();
+      delete file.gridFdId;
+      return res.json(file);
+    } catch (err) {
+      return res.status(500).json({ error: err.message });
+    }
   }
-});
+);
 
 export default router;

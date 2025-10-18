@@ -68,6 +68,7 @@ const CreateStateConditional = ({ fileId, open, setOpen, updateFile }) => {
   function onVariableChange(variable) {
     setSelectedState(variable);
     setValue(getDefaultValue(variable.type));
+    setComparator("=");
   }
 
   const isSubmittable = selectedState && comparator && value != null;
