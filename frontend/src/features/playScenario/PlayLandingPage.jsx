@@ -19,7 +19,7 @@ export default function PlayLandingPage() {
     currentScenario,
     setCurrentScenario,
   } = useContext(ScenarioContext);
-  const { user: _user, getUserIdToken, VpsUser, signOut } = useContext(
+  const { getUserIdToken, VpsUser, signOut } = useContext(
     AuthenticationContext
   ); // Added signOut
   const history = useHistory();
