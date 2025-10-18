@@ -6,7 +6,6 @@ import AuthenticationContext from "../../context/AuthenticationContext";
 import ScenarioContext from "../../context/ScenarioContext";
 import AccessLevel from "../../enums/route.access.level";
 import { useDelete } from "../../hooks/crudHooks";
-import HorizontalGradientLine from "./components/HorizontalGradientLine";
 import Thumbnail from "../authoring/components/Thumbnail";
 import "./PlayLandingPage.css";
 import TopNavBar from "../../features/TopNavBar/TopNavBar";
@@ -20,7 +19,7 @@ export default function PlayLandingPage() {
     currentScenario,
     setCurrentScenario,
   } = useContext(ScenarioContext);
-  const { user, getUserIdToken, VpsUser, signOut } = useContext(
+  const { user: _user, getUserIdToken, VpsUser, signOut } = useContext(
     AuthenticationContext
   ); // Added signOut
   const history = useHistory();
