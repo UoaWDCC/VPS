@@ -10,6 +10,7 @@ import LoadingPage from "../status/LoadingPage";
 
 import PlayScenarioPage from "./PlayScenarioPage";
 import PlayScenarioPageMulti from "./PlayScenarioPageMulti";
+import PlayLandingPage from "./PlayLandingPage"; // Import the new landing page
 
 const getGroup = async (user, scenarioId) => {
   const token = await user.getIdToken();
@@ -33,6 +34,10 @@ export default function PlayScenarioResolver() {
 
   useEffect(() => {
     const resolveType = async () => {
+      if (!scenarioId) {
+        // If no scenarioId, stay on the landing page
+        return;
+      }
       const fetchedGroup = await getGroup(user, scenarioId);
       if (!fetchedGroup) {
         setGroup("none");
@@ -44,10 +49,14 @@ export default function PlayScenarioResolver() {
     resolveType();
   }, [scenarioId]);
 
-  if (!group) return <LoadingPage text="Loading Scenario..." />;
+  if (!group && scenarioId) return <LoadingPage text="Loading Scenario..." />;
 
   return (
     <Switch>
+      {/* Landing page route when no scenarioId is provided */}
+      <Route exact path="/play">
+        <PlayLandingPage />
+      </Route>
       <Route exact path="/play/:scenarioId/error">
         <GenericErrorPage />
       </Route>

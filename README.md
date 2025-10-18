@@ -1,9 +1,9 @@
 # Virtual Patient Simulator (VPS)
+
 ![GitHub contributors from allcontributors.org](https://img.shields.io/github/all-contributors/UoaWDCC/VPS?style=for-the-badge&color=orange)
 ![GitHub commit activity (branch)](https://img.shields.io/github/commit-activity/t/UoaWDCC/VPS/master?style=for-the-badge)
 ![GitHub Issues or Pull Requests](https://img.shields.io/github/issues-pr-closed-raw/UoaWDCC/VPS?style=for-the-badge)
 ![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/UoaWDCC/VPS/deploy.staging.yml?style=for-the-badge)
-
 
 This project aims to provide Medical and Health Science students at the University of Auckland with a tool that supports interactive and immersive education through virtual patient scenarios.
 

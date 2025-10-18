@@ -55,7 +55,7 @@ function ScenarioInfo() {
   };
 
   const handleBackToPlay = () => {
-    history.push("/play-page");
+    history.push("/play");
   };
 
   const openEditModal = () => {
