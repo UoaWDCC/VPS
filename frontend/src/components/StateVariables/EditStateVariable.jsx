@@ -22,6 +22,8 @@ const EditStateVariable = ({ stateVariable, scenarioId }) => {
   const [newType, setNewType] = useState(type);
   const [newValue, setNewValue] = useState(value);
 
+  const isEditing = newName !== name || newType !== type || newValue !== value;
+
   function resetFields(e) {
     e.preventDefault();
     setNewName(name);
@@ -125,12 +127,15 @@ const EditStateVariable = ({ stateVariable, scenarioId }) => {
     if (type === stateTypes.NUMBER) setNewValue(Number(val));
     else setNewValue(val);
   }
+  `bg-base-300 mt-xs px-[1rem] py-[0.5rem] `;
 
   return (
     <>
       <fieldset
         key={stateVariable.name}
-        className="fieldset bg-base-200 border-base-300 rounded-box border p-4"
+        className={`fieldset bg-base-200 border-base-300 rounded-box border p-4 ${
+          isEditing ? "ring-2 ring-grey" : ""
+        }`}
       >
         <div className="flex wrap gap-xs">
           <div className="flex-1 flex flex-col">

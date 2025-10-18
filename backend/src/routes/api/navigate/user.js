@@ -46,6 +46,27 @@ const initiateStateVariables = async (userId, scenarioId) => {
   return await setUserStateVariables(userId, scenarioId, stateVariables);
 };
 
+// Sync state variables for a user (author may have changed state in-between playthroughs)
+const syncStateVariables = async (user, scenarioId) => {
+  const stateVariables = user.stateVariables[scenarioId];
+  const scenarioStateVariables = await getStateVariables(scenarioId);
+
+  const newStateVariables = scenarioStateVariables.map((scenarioVar) => {
+    const existingVar = stateVariables.find((v) => v.id === scenarioVar.id);
+
+    if (existingVar && existingVar.type === scenarioVar.type) {
+      return existingVar;
+    } else {
+      return scenarioVar;
+    }
+  });
+
+  if (JSON.stringify(newStateVariables) !== JSON.stringify(stateVariables)) {
+    return await setUserStateVariables(user._id, scenarioId, newStateVariables);
+  }
+  return [stateVariables, user.stateVersions[scenarioId]];
+};
+
 // Update state variables for a user
 const updateStateVariables = async (user, scenarioId, component) => {
   // If no update necessary, just return existing data
@@ -87,8 +108,12 @@ export const userNavigate = async (req) => {
   // the first time the user is navigating in their session
   if (!currentScene) {
     const scenes = await getConnectedScenes(path[0]);
-    const stateVariables = user.stateVariables[scenarioId];
-    const stateVersion = user.stateVersions[scenarioId];
+
+    const [stateVariables, stateVersion] = await syncStateVariables(
+      user,
+      scenarioId
+    );
+
     return {
       status: STATUS.OK,
       json: { ...scenes, stateVariables, stateVersion },

@@ -19,6 +19,21 @@ const StoredFileSchema = new Schema(
       unique: true,
       index: true,
     },
+
+    stateConditionals: {
+      type: [
+        {
+          stateVariableId: { type: String, required: true },
+          comparator: {
+            type: String,
+            enum: ["=", "!=", "<", ">"],
+            required: true,
+          },
+          value: { type: String, required: true },
+        },
+      ],
+      default: [],
+    },
   },
   {
     versionKey: false,

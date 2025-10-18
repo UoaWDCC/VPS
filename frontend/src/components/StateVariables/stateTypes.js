@@ -27,3 +27,9 @@ export const validOperations = {
   [stateTypes.NUMBER]: [operations.SET, operations.ADD],
   [stateTypes.BOOLEAN]: [operations.SET],
 };
+
+export const validComparators = {
+  [stateTypes.STRING]: ["=", "!="],
+  [stateTypes.NUMBER]: ["=", "!=", ">", "<"],
+  [stateTypes.BOOLEAN]: ["=", "!="],
+};
