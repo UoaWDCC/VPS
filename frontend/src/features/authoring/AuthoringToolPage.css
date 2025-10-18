@@ -1,0 +1,20 @@
+@import "tailwindcss";
+
+input[type="number"] {
+  -moz-appearance: textfield;
+}
+
+.topbar.menu li > a {
+  @apply p-1.5;
+}
+
+.topbar.menu li > a:has(> div) {
+  @apply p-1.25;
+}
+.topbar .divider {
+  @apply m-0;
+}
+
+.topbar div.dropdown:focus-within > li > a {
+  @apply bg-[var(--color-base-100)];
+}

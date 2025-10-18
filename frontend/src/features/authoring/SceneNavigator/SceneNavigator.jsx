@@ -1,15 +1,10 @@
 import SceneContext from "context/SceneContext";
-import React, { useContext, useEffect, useState } from "react";
-import { useHistory, useParams } from "react-router-dom";
-import styles from "./SceneNavigator.module.scss";
+import React, { useContext, useState } from "react";
+import { useParams } from "react-router-dom";
 import SceneListItem from "./SceneListItem";
 import Thumbnail from "../components/Thumbnail";
-import RightContextMenu from "../../../components/ContextMenu/RightContextMenu";
-import { MenuItem, MenuList, Paper } from "@material-ui/core";
 import AuthenticationContext from "../../../context/AuthenticationContext";
-import { handle } from "../../../components/ContextMenu/portal";
 import { api, handleGeneric } from "../../../util/api";
-import DashedCard from "../../../components/DashedCard";
 import {
   DndContext,
   KeyboardSensor,
@@ -24,36 +19,32 @@ import {
   verticalListSortingStrategy,
   arrayMove,
 } from "@dnd-kit/sortable";
+import useVisualScene from "../stores/visual";
+import { PlusIcon } from "lucide-react";
 
-const SceneMenu = ({ id, deleteScene, duplicateScene }) => {
-  return (
-    <Paper>
-      <MenuList>
-        <MenuItem onClick={handle(duplicateScene, id)}>Duplicate 123</MenuItem>
-        <MenuItem onClick={handle(deleteScene, id)}>Delete</MenuItem>
-      </MenuList>
-    </Paper>
-  );
-};
+function ThumbOverlay({ scene }) {
+  return <Thumbnail components={scene.components} />;
+}
 
-const SceneNavigator = ({ saveScene }) => {
-  const [thumbnails, setThumbnails] = useState(null);
-  const {
-    scenes,
-    currentScene,
-    currentSceneRef,
-    setCurrentScene,
-    reFetch,
-    setScenes,
-  } = useContext(SceneContext);
-  const { scenarioId } = useParams();
-  const history = useHistory();
+// TODO: sort out animation flickering here
+const SceneNavigator = () => {
   const { user } = useContext(AuthenticationContext);
-  const [activeId, setActiveId] = useState(null);
-  const [dropIndicator, setDropIndicator] = useState({
-    show: false,
-    index: -1,
-  });
+
+  const { scenarioId } = useParams();
+
+  const { scenes, reFetch, reorderScenes } = useContext(SceneContext);
+  const activeId = useVisualScene((store) => store.id);
+
+  const [activeIdDragging, setActiveIdDragging] = useState(null);
+
+  async function addScene() {
+    api
+      .post(user, `/api/scenario/${scenarioId}/scene`, {
+        name: `Scene ${scenes.length}`,
+      })
+      .then(reFetch)
+      .catch(handleGeneric);
+  }
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -64,196 +55,65 @@ const SceneNavigator = ({ saveScene }) => {
     useSensor(KeyboardSensor)
   );
 
-  const deleteScene = async (id) => {
-    api
-      .delete(user, `/api/scenario/${scenarioId}/scene/${id}`)
-      .then(reFetch)
-      .catch(handleGeneric);
-  };
+  const sceneIds = scenes.map((s) => s._id);
+  const activeIndexDragging = activeIdDragging
+    ? sceneIds.indexOf(activeIdDragging)
+    : -1;
 
-  const duplicateScene = async (id) => {
-    api
-      .post(user, `/api/scenario/${scenarioId}/scene/duplicate/${id}`, {})
-      .then(reFetch)
-      .catch(handleGeneric);
-  };
+  function handleDragStart({ active }) {
+    setActiveIdDragging(active.id);
+  }
 
-  const addScene = async () => {
-    api
-      .post(user, `/api/scenario/${scenarioId}/scene`, {
-        name: `Scene ${scenes.length}`,
-      })
-      .then(reFetch)
-      .catch(handleGeneric);
-  };
+  function handleDragEnd({ active, over }) {
+    if (!over) return;
 
-  const updateSceneOrder = async (newScenes) => {
-    setScenes(newScenes);
+    const oldIndex = sceneIds.indexOf(active.id);
+    const newIndex = sceneIds.indexOf(over.id);
 
-    const sceneIds = newScenes.map((scene) => scene._id);
-
-    try {
-      const result = await api.put(
-        user,
-        `/api/scenario/${scenarioId}/scene/reorder`,
-        { sceneIds }
-      );
-
-      console.log("Scene order updated successfully:", result.data);
-    } catch (error) {
-      console.error("Failed to update scene order:", error);
-
-      reFetch();
-    }
-  };
-
-  const handleDragStart = (event) => {
-    setActiveId(event.active.id);
-  };
-
-  const handleDragOver = (event) => {
-    const { active, over } = event;
-
-    if (!over) {
-      setDropIndicator({ show: false, index: -1 });
-      return;
+    if (oldIndex !== newIndex) {
+      reorderScenes(arrayMove(sceneIds, oldIndex, newIndex));
     }
 
-    if (active.id !== over.id) {
-      const activeIndex = scenes.findIndex((scene) => scene._id === active.id);
-      const overIndex = scenes.findIndex((scene) => scene._id === over.id);
-
-      let indicatorIndex = overIndex;
-
-      if (activeIndex < overIndex) {
-        indicatorIndex = overIndex;
-      } else if (activeIndex > overIndex) {
-        indicatorIndex = overIndex;
-      }
-
-      setDropIndicator({ show: true, index: indicatorIndex });
-    } else {
-      setDropIndicator({ show: false, index: -1 });
-    }
-  };
-
-  const handleDragEnd = (event) => {
-    setActiveId(null);
-    setDropIndicator({ show: false, index: -1 });
-
-    const { active, over } = event;
-
-    if (!over || active.id === over.id) {
-      return;
-    }
-
-    const activeIndex = scenes.findIndex((scene) => scene._id === active.id);
-    const overIndex = scenes.findIndex((scene) => scene._id === over.id);
-
-    if (activeIndex === overIndex) {
-      return;
-    }
-
-    const newScenes = arrayMove(scenes, activeIndex, overIndex);
-
-    updateSceneOrder(newScenes);
-  };
-
-  useEffect(() => {
-    if (!scenes?.length) return;
-
-    setThumbnails(
-      scenes.map((scene, index) => ({
-        sceneId: scene._id,
-        sceneListItem: (
-          <RightContextMenu
-            menu={SceneMenu({
-              id: scene._id,
-              deleteScene,
-              duplicateScene,
-            })}
-          >
-            <div className="flex items-center gap-2.5">
-              <p className="w-4">{index + 1}</p>
-              <button
-                type="button"
-                onClick={() => {
-                  if (currentSceneRef.current._id === scene._id) return;
-
-                  saveScene();
-                  setCurrentScene(scene);
-
-                  history.push({
-                    pathname: `/scenario/${scenarioId}/scene/${scene._id}`,
-                  });
-                }}
-                className={styles.sceneButton}
-                style={
-                  currentScene._id === scene._id
-                    ? {
-                        border: "3px solid #035084",
-                      }
-                    : null
-                }
-                key={scene._id}
-              >
-                <Thumbnail components={scene.components} />
-              </button>
-            </div>
-          </RightContextMenu>
-        ),
-      }))
-    );
-  }, [scenes, currentScene]);
+    setActiveIdDragging(null);
+  }
 
   return (
-    thumbnails && (
-      <div style={{ display: "flex", position: "relative" }}>
-        <DndContext
-          sensors={sensors}
-          collisionDetection={closestCenter}
-          onDragStart={handleDragStart}
-          onDragOver={handleDragOver}
-          onDragEnd={handleDragEnd}
-        >
-          <SortableContext
-            items={scenes.map((scene) => scene._id)}
-            strategy={verticalListSortingStrategy}
-          >
-            <ul className={styles.sceneNavigator}>
-              {thumbnails.map(
-                ({ sceneListItem: thumbnail, sceneId }, index) => (
-                  <React.Fragment key={`scene-item-${sceneId}`}>
-                    {dropIndicator.show && dropIndicator.index === index && (
-                      <div className={styles.dropIndicator} />
-                    )}
-                    <SceneListItem
-                      thumbnail={thumbnail}
-                      sceneId={sceneId}
-                      key={sceneId}
-                    />
-                  </React.Fragment>
-                )
-              )}
-              {dropIndicator.show && dropIndicator.index === scenes.length && (
-                <div className={styles.dropIndicator} />
-              )}
-              <div className="w-full pl-6.5">
-                <DashedCard height={94} onClick={addScene} />
-              </div>
-            </ul>
-          </SortableContext>
-
-          <DragOverlay>
-            {activeId && thumbnails.find((t) => t.sceneId === activeId) && (
-              <div className={styles.sceneListItem} style={{ opacity: 0.8 }}>
-                {thumbnails.find((t) => t.sceneId === activeId).sceneListItem}
-              </div>
-            )}
-          </DragOverlay>
-        </DndContext>
-      </div>
-    )
+    <DndContext
+      onDragEnd={handleDragEnd}
+      onDragStart={handleDragStart}
+      sensors={sensors}
+      collisionDetection={closestCenter}
+    >
+      <SortableContext items={sceneIds} strategy={verticalListSortingStrategy}>
+        <div className="h-full overflow-y-auto no-scrollbar">
+          <ul className="flex flex-col gap-s pb-m">
+            {scenes.map((scene, index) => (
+              <SceneListItem
+                scene={scene}
+                index={index}
+                key={scene._id}
+                active={scene._id === activeId}
+              />
+            ))}
+            <div className="w-full">
+              <button className="float-right" onClick={addScene}>
+                <div className="text-primary hover:text-secondary w-[160px] h-[94px] border-3 border-primary hover:border-secondary rounded-sm flex justify-center items-center">
+                  <PlusIcon />
+                </div>
+              </button>
+            </div>
+          </ul>
+        </div>
+      </SortableContext>
+      <DragOverlay dropAnimation={null}>
+        {activeIdDragging ? (
+          <ThumbOverlay
+            scene={scenes[activeIndexDragging]}
+            sceneIds={sceneIds}
+          />
+        ) : null}
+      </DragOverlay>
+    </DndContext>
   );
 };
 
