@@ -22,23 +22,12 @@ const addThumbs = async (scenarios) => {
   const scenarioData = await Promise.all(
     scenarios.map(async (scenario) => {
       if (!scenario.scenes || !scenario.scenes[0])
-        return {
-          _id: scenario._id,
-          name: scenario.name,
-          description: scenario.description,
-          estimatedTime: scenario.estimatedTime,
-        };
+        return { _id: scenario._id, name: scenario.name };
       const thumbnail = await Scene.findById(scenario.scenes[0], {
         components: 1,
         _id: 0,
       }).lean();
-      return {
-        _id: scenario._id,
-        name: scenario.name,
-        thumbnail,
-        description: scenario.description,
-        estimatedTime: scenario.estimatedTime,
-      };
+      return { _id: scenario._id, name: scenario.name, thumbnail };
     })
   );
   return scenarioData;
@@ -52,7 +41,7 @@ const addThumbs = async (scenarios) => {
 const retrieveScenarioList = async (uid) => {
   const scenarios = await Scenario.find(
     { uid },
-    { name: 1, scenes: { $slice: 1 }, description: 1, estimatedTime: 1 }
+    { name: 1, scenes: { $slice: 1 } }
   )
     .sort({ _id: 1 })
     .lean();
@@ -77,7 +66,7 @@ const retrieveScenario = async (scenarioId) => {
 const retrieveScenarios = async (scenarioIds) => {
   const scenarios = await Scenario.find(
     { _id: { $in: scenarioIds } },
-    { name: 1, scenes: { $slice: 1 }, description: 1, estimatedTime: 1 }
+    { name: 1, scenes: { $slice: 1 } }
   );
   return addThumbs(scenarios);
 };
@@ -95,22 +84,23 @@ const retrieveRoleList = async (scenarioId) => {
 /**
  * Updates the name of a scenario in the database
  * @param {String} scenarioId MongoDB ID of scenario
- * @param {{name: String, description: String, estimatedTime: String}} updatedScenario updated scenario object
+ * @param {{name: String}} updatedScenario updated scenario object
  * @returns updated database scenario object
  */
 const updateScenario = async (scenarioId, updatedScenario) => {
   const scenario = await Scenario.findById(scenarioId);
 
-  if (updatedScenario.name?.trim()) {
-    scenario.name = updatedScenario.name;
-  }
+  // define temperary variable to store old name incase new name is empty
+  const previousName = scenario.name;
+  scenario.name = updatedScenario.name;
 
-  if (updatedScenario.description !== undefined) {
-    scenario.description = updatedScenario.description;
-  }
-
-  if (updatedScenario.estimatedTime !== undefined) {
-    scenario.estimatedTime = updatedScenario.estimatedTime;
+  // if new name is empty, set name to old name
+  if (
+    scenario.name === "" ||
+    scenario.name == null ||
+    scenario.name.trim() === ""
+  ) {
+    scenario.name = previousName;
   }
 
   await scenario.save();

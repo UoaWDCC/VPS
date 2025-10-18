@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect } from "react";
+import React, { useMemo, useRef, useState, useEffect } from "react";
 import { getAuth } from "firebase/auth";
 import axios from "axios";
 import Papa from "papaparse";
@@ -7,6 +7,7 @@ import { useParams } from "react-router-dom";
 import ScreenContainer from "../../components/ScreenContainer/ScreenContainer";
 import TopBar from "../../components/TopBar/TopBar";
 import AddGroup from "./components/AddGroup";
+import AddChild from "./components/AddChild";
 
 export default function ManageResourcesPage() {
   const { scenarioId } = useParams();
@@ -14,7 +15,6 @@ export default function ManageResourcesPage() {
   const csvInputRef = useRef(null);
   const [setResources] = useState([]);
 
-  // Fetch resources (CSV uploads)
   useEffect(() => {
     let cancelled = false;
     (async () => {
@@ -73,17 +73,17 @@ export default function ManageResourcesPage() {
           const msg = error?.response?.data || error.message || "Unknown error";
           toast.error(`Error uploading: ${msg}`);
         } finally {
-          event.target.value = "";
+          event.target.value = ""; // reset input
         }
       },
     });
   };
 
-  // Groups (each with files)
-  const [groups, setGroups] = useState([]);
+  const [groups, setGroups] = useState([]); // { id, name, order, children:[{ id, name, order, files:[...] }] }
   const [selectedFile, setSelectedFile] = useState(null);
+  const [filter, setFilter] = useState("");
 
-  // Load groups and files
+  // Load persisted tree on mount
   useEffect(() => {
     let cancelled = false;
     (async () => {
@@ -106,19 +106,24 @@ export default function ManageResourcesPage() {
             id: g._id,
             name: g.name,
             order: g.order ?? 0,
-            files: (g.files || []).map((f) => ({
-              id: f._id,
-              name: f.name,
-              size: f.size,
-              type: f.type,
-              createdAt: f.createdAt,
+            children: (g.children || []).map((c) => ({
+              id: c._id,
+              name: c.name,
+              order: c.order ?? 0,
+              files: (c.files || []).map((f) => ({
+                id: f._id,
+                name: f.name,
+                size: f.size,
+                type: f.type,
+                createdAt: f.createdAt,
+              })),
             })),
           })) || [];
 
         if (!cancelled) setGroups(normalized);
       } catch (err) {
         console.error(err);
-        if (!cancelled) toast.error("Failed to load groups/files");
+        if (!cancelled) toast.error("Failed to load folders/files");
       }
     })();
 
@@ -127,14 +132,50 @@ export default function ManageResourcesPage() {
     };
   }, [scenarioId]);
 
+  // Helpers
+  const findGroupIdByChildId = (childId) => {
+    for (const g of groups) {
+      if (g.children?.some((c) => c.id === childId)) return g.id;
+    }
+    return null;
+  };
+
+  const allFiles = useMemo(() => {
+    const out = [];
+    for (const g of groups) {
+      for (const c of g.children || []) {
+        for (const f of c.files || [])
+          out.push({
+            ...f,
+            groupId: g.id,
+            childId: c.id,
+            groupName: g.name,
+            childName: c.name,
+          });
+      }
+    }
+    return out;
+  }, [groups]);
+
+  const filteredFiles = useMemo(() => {
+    if (!filter) return allFiles;
+    const q = filter.toLowerCase();
+    return allFiles.filter(
+      (f) =>
+        f.name.toLowerCase().includes(q) ||
+        `${f.groupName}/${f.childName}`.toLowerCase().includes(q)
+    );
+  }, [allFiles, filter]);
+
+  // Build a download URL with Firebase token as query
   async function makeDownloadUrl(fileId) {
     const user = getAuth().currentUser;
     const token = await user.getIdToken();
     return `/api/files/download/${fileId}?token=${encodeURIComponent(token)}`;
   }
 
-  // Upload directly to group
-  async function addFilesTo(groupId, files) {
+  // Upload from "+" button to the backend, then merge returned files into state
+  async function addFilesTo(childId, files) {
     try {
       const user = getAuth().currentUser;
       if (!user) {
@@ -142,10 +183,16 @@ export default function ManageResourcesPage() {
         return;
       }
       const idToken = await user.getIdToken();
+      const groupId = findGroupIdByChildId(childId);
+      if (!groupId) {
+        toast.error("Could not determine group for this child");
+        return;
+      }
 
       const fd = new FormData();
       fd.set("scenarioId", scenarioId);
       fd.set("groupId", groupId);
+      fd.set("childId", childId);
       for (const file of files) fd.append("files", file);
 
       const { data } = await axios.post("/api/files/upload", fd, {
@@ -169,7 +216,17 @@ export default function ManageResourcesPage() {
       setGroups((prev) =>
         prev.map((g) =>
           g.id === groupId
-            ? { ...g, files: [...normalizedUploaded, ...(g.files || [])] }
+            ? {
+                ...g,
+                children: g.children.map((c) =>
+                  c.id === childId
+                    ? {
+                        ...c,
+                        files: [...normalizedUploaded, ...(c.files || [])],
+                      }
+                    : c
+                ),
+              }
             : g
         )
       );
@@ -196,7 +253,10 @@ export default function ManageResourcesPage() {
       setGroups((prev) =>
         prev.map((g) => ({
           ...g,
-          files: (g.files || []).filter((f) => f.id !== fileId),
+          children: g.children.map((c) => ({
+            ...c,
+            files: (c.files || []).filter((f) => f.id !== fileId),
+          })),
         }))
       );
 
@@ -208,9 +268,44 @@ export default function ManageResourcesPage() {
     }
   }
 
+  async function deleteChild(childId, groupId) {
+    const ok = window.confirm(
+      "Delete this child and ALL of its files? This cannot be undone."
+    );
+    if (!ok) return;
+    try {
+      const user = getAuth().currentUser;
+      if (!user) {
+        toast.error("You must be logged in to delete.");
+        return;
+      }
+      const idToken = await user.getIdToken();
+      await axios.delete(`/api/collections/children/${childId}`, {
+        headers: { Authorization: `Bearer ${idToken}` },
+      });
+
+      setGroups((prev) =>
+        prev.map((g) =>
+          g.id === groupId
+            ? { ...g, children: g.children.filter((c) => c.id !== childId) }
+            : g
+        )
+      );
+
+      // Clear preview if it pointed to a file under this child
+      if (selectedFile && selectedFile.childId === childId)
+        setSelectedFile(null);
+
+      toast.success("Child deleted");
+    } catch (err) {
+      console.error(err);
+      toast.error(err?.response?.data?.error || "Failed to delete child");
+    }
+  }
+
   async function deleteGroup(groupId) {
     const ok = window.confirm(
-      "Delete this group and ALL of its files? This cannot be undone."
+      "Delete this group and ALL of its children and files? This cannot be undone."
     );
     if (!ok) return;
     try {
@@ -226,6 +321,7 @@ export default function ManageResourcesPage() {
 
       setGroups((prev) => prev.filter((g) => g.id !== groupId));
 
+      // Clear preview if it belonged to this group
       if (selectedFile && selectedFile.groupId === groupId)
         setSelectedFile(null);
 
@@ -256,7 +352,6 @@ export default function ManageResourcesPage() {
       </section>
 
       <div className="container mx-auto p-4 grid grid-cols-1 lg:grid-cols-2 gap-4">
-        {/* LEFT: Groups and files */}
         <div className="card bg-base-100 shadow-md">
           <div className="card-body gap-4">
             <div className="flex items-center justify-between gap-2">
@@ -278,7 +373,7 @@ export default function ManageResourcesPage() {
                         id: data._id,
                         name: data.name,
                         order: data.order ?? 0,
-                        files: [],
+                        children: [],
                       },
                     ]);
                   } catch (e) {
@@ -296,9 +391,8 @@ export default function ManageResourcesPage() {
                   <details>
                     <summary className="flex items-center gap-2">
                       <span className="font-medium">{group.name}</span>
-                      <UploadButton
-                        onFiles={(files) => addFilesTo(group.id, files)}
-                      />
+
+                      {/* Delete group button */}
                       <button
                         className="btn btn-ghost btn-xs text-error"
                         onClick={(e) => {
@@ -306,38 +400,114 @@ export default function ManageResourcesPage() {
                           e.stopPropagation();
                           deleteGroup(group.id);
                         }}
-                        title="Delete group"
+                        title="Delete group (cascade)"
                       >
                         ✕
                       </button>
+
+                      <AddChild
+                        onAdd={async (name) => {
+                          try {
+                            const user = getAuth().currentUser;
+                            if (!user)
+                              return toast.error("You must be logged in.");
+                            const idToken = await user.getIdToken();
+                            const { data } = await axios.post(
+                              "/api/collections/children",
+                              { scenarioId, groupId: group.id, name },
+                              {
+                                headers: { Authorization: `Bearer ${idToken}` },
+                              }
+                            );
+                            setGroups((prev) =>
+                              prev.map((g) =>
+                                g.id === group.id
+                                  ? {
+                                      ...g,
+                                      children: [
+                                        ...g.children,
+                                        {
+                                          id: data._id,
+                                          name: data.name,
+                                          order: data.order ?? 0,
+                                          files: [],
+                                        },
+                                      ],
+                                    }
+                                  : g
+                              )
+                            );
+                          } catch (e) {
+                            toast.error(
+                              e?.response?.data?.error ||
+                                "Failed to create child"
+                            );
+                          }
+                        }}
+                      />
                     </summary>
 
-                    {group.files.length === 0 && (
-                      <li className="opacity-60 p-2">No files yet</li>
-                    )}
+                    <ul>
+                      {group.children.length === 0 && (
+                        <li className="opacity-60 p-2">No sub-items yet</li>
+                      )}
 
-                    {group.files.map((f) => (
-                      <li key={f.id} className="flex items-center gap-1">
-                        <button
-                          className="btn btn-ghost btn-xs justify-start"
-                          onClick={() =>
-                            setSelectedFile({
-                              ...f,
-                              groupId: group.id,
-                              groupName: group.name,
-                            })
-                          }
-                        >
-                          {f.name}
-                        </button>
-                        <button
-                          className="btn btn-ghost btn-xs text-error"
-                          onClick={() => removeFile(f.id)}
-                        >
-                          ✕
-                        </button>
-                      </li>
-                    ))}
+                      {group.children.map((child) => (
+                        <li key={child.id}>
+                          <div className="flex items-center justify-between pr-2 gap-2">
+                            <span>{child.name}</span>
+                            <div className="flex items-center gap-1">
+                              {/* Upload to child */}
+                              <UploadButton
+                                onFiles={(files) => addFilesTo(child.id, files)}
+                              />
+
+                              {/* Delete child button */}
+                              <button
+                                className="btn btn-ghost btn-xs text-error"
+                                onClick={() => deleteChild(child.id, group.id)}
+                                title="Delete child (cascade)"
+                              >
+                                ✕
+                              </button>
+                            </div>
+                          </div>
+
+                          {child.files.length > 0 && (
+                            <ul className="ml-2 border-l border-base-300">
+                              {child.files.map((f) => (
+                                <li
+                                  key={f.id}
+                                  className="flex items-center gap-1"
+                                >
+                                  <button
+                                    className="btn btn-ghost btn-xs justify-start"
+                                    onClick={() =>
+                                      setSelectedFile({
+                                        ...f,
+                                        groupId: group.id,
+                                        childId: child.id,
+                                        groupName: group.name,
+                                        childName: child.name,
+                                      })
+                                    }
+                                  >
+                                    {f.name}
+                                  </button>
+                                  <button
+                                    className="btn btn-ghost btn-xs text-error"
+                                    onClick={() => removeFile(f.id)}
+                                    title="Remove file"
+                                  >
+                                    ✕
+                                  </button>
+                                </li>
+                              ))}
+                            </ul>
+                          )}
+                        </li>
+                      ))}
+                    </ul>
                   </details>
                 </li>
               ))}
@@ -345,17 +515,76 @@ export default function ManageResourcesPage() {
           </div>
         </div>
 
-        {/* RIGHT: File list and preview */}
         <div className="card bg-base-100 shadow-md">
-          <div className="divider my-2" />
-          <Preview file={selectedFile} makeDownloadUrl={makeDownloadUrl} />
+          <div className="card-body gap-4">
+            <div className="flex items-center gap-2">
+              <h2 className="card-title flex-1">Files</h2>
+              <input
+                type="text"
+                placeholder="Search files..."
+                className="input input-bordered input-sm w-full max-w-xs"
+                value={filter}
+                onChange={(e) => setFilter(e.target.value)}
+              />
+            </div>
+
+            {filteredFiles.length === 0 ? (
+              <div className="alert">
+                <span>No files yet. Use the + on the left to upload.</span>
+              </div>
+            ) : (
+              <div className="overflow-auto max-h-56">
+                <table className="table table-zebra">
+                  <thead>
+                    <tr>
+                      <th>Name</th>
+                      <th>Bucket</th>
+                      <th className="text-right">Size</th>
+                      <th></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {filteredFiles.map((f) => (
+                      <tr key={f.id}>
+                        <td>
+                          <button
+                            className="link"
+                            onClick={() => setSelectedFile(f)}
+                          >
+                            {f.name}
+                          </button>
+                        </td>
+                        <td className="text-xs opacity-70">
+                          {f.groupName} / {f.childName}
+                        </td>
+                        <td className="text-right text-xs">
+                          {formatBytes(f.size)}
+                        </td>
+                        <td className="text-right">
+                          <button
+                            className="btn btn-ghost btn-xs text-error"
+                            onClick={() => removeFile(f.id)}
+                          >
+                            Delete
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+
+            <div className="divider my-2" />
+
+            <Preview file={selectedFile} makeDownloadUrl={makeDownloadUrl} />
+          </div>
         </div>
       </div>
     </ScreenContainer>
   );
 }
 
-// Helper components
 function UploadButton({ onFiles, multiple = true, className = "" }) {
   const inputRef = useRef(null);
   return (
@@ -388,6 +617,7 @@ function Preview({ file, makeDownloadUrl }) {
 
   useEffect(() => {
     let cancelled = false;
+
     (async () => {
       if (!file) {
         setDownloadUrl(null);
@@ -397,6 +627,7 @@ function Preview({ file, makeDownloadUrl }) {
       const url = await makeDownloadUrl(file.id);
       if (!cancelled) setDownloadUrl(url);
     })();
+
     return () => {
       cancelled = true;
     };
@@ -404,6 +635,7 @@ function Preview({ file, makeDownloadUrl }) {
 
   useEffect(() => {
     let cancelled = false;
+
     (async () => {
       if (!file || !downloadUrl) {
         setText(null);
@@ -423,6 +655,7 @@ function Preview({ file, makeDownloadUrl }) {
         if (!cancelled) setText("Failed to load text preview");
       }
     })();
+
     return () => {
       cancelled = true;
     };
@@ -469,4 +702,12 @@ function Preview({ file, makeDownloadUrl }) {
       )}
     </div>
   );
+}
+
+function formatBytes(bytes) {
+  if (!+bytes) return "0 B";
+  const k = 1024;
+  const sizes = ["B", "KB", "MB", "GB", "TB"];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  return `${(bytes / Math.pow(k, i)).toFixed(2)} ${sizes[i]}`;
 }

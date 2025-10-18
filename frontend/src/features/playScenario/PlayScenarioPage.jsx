@@ -32,9 +32,7 @@ const navigate = async (
     data: { currentScene, addFlags, removeFlags, componentId },
   };
   const res = await axios.request(config);
-  if (res.data.scenes) {
-    res.data.scenes.forEach((scene) => sceneCache.set(scene._id, scene));
-  }
+  res.data.scenes.forEach((scene) => sceneCache.set(scene._id, scene));
   return {
     newSceneId: res.data.active,
     stateVariables: res.data.stateVariables,
@@ -102,7 +100,7 @@ export default function PlayScenarioPage() {
         setStateVariables(stateVariables);
         setStateVersion(newStateVersion);
       }
-      if (!sceneId && newSceneId) {
+      if (!sceneId) {
         setSceneId(newSceneId);
       }
     } catch (e) {
@@ -155,7 +153,6 @@ export default function PlayScenarioPage() {
         setAddFlags={setAddFlags}
         setRemoveFlags={setRemoveFlags}
         buttonPressed={buttonPressed}
-        stateVariables={stateVariables}
       />
       <div className="absolute top-2 right-2 z-30 flex items-center gap-2">
         <button

@@ -28,14 +28,6 @@ const scenarioSchema = new Schema({
       type: Object,
     },
   ],
-  description: {
-    type: String,
-    default: "",
-  },
-  estimatedTime: {
-    type: String,
-    default: "",
-  },
 });
 
 // before removal of a scenario from the database, first remove all its scenes

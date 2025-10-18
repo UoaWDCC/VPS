@@ -3,6 +3,7 @@ import mongoose from "mongoose";
 import multer from "multer";
 import auth from "../../middleware/firebaseAuth.js";
 import CollectionGroup from "../../db/models/CollectionGroup.js";
+import CollectionChild from "../../db/models/CollectionChild.js";
 import StoredFile from "../../db/models/StoredFile.js";
 import {
   uploadBufferToGridFS,
@@ -20,17 +21,14 @@ router.use((req, _res, next) => {
   next();
 });
 
-/**
- * @route GET /api/files/download/:fileId
- * @desc Stream a file directly from GridFS by ID
- */
 router.get("/download/:fileId", async (req, res) => {
   try {
     const { fileId } = req.params;
     const meta = await StoredFile.findById(fileId).lean();
     if (!meta) return res.status(404).json({ error: "File not found" });
 
-    res.setHeader("Cache-Control", "no-store"); // avoid caching auth-protected content
+    // Optional: avoid caching auth-related redirects/stale tokens.
+    res.setHeader("Cache-Control", "no-store");
 
     return streamGridFsToResponse({
       fileId: meta.gridFsId,
@@ -44,10 +42,9 @@ router.get("/download/:fileId", async (req, res) => {
   }
 });
 
-// 🔒 All routes below require Firebase auth
+// Everything below requires auth
 router.use(auth);
 
-// Upload configuration
 const MAX_FILE_SIZE_MB = parseInt(process.env.MAX_FILE_SIZE_MB || "50", 10);
 const ALLOWED_MIME_SET = new Set(
   (
@@ -58,7 +55,7 @@ const ALLOWED_MIME_SET = new Set(
     .map((s) => s.trim())
 );
 
-// Multer (in-memory storage → GridFS)
+// Multer memory storage; we write bytes to GridFS
 const upload = multer({
   storage: multer.memoryStorage(),
   limits: { fileSize: MAX_FILE_SIZE_MB * 1024 * 1024 },
@@ -70,28 +67,32 @@ const upload = multer({
   },
 });
 
-/**
- * Validate that group belongs to scenario
- */
-async function assertGroupInScenario({ scenarioId, groupId }) {
-  const group = await CollectionGroup.findById(groupId);
+async function assertHierarchy({ scenarioId, groupId, childId }) {
+  const [group, child] = await Promise.all([
+    CollectionGroup.findById(groupId),
+    CollectionChild.findById(childId),
+  ]);
   if (!group) throw new Error("Group not found");
   if (String(group.scenarioId) !== String(scenarioId)) {
     throw new Error("groupId does not belong to scenarioId");
   }
+  if (!child) throw new Error("Child not found");
+  if (
+    String(child.groupId) !== String(groupId) ||
+    String(child.scenarioId) !== String(scenarioId)
+  ) {
+    throw new Error("childId does not belong to groupId/scenarioId");
+  }
 }
 
-/**
- * @route POST /api/files/upload
- * @desc Upload one or more files to a group within a scenario
- */
+// POST /api/files/upload (multipart)
 router.post("/upload", upload.array("files"), async (req, res) => {
   try {
-    const { scenarioId, groupId } = req.body;
-    if (!scenarioId || !groupId) {
+    const { scenarioId, groupId, childId } = req.body;
+    if (!scenarioId || !groupId || !childId) {
       return res
         .status(400)
-        .json({ error: "scenarioId and groupId are required" });
+        .json({ error: "scenarioId, groupId, childId are required" });
     }
     if (!req.files || req.files.length === 0) {
       return res.status(400).json({ error: "No files uploaded" });
@@ -99,10 +100,12 @@ router.post("/upload", upload.array("files"), async (req, res) => {
 
     const scenarioObjId = new mongoose.Types.ObjectId(scenarioId);
     const groupObjId = new mongoose.Types.ObjectId(groupId);
+    const childObjId = new mongoose.Types.ObjectId(childId);
 
-    await assertGroupInScenario({
+    await assertHierarchy({
       scenarioId: scenarioObjId,
       groupId: groupObjId,
+      childId: childObjId,
     });
 
     const uploaderUid = req.user?.uid || "unknown";
@@ -113,17 +116,17 @@ router.post("/upload", upload.array("files"), async (req, res) => {
         filename: f.originalname,
         contentType: f.mimetype,
         buffer: f.buffer,
-        metadata: { scenarioId, groupId, uploaderUid },
+        metadata: { scenarioId, groupId, childId, uploaderUid },
       });
 
       const doc = await StoredFile.create({
         scenarioId: scenarioObjId,
         groupId: groupObjId,
+        childId: childObjId,
         name: f.originalname,
         size: f.size,
         type: f.mimetype,
         gridFsId,
-        uploaderUid,
       });
 
       const ret = doc.toObject();
@@ -145,10 +148,7 @@ router.post("/upload", upload.array("files"), async (req, res) => {
   }
 });
 
-/**
- * @route DELETE /api/files/:fileId
- * @desc Delete a stored file and its GridFS data
- */
+// DELETE /api/files/:fileId
 router.delete("/:fileId", async (req, res) => {
   try {
     const { fileId } = req.params;

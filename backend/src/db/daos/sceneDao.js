@@ -64,23 +64,22 @@ const updateScene = async (sceneId, updatedScene) => {
   // makes sure when we update components is not null
   if (updatedScene.components) {
     const prevDbScene = await Scene.findById(sceneId);
-
-    // if previous firebase media component no longer exists, try to delete file from firebase storage
+    // if previous firebase image component no longer exists, try to delete file from firebase storage
     prevDbScene.components.forEach((c) => {
-      if (c.type === "image" || c.type === "audio") {
+      if (c.type === "FIREBASEIMAGE" || c.type === "FIREBASEAUDIO") {
         // checks for non-existance in new components array
         if (!updatedScene.components.some((newC) => newC.id === c.id)) {
-          tryDeleteFile(c.href ?? c.url);
+          tryDeleteFile(c.url);
         }
       }
     });
-
     const dbScene = await Scene.findOneAndUpdate(
       { _id: sceneId },
       updatedScene,
-      { new: true }
+      {
+        new: true,
+      }
     );
-
     return dbScene;
   }
 
@@ -98,7 +97,6 @@ const updateScene = async (sceneId, updatedScene) => {
   dbScene = await Scene.updateOne({ _id: sceneId }, updatedScene, {
     new: true,
   });
-  console.log(dbScene);
   return dbScene;
 };
 
@@ -138,7 +136,7 @@ const duplicateScene = async (scenarioId, sceneId) => {
   await dbScene.save();
 
   dbScene.components.forEach((c) => {
-    if (c.type === "image" || c.type === "audio") {
+    if (c.type === "FIREBASEIMAGE" || c.type === "FIREBASEAUDIO") {
       updateFileMetadata(c.url);
     }
   });

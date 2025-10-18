@@ -1,5 +1,14 @@
 import { CircularProgress, Grid, Typography } from "@material-ui/core";
 
+/**
+ * Component used to show a loading screen
+ *
+ * @component
+ * @example
+ * if (currentSceneId === null) {
+    return <LoadingPage text="Loading contents..." />;
+  }
+ */
 function LoadingPage({ text }) {
   return (
     <Grid

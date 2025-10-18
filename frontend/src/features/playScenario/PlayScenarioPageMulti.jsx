@@ -36,9 +36,7 @@ const navigate = async (
     data: { currentScene, addFlags, removeFlags, componentId },
   };
   const res = await axios.request(config);
-  if (res.data.scenes) {
-    res.data.scenes.forEach((scene) => sceneCache.set(scene._id, scene));
-  }
+  res.data.scenes.forEach((scene) => sceneCache.set(scene._id, scene));
   return {
     newSceneId: res.data.active,
     stateVariables: res.data.stateVariables,
@@ -130,7 +128,7 @@ export default function PlayScenarioPageMulti({ group }) {
         setStateVariables(stateVariables);
         setStateVersion(newStateVersion);
       }
-      if (!sceneId && newSceneId) {
+      if (!sceneId) {
         setSceneId(newSceneId);
       }
     } catch (e) {
@@ -191,7 +189,6 @@ export default function PlayScenarioPageMulti({ group }) {
         setAddFlags={setAddFlags}
         setRemoveFlags={setRemoveFlags}
         buttonPressed={buttonPressed}
-        stateVariables={stateVariables}
       />
       <PlayPageSideButton
         setNoteOpen={setNoteOpen}

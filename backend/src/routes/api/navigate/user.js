@@ -13,7 +13,7 @@ import { getScenarioFirstScene, getSimpleScene } from "./group.js";
 const getConnectedScenes = async (sceneID, active = true) => {
   const scene = await getSimpleScene(sceneID);
   const connectedIds = scene.components
-    .filter((c) => c.clickable)
+    .filter((c) => c.type === "BUTTON")
     .map((b) => b.nextScene)
     .filter(Boolean);
   const connected = await Scene.find(
@@ -103,20 +103,12 @@ export const userNavigate = async (req) => {
   const component = await getComponent(currentScene, componentId);
 
   // if the button does not lead to another scene or component does not exist, stay in the current scene
-  let scenes = null;
-  if (component?.nextScene && component.nextScene !== currentScene) {
-    const nextScene = component.nextScene;
-    [, scenes] = await Promise.all([
-      addSceneToPath(user._id, scenarioId, currentScene, nextScene),
-      getConnectedScenes(nextScene, false),
-    ]);
-  }
-
-  const [stateVariables, stateVersion] = await updateStateVariables(
-    user,
-    scenarioId,
-    component
-  );
+  const nextScene = component?.nextScene || currentScene;
+  const [, scenes, [stateVariables, stateVersion]] = await Promise.all([
+    addSceneToPath(user._id, scenarioId, currentScene, nextScene),
+    getConnectedScenes(nextScene, false),
+    updateStateVariables(user, scenarioId, component),
+  ]);
 
   return {
     status: STATUS.OK,
