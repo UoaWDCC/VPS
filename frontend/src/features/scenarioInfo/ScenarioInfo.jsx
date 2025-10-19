@@ -5,6 +5,7 @@ import Thumbnail from "../authoring/components/Thumbnail";
 import ScenarioContext from "../../context/ScenarioContext";
 import AuthenticationContext from "../../context/AuthenticationContext";
 import { usePatch } from "../../hooks/crudHooks";
+import FabMenu from "../../components/FabMenu";
 
 function ScenarioInfo() {
   const [selectedScenario, setSelectedScenario] = useState(null);
@@ -117,10 +118,7 @@ function ScenarioInfo() {
   };
 
   return (
-    <div
-      className="bg-base-100 text-base-content min-h-screen relative overflow-x-hidden"
-      data-theme="vps-light"
-    >
+    <div className="bg-base-100 text-base-content min-h-screen relative overflow-x-hidden">
       {/* Back Button */}
       <button
         className="absolute z-50 bg-transparent border-none text-primary cursor-pointer hover:text-base-content transition-colors px-8 py-6 top-0 left-0 font-dm text-s"
@@ -286,10 +284,7 @@ function ScenarioInfo() {
       {/* Edit Details Modal */}
       {showEditModal && (
         <dialog open className="modal modal-open fixed inset-0 z-[9999]">
-          <div
-            className="modal-box bg-base-100 border border-primary/20 w-[600px] max-w-[90vw] p-8"
-            data-theme="vps-dark"
-          >
+          <div className="modal-box bg-base-100 border border-primary/20 w-[600px] max-w-[90vw] p-8">
             <h3 className="font-bold text-2xl mb-6 text-base-content font-dm">
               Edit Scenario Details
             </h3>
@@ -386,6 +381,7 @@ function ScenarioInfo() {
           </form>
         </dialog>
       )}
+      <FabMenu />
     </div>
   );
 }

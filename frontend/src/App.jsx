@@ -1,4 +1,5 @@
 import { ThemeProvider } from "@material-ui/core";
+import { useEffect } from "react";
 import { BrowserRouter, Route, Switch } from "react-router-dom";
 import AuthenticationContextProvider from "./context/AuthenticationContextProvider";
 import ScenarioContextProvider from "./context/ScenarioContextProvider";
@@ -15,6 +16,7 @@ import ScenarioInfo from "./features/scenarioInfo/ScenarioInfo";
 import PlayPage from "./features/play/PlayPage";
 
 import Dashboard from "./features/dashboard/Dashboard";
+import AboutUsPage from "./features/aboutUs/AboutUsPage";
 
 import { ScenePage } from "./features/sceneSelection/SceneSelectionPage";
 import theme from "./theme/App.theme";
@@ -30,6 +32,16 @@ const TOAST_OFFSET = 25;
 const queryClient = new QueryClient();
 
 export default function App() {
+  useEffect(() => {
+    const savedTheme = localStorage.getItem("vps-theme");
+    if (savedTheme === "vps-light" || savedTheme === "vps-dark") {
+      document.documentElement.setAttribute("data-theme", savedTheme);
+    } else {
+      document.documentElement.setAttribute("data-theme", "vps-dark");
+      localStorage.setItem("vps-theme", "vps-dark");
+    }
+  }, []);
+
   return (
     <>
       {/* Toaster container */}
@@ -79,6 +91,12 @@ export default function App() {
                   <PlayScenarioResolver />
                 </ProtectedRoute>
 
+                <ProtectedRoute exact path="/">
+                  <ScenarioContextProvider>
+                    <ScenarioSelectionPage />
+                  </ScenarioContextProvider>
+                </ProtectedRoute>
+
                 <ProtectedRoute path="/dashboard/:scenarioId">
                   <ScenarioContextProvider>
                     <SceneContextProvider>
@@ -86,6 +104,8 @@ export default function App() {
                     </SceneContextProvider>
                   </ScenarioContextProvider>
                 </ProtectedRoute>
+
+                <Route path="/aboutus" component={AboutUsPage} />
 
                 <ProtectedRoute path="/play-page">
                   <ScenarioContextProvider>
