@@ -167,76 +167,79 @@ export default function ResourcesPanel({ scenarioId, open, onClose }) {
               <XIcon size={16} />
             </button>
           </div>
-
-          {/* Search */}
-          <div className="p-3 border-b border-base-200">
-            <div className="flex gap-2 mb-2">
-              <input
-                type="text"
-                className="input input-bordered input-sm flex-1"
-                placeholder="Search files or group name"
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-              />
-              <button
-                className="btn btn-ghost btn-sm"
-                onClick={expandAll}
-                title="Expand all"
-                disabled={loading || !tree.length}
-              >
-                ⬇
-              </button>
-              <button
-                className="btn btn-ghost btn-sm"
-                onClick={collapseAll}
-                title="Collapse all"
-                disabled={loading || !tree.length}
-              >
-                ⬆
-              </button>
+          <div className="u-container w-full">
+            <div className="container mx-auto">
+              {/* Search */}
+              <div className="p-3 border-b border-base-200">
+                <div className="flex gap-2 mb-2">
+                  <input
+                    type="text"
+                    className="input input-bordered input-sm flex-1"
+                    placeholder="Search files or group name"
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                  />
+                  <button
+                    className="btn btn-ghost btn-sm"
+                    onClick={expandAll}
+                    title="Expand all"
+                    disabled={loading || !tree.length}
+                  >
+                    ⬇
+                  </button>
+                  <button
+                    className="btn btn-ghost btn-sm"
+                    onClick={collapseAll}
+                    title="Collapse all"
+                    disabled={loading || !tree.length}
+                  >
+                    ⬆
+                  </button>
+                </div>
+              </div>
+              <div className="p-3 h-[calc(100%-112px)] overflow-hidden">
+                {loading ? (
+                  <SkeletonBody />
+                ) : error ? (
+                  <div className="h-full flex flex-col items-center justify-center gap-3">
+                    <div className="alert alert-error max-w-md">
+                      <span>{error}</span>
+                    </div>
+                    <button className="btn btn-sm" onClick={handleRetry}>
+                      Retry
+                    </button>
+                  </div>
+                ) : (filteredTree?.length ?? 0) === 0 ? (
+                  <div className="h-full flex items-center justify-center">
+                    <div className="text-center opacity-70">
+                      <p>No resources available for this scenario.</p>
+                      <p className="text-sm">
+                        Ask the author to upload files in the authoring UI.
+                      </p>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 h-full">
+                    <div className="overflow-auto border border-base-200 rounded-lg">
+                      <ResourceTree
+                        tree={filteredTree}
+                        search={search}
+                        onSelectFile={handleSelectFile}
+                        selectedFileId={selectedFileId}
+                        openGroups={openGroups}
+                        toggleGroup={toggleGroup}
+                      />
+                    </div>
+                    <div className="overflow-auto border border-base-200 rounded-lg">
+                      <ResourcePreview
+                        file={selectedFile}
+                        getDownloadUrl={getDownloadUrl}
+                      />
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
-          </div>
-          <div className="p-3 h-[calc(100%-112px)] overflow-hidden">
-            {loading ? (
-              <SkeletonBody />
-            ) : error ? (
-              <div className="h-full flex flex-col items-center justify-center gap-3">
-                <div className="alert alert-error max-w-md">
-                  <span>{error}</span>
-                </div>
-                <button className="btn btn-sm" onClick={handleRetry}>
-                  Retry
-                </button>
-              </div>
-            ) : (filteredTree?.length ?? 0) === 0 ? (
-              <div className="h-full flex items-center justify-center">
-                <div className="text-center opacity-70">
-                  <p>No resources available for this scenario.</p>
-                  <p className="text-sm">
-                    Ask the author to upload files in the authoring UI.
-                  </p>
-                </div>
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 h-full">
-                <div className="overflow-auto border border-base-200 rounded-lg">
-                  <ResourceTree
-                    tree={filteredTree}
-                    search={search}
-                    onSelectFile={handleSelectFile}
-                    selectedFileId={selectedFileId}
-                    openGroups={openGroups}
-                    toggleGroup={toggleGroup}
-                  />
-                </div>
-                <div className="overflow-auto border border-base-200 rounded-lg">
-                  <ResourcePreview
-                    file={selectedFile}
-                    getDownloadUrl={getDownloadUrl}
-                  />
-                </div>
-              </div>
-            )}
           </div>
         </div>
       </div>
