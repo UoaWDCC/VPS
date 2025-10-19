@@ -1,16 +1,6 @@
 import { Visibility } from "@material-ui/icons";
-import Table from "@material-ui/core/Table";
-import TableBody from "@material-ui/core/TableBody";
-import TableCell from "@material-ui/core/TableCell";
-import TableContainer from "@material-ui/core/TableContainer";
-import TableHead from "@material-ui/core/TableHead";
-import TableRow from "@material-ui/core/TableRow";
-import { Paper, Typography } from "@material-ui/core";
-import TableFooter from "@mui/material/TableFooter";
-import TablePagination from "@mui/material/TablePagination";
 import { useMemo, useState } from "react";
 import TablePaginationActions from "./TablePaginationAction";
-import TableSortLabel from "@mui/material/TableSortLabel";
 import getComparator from "../../utils/TableHelper";
 import CustomSortHeader from "./CustomSortHeader";
 import CustomPagination from "./CustomPagination";
@@ -65,8 +55,8 @@ const DashGroupTable = ({ groupInfo, rowClick }) => {
   );
 
   return (
-    <div className="overflow-x-auto rounded-box border border-base-content/5 w-full">
-      <table className="table table-zebra table-fixed">
+    <div className="overflow-x-auto rounded-box border border-base-content/15 w-full">
+      <table className="table table-zebra ">
         <thead>
             {mode == "groups" ? (
               <tr>

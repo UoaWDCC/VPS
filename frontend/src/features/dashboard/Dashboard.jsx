@@ -14,6 +14,9 @@ import ScenarioGraph from "./components/ScenarioGraph";
 import ProtectedRoute from "../../firebase/ProtectedRoute";
 import ViewGroup from "./components/ViewGroup";
 import LoadingPage from "../status/LoadingPage";
+import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
+import AccessTable from "./components/table/AccessTable";
+
 /**
  * Could maybe add some info about the scenario? Who created what time, last edited, thumbnail of the scenario and an overlay edit button * which directs you to the edit page?
  *
@@ -27,7 +30,6 @@ export default function Dashboard() {
   const [scenarioGroupInfo, setScenarioGroupInfo] = useState([]);
   const [scenario, setCurrentScenario] = useState({});
   const [scenes, setScenes] = useState([]);
-  const [accessList, setAccessList] = useState(null);
   const [accessInfo, setAccessInfo] = useState(null)
   const [allowed, setAllowed] = useState(false);
 
@@ -60,16 +62,14 @@ export default function Dashboard() {
     
   }, [accessLoading, accessError, accessInfo, accessRes])
 
-  useGet(`api/access/users/${scenarioId}`, setAccessList, true, !allowed);
   useGet(`api/dashboard/scenarios/${scenarioId}`, setCurrentScenario, true, !allowed);
   useGet(`api/dashboard/scenarios/${scenarioId}/scenes`, setScenes, true, !allowed);
-  // console.log(scenario)
-  // useGet(`api/access/dashboard/${scenarioId}`, setAccessList);
+ 
   const { isLoading } = useGet(
     `/api/dashboard/scenarios/${scenarioId}/groups`,
     setScenarioGroupInfo, true, !allowed
   );
-  // console.log(accessList)
+
   // Check what page we are on
   const matchViewGroup = useRouteMatch(`${path}/view-group/:groupId`);
   const backURL = matchViewGroup ? url : "/";
@@ -153,16 +153,21 @@ export default function Dashboard() {
       </div>
     );
   };
-
+  function revokeUserAccess(uid) {
+    console.log("Access Revoked: " + uid)
+  }
   // Cheap way to block the user from seeing the dashboard page before permissions are fully checked.
   // Could be a better way?
  if (allowed == false) return <LoadingPage text="Checking permissions..." />;
+
+
   return (
     <ScreenContainer vertical>
       <DashTopBar back={backURL}>
         {/* Need to change the help button to maybe be able to pass something down like have a file of help messages which can be accessed and passed down to be page specific */}
         <HelpButton />
       </DashTopBar>
+      <AccessTable/>
       <div className="h-full px-10 py-7 overflow-y-scroll ">
         <h1 className="text-xl font-bold">
           {heading ? heading : <span className="invisible">placeholder</span>}
@@ -176,6 +181,31 @@ export default function Dashboard() {
                   className={"lg:stats-horizontal mb-10"}
                   groupData={scenarioGroupInfo}
                 />
+                <h1 className="text-xl">Permissions/Access</h1>
+                <div className="overflow-x-auto rounded-box border border-base-content/15 w-full">
+                <div>
+                  <input type="text" />
+                </div>
+                <table className="table table-zebra">
+                  <thead>
+                  <tr>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Date Added</th>
+                    <th></th>
+                  </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td>John Smith</td>
+                      <td>Johnsmith@gmail.com</td>
+                      <td>18/10/2025</td>
+                      <td><DeleteForeverIcon className="hover:cursor-pointer hover:text-red-400" onClick={() => revokeUserAccess(123)}/></td>
+                    </tr>
+                  </tbody>
+                </table>
+
+                </div>
                 <h1 className="text-xl">Groups Table</h1>
                 {!isLoading && (
                   <DashGroupTable

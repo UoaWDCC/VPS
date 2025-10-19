@@ -19,10 +19,10 @@ export default async function dashboardAuth(req, res, next) {
             return res.sendStatus(HTTP_NOT_FOUND);
         }
 
-        const accessList = await getAccessList(sId).catch(() => null);
+        const accessList = await getAccessList(sId);
         const scenario = await retrieveScenario(sId).catch(() => null);
-
-        // If neither exists return 404
+      
+        // If both dont exists return 404
         if(!accessList && !scenario) {
             res.sendStatus(HTTP_NOT_FOUND);
             return;
@@ -30,8 +30,9 @@ export default async function dashboardAuth(req, res, next) {
         let isOnList = false;
         let isOwner = false;
         if(accessList) {
-            isOnList = (accessList?.users).includes(req.body.uid);
+            isOnList = (accessList?.users).has(req.body.uid) || accessList.ownerId == req.body.uid;
         } else {
+            // (Legacy Support) fallback for no accesslist
             isOwner = scenario?.uid == req.body.uid;
         }
 
