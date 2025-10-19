@@ -1,17 +1,18 @@
 import React, { useRef, useState, useEffect } from "react";
 import { getAuth } from "firebase/auth";
 import axios from "axios";
-import Papa from "papaparse";
+// Papa (CSV parsing) removed from top strip — keep parser usage local to CSV upload controls where needed
 import toast from "react-hot-toast";
 import { useParams } from "react-router-dom";
 import ScreenContainer from "../../components/ScreenContainer/ScreenContainer";
-import TopBar from "../../components/TopBar/TopBar";
+import { useHistory } from "react-router-dom";
+import { ArrowLeftIcon, PlayIcon, UsersIcon } from "lucide-react";
 import AddGroup from "./components/AddGroup";
 
 export default function ManageResourcesPage() {
   const { scenarioId } = useParams();
+  const history = useHistory();
 
-  const csvInputRef = useRef(null);
   const [setResources] = useState([]);
 
   // Fetch resources (CSV uploads)
@@ -45,39 +46,17 @@ export default function ManageResourcesPage() {
     };
   }, [scenarioId]);
 
-  const triggerCsvUpload = () => csvInputRef.current?.click();
+  function goBack() {
+    history.push(`/scenario/${scenarioId}`);
+  }
 
-  const handleCsvUpload = (event) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
-    Papa.parse(file, {
-      header: true,
-      skipEmptyLines: true,
-      complete: async ({ data }) => {
-        try {
-          const user = getAuth().currentUser;
-          if (!user) {
-            toast.error("You must be logged in to upload.");
-            return;
-          }
-          const idToken = await user.getIdToken();
-          const res = await axios.post(`/api/resources/${scenarioId}`, data, {
-            headers: { Authorization: `Bearer ${idToken}` },
-          });
-          toast.success(`Successfully uploaded ${data.length} resources!`);
-          setResources((prev) => [
-            ...prev,
-            ...(Array.isArray(res.data) ? res.data : []),
-          ]);
-        } catch (error) {
-          const msg = error?.response?.data || error.message || "Unknown error";
-          toast.error(`Error uploading: ${msg}`);
-        } finally {
-          event.target.value = "";
-        }
-      },
-    });
-  };
+  function goToGroups() {
+    history.push(`/scenario/${scenarioId}/manage-groups`);
+  }
+
+  function playScenario() {
+    window.open(`/play/${scenarioId}`, "_blank");
+  }
 
   // Groups (each with files)
   const [groups, setGroups] = useState([]);
@@ -238,117 +217,126 @@ export default function ManageResourcesPage() {
 
   return (
     <ScreenContainer vertical>
-      <TopBar back={`/scenario/${scenarioId}`}>
-        <input
-          type="file"
-          ref={csvInputRef}
-          accept=".csv"
-          className="hidden"
-          onChange={handleCsvUpload}
-        />
-        <button className="btn vps w-[100px]" onClick={triggerCsvUpload}>
-          Upload CSV
-        </button>
-      </TopBar>
+      <div className="font-ibm flex flex-col h-screen w-screen overflow-hidden gap-2xl">
+        <div className="flex pt-l px-l">
+          <button onClick={goBack} className="btn btn-phantom text-m">
+            <ArrowLeftIcon size={20} />
+            Back
+          </button>
 
-      <section className="p-4">
-        <h2 className="text-xl font-semibold mb-2">Uploaded Resources</h2>
-      </section>
+          <button
+            onClick={goToGroups}
+            className="btn btn-phantom text-m ml-auto"
+          >
+            <UsersIcon size={20} />
+            Groups
+          </button>
 
-      <div className="container mx-auto p-4 grid grid-cols-1 lg:grid-cols-2 gap-4">
-        {/* LEFT: Groups and files */}
-        <div className="card bg-base-100 shadow-md">
-          <div className="card-body gap-4">
-            <div className="flex items-center justify-between gap-2">
-              <h2 className="card-title">Collections</h2>
-              <AddGroup
-                onAdd={async (name) => {
-                  try {
-                    const user = getAuth().currentUser;
-                    if (!user) return toast.error("You must be logged in.");
-                    const idToken = await user.getIdToken();
-                    const { data } = await axios.post(
-                      "/api/collections/groups",
-                      { scenarioId, name },
-                      { headers: { Authorization: `Bearer ${idToken}` } }
-                    );
-                    setGroups((g) => [
-                      ...g,
-                      {
-                        id: data._id,
-                        name: data.name,
-                        order: data.order ?? 0,
-                        files: [],
-                      },
-                    ]);
-                  } catch (e) {
-                    toast.error(
-                      e?.response?.data?.error || "Failed to create group"
-                    );
-                  }
-                }}
-              />
-            </div>
-
-            <ul className="menu bg-base-100 rounded-box w-full">
-              {groups.map((group) => (
-                <li key={group.id}>
-                  <details>
-                    <summary className="flex items-center gap-2">
-                      <span className="font-medium">{group.name}</span>
-                      <UploadButton
-                        onFiles={(files) => addFilesTo(group.id, files)}
-                      />
-                      <button
-                        className="btn btn-ghost btn-xs text-error"
-                        onClick={(e) => {
-                          e.preventDefault();
-                          e.stopPropagation();
-                          deleteGroup(group.id);
-                        }}
-                        title="Delete group"
-                      >
-                        ✕
-                      </button>
-                    </summary>
-
-                    {group.files.length === 0 && (
-                      <li className="opacity-60 p-2">No files yet</li>
-                    )}
-
-                    {group.files.map((f) => (
-                      <li key={f.id} className="flex items-center gap-1">
-                        <button
-                          className="btn btn-ghost btn-xs justify-start"
-                          onClick={() =>
-                            setSelectedFile({
-                              ...f,
-                              groupId: group.id,
-                              groupName: group.name,
-                            })
-                          }
-                        >
-                          {f.name}
-                        </button>
-                        <button
-                          className="btn btn-ghost btn-xs text-error"
-                          onClick={() => removeFile(f.id)}
-                        >
-                          ✕
-                        </button>
-                      </li>
-                    ))}
-                  </details>
-                </li>
-              ))}
-            </ul>
-          </div>
+          <button onClick={playScenario} className="btn btn-phantom text-m">
+            <PlayIcon size={20} />
+            Play
+          </button>
         </div>
 
-        {/* RIGHT: File list and preview */}
-        <div className="card bg-base-100 shadow-md">
-          <div className="divider my-2" />
-          <Preview file={selectedFile} makeDownloadUrl={makeDownloadUrl} />
+        <div className="u-container w-full">
+          <h1 className="text-xl mb-l">Uploaded Resources</h1>
+
+          <div className="container mx-auto p-4 grid grid-cols-1 lg:grid-cols-2 gap-4">
+            {/* LEFT: Groups and files */}
+            <div className="card bg-base-100 shadow-md">
+              <div className="card-body gap-4">
+                <div className="flex items-center justify-between gap-2">
+                  <h2 className="card-title">Collections</h2>
+                  <AddGroup
+                    onAdd={async (name) => {
+                      try {
+                        const user = getAuth().currentUser;
+                        if (!user) return toast.error("You must be logged in.");
+                        const idToken = await user.getIdToken();
+                        const { data } = await axios.post(
+                          "/api/collections/groups",
+                          { scenarioId, name },
+                          { headers: { Authorization: `Bearer ${idToken}` } }
+                        );
+                        setGroups((g) => [
+                          ...g,
+                          {
+                            id: data._id,
+                            name: data.name,
+                            order: data.order ?? 0,
+                            files: [],
+                          },
+                        ]);
+                      } catch (e) {
+                        toast.error(
+                          e?.response?.data?.error || "Failed to create group"
+                        );
+                      }
+                    }}
+                  />
+                </div>
+
+                <ul className="menu bg-base-100 rounded-box w-full">
+                  {groups.map((group) => (
+                    <li key={group.id}>
+                      <details>
+                        <summary className="flex items-center gap-2">
+                          <span className="font-medium">{group.name}</span>
+                          <UploadButton
+                            onFiles={(files) => addFilesTo(group.id, files)}
+                          />
+                          <button
+                            className="btn btn-ghost btn-xs text-error"
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              deleteGroup(group.id);
+                            }}
+                            title="Delete group"
+                          >
+                            ✕
+                          </button>
+                        </summary>
+
+                        {group.files.length === 0 && (
+                          <li className="opacity-60 p-2">No files yet</li>
+                        )}
+
+                        {group.files.map((f) => (
+                          <li key={f.id} className="flex items-center gap-1">
+                            <button
+                              className="btn btn-ghost btn-xs justify-start"
+                              onClick={() =>
+                                setSelectedFile({
+                                  ...f,
+                                  groupId: group.id,
+                                  groupName: group.name,
+                                })
+                              }
+                            >
+                              {f.name}
+                            </button>
+                            <button
+                              className="btn btn-ghost btn-xs text-error"
+                              onClick={() => removeFile(f.id)}
+                            >
+                              ✕
+                            </button>
+                          </li>
+                        ))}
+                      </details>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+
+            {/* RIGHT: File list and preview */}
+            <div className="card bg-base-100 shadow-md">
+              <div className="divider my-2" />
+              <Preview file={selectedFile} makeDownloadUrl={makeDownloadUrl} />
+            </div>
+          </div>
         </div>
       </div>
     </ScreenContainer>
