@@ -428,6 +428,7 @@ function Preview({ file, makeDownloadUrl }) {
     );
 
   const isImage = file.type?.startsWith("image/");
+  const isPDF = file.type === "application/pdf";
 
   return (
     <div className="space-y-3">
@@ -446,6 +447,14 @@ function Preview({ file, makeDownloadUrl }) {
           alt={file.name}
           className="rounded-xl max-h-80 object-contain"
         />
+      ) : isPDF && downloadUrl ? (
+        <div className="w-full h-full">
+          <iframe
+            src={downloadUrl}
+            title={file.name}
+            className="w-full h-full min-h-[60vh] rounded-xl border"
+          />
+        </div>
       ) : text != null ? (
         <pre className="mockup-code whitespace-pre-wrap text-xs max-h-80 overflow-auto p-4">
           {text}
