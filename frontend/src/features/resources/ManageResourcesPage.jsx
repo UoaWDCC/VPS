@@ -6,7 +6,13 @@ import toast from "react-hot-toast";
 import { useParams } from "react-router-dom";
 import ScreenContainer from "../../components/ScreenContainer/ScreenContainer";
 import { useHistory } from "react-router-dom";
-import { ArrowLeftIcon, PlayIcon, UsersIcon } from "lucide-react";
+import {
+  ArrowLeftIcon,
+  PlayIcon,
+  UsersIcon,
+  PlusIcon,
+  XIcon,
+} from "lucide-react";
 import AddGroup from "./components/AddGroup";
 
 export default function ManageResourcesPage() {
@@ -281,21 +287,25 @@ export default function ManageResourcesPage() {
                     <li key={group.id}>
                       <details>
                         <summary className="flex items-center gap-2">
-                          <span className="font-medium">{group.name}</span>
-                          <UploadButton
-                            onFiles={(files) => addFilesTo(group.id, files)}
-                          />
-                          <button
-                            className="btn btn-ghost btn-xs text-error"
-                            onClick={(e) => {
-                              e.preventDefault();
-                              e.stopPropagation();
-                              deleteGroup(group.id);
-                            }}
-                            title="Delete group"
-                          >
-                            ✕
-                          </button>
+                          <span className="font-medium min-w-0 truncate flex-1">
+                            {group.name}
+                          </span>
+                          <div className="flex items-center gap-2 ml-auto">
+                            <UploadButton
+                              onFiles={(files) => addFilesTo(group.id, files)}
+                            />
+                            <button
+                              className="btn btn-ghost btn-xs text-error"
+                              onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                deleteGroup(group.id);
+                              }}
+                              title="Delete group"
+                            >
+                              <XIcon size={14} />
+                            </button>
+                          </div>
                         </summary>
 
                         {group.files.length === 0 && (
@@ -369,7 +379,7 @@ function UploadButton({ onFiles, multiple = true, className = "" }) {
         onClick={() => inputRef.current?.click()}
         title="Add files"
       >
-        ＋
+        <PlusIcon size={14} />
       </button>
     </>
   );

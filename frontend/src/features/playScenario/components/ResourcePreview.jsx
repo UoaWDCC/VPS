@@ -68,13 +68,13 @@ export default function ResourcePreview({ file, getDownloadUrl }) {
     file.type?.startsWith("text/") || /json|xml|csv/.test(file.type || "");
 
   return (
-    <div className="p-3 h-full flex flex-col gap-3">
+    <div className="p-3 h-full flex flex-col gap-3 font-ibm">
       <div className="flex items-start justify-between gap-2">
         <div>
           <div className="font-semibold truncate" title={file.name}>
             {file.name}
           </div>
-          <div className="text-xs opacity-70">
+          <div className="text-xs opacity-70 text-primary">
             {file.groupName} / {file.childName}
           </div>
         </div>

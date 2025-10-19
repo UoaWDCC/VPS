@@ -151,11 +151,13 @@ export default function ResourcesPanel({ scenarioId, open, onClose }) {
       >
         <div
           ref={dialogRef}
-          className="shadow-2xl w-full h-full overflow-hidden"
+          className="shadow-2xl w-full h-full overflow-hidden font-ibm"
           onClick={stopPropagation}
         >
           <div className="sticky top-0 z-10 bg-base-100 border-b border-base-300 p-3 flex items-center gap-2">
-            <h2 className="text-lg font-semibold flex-1">Resources</h2>
+            <h2 className="text-lg font-semibold flex-1 font-dm text-primary">
+              Resources
+            </h2>
             <button
               className="btn btn-ghost btn-sm"
               onClick={onClose}
