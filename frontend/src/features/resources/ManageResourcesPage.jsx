@@ -303,25 +303,30 @@ export default function ManageResourcesPage() {
                         )}
 
                         {group.files.map((f) => (
-                          <li key={f.id} className="flex items-center gap-1">
-                            <button
-                              className="btn btn-ghost btn-xs justify-start"
-                              onClick={() =>
-                                setSelectedFile({
-                                  ...f,
-                                  groupId: group.id,
-                                  groupName: group.name,
-                                })
-                              }
-                            >
-                              {f.name}
-                            </button>
-                            <button
-                              className="btn btn-ghost btn-xs text-error"
-                              onClick={() => removeFile(f.id)}
-                            >
-                              ✕
-                            </button>
+                          <li key={f.id}>
+                            <div className="flex items-center justify-between w-full">
+                              <button
+                                className="btn btn-ghost btn-xs justify-start min-w-0 flex-1 text-left"
+                                onClick={() =>
+                                  setSelectedFile({
+                                    ...f,
+                                    groupId: group.id,
+                                    groupName: group.name,
+                                  })
+                                }
+                              >
+                                <span className="truncate block max-w-full">
+                                  {f.name}
+                                </span>
+                              </button>
+                              <button
+                                className="btn btn-ghost btn-xs text-error ml-2"
+                                onClick={() => removeFile(f.id)}
+                                title="Delete file"
+                              >
+                                ✕
+                              </button>
+                            </div>
                           </li>
                         ))}
                       </details>
