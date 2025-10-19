@@ -245,111 +245,118 @@ export default function ManageResourcesPage() {
         </div>
 
         <div className="u-container w-full">
-          <h1 className="text-xl mb-l">Uploaded Resources</h1>
+          <div className="container mx-auto">
+            <h1 className="text-xl mb-l">Uploaded Resources</h1>
 
-          <div className="container mx-auto p-4 grid grid-cols-1 lg:grid-cols-2 gap-4">
-            {/* LEFT: Groups and files */}
-            <div className="card bg-base-100 shadow-md">
-              <div className="card-body gap-4">
-                <div className="flex items-center justify-between gap-2">
-                  <h2 className="card-title">Collections</h2>
-                  <AddGroup
-                    onAdd={async (name) => {
-                      try {
-                        const user = getAuth().currentUser;
-                        if (!user) return toast.error("You must be logged in.");
-                        const idToken = await user.getIdToken();
-                        const { data } = await axios.post(
-                          "/api/collections/groups",
-                          { scenarioId, name },
-                          { headers: { Authorization: `Bearer ${idToken}` } }
-                        );
-                        setGroups((g) => [
-                          ...g,
-                          {
-                            id: data._id,
-                            name: data.name,
-                            order: data.order ?? 0,
-                            files: [],
-                          },
-                        ]);
-                      } catch (e) {
-                        toast.error(
-                          e?.response?.data?.error || "Failed to create group"
-                        );
-                      }
-                    }}
-                  />
-                </div>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+              {/* LEFT: Groups and files */}
+              <div className="card bg-base-100 shadow-md">
+                <div className="card-body gap-4 px-0">
+                  <div className="flex items-center justify-between gap-2">
+                    <h2 className="card-title">Collections</h2>
+                    <AddGroup
+                      onAdd={async (name) => {
+                        try {
+                          const user = getAuth().currentUser;
+                          if (!user)
+                            return toast.error("You must be logged in.");
+                          const idToken = await user.getIdToken();
+                          const { data } = await axios.post(
+                            "/api/collections/groups",
+                            { scenarioId, name },
+                            { headers: { Authorization: `Bearer ${idToken}` } }
+                          );
+                          setGroups((g) => [
+                            ...g,
+                            {
+                              id: data._id,
+                              name: data.name,
+                              order: data.order ?? 0,
+                              files: [],
+                            },
+                          ]);
+                        } catch (e) {
+                          toast.error(
+                            e?.response?.data?.error || "Failed to create group"
+                          );
+                        }
+                      }}
+                    />
+                  </div>
 
-                <ul className="menu bg-base-100 rounded-box w-full">
-                  {groups.map((group) => (
-                    <li key={group.id}>
-                      <details>
-                        <summary className="flex items-center gap-2">
-                          <span className="font-medium min-w-0 truncate flex-1">
-                            {group.name}
-                          </span>
-                          <div className="flex items-center gap-2 ml-auto">
-                            <UploadButton
-                              onFiles={(files) => addFilesTo(group.id, files)}
-                            />
-                            <button
-                              className="btn btn-ghost btn-xs text-error"
-                              onClick={(e) => {
-                                e.preventDefault();
-                                e.stopPropagation();
-                                deleteGroup(group.id);
-                              }}
-                              title="Delete group"
-                            >
-                              <XIcon size={14} />
-                            </button>
-                          </div>
-                        </summary>
-
-                        {group.files.length === 0 && (
-                          <li className="opacity-60 p-2">No files yet</li>
-                        )}
-
-                        {group.files.map((f) => (
-                          <li key={f.id}>
-                            <div className="flex items-center justify-between w-full">
+                  <ul className="menu bg-base-100 rounded-box w-full">
+                    {groups.map((group) => (
+                      <li key={group.id}>
+                        <details>
+                          <summary className="flex items-center gap-2">
+                            <span className="font-medium min-w-0 truncate flex-1">
+                              {group.name}
+                            </span>
+                            <div className="flex items-center gap-2 ml-auto">
+                              <UploadButton
+                                onFiles={(files) => addFilesTo(group.id, files)}
+                              />
                               <button
-                                className="btn btn-ghost btn-xs justify-start min-w-0 flex-1 text-left"
-                                onClick={() =>
-                                  setSelectedFile({
-                                    ...f,
-                                    groupId: group.id,
-                                    groupName: group.name,
-                                  })
-                                }
+                                className="btn btn-ghost btn-xs text-error"
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  e.stopPropagation();
+                                  deleteGroup(group.id);
+                                }}
+                                title="Delete group"
                               >
-                                <span className="truncate block max-w-full">
-                                  {f.name}
-                                </span>
-                              </button>
-                              <button
-                                className="btn btn-ghost btn-xs text-error ml-2"
-                                onClick={() => removeFile(f.id)}
-                                title="Delete file"
-                              >
-                                ✕
+                                <XIcon size={14} />
                               </button>
                             </div>
-                          </li>
-                        ))}
-                      </details>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </div>
+                          </summary>
 
-            {/* RIGHT: File list and preview */}
-            <div className="card bg-base-100 shadow-md">
-              <div className="divider my-2" />
-              <Preview file={selectedFile} makeDownloadUrl={makeDownloadUrl} />
+                          {group.files.length === 0 && (
+                            <li className="opacity-60 p-2">No files yet</li>
+                          )}
+
+                          {group.files.map((f) => (
+                            <li key={f.id}>
+                              <div className="flex items-center justify-between w-full">
+                                <button
+                                  className="btn btn-ghost btn-xs justify-start min-w-0 flex-1 text-left"
+                                  onClick={() =>
+                                    setSelectedFile({
+                                      ...f,
+                                      groupId: group.id,
+                                      groupName: group.name,
+                                    })
+                                  }
+                                >
+                                  <span className="truncate block max-w-full">
+                                    {f.name}
+                                  </span>
+                                </button>
+                                <button
+                                  className="btn btn-ghost btn-xs text-error ml-2"
+                                  onClick={() => removeFile(f.id)}
+                                  title="Delete file"
+                                >
+                                  ✕
+                                </button>
+                              </div>
+                            </li>
+                          ))}
+                        </details>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+
+              {/* RIGHT: File list and preview */}
+              <div className="card bg-base-100 shadow-md">
+                <div className="card-body gap-4">
+                  <Preview
+                    file={selectedFile}
+                    makeDownloadUrl={makeDownloadUrl}
+                  />
+                </div>
+              </div>
             </div>
           </div>
         </div>
