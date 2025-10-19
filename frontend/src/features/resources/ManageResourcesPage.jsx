@@ -1,7 +1,6 @@
 import React, { useRef, useState, useEffect } from "react";
 import { getAuth } from "firebase/auth";
 import axios from "axios";
-// Papa (CSV parsing) removed from top strip — keep parser usage local to CSV upload controls where needed
 import toast from "react-hot-toast";
 import { useParams } from "react-router-dom";
 import ScreenContainer from "../../components/ScreenContainer/ScreenContainer";
@@ -15,13 +14,13 @@ import {
 } from "lucide-react";
 import AddGroup from "./components/AddGroup";
 
+// Page for managing resources (collections and files) for a scenario
 export default function ManageResourcesPage() {
   const { scenarioId } = useParams();
   const history = useHistory();
 
   const [setResources] = useState([]);
 
-  // Fetch resources (CSV uploads)
   useEffect(() => {
     let cancelled = false;
     (async () => {
