@@ -1,13 +1,11 @@
-import { useHistory } from "react-router-dom";
 import CloseIcon from "@mui/icons-material/Close";
+import { useHistory, useLocation } from "react-router-dom";
 import FabMenu from "../../components/FabMenu";
-import { useContext } from "react";
-import AuthenticationContext from "../../context/AuthenticationContext";
 import contributorsByYear from "./contributorsByYear";
 
 const AboutUsPage = () => {
   const history = useHistory();
-  const { user } = useContext(AuthenticationContext);
+  const location = useLocation();
 
   return (
     <div
@@ -17,13 +15,10 @@ const AboutUsPage = () => {
       <button
         className="absolute top-8 left-8 bg-transparent border-none p-2 cursor-pointer z-10"
         onClick={() => {
-          const isLoggedIn = !!user;
-          console.log("Is Logged In:", isLoggedIn);
-
-          if (isLoggedIn) {
+          if (location.key !== undefined) {
             history.goBack();
           } else {
-            history.push("/login");
+            history.push("/");
           }
         }}
         aria-label="Close"
