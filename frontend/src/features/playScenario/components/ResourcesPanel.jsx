@@ -4,6 +4,7 @@ import axios from "axios";
 import toast from "react-hot-toast";
 import ResourceTree from "./ResourceTree";
 import ResourcePreview from "./ResourcePreview";
+import { XIcon } from "lucide-react";
 import { getDownloadUrl } from "../hooks/useDownloadUrl";
 
 export default function ResourcesPanel({ scenarioId, open, onClose }) {
@@ -163,7 +164,7 @@ export default function ResourcesPanel({ scenarioId, open, onClose }) {
               onClick={onClose}
               aria-label="Close"
             >
-              ✕
+              <XIcon size={16} />
             </button>
           </div>
 

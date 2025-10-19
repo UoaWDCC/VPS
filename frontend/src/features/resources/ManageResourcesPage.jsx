@@ -442,8 +442,8 @@ function Preview({ file, makeDownloadUrl }) {
       <div className="prose max-w-none opacity-70">
         <h3>Preview</h3>
         <p>
-          Select a file to preview. Images are shown inline. Text is rendered
-          below. For other files, a download link appears.
+          Select a file to preview. Images and PDFs are shown inline. Text is
+          rendered below. For other files, a download link appears.
         </p>
       </div>
     );

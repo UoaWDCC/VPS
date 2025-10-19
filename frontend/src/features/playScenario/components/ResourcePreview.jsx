@@ -54,8 +54,8 @@ export default function ResourcePreview({ file, getDownloadUrl }) {
         <div>
           <div className="text-sm">Select a file to preview.</div>
           <div className="text-xs">
-            Images show inline; text/CSV/JSON render below; other files provide
-            a download.
+            Images and PDFs show inline; text/CSV/JSON render below; other files
+            provide a download.
           </div>
         </div>
       </div>
@@ -71,13 +71,21 @@ export default function ResourcePreview({ file, getDownloadUrl }) {
     <div className="p-3 h-full flex flex-col gap-3 font-ibm">
       <div className="flex items-start justify-between gap-2">
         <div>
-          <div className="font-semibold truncate" title={file.name}>
+          <h3
+            className="font-dm font-semibold text-primary truncate"
+            title={file.name}
+          >
             {file.name}
-          </div>
+          </h3>
           <div className="text-xs opacity-70 text-primary">
             {file.groupName} / {file.childName}
           </div>
         </div>
+        {url && (
+          <a className="btn btn-ghost btn-xs" href={url} download>
+            Download
+          </a>
+        )}
       </div>
       <div className="flex-1 min-h-0">
         {loading ? (
