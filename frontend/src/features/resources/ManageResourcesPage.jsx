@@ -269,12 +269,12 @@ export default function ManageResourcesPage() {
           <div className="container mx-auto">
             <h1 className="text-xl mb-l">Uploaded Resources</h1>
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
               {/* LEFT: Groups and files */}
               <div className="card bg-base-100 shadow-md">
                 <div className="card-body gap-4 px-0">
                   <div className="flex items-center justify-between gap-2">
-                    <h2 className="card-title">Collections</h2>
+                    <h2 className="text-m">Collections</h2>
                     <AddGroup
                       onAdd={async (name) => {
                         try {
@@ -309,16 +309,16 @@ export default function ManageResourcesPage() {
                     {groups.map((group) => (
                       <li key={group.id}>
                         <details>
-                          <summary className="flex items-center gap-2">
-                            <span className="font-medium min-w-0 truncate flex-1">
+                          <summary className="flex items-center">
+                            <span className="text--1 truncate">
                               {group.name}
                             </span>
-                            <div className="flex items-center gap-2 ml-auto">
+                            <div className="flex items-center ml-auto">
                               <UploadButton
                                 onFiles={(files) => addFilesTo(group.id, files)}
                               />
                               <button
-                                className="btn btn-ghost btn-xs text-error"
+                                className="btn btn-phantom btn-xs"
                                 onClick={(e) => {
                                   e.preventDefault();
                                   e.stopPropagation();
@@ -326,42 +326,42 @@ export default function ManageResourcesPage() {
                                 }}
                                 title="Delete group"
                               >
-                                <XIcon size={14} />
+                                <XIcon size={16} />
                               </button>
                             </div>
                           </summary>
 
-                          {group.files.length === 0 && (
-                            <li className="opacity-60 p-2">No files yet</li>
-                          )}
+                          <ul>
+                            {group.files.length === 0 && (
+                              <li className="opacity-60 p-2">No files yet</li>
+                            )}
 
-                          {group.files.map((f) => (
-                            <li key={f.id}>
-                              <div className="flex items-center justify-between w-full">
-                                <button
-                                  className="btn btn-ghost btn-xs justify-start min-w-0 flex-1 text-left"
-                                  onClick={() =>
-                                    setSelectedFile({
-                                      ...f,
-                                      groupId: group.id,
-                                      groupName: group.name,
-                                    })
-                                  }
-                                >
-                                  <span className="truncate block max-w-full">
+                            {group.files.map((f) => (
+                              <li key={f.id}>
+                                <div className="flex items-center justify-between">
+                                  <a
+                                    className="min-w-0 flex-1 text--1 truncate"
+                                    onClick={() =>
+                                      setSelectedFile({
+                                        ...f,
+                                        groupId: group.id,
+                                        groupName: group.name,
+                                      })
+                                    }
+                                  >
                                     {f.name}
-                                  </span>
-                                </button>
-                                <button
-                                  className="btn btn-ghost btn-xs text-error ml-2"
-                                  onClick={() => removeFile(f.id)}
-                                  title="Delete file"
-                                >
-                                  ✕
-                                </button>
-                              </div>
-                            </li>
-                          ))}
+                                  </a>
+                                  <button
+                                    className="btn btn-phantom btn-xs px-0"
+                                    onClick={() => removeFile(f.id)}
+                                    title="Delete file"
+                                  >
+                                    <XIcon size={16} />
+                                  </button>
+                                </div>
+                              </li>
+                            ))}
+                          </ul>
                         </details>
                       </li>
                     ))}
@@ -370,7 +370,7 @@ export default function ManageResourcesPage() {
               </div>
 
               {/* RIGHT: File list and preview */}
-              <div className="card bg-base-100 shadow-md">
+              <div className="card col-span-2">
                 <div className="card-body gap-4">
                   <StateConditionalMenu
                     file={selectedFile}
@@ -407,11 +407,11 @@ function UploadButton({ onFiles, multiple = true, className = "" }) {
         }}
       />
       <button
-        className={`btn btn-ghost btn-xs ${className}`}
+        className={`btn btn-phantom btn-xs ${className}`}
         onClick={() => inputRef.current?.click()}
         title="Add files"
       >
-        <PlusIcon size={14} />
+        <PlusIcon size={16} />
       </button>
     </>
   );
@@ -480,9 +480,9 @@ function Preview({ file, makeDownloadUrl }) {
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between">
-        <h3 className="font-semibold">{file.name}</h3>
+        <h3 className="text-m">{file.name}</h3>
         {downloadUrl && (
-          <a className="btn btn-ghost btn-xs" href={downloadUrl} download>
+          <a className="btn btn-phantom btn-xs" href={downloadUrl} download>
             Download
           </a>
         )}

@@ -7,8 +7,11 @@ function AddGroup({ onAdd }) {
 
   return (
     <div className="dropdown dropdown-end">
-      <button className="btn btn-sm" onClick={() => setOpen((v) => !v)}>
-        New group
+      <button
+        className="btn btn-phantom btn-sm"
+        onClick={() => setOpen((v) => !v)}
+      >
+        Create
       </button>
       {open && (
         <div className="dropdown-content z-[1] bg-base-200 rounded-box p-3 w-64 shadow">

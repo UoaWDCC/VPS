@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo } from "react";
+import React, { useEffect } from "react";
 
 export default function ResourceTree({
   tree,
@@ -16,63 +16,50 @@ export default function ResourceTree({
     }
   }, [search, tree, openGroups, toggleGroup]);
 
-  // Count total files
-  const totalFiles = useMemo(
-    () => tree.reduce((sum, g) => sum + (g.files ? g.files.length : 0), 0),
-    [tree]
-  );
-
   return (
-    <div className="p-2">
-      <div className="px-2 pb-2 text-xs opacity-70">
-        {totalFiles} file{totalFiles !== 1 ? "s" : ""}
-      </div>
+    <ul className="menu w-full">
+      {tree.map((group) => (
+        <li key={group.id} className="mb-1">
+          <button
+            className="flex items-center justify-between px-2 py-1 rounded hover:bg-base-200 focus:outline-none"
+            onClick={() => toggleGroup(group.id)}
+            aria-expanded={openGroups.has(group.id)}
+          >
+            <span className="font-medium truncate">{group.name}</span>
+            <span className="text-xs opacity-70">
+              {(group.files || []).length}{" "}
+              {openGroups.has(group.id) ? "▾" : "▸"}
+            </span>
+          </button>
 
-      <ul className="menu w-full">
-        {tree.map((group) => (
-          <li key={group.id} className="mb-1">
-            <button
-              className="flex items-center justify-between px-2 py-1 rounded hover:bg-base-200 focus:outline-none"
-              onClick={() => toggleGroup(group.id)}
-              aria-expanded={openGroups.has(group.id)}
-            >
-              <span className="font-medium truncate">{group.name}</span>
-              <span className="text-xs opacity-70">
-                {(group.files || []).length}{" "}
-                {openGroups.has(group.id) ? "▾" : "▸"}
-              </span>
-            </button>
-
-            {openGroups.has(group.id) && (
-              <ul className="ml-3 border-l border-base-300">
-                {(group.files || []).map((f) => (
-                  <li key={f.id}>
-                    <button
-                      className={`flex w-full items-center justify-between px-2 py-1 rounded hover:bg-base-200 text-left ${
-                        selectedFileId === f.id ? "bg-base-200" : ""
+          {openGroups.has(group.id) && (
+            <ul className="ml-3">
+              {(group.files || []).map((f) => (
+                <li key={f.id}>
+                  <button
+                    className={`flex w-full items-center justify-between px-2 py-1 rounded hover:bg-base-200 text-left ${selectedFileId === f.id ? "bg-base-200" : ""
                       }`}
-                      onClick={() =>
-                        onSelectFile({
-                          ...f,
-                          groupId: group.id,
-                          groupName: group.name,
-                        })
-                      }
-                      title={`${group.name}/${f.name}`}
-                    >
-                      <span className="truncate">{f.name}</span>
-                      <span className="text-[10px] opacity-60 ml-2 whitespace-nowrap">
-                        {formatBytes(f.size)} · {shortType(f.type)}
-                      </span>
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </li>
-        ))}
-      </ul>
-    </div>
+                    onClick={() =>
+                      onSelectFile({
+                        ...f,
+                        groupId: group.id,
+                        groupName: group.name,
+                      })
+                    }
+                    title={`${group.name}/${f.name}`}
+                  >
+                    <span className="truncate">{f.name}</span>
+                    <span className="text-[10px] opacity-60 ml-2 whitespace-nowrap">
+                      {formatBytes(f.size)} · {shortType(f.type)}
+                    </span>
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
+        </li>
+      ))}
+    </ul>
   );
 }
 

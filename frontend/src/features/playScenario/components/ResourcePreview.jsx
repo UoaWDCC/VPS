@@ -72,7 +72,7 @@ export default function ResourcePreview({ file, getDownloadUrl }) {
       <div className="flex items-start justify-between gap-2">
         <div>
           <h3
-            className="font-dm font-semibold text-primary truncate"
+            className="font-dm text-l text-base-content truncate"
             title={file.name}
           >
             {file.name}
@@ -82,7 +82,7 @@ export default function ResourcePreview({ file, getDownloadUrl }) {
           </div>
         </div>
         {url && (
-          <a className="btn btn-ghost btn-xs" href={url} download>
+          <a className="btn btn-phantom btn-xs" href={url} download>
             Download
           </a>
         )}
