@@ -10,19 +10,15 @@ export default function ImageListContainer({
   onItemSelected,
   selectedId,
 }) {
-  const rowHeight = 150;
-
-  const onItemClick = (item) => {
-    onItemSelected(item);
-  };
+  const rowHeight = 100;
 
   return (
-    <ImageList rowHeight={rowHeight} cols={2} gap={10}>
+    <ImageList rowHeight={rowHeight} cols={4} gap={10}>
       {data?.map((item) => (
         <ImageListItem
           key={item.id || item._id} // fallback if some have _id instead
           cols={1}
-          onClick={() => onItemClick(item)}
+          onClick={() => onItemSelected(item)}
         >
           <Box
             height={rowHeight}

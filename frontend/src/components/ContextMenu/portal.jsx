@@ -1,6 +1,6 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 
-const OFFSET = 10;
+const OFFSET = 5;
 
 let listener;
 
@@ -36,11 +36,38 @@ const attachClickAwayListener = () => {
 
 export const ContextMenuPortal = () => {
   const [current, setCurrent] = useState({ menu: null, position: null });
+  const [adjustedPosition, setAdjustedPosition] = useState(null);
+
+  const menuRef = useRef(null);
 
   useEffect(() => {
     listener = setCurrent;
     return () => (listener = null);
   }, [setCurrent]);
+
+  useEffect(() => {
+    if (!current.menu || !menuRef.current) return;
+
+    const { innerWidth: vw, innerHeight: vh } = window;
+    const rect = menuRef.current.getBoundingClientRect();
+
+    let left = current.position.x + OFFSET;
+    let top = current.position.y + OFFSET;
+
+    if (current.position.x + OFFSET + rect.width > vw) {
+      left = current.position.x - OFFSET - rect.width;
+    }
+    if (current.position.y + OFFSET + rect.height > vh) {
+      top = current.position.y - OFFSET - rect.height;
+    }
+
+    setAdjustedPosition({ top, left });
+  }, [current]);
+
+  if (!current.menu) return null;
+
+  const top = adjustedPosition?.top ?? current.position.y + OFFSET;
+  const left = adjustedPosition?.left ?? current.position.x + OFFSET;
 
   return (
     <div
@@ -49,11 +76,9 @@ export const ContextMenuPortal = () => {
     >
       {current.menu && (
         <div
+          ref={menuRef}
           id="context-menu-wrapper"
-          style={{
-            top: current.position.y + OFFSET,
-            left: current.position.x + OFFSET,
-          }}
+          style={{ top, left }}
           className="absolute pointer-events-auto"
         >
           {current.menu}

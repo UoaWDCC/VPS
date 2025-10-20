@@ -75,7 +75,7 @@ const getGroupByIdAndUser = async (groupId, uid) => {
 const getConnectedScenes = async (sceneID, role, active = true) => {
   const scene = await getSceneConsideringRole(sceneID, role);
   const connectedIds = scene.components
-    .filter((c) => c.type === "BUTTON")
+    .filter((c) => c.clickable)
     .map((b) => b.nextScene)
     .filter(Boolean);
   const connectedScenes = await Scene.find(
@@ -150,6 +150,27 @@ const initiateStateVariables = async (groupId, scenarioId) => {
   return await setGroupStateVariables(groupId, stateVariables);
 };
 
+// Sync state variables for a group (author may have changed state in-between playthroughs)
+const syncStateVariables = async (group) => {
+  const stateVariables = group.stateVariables;
+  const scenarioStateVariables = await getStateVariables(group.scenarioId);
+
+  const newStateVariables = scenarioStateVariables.map((scenarioVar) => {
+    const existingVar = stateVariables.find((v) => v.id === scenarioVar.id);
+
+    if (existingVar && existingVar.type === scenarioVar.type) {
+      return existingVar;
+    } else {
+      return scenarioVar;
+    }
+  });
+
+  if (JSON.stringify(newStateVariables) !== JSON.stringify(stateVariables)) {
+    return await setGroupStateVariables(group._id, newStateVariables);
+  }
+  return [stateVariables, group.stateVersions];
+};
+
 // Updates state variables for a group
 const updateStateVariables = async (group, component) => {
   // If no update necessary, just return existing data
@@ -189,8 +210,9 @@ export const groupNavigate = async (req) => {
   // the first time the user is navigating in their session
   if (!currentScene) {
     const scenes = await getConnectedScenes(group.path[0], role);
-    const stateVariables = group.stateVariables;
-    const stateVersion = group.stateVersion;
+
+    const [stateVariables, stateVersion] = await syncStateVariables(group);
+
     return {
       status: STATUS.OK,
       json: { ...scenes, stateVariables, stateVersion },
@@ -207,7 +229,7 @@ export const groupNavigate = async (req) => {
 
   // if the button does not lead to another scene or component does not exist, stay in the current scene
   let scenes = null;
-  if (component?.nextScene !== currentScene) {
+  if (component?.nextScene && component.nextScene !== currentScene) {
     const nextScene = component.nextScene;
     [, , , scenes] = await Promise.all([
       addSceneToPath(group._id, currentScene, nextScene),

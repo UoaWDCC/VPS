@@ -120,19 +120,21 @@ const updateResourceById = async (
   name,
   type,
   content,
-  requiredFlags
+  requiredFlags,
+  stateConditionals
 ) => {
   const resource = await Resource.findById(resourceId);
 
   resource.name = name;
+  resource.requiredFlags = requiredFlags;
+  resource.stateConditionals = stateConditionals;
+
   switch (type) {
     case "text":
       resource.textContent = content;
-      resource.requiredFlags = requiredFlags;
       break;
     case "image":
       resource.imageContent = content;
-      resource.requiredFlags = requiredFlags;
       break;
     default:
       throw new Error(`Unsupported resource type: ${type}`);

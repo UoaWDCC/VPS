@@ -44,7 +44,7 @@ router.get("/download/:fileId", async (req, res) => {
   }
 });
 
-// 🔒 All routes below require Firebase auth
+// All routes below require Firebase auth
 router.use(auth);
 
 // Upload configuration
@@ -58,7 +58,7 @@ const ALLOWED_MIME_SET = new Set(
     .map((s) => s.trim())
 );
 
-// Multer (in-memory storage → GridFS)
+// Multer (in-memory storage -> GridFS)
 const upload = multer({
   storage: multer.memoryStorage(),
   limits: { fileSize: MAX_FILE_SIZE_MB * 1024 * 1024 },
@@ -163,5 +163,80 @@ router.delete("/:fileId", async (req, res) => {
     return res.status(500).json({ error: err.message });
   }
 });
+
+/**
+ * @route POST /api/files/state-conditionals/:fileId
+ * @desc Add a state conditional to a stored file
+ */
+router.post("/state-conditionals/:fileId", async (req, res) => {
+  try {
+    const { fileId } = req.params;
+    const { stateConditional } = req.body;
+    const meta = await StoredFile.findById(fileId);
+    if (!meta) return res.status(404).json({ error: "File not found" });
+    meta.stateConditionals.push(stateConditional);
+    await meta.save();
+    const file = meta.toObject();
+    delete file.gridFdId;
+    return res.json(file);
+  } catch (err) {
+    return res.status(500).json({ error: err.message });
+  }
+});
+
+/**
+ * @route PUT /api/files/state-conditionals/:fileId
+ * @desc Update a state conditional on a stored file
+ */
+router.put("/state-conditionals/:fileId", async (req, res) => {
+  try {
+    const { fileId } = req.params;
+    const { stateConditional } = req.body;
+    const meta = await StoredFile.findById(fileId);
+    if (!meta) return res.status(404).json({ error: "File not found" });
+
+    meta.stateConditionals = meta.stateConditionals.map((sc) =>
+      sc._id.toString() === stateConditional._id ? stateConditional : sc
+    );
+
+    await meta.save();
+    const file = meta.toObject();
+    delete file.gridFdId;
+    return res.json(file);
+  } catch (err) {
+    return res.status(500).json({ error: err.message });
+  }
+});
+
+/**
+ * @route DELETE /api/files/state-conditionals/:fileId
+ * @desc Delete a state conditional from a stored file
+ */
+router.delete(
+  "/state-conditionals/:fileId/:stateConditionalId",
+  async (req, res) => {
+    try {
+      const { fileId, stateConditionalId } = req.params;
+      const meta = await StoredFile.findById(fileId);
+      if (!meta) return res.status(404).json({ error: "File not found" });
+
+      const originalLength = meta.stateConditionals.length;
+      meta.stateConditionals = meta.stateConditionals.filter(
+        (sc) => sc._id.toString() !== stateConditionalId
+      );
+
+      if (meta.stateConditionals.length === originalLength) {
+        return res.status(404).json({ error: "State conditional not found" });
+      }
+
+      await meta.save();
+      const file = meta.toObject();
+      delete file.gridFdId;
+      return res.json(file);
+    } catch (err) {
+      return res.status(500).json({ error: err.message });
+    }
+  }
+);
 
 export default router;

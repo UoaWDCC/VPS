@@ -4,6 +4,11 @@ import axios from "axios";
 import toast from "react-hot-toast";
 import ResourceTree from "./ResourceTree";
 import ResourcePreview from "./ResourcePreview";
+import {
+  ListChevronsDownUpIcon,
+  ListChevronsUpDownIcon,
+  XIcon,
+} from "lucide-react";
 import { getDownloadUrl } from "../hooks/useDownloadUrl";
 
 export default function ResourcesPanel({ scenarioId, open, onClose }) {
@@ -151,89 +156,90 @@ export default function ResourcesPanel({ scenarioId, open, onClose }) {
       >
         <div
           ref={dialogRef}
-          className="shadow-2xl w-full h-full overflow-hidden"
+          className="shadow-2xl w-full h-full overflow-hidden font-ibm"
           onClick={stopPropagation}
         >
-          <div className="sticky top-0 z-10 bg-base-100 border-b border-base-300 p-3 flex items-center gap-2">
-            <h2 className="text-lg font-semibold flex-1">Resources</h2>
-            <button
-              className="btn btn-ghost btn-sm"
-              onClick={onClose}
-              aria-label="Close"
-            >
-              ✕
-            </button>
-          </div>
-
-          {/* Search */}
-          <div className="p-3 border-b border-base-200">
-            <div className="flex gap-2 mb-2">
-              <input
-                type="text"
-                className="input input-bordered input-sm flex-1"
-                placeholder="Search files or group name"
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-              />
+          <div className="u-container w-full pt-4xl">
+            <div className="flex justify-between items-center mb-l">
+              <h1 className="text-xl">Resources </h1>
               <button
-                className="btn btn-ghost btn-sm"
-                onClick={expandAll}
-                title="Expand all"
-                disabled={loading || !tree.length}
+                className="btn btn-phantom btn-sm"
+                onClick={onClose}
+                aria-label="Close"
               >
-                ⬇
-              </button>
-              <button
-                className="btn btn-ghost btn-sm"
-                onClick={collapseAll}
-                title="Collapse all"
-                disabled={loading || !tree.length}
-              >
-                ⬆
+                <XIcon size={32} />
               </button>
             </div>
-          </div>
-          <div className="p-3 h-[calc(100%-112px)] overflow-hidden">
-            {loading ? (
-              <SkeletonBody />
-            ) : error ? (
-              <div className="h-full flex flex-col items-center justify-center gap-3">
-                <div className="alert alert-error max-w-md">
-                  <span>{error}</span>
-                </div>
-                <button className="btn btn-sm" onClick={handleRetry}>
-                  Retry
+            {/* Search */}
+            <div className="p-3">
+              <div className="flex gap-2 mb-2">
+                <input
+                  type="text"
+                  className="flex-1 outline-none pb-3 border-0 border-b-1 border-primary"
+                  placeholder="Search files or group name"
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                />
+                <button
+                  className="btn btn-phantom btn-sm"
+                  onClick={expandAll}
+                  title="Expand all"
+                  disabled={loading || !tree.length}
+                >
+                  <ListChevronsDownUpIcon size={20} />
+                </button>
+                <button
+                  className="btn btn-phantom btn-sm"
+                  onClick={collapseAll}
+                  title="Collapse all"
+                  disabled={loading || !tree.length}
+                >
+                  <ListChevronsUpDownIcon size={20} />
                 </button>
               </div>
-            ) : (filteredTree?.length ?? 0) === 0 ? (
-              <div className="h-full flex items-center justify-center">
-                <div className="text-center opacity-70">
-                  <p>No resources available for this scenario.</p>
-                  <p className="text-sm">
-                    Ask the author to upload files in the authoring UI.
-                  </p>
+            </div>
+            <div className="p-3 h-[calc(100%-112px)] overflow-hidden">
+              {loading ? (
+                <SkeletonBody />
+              ) : error ? (
+                <div className="h-full flex flex-col items-center justify-center gap-3">
+                  <div className="alert alert-error max-w-md">
+                    <span>{error}</span>
+                  </div>
+                  <button className="btn btn-sm" onClick={handleRetry}>
+                    Retry
+                  </button>
                 </div>
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 h-full">
-                <div className="overflow-auto border border-base-200 rounded-lg">
-                  <ResourceTree
-                    tree={filteredTree}
-                    search={search}
-                    onSelectFile={handleSelectFile}
-                    selectedFileId={selectedFileId}
-                    openGroups={openGroups}
-                    toggleGroup={toggleGroup}
-                  />
+              ) : (filteredTree?.length ?? 0) === 0 ? (
+                <div className="h-full flex items-center justify-center">
+                  <div className="text-center opacity-70">
+                    <p>No resources available for this scenario.</p>
+                    <p className="text-sm">
+                      Ask the author to upload files in the authoring UI.
+                    </p>
+                  </div>
                 </div>
-                <div className="overflow-auto border border-base-200 rounded-lg">
-                  <ResourcePreview
-                    file={selectedFile}
-                    getDownloadUrl={getDownloadUrl}
-                  />
+              ) : (
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 h-full">
+                  <div className="overflow-auto rounded-lg">
+                    <ResourceTree
+                      tree={filteredTree}
+                      search={search}
+                      onSelectFile={handleSelectFile}
+                      selectedFileId={selectedFileId}
+                      openGroups={openGroups}
+                      toggleGroup={toggleGroup}
+                    />
+                  </div>
+                  <div className="col-span-2 overflow-auto rounded-lg">
+                    <ResourcePreview
+                      file={selectedFile}
+                      getDownloadUrl={getDownloadUrl}
+                    />
+                  </div>
                 </div>
-              </div>
-            )}
+              )}
+            </div>
           </div>
         </div>
       </div>
@@ -243,7 +249,7 @@ export default function ResourcesPanel({ scenarioId, open, onClose }) {
 
 function SkeletonBody() {
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 h-full">
+    <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 h-full">
       <div className="space-y-2">
         <div className="skeleton h-5 w-1/2" />
         <div className="skeleton h-4 w-2/3" />
@@ -251,7 +257,7 @@ function SkeletonBody() {
         <div className="skeleton h-4 w-1/2" />
         <div className="skeleton h-4 w-2/3" />
       </div>
-      <div className="space-y-2">
+      <div className="space-y-2 col-span-2">
         <div className="skeleton h-6 w-3/4" />
         <div className="skeleton h-48 w-full" />
         <div className="skeleton h-4 w-1/3" />

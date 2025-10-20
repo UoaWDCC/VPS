@@ -5,6 +5,7 @@ import Thumbnail from "../authoring/components/Thumbnail";
 import ScenarioContext from "../../context/ScenarioContext";
 import AuthenticationContext from "../../context/AuthenticationContext";
 import { usePatch } from "../../hooks/crudHooks";
+import FabMenu from "../../components/FabMenu";
 
 function ScenarioInfo() {
   const [selectedScenario, setSelectedScenario] = useState(null);
@@ -117,27 +118,24 @@ function ScenarioInfo() {
   };
 
   return (
-    <div
-      className="bg-base-100 text-base-content min-h-screen relative"
-      data-theme="vps-dark"
-    >
+    <div className="bg-base-100 text-base-content min-h-screen relative overflow-x-hidden">
       {/* Back Button */}
       <button
-        className="absolute z-50 bg-transparent border-none text-primary cursor-pointer hover:text-base-content transition-colors p-s top-l lg:left-16 xl:left-24 font-dm text-s"
+        className="absolute z-50 bg-transparent border-none text-primary cursor-pointer hover:text-base-content transition-colors px-8 py-6 top-0 left-0 font-dm text-s"
         onClick={handleBackToPlay}
       >
         ← Back
       </button>
       {/* Responsive Container optimised for 1024x768 min to 1600x900 max */}
-      <div className="min-w-[1024px] max-w-[1600px] mx-auto px-8 lg:px-16 xl:px-24 h-screen flex relative">
+      <div className="min-w-[1024px] max-w-[1600px] mx-auto px-8 lg:px-16 xl:px-24 h-screen flex relative overflow-hidden">
         {/* Sidebar */}
-        <div className="w-[27%] bg-base-100 flex flex-col relative h-screen">
+        <div className="w-[27%] bg-base-100 flex flex-col relative h-full overflow-hidden flex-shrink-0">
           {/* Spacer to push content down */}
           <div className="h-[35vh] flex-shrink-0"></div>
 
           {/* Search Container - Positioned above the list */}
-          <div className="bg-transparent p-[2vh_2.5%] absolute top-[20vh] left-0 right-0 z-10 flex-shrink-0">
-            <label className="bg-transparent gap-[1vw] pl-[3vw] flex items-center flex-row-reverse mr-10">
+          <div className="bg-transparent px-[5%] py-[2vh] absolute top-[20vh] left-0 right-0 z-10 flex-shrink-0">
+            <label className="bg-transparent gap-[2vw] flex items-center flex-row-reverse">
               <svg
                 className="h-m w-m opacity-50 flex-shrink-0 stroke-current"
                 xmlns="http://www.w3.org/2000/svg"
@@ -163,12 +161,12 @@ function ScenarioInfo() {
                 required
               />
             </label>
-            {/* Simple line under search bar - stops before search icon */}
-            <div className="h-px bg-primary/20 mt-2 ml-[3vw] mr-[calc(theme(fontSize.m)+3vw)]"></div>
+            {/* Simple line under search bar */}
+            <div className="h-px bg-primary/20 mt-3"></div>
           </div>
 
           {/* Scenario List */}
-          <div className="overflow-y-auto pl-[3vw] absolute top-[26vh] left-0 right-0 bottom-0 pr-[1vw]">
+          <div className="overflow-y-auto px-[5%] absolute top-[28vh] left-0 right-0 bottom-0">
             {filteredScenarios.map((scenario) => (
               <div
                 key={scenario._id}
@@ -186,25 +184,27 @@ function ScenarioInfo() {
         </div>
 
         {/* Main Content */}
-        <div className="flex-1 flex items-center justify-center">
+        <div className="flex-1 flex items-center justify-center overflow-hidden min-w-0">
           {selectedScenario ? (
-            <div className="w-full h-full flex flex-col overflow-y-auto">
+            <div className="w-full h-full flex flex-col overflow-y-auto overflow-x-hidden">
               {/* Scenario Header */}
-              <div className="text-left pb-[4vh] pl-[8vw] pt-[8vh] pr-[4vw]">
-                <div className="flex items-center justify-between mb-[4vh]">
-                  <h1 className="text-base-content font-light text-xl font-dm">
-                    {selectedScenario.name}
-                  </h1>
-                  <button
-                    onClick={openEditModal}
-                    className="btn btn-sm btn-ghost text-base-content border border-base-content/20 hover:bg-base-content/10 hover:border-base-content/40 font-dm"
-                  >
-                    Edit Details
-                  </button>
+              <div className="text-left pb-[3vh] pl-[6vw] pt-[6vh] pr-[4vw] flex-shrink-0 max-w-full">
+                <div className="mb-[3vh]">
+                  <div className="flex items-center gap-3 mb-[1vh]">
+                    <h1 className="text-base-content font-light text-xl font-dm">
+                      {selectedScenario.name}
+                    </h1>
+                    <button
+                      onClick={openEditModal}
+                      className="btn btn-sm btn-ghost text-base-content border border-base-content/20 hover:bg-base-content/10 hover:border-base-content/40 font-dm flex-shrink-0"
+                    >
+                      Edit Details
+                    </button>
+                  </div>
                 </div>
 
                 {/* Scenario Meta */}
-                <div className="flex justify-start gap-[4vw]">
+                <div className="flex justify-start gap-[3vw] flex-wrap">
                   <div className="flex flex-col items-start">
                     <span className="text--1 text-base-content/60 mb-[1vh] font-ibm">
                       Created By
@@ -235,9 +235,9 @@ function ScenarioInfo() {
               </div>
 
               {/* Scenario Content */}
-              <div className="flex-1 flex flex-col items-start p-[0_4vw_4vh_8vw]">
+              <div className="flex-1 flex flex-col items-start p-[0_4vw_4vh_6vw] overflow-y-hidden overflow-x-hidden max-w-full">
                 {/* Scenario Thumbnail */}
-                <div className="w-full max-w-[45vw] mb-[4vh]">
+                <div className="w-full max-w-[45vw] mb-[3vh] flex-shrink-0">
                   <div className="w-full aspect-video bg-white border border-gray-600 rounded-lg overflow-hidden flex items-center justify-center">
                     <Thumbnail
                       components={selectedScenario.thumbnail?.components || []}
@@ -246,19 +246,18 @@ function ScenarioInfo() {
                 </div>
 
                 {/* Scenario Description */}
-                <div className="w-full max-w-[45vw] pt-[2vh]">
+                <div className="w-full max-w-[50vw] pt-[2vh] relative flex-shrink-0 pb-[2vh]">
                   <h3 className="text-text-m text-base-content text-left font-dm mb-[1vh]">
                     Description
                   </h3>
-                  <div className="flex items-start gap-[2vw] mt-[1vh]">
-                    <p className="text-s leading-relaxed text-base-content/80 text-left font-ibm min-h-[4em] break-words break-all max-w-[35vw]">
+                  <div className="mt-[1vh] flex items-start gap-6 flex-wrap">
+                    <p className="text-[clamp(0.875rem,1vw,1.125rem)] leading-relaxed text-base-content/80 text-left font-ibm min-h-[4em] break-words flex-1 max-w-[35vw] min-w-[200px]">
                       {editableDescription ||
                         "No description available. Click 'Edit Details' to add one."}
                     </p>
 
                     {/* Play Button */}
-
-                    <div className="flex-shrink-0 ml-[2vw]">
+                    <div className="flex-shrink-0 ml-8 -mt-4">
                       <DiamondPlayButton
                         size={100}
                         onClick={() => handlePlayScenario(selectedScenario)}
@@ -285,10 +284,7 @@ function ScenarioInfo() {
       {/* Edit Details Modal */}
       {showEditModal && (
         <dialog open className="modal modal-open fixed inset-0 z-[9999]">
-          <div
-            className="modal-box bg-base-100 border border-primary/20 w-[600px] max-w-[90vw] p-8"
-            data-theme="vps-dark"
-          >
+          <div className="modal-box bg-base-100 border border-primary/20 w-[600px] max-w-[90vw] p-8">
             <h3 className="font-bold text-2xl mb-6 text-base-content font-dm">
               Edit Scenario Details
             </h3>
@@ -327,11 +323,11 @@ function ScenarioInfo() {
                 onChange={(e) => setEditableDescription(e.target.value)}
                 placeholder="Enter scenario description..."
                 className="textarea textarea-bordered border-primary/30 bg-base-100 text-base-content h-32 font-ibm text-base w-full focus:border-primary focus:outline-none placeholder:text-base-content/40"
-                maxLength={250}
+                maxLength={200}
               />
               <label className="label">
                 <span className="label-text-alt text-base-content/50 font-ibm">
-                  {editableDescription.length}/250 characters
+                  {editableDescription.length}/200 characters
                 </span>
               </label>
             </div>
@@ -385,6 +381,7 @@ function ScenarioInfo() {
           </form>
         </dialog>
       )}
+      <FabMenu />
     </div>
   );
 }
