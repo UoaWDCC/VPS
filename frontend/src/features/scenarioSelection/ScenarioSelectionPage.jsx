@@ -137,7 +137,7 @@ export default function ScenarioSelectionPage() {
           <div className="flex justify-between items-center mb-4">
             <h1 className="text-3xl font-mona font-bold">Scenarios</h1>
             <button
-              onClick={() => history.push("/play-page")}
+              onClick={() => history.push("/play")}
               className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium"
             >
               Go to Play Page

@@ -1,30 +1,30 @@
 import { ThemeProvider } from "@material-ui/core";
 import { useEffect } from "react";
 import { BrowserRouter, Route, Switch } from "react-router-dom";
+
 import AuthenticationContextProvider from "./context/AuthenticationContextProvider";
 import ScenarioContextProvider from "./context/ScenarioContextProvider";
 import SceneContextProvider from "./context/SceneContextProvider";
-// import AccessLevel from "./enums/route.access.level";
 import ProtectedRoute from "./firebase/ProtectedRoute";
-import "./styles/style.scss";
 import LoginPage from "./features/login/LoginPage/LoginPage";
 import ManageGroupsPage from "./features/groups/ManageGroupsPage";
 import PlayScenarioResolver from "./features/playScenario/PlayScenarioResolver";
+import PlayLandingPage from "./features/playScenario/PlayLandingPage";
 import ScenarioSelectionPage from "./features/scenarioSelection/ScenarioSelectionPage";
-
 import ScenarioInfo from "./features/scenarioInfo/ScenarioInfo";
 import PlayPage from "./features/play/PlayPage";
-
 import Dashboard from "./features/dashboard/Dashboard";
 import AboutUsPage from "./features/aboutUs/AboutUsPage";
-
+import CreateLandingPage from "./features/create/CreateLandingPage";
+import ManageResourcesPage from "./features/resources/ManageResourcesPage";
 import { ScenePage } from "./features/sceneSelection/SceneSelectionPage";
+
+import "./styles/style.scss";
 import theme from "./theme/App.theme";
 
 import { Toaster } from "react-hot-toast";
 import { ContextMenuPortal } from "./components/ContextMenu/portal";
 
-import ManageResourcesPage from "./features/resources/ManageResourcesPage";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
 const TOAST_OFFSET = 25;
@@ -81,6 +81,12 @@ export default function App() {
                   </ScenarioContextProvider>
                 </ProtectedRoute>
 
+                <ProtectedRoute exact path="/play">
+                  <ScenarioContextProvider>
+                    <PlayLandingPage />
+                  </ScenarioContextProvider>
+                </ProtectedRoute>
+
                 <ProtectedRoute path="/scenario-info">
                   <ScenarioContextProvider>
                     <ScenarioInfo />
@@ -91,9 +97,10 @@ export default function App() {
                   <PlayScenarioResolver />
                 </ProtectedRoute>
 
-                <ProtectedRoute exact path="/">
+                {/* New Create Landing Page Route */}
+                <ProtectedRoute exact path="/create">
                   <ScenarioContextProvider>
-                    <ScenarioSelectionPage />
+                    <CreateLandingPage />
                   </ScenarioContextProvider>
                 </ProtectedRoute>
 
