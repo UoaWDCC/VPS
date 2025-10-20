@@ -81,6 +81,12 @@ export default function App() {
                   </ScenarioContextProvider>
                 </ProtectedRoute>
 
+                <ProtectedRoute exact path="/play">
+                  <ScenarioContextProvider>
+                    <PlayLandingPage />
+                  </ScenarioContextProvider>
+                </ProtectedRoute>
+
                 <ProtectedRoute path="/scenario-info">
                   <ScenarioContextProvider>
                     <ScenarioInfo />
@@ -131,9 +137,9 @@ export default function App() {
                 </ScenarioContextProvider>
               </Switch>
             </BrowserRouter>
-          </QueryClientProvider >
-        </AuthenticationContextProvider >
-      </ThemeProvider >
+          </QueryClientProvider>
+        </AuthenticationContextProvider>
+      </ThemeProvider>
     </>
   );
 }

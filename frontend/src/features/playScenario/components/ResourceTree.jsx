@@ -37,8 +37,9 @@ export default function ResourceTree({
               {(group.files || []).map((f) => (
                 <li key={f.id}>
                   <button
-                    className={`flex w-full items-center justify-between px-2 py-1 rounded hover:bg-base-200 text-left ${selectedFileId === f.id ? "bg-base-200" : ""
-                      }`}
+                    className={`flex w-full items-center justify-between px-2 py-1 rounded hover:bg-base-200 text-left ${
+                      selectedFileId === f.id ? "bg-base-200" : ""
+                    }`}
                     onClick={() =>
                       onSelectFile({
                         ...f,

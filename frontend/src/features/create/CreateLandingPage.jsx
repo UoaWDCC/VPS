@@ -5,13 +5,12 @@ import ContextMenu from "../../components/ContextMenu";
 import AuthenticationContext from "../../context/AuthenticationContext";
 import ScenarioContext from "../../context/ScenarioContext";
 import AccessLevel from "../../enums/route.access.level";
-import { useDelete, usePost } from "../../hooks/crudHooks"; 
-import HorizontalGradientLine from "../create/components/HorizontalGradientLine";
+import { useDelete, usePost } from "../../hooks/crudHooks";
 import Thumbnail from "../authoring/components/Thumbnail";
-import CreateScenarioCard from "../../components/CreateScenarioCard/CreateScenarioCard"; 
+import CreateScenarioCard from "../../components/CreateScenarioCard/CreateScenarioCard";
 import TopNavBar from "../../features/TopNavBar/TopNavBar";
-import "../playScenario/PlayLandingPage.css"; 
-import "./CreateLandingPage.css"; 
+import "../playScenario/PlayLandingPage.css";
+import "./CreateLandingPage.css";
 
 export default function CreateLandingPage() {
   const {
@@ -20,7 +19,9 @@ export default function CreateLandingPage() {
     currentScenario,
     setCurrentScenario,
   } = useContext(ScenarioContext);
-  const { getUserIdToken, VpsUser, signOut } = useContext(AuthenticationContext);
+  const { getUserIdToken, VpsUser, signOut } = useContext(
+    AuthenticationContext
+  );
   const history = useHistory();
 
   const [search, setSearch] = useState("");
@@ -90,7 +91,7 @@ export default function CreateLandingPage() {
   return (
     <div className="play-container" data-theme="dark">
       {/* Top Nav - Using extracted component */}
-      <TopNavBar 
+      <TopNavBar
         onLogout={handleLogout}
         onOpenDashboard={openDashboardModal}
         activeTab="create"
@@ -217,7 +218,9 @@ export default function CreateLandingPage() {
             >
               ✕
             </button>
-            <h2 className="text-2xl font mb-4 text-white">Select Scenario for Dashboard</h2>
+            <h2 className="text-2xl font mb-4 text-white">
+              Select Scenario for Dashboard
+            </h2>
             <div className="search-section mb-4">
               <div className="search-container-play">
                 <label className="search-input-wrapper-play">
@@ -256,7 +259,9 @@ export default function CreateLandingPage() {
                   onClick={() => selectDashboardScenario(scenario)}
                 >
                   <div className="scenario-card-thumbnail">
-                    <Thumbnail components={scenario.thumbnail?.components || []} />
+                    <Thumbnail
+                      components={scenario.thumbnail?.components || []}
+                    />
                   </div>
                   <div className="scenario-card-name">
                     <h3 className="scenario-name-text">{scenario.name}</h3>
