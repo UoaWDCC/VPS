@@ -1,20 +1,21 @@
 # Virtual Patient Simulator (VPS)
+
 ![GitHub contributors from allcontributors.org](https://img.shields.io/github/all-contributors/UoaWDCC/VPS?style=for-the-badge&color=orange)
 ![GitHub commit activity (branch)](https://img.shields.io/github/commit-activity/t/UoaWDCC/VPS/master?style=for-the-badge)
 ![GitHub Issues or Pull Requests](https://img.shields.io/github/issues-pr-closed-raw/UoaWDCC/VPS?style=for-the-badge)
 ![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/UoaWDCC/VPS/deploy.staging.yml?style=for-the-badge)
 
+This project aims to provide students and faculty at the University of Auckland with a tool that supports interactive and immersive education through scene based branching scenarios.
 
-This project aims to provide Medical and Health Science students at the University of Auckland with a tool that supports interactive and immersive education through virtual patient scenarios.
+![VPS login page](/images/login.png)
+![VPS authoring page](/images/authoring.png)
 
-![VPS home page](/images/vps-hero.png)
-
-This project was associated with The University of Auckland SOFTENG 761 but since 2022, is being developed by WDCC project teams. The repo located here for this project is a bare clone of the original repo, which no longer exists.
+This project was initally associated with The University of Auckland SOFTENG 761 in 2021, but since 2022, is being developed by WDCC project teams. The repo located here for this project is a bare clone of the original repo, which no longer exists. The project has grown immensely over that time, and the result you can see here is a culmination of the hard work of all of the many teams who put hundreds of collective hours into this each year.
 
 # Live deployments
 
-- Production: https://wdcc-vps.fly.dev/
-- Staging: https://wdcc-vps-staging.fly.dev/
+-   Production: https://wdcc-vps.fly.dev/
+-   Staging: https://wdcc-vps-staging.fly.dev/
 
 # Contributing
 
@@ -23,6 +24,8 @@ Onboarding documentation can be found in the Github Wiki under `Wiki/Onboarding`
 This project uses the [conventional commits](https://www.conventionalcommits.org) specification for commit messages.
 
 # Contributors ✨
+
+For a more detailed list of the contributors and project teams, visit the [about us](https://wdcc-vps-staging.fly.dev/aboutus) page.
 
 Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/docs/en/emoji-key)):
 
