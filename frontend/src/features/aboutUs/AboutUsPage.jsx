@@ -2,6 +2,20 @@ import CloseIcon from "@mui/icons-material/Close";
 import { useHistory, useLocation } from "react-router-dom";
 import FabMenu from "../../components/FabMenu";
 import contributorsByYear from "./contributorsByYear";
+import testers from "./testers";
+
+function titlecase(value) {
+  const words = value.split(" ");
+  return words.map((w) => w[0].toUpperCase() + w.slice(1)).join(" ");
+}
+
+const descs = {
+  2021: "the initial 761 project team",
+  2022: "the first year with WDCC",
+  2023: "the backend overhaul",
+  2024: "the year of multiplayer",
+  2025: "the state, authoring and ui overhaul",
+};
 
 const AboutUsPage = () => {
   const history = useHistory();
@@ -31,14 +45,14 @@ const AboutUsPage = () => {
           <span>Simulator</span>
         </div>
       </div>
-      <div className="w-1/2 flex flex-col items-start px-12 overflow-y-auto pt-[12vh]">
-        {contributorsByYear.map((group, idx) => (
-          <div
-            key={group.year}
-            className={`mb-12 ${idx === 0 ? "mt-[16vh]" : ""} ${idx === contributorsByYear.length - 1 ? "pb-[15vh]" : ""}`}
-          >
+      <div className="w-1/2 flex flex-col items-start px-12 overflow-y-auto pt-[28vh] pb-[16vh]">
+        {contributorsByYear.map((group) => (
+          <div key={group.year} className="mb-12">
             <div className="text-2xl mb-4 text-base-content font-normal font-ibm">
               {group.year}
+              <span className="text-s text-primary ml-s">
+                {descs[group.year] ?? ""}
+              </span>
             </div>
             <div className="grid grid-cols-1 gap-2">
               {group.members.map((contributor) => (
@@ -47,16 +61,39 @@ const AboutUsPage = () => {
                   className="flex flex-row items-center justify-center"
                 >
                   <span className="text-sm text-right font-ibm text-primary font-normal mr-6 min-w-[240px]">
-                    {getContributionText(contributor.contributions)}
+                    {getContributionText(contributor.roles)}
                   </span>
-                  <span className="text-m text-left text-base-content font-bold font-ibm min-w-[220px]">
+                  <a
+                    href={contributor.profile}
+                    className="text-m text-left text-base-content font-bold font-ibm min-w-[220px]"
+                  >
                     {contributor.name}
-                  </span>
+                  </a>
                 </div>
               ))}
             </div>
           </div>
         ))}
+        <div className="mb-12">
+          <div className="text-2xl mb-4 text-base-content font-normal font-ibm">
+            Testers
+          </div>
+          <div className="grid grid-cols-1 gap-2">
+            {testers.map((tester) => (
+              <div
+                key={tester.name}
+                className="flex flex-row items-center justify-center"
+              >
+                <span className="text-sm text-right font-ibm text-primary font-normal mr-6 min-w-[240px]">
+                  Solo Testing
+                </span>
+                <span className="text-m text-left text-base-content font-bold font-ibm min-w-[220px]">
+                  {tester.name}
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
 
       <FabMenu />
@@ -67,29 +104,7 @@ const AboutUsPage = () => {
 function getContributionText(contributions) {
   if (!contributions || !Array.isArray(contributions)) return "";
 
-  if (
-    contributions.includes("code") &&
-    contributions.includes("projectManagement")
-  ) {
-    return "Technical Lead";
-  }
-
-  return contributions
-    .map((contribution) => {
-      switch (contribution) {
-        case "code":
-          return "Software Engineer";
-        case "projectManagement":
-          return "Project Manager";
-        case "design":
-          return "Design Lead";
-        case "infra":
-          return "Infrastructure";
-        default:
-          return contribution;
-      }
-    })
-    .join("/");
+  return contributions.map(titlecase).join(" / ");
 }
 
 export default AboutUsPage;

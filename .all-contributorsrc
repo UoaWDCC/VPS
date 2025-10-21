@@ -122,6 +122,15 @@
       ]
     },
     {
+      "login": "chrisv09",
+      "name": "Chris Valenzuela",
+      "avatar_url": "https://avatars.githubusercontent.com/u/55444457?v=4",
+      "profile": "https://github.com/chrisv09",
+      "contributions": [
+        "userTesting"
+      ]
+    },
+    {
       "login": "wjin-lee",
       "name": "Woo Jin Lee",
       "avatar_url": "https://avatars.githubusercontent.com/u/100455176?v=4",
@@ -168,10 +177,10 @@
       ]
     },
     {
-      "login": "Kot6603",
+      "login": "koutaroyumiba",
       "name": "Koutaro Yumiba",
       "avatar_url": "https://avatars.githubusercontent.com/u/89110272?v=4",
-      "profile": "https://github.com/Kot6603",
+      "profile": "https://github.com/koutaroyumiba",
       "contributions": [
         "code"
       ]
