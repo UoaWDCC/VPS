@@ -10,8 +10,14 @@ import {
   XIcon,
 } from "lucide-react";
 import { getDownloadUrl } from "../hooks/useDownloadUrl";
+import { filterTreeByConditions } from "../../../utils/stateConditionalEvaluator";
 
-export default function ResourcesPanel({ scenarioId, open, onClose }) {
+export default function ResourcesPanel({
+  scenarioId,
+  stateVariables,
+  open,
+  onClose,
+}) {
   const [loading, setLoading] = useState(false);
   const [tree, setTree] = useState([]);
   const [error, setError] = useState(null);
@@ -61,14 +67,17 @@ export default function ResourcesPanel({ scenarioId, open, onClose }) {
             size: f.size,
             type: f.type,
             createdAt: f.createdAt,
+            stateConditionals: f.stateConditionals || [],
           })),
         })) || [];
 
-      setTree(normalized);
+      const filteredTree = filterTreeByConditions(normalized, stateVariables);
+
+      setTree(filteredTree);
       setLoading(false);
 
       if (selectedFileId) {
-        const f = findFileById(normalized, selectedFileId);
+        const f = findFileById(filteredTree, selectedFileId);
         setSelectedFile(f || null);
       }
     } catch (err) {
@@ -83,7 +92,7 @@ export default function ResourcesPanel({ scenarioId, open, onClose }) {
 
   useEffect(() => {
     if (open && scenarioId) fetchTree();
-  }, [open, scenarioId]);
+  }, [open, scenarioId, stateVariables]);
 
   // Filtered tree for search
   const filteredTree = useMemo(() => {

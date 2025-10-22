@@ -169,6 +169,7 @@ export default function PlayScenarioPage() {
 
       <ResourcesPanel
         scenarioId={scenarioId}
+        stateVariables={stateVariables}
         open={resourcesOpen}
         onClose={() => setResourcesOpen(false)}
       />
