@@ -1,6 +1,16 @@
 import Access from "../models/access.js";
 import User from "../models/user.js";
-import { retrieveUser } from "./userDao.js";
+
+
+const getAccessibleScenarios = async(uid) => {
+    if(!uid) return null;
+    const accessDocs = await Access.find({
+        $or: [{ownerId: uid}, {[`users.${uid}`]: {$exists: true}}],
+    }).sort({_id: 1}).lean();
+
+
+    // return addThumbs(accessible);
+}
 
 /**
  * 
@@ -97,6 +107,7 @@ const revokeAccess = async(scenarioId, userId) => {
 }
 
 export {
+    getAccessibleScenarios,
     getAccessList,
     createAccessList,
     deleteAccessList,

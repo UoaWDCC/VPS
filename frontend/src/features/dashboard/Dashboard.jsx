@@ -34,7 +34,8 @@ export default function Dashboard() {
   const [scenes, setScenes] = useState([]);
   const [accessInfo, setAccessInfo] = useState({allowed: false})
   const [allowed, setAllowed] = useState(false);
-    const {getUserIdToken} = useContext(AuthenticationContext);
+    const {getUserIdToken, user} = useContext(AuthenticationContext);
+
 const [token, setToken] = useState("");
     async function getToken(){
         const temp = await getUserIdToken();
@@ -164,9 +165,6 @@ const [token, setToken] = useState("");
       </div>
     );
   };
-  function revokeUserAccess(uid) {
-    console.log("Access Revoked: " + uid)
-  }
   // Cheap way to block the user from seeing the dashboard page before permissions are fully checked.
   // Could be a better way?
   
@@ -178,7 +176,6 @@ const [token, setToken] = useState("");
         {/* Need to change the help button to maybe be able to pass something down like have a file of help messages which can be accessed and passed down to be page specific */}
         <HelpButton />
       </DashTopBar>
-      <AccessTable token={token} ownerUid={scenario.uid}/>
       <div className="h-full px-10 py-7 overflow-y-scroll ">
         <h1 className="text-xl font-bold">
           {heading ? heading : <span className="invisible">placeholder</span>}
@@ -192,31 +189,12 @@ const [token, setToken] = useState("");
                   className={"lg:stats-horizontal mb-10"}
                   groupData={scenarioGroupInfo}
                 />
-                <h1 className="text-xl">Permissions/Access</h1>
-                <div className="overflow-x-auto rounded-box border border-base-content/15 w-full">
-                <div>
-                  <input type="text" />
-                </div>
-                <table className="table table-zebra">
-                  <thead>
-                  <tr>
-                    <th>Name</th>
-                    <th>Email</th>
-                    <th>Date Added</th>
-                    <th></th>
-                  </tr>
-                  </thead>
-                  <tbody>
-                    <tr>
-                      <td>John Smith</td>
-                      <td>Johnsmith@gmail.com</td>
-                      <td>18/10/2025</td>
-                      <td><DeleteForeverIcon className="hover:cursor-pointer hover:text-red-400" onClick={() => revokeUserAccess(123)}/></td>
-                    </tr>
-                  </tbody>
-                </table>
-
-                </div>
+                {user.uid == scenario.uid && (
+                  <div className="mb-10">
+                    <h1 className="text-xl">Access List</h1>
+                    <AccessTable token={token} ownerUid={scenario.uid}/>
+                  </div>
+                )}
                 <h1 className="text-xl">Groups Table</h1>
                 {!isLoading && (
                   <DashGroupTable

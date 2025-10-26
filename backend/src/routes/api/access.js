@@ -1,14 +1,18 @@
 import { Router } from "express";
-import { createAccessList, deleteAccessList, getAccessList, grantAccess, revokeAccess } from "../../db/daos/accessDao.js";
+import { getAccessibleScenarios, createAccessList, deleteAccessList, getAccessList, grantAccess, revokeAccess } from "../../db/daos/accessDao.js";
 import auth from "../../middleware/firebaseAuth.js";
-import { retrieveScenario } from "../../db/daos/scenarioDao.js";
+import { retrieveAccessibleScenarios, retrieveScenario } from "../../db/daos/scenarioDao.js";
 const router = Router();
 
 router.use(auth);
 
+// Returns the scenarios the user has view access to dashboard
 router.get("/", async(req, res) => {
     // res.json("test")
-    return res.json("Access route");
+    const uid = req.body.uid;
+    const accessible = await retrieveAccessibleScenarios(uid);
+  
+    return res.status(200).json(accessible);
 })
 
 router.get("/:scenarioId/users", async (req, res) => {

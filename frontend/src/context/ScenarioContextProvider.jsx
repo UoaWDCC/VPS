@@ -18,11 +18,13 @@ export default function ScenarioContextProvider({ children }) {
     null
   );
   const [scenarios, setScenarios] = useState();
+  const [accessScenarios, setAccessScenarios] = useState();
   const [assignedScenarios, setAssignedScenarios] = useState();
   const [roleList, setRoleList] = useState();
   const [stateVariables, setStateVariables] = useState();
 
   const { reFetch } = useGet(`api/scenario`, setScenarios, true, !user);
+  const {reFetch: dashAccessReFetch} = useGet(`api/access/`, setAccessScenarios, true, !user);
   const { reFetch: reFetch2 } = useGet(
     `api/scenario/assigned`,
     setAssignedScenarios,
@@ -48,6 +50,7 @@ export default function ScenarioContextProvider({ children }) {
       // Add a small delay to ensure token is properly refreshed
       const timeoutId = setTimeout(() => {
         reFetch();
+        dashAccessReFetch()
         reFetch2();
         reFetch3();
       }, 100);
@@ -63,6 +66,7 @@ export default function ScenarioContextProvider({ children }) {
       const retryTimeoutId = setTimeout(() => {
         if (!scenarios) reFetch();
         if (!assignedScenarios) reFetch2();
+        if(!accessScenarios) dashAccessReFetch();
       }, 1000);
 
       return () => clearTimeout(retryTimeoutId);
@@ -92,6 +96,9 @@ export default function ScenarioContextProvider({ children }) {
         scenarios,
         setScenarios,
         reFetch,
+        accessScenarios,
+        setAccessScenarios,
+        dashAccessReFetch,
         assignedScenarios,
         setAssignedScenarios,
         reFetch2,

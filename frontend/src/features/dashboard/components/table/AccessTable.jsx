@@ -1,29 +1,19 @@
-import { useReactTable, getCoreRowModel, flexRender, getSortedRowModel, getFilteredRowModel } from '@tanstack/react-table'
+import { useReactTable, getCoreRowModel, flexRender, getSortedRowModel, getFilteredRowModel, getPaginationRowModel } from '@tanstack/react-table'
 import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
 import { useState, useMemo, useRef, useEffect, useContext } from 'react';
 import { useParams } from 'react-router-dom';
 import { useGet } from "hooks/crudHooks";
-import { useAuthDelete, useDelete, usePost } from '../../../../hooks/crudHooks';
 import axios from 'axios';
-import Select, { components } from "react-select"
-
-
+import FirstPageIcon from "@mui/icons-material/FirstPage";
+import KeyboardArrowLeft from "@mui/icons-material/KeyboardArrowLeft";
+import KeyboardArrowRight from "@mui/icons-material/KeyboardArrowRight";
+import LastPageIcon from "@mui/icons-material/LastPage";
 /**
  * Tanstack table code adapted from previous course work 
  * Accessed: 18/10/2025
  * URL: https://github.com/jackdar/speed-app/blob/main/frontend/src/components/article-table.tsx
  * - Bradley
  */
-
-
-const CustomOption = (opt) => {
-    return(
-        <div className='flex flex-col text-black'>
-            <span className='font-semibold'>{opt.name}</span>
-            {/* <span className='text-[12px] text-black'>{opt.email}</span> */}
-        </div>
-    )
-}
 
 const AccessTable = ({token, ownerUid}) => {
    const [users, setUsers] = useState();
@@ -113,7 +103,7 @@ const [sorting, setSorting] = useState([]);
                     Authorization: `Bearer ${token}`
                 }
             })
-            console.log(result)
+            // console.log(result)
             if(result.status != 200) return;
             setData((prev) => prev.filter((r) => r.uid !== uid));
             await fetchAccessList();
@@ -160,25 +150,29 @@ return;
         }
       }
     const columns = useMemo(()=>[
-        {header: "name", accessorKey:"name"},
+        {header: "Name", accessorKey:"name"},
         {header:"Email", accessorKey:"email"},
         {header:"Date Added", accessorKey:"date"},
-        {id:"action", header: "", cell: ({ row }) => {
-      const item = row.original;
-     
-      
-      return (
-        <button
-          onClick={() => handleDelete(item.uid)}
-          aria-label={`Delete ${item.name}`}
-          className="btn btn-ghost btn-sm"
-        >
-          <DeleteForeverIcon fontSize="small" />
-        </button>
-      );
-    },
-    }
+        {id:"action", header: "Revoke",cell: ({ row }) => {
+            const item = row.original;
+            if(ownerUid == item.uid) return <p>(You)</p>;
+            return (
+                <button
+                onClick={() => handleDelete(item.uid)}
+                aria-label={`Delete ${item.name}`}
+                className="btn btn-ghost btn-sm"
+                >
+                <DeleteForeverIcon fontSize="small" />
+                </button>
+            );
+            },
+        }
     ])
+
+    const [pagination, setPagination] = useState({
+        pageIndex: 0,
+        pageSize: 5
+    })
 const table = useReactTable({ 
     data, 
     columns, 
@@ -188,6 +182,12 @@ const table = useReactTable({
   getCoreRowModel: getCoreRowModel(),
   getFilteredRowModel: getFilteredRowModel(),
   getSortedRowModel: getSortedRowModel(),
+  getPaginationRowModel: getPaginationRowModel(),
+  onPaginationChange: setPagination,
+  state: {
+    pagination
+  },
+
 
 })
 
@@ -223,42 +223,42 @@ const table = useReactTable({
 
     return(
         <>
-        <div className=" rounded-box border border-base-content/15 w-full">
-        <div className='flex justify-between'>
-        <label className="input input-lg focus-within:outline-0">
-            <svg className="h-[1em] opacity-50" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-                <g
-                strokeLinejoin="round"
-                strokeLinecap="round"
-                strokeWidth="2.5"
-                fill="none"
-                stroke="currentColor"
-                >
-                <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path>
-                <circle cx="12" cy="7" r="4"></circle>
-                </g>
-            </svg>
-            <input type="search" className="w-[250px] py-2" ref={searchInputRef} placeholder='Search table' onChange={handleSearchChange}/>
-        </label>
+        <div className="overflow-x-auto rounded-box border border-base-content/15 w-full">
+        <div className='flex flex-col xl:flex-row md:justify-between p-2 gap-2'>
+            <label className="input focus-within:outline-0">
+                <svg className="h-[1em] opacity-50" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                    <g
+                    strokeLinejoin="round"
+                    strokeLinecap="round"
+                    strokeWidth="2.5"
+                    fill="none"
+                    stroke="currentColor"
+                    >
+                    <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path>
+                    <circle cx="12" cy="7" r="4"></circle>
+                    </g>
+                </svg>
+                <input type="search" className="w-[250px] py-2" ref={searchInputRef} placeholder='Search table' onChange={handleSearchChange}/>
+            </label>
 
-        {accessList != null ? (
-            <span className='flex'>
-                {/* <input type="select" list="test" onChange={handleChange}/> */}
-                <select name="selectUser" id="selectUser" className='select' onChange={handleChange}>
-                    <option value="-1" name="" email="">- Select user -</option>
-                    {/* This option thing is prob wrong idk lol */}
-                    {options.map((option, index) => {
-                        return(<option value={index} label={option.name} key={option.value}>{option.name}</option>)
-                    })}
-                </select>
-                <button className='btn' onClick={() => {handleGrantAccess()}}>Add</button>
-                <button className='btn' onClick={() => {deleteAccessList()}}>Delete List</button>
-            </span>
+            {accessList != null ? (
+                <span className='flex lg:flex-col xl:flex-row gap-1'>
+                    {/* <input type="select" list="test" onChange={handleChange}/> */}
+                    <select name="selectUser" id="selectUser" className='select min-w-[250px]'  onChange={handleChange}>
+                        <option value="-1" name="" email="">- Select user -</option>
+                        {/* This option thing is prob wrong idk lol */}
+                        {options.map((option, index) => {
+                            return(<option value={index} label={option.name} key={option.value}>{option.name}</option>)
+                        })}
+                    </select>
 
-        ) : (
-            <button className='btn' onClick={() => {createAccessList()}}>Create access List</button>
-        )}
-     
+                        <button className='btn ' onClick={() => {handleGrantAccess()}}>Add</button>
+                        <button className='btn ' onClick={() => {deleteAccessList()}}>Delete List</button>
+                </span>
+
+            ) : (
+                <button className='btn' onClick={() => {createAccessList()}}>Create access List</button>
+            )}
         </div>
         <table className="table table-zebra">
         <thead>
@@ -288,6 +288,64 @@ const table = useReactTable({
             </tr>
         )}
         </tbody>
+        <tfoot>
+            <tr>
+                <td colSpan={4}>
+                <div className="flex items-center justify-end">
+                    {/* row per page */}
+                    <div>
+                    <span>Rows per page: </span>
+                    <select value={pagination.pageSize} onChange={e=> {table.setPageSize(Number(e.target.value))}}  className="select select-xs w-[40%]">
+                        <option value={5}>5</option>
+                        <option value={10}>10</option>
+                        <option value={25}>25</option>
+                        <option value={data.length}>All</option>
+                    </select>
+                    </div>
+                    {/* No. of items */}
+                    <div className="pl-6">
+                        {/* some funky math going on here displaying the wrong data showing 1-2 instead of 1-1 when only 1 row */}
+                    {pagination.pageSize * pagination.pageIndex + 1} - {Math.max(Math.min(pagination.pageSize, data.length), pagination.pageSize * pagination.pageIndex + 1 + Math.ceil(data.length/pagination.pageSize))} of {data.length}
+                    </div>
+                    <div className="flex gap-0.5">
+                    <button 
+                    className="btn btn-xs"
+                        onClick={() => table.firstPage()}
+                        disabled={!table.getCanPreviousPage()}
+                        aria-label="first page"
+
+                    >
+                        <FirstPageIcon />
+                    </button>
+                    <button
+                    className="btn btn-xs"
+                        onClick={() => table.previousPage()}
+                        disabled={!table.getCanPreviousPage()}
+                        aria-label="previous page"
+                    >
+                        <KeyboardArrowLeft />
+                    </button>
+                    <button
+                    className="btn btn-xs"
+                        onClick={() => table.nextPage()}
+                        disabled={!table.getCanNextPage()}
+                        aria-label="next page"
+                    >
+                        <KeyboardArrowRight />
+                    </button>
+                    <button
+                    className="btn btn-xs"
+                        onClick={() => table.lastPage()}
+                        disabled={!table.getCanNextPage()}
+                        aria-label="last page"
+                    >
+                        <LastPageIcon />
+                    </button>
+                    </div>
+                </div>
+                </td>
+            </tr>
+        </tfoot>
     </table>
     </div>
         </>
