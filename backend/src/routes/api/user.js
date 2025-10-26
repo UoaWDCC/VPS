@@ -8,7 +8,7 @@ import {
   addPlayed,
   retrievePlayedUsers,
   assignScenarioToUsers,
-  retrieveAllUserMin,
+  retrieveAllUserMinAsc,
 } from "../../db/daos/userDao.js";
 import User from "../../db/models/user.js";
 import Group from "../../db/models/group.js";
@@ -27,7 +27,7 @@ router.get("/", async (req, res) => {
 
 // Only gets the uid, name and email.
 router.get("/min", async (req, res) => {
-  const users = await retrieveAllUserMin();
+  const users = await retrieveAllUserMinAsc();
   res.json(users);
 })
 

@@ -5,11 +5,11 @@ import { retrieveUser } from "./userDao.js";
 /**
  * 
  * @param {string} scenarioId 
- * @returns the access list of the given scenarioId
+ * @returns the access list of the given scenarioId ordered
  */
 const getAccessList = async(scenarioId) => {
     if(!scenarioId) return null;
-    const list = await Access.findOne({scenarioId: scenarioId});
+    const list = await Access.findOne({scenarioId: scenarioId}).sort({name: -1});
     return list;
 }
 
@@ -40,6 +40,7 @@ const deleteAccessList = async(scenarioId, ownerId) => {
         const res = await Access.findOneAndDelete(
             {scenarioId: scenarioId, ownerId: ownerId}
         )
+        console.log(res);
         if(res){
             return true;
         }
@@ -60,16 +61,13 @@ const grantAccess = async(scenarioId, userId) => {
     const uInfo = await User.findOne({uid: userId}).select("name email -_id");
     if(!uInfo) return null;
     const updateObj ={[`users.${userId}`]: {name: uInfo.name, email: uInfo.email, date: new Date()}};
-    console.log(updateObj)
+
     const updatedList = await Access.findOneAndUpdate(
         {scenarioId: scenarioId},
         {$set: updateObj},
         {new: true}
     );
-    console.log(updatedList)
-
     return updatedList;
-    
 }
 
 /**
@@ -88,13 +86,14 @@ const revokeAccess = async(scenarioId, userId) => {
  
     const updated = await Access.findOneAndUpdate(
         {scenarioId: scenarioId},
-        {$unset: {[`users.${userId+1}`]:""}},
+        {$unset: {[`users.${userId}`]:""}},
+        {new: true}
     )
-    console.log(updated.users)
+    const stillContains = updated.users.has(userId);
+
+    if(stillContains) return {status: 304, message:"No found or removed"};
     
-    const stillContains = updated.users && updated.users.has(userId+1);
-    console.log("Still contains the user: " + stillContains);
-    return false;
+    return {status:200, message: "Revoked"};
 }
 
 export {

@@ -19,7 +19,7 @@ export default async function dashboardAuth(req, res, next) {
             return res.sendStatus(HTTP_NOT_FOUND);
         }
 
-        const accessList = await getAccessList(sId);
+        const accessList = await getAccessList(sId).catch(() => null);
         const scenario = await retrieveScenario(sId).catch(() => null);
       
         // If both dont exists return 404
@@ -40,12 +40,10 @@ export default async function dashboardAuth(req, res, next) {
             next();
             return;
         } 
-
         // If it reaches the end just unauthorize
         return res.sendStatus(HTTP_UNAUTHORISED)
         
     } catch(err) {
-
 
             res.status(500).json({error: "Internal server error"})
 return 

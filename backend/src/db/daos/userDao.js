@@ -15,8 +15,8 @@ const retrieveAllUser = async () => {
  * Retrieves minified all users
  * @returns uid, name, and email of all users
  */
-const retrieveAllUserMin = async () => {
-  return User.find().select("uid name email -_id");
+const retrieveAllUserMinAsc = async () => {
+  return User.find().select("uid name email -_id").sort({name: 1});
 }
 
 /**
@@ -189,7 +189,7 @@ const setUserStateVariables = async (userId, scenarioId, stateVariables) => {
 
 export {
   retrieveAllUser,
-  retrieveAllUserMin,
+  retrieveAllUserMinAsc,
   createUser,
   retrieveUser,
   retrieveUserByEmail,

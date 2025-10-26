@@ -13,7 +13,7 @@ router.use(auth);
 router.get("/", async(req, res) =>{
     return res.status(200).json({ok: true})
 })
-router.use("/access", dashboardAuth);
+router.use("/scenarios/:scenarioId/access", dashboardAuth);
 router.use("/scenarios/:scenarioId", dashboardAuth);
 router.use("/groups/:groupId", dashboardAuth)
 

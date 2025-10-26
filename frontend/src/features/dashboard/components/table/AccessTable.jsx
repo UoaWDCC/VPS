@@ -1,11 +1,12 @@
 import { useReactTable, getCoreRowModel, flexRender, getSortedRowModel, getFilteredRowModel } from '@tanstack/react-table'
 import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
-import { useState, useMemo, useRef, useEffect } from 'react';
+import { useState, useMemo, useRef, useEffect, useContext } from 'react';
 import { useParams } from 'react-router-dom';
 import { useGet } from "hooks/crudHooks";
-import { useAuthDelete } from '../../../../hooks/crudHooks';
+import { useAuthDelete, useDelete, usePost } from '../../../../hooks/crudHooks';
 import axios from 'axios';
-import Select from "react-select"
+import Select, { components } from "react-select"
+
 
 /**
  * Tanstack table code adapted from previous course work 
@@ -24,21 +25,52 @@ const CustomOption = (opt) => {
     )
 }
 
-const AccessTable = () => {
+const AccessTable = ({token, ownerUid}) => {
    const [users, setUsers] = useState();
     const [accessList, setAccessList] = useState(null);
    const { scenarioId } = useParams();
-   const [options, setOptions] = useState();
+   const [options, setOptions] = useState([]);
    const [data, setData] = useState([])
-    const [selectedUser, setSelectedUser] = useState();
-    const [inputValue, setInputValue] = useState();
-   const {isLoading: userListLoading} = useGet(`api/user/min`, setUsers); 
-    const {isLoading: listLoading, reFetch: accessReFetch} = useGet(`api/access/${scenarioId}/users`, setAccessList, true);
+    const [selectedUserIndex, setSelectedUserIndex] = useState();
+    // const {isLoading: listLoading, reFetch: accessReFetch} = useGet(`api/access/${scenarioId}/users`, setAccessList, true);
 
+    const [listLoading, setListLoading] = useState(false);
+    const fetchAccessList = async() => {
+        setListLoading(true);
+        try{
+            const res = await axios.get(`/api/access/${scenarioId}/users`, {
+                headers:{
+                    Authorization: `Bearer ${token}`
+                }
+            });
+            if(res.status == 200) {
+                if(res.data.status === 404){
+                    setAccessList(null);
+                    return;
+                } 
+                setAccessList(res.data);
+                
+
+            }
+         }catch(err) {
+                console.log(err.message)
+        } finally {
+            setListLoading(false);
+        }
+    }
+    useEffect(() =>{
+        fetchAccessList()
+    }, [scenarioId, token])
+    // need some kind of check to only fetch if there is access list
+    const {isLoading: userListLoading, reFetch: userReFetch} = useGet(`api/user/min`, setUsers); 
+
+    const [accessSet, setAccessSet] = useState();
 useEffect(() => {
-    if(listLoading || !accessList) return;
+
+    if(listLoading || accessList == null) return;
 
     let rows = [];
+    let tempSet = new Set();
     Object.entries(accessList.users).forEach(([uid, info]) => {
         // console.log(uid)
         rows.push({
@@ -47,8 +79,11 @@ useEffect(() => {
             email: info.email,
             date: info.addedAt
         })
+        tempSet.add(uid);
     })
     setData(rows)
+    setAccessSet(tempSet);
+    // console.log(tempSet);
 },[accessList, listLoading])
 
 
@@ -57,31 +92,73 @@ useEffect(() => {
 
     let rows = [];
     users.forEach((user) => {
-        rows.push({
-            value: user.uid,
-            name: user.name,
-            email: user.email,
-        })
+        if(accessSet && !accessSet.has(user.uid) || !user.uid == ownerUid){
+            rows.push({
+                value: user.uid,
+                name: user.name,
+                email: user.email,
+            })
+        };
     })
-    setOptions(rows);
-    console.log(users);
-    
+    setOptions(rows);    
 }, [users, userListLoading])
 const [sorting, setSorting] = useState([]);
   const [globalFilter, setGlobalFilter] = useState("");
   const searchInputRef = useRef(null);
-    const accessInputRef = useRef(null);
-    const authDelete = useAuthDelete;
+// console.log(accessSet)
      const handleDelete = async (uid) => {
         try{
-            const result = await axios.delete(`/api/access/${scenarioId}/users/${uid}`)
+            const result = await axios.delete(`/api/access/${scenarioId}/users/${uid}`,{
+                headers:{
+                    Authorization: `Bearer ${token}`
+                }
+            })
             console.log(result)
+            if(result.status != 200) return;
             setData((prev) => prev.filter((r) => r.uid !== uid));
-            accessReFetch();
+            await fetchAccessList();
         } catch(err) {
             console.error(err.message)
         }
       };
+
+      const createAccessList = async() => {
+        // console.log("Create button pressed")
+        try{
+            // console.log(token)
+            const result = await axios.post(`/api/access/${scenarioId}/create`,{},{
+                headers:{
+                    Authorization: `Bearer ${token}`
+                }
+            });
+            // console.log(result.data)
+            if(result.status == 201){
+                setAccessList(result.data);
+                userReFetch();
+            }
+        } catch(err){
+            console.log(err.message)
+        }
+      }
+
+      const deleteAccessList = async() => {
+        try{
+            const result = await axios.delete(`/api/access/${scenarioId}`, {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            });
+            if(result.status == 200){
+setAccessList(null);
+setAccessSet(null)
+setData([])
+return;
+            } 
+            console.log(result);
+        } catch(err) {
+            console.log(err.message)
+        }
+      }
     const columns = useMemo(()=>[
         {header: "name", accessorKey:"name"},
         {header:"Email", accessorKey:"email"},
@@ -113,11 +190,35 @@ const table = useReactTable({
   getSortedRowModel: getSortedRowModel(),
 
 })
-console.log(selectedUser)
+
     const handleSearchChange = (e) => {
         const v = e.target.value || "";
         // console.log(v)
         table.setGlobalFilter(v);
+    }
+
+    const handleChange = (e) => {
+        // console.log(e.target.value)
+        setSelectedUserIndex(e.target.value);
+    }
+
+    async function handleGrantAccess(){
+        if(selectedUserIndex == -1) return;
+
+        try{
+            const uid = options[selectedUserIndex].value;
+            const result = await axios.put(`/api/access/${scenarioId}/users/${uid}`,{},{
+                headers:{
+                    Authorization: `Bearer ${token}`
+                }
+            });
+            if(result.status == 200){
+                await fetchAccessList();
+                userReFetch();
+            }
+        } catch(err) {
+            console.log(err.message);
+        }
     }
 
     return(
@@ -139,29 +240,25 @@ console.log(selectedUser)
             </svg>
             <input type="search" className="w-[250px] py-2" ref={searchInputRef} placeholder='Search table' onChange={handleSearchChange}/>
         </label>
-        <Select 
-            placeholder="Add user"
-            options={options} 
-            className='w-[300px] text-black'
-            getOptionLabel={(opt) => opt.name}
-            getOptionValue={(opt) => opt.value}
-            isSearchable={true}
-            filterOption={(option, inputValue) => {
-                const oData = option.data;
-                const query = (inputValue || "");
-                return(
-                    String(oData.name || "").toLowerCase().includes(query) ||
-                    String(oData.email || "").toLowerCase().includes(query)
-                )
-            }}
-            onChange={(val, {action}) => {
-                if(action == "input-change" && inputValue && inputValue.length > 0) {
-                    setSelectedUser(val);
-                }
-                return null;
-            }}
-        />
-      
+
+        {accessList != null ? (
+            <span className='flex'>
+                {/* <input type="select" list="test" onChange={handleChange}/> */}
+                <select name="selectUser" id="selectUser" className='select' onChange={handleChange}>
+                    <option value="-1" name="" email="">- Select user -</option>
+                    {/* This option thing is prob wrong idk lol */}
+                    {options.map((option, index) => {
+                        return(<option value={index} label={option.name} key={option.value}>{option.name}</option>)
+                    })}
+                </select>
+                <button className='btn' onClick={() => {handleGrantAccess()}}>Add</button>
+                <button className='btn' onClick={() => {deleteAccessList()}}>Delete List</button>
+            </span>
+
+        ) : (
+            <button className='btn' onClick={() => {createAccessList()}}>Create access List</button>
+        )}
+     
         </div>
         <table className="table table-zebra">
         <thead>

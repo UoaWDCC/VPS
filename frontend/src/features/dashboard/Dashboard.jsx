@@ -16,6 +16,8 @@ import ViewGroup from "./components/ViewGroup";
 import LoadingPage from "../status/LoadingPage";
 import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
 import AccessTable from "./components/table/AccessTable";
+import AuthenticationContext from "../../context/AuthenticationContext";
+
 
 /**
  * Could maybe add some info about the scenario? Who created what time, last edited, thumbnail of the scenario and an overlay edit button * which directs you to the edit page?
@@ -30,9 +32,18 @@ export default function Dashboard() {
   const [scenarioGroupInfo, setScenarioGroupInfo] = useState([]);
   const [scenario, setCurrentScenario] = useState({});
   const [scenes, setScenes] = useState([]);
-  const [accessInfo, setAccessInfo] = useState(null)
+  const [accessInfo, setAccessInfo] = useState({allowed: false})
   const [allowed, setAllowed] = useState(false);
+    const {getUserIdToken} = useContext(AuthenticationContext);
+const [token, setToken] = useState("");
+    async function getToken(){
+        const temp = await getUserIdToken();
+        setToken(temp);
+    }
 
+    useEffect(() => {
+        getToken();
+    }, [])
   const {isLoading: accessLoading, error: accessError, res: accessRes} = useGet(`api/dashboard/scenarios/${scenarioId}/access`, setAccessInfo);
   // console.log(accessRes)
   useEffect(() => {
@@ -55,7 +66,7 @@ export default function Dashboard() {
       return;
     }
 
-    if(accessInfo.allowed)
+    if(accessInfo?.allowed == true)
     {
       setAllowed(true);
     }
@@ -158,8 +169,8 @@ export default function Dashboard() {
   }
   // Cheap way to block the user from seeing the dashboard page before permissions are fully checked.
   // Could be a better way?
+  
  if (allowed == false) return <LoadingPage text="Checking permissions..." />;
-
 
   return (
     <ScreenContainer vertical>
@@ -167,7 +178,7 @@ export default function Dashboard() {
         {/* Need to change the help button to maybe be able to pass something down like have a file of help messages which can be accessed and passed down to be page specific */}
         <HelpButton />
       </DashTopBar>
-      <AccessTable/>
+      <AccessTable token={token} ownerUid={scenario.uid}/>
       <div className="h-full px-10 py-7 overflow-y-scroll ">
         <h1 className="text-xl font-bold">
           {heading ? heading : <span className="invisible">placeholder</span>}
