@@ -50,11 +50,11 @@ export default function App() {
             <Switch>
               <Route exact path="/login" component={LoginPage} />
 
-               <ProtectedRoute exact path="/">
-                  <ScenarioContextProvider>
-                    <ScenarioSelectionPage />
-                  </ScenarioContextProvider>
-                </ProtectedRoute>
+              <ProtectedRoute exact path="/">
+                <ScenarioContextProvider>
+                  <ScenarioSelectionPage />
+                </ScenarioContextProvider>
+              </ProtectedRoute>
 
               <ProtectedRoute path="/play/:scenarioId">
                 <PlayScenarioResolver />
@@ -72,11 +72,11 @@ export default function App() {
                 </ScenarioContextProvider>
               </ProtectedRoute>
 
-                <ProtectedRoute path="/dashboard/:scenarioId">
-                  <ScenarioContextProvider>
-                    <Dashboard />
-                  </ScenarioContextProvider>
-                </ProtectedRoute>
+              <ProtectedRoute path="/dashboard/:scenarioId">
+                <ScenarioContextProvider>
+                  <Dashboard />
+                </ScenarioContextProvider>
+              </ProtectedRoute>
 
               <ScenarioContextProvider>
                 <Switch>
@@ -90,7 +90,6 @@ export default function App() {
                   </ProtectedRoute>
                 </Switch>
               </ScenarioContextProvider>
-
             </Switch>
           </BrowserRouter>
         </AuthenticationContextProvider>

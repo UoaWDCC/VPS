@@ -29,7 +29,7 @@ router.get("/", async (req, res) => {
 router.get("/min", async (req, res) => {
   const users = await retrieveAllUserMinAsc();
   res.json(users);
-})
+});
 
 // get user by uid
 router.get("/:uid", async (req, res) => {

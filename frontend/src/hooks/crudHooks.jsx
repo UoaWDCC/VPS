@@ -264,7 +264,7 @@ export function useGet(url, setData, requireAuth = true, skipRequest = false) {
   const [version, setVersion] = useState(0);
   const { getUserIdToken, user } = useContext(AuthenticationContext);
   // Could add a error state for the response etc to check on the frontend side
-  const [res, setRes] = useState(null)
+  const [res, setRes] = useState(null);
   const [error, setError] = useState(null);
   function reFetch() {
     setVersion(version + 1);
@@ -274,7 +274,7 @@ export function useGet(url, setData, requireAuth = true, skipRequest = false) {
     let isMounted = true;
 
     async function fetchData() {
-      if(!isMounted) return;
+      if (!isMounted) return;
       setLoading(true);
       setError(null);
 
@@ -291,18 +291,18 @@ export function useGet(url, setData, requireAuth = true, skipRequest = false) {
 
       try {
         const response = await axios.get(url, config);
-          if(!isMounted) return;
-          setData(response.data);
-          setRes(response)
+        if (!isMounted) return;
+        setData(response.data);
+        setRes(response);
       } catch (err) {
-        if(!isMounted) return;
+        if (!isMounted) return;
         console.log(
           `Request failed for ${url}:`,
           err.response?.status,
           err.message
         );
         setError(err.response);
-        setRes(err.response)
+        setRes(err.response);
         // If we get a 401 and have a user object, try to refresh the token
         if (err.response?.status === 401 && user && requireAuth) {
           console.log(`Attempting token refresh for ${url}`);
@@ -320,7 +320,7 @@ export function useGet(url, setData, requireAuth = true, skipRequest = false) {
               const retryResponse = await axios.get(url, retryConfig);
               if (isMounted) {
                 setData(retryResponse.data);
-                setRes(retryResponse)
+                setRes(retryResponse);
               }
             } else {
               console.log(`Token refresh failed for ${url}`);

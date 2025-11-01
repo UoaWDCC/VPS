@@ -34,30 +34,30 @@ const addThumbs = async (scenarios) => {
   return scenarioData;
 };
 
-const retrieveAccessibleScenarios = async(uid) => {
-  if(!uid) return [];
+const retrieveAccessibleScenarios = async (uid) => {
+  if (!uid) return [];
 
   //Get all access list where the user is on the list but not owner
   const access = await Access.find({
-    ownerId: {$ne: uid},
-    [`users.${uid}`]:{$exists: true}
-  }
-  ).sort({_id:1}).select("scenarioId -_id").lean();
+    ownerId: { $ne: uid },
+    [`users.${uid}`]: { $exists: true },
+  })
+    .sort({ _id: 1 })
+    .select("scenarioId -_id")
+    .lean();
 
-  const scenarioIds = [
-    ...access.map((s) => (s.scenarioId))
-  ]
-  if(scenarioIds.length == 0) return [];
+  const scenarioIds = [...access.map((s) => s.scenarioId)];
+  if (scenarioIds.length == 0) return [];
 
   const scenarios = await Scenario.find(
-    {_id: {$in: scenarioIds}},
-    {name: 1, scenes:{$slice: 1}}
-  ).sort({_id: 1})
-  .lean();
+    { _id: { $in: scenarioIds } },
+    { name: 1, scenes: { $slice: 1 } }
+  )
+    .sort({ _id: 1 })
+    .lean();
 
   return addThumbs(scenarios);
-  
-}
+};
 
 /**
  * Retrieves all scenarios authored by particular user

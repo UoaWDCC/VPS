@@ -82,7 +82,10 @@ router.put("/:scenarioId", async (req, res) => {
 // Delete a scenario of a user
 router.delete("/:scenarioId", async (req, res) => {
   const deleted = await deleteScenario(req.params.scenarioId);
-  const accessDeleted = await deleteAccessList(req.params.scenarioId, req.body.uid);
+  const accessDeleted = await deleteAccessList(
+    req.params.scenarioId,
+    req.body.uid
+  );
   if (deleted && accessDeleted) {
     res.sendStatus(HTTP_OK);
   } else {

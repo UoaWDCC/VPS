@@ -3,7 +3,7 @@ import ScenarioContext from "../../../context/ScenarioContext";
 import DashGroupTable from "./table/DashGroupTable";
 import StateVarTable from "./table/StateVarTable";
 
-export default function ViewGroup({groupInfo}) {
+export default function ViewGroup({ groupInfo }) {
   const [hasStateVar, setHasStateVar] = useState(false);
   const { stateVariables } = useContext(ScenarioContext);
 

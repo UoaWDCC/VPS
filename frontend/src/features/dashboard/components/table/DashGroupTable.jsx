@@ -22,9 +22,6 @@ const DashGroupTable = ({ groupInfo, rowClick }) => {
 
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
-  const tempLength = mode == "groups" ? group.length : group[0].users.length;
-  const emptyRows =
-    page > 0 ? Math.max(0, (1 + page) * rowsPerPage - tempLength) : 0;
   const [order, setOrder] = useState("asc");
   const [orderBy, setOrderBy] = useState(
     mode === "groups" ? "groupNum" : "name"
@@ -58,102 +55,105 @@ const DashGroupTable = ({ groupInfo, rowClick }) => {
     <div className="overflow-x-auto rounded-box border border-base-content/15 w-full">
       <table className="table table-zebra ">
         <thead>
-            {mode == "groups" ? (
-              <tr>
-                <CustomSortHeader
-                  active={orderBy === "groupNum"}
-                  direction={orderBy === "groupNum" ? order : "asc"}
-                  onClick={() => handleRequestSort("groupNum")}
-                  >
-                    Group Number
-                  </CustomSortHeader>
-                  <CustomSortHeader
-                  active={orderBy === "groupSize"}
-                      direction={orderBy === "groupSize" ? order : "asc"}
-                      onClick={() => handleRequestSort("groupSize")}
-                  >
-                    Number of Members
-                  </CustomSortHeader>
-                  <th>Members - [Role]</th>
-                  <CustomSortHeader
-                  active={orderBy === "groupStarted"}
-                  direction={orderBy === "groupStarted" ? order : "asc"}
-                  onClick={() => handleRequestSort("groupStarted")}
-                  >
-                    Started
-                  </CustomSortHeader>
-                  <th>View Progress</th>
-              </tr>
-            ): (
-              <tr>
-                <CustomSortHeader
-                  active={orderBy === "name"}
-                  direction={orderBy === "name" ? order : "asc"}
-                  onClick={() => handleRequestSort("name")}
-                  >
-                    Name
-                  </CustomSortHeader>
-                <CustomSortHeader
-                  active={orderBy === "email"}
-                  direction={orderBy === "email" ? order : "asc"}
-                  onClick={() => handleRequestSort("email")}
-                  >
-                    Email
-                  </CustomSortHeader>
-                   <CustomSortHeader
-                  active={orderBy === "role"}
-                  direction={orderBy === "role" ? order : "asc"}
-                  onClick={() => handleRequestSort("role")}
-                  >
-                    Role
-                  </CustomSortHeader>
-              </tr>
-            )}
+          {mode == "groups" ? (
+            <tr>
+              <CustomSortHeader
+                active={orderBy === "groupNum"}
+                direction={orderBy === "groupNum" ? order : "asc"}
+                onClick={() => handleRequestSort("groupNum")}
+              >
+                Group Number
+              </CustomSortHeader>
+              <CustomSortHeader
+                active={orderBy === "groupSize"}
+                direction={orderBy === "groupSize" ? order : "asc"}
+                onClick={() => handleRequestSort("groupSize")}
+              >
+                Number of Members
+              </CustomSortHeader>
+              <th>Members - [Role]</th>
+              <CustomSortHeader
+                active={orderBy === "groupStarted"}
+                direction={orderBy === "groupStarted" ? order : "asc"}
+                onClick={() => handleRequestSort("groupStarted")}
+              >
+                Started
+              </CustomSortHeader>
+              <th>View Progress</th>
+            </tr>
+          ) : (
+            <tr>
+              <CustomSortHeader
+                active={orderBy === "name"}
+                direction={orderBy === "name" ? order : "asc"}
+                onClick={() => handleRequestSort("name")}
+              >
+                Name
+              </CustomSortHeader>
+              <CustomSortHeader
+                active={orderBy === "email"}
+                direction={orderBy === "email" ? order : "asc"}
+                onClick={() => handleRequestSort("email")}
+              >
+                Email
+              </CustomSortHeader>
+              <CustomSortHeader
+                active={orderBy === "role"}
+                direction={orderBy === "role" ? order : "asc"}
+                onClick={() => handleRequestSort("role")}
+              >
+                Role
+              </CustomSortHeader>
+            </tr>
+          )}
         </thead>
         <tbody>
-          {mode == "groups"?
-            visibleRows.map((ginfo, index) => (
-              <tr key={ginfo._id || index}>
-                <td>{ginfo.users[0].group}</td>
-                <td>{ginfo.users.length}</td>
-                <td>{ginfo.users.map((user) => (
-                  <span key={user.email}>
-                    {user.name} - [{user.role}]
-                  </span>
-                ))}</td>
-                <td>{ginfo.path.length != 0 ? "Started" : "Not yet started"}</td>
-                <td><Visibility className="hover:cursor-pointer" onClick={() => {
-                  rowClick(ginfo._id)
-                }}/></td>
-              </tr>
-            ))  : visibleRows.map((user, index) => (
-              <tr key={user.email || index}>
-                <td>{user.name}</td>
-                <td>{user.email}</td>
-                <td>{user.role}</td>
-              </tr>
-            )) 
-        }
-        {/* {emptyRows > 0 && (
-          <tr style={{height: 46 * emptyRows}}>
-            <td colSpan={mode == "groups" ? 5 : 3}></td>
-          </tr>
-        )} */}
+          {mode == "groups"
+            ? visibleRows.map((ginfo, index) => (
+                <tr key={ginfo._id || index}>
+                  <td>{ginfo.users[0].group}</td>
+                  <td>{ginfo.users.length}</td>
+                  <td>
+                    {ginfo.users.map((user) => (
+                      <span key={user.email}>
+                        {user.name} - [{user.role}]
+                      </span>
+                    ))}
+                  </td>
+                  <td>
+                    {ginfo.path.length != 0 ? "Started" : "Not yet started"}
+                  </td>
+                  <td>
+                    <Visibility
+                      className="hover:cursor-pointer"
+                      onClick={() => {
+                        rowClick(ginfo._id);
+                      }}
+                    />
+                  </td>
+                </tr>
+              ))
+            : visibleRows.map((user, index) => (
+                <tr key={user.email || index}>
+                  <td>{user.name}</td>
+                  <td>{user.email}</td>
+                  <td>{user.role}</td>
+                </tr>
+              ))}
         </tbody>
         <tfoot>
           <CustomPagination
-              colSpan={mode == "groups" ? 5 : 3}
-              value={rowsPerPage}
-              onChange={handleChangeRowsPerPage}
-              count={group.length}
-              page={page}
-              rowsPerPage={rowsPerPage}
-              onPageChange={handleChangePage}
-              actionComponent={TablePaginationActions}
-            />
+            colSpan={mode == "groups" ? 5 : 3}
+            value={rowsPerPage}
+            onChange={handleChangeRowsPerPage}
+            count={group.length}
+            page={page}
+            rowsPerPage={rowsPerPage}
+            onPageChange={handleChangePage}
+            actionComponent={TablePaginationActions}
+          />
         </tfoot>
       </table>
-
     </div>
   );
 };

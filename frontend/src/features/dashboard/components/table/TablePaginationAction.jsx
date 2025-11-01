@@ -2,8 +2,6 @@
  * https://mui.com/material-ui/react-table/#custom-pagination-actions
  */
 
-import Box from "@mui/material/Box";
-import IconButton from "@mui/material/IconButton";
 import FirstPageIcon from "@mui/icons-material/FirstPage";
 import KeyboardArrowLeft from "@mui/icons-material/KeyboardArrowLeft";
 import KeyboardArrowRight from "@mui/icons-material/KeyboardArrowRight";
@@ -30,17 +28,16 @@ export default function TablePaginationActions(props) {
 
   return (
     <div className="flex gap-0.5">
-      <button 
-      className="btn btn-xs"
+      <button
+        className="btn btn-xs"
         onClick={handleFirstPageButtonClick}
         disabled={page === 0}
         aria-label="first page"
-
       >
         <FirstPageIcon />
       </button>
       <button
-      className="btn btn-xs"
+        className="btn btn-xs"
         onClick={handleBackButtonClick}
         disabled={page === 0}
         aria-label="previous page"
@@ -48,7 +45,7 @@ export default function TablePaginationActions(props) {
         <KeyboardArrowLeft />
       </button>
       <button
-      className="btn btn-xs"
+        className="btn btn-xs"
         onClick={handleNextButtonClick}
         disabled={page >= Math.ceil(count / rowsPerPage) - 1}
         aria-label="next page"
@@ -56,7 +53,7 @@ export default function TablePaginationActions(props) {
         <KeyboardArrowRight />
       </button>
       <button
-      className="btn btn-xs"
+        className="btn btn-xs"
         onClick={handleLastPageButtonClick}
         disabled={page >= Math.ceil(count / rowsPerPage) - 1}
         aria-label="last page"

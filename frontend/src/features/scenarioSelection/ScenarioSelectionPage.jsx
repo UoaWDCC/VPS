@@ -12,7 +12,7 @@ import { useDelete, usePut } from "../../hooks/crudHooks";
 import { toast } from "react-hot-toast";
 import MovieFilterRoundedIcon from "@mui/icons-material/MovieFilterRounded";
 import TheatersRoundedIcon from "@mui/icons-material/TheatersRounded";
-import AssessmentIcon from '@mui/icons-material/Assessment';
+import AssessmentIcon from "@mui/icons-material/Assessment";
 
 /**
  * Page that shows the user's existing scenarios.
@@ -103,13 +103,13 @@ export default function ScenarioSelectionPage() {
   // Show the toast if included in payload when redirecting
   useEffect(() => {
     const payload = location.state?.toast;
-    if(payload?.message) {
-      const toastFunc = payload.type == "error" ? toast.error: toast;
-      const options = {...payload.options}
+    if (payload?.message) {
+      const toastFunc = payload.type == "error" ? toast.error : toast;
+      const options = { ...payload.options };
       toastFunc(payload.message, options);
       history.replace("/", {});
     }
-  }, [location, history])
+  }, [location, history]);
 
   useEffect(() => {
     setCurrentScenario(null);
@@ -183,24 +183,24 @@ export default function ScenarioSelectionPage() {
 
           {accessScenarios && (
             <div>
-                <h1 className="text-3xl font-mona font-bold my-3 flex items-center gap-3">
-                  <AssessmentIcon fontSize="large" /> Dashboard Access
-                </h1>
+              <h1 className="text-3xl font-mona font-bold my-3 flex items-center gap-3">
+                <AssessmentIcon fontSize="large" /> Dashboard Access
+              </h1>
 
-                <div>
-                  <ThumbnailList
-                    // data={userScenarios}
-                    data={accessScenarios.map((scenario) => {
-                      scenario.components = scenario.thumbnail?.components || [];
-                      return scenario;
-                    })}
-                    onItemSelected={setCurrentScenario}
-                    onItemDoubleClick={editScenario}
-                    onItemBlur={changeScenarioName}
-                    invalidNameId={invalidNameId}
-                  />
-                </div>
+              <div>
+                <ThumbnailList
+                  // data={userScenarios}
+                  data={accessScenarios.map((scenario) => {
+                    scenario.components = scenario.thumbnail?.components || [];
+                    return scenario;
+                  })}
+                  onItemSelected={setCurrentScenario}
+                  onItemDoubleClick={editScenario}
+                  onItemBlur={changeScenarioName}
+                  invalidNameId={invalidNameId}
+                />
               </div>
+            </div>
           )}
 
           {/* List of scenarios assigned to the logged-in user */}
