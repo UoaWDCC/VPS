@@ -18,6 +18,7 @@ import Scenario from "../../../db/models/scenario.js";
 import Scene from "../../../db/models/scene.js";
 import auth from "../../../middleware/firebaseAuth.js";
 import scenarioAuth from "../../../middleware/scenarioAuth.js";
+import Access from "../../../db/models/access.js";
 
 jest.mock("../../../middleware/firebaseAuth");
 jest.mock("../../../middleware/scenarioAuth");
@@ -70,6 +71,20 @@ describe("Scenario API tests", () => {
     uid: "user1",
   };
 
+  const access1 = {
+    scenarioId: new mongoose.mongo.ObjectId("000000000000000000000001"),
+    name: "Scenario 1",
+    ownerId: "user1",
+    users: {},
+  }
+
+  const access2 = {
+    scenarioId: new mongoose.mongo.ObjectId("000000000000000000000002"),
+    name: "Scenario 2",
+    ownerId: "user1",
+    users: {},
+  }
+
   // setup in-memory mongodb and express API
   beforeAll(async () => {
     mongoServer = await MongoMemoryServer.create();
@@ -88,6 +103,7 @@ describe("Scenario API tests", () => {
   beforeEach(async () => {
     // Add scenario to database
     await Scenario.create([scenario1, scenario2]);
+    await Access.create([access1, access2]);
     await Scene.create([scene1, scene2]);
   });
 

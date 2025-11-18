@@ -68,7 +68,7 @@ describe("Scenario Auth Middleware tests", () => {
     const res = mockResponse();
     await scenarioAuth(req, res, nextFunction);
 
-    expect(nextFunction).toBeCalledTimes(1);
+    expect(nextFunction).toHaveBeenCalledTimes(1);
   });
 
   it("fails unauthorised user for scenario", async () => {

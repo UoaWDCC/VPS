@@ -120,7 +120,6 @@ export default function App() {
 
                 <ScenarioContextProvider>
                   <Switch>
-                  
                     <ProtectedRoute path="/scenario/:scenarioId/manage-resources">
                       <ManageResourcesPage />
                     </ProtectedRoute>
@@ -134,7 +133,6 @@ export default function App() {
                         <ScenePage />
                       </SceneContextProvider>
                     </ProtectedRoute>
-
                   </Switch>
                 </ScenarioContextProvider>
               </Switch>
