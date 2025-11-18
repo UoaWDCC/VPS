@@ -81,6 +81,10 @@ export default function App() {
                   </ScenarioContextProvider>
                 </ProtectedRoute>
 
+                <ProtectedRoute path="/play/:scenarioId">
+                  <PlayScenarioResolver />
+                </ProtectedRoute>
+
                 <ProtectedRoute exact path="/play">
                   <ScenarioContextProvider>
                     <PlayLandingPage />
@@ -93,22 +97,16 @@ export default function App() {
                   </ScenarioContextProvider>
                 </ProtectedRoute>
 
-                <ProtectedRoute path="/play/:scenarioId">
-                  <PlayScenarioResolver />
+                <ProtectedRoute path="/dashboard/:scenarioId">
+                  <ScenarioContextProvider>
+                    <Dashboard />
+                  </ScenarioContextProvider>
                 </ProtectedRoute>
 
                 {/* New Create Landing Page Route */}
                 <ProtectedRoute exact path="/create">
                   <ScenarioContextProvider>
                     <CreateLandingPage />
-                  </ScenarioContextProvider>
-                </ProtectedRoute>
-
-                <ProtectedRoute path="/dashboard/:scenarioId">
-                  <ScenarioContextProvider>
-                    <SceneContextProvider>
-                      <Dashboard />
-                    </SceneContextProvider>
                   </ScenarioContextProvider>
                 </ProtectedRoute>
 
@@ -125,9 +123,11 @@ export default function App() {
                     <ProtectedRoute path="/scenario/:scenarioId/manage-resources">
                       <ManageResourcesPage />
                     </ProtectedRoute>
+
                     <ProtectedRoute path="/scenario/:scenarioId/manage-groups">
                       <ManageGroupsPage />
                     </ProtectedRoute>
+
                     <ProtectedRoute index path="/scenario/:scenarioId">
                       <SceneContextProvider>
                         <ScenePage />

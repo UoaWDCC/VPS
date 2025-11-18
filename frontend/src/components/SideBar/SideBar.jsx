@@ -45,7 +45,6 @@ export default function SideBar() {
       getUserIdToken
     );
     setCurrentScenario(newScenario);
-
     history.push(`/scenario/${newScenario._id}`);
   }
 

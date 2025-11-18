@@ -1,10 +1,10 @@
 import ScreenContainer from "../../components/ScreenContainer/ScreenContainer";
 import { useGet } from "hooks/crudHooks";
 import { useParams, useHistory, useRouteMatch, Switch } from "react-router-dom";
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo, useContext } from "react";
 import DashTopBar from "./components/DashTopBar";
 import HelpButton from "../../components/HelpButton";
-import DashGroupTable from "./components/DashGroupTable";
+import DashGroupTable from "./components/table/DashGroupTable";
 import GroupsIcon from "@mui/icons-material/Groups";
 import PlayArrowIcon from "@mui/icons-material/PlayArrow";
 import HourglassEmptyIcon from "@mui/icons-material/HourglassEmpty";
@@ -13,6 +13,10 @@ import CreateGraphData from "./utils/GraphHelper";
 import ScenarioGraph from "./components/ScenarioGraph";
 import ProtectedRoute from "../../firebase/ProtectedRoute";
 import ViewGroup from "./components/ViewGroup";
+import LoadingPage from "../status/LoadingPage";
+import AccessTable from "./components/table/AccessTable";
+import AuthenticationContext from "../../context/AuthenticationContext";
+
 /**
  * Could maybe add some info about the scenario? Who created what time, last edited, thumbnail of the scenario and an overlay edit button * which directs you to the edit page?
  *
@@ -24,15 +28,85 @@ export default function Dashboard() {
   const { scenarioId } = useParams();
   const history = useHistory();
   const [scenarioGroupInfo, setScenarioGroupInfo] = useState([]);
-  const [scenario, setCurrentSecnario] = useState({});
+  const [scenario, setCurrentScenario] = useState({});
   const [scenes, setScenes] = useState([]);
-  useGet(`api/scenario/${scenarioId}`, setCurrentSecnario);
-  useGet(`api/scenario/${scenarioId}/scene/all`, setScenes);
+  const [accessInfo, setAccessInfo] = useState({ allowed: false });
+  const [allowed, setAllowed] = useState(false);
+  const { getUserIdToken, user } = useContext(AuthenticationContext);
+
+  const [token, setToken] = useState("");
+  async function getToken() {
+    const temp = await getUserIdToken();
+    setToken(temp);
+  }
+
+  useEffect(() => {
+    getToken();
+  }, []);
+  const {
+    isLoading: accessLoading,
+    error: accessError,
+    res: accessRes,
+  } = useGet(`api/dashboard/scenarios/${scenarioId}/access`, setAccessInfo);
+  // console.log(accessRes)
+  useEffect(() => {
+    if (accessLoading || !accessRes) return;
+    // Middleware deny
+
+    if (accessRes.status == 401 || accessRes == null) {
+      setAllowed(false);
+      history.replace("/", {
+        toast: {
+          message:
+            "Access denied. If you believe this is an error, please contact the author of the scenario.",
+          type: "error",
+          options: { duration: 6000 },
+        },
+      });
+      return;
+    }
+
+    /**
+     * In practice this error should not occur as it's the middleware is currently running checks against an access list
+     * which would be created alongside when new scenarios are created. This error currently is in place due to an access list not existsing but will implement a check in the dashboard middleware to check for ownership against the scenario it self and not search for the access list to make it more robust and support legacy scenarios. Ideally, once this is implemented the dashboard page when there is no access list found, the author would be able to access it and it should have a button for them to create an access list, this would then allow them to add extra users for dashboard.
+     */
+    if (accessRes.status == 404) {
+      setAllowed(false);
+      history.replace("/", {
+        toast: {
+          message: "Not Found",
+          type: "error",
+          options: { duration: 6000 },
+        },
+      });
+      return;
+    }
+
+    if (accessInfo?.allowed == true) {
+      setAllowed(true);
+    }
+  }, [accessLoading, accessError, accessInfo, accessRes]);
+
+  useGet(
+    `api/dashboard/scenarios/${scenarioId}`,
+    setCurrentScenario,
+    true,
+    !allowed
+  );
+  useGet(
+    `api/dashboard/scenarios/${scenarioId}/scenes`,
+    setScenes,
+    true,
+    !allowed
+  );
 
   const { isLoading } = useGet(
-    `/api/group/scenario/${scenarioId}`,
-    setScenarioGroupInfo
+    `/api/dashboard/scenarios/${scenarioId}/groups`,
+    setScenarioGroupInfo,
+    true,
+    !allowed
   );
+
   // Check what page we are on
   const matchViewGroup = useRouteMatch(`${path}/view-group/:groupId`);
   const backURL = matchViewGroup ? url : "/";
@@ -45,10 +119,10 @@ export default function Dashboard() {
   }, [scenario]);
   // Fetch group data if in view group mode, skips if not
   useGet(
-    `/api/group/retrieve/${viewGroupId}`,
+    `/api/dashboard/groups/${viewGroupId}`,
     setGroupInfo,
     true,
-    !isViewGroupMode
+    !isViewGroupMode || !allowed
   );
 
   const viewGroup = async (groupId) => {
@@ -68,7 +142,7 @@ export default function Dashboard() {
       return;
     }
     if (Object.keys(groupInfo).length == 0) return;
-    setHeading(`Group: ${groupInfo.users[0].name}`);
+    setHeading(`${groupInfo.users[0].name}`);
   }, [groupInfo]);
 
   // Create the graph data, also passes if the current group info if it's present
@@ -84,6 +158,7 @@ export default function Dashboard() {
     const groupsStarted = groupData.filter(
       (group) => group.path.length != 0
     ).length;
+
     return (
       <div
         className={`${className} inline-grid lg:stats-vertical xl:stats-horizontal shadow-(--color-base-content-box-shadow) w-full`}
@@ -115,6 +190,10 @@ export default function Dashboard() {
       </div>
     );
   };
+  // Cheap way to block the user from seeing the dashboard page before permissions are fully checked.
+  // Could be a better way?
+
+  if (allowed == false) return <LoadingPage text="Checking permissions..." />;
 
   return (
     <ScreenContainer vertical>
@@ -123,7 +202,7 @@ export default function Dashboard() {
         <HelpButton />
       </DashTopBar>
       <div className="h-full px-10 py-7 overflow-y-scroll ">
-        <h1 className="text-3xl font-mona font-bold my-3 flex items-center gap-3">
+        <h1 className="text-xl font-bold">
           {heading ? heading : <span className="invisible">placeholder</span>}
         </h1>
         <div className="flex gap-10">
@@ -135,6 +214,13 @@ export default function Dashboard() {
                   className={"lg:stats-horizontal mb-10"}
                   groupData={scenarioGroupInfo}
                 />
+                {user.uid == scenario.uid && (
+                  <div className="mb-10">
+                    <h1 className="text-xl">Access List</h1>
+                    <AccessTable token={token} ownerUid={scenario.uid} />
+                  </div>
+                )}
+                <h1 className="text-xl">Groups Table</h1>
                 {!isLoading && (
                   <DashGroupTable
                     groupInfo={scenarioGroupInfo}
@@ -143,7 +229,7 @@ export default function Dashboard() {
                 )}
               </ProtectedRoute>
               <ProtectedRoute path={`${path}/view-group/:groupId`}>
-                <ViewGroup />
+                <ViewGroup groupInfo={groupInfo} />
               </ProtectedRoute>
             </Switch>
           </div>
