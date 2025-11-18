@@ -76,14 +76,14 @@ describe("Scenario API tests", () => {
     name: "Scenario 1",
     ownerId: "user1",
     users: {},
-  }
+  };
 
   const access2 = {
     scenarioId: new mongoose.mongo.ObjectId("000000000000000000000002"),
     name: "Scenario 2",
     ownerId: "user1",
     users: {},
-  }
+  };
 
   // setup in-memory mongodb and express API
   beforeAll(async () => {
