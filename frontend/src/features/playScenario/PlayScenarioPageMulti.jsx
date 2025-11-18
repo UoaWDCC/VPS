@@ -12,6 +12,7 @@ import ResourcesModal from "./modals/ResourcesModal/ResourcesModal";
 import PlayPageSideButton from "./components/PlayPageSideButton/PlayPageSideButton";
 import PlayScenarioCanvas from "./PlayScenarioCanvas";
 import { applyStateOperations } from "../../components/StateVariables/stateOperations";
+import { filterResourcesByConditions } from "../../utils/stateConditionalEvaluator";
 
 const sceneCache = new Map();
 
@@ -123,7 +124,11 @@ export default function PlayScenarioPageMulti({ group }) {
         componentId
       );
       const newResources = await getResources(user, group._id);
-      setResources(newResources);
+      const filteredResources = filterResourcesByConditions(
+        newResources,
+        stateVariables
+      );
+      setResources(filteredResources);
 
       // Updates state variables if there is a desync
       if (stateVersion < newStateVersion) {
@@ -191,6 +196,7 @@ export default function PlayScenarioPageMulti({ group }) {
         setAddFlags={setAddFlags}
         setRemoveFlags={setRemoveFlags}
         buttonPressed={buttonPressed}
+        stateVariables={stateVariables}
       />
       <PlayPageSideButton
         setNoteOpen={setNoteOpen}

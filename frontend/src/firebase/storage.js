@@ -3,7 +3,6 @@ import {
   uploadBytesResumable,
   updateMetadata,
   getDownloadURL,
-  deleteObject,
 } from "firebase/storage";
 import { v4 } from "uuid";
 import { storage } from "./firebase";
@@ -17,8 +16,8 @@ import { storage } from "./firebase";
  * @param {string} sceneId
  * @returns
  */
-const uploadFile = async (file, scenarioId, sceneId, isEndImage) => {
-  const fileUUID = isEndImage ? "endImage" : v4(); // Generate a UUID or use "endImage"
+const uploadFile = async (file, scenarioId, sceneId) => {
+  const fileUUID = v4();
   const storageRef = ref(storage, `${scenarioId}/${sceneId}/${fileUUID}`); // Create a storage reference
   const uploadTask = uploadBytesResumable(storageRef, file); // Start the upload
 
@@ -75,46 +74,50 @@ const uploadFile = async (file, scenarioId, sceneId, isEndImage) => {
  * Function to delete file from Firebase
  * @param {string} fileUrl
  */
-const deleteFile = (fileUrl) => {
-  const fileRef = ref(storage, fileUrl);
-  deleteObject(fileRef)
-    .then(() => {})
-    .catch((error) => {
-      console.log("Error to delete file:", error);
-    });
-};
+// const deleteFile = (fileUrl) => {
+//   const fileRef = ref(storage, fileUrl);
+//   deleteObject(fileRef)
+//     .then(() => {})
+//     .catch((error) => {
+//       console.log("Error to delete file:", error);
+//     });
+// };
+
+// to prevent reuploads
+const uploads = new Map();
 
 /**
  * Method to upload files to Firebase Storage
  * @param {[Object]} components - List of components
- * @param {File} endImage - The end image file to upload
  * @param {string} scenarioId - The ID of the scenario
  * @param {string} sceneId - The ID of the scene
  * @returns {Promise<void>}
  */
-const uploadFiles = async (components, endImage, scenarioId, sceneId) => {
-  // Loop through each component and upload if it's a FIREBASEIMAGE or FIREBASEAUDIO
-  for (let i = 0; i < components.length; i += 1) {
-    if (
-      (components[i].type === "FIREBASEIMAGE" ||
-        components[i].type === "FIREBASEAUDIO") &&
-      "fileObject" in components[i]
-    ) {
-      components[i].url = await uploadFile(
-        components[i].fileObject,
-        scenarioId,
-        sceneId,
-        false
-      );
-      delete components[i].fileObject; // Remove the fileObject after uploading
+export async function parseMedia(components, scenarioId, sceneId) {
+  // remove uploads that no longer exist in components
+  const currentUrls = new Set(components.map((c) => c.url));
+  for (const key of uploads.keys()) {
+    if (!currentUrls.has(key)) {
+      uploads.delete(key);
     }
   }
 
-  // Upload the endImage if provided
-  if (endImage) {
-    const endImageUrl = await uploadFile(endImage, scenarioId, sceneId, true);
-    console.log("End image uploaded at:", endImageUrl);
-  }
-};
+  // upload any media to firebase
+  for (const component of components) {
+    if (component.type === "audio" && "fileObject" in component) {
+      if (uploads.has(component.url)) return;
 
-export { uploadFile, deleteFile, uploadFiles };
+      const firebaseUrl = await uploadFile(
+        component.fileObject,
+        scenarioId,
+        sceneId
+      );
+
+      uploads.set(component.url, firebaseUrl);
+      component.url = firebaseUrl;
+      delete component.fileObject;
+    }
+  }
+
+  return components;
+}

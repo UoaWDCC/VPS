@@ -2,7 +2,6 @@ import { Router } from "express";
 import mongoose from "mongoose";
 import auth from "../../middleware/firebaseAuth.js";
 import CollectionGroup from "../../db/models/CollectionGroup.js";
-import CollectionChild from "../../db/models/CollectionChild.js";
 import StoredFile from "../../db/models/StoredFile.js";
 import { deleteGridFsById } from "../../util/gridfs.js";
 
@@ -16,16 +15,21 @@ router.use((req, _res, next) => {
   next();
 });
 
+// Require Firebase auth for all routes below
 router.use(auth);
 
-// Create Group
+/**
+ * @route POST /api/collections/groups
+ * @desc Create a new group under a scenario
+ */
 router.post("/groups", async (req, res) => {
   try {
     const { scenarioId, name, order = 0 } = req.body;
-    if (!scenarioId || !name)
+    if (!scenarioId || !name) {
       return res
         .status(400)
         .json({ error: "scenarioId and name are required" });
+    }
 
     const group = await CollectionGroup.create({
       scenarioId: new mongoose.Types.ObjectId(scenarioId),
@@ -39,89 +43,39 @@ router.post("/groups", async (req, res) => {
   }
 });
 
-// Create Child
-router.post("/children", async (req, res) => {
-  try {
-    const { scenarioId, groupId, name, order = 0 } = req.body;
-    if (!scenarioId || !groupId || !name) {
-      return res
-        .status(400)
-        .json({ error: "scenarioId, groupId and name are required" });
-    }
-
-    // Validate group belongs to scenario
-    const group = await CollectionGroup.findById(groupId);
-    if (!group) return res.status(404).json({ error: "Group not found" });
-    if (String(group.scenarioId) !== String(scenarioId)) {
-      return res
-        .status(400)
-        .json({ error: "groupId does not belong to scenarioId" });
-    }
-
-    const child = await CollectionChild.create({
-      scenarioId: new mongoose.Types.ObjectId(scenarioId),
-      groupId: new mongoose.Types.ObjectId(groupId),
-      name,
-      order,
-    });
-
-    return res.status(201).json(child);
-  } catch (err) {
-    return res.status(500).json({ error: err.message });
-  }
-});
-
-// Get full tree for a scenarioId
+/**
+ * @route GET /api/collections/tree/:scenarioId
+ * @desc Get all groups + their files for a scenario
+ */
 router.get("/tree/:scenarioId", async (req, res) => {
   try {
     const { scenarioId } = req.params;
     const scenarioObjId = new mongoose.Types.ObjectId(scenarioId);
 
-    const [groups, children, files] = await Promise.all([
+    const [groups, files] = await Promise.all([
       CollectionGroup.find({ scenarioId: scenarioObjId })
         .sort({ order: 1, name: 1 })
-        .lean(),
-      CollectionChild.find({ scenarioId: scenarioObjId })
-        .sort({ groupId: 1, order: 1, name: 1 })
         .lean(),
       StoredFile.find({ scenarioId: scenarioObjId })
         .sort({ createdAt: -1 })
         .lean(),
     ]);
 
-    // index children by groupId
-    const childrenByGroup = new Map();
-    for (const c of children) {
-      const key = String(c.groupId);
-      if (!childrenByGroup.has(key)) childrenByGroup.set(key, []);
-      childrenByGroup.get(key).push({ ...c, files: [] });
-    }
-
-    // index files by childId
-    const filesByChild = new Map();
+    // index files by groupId
+    const filesByGroup = new Map();
     for (const f of files) {
-      const key = String(f.childId);
-      if (!filesByChild.has(key)) filesByChild.set(key, []);
-
-      // omit gridFsId without creating an unused variable
+      const key = String(f.groupId);
+      if (!filesByGroup.has(key)) filesByGroup.set(key, []);
       const safe = { ...f };
-      delete safe.gridFsId;
-
-      filesByChild.get(key).push(safe);
+      delete safe.gridFsId; // never send internal GridFS IDs to client
+      filesByGroup.get(key).push(safe);
     }
 
-    // attach files to children
-    for (const list of childrenByGroup.values()) {
-      for (const child of list) {
-        child.files = filesByChild.get(String(child._id)) || [];
-      }
-    }
-
-    // build groups -> children
-    const tree = groups.map((g) => {
-      const kids = childrenByGroup.get(String(g._id)) || [];
-      return { ...g, children: kids };
-    });
+    // attach files directly to each group
+    const tree = groups.map((g) => ({
+      ...g,
+      files: filesByGroup.get(String(g._id)) || [],
+    }));
 
     return res.json(tree);
   } catch (err) {
@@ -129,7 +83,10 @@ router.get("/tree/:scenarioId", async (req, res) => {
   }
 });
 
-// Delete a group (cascade children + files + GridFS)
+/**
+ * @route DELETE /api/collections/groups/:groupId
+ * @desc Delete a group and all associated files
+ */
 router.delete("/groups/:groupId", async (req, res) => {
   try {
     const { groupId } = req.params;
@@ -137,20 +94,11 @@ router.delete("/groups/:groupId", async (req, res) => {
     const group = await CollectionGroup.findById(groupId);
     if (!group) return res.status(404).json({ error: "Group not found" });
 
-    const children = await CollectionChild.find({ groupId: group._id }, "_id");
-    const childIds = children.map((c) => c._id);
-
-    // All files under this group (covers all children)
     const files = await StoredFile.find({ groupId: group._id }, "_id gridFsId");
 
-    // Delete GridFS blobs
+    // Delete GridFS blobs and metadata
     await Promise.all(files.map((f) => deleteGridFsById(f.gridFsId)));
-
-    // Delete file metadata
     await StoredFile.deleteMany({ groupId: group._id });
-
-    // Delete children
-    await CollectionChild.deleteMany({ groupId: group._id });
 
     // Delete group
     await group.deleteOne();
@@ -158,32 +106,6 @@ router.delete("/groups/:groupId", async (req, res) => {
     return res.json({
       deleted: {
         groups: 1,
-        children: childIds.length,
-        files: files.length,
-      },
-    });
-  } catch (err) {
-    return res.status(500).json({ error: err.message });
-  }
-});
-
-// Delete a child (cascade files + GridFS)
-router.delete("/children/:childId", async (req, res) => {
-  try {
-    const { childId } = req.params;
-
-    const child = await CollectionChild.findById(childId);
-    if (!child) return res.status(404).json({ error: "Child not found" });
-
-    const files = await StoredFile.find({ childId: child._id }, "_id gridFsId");
-
-    await Promise.all(files.map((f) => deleteGridFsById(f.gridFsId)));
-    await StoredFile.deleteMany({ childId: child._id });
-    await child.deleteOne();
-
-    return res.json({
-      deleted: {
-        children: 1,
         files: files.length,
       },
     });

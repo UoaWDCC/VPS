@@ -222,3 +222,15 @@ body,
   color: var(--color-base-content) !important;
   box-shadow: var(--color-base-content-box-shadow);
 }
+
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.btn.btn-phantom {
+  @apply btn-ghost font-normal text-primary hover:text-secondary border-none shadow-none bg-transparent;
+}

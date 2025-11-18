@@ -4,6 +4,7 @@ import "./playPage.css";
 import HorizontalGradientLine from "./components/HorizontalGradientLine";
 import Thumbnail from "../authoring/components/Thumbnail";
 import ScenarioContext from "../../context/ScenarioContext";
+import FabMenu from "../../components/FabMenu";
 
 function PlayPage() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -107,6 +108,7 @@ function PlayPage() {
           </div>
         ))}
       </div>
+      <FabMenu />
     </div>
   );
 }
