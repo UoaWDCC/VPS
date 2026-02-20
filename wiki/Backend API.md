@@ -1,4 +1,7 @@
-## Backend API
+# Backend API
+
+> [!WARNING]
+> I'm unsure how accurate this documentation is, given that it wasn’t updated at all during 2024. If you find something inaccurate or something missing, please correct it or add in some brief documentation for the endpoint. If you’re unsure ask someone else, it would be great to get it fully accurate at some point. - Hartej
 
 ### Routes
 

@@ -1,4 +1,4 @@
-# Uploading Image and Audio Files
+# Uploading Media Files
 
 This project uses [Firebase Storage](https://firebase.google.com/docs/storage) to allow users are given the ability to upload their own image and audio files. These files are stored in Firebase's Cloud Storage.
 

@@ -19,9 +19,9 @@ This project was initally associated with The University of Auckland SOFTENG 761
 
 # Contributing
 
-Onboarding documentation can be found in the Github Wiki under `Wiki/Onboarding`.
+[Documentation](./wiki/VPS%20Home.md) for the project lives here in this repo, with some basic onboarding / setup information and (very!) partial documentation of the codebase.
 
-This project uses the [conventional commits](https://www.conventionalcommits.org) specification for commit messages.
+Try to use the [conventional commits](https://www.conventionalcommits.org) specification for commit messages, it makes it easier for everyone.
 
 # Contributors ✨
 
