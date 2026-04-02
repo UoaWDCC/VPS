@@ -7,7 +7,7 @@ This is information about running unit-tests on your code, and linting your code
 1. Open terminal and `cd frontend` or `cd backend` depending on which folder you are testing
 2. Run `yarn run test` to run unit tests
 3. Run `yarn run lint` to lint; Run `yarn run lint:fix` to fix linting;
-4. Run `yarn run prettier` to test for prettier; Run `yarn run prettify` to fix prettier issues;
+4. Run `yarn run prettier` to test for prettier; Run `yarn run prettier:write` to fix prettier issues;
 
 To update the Jest snapshots (e.g. when updating the UI) and pass all the frontend tests:
 
