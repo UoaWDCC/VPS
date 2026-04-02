@@ -1,9 +1,8 @@
-app = 'wdcc-vps-staging'
+app = 'wdcc-vps'
 primary_region = 'syd'
 swap_size_mb = 512
 
 [build]
-  # dockerfile contains build time non-sensitive env vars
   dockerfile = "Dockerfile"
 
 [http_service]
@@ -17,4 +16,4 @@ swap_size_mb = 512
 [[vm]]
   cpu_kind = 'shared'
   cpus = 1
-  memory_mb = 256
+  memory_mb = 512
