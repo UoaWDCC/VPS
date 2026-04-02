@@ -1,25 +1,19 @@
-## Describe the issue
+## Issue
 
-A clear and concise description of what the issue is.
+_A clear and concise description of what the issue is_
 
-## Describe the solution
+## Solution
 
-A clear and concise description of what the solution is.
+_A clear and concise description of what the solution is_
 
 ## Risk
 
-Potential risks that this PR might brings
+_Potential risks that this PR might bring_
 
-## Definition of Done
+## Checklist
 
-- [ ] Code peer-reviewed
-- [ ] Wiki Documentation is written and up to date
+- [ ] Acceptance criteria met
+- [ ] Wiki documentation is written and up to date
 - [ ] Unit tests written and passing
 - [ ] Integration tests written and passing
-- [ ] Continuous Integration build passing
-- [ ] Acceptance criteria met
-- [ ] Deployed to production environment
-
-## Reviewed By
-
-Who reviewed your PR - for commit history once merged
+- [ ] Continuous integration build passing
