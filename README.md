@@ -98,6 +98,9 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
       <td align="center" valign="top" width="16.66%"><a href="https://github.com/afei088"><img src="https://avatars.githubusercontent.com/u/60560589?v=4?s=100" width="100px;" alt="Andrew Fei"/><br /><sub><b>Andrew Fei</b></sub></a><br /><a href="https://github.com/UoaWDCC/VPS/commits?author=afei088" title="Code">💻</a></td>
       <td align="center" valign="top" width="16.66%"><a href="https://github.com/del-ereno"><img src="https://avatars.githubusercontent.com/u/154120298?v=4?s=100" width="100px;" alt="del"/><br /><sub><b>del</b></sub></a><br /><a href="https://github.com/UoaWDCC/VPS/commits?author=del-ereno" title="Code">💻</a></td>
     </tr>
+    <tr>
+      <td align="center" valign="top" width="16.66%"><a href="https://github.com/leowla"><img src="https://avatars.githubusercontent.com/u/38830741?v=4?s=100" width="100px;" alt="Leo Wang"/><br /><sub><b>Leo Wang</b></sub></a><br /><a href="https://github.com/UoaWDCC/VPS/commits?author=leowla" title="Code">💻</a></td>
+    </tr>
   </tbody>
 </table>
 
