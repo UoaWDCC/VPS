@@ -100,6 +100,7 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
     </tr>
     <tr>
       <td align="center" valign="top" width="16.66%"><a href="https://github.com/leowla"><img src="https://avatars.githubusercontent.com/u/38830741?v=4?s=100" width="100px;" alt="Leo Wang"/><br /><sub><b>Leo Wang</b></sub></a><br /><a href="https://github.com/UoaWDCC/VPS/commits?author=leowla" title="Code">💻</a></td>
+      <td align="center" valign="top" width="16.66%"><a href="https://github.com/kmck133"><img src="https://avatars.githubusercontent.com/u/160551320?v=4?s=100" width="100px;" alt="Kieran McKenna"/><br /><sub><b>Kieran McKenna</b></sub></a><br /><a href="https://github.com/UoaWDCC/VPS/commits?author=kmck133" title="Documentation">📖</a></td>
     </tr>
   </tbody>
 </table>
