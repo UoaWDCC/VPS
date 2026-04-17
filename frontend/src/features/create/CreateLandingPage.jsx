@@ -94,24 +94,13 @@ export default function CreateLandingPage() {
       <TopNavBar
         onLogout={handleLogout}
         onOpenDashboard={openDashboardModal}
-        activeTab="create"
+        activeTab={showDashboardModal ? "dashboard" : "create"}
       />
 
       {/* Rest of your component remains the same */}
-      <div className="section-block">
-        <h2 className="section-header">Create</h2>
-        <div className="scenarios-grid">
-          <div className="scenario-card create-card" onClick={handleCreate}>
-            <div className="scenario-card-thumbnail create-thumbnail">
-              <span className="create-plus">+</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
       {/* Edit Section */}
       <div className="section-block">
-        <h2 className="section-header">Edit</h2>
+        <h2 className="section-header">Create & Edit</h2>
 
         <div className="search-section">
           <div className="search-container-play">
@@ -145,6 +134,11 @@ export default function CreateLandingPage() {
         </div>
 
         <div className="scenarios-grid">
+          <div className="scenario-card create-card" onClick={handleCreate}>
+            <div className="scenario-card-thumbnail create-thumbnail">
+              <span className="create-plus">+</span>
+            </div>
+          </div>
           {filteredScenarios.map((scenario) => (
             <div
               key={scenario._id}
@@ -211,7 +205,7 @@ export default function CreateLandingPage() {
       {/* Dashboard Modal */}
       {showDashboardModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-black-800 p-8 rounded-lg max-w-7xl w-full h-4/5 overflow-y-auto relative animate-slide-up">
+          <div className="bg-white-800 p-8 rounded-lg max-w-7xl w-full h-4/5 overflow-y-auto relative animate-slide-up border-white border-2">
             <button
               className="btn btn-sm btn-square absolute right-2 top-2 text-white"
               onClick={() => setShowDashboardModal(false)}

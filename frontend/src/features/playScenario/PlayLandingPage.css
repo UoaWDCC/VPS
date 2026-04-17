@@ -18,7 +18,7 @@
 }
 
 .nav-left {
-  display: flex;
+  display: flex; 
   align-items: center;
 }
 
@@ -34,6 +34,7 @@
   border-radius: none !important; /* edit */
   font-size: 14px;
   transition: color 0.2s ease;
+  margin-left: auto;
 }
 
 .logout-btn:hover {
@@ -45,13 +46,38 @@
   height: 16px;
 }
 
-.nav-right {
+.back-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: transparent;
+  border: none;
+  color: var(--color-grey);
+  cursor: pointer;
+  padding: 0.5rem 1rem;
+  border-radius: none !important; /* edit */
+  font-size: 14px;
+  transition: color 0.2s ease;
+}
+
+.back-btn:hover {
+  color: var(--color-white);
+}
+
+.nav-center{
   display: flex;
   align-items: center;
   gap: 2rem;
   position: absolute;
   left: 50%;
   transform: translateX(-50%);
+
+}
+
+.nav-right {
+  display: flex;
+  align-items: center;
+  margin-left: auto;
 }
 
 .nav-btn {

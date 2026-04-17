@@ -109,7 +109,7 @@ export default function PlayLandingPage() {
         onLogout={handleLogout}
         onOpenDashboard={openDashboardModal}
         onCreate={handleCreate} // pass the handleCreate function
-        activeTab="play"
+        activeTab={showDashboardModal ? "dashboard" : "play"}
       />
 
       {/* Header */}
@@ -191,7 +191,7 @@ export default function PlayLandingPage() {
 
       {showDashboardModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-black-800 p-8 rounded-lg max-w-7xl w-full h-4/5 overflow-y-auto relative animate-slide-up">
+          <div className="bg-white-800 p-8 rounded-lg max-w-7xl w-full h-4/5 overflow-y-auto relative animate-slide-up border-white border-2">
             <button
               className="btn btn-sm btn-square absolute right-2 top-2 text-white"
               onClick={() => setShowDashboardModal(false)}
