@@ -55,7 +55,7 @@
   color: var(--color-grey);
   cursor: pointer;
   padding: 0.5rem 1rem;
-  border-radius: none !important; /* edit */
+  border-radius: none !important;
   font-size: 14px;
   transition: color 0.2s ease;
 }
