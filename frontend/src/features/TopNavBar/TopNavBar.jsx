@@ -12,7 +12,9 @@ export default function TopNavBar({
   return (
     <div className="top-nav-bar">
       <div className="nav-left">
-        <button className="back-btn">Back</button>
+        <button className="back-btn" onClick={() => history.push("/")}>
+          Back
+        </button>
       </div>
 
       <div className="nav-center">

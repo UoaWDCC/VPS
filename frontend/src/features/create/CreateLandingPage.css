@@ -42,6 +42,35 @@
   background: var(--color-white);
 }
 
+/* .back-btn {
+  background: transparent;
+  border: none;
+  color: var(--color-grey);
+  cursor: pointer;
+  padding: 1.5rem 1.5rem;
+  font-size: 16px;
+  font-weight: 400;
+  transition: all 0.2s ease;
+  position: relative;
+} */
+
+.back-btn {
+  background: transparent;
+  border: none;
+  color: var(--color-grey);
+  cursor: pointer;
+  padding: 0.5rem 1rem;
+  font-size: 16px;
+  font-weight: 400;
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+
+.back-btn:hover {
+  color: var(--color-white);
+}
+
 .create-card {
   display: flex;
   align-items: flex-start;
