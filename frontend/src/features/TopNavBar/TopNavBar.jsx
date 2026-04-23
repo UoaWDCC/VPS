@@ -1,13 +1,24 @@
-import React from "react";
+import React, { useContext } from "react";
 import { useHistory } from "react-router-dom";
 import { ArrowLeftIcon } from "lucide-react";
+import AuthenticationContext from "../../context/AuthenticationContext";
 
-export default function TopNavBar({ onLogout, activeTab = "create" }) {
+export default function TopNavBar({ activeTab = "create" }) {
   const history = useHistory();
+  const { signOut } = useContext(AuthenticationContext);
 
   function goBack() {
     history.push("/");
   }
+
+  const handleLogout = async () => {
+    try {
+      await signOut(); // This calls the signOut function from your context
+      // The auth state change will automatically handle the redirect via your ProtectedRoute
+    } catch (error) {
+      console.error("Logout failed:", error);
+    }
+  };
 
   return (
     <div className="top-nav-bar">
@@ -16,7 +27,7 @@ export default function TopNavBar({ onLogout, activeTab = "create" }) {
           <ArrowLeftIcon size={20} />
           Back
         </button>
-        <button className="logout-btn" onClick={onLogout}>
+        <button className="logout-btn" onClick={handleLogout}>
           <svg
             className="logout-icon"
             xmlns="http://www.w3.org/2000/svg"

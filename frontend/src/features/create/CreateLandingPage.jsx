@@ -19,9 +19,7 @@ export default function CreateLandingPage() {
     currentScenario,
     setCurrentScenario,
   } = useContext(ScenarioContext);
-  const { getUserIdToken, VpsUser, signOut } = useContext(
-    AuthenticationContext
-  );
+  const { getUserIdToken, VpsUser } = useContext(AuthenticationContext);
   const history = useHistory();
 
   const [search, setSearch] = useState("");
@@ -66,19 +64,10 @@ export default function CreateLandingPage() {
     history.push("/dashboard");
   };
 
-  // Add the logout function
-  const handleLogout = async () => {
-    try {
-      await signOut();
-    } catch (error) {
-      console.error("Logout failed:", error);
-    }
-  };
-
   return (
     <div className="play-container" data-theme="dark">
       {/* Top Nav - Using extracted component */}
-      <TopNavBar onLogout={handleLogout} activeTab="create" />
+      <TopNavBar activeTab="create" />
 
       {/* Rest of your component remains the same */}
       {/* Edit Section */}

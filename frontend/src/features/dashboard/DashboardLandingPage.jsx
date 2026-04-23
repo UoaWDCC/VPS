@@ -1,6 +1,5 @@
 import { useState, useContext, useEffect, useMemo } from "react";
 import { useHistory } from "react-router-dom";
-import AuthenticationContext from "../../context/AuthenticationContext";
 import ScenarioContext from "../../context/ScenarioContext";
 import TopNavBar from "../TopNavBar/TopNavBar";
 import Thumbnail from "../authoring/components/Thumbnail";
@@ -14,7 +13,6 @@ export default function DashboardLandingPage() {
     reFetch2,
     setCurrentScenario,
   } = useContext(ScenarioContext);
-  const { signOut } = useContext(AuthenticationContext);
   const history = useHistory();
 
   const [search, setSearch] = useState("");
@@ -38,14 +36,6 @@ export default function DashboardLandingPage() {
     scenario.name.toLowerCase().includes(search.toLowerCase())
   );
 
-  const handleLogout = async () => {
-    try {
-      await signOut();
-    } catch (error) {
-      console.error("Logout failed:", error);
-    }
-  };
-
   const selectDashboardScenario = (scenario) => {
     setCurrentScenario(scenario);
     history.push(`/dashboard/${scenario._id}`);
@@ -53,7 +43,7 @@ export default function DashboardLandingPage() {
 
   return (
     <div className="play-container" data-theme="dark">
-      <TopNavBar onLogout={handleLogout} activeTab="dashboard" />
+      <TopNavBar activeTab="dashboard" />
 
       <div className="play-header">
         <h1 className="play-title">Dashboard</h1>

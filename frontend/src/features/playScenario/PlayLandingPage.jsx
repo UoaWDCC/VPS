@@ -19,9 +19,7 @@ export default function PlayLandingPage() {
     currentScenario,
     setCurrentScenario,
   } = useContext(ScenarioContext);
-  const { getUserIdToken, VpsUser, signOut } = useContext(
-    AuthenticationContext
-  ); // Added signOut
+  const { getUserIdToken, VpsUser } = useContext(AuthenticationContext); // Added signOut
   const history = useHistory();
 
   const [search, setSearch] = useState("");
@@ -76,19 +74,9 @@ export default function PlayLandingPage() {
     history.push(`/scenario-info?id=${scenario._id}`);
   };
 
-  // Add this logout function
-  const handleLogout = async () => {
-    try {
-      await signOut(); // This calls the signOut function from your context
-      // The auth state change will automatically handle the redirect via your ProtectedRoute
-    } catch (error) {
-      console.error("Logout failed:", error);
-    }
-  };
-
   return (
     <div className="play-container" data-theme="dark">
-      <TopNavBar onLogout={handleLogout} activeTab="play" />
+      <TopNavBar activeTab="play" />
 
       {/* Header */}
       <div className="play-header">
