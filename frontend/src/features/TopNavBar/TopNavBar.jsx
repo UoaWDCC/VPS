@@ -2,12 +2,7 @@ import React from "react";
 import { useHistory } from "react-router-dom";
 import { ArrowLeftIcon } from "lucide-react";
 
-export default function TopNavBar({
-  onLogout,
-  onOpenDashboard,
-  onCreate, // new prop for creating
-  activeTab = "create",
-}) {
+export default function TopNavBar({ onLogout, activeTab = "create" }) {
   const history = useHistory();
 
   function goBack() {

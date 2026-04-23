@@ -72,10 +72,6 @@ export default function PlayLandingPage() {
     }
   };
 
-  const handleCreate = () => {
-    history.push("/create");
-  };
-
   const handleScenarioPlay = (scenario) => {
     history.push(`/scenario-info?id=${scenario._id}`);
   };
@@ -92,10 +88,7 @@ export default function PlayLandingPage() {
 
   return (
     <div className="play-container" data-theme="dark">
-      <TopNavBar
-        onLogout={handleLogout}
-        activeTab="play"
-      />
+      <TopNavBar onLogout={handleLogout} activeTab="play" />
 
       {/* Header */}
       <div className="play-header">

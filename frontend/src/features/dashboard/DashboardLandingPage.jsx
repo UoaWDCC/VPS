@@ -46,7 +46,6 @@ export default function DashboardLandingPage() {
     }
   };
 
-  const openCreatePage = () => history.push("/create");
   const selectDashboardScenario = (scenario) => {
     setCurrentScenario(scenario);
     history.push(`/dashboard/${scenario._id}`);
@@ -54,10 +53,7 @@ export default function DashboardLandingPage() {
 
   return (
     <div className="play-container" data-theme="dark">
-      <TopNavBar
-        onLogout={handleLogout}
-        activeTab="dashboard"
-      />
+      <TopNavBar onLogout={handleLogout} activeTab="dashboard" />
 
       <div className="play-header">
         <h1 className="play-title">Dashboard</h1>

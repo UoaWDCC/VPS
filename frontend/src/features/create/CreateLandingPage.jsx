@@ -78,10 +78,7 @@ export default function CreateLandingPage() {
   return (
     <div className="play-container" data-theme="dark">
       {/* Top Nav - Using extracted component */}
-      <TopNavBar
-        onLogout={handleLogout}
-        activeTab="create"
-      />
+      <TopNavBar onLogout={handleLogout} activeTab="create" />
 
       {/* Rest of your component remains the same */}
       {/* Edit Section */}
