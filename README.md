@@ -99,6 +99,7 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
     </tr>
     <tr>
       <td align="center" valign="top" width="16.66%"><a href="https://github.com/leowla"><img src="https://avatars.githubusercontent.com/u/38830741?v=4?s=100" width="100px;" alt="Leo Wang"/><br /><sub><b>Leo Wang</b></sub></a><br /><a href="https://github.com/UoaWDCC/VPS/commits?author=leowla" title="Code">💻</a></td>
+      <td align="center" valign="top" width="16.66%"><a href="https://github.com/rgin216"><img src="https://avatars.githubusercontent.com/u/100395589?v=4?s=100" width="100px;" alt="rgin216"/><br /><sub><b>rgin216</b></sub></a><br /><a href="https://github.com/UoaWDCC/VPS/commits?author=rgin216" title="Code">💻</a></td>
     </tr>
   </tbody>
 </table>
