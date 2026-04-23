@@ -56,8 +56,6 @@ export default function DashboardLandingPage() {
     <div className="play-container" data-theme="dark">
       <TopNavBar
         onLogout={handleLogout}
-        onOpenDashboard={() => history.push("/dashboard")}
-        onCreate={openCreatePage}
         activeTab="dashboard"
       />
 

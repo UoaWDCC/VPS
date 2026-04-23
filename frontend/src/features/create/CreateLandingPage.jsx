@@ -80,7 +80,6 @@ export default function CreateLandingPage() {
       {/* Top Nav - Using extracted component */}
       <TopNavBar
         onLogout={handleLogout}
-        onOpenDashboard={openDashboardModal}
         activeTab="create"
       />
 

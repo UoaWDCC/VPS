@@ -94,8 +94,6 @@ export default function PlayLandingPage() {
     <div className="play-container" data-theme="dark">
       <TopNavBar
         onLogout={handleLogout}
-        onOpenDashboard={openDashboardModal}
-        onCreate={handleCreate}
         activeTab="play"
       />
 

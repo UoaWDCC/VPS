@@ -45,13 +45,13 @@ export default function TopNavBar({
         </button>
         <button
           className={`nav-btn ${activeTab === "dashboard" ? "nav-btn-active" : ""}`}
-          onClick={onOpenDashboard}
+          onClick={() => history.push("/dashboard")}
         >
           Dashboard
         </button>
         <button
           className={`nav-btn ${activeTab === "create" ? "nav-btn-active" : ""}`}
-          onClick={activeTab === "create" ? undefined : onCreate} // only sets onClick if not active
+          onClick={() => history.push("/create")}
         >
           Create & Edit
         </button>
