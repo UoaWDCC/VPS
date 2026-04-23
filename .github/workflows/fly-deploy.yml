@@ -1,8 +1,10 @@
-name: Fly Deploy Staging
+name: Fly Deploy
 
 on:
   push:
-    branches: [ master ]
+    branches:
+      - master
+  workflow_dispatch:
 
 jobs:
   deploy-web:
@@ -11,17 +13,18 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: superfly/flyctl-actions/setup-flyctl@master
-      - run: >
-          flyctl deploy --remote-only --config fly.staging.toml 
-          --build-arg VITE_FIREBASE_PROJECT_ID=${{ secrets.VITE_FIREBASE_PROJECT_ID }} 
-          --build-arg VITE_FIREBASE_API_KEY=${{ secrets.VITE_REACT_APP_API_KEY }} 
-          --build-arg VITE_FIREBASE_AUTH_DOMAIN=${{ secrets.VITE_REACT_APP_AUTH_DOMAIN }} 
-          --build-arg VITE_FIREBASE_STORAGE_BUCKET=${{ secrets.VITE_REACT_APP_STORAGE_BUCKET }} 
-          --build-arg VITE_FIREBASE_APP_ID=${{ secrets.VITE_REACT_APP_APP_ID }} 
-          --build-arg VITE_SERVER_URL=${{ secrets.VITE_REACT_APP_SERVER_URL_STAGING }}
+      - name: Deploy Frontend to Fly.io
+        run: >
+          flyctl deploy --remote-only --config fly.toml
+          --build-arg VITE_FIREBASE_PROJECT_ID=${{ secrets.FIREBASE_PROJECT_ID }}
+          --build-arg VITE_FIREBASE_API_KEY=${{ secrets.FIREBASE_API_KEY }}
+          --build-arg VITE_FIREBASE_AUTH_DOMAIN=${{ secrets.FIREBASE_AUTH_DOMAIN }}
+          --build-arg VITE_FIREBASE_STORAGE_BUCKET=${{ secrets.FIREBASE_STORAGE_BUCKET }}
+          --build-arg VITE_FIREBASE_APP_ID=${{ secrets.FIREBASE_APP_ID }}
+          --build-arg VITE_SERVER_URL=${{ secrets.SERVER_URL }}
         working-directory: ./frontend
         env:
-          FLY_API_TOKEN: ${{ secrets.FLY_STAGING_API_TOKEN }}
+          FLY_API_TOKEN: ${{ secrets.FLY_PRODUCTION_API_TOKEN }}
 
   deploy-api:
     name: Deploy Api
@@ -29,10 +32,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: superfly/flyctl-actions/setup-flyctl@master
-      - run: flyctl deploy --remote-only --config fly.staging.toml
+      - name: Deploy Backend to Fly.io
+        run: flyctl deploy --remote-only --config fly.toml
         working-directory: ./backend
         env:
-          FLY_API_TOKEN: ${{ secrets.FLY_API_STAGING_API_TOKEN }}
+          FLY_API_TOKEN: ${{ secrets.FLY_API_PRODUCTION_API_TOKEN }}
 
   finalize-deployment:
     name: Finalize Deployment
@@ -49,10 +53,10 @@ jobs:
             https://api.github.com/repos/${{ github.repository }}/deployments \
             -d '{
               "ref": "${{ github.sha }}",
-              "environment": "Fly Staging",
+              "environment": "Fly Production",
               "required_contexts": [],
               "auto_merge": false,
-              "description": "Deploying frontend and backend to Staging"
+              "description": "Deploying frontend and backend to Production"
             }')
           echo "deployment_id=$(echo $response | jq -r '.id')" >> $GITHUB_OUTPUT
         env:
