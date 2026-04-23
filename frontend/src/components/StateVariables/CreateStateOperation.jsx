@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from "react";
+import { useContext, useState } from "react";
 import ScenarioContext from "context/ScenarioContext";
 import { getDefaultValue, stateTypes, validOperations } from "./stateTypes";
 import { modifyComponentProp } from "../../features/authoring/scene/operations/component";
