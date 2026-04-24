@@ -364,18 +364,16 @@
       "contributions": ["code"]
     },
     {
+      "login": "kmck133",
+      "name": "Kieran McKenna",
+      "avatar_url": "https://avatars.githubusercontent.com/u/160551320?v=4",
+      "profile": "https://github.com/kmck133",
+      "contributions": ["code"]
       "login": "glybrio",
       "name": "glybrio",
       "avatar_url": "https://avatars.githubusercontent.com/u/179700217?v=4",
       "profile": "https://github.com/glybrio",
       "contributions": ["code"]
-    }
-  ]
-}
-
-      "contributions": [
-        "code"
-      ]
     },
     {
       "login": "rgin216",
@@ -388,3 +386,4 @@
     }
   ]
 }
+
