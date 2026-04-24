@@ -15,6 +15,8 @@ import {
   handleMouseUpGlobal,
 } from "../handlers/pointer/pointer";
 import { handleContextGlobal } from "../handlers/pointer/context";
+import LoadingOverlay from "./LoadingOverlay.tsx";
+import useEditorStore from "../stores/editor.ts";
 
 const componentMap: Record<string, React.FC<any>> = {
   textbox: (props) => <TextBox {...props} editable={true} />,
@@ -67,16 +69,19 @@ function Canvas() {
     .sort((a, b) => a.zIndex - b.zIndex)
     .map(resolve);
 
+  const loading = useEditorStore((state) => state.loading);
   return (
     <CanvasContext.Provider value={{ toSVGSpace, canvasRef }}>
       <div
-        className="flex-grow relative"
+        className={`flex-grow relative ${loading ? "pointer-events-none" : ""}`}
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
         onMouseDown={handleMouseDown}
         onContextMenu={handleContextMenu}
       >
         <Overlay />
+        <LoadingOverlay />
+
         <svg
           id="main"
           className="w-full h-full"
