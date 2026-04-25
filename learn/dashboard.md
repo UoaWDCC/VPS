@@ -1,3 +1,7 @@
+---
+layout: base.njk
+---
+
 # Dashboard
 
 The dashboard is how scenario authors can view the progress of players that have been assigned to that scenario, either individually or as groups. This allows you to analyse the general flow of players through scenarios so that you can adjust them accordingly, or view the fine grained progress of specific groups / players.

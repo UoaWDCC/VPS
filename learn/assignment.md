@@ -1,3 +1,7 @@
+---
+layout: base.njk
+---
+
 # Assignment
 
 You can assign scenarios to players either as individuals or as groups.

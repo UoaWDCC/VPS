@@ -1,3 +1,7 @@
+---
+layout: base.njk
+---
+
 # Getting Started with VPS
 
 VPS is a tool that supports interactive and immersive education through scene based branching scenarios.

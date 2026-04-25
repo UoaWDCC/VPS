@@ -24,7 +24,7 @@ jobs:
         uses: actions/cache@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # 5.0.3
         with:
           path: ~/.yarn/cache
-          key: ${{ runner.os }}-yarn-${{ hashFiles('docs/yarn.lock') }}
+          key: ${{ runner.os }}-yarn-${{ hashFiles('learn/yarn.lock') }}
 
       - name: Cache Eleventy .cache
         uses: actions/cache@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # 5.0.3
@@ -33,16 +33,16 @@ jobs:
           key: ${{ runner.os }}-eleventy-fetch-cache
 
       - run: yarn install --frozen-lockfile
-        working-directory: docs
+        working-directory: learn
 
-      - run: yarn build-ghpages
-        working-directory: docs
+      - run: yarn build
+        working-directory: learn
 
       - name: Upload static files as artifact
         id: deployment
         uses: actions/upload-pages-artifact@7b1f4a764d45c48632c6b24a0339c27f5614fb0b # 4.0.0
         with:
-          path: docs/_site/
+          path: learn/_site/
 
   deploy:
     environment:

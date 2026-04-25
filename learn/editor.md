@@ -1,3 +1,7 @@
+---
+layout: base.njk
+---
+
 # Editor
 
 The scenario editor consists of a few different features that makes both simple and complex scenarios possible.
