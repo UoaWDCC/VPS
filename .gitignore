@@ -26,6 +26,7 @@ yarn-error.log*
 
 # ide files
 .idea
+.vscode
 
 # docs folder
 docs/_site

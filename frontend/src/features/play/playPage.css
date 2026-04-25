@@ -28,6 +28,7 @@
   padding: 0.5rem 1rem;
   border-radius: 6px;
   font-size: 14px;
+  font-weight: 400;
   transition: color 0.2s ease;
 }
 

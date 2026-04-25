@@ -32,8 +32,9 @@
   cursor: pointer;
   padding: 0.5rem 1rem;
   border-radius: none !important; /* edit */
-  font-size: 14px;
+  font-size: 16px;
   transition: color 0.2s ease;
+  margin-left: auto;
 }
 
 .logout-btn:hover {
@@ -45,13 +46,39 @@
   height: 16px;
 }
 
-.nav-right {
+.back-btn {
+  align-items: center;
+  gap: 0.2rem;
+  display: flex;
+  background: transparent;
+  border: none;
+  color: var(--color-grey);
+  cursor: pointer;
+  padding: 0.5rem 1rem;
+  font-size: 16px;
+  font-weight: 400;
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.back-btn:hover {
+  color: var(--color-white);
+}
+
+.nav-center {
   display: flex;
   align-items: center;
   gap: 2rem;
   position: absolute;
   left: 50%;
   transform: translateX(-50%);
+}
+
+.nav-right {
+  display: flex;
+  align-items: center;
+  margin-left: auto;
+  transform: translateX(0%);
 }
 
 .nav-btn {
