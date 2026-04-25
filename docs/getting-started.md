@@ -25,5 +25,3 @@ The app has a dashboard view for scenario authors to view the progress of indivi
 Once you have the basics down, take a look at how certain features of the app work in depth:
 
 - [Multiplayer](/multiplayer/)
-
-

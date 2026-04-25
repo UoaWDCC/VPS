@@ -10,10 +10,10 @@ To create a new scene, press the plus button at the bottom of the scenes list, w
 
 A scene can contain images, text and a few different shapes. To add any of these to the scene, press the associated icon in the topbar, and for a textbox or shape, drag your mouse on the canvas area to set the initial size and location. When adjusting any content, you can use the following shortcuts:
 
-| Shortcut | Action |
-| -------- | ------ |
-| Shift    | Lock aspect ratio |
-| Ctrl     | Resize from center |
+| Shortcut         | Action              |
+| ---------------- | ------------------- |
+| Shift            | Lock aspect ratio   |
+| Ctrl             | Resize from center  |
 | Shift (Rotating) | Increment by 15 deg |
 
 ### Audio Content
@@ -22,13 +22,13 @@ You can also add audio to a scene, by expanding the **Audio Elements** section a
 
 ## Transitioning Between Scenes
 
-Scene transitions are performed when the player presses any scene content that has a **link** attached to it. This can be images, textboxes or shapes. To add a link to a scene element, select the element and then expand the **Link Details** section that appears on the right. Press the **Next Scene** input to select the scene this element should link to. 
+Scene transitions are performed when the player presses any scene content that has a **link** attached to it. This can be images, textboxes or shapes. To add a link to a scene element, select the element and then expand the **Link Details** section that appears on the right. Press the **Next Scene** input to select the scene this element should link to.
 
-Importantly, if an element doesn't have a link or action attached to it, that element will become *passthrough*, which means that it wont respond to mouse input at all. Therefore you can put other interactive elements underneath, and they will work as expected.
+Importantly, if an element doesn't have a link or action attached to it, that element will become _passthrough_, which means that it wont respond to mouse input at all. Therefore you can put other interactive elements underneath, and they will work as expected.
 
 ## How to Track Scenario Progress
 
-Scenario progress in VPS is managed by **tracked values** and **actions**. 
+Scenario progress in VPS is managed by **tracked values** and **actions**.
 
 ### Tracked Values
 
@@ -43,11 +43,11 @@ To create a tracked value, press the **State Variables** button on the very left
 
 This table explains the different types:
 
-| Name | Meaning | Example |
-| ---- | ------- | ------- |
-| String | A text value | A character's mood can be "happy", "sad" or "angry" |
-| Number | A positive or negative number | A player's score |
-| Boolean | A value that can be either true or false | Whether a player has visited a specific scene |
+| Name    | Meaning                                  | Example                                             |
+| ------- | ---------------------------------------- | --------------------------------------------------- |
+| String  | A text value                             | A character's mood can be "happy", "sad" or "angry" |
+| Number  | A positive or negative number            | A player's score                                    |
+| Boolean | A value that can be either true or false | Whether a player has visited a specific scene       |
 
 ### Actions
 
@@ -58,11 +58,11 @@ To make tracked values useful, you need to update them as the player progresses 
 
 Set will just set the tracked value to the value you specify in the input. For example, you might set the tracked value character mood to "happy". The add action will just perform addition to the tracked value. To perform subtraction, use the add action with a negative value.
 
-A good way to think of actions are as sentences in the order *action type*, *tracked value*, *action value*, *scene element*:
+A good way to think of actions are as sentences in the order _action type_, _tracked value_, _action value_, _scene element_:
 
-- **Set** the **player-health** to **0**, when the player presses *the wrong option*.
-- **Set** whether the player **has-requested-scans** to **true**, when the player presses *the request scans button*.
-- **Add** to the **player-score** by **1**, when the player presses *the correct answer*.
+- **Set** the **player-health** to **0**, when the player presses _the wrong option_.
+- **Set** whether the player **has-requested-scans** to **true**, when the player presses _the request scans button_.
+- **Add** to the **player-score** by **1**, when the player presses _the correct answer_.
 
 ## Showing the Scenario Progress
 
@@ -82,18 +82,18 @@ To get started, you need to first create a collection by pressing the **Create**
 
 ### Conditionally Showing Resources
 
-Sometimes you might not want to have a resource always available for the player. For example, the scenario could involve the player requesting certain scans to be done on a patient. In this case, you would only want the player to see the 'scan' resource after they've made that decision. You can do this in the app using [tracked values](#tracked-values). 
+Sometimes you might not want to have a resource always available for the player. For example, the scenario could involve the player requesting certain scans to be done on a patient. In this case, you would only want the player to see the 'scan' resource after they've made that decision. You can do this in the app using [tracked values](#tracked-values).
 
-First, you need to setup the tracked value for that resource if it doesn't yet exist. Then, you can select a resource and press the plus button on the **State Conditionals** section on the right. In the modal that appears, you need to select the *comparator* and the *comparison value*. The comparator can be either:
+First, you need to setup the tracked value for that resource if it doesn't yet exist. Then, you can select a resource and press the plus button on the **State Conditionals** section on the right. In the modal that appears, you need to select the _comparator_ and the _comparison value_. The comparator can be either:
 
-| Comparator | Meaning |
-| ---------- | ------- |
-| = | The tracked value is the same as the comparison value |
-| != | The tracked value is **not** the same as the comparison value |
-| > | The tracked value is greater than the comparison value |
-| < | The tracked value is less than the comparison value |
+| Comparator | Meaning                                                       |
+| ---------- | ------------------------------------------------------------- |
+| =          | The tracked value is the same as the comparison value         |
+| !=         | The tracked value is **not** the same as the comparison value |
+| >          | The tracked value is greater than the comparison value        |
+| <          | The tracked value is less than the comparison value           |
 
-Once you set this, the resource will only be shown to the player as long as that condition holds true. Therefore, you can swap resources easily as the player progresses to create a sense of change due to time or choice etc. In our scans example, the condition would be: *has_requested_scans* **=** *true*.
+Once you set this, the resource will only be shown to the player as long as that condition holds true. Therefore, you can swap resources easily as the player progresses to create a sense of change due to time or choice etc. In our scans example, the condition would be: _has_requested_scans_ **=** _true_.
 
 ## Timing Scenes
 
@@ -102,4 +102,3 @@ Not yet implemented.
 ## Assigning Roles
 
 Since the multiplayer playthrough of scenarios is intended to be role-based asynchronous multiplayer, you should be assigning roles to scenes. You can do this by selecting all of the roles that should be able to access that scene in the **Roles** input in the **Scene Details** section on the right.
-
