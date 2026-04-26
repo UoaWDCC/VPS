@@ -1,5 +1,6 @@
 /* NOTE: these declarations will overwrite libdoc styles */
 
 body {
-  background: #fafafa;
+  background-color: transparent;
+  background-image: none;
 }
