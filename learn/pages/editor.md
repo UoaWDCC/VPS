@@ -1,10 +1,12 @@
 ---
-layout: base.njk
+title: Editor
+description: The scenario editor consists of a few different features that makes both simple and complex scenarios possible.
+layout: libdoc_page.liquid
+eleventyNavigation:
+  key: Editor
+  parent: Getting Started
+  order: 1
 ---
-
-# Editor
-
-The scenario editor consists of a few different features that makes both simple and complex scenarios possible.
 
 ## Creating a Scene
 

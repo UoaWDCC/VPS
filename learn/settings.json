@@ -1,0 +1,7 @@
+{
+  "siteTitle": "VPS Learn",
+  "siteDescription": "Virtual Patient Simulator learning resources",
+  "faviconUrl": "/assets/myfavicon.png",
+  "productionUrl": "https://uoawdcc.github.io/VPS/",
+  "editThisPageRootUrl": "https://github.com/UoaWDCC/VPS/tree/master/learn"
+}
