@@ -169,16 +169,6 @@
 		"fr": "Résultat",
 		"it": "Risultato"
 	},
-	"sandbox": {
-		"en": "Sandbox",
-		"fr": "Bac à sable",
-		"it": "Sandbox"
-	},
-	"sandboxResizeHelper": {
-		"en": "Click and drag to resize code and result",
-		"fr": "Cliquer déplacer pour redimensionner code et résultat",
-		"it": "Clicca e trascina per ridimensionare il codice e il risultato"
-	},
 	"search": {
 		"en": "Search",
 		"fr": "Rechercher",

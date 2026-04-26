@@ -823,36 +823,6 @@ main .__search-occurrence {
     text-decoration-color: var(--ita-colors-primary-300);
 }
 
-/* SANDBOX */
-.sandbox {
-    max-width: 100%;
-    margin-left: auto;
-    margin-right: auto;
-}
-.sandbox .sandbox__code {
-    min-height: 500px;
-}
-.sandbox .sandbox__resizer {
-    width: 20px;
-}
-.sandbox .sandbox__resizer:active,
-.sandbox .sandbox__resizer:hover {
-    cursor: col-resize;
-}
-.sandbox .sandbox__enable_wrapper {
-    opacity: 0;
-    transition: opacity 300ms;
-}
-.sandbox .sandbox__enable_wrapper:hover {
-    opacity: 1;
-}
-.sandbox:has(.sandbox__enable_switch:checked) .sandbox__enable_wrapper {
-    display: none;
-}
-.sandbox + .sandbox {
-    margin-top: 2em;
-}
-
 /* FLOATING TABLE OF CONTENT */
 #floating_toc[open] summary [class*="icon-"]::before {
     content: '\e910'

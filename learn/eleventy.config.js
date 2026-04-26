@@ -64,18 +64,9 @@ export default function(eleventyConfig) {
   eleventyConfig.addShortcode("icons", libdocFunctions.shortcodes.icons);
   eleventyConfig.addShortcode("icon", libdocFunctions.shortcodes.icon);
   eleventyConfig.addShortcode("iconCard", libdocFunctions.shortcodes.iconCard);
-  eleventyConfig.addPairedShortcode(
-    "sandbox",
-    libdocFunctions.shortcodes.sandbox,
-  );
-  eleventyConfig.addPairedShortcode(
-    "sandboxFile",
-    libdocFunctions.shortcodes.sandboxFile,
-  );
   // END SHORTCODES
 
   // START FILE COPY
-  eleventyConfig.addPassthroughCopy("sandboxes");
   eleventyConfig.addPassthroughCopy("assets");
   eleventyConfig.addPassthroughCopy("core/assets");
   eleventyConfig.addPassthroughCopy("favicon.png");

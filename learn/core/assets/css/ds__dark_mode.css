@@ -115,39 +115,6 @@
         box-shadow: var(--libdoc-long-shadow);
     }
 
-    /* SANDBOX */
-    .sandbox .sandbox__code_wrapper,
-    .sandbox .sandbox__iframe_wrapper {
-        background-color: var(--ita-colors-neutral-300);
-        color: var(--ita-colors-neutral-800);
-    }
-    .sandbox .sandbox__resizer {
-        background-color: var(--ita-colors-neutral-300);
-        color: var(--ita-colors-neutral-800);
-    }
-    .sandbox .sandbox__resizer:active,
-    .sandbox .sandbox__resizer:hover {
-        background-color: var(--ita-colors-neutral-400);
-    }
-    main .sandbox__iframe_wrapper a,
-    .sandbox .sandbox__reload,
-    .sandbox .sandbox__copy_url,
-    .sandbox .sandbox__copy_code {
-        color: var(--ita-colors-neutral-900);
-    }
-    .sandbox .sandbox__enable_switch ~ label {
-        background-color: var(--ita-colors-neutral-100);
-        color: var(--ita-colors-neutral-900);
-    }
-    .sandbox .sandbox__tabs {
-        background-color: var(--ita-colors-primary-300);
-        box-shadow: inset 0px 0px 5px var(--ita-colors-primary-100);
-    }
-    .sandbox .sandbox__tab.__active {
-        background-color: var(--ita-colors-neutral-100);
-        box-shadow: var(--libdoc-soft-shadow);
-    }
-
     /* WIDGETS */
     .widget-iconCard > p {
         background-color: var(--ita-colors-neutral-200);
