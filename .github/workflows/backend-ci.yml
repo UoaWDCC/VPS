@@ -1,0 +1,42 @@
+name: Backend CI
+
+on:
+  push:
+    branches: [ master ]
+    paths: [ "backend/**" ]
+  pull_request:
+    branches: [ master ]
+    paths: [ "backend/**" ]
+
+jobs:
+  lint-format:
+    name: lint & format
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'yarn'
+      - run: yarn install --frozen-lockfile
+      - run: yarn prettier
+      - run: yarn lint
+
+  test:
+    name: test
+    needs: lint-format
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'yarn'
+      - run: yarn install --frozen-lockfile
+      - run: yarn test
