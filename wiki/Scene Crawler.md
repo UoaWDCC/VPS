@@ -8,7 +8,7 @@ To maintain integrity across a group, it also relies on a universal scene pointe
 
 The primary functionality exposed by the backend is captured by a sole API endpoint: `/api/navigate/group/:groupId`. This endpoint accepts 3 parameters, 1 mandatory URL parameter and 2 context dependent body props:
 
-- Group ID (URL parameter, mandatory) 
+- Group ID (URL parameter, mandatory)
 - Current Scene ID
 - Next Scene ID
 
@@ -25,8 +25,8 @@ let config = {
   method: 'post',
   maxBodyLength: Infinity,
   url: 'http://localhost:5000/api/navigate/group/6642fdb8a03cb4c2f15213ac',
-  headers: { 
-    'Content-Type': 'application/json', 
+  headers: {
+    'Content-Type': 'application/json',
     'Authorization': '••••••'
   },
   data : data
@@ -41,13 +41,13 @@ axios.request(config)
 });
 ```
 
-There are 3 possible situations that we face when the navigate functionality is called, each one requiring differing logic. 
+There are 3 possible situations that we face when the navigate functionality is called, each one requiring differing logic.
 
 ### Situation 1: No member of the group has visited this scenario
 
-In this case, the group object relating to the user will have no scene pointer set, because we don’t initialise that pointer when creating the group. 
+In this case, the group object relating to the user will have no scene pointer set, because we don’t initialise that pointer when creating the group.
 
-To overcome this, we fetch the current scenario object and grab the first scene ID that’s stored within it, which we expect to be the entry point of the scenario. 
+To overcome this, we fetch the current scenario object and grab the first scene ID that’s stored within it, which we expect to be the entry point of the scenario.
 
 Once, we fetch this ID, we can return the information for that scene along with the connected scenes.
 
@@ -142,26 +142,25 @@ However, because we want to give the user an instant response where possible, we
 
 ## Frontend Implementation
 
-On the frontend side, we use a simple Map object as a basic cache to store the scene data we receive from the API endpoint. We then update that cache alongside the requests we make, and return the active scene’s ID:
+Relevant file: `frontend/src/features/playScenario/PlayScenarioPage.jsx`.
 
-```
-const navigate = async (user, groupId, currentScene, nextScene) => {
-  const token = await user.getIdToken();
-  const config = {
-    method: "post",
-    url: `http://localhost:5000/api/navigate/group/${groupId}`,
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
-    },
-    data: { currentScene, nextScene },
-  };
-  const res = await axios.request(config);
-  res.data.scenes.forEach((scene) => sceneCache.set(scene._id, scene));
-  return res.data.active;
-};
-```
+We use a simple Map object (`sceneCache`) as a basic cache to store the scene data we receive from the API endpoint. We then update that cache alongside the requests we make, return the active scene’s ID, and track active play state with `sceneId`, `stateVariables`, and `stateVersion`.
 
-This is called within a simple `useEffect` hook, which is called every time the active scene ID (stored in the URL) is changed.
+### Navigation Request and Response
 
-To make that actual URL change, we just attach a function to the button components in a scene which will redirect to the respective scene ID.
+- The page calls:
+  - `POST /api/navigate/user/:scenarioId` for singleplayer
+  - `POST /api/navigate/group/:groupId` for multiplayer
+- It sends `currentScene`, `componentId`, `addFlags`, and `removeFlags`.
+- It receives `active`, `stateVariables`, `stateVersion`, and nearby `scenes`.
+- Returned scenes are merged into `sceneCache`.
+
+### Scene Click Flow
+
+1. User clicks a clickable component.
+2. If `nextScene` is already cached, the UI switches immediately.
+3. The app sends the navigate request using `component.id`.
+4. The backend confirms the move and returns the authoritative state.
+5. The page updates scene/state values and handles errors (`409`, `403`, fallback error route).
+
+In multiplayer, the page also refreshes resources from `GET /api/navigate/group/resources/:groupId` and filters them using current state variables.
