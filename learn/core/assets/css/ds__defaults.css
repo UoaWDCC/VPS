@@ -443,8 +443,7 @@ main > *:not(pre) code {
     border-radius: 0.3em;
     font-variation-settings: "wght" 400, "MONO" 1, "CASL" 0, "CRSV" 0;
 }
-/* language not supported in highlight js */
-main pre:not(:has(.hljs)) {
+main pre {
     overflow: auto;
 }
 main > pre {

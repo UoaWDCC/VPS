@@ -3,7 +3,6 @@ const libdocUi = {
     localStorageIdentifier: 'eleventyLibdoc',
     colorSchemes: ['auto', 'light', 'dark'],
     darkModeCssFilePath: `${libdocConfig.htmlBasePathPrefix}/core/assets/css/ds__dark_mode.css`,
-    supportedLanguagesJsonPath: `${libdocConfig.htmlBasePathPrefix}/core/assets/js/supported-languages.json`,
     darkModeCssMedia: '',
     screenSizes: {
       xs: [0, 599],
@@ -841,23 +840,6 @@ const libdocUi = {
           }
         }
       });
-      // Adjust proper language name display
-      const languagesNamesArray = libdocUi.getJson(libdocUi.defaults.supportedLanguagesJsonPath);
-      languagesNamesArray.then(languagesArray => {
-        if (languagesArray.length > 0) {
-          document.querySelectorAll('code[data-language-name]').forEach(function(elCode) {
-            const languageAlias = elCode.dataset.languageName;
-            let index = -1;
-            languagesArray.forEach(function(lang, langIndex) {
-              if (lang.includes(languageAlias)) index = langIndex;
-            });
-            if (index > -1) {
-              const languageName = languagesArray[index].split('|')[1];
-              elCode.dataset.languageName = languageName;
-            }
-          })
-        }
-      });
     }
   },
   initKeyShortcuts: function() {
@@ -946,7 +928,6 @@ const libdocUi = {
     libdocUi.defaults.darkModeCssMedia = libdocUi.el.darkModeCssMetaLink.media;
     libdocUi.setColorScheme(libdocUi.getUserPreferences().colorScheme);
     libdocUi._currentScreenSizeName = libdocUi.getCurrentScreenSizeName();
-    hljs.highlightAll();
     libdocUi.createCopyCodeOnCodeBlocks();
     libdocUi.createFloatingToc();
     libdocUi.createGoToTop();
