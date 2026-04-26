@@ -11,14 +11,14 @@ import libdocConfig from "./_data/libdocConfig.js";
 import libdocFunctions from "./_data/libdocFunctions.js";
 // END LibDoc imports
 
-export default function(eleventyConfig) {
+export default function (eleventyConfig) {
   // START PLUGINS
   eleventyConfig.addPlugin(EleventyHtmlBasePlugin);
   eleventyConfig.addPlugin(InputPathToUrlTransformPlugin);
   eleventyConfig.addPlugin(eleventyNavigationPlugin);
   eleventyConfig.addPlugin(
     eleventyImageTransformPlugin,
-    libdocFunctions.pluginsParameters.eleventyImageTransform(),
+    libdocFunctions.pluginsParameters.eleventyImageTransform()
   );
   eleventyConfig.addPlugin(pluginRss);
   // END PLUGINS
@@ -29,20 +29,20 @@ export default function(eleventyConfig) {
   eleventyConfig.addAsyncFilter("cleanup", libdocFunctions.filters.cleanup);
   eleventyConfig.addAsyncFilter(
     "dateString",
-    libdocFunctions.filters.dateString,
+    libdocFunctions.filters.dateString
   );
   eleventyConfig.addAsyncFilter(
     "datePrefixText",
-    libdocFunctions.filters.datePrefixText,
+    libdocFunctions.filters.datePrefixText
   );
   eleventyConfig.addAsyncFilter("toc", libdocFunctions.filters.toc);
   eleventyConfig.addAsyncFilter(
     "sanitizeJSON",
-    libdocFunctions.filters.sanitizeJson,
+    libdocFunctions.filters.sanitizeJson
   );
   eleventyConfig.addAsyncFilter(
     "gitLastModifiedDate",
-    libdocFunctions.filters.gitLastModifiedDate,
+    libdocFunctions.filters.gitLastModifiedDate
   );
   // END FILTERS
 
@@ -50,7 +50,7 @@ export default function(eleventyConfig) {
   eleventyConfig.addCollection("myTags", libdocFunctions.collections.myTags);
   eleventyConfig.addCollection(
     "postsByDateDescending",
-    libdocFunctions.collections.postsByDateDescending,
+    libdocFunctions.collections.postsByDateDescending
   );
   // END COLLECTIONS
 
@@ -58,7 +58,7 @@ export default function(eleventyConfig) {
   eleventyConfig.addShortcode("alert", libdocFunctions.shortcodes.alert);
   eleventyConfig.addPairedShortcode(
     "alertAlt",
-    libdocFunctions.shortcodes.alert,
+    libdocFunctions.shortcodes.alert
   );
   eleventyConfig.addShortcode("embed", libdocFunctions.shortcodes.embed);
   eleventyConfig.addShortcode("icons", libdocFunctions.shortcodes.icons);

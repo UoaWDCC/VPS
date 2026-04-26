@@ -13,12 +13,16 @@ const userConfig = require("../settings.json");
 export default {
   lang: userConfig.lang ?? "en",
   siteTitle: userConfig.siteTitle ?? "11ty LibDoc",
-  siteDescription: userConfig.siteDescription ?? "An Eleventy starter project to craft slick documentation",
+  siteDescription:
+    userConfig.siteDescription ??
+    "An Eleventy starter project to craft slick documentation",
   siteLogoUrl: userConfig.siteLogoUrl ?? "",
   siteLogoMaxHeight: userConfig.siteLogoMaxHeight ?? 60,
   author: userConfig.author ?? false,
   faviconUrl: userConfig.faviconUrl ?? "/favicon.png",
-  ogImageUrl: userConfig.ogImageUrl ?? "https://raw.githubusercontent.com/ita-design-system/ita-medias/refs/heads/main/ogimage-11ty-libdoc.png",
+  ogImageUrl:
+    userConfig.ogImageUrl ??
+    "https://raw.githubusercontent.com/ita-design-system/ita-medias/refs/heads/main/ogimage-11ty-libdoc.png",
   customLinks: userConfig.customLinks ?? [],
   blogTitle: userConfig.blogTitle ?? "Blog Posts",
   blogDescription: userConfig.blogDescription ?? false,
@@ -36,5 +40,5 @@ export default {
   imgBgColorLightMode: userConfig.imgBgColorLightMode ?? "transparent",
   imgBgColorDarkMode: userConfig.imgBgColorDarkMode ?? "transparent",
   productionUrl: userConfig.productionUrl ?? "",
-  ogImageUrlForEachTag: userConfig.ogImageUrlForEachTag ?? {}
+  ogImageUrlForEachTag: userConfig.ogImageUrlForEachTag ?? {},
 };
