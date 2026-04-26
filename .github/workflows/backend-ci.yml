@@ -3,10 +3,16 @@ name: Backend CI
 on:
   push:
     branches: [ master ]
-    paths: [ "backend/**" ]
+    paths:
+      - "backend/**"
+      - ".github/workflows/backend-ci.yml"
+      - ".prettierrc.json"
   pull_request:
     branches: [ master ]
-    paths: [ "backend/**" ]
+    paths:
+      - "backend/**"
+      - ".github/workflows/backend-ci.yml"
+      - ".prettierrc.json"
 
 jobs:
   lint-format:
@@ -21,6 +27,7 @@ jobs:
         with:
           node-version: '20'
           cache: 'yarn'
+          cache-dependency-path: backend/yarn.lock
       - run: yarn install --frozen-lockfile
       - run: yarn prettier
       - run: yarn lint
@@ -38,5 +45,6 @@ jobs:
         with:
           node-version: '20'
           cache: 'yarn'
+          cache-dependency-path: backend/yarn.lock
       - run: yarn install --frozen-lockfile
       - run: yarn test

@@ -3,10 +3,16 @@ name: Frontend CI
 on:
   push:
     branches: [ master ]
-    paths: [ "frontend/**" ]
+    paths:
+      - "frontend/**"
+      - ".github/workflows/frontend-ci.yml"
+      - ".prettierrc.json"
   pull_request:
     branches: [ master ]
-    paths: [ "frontend/**" ]
+    paths:
+      - "frontend/**"
+      - ".github/workflows/frontend-ci.yml"
+      - ".prettierrc.json"
 
 jobs:
   lint-format:
@@ -21,6 +27,7 @@ jobs:
         with:
           node-version: '20'
           cache: 'yarn'
+          cache-dependency-path: frontend/yarn.lock
       - run: yarn install --frozen-lockfile
       - run: yarn prettier
       - run: yarn lint
