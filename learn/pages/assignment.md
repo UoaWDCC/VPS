@@ -1,10 +1,12 @@
 ---
-layout: base.njk
+title: Assignment
+description: You can assign scenarios to players either as individuals or as groups.
+layout: libdoc_page.liquid
+eleventyNavigation:
+  key: Assignment
+  parent: Getting Started
+  order: 2
 ---
-
-# Assignment
-
-You can assign scenarios to players either as individuals or as groups.
 
 ## Assigning to Groups
 

@@ -1,10 +1,14 @@
 ---
-layout: base.njk
+title: Dashboard
+description: The dashboard is how scenario authors can view the progress of players that have been assigned to that scenario, either individually or as groups.
+layout: libdoc_page.liquid
+eleventyNavigation:
+  key: Dashboard
+  parent: Getting Started
+  order: 3
 ---
 
-# Dashboard
-
-The dashboard is how scenario authors can view the progress of players that have been assigned to that scenario, either individually or as groups. This allows you to analyse the general flow of players through scenarios so that you can adjust them accordingly, or view the fine grained progress of specific groups / players.
+The dashboard allows you to analyse the general flow of players through scenarios so that you can adjust them accordingly, or view the fine grained progress of specific groups / players.
 
 ## Selecting a Playthrough
 
@@ -16,7 +20,7 @@ What you can see in the progress view for the group are the members of the group
 
 To make viewing the exact path the group took step by step easier, you can roll forward and back through the playthrough by using the **Next** and **Prev** buttons on the flow chart.
 
-The [tracked values](/VPS/editor/#tracked-values) under the **State Variables** section are the current values at this point in time. You can use these to check things like player score at the end of a playthorugh, but also as an easier way to track the path. For example, instead of analysing the flowchart for every group to see if they visited a certain scene, you can use a tracked value like _has_visited_scene_x_, and just look at this for every group.
+The [tracked values](/editor/#tracked-values) under the **State Variables** section are the current values at this point in time. You can use these to check things like player score at the end of a playthorugh, but also as an easier way to track the path. For example, instead of analysing the flowchart for every group to see if they visited a certain scene, you can use a tracked value like _has_visited_scene_x_, and just look at this for every group.
 
 ## Exporting
 
