@@ -2,6 +2,8 @@ import { getObject } from "./util";
 
 let scene = {} as any;
 let scenes: Record<string, any>[] = [];
+let sceneSaveRef: ((scene: Record<string, any>) => unknown) | null = null;
+let scenarioId: string | null = null;
 
 // @ts-ignore
 window.scene = scene;
@@ -24,6 +26,24 @@ export function getScenes() {
 
 export function setScenes(newScenes: Record<string, any>[]) {
   scenes = newScenes;
+}
+
+export function getSceneSaveRef() {
+  return sceneSaveRef;
+}
+
+export function setSceneSaveRef(
+  newSceneSaveRef: ((scene: Record<string, any>) => unknown) | null
+) {
+  sceneSaveRef = newSceneSaveRef;
+}
+
+export function getScenarioId() {
+  return scenarioId;
+}
+
+export function setScenarioId(id: string | null) {
+  scenarioId = id;
 }
 
 export function getComponent(id: string) {
