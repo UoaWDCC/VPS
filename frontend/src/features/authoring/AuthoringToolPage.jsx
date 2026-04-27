@@ -9,7 +9,7 @@ import SceneNavigator from "./SceneNavigator/SceneNavigator";
 import Canvas from "./canvas/Canvas";
 import Topbar from "./topbar/Topbar";
 import useVisualScene from "./stores/visual";
-import { getScene } from "./scene/scene";
+import { getScene, setScenes } from "./scene/scene";
 import { handleGlobal } from "./handlers/keyboard/keyboard";
 import { copy, cut, paste } from "./handlers/keyboard/clipboard";
 import useEditorStore from "./stores/editor";
@@ -46,6 +46,10 @@ export default function AuthoringToolPage() {
     const autosave = setInterval(save, AUTOSAVE_INTERVAL);
     return () => clearInterval(autosave);
   }, [sceneId]);
+
+  useEffect(() => {
+    setScenes(scenes);
+  }, [scenes]);
 
   useEffect(() => {
     const activeScene = localStorage.getItem(`${scenarioId}:activeScene`);
