@@ -130,4 +130,16 @@ router.put("/visited/:sceneId", async (req, res) => {
   res.status(HTTP_OK).json(scene);
 });
 
+router.patch("/:sceneId", async (req, res) => {
+  const { fields = {}, components = [], deletedComponentIds = [] } = req.body;
+
+  const scene = await patchScene(req.params.sceneId, {
+    fields,
+    components,
+    deletedComponentIds,
+  });
+
+  res.status(HTTP_OK).json(scene);
+});
+
 export default router;

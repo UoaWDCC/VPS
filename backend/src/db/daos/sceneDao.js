@@ -195,10 +195,49 @@ const updateSceneOrder = async (scenarioId, sceneIds) => {
   return updatedScenario;
 };
 
+const patchScene = async (sceneId, patch) => {
+  const { fields = {}, components = [], deletedComponentIds = [] } = patch;
+
+  const allowedFields = {};
+  ["name", "roles", "time"].forEach((field) => {
+    if (Object.prototype.hasOwnProperty.call(fields, field)) {
+      allowedFields[field] = fields[field];
+    }
+  });
+
+  if (Object.keys(allowedFields).length > 0) {
+    await Scene.updateOne({ _id: sceneId }, { $set: allowedFields });
+  }
+
+  if (deletedComponentIds.length > 0) {
+    await Scene.updateOne(
+      { _id: sceneId },
+      { $pull: { components: { id: { $in: deletedComponentIds } } } }
+    );
+  }
+
+  for (const component of components) {
+    const result = await Scene.updateOne(
+      { _id: sceneId, "components.id": component.id },
+      { $set: { "components.$": component } }
+    );
+
+    if (result.matchedCount === 0) {
+      await Scene.updateOne(
+        { _id: sceneId },
+        { $push: { components: component } }
+      );
+    }
+  }
+
+  return Scene.findById(sceneId);
+};
+
 export {
   createScene,
   retrieveSceneList,
   retrieveScene,
+  patchScene,
   deleteScene,
   updateScene,
   duplicateScene,
