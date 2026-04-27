@@ -1,6 +1,7 @@
 import { getObject } from "./util";
 
 let scene = {} as any;
+let scenes: Record<string, any>[] = [];
 
 // @ts-ignore
 window.scene = scene;
@@ -15,6 +16,14 @@ export function getSceneId() {
 
 export function setScene(newScene: Record<string, any>) {
   scene = newScene as any;
+}
+
+export function getScenes() {
+  return scenes;
+}
+
+export function setScenes(newScenes: Record<string, any>[]) {
+  scenes = newScenes;
 }
 
 export function getComponent(id: string) {
