@@ -32,6 +32,20 @@ async function saveScene(user, scenarioId, scene) {
   });
 }
 
+async function saveScenePatch(user, scenarioId, patch) {
+  const parsedComponents = await parseMedia(
+    patch.components,
+    scenarioId,
+    patch._id
+  );
+
+  await api.patch(user, `/api/scenario/${scenarioId}/scene/${patch._id}`, {
+    fields: patch.fields,
+    components: parsedComponents,
+    deletedComponentIds: patch.deletedComponentIds,
+  });
+}
+
 /**
  * This is a Context Provider made with the React Context API
  * SceneContextProvider allows access to scene info and the refetch function
@@ -93,6 +107,10 @@ export default function SceneContextProvider({ children }) {
     saveSceneMutation.mutate(scene);
   }
 
+  function saveScenePatchWrapper(patch) {
+    saveScenePatchMutation.mutate(patch);
+  }
+
   const saveSceneMutation = useMutation({
     mutationFn: (scene) => saveScene(user, scenarioId, scene),
     onMutate: async (scene) => {
@@ -105,6 +123,15 @@ export default function SceneContextProvider({ children }) {
     onError: () => {
       toast.error(
         "Something went wrong updating the scenes, your last changes weren't saved"
+      );
+    },
+  });
+
+  const saveScenePatchMutation = useMutation({
+    mutationFn: (patch) => saveScenePatch(user, scenarioId, patch),
+    onError: () => {
+      toast.error(
+        "Something went wrong updating the scene, your last changes weren't saved"
       );
     },
   });
@@ -124,6 +151,7 @@ export default function SceneContextProvider({ children }) {
         scenes: scenesQuery.data,
         reorderScenes: reorderMutation.mutate,
         saveScene: saveSceneWrapper,
+        saveScenePatch: saveScenePatchWrapper,
         deleteScene: deleteMutation.mutate,
         reFetch: scenesQuery.refetch,
       }}
