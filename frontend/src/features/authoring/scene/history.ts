@@ -1,12 +1,13 @@
 import { fastIsEqual } from "fast-is-equal";
 import type { Component } from "../types";
-import { getComponent, getScene } from "./scene";
+import { getComponent, getScene, getSceneId } from "./scene";
 import { merge } from "./util";
 import useVisualScene from "../stores/visual";
 import { buildVisualComponent } from "../pipeline";
 import { add, remove } from "./operations/modifiers";
 
 interface HistoryObject {
+  sceneId: string;
   id: string;
   state: Component | null;
 }
@@ -16,7 +17,7 @@ const redoStack: HistoryObject[] = [];
 
 export function updateHistory(id: string, prevState: Component | null) {
   if (fastIsEqual(prevState, getComponent(id))) return;
-  undoStack.push({ id, state: prevState });
+  undoStack.push({ sceneId: getSceneId(), id, state: prevState });
   redoStack.length = 0;
 }
 
@@ -27,7 +28,7 @@ export function undo() {
   if (current == null) add(prev.state!, false);
   else if (prev.state == null) remove(prev.id, false);
   else modifyComponent(prev.id, prev.state);
-  redoStack.push({ id: prev.id, state: current });
+  redoStack.push({ sceneId: prev.sceneId, id: prev.id, state: current });
 }
 
 export function redo() {
@@ -37,7 +38,7 @@ export function redo() {
   if (current == null) add(subs.state!, false);
   else if (subs.state == null) remove(subs.id, false);
   else modifyComponent(subs.id, subs.state);
-  undoStack.push({ id: subs.id, state: current });
+  undoStack.push({ sceneId: subs.sceneId, id: subs.id, state: current });
 }
 
 function modifyComponent(id: string, props: Record<string, any>) {
