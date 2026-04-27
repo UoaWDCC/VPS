@@ -21,7 +21,7 @@ interface HistoryObject {
 }
 
 let undoStack: HistoryObject[] = [];
-let redoStack: HistoryObject[] = []; 
+let redoStack: HistoryObject[] = [];
 
 export function updateHistory(id: string, prevState: Component | null) {
   if (fastIsEqual(prevState, getComponent(id))) return;
