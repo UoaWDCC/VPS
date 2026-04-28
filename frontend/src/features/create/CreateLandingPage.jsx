@@ -19,16 +19,12 @@ export default function CreateLandingPage() {
     currentScenario,
     setCurrentScenario,
   } = useContext(ScenarioContext);
-  const { getUserIdToken, VpsUser, signOut } = useContext(
-    AuthenticationContext
-  );
+  const { getUserIdToken, VpsUser } = useContext(AuthenticationContext);
   const history = useHistory();
 
   const [search, setSearch] = useState("");
   const [contextMenuPosition, setContextMenuPosition] = useState(null);
   const [showCreateModal, setShowCreateModal] = useState(false);
-  const [showDashboardModal, setShowDashboardModal] = useState(false);
-  const [dashboardSearch, setDashboardSearch] = useState("");
 
   useEffect(() => {
     reFetch();
@@ -36,10 +32,6 @@ export default function CreateLandingPage() {
 
   const filteredScenarios = (userScenarios || []).filter((scenario) =>
     scenario.name.toLowerCase().includes(search.toLowerCase())
-  );
-
-  const filteredDashboardScenarios = (userScenarios || []).filter((scenario) =>
-    scenario.name.toLowerCase().includes(dashboardSearch.toLowerCase())
   );
 
   const handleContextMenu = (event, scenario) => {
@@ -69,49 +61,18 @@ export default function CreateLandingPage() {
   };
 
   const openDashboardModal = () => {
-    setShowDashboardModal(true);
-    setDashboardSearch(""); // Reset search in modal
-  };
-
-  const selectDashboardScenario = (scenario) => {
-    setCurrentScenario(scenario); // Set the current scenario in the context
-    history.push(`/dashboard/${scenario._id}`);
-    setShowDashboardModal(false);
-  };
-
-  // Add the logout function
-  const handleLogout = async () => {
-    try {
-      await signOut();
-    } catch (error) {
-      console.error("Logout failed:", error);
-    }
+    history.push("/dashboard");
   };
 
   return (
     <div className="play-container" data-theme="dark">
       {/* Top Nav - Using extracted component */}
-      <TopNavBar
-        onLogout={handleLogout}
-        onOpenDashboard={openDashboardModal}
-        activeTab="create"
-      />
+      <TopNavBar activeTab="create" />
 
       {/* Rest of your component remains the same */}
-      <div className="section-block">
-        <h2 className="section-header">Create</h2>
-        <div className="scenarios-grid">
-          <div className="scenario-card create-card" onClick={handleCreate}>
-            <div className="scenario-card-thumbnail create-thumbnail">
-              <span className="create-plus">+</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
       {/* Edit Section */}
       <div className="section-block">
-        <h2 className="section-header">Edit</h2>
+        <h2 className="section-header">Create & Edit</h2>
 
         <div className="search-section">
           <div className="search-container-play">
@@ -145,6 +106,11 @@ export default function CreateLandingPage() {
         </div>
 
         <div className="scenarios-grid">
+          <div className="scenario-card create-card" onClick={handleCreate}>
+            <div className="scenario-card-thumbnail create-thumbnail">
+              <span className="create-plus">+</span>
+            </div>
+          </div>
           {filteredScenarios.map((scenario) => (
             <div
               key={scenario._id}
@@ -209,69 +175,6 @@ export default function CreateLandingPage() {
       )}
 
       {/* Dashboard Modal */}
-      {showDashboardModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-black-800 p-8 rounded-lg max-w-7xl w-full h-4/5 overflow-y-auto relative animate-slide-up">
-            <button
-              className="btn btn-sm btn-square absolute right-2 top-2 text-white"
-              onClick={() => setShowDashboardModal(false)}
-            >
-              ✕
-            </button>
-            <h2 className="text-2xl font mb-4 text-white">
-              Select Scenario for Dashboard
-            </h2>
-            <div className="search-section mb-4">
-              <div className="search-container-play">
-                <label className="search-input-wrapper-play">
-                  <svg
-                    className="search-icon-play"
-                    xmlns="http://www.w3.org/2000/svg"
-                    viewBox="0 0 24 24"
-                  >
-                    <g
-                      strokeLinejoin="round"
-                      strokeLinecap="round"
-                      strokeWidth="2.5"
-                      fill="none"
-                      stroke="currentColor"
-                    >
-                      <circle cx="11" cy="11" r="8"></circle>
-                      <path d="m21 21-4.3-4.3"></path>
-                    </g>
-                  </svg>
-                  <input
-                    type="search"
-                    placeholder="Search scenario"
-                    value={dashboardSearch}
-                    onChange={(e) => setDashboardSearch(e.target.value)}
-                    className="search-input-play"
-                    required
-                  />
-                </label>
-              </div>
-            </div>
-            <div className="scenarios-grid">
-              {filteredDashboardScenarios.map((scenario) => (
-                <div
-                  key={scenario._id}
-                  className="scenario-card"
-                  onClick={() => selectDashboardScenario(scenario)}
-                >
-                  <div className="scenario-card-thumbnail">
-                    <Thumbnail
-                      components={scenario.thumbnail?.components || []}
-                    />
-                  </div>
-                  <div className="scenario-card-name">
-                    <h3 className="scenario-name-text">{scenario.name}</h3>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
