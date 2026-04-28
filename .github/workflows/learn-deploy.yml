@@ -1,9 +1,9 @@
-name: Deploy to GitHub Pages
+name: Learn Deploy
 
 on:
   push:
-    branches:
-      - master
+    branches: [ master ]
+    paths: [ "learn/**" ]
 
 jobs:
   build:
