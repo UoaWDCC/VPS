@@ -31,7 +31,7 @@ export default function ManageResourcesPage() {
   const { scenarioId } = useParams();
   const history = useHistory();
 
-  const [setResources] = useState([]);
+  const [resources, setResources] = useState([]);
 
   useEffect(() => {
     let cancelled = false;

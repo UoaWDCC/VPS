@@ -4,7 +4,9 @@ import { marked } from "marked";
 
 function renderMarkdown(content) {
   if (!content) return "";
+  console.log("raw content:", content);
   const html = marked.parse(content, { headerIds: false });
+  console.log("parse", html)
   return DOMPurify.sanitize(html);
 }
 
@@ -13,7 +15,8 @@ function renderHTML(content) {
   return DOMPurify.sanitize(content);
 }
 
-export default function FileViewer({ file, content, loading, error }) {
+export default function FileViewer({ file, content, loading, error }){
+  if (!file) return null;
   const isMarkdown =
     file.type === "text/markdown" || /\.md$/i.test(file.name || "");
   const isHTML = file.type === "text/html" || /\.html?$/i.test(file.name || "");
