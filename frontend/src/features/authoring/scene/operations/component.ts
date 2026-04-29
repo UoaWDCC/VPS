@@ -146,11 +146,15 @@ export function modifyComponentBounds(id: string, bounds: Partial<Bounds>) {
 export function bringForward(id: string) {
   const currentZIndex = getComponentProp(id, "zIndex") as number;
   const components = Object.values(getScene().components) as Component[];
+  // 1. Find all z-indices that are strictly greater than the current one
   const higherZIndices = components
     .map((c) => c.zIndex)
     .filter((z) => z >= currentZIndex);
 
+  if (higherZIndices.length === 0) return;
+
   const immediatelyAbove = Math.min(...higherZIndices);
+  console.log(higherZIndices);
 
   if (currentZIndex === immediatelyAbove) {
     return modifyComponentProp(id, "zIndex", immediatelyAbove + 1);
@@ -165,6 +169,8 @@ export function sendBackward(id: string) {
   const lowerZIndices = components
     .map((c) => c.zIndex)
     .filter((z) => z <= currentZIndex);
+
+  if (lowerZIndices.length === 0) return;
 
   const immediatelyBelow = Math.max(...lowerZIndices);
 
