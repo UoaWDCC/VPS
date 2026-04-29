@@ -14,7 +14,6 @@ function renderHTML(content) {
   return DOMPurify.sanitize(content);
 }
 
-
 // Text and Markdown rendering fucntion (Not really fileviewer there is probably better name since its not universal)
 export default function FileViewer({ file, content, loading, error }) {
   if (!file) return null;
@@ -24,7 +23,7 @@ export default function FileViewer({ file, content, loading, error }) {
     file.type === "text/markdown" || /\.md$/i.test(file.name || "");
   const isHTML = file.type === "text/html" || /\.html?$/i.test(file.name || "");
 
-  // caches res to avoid frequent updating  
+  // caches res to avoid frequent updating
   const renderedHTML = useMemo(() => {
     if (isMarkdown) return renderMarkdown(content);
     if (isHTML) return renderHTML(content);
@@ -51,7 +50,7 @@ export default function FileViewer({ file, content, loading, error }) {
   if (isMarkdown || isHTML) {
     return (
       <div className="prose prose-sm max-h-[60vh] overflow-auto rounded-xl border p-3 bg-base-200">
-      {/* dont worry its purified html 😄*/}
+        {/* dont worry its purified html 😄*/}
         <div dangerouslySetInnerHTML={{ __html: renderedHTML }} />
       </div>
     );

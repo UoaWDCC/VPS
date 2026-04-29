@@ -32,37 +32,44 @@ export default function ManageResourcesPage() {
   const { scenarioId } = useParams();
   const history = useHistory();
 
-  const [resources, setResources] = useState([]);
+  // Im not sure what this does beside cause an error?
+  // const [resources, setResources] = useState([]);
 
-  useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      try {
-        const user = getAuth().currentUser;
-        if (!user) {
-          toast.error("You must be logged in to view resources.");
-          return;
-        }
-        const idToken = await user.getIdToken();
-        const { data } = await axios.get(
-          `/api/resources/scenario/${scenarioId}`,
-          {
-            headers: { Authorization: `Bearer ${idToken}` },
-          }
-        );
-        if (!cancelled) setResources(data);
-      } catch (err) {
-        if (!cancelled) {
-          toast.error(
-            "Error fetching resources: " + (err?.message || String(err))
-          );
-        }
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, [scenarioId]);
+  // Im not even sure if anything inside this useEffect is ever used? someone review
+  // useEffect(() => {
+  //   let cancelled = false;
+  //   (async () => {
+  //     try {
+  //       const user = getAuth().currentUser;
+  //       if (!user) {
+  //         toast.error("You must be logged in to view resources.");
+  //         return;
+  //       }
+
+  //       // const idToken = await user.getIdToken();
+
+  //       // const { data } = await axios.get(
+  //       //   `/api/resources/scenario/${scenarioId}`,
+  //       //   {
+  //       //     headers: { Authorization: `Bearer ${idToken}` },
+  //       //   }
+  //       // );
+
+  //       // setResources is never used defined/used same as before
+  //       // if (!cancelled) setResources(data);
+
+  //     } catch (err) {
+  //       if (!cancelled) {
+  //         toast.error(
+  //           "Error fetching resources: " + (err?.message || String(err))
+  //         );
+  //       }
+  //     }
+  //   })();
+  //   return () => {
+  //     cancelled = true;
+  //   };
+  // }, [scenarioId]);
 
   function goBack() {
     history.push(`/scenario/${scenarioId}`);
@@ -493,7 +500,7 @@ function Preview({ file, makeDownloadUrl }) {
       </div>
     );
 
-  // logic is consistent with resource panel 
+  // logic is consistent with resource panel
   const isImage = file.type?.startsWith("image/");
   const isPDF = file.type === "application/pdf";
   const isText =
