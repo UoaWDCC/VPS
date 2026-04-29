@@ -205,29 +205,64 @@ const patchScene = async (sceneId, patch) => {
     }
   });
 
+  const operations = [];
+
   if (Object.keys(allowedFields).length > 0) {
-    await Scene.updateOne({ _id: sceneId }, { $set: allowedFields });
+    operations.push({
+      updateOne: {
+        filter: { _id: sceneId },
+        update: { $set: allowedFields },
+      },
+    });
   }
 
   if (deletedComponentIds.length > 0) {
-    await Scene.updateOne(
-      { _id: sceneId },
-      { $pull: { components: { id: { $in: deletedComponentIds } } } }
-    );
+    operations.push({
+      updateOne: {
+        filter: { _id: sceneId },
+        update: {
+          $pull: {
+            components: { id: { $in: deletedComponentIds } },
+          },
+        },
+      },
+    });
   }
 
   for (const component of components) {
-    const result = await Scene.updateOne(
-      { _id: sceneId, "components.id": component.id },
-      { $set: { "components.$": component } }
-    );
+    // Update existing component
+    operations.push({
+      updateOne: {
+        filter: {
+          _id: sceneId,
+          "components.id": component.id,
+        },
+        update: {
+          $set: {
+            "components.$": component,
+          },
+        },
+      },
+    });
 
-    if (result.matchedCount === 0) {
-      await Scene.updateOne(
-        { _id: sceneId },
-        { $push: { components: component } }
-      );
-    }
+    // Insert component if it does not already exist
+    operations.push({
+      updateOne: {
+        filter: {
+          _id: sceneId,
+          "components.id": { $ne: component.id },
+        },
+        update: {
+          $push: {
+            components: component,
+          },
+        },
+      },
+    });
+  }
+
+  if (operations.length > 0) {
+    await Scene.bulkWrite(operations, { ordered: true });
   }
 
   return Scene.findById(sceneId);

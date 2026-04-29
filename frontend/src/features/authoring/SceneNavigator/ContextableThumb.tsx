@@ -55,15 +55,6 @@ function ContextableThumb({
   const { reFetch, saveScenePatch, deleteScene } = useContext(SceneContext);
   const patch = structuredClone(getScenePatch());
 
-  if (
-    Object.keys(patch.fields).length > 0 ||
-    patch.components.length > 0 ||
-    patch.deletedComponentIds.length > 0
-  ) {
-    saveScenePatch(patch);
-    commitSavedScene();
-  }
-
   const duplicateScene = async (id: string) => {
     api
       .post(user, `/api/scenario/${scenarioId}/scene/duplicate/${id}`, {})
@@ -83,6 +74,7 @@ function ContextableThumb({
     ) {
       await saveScenePatch(patch);
       commitSavedScene();
+      await reFetch();
     }
     useEditorStore.getState().clear();
     replace(scene);
