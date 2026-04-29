@@ -31,7 +31,7 @@ export default function ResourcePreview({ file, getDownloadUrl }) {
           const resp = await fetch(u);
           if (!resp.ok) throw new Error(`Failed to fetch (${resp.status})`);
           const t = await resp.text();
-          if (!cancelled) setText(t); // safety cap
+          if (!cancelled) setText(t);
         }
       } catch (err) {
         console.error(err);
@@ -56,8 +56,8 @@ export default function ResourcePreview({ file, getDownloadUrl }) {
         <div>
           <div className="text-sm">Select a file to preview.</div>
           <div className="text-xs">
-            Images and PDFs files show inline; text/CSV/JSON/Markdown render
-            below; other files provide a download.
+            Select a file to preview. Images and PDFs files show inline;
+            text/CSV/JSON/Markdown render below; other files provide a download.
           </div>
         </div>
       </div>

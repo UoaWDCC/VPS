@@ -449,12 +449,12 @@ function Preview({ file, makeDownloadUrl }) {
         setTextLoading(false);
         return;
       }
-      const isTextLike =
+      const isText =
         file.type?.startsWith("text/") ||
         /\.md$|\.html?$/i.test(file.name || "") ||
         /json|xml|csv/.test(file.type || "");
 
-      if (!isTextLike) {
+      if (!isText) {
         setText(null);
         setFetchErr(null);
         return;
@@ -464,7 +464,8 @@ function Preview({ file, makeDownloadUrl }) {
       setFetchErr(null);
       try {
         const resp = await fetch(downloadUrl);
-        if (!resp.ok) throw new Error(`Failed to load preview (${resp.status})`);
+        if (!resp.ok)
+          throw new Error(`Failed to load preview (${resp.status})`);
         const t = await resp.text();
         if (!cancelled) setText(t);
       } catch (err) {
@@ -486,15 +487,16 @@ function Preview({ file, makeDownloadUrl }) {
       <div className="prose max-w-none opacity-70">
         <h3>Preview</h3>
         <p>
-          Select a file to preview. Images and PDFs are shown inline. Text is
-          rendered below. For other files, a download link appears.
+          Select a file to preview. Images and PDFs files show inline;
+          text/CSV/JSON/Markdown render below; other files provide a download.
         </p>
       </div>
     );
 
+  // logic is consistent with resource panel 
   const isImage = file.type?.startsWith("image/");
   const isPDF = file.type === "application/pdf";
-  const isTextLike =
+  const isText =
     file.type?.startsWith("text/") ||
     /\.md$|\.html?$/i.test(file.name || "") ||
     /json|xml|csv/.test(file.type || "");
@@ -524,12 +526,13 @@ function Preview({ file, makeDownloadUrl }) {
             className="w-full h-full min-h-[60vh] rounded-xl border"
           />
         </div>
-      ) : isTextLike ? (
+      ) : isText ? (
         <FileViewer
           file={file}
           content={text}
           loading={
-            textLoading || (text == null && downloadUrl == null && fetchErr == null)
+            textLoading ||
+            (text == null && downloadUrl == null && fetchErr == null)
           }
           error={fetchErr}
         />
