@@ -14,6 +14,7 @@ import ScenarioSelectionPage from "./features/scenarioSelection/ScenarioSelectio
 import ScenarioInfo from "./features/scenarioInfo/ScenarioInfo";
 import PlayPage from "./features/play/PlayPage";
 import Dashboard from "./features/dashboard/Dashboard";
+import DashboardLandingPage from "./features/dashboard/DashboardLandingPage";
 import AboutUsPage from "./features/aboutUs/AboutUsPage";
 import CreateLandingPage from "./features/create/CreateLandingPage";
 import ManageResourcesPage from "./features/resources/ManageResourcesPage";
@@ -94,6 +95,12 @@ export default function App() {
                 <ProtectedRoute path="/scenario-info">
                   <ScenarioContextProvider>
                     <ScenarioInfo />
+                  </ScenarioContextProvider>
+                </ProtectedRoute>
+
+                <ProtectedRoute exact path="/dashboard">
+                  <ScenarioContextProvider>
+                    <DashboardLandingPage />
                   </ScenarioContextProvider>
                 </ProtectedRoute>
 
