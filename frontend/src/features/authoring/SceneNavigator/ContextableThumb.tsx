@@ -5,7 +5,7 @@ import Thumbnail from "../components/Thumbnail";
 import AuthenticationContext from "../../../context/AuthenticationContext";
 import SceneContext from "../../../context/SceneContext";
 import { useParams, useHistory } from "react-router-dom";
-import { getScene } from "../scene/scene";
+import { commitSavedScene, getScenePatch } from "../scene/scene";
 import useEditorStore from "../stores/editor";
 import { replace } from "../scene/operations/modifiers";
 import { handle } from "../../../components/ContextMenu/portal";
@@ -48,11 +48,21 @@ function ContextableThumb({
   active: boolean;
 }) {
   const { user } = useContext(AuthenticationContext);
-
-  const { scenarioId } = useParams();
+  
+  const { scenarioId } = useParams<{ scenarioId: string }>();
   const history = useHistory();
 
-  const { reFetch, saveScene, deleteScene } = useContext(SceneContext);
+  const { reFetch, saveScenePatch, deleteScene } = useContext(SceneContext);
+  const patch = structuredClone(getScenePatch());
+
+  if (
+    Object.keys(patch.fields).length > 0 ||
+    patch.components.length > 0 ||
+    patch.deletedComponentIds.length > 0
+  ) {
+    saveScenePatch(patch);
+    commitSavedScene();
+  }
 
   const duplicateScene = async (id: string) => {
     api
@@ -61,10 +71,19 @@ function ContextableThumb({
       .catch(handleGeneric);
   };
 
-  function switchScene(scene: Record<string, any>) {
+  async function switchScene(scene: Record<string, any>) {
     if (active) return;
 
-    saveScene(structuredClone(getScene()));
+    const patch = structuredClone(getScenePatch());
+
+    if (
+      Object.keys(patch.fields).length > 0 ||
+      patch.components.length > 0 ||
+      patch.deletedComponentIds.length > 0
+    ) {
+      await saveScenePatch(patch);
+      commitSavedScene();
+    }
     useEditorStore.getState().clear();
     replace(scene);
 

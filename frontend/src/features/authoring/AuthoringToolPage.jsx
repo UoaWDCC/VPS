@@ -31,7 +31,7 @@ const AUTOSAVE_INTERVAL = 30000; // 30 secs
  * @container
  */
 export default function AuthoringToolPage() {
-  const { scenes, saveScene } = useContext(SceneContext);
+  const { scenes, saveScene, saveScenePatch } = useContext(SceneContext);
   const { scenarioId } = useParams();
 
   const sceneId = useVisualScene((scene) => scene.id);
