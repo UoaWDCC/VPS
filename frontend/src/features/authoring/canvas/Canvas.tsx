@@ -48,14 +48,17 @@ function Canvas() {
   }
 
   function handleMouseMove(e: React.MouseEvent) {
+    if (e.button === 2) return;
     handleMouseMoveGlobal(e, toSVGSpace(e.clientX, e.clientY));
   }
 
-  function handleMouseUp() {
+  function handleMouseUp(e: React.MouseEvent) {
+    if (e.button === 2) return;
     handleMouseUpGlobal();
   }
 
   function handleMouseDown(e: React.MouseEvent) {
+    if (e.button === 2) return;
     handleMouseDownGlobal(e, toSVGSpace(e.clientX, e.clientY));
   }
 

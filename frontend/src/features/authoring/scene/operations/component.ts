@@ -144,11 +144,34 @@ export function modifyComponentBounds(id: string, bounds: Partial<Bounds>) {
 }
 
 export function bringForward(id: string) {
-  modifyComponentProp(id, "zIndex", (val: number) => val + 1);
+  const currentZIndex = getComponentProp(id, "zIndex") as number;
+  const components = Object.values(getScene().components) as Component[];
+  const higherZIndices = components
+    .map((c) => c.zIndex)
+    .filter((z) => z >= currentZIndex);
+
+  const immediatelyAbove = Math.min(...higherZIndices);
+
+  if (currentZIndex === immediatelyAbove) {
+    return modifyComponentProp(id, "zIndex", immediatelyAbove + 1);
+  }
+  modifyComponentProp(id, "zIndex", immediatelyAbove);
 }
 
 export function sendBackward(id: string) {
-  modifyComponentProp(id, "zIndex", (val: number) => val - 1);
+  const currentZIndex = getComponentProp(id, "zIndex") as number;
+  const components = Object.values(getScene().components) as Component[];
+
+  const lowerZIndices = components
+    .map((c) => c.zIndex)
+    .filter((z) => z <= currentZIndex);
+
+  const immediatelyBelow = Math.max(...lowerZIndices);
+
+  if (currentZIndex === immediatelyBelow) {
+    return modifyComponentProp(id, "zIndex", immediatelyBelow - 1);
+  }
+  modifyComponentProp(id, "zIndex", immediatelyBelow);
 }
 
 export function bringToFront(id: string) {
@@ -157,7 +180,6 @@ export function bringToFront(id: string) {
     (p, c) => (c.zIndex > p ? c.zIndex : p),
     -Infinity
   );
-  if (getComponentProp(id, "zIndex") === max) return;
   modifyComponentProp(id, "zIndex", max + 1);
 }
 
@@ -167,6 +189,5 @@ export function sendToBack(id: string) {
     (p, c) => (c.zIndex < p ? c.zIndex : p),
     Infinity
   );
-  if (getComponentProp(id, "zIndex") === min) return;
   modifyComponentProp(id, "zIndex", min - 1);
 }
