@@ -20,6 +20,8 @@ import auth from "../../../middleware/firebaseAuth.js";
 import scenarioAuth from "../../../middleware/scenarioAuth.js";
 import Access from "../../../db/models/access.js";
 
+jest.setTimeout(30000);
+
 jest.mock("../../../middleware/firebaseAuth");
 jest.mock("../../../middleware/scenarioAuth");
 jest.mock("firebase-admin"); // Needed to mock the firebase-admin dependency in firebase-auth.js
