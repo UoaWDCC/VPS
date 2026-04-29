@@ -9,6 +9,7 @@ import {
   retrieveSceneList,
   updateScene,
   updateSceneOrder,
+  patchScene,
 } from "../../db/daos/sceneDao.js";
 import auth from "../../middleware/firebaseAuth.js";
 import scenarioAuth from "../../middleware/scenarioAuth.js";

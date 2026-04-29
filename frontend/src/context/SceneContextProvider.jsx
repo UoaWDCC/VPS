@@ -108,7 +108,7 @@ export default function SceneContextProvider({ children }) {
   }
 
   function saveScenePatchWrapper(patch) {
-    saveScenePatchMutation.mutate(patch);
+    return saveScenePatchMutation.mutateAsync(patch);
   }
 
   const saveSceneMutation = useMutation({
