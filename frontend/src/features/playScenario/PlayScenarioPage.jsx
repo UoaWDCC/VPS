@@ -19,7 +19,8 @@ const navigate = async (
   currentScene,
   addFlags,
   removeFlags,
-  componentId
+  componentId,
+  directAdvance = false
 ) => {
   const token = await user.getIdToken();
   const config = {
@@ -29,7 +30,7 @@ const navigate = async (
       "Content-Type": "application/json",
       Authorization: `Bearer ${token}`,
     },
-    data: { currentScene, addFlags, removeFlags, componentId },
+    data: { currentScene, addFlags, removeFlags, componentId, directAdvance },
   };
   const res = await axios.request(config);
   if (res.data.scenes) {
@@ -61,6 +62,37 @@ export default function PlayScenarioPage() {
   const [resourcesOpen, setResourcesOpen] = useState(false);
 
   const currScene = sceneCache.get(sceneId);
+
+  const directAdvance = async () => {
+    if (!sceneId || !currScene?.directLink) return;
+
+    try {
+      const { newSceneId, stateVariables, newStateVersion } = await navigate(
+        user,
+        scenarioId,
+        sceneId,
+        addFlags,
+        removeFlags,
+        null,
+        true
+      );
+
+      if (stateVersion < newStateVersion) {
+        setStateVariables(stateVariables);
+        setStateVersion(newStateVersion);
+      }
+
+      if (newSceneId) {
+        if (sceneCache.get(newSceneId)?.error) {
+          handleError(sceneCache.get(newSceneId));
+          return;
+        }
+        setSceneId(newSceneId);
+      }
+    } catch (e) {
+      handleError(e?.response?.data);
+    }
+  };
 
   const handleError = (error) => {
     if (!error) return;
@@ -113,6 +145,29 @@ export default function PlayScenarioPage() {
   useEffect(() => {
     onSceneChange();
   }, []);
+
+  useEffect(() => {
+    const onKeyDown = (e) => {
+      if (e.repeat) return;
+      if (!currScene?.directLink) return;
+
+      const tag = document.activeElement?.tagName;
+      const isTyping =
+        tag === "INPUT" ||
+        tag === "TEXTAREA" ||
+        document.activeElement?.isContentEditable;
+
+      if (isTyping) return;
+
+      if (e.code === "Space" || e.key === "ArrowRight") {
+        e.preventDefault();
+        directAdvance();
+      }
+    };
+
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [currScene, sceneId, stateVariables, stateVersion, addFlags, removeFlags]);
 
   const buttonPressed = async (component) => {
     const currentSceneId = sceneId;

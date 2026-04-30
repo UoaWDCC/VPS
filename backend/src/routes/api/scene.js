@@ -54,12 +54,14 @@ router.get("/all", async (req, res) => {
 
 // Create a scene for a scenario
 router.post("/", async (req, res) => {
-  const { name, components, time } = req.body;
+  const { name, components, time, directLink, directLinkScene } = req.body;
 
   const scene = await createScene(req.params.scenarioId, {
     name,
     components,
     time,
+    directLink,
+    directLinkScene,
   });
 
   res.status(HTTP_OK).json(scene);
@@ -95,13 +97,16 @@ router.put("/reorder", async (req, res) => {
 
 // Update a scene
 router.put("/:sceneId", async (req, res) => {
-  const { name, components, roles, time } = req.body;
+  const { name, components, roles, time, directLink, directLinkScene } =
+    req.body;
 
   const scene = await updateScene(req.params.sceneId, {
     name,
     components,
     time,
     roles,
+    directLink,
+    directLinkScene,
   });
 
   res.status(HTTP_OK).json(scene);
