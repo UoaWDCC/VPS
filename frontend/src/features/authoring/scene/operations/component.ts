@@ -146,38 +146,47 @@ export function modifyComponentBounds(id: string, bounds: Partial<Bounds>) {
 export function bringForward(id: string) {
   const currentZIndex = getComponentProp(id, "zIndex") as number;
   const components = Object.values(getScene().components) as Component[];
-  // 1. Find all z-indices that are strictly greater than the current one
-  const higherZIndices = components
-    .map((c) => c.zIndex)
-    .filter((z) => z >= currentZIndex);
 
-  if (higherZIndices.length === 0) return;
+  // 1. Find the highest zIndex that is strictly greater than the current one
 
-  const immediatelyAbove = Math.min(...higherZIndices);
-  console.log(higherZIndices);
+  const targetComponent = components
+    .filter((curr) => curr.zIndex > currentZIndex)
+    .reduce(
+      (prev, curr) => {
+        return prev == null || prev.zIndex > curr.zIndex ? curr : prev;
+      },
+      null as Component | null
+    );
 
-  if (currentZIndex === immediatelyAbove) {
-    return modifyComponentProp(id, "zIndex", immediatelyAbove + 1);
-  }
-  modifyComponentProp(id, "zIndex", immediatelyAbove);
+  // Return if component is at the top already
+  if (!targetComponent) return;
+
+  const aboveZIndex = targetComponent.zIndex;
+
+  // Swap Zindexs
+  modifyComponentProp(id, "zIndex", aboveZIndex);
+  modifyComponentProp(targetComponent.id, "zIndex", currentZIndex);
 }
 
 export function sendBackward(id: string) {
   const currentZIndex = getComponentProp(id, "zIndex") as number;
   const components = Object.values(getScene().components) as Component[];
 
-  const lowerZIndices = components
-    .map((c) => c.zIndex)
-    .filter((z) => z <= currentZIndex);
+  // 1. Find the highest zIndex that is strictly less than the current one
+  const targetComponent = components
+    .filter((curr) => curr.zIndex < currentZIndex)
+    .reduce(
+      (prev, curr) => {
+        return prev == null || prev.zIndex < curr.zIndex ? curr : prev;
+      },
+      null as Component | null
+    );
 
-  if (lowerZIndices.length === 0) return;
+  if (!targetComponent) return;
 
-  const immediatelyBelow = Math.max(...lowerZIndices);
-
-  if (currentZIndex === immediatelyBelow) {
-    return modifyComponentProp(id, "zIndex", immediatelyBelow - 1);
-  }
-  modifyComponentProp(id, "zIndex", immediatelyBelow);
+  const belowZIndex = targetComponent.zIndex;
+  modifyComponentProp(id, "zIndex", belowZIndex);
+  modifyComponentProp(targetComponent.id, "zIndex", currentZIndex);
 }
 
 export function bringToFront(id: string) {
