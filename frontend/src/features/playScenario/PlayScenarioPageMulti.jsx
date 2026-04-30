@@ -19,7 +19,7 @@ const sceneCache = new Map();
 // returns the scene id that we should switch to
 const navigate = async (
   user,
-  scenarioId,
+  groupId,
   currentScene,
   addFlags,
   removeFlags,
@@ -94,7 +94,8 @@ export default function PlayScenarioPageMulti({ group }) {
         sceneId,
         addFlags,
         removeFlags,
-        componentId
+        null,
+        true
       );
 
       const newResources = await getResources(user, group._id);
@@ -109,7 +110,7 @@ export default function PlayScenarioPageMulti({ group }) {
         setStateVersion(newStateVersion);
       }
 
-      if (!sceneId && newSceneId) {
+      if (newSceneId) {
         setSceneId(newSceneId);
       }
     } catch (e) {
@@ -148,7 +149,15 @@ export default function PlayScenarioPageMulti({ group }) {
       }
     }
     try {
-      navigate(user, group._id, sceneId, addFlags, removeFlags, null, true);
+      const { newSceneId, stateVariables, newStateVersion } = await navigate(
+        user,
+        group._id,
+        sceneId,
+        addFlags,
+        removeFlags,
+        componentId
+      );
+
       const newResources = await getResources(user, group._id);
       const filteredResources = filterResourcesByConditions(
         newResources,
@@ -156,11 +165,11 @@ export default function PlayScenarioPageMulti({ group }) {
       );
       setResources(filteredResources);
 
-      // Updates state variables if there is a desync
       if (stateVersion < newStateVersion) {
         setStateVariables(stateVariables);
         setStateVersion(newStateVersion);
       }
+
       if (!sceneId && newSceneId) {
         setSceneId(newSceneId);
       }
