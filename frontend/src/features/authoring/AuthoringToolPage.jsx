@@ -9,7 +9,7 @@ import SceneNavigator from "./SceneNavigator/SceneNavigator";
 import Canvas from "./canvas/Canvas";
 import Topbar from "./topbar/Topbar";
 import useVisualScene from "./stores/visual";
-import { getScene, getScenePatch, commitSavedScene } from "./scene/scene";
+import { getScenePatch, commitSavedScene } from "./scene/scene";
 import { handleGlobal } from "./handlers/keyboard/keyboard";
 import { copy, cut, paste } from "./handlers/keyboard/clipboard";
 import useEditorStore from "./stores/editor";
@@ -31,7 +31,7 @@ const AUTOSAVE_INTERVAL = 30000; // 30 secs
  * @container
  */
 export default function AuthoringToolPage() {
-  const { scenes, saveScene, saveScenePatch } = useContext(SceneContext);
+  const { scenes, saveScenePatch } = useContext(SceneContext);
   const { scenarioId } = useParams();
 
   const sceneId = useVisualScene((scene) => scene.id);
