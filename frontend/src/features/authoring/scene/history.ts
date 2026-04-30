@@ -1,18 +1,12 @@
 import { fastIsEqual } from "fast-is-equal";
 import type { Component } from "../types";
-import {
-  getComponent,
-  getScene,
-  getSceneId,
-  getScenarioId,
-  getSceneSaveRef,
-  getScenes,
-} from "./scene";
+import { getComponent, getScene, getSceneId } from "./scene";
 import { merge } from "./util";
 import useVisualScene from "../stores/visual";
 import { buildVisualComponent } from "../pipeline";
 import { add, remove, replace } from "./operations/modifiers";
 import useEditorStore from "../stores/editor";
+import useAuthoringStore from "../stores/authoring";
 
 interface HistoryObject {
   sceneId: string;
@@ -55,14 +49,16 @@ export function redo() {
 //ensure redo/undo applies to correct scene
 function switchToHistoryScene(sceneId: string) {
   if (sceneId === getSceneId()) return;
-  const nextScene = getScenes().find((scene) => scene._id === sceneId);
+  const nextScene = useAuthoringStore
+    .getState()
+    .scenes.find((scene) => scene._id === sceneId);
   if (!nextScene) return;
 
   //clones current scene and switches editor state
-  const saveScene = getSceneSaveRef();
+  const saveScene = useAuthoringStore.getState().sceneSaveRef;
   if (saveScene) saveScene(structuredClone(getScene()));
   replace(nextScene);
-  const scenarioId = getScenarioId();
+  const scenarioId = useAuthoringStore.getState().scenarioId;
   if (scenarioId) {
     localStorage.setItem(`${scenarioId}:activeScene`, sceneId);
   }

@@ -9,15 +9,11 @@ import SceneNavigator from "./SceneNavigator/SceneNavigator";
 import Canvas from "./canvas/Canvas";
 import Topbar from "./topbar/Topbar";
 import useVisualScene from "./stores/visual";
-import {
-  getScene,
-  setScenes,
-  setSceneSaveRef,
-  setScenarioId,
-} from "./scene/scene";
+import { getScene } from "./scene/scene";
 import { handleGlobal } from "./handlers/keyboard/keyboard";
 import { copy, cut, paste } from "./handlers/keyboard/clipboard";
 import useEditorStore from "./stores/editor";
+import useAuthoringStore from "./stores/authoring";
 import { useHistory } from "react-router-dom";
 import { replace } from "./scene/operations/modifiers";
 import { ArrowLeftIcon, FilesIcon, PlayIcon, UsersIcon } from "lucide-react";
@@ -53,17 +49,15 @@ export default function AuthoringToolPage() {
   }, [sceneId]);
 
   useEffect(() => {
-    setScenes(scenes);
+    useAuthoringStore.getState().setScenes(scenes);
   }, [scenes]);
-
   useEffect(() => {
-    setSceneSaveRef(saveScene);
-    return () => setSceneSaveRef(null);
+    useAuthoringStore.getState().setSceneSaveRef(saveScene);
+    return () => useAuthoringStore.getState().setSceneSaveRef(null);
   }, [saveScene]);
-
   useEffect(() => {
-    setScenarioId(scenarioId);
-    return () => setScenarioId(null);
+    useAuthoringStore.getState().setScenarioId(scenarioId);
+    return () => useAuthoringStore.getState().setScenarioId(null);
   }, [scenarioId]);
 
   useEffect(() => {
