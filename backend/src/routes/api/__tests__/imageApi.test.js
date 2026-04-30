@@ -15,7 +15,6 @@ import axios from "axios";
 import routes from "../../index.js";
 import Image from "../../../db/models/image.js";
 
-
 jest.mock("firebase-admin"); // Needed to mock the firebase-admin dependency in firebase-auth.js which is in routes
 
 describe("Image API tests", () => {

@@ -19,7 +19,6 @@ import Scenario from "../../../db/models/scenario.js";
 import auth from "../../../middleware/firebaseAuth.js";
 import scenarioAuth from "../../../middleware/scenarioAuth.js";
 
-
 jest.mock("../../../middleware/firebaseAuth");
 jest.mock("../../../middleware/scenarioAuth");
 jest.mock("firebase-admin"); // Needed to mock the firebase-admin dependency in firebase-auth.js
