@@ -83,20 +83,20 @@ export default function AuthoringToolPage() {
     if (saving) return; // we dont want to interrupt in progress saves (usually uploading media)
     setSaving(true);
 
-    const patch = structuredClone(getScenePatch()); 
+    const patch = structuredClone(getScenePatch());
 
     const hasChanges =
       Object.keys(patch.fields).length > 0 ||
       patch.components.length > 0 ||
-      patch.deletedComponentIds.length > 0; 
+      patch.deletedComponentIds.length > 0;
 
     if (!hasChanges) {
       setSaving(false);
       return;
-    } 
+    }
 
     await saveScenePatch(patch);
-    commitSavedScene(); 
+    commitSavedScene();
 
     setTimeout(() => setSaving(false), 5000);
   }

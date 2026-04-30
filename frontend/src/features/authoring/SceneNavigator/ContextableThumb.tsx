@@ -48,7 +48,7 @@ function ContextableThumb({
   active: boolean;
 }) {
   const { user } = useContext(AuthenticationContext);
-  
+
   const { scenarioId } = useParams<{ scenarioId: string }>();
   const history = useHistory();
 

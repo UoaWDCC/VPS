@@ -22,7 +22,7 @@ export function modifySceneProp<K extends keyof VisualSceneState>(
   if (prop === "name") {
     useVisualScene.setState({ name: value as string | null });
   }
-  
+
   if (prop === "roles") {
     useVisualScene.setState({ roles: value as string[] | null });
   }
