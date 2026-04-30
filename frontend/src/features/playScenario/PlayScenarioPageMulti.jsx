@@ -19,12 +19,12 @@ const sceneCache = new Map();
 // returns the scene id that we should switch to
 const navigate = async (
   user,
-  groupId,
+  scenarioId,
   currentScene,
   addFlags,
   removeFlags,
-
-  componentId
+  componentId,
+  directAdvance = false
 ) => {
   const token = await user.getIdToken();
   const config = {
@@ -34,7 +34,7 @@ const navigate = async (
       "Content-Type": "application/json",
       Authorization: `Bearer ${token}`,
     },
-    data: { currentScene, addFlags, removeFlags, componentId },
+    data: { currentScene, addFlags, removeFlags, componentId, directAdvance },
   };
   const res = await axios.request(config);
   if (res.data.scenes) {
@@ -84,6 +84,39 @@ export default function PlayScenarioPageMulti({ group }) {
 
   const currScene = sceneCache.get(sceneId);
 
+  const directAdvance = async () => {
+    if (!sceneId || !currScene?.directLink) return;
+
+    try {
+      const { newSceneId, stateVariables, newStateVersion } = await navigate(
+        user,
+        group._id,
+        sceneId,
+        addFlags,
+        removeFlags,
+        componentId
+      );
+
+      const newResources = await getResources(user, group._id);
+      const filteredResources = filterResourcesByConditions(
+        newResources,
+        stateVariables
+      );
+      setResources(filteredResources);
+
+      if (stateVersion < newStateVersion) {
+        setStateVariables(stateVariables);
+        setStateVersion(newStateVersion);
+      }
+
+      if (!sceneId && newSceneId) {
+        setSceneId(newSceneId);
+      }
+    } catch (e) {
+      handleError(e?.response?.data);
+    }
+  };
+
   const handleError = (error) => {
     if (!error) return;
     if (error.status === 409) {
@@ -115,14 +148,7 @@ export default function PlayScenarioPageMulti({ group }) {
       }
     }
     try {
-      const { newSceneId, stateVariables, newStateVersion } = await navigate(
-        user,
-        group._id,
-        sceneId,
-        addFlags,
-        removeFlags,
-        componentId
-      );
+      navigate(user, group._id, sceneId, addFlags, removeFlags, null, true)
       const newResources = await getResources(user, group._id);
       const filteredResources = filterResourcesByConditions(
         newResources,
@@ -146,6 +172,29 @@ export default function PlayScenarioPageMulti({ group }) {
   useEffect(() => {
     onSceneChange();
   }, []);
+
+  useEffect(() => {
+    const onKeyDown = (e) => {
+      if (e.repeat) return;
+      if (!currScene?.directLink) return;
+
+      const tag = document.activeElement?.tagName;
+      const isTyping =
+        tag === "INPUT" ||
+        tag === "TEXTAREA" ||
+        document.activeElement?.isContentEditable;
+
+      if (isTyping) return;
+
+      if (e.code === "Space" || e.key === "ArrowRight") {
+        e.preventDefault();
+        directAdvance();
+      }
+    };
+
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [currScene, sceneId, stateVariables, stateVersion, addFlags, removeFlags]);
 
   const buttonPressed = async (component) => {
     const currentSceneId = sceneId;

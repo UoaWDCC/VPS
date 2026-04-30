@@ -20,6 +20,7 @@ export default function SceneSettings() {
 
   const name = useVisualScene((scene) => scene.name);
   const roles = useVisualScene((scene) => scene.roles);
+  const directLink = useVisualScene((scene) => scene.directLink);
 
   const [selectedRoles, setSelectedRoles] = useState(roles ?? []);
   const [sceneName, setSceneName] = useState(name ?? "");
@@ -111,6 +112,18 @@ export default function SceneSettings() {
               })}
             </ul>
           </div>
+          {/* toggle for direct link */}
+          <label className="label cursor-pointer justify-start gap-3 mt-2">
+            <input
+              type="checkbox"
+              className="checkbox"
+              checked={!!directLink}
+              onChange={(e) => modifySceneProp("directLink", e.target.checked)}
+            />
+            <span className="label-text">
+              Direct Link
+            </span>
+          </label>
         </fieldset>
       </div>
     </div>

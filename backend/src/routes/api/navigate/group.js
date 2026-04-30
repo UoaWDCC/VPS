@@ -19,7 +19,7 @@ const createInvalidError = (roles) =>
 export const getSimpleScene = async (sceneId) => {
   const scene = await Scene.findOne(
     { _id: sceneId },
-    { roles: 1, components: 1 }
+    { roles: 1, components: 1, directLink: 1 }
   ).lean();
   if (!scene)
     throw new HttpError("No scene exists with that id", STATUS.NOT_FOUND);
@@ -80,7 +80,7 @@ const getConnectedScenes = async (sceneID, role, active = true) => {
     .filter(Boolean);
   const connectedScenes = await Scene.find(
     { _id: { $in: connectedIds } },
-    { roles: 1, components: 1 }
+    { roles: 1, components: 1, directLink: 1 }
   ).lean();
   const filtered = connectedScenes.map((s) => {
     if (s.roles.includes(role) || !s.roles.length) return s;
@@ -104,6 +104,23 @@ const addSceneToPath = async (groupId, currentSceneId, sceneId) => {
   );
   if (!res) throw new HttpError("Scene mismatch has occured", STATUS.CONFLICT);
   return STATUS.OK;
+};
+
+export const getNextSceneInScenario = async (scenarioId, currentSceneId) => {
+  const scenario = await Scenario.findById(scenarioId, { scenes: 1 }).lean();
+  if (!scenario) {
+    throw new HttpError("Scenario not found", STATUS.NOT_FOUND);
+  }
+
+  const index = scenario.scenes.findIndex(
+    (id) => id.toString() === currentSceneId.toString()
+  );
+
+  if (index === -1) {
+    throw new HttpError("Current scene not found in scenario", STATUS.NOT_FOUND);
+  }
+
+  return scenario.scenes[index + 1] ?? null;
 };
 
 // Adds flags to group on scene change
@@ -173,10 +190,10 @@ const syncStateVariables = async (group) => {
 
 // Updates state variables for a group
 const updateStateVariables = async (group, component) => {
-  // If no update necessary, just return existing data
-  if (!component.stateOperations) {
+  if (!component || !component.stateOperations) {
     return [group.stateVariables, group.stateVersion];
   }
+
   const stateVariables = applyStateOperations(
     group.stateVariables,
     component.stateOperations
@@ -186,7 +203,7 @@ const updateStateVariables = async (group, component) => {
 };
 
 export const groupNavigate = async (req) => {
-  const { uid, currentScene, addFlags, removeFlags, componentId } = req.body;
+  const { uid, currentScene, addFlags, removeFlags, componentId, directAdvance } = req.body;
 
   const group = await getGroupByIdAndUser(req.params.groupId, uid);
   const { role } = group.users[0];
@@ -225,18 +242,39 @@ export const groupNavigate = async (req) => {
   // Validate that the user is allowed to move to this scene
   await getSceneConsideringRole(currentScene, role);
 
-  const component = await getComponent(currentScene, componentId);
+    const component = componentId
+    ? await getComponent(currentScene, componentId)
+    : null;
 
-  // if the button does not lead to another scene or component does not exist, stay in the current scene
   let scenes = null;
+
   if (component?.nextScene && component.nextScene !== currentScene) {
     const nextScene = component.nextScene;
     [, , , scenes] = await Promise.all([
       addSceneToPath(group._id, currentScene, nextScene),
       addFlagsToGroup(group._id, addFlags),
       removeFlagsFromGroup(group._id, removeFlags),
-      getConnectedScenes(nextScene, role, false),
+      getConnectedScenes(nextScene, role, true),
     ]);
+  } else if (directAdvance) {
+    const current = await getSceneConsideringRole(currentScene, role);
+
+    if (!current.directLink) {
+      throw new HttpError("Direct advance not allowed on this scene", STATUS.FORBIDDEN);
+    }
+
+    const nextScene = await getNextSceneInScenario(group.scenarioId, currentScene);
+
+    if (nextScene && nextScene.toString() !== currentScene.toString()) {
+      await getSceneConsideringRole(nextScene, role);
+
+      [, , , scenes] = await Promise.all([
+        addSceneToPath(group._id, currentScene, nextScene),
+        addFlagsToGroup(group._id, addFlags),
+        removeFlagsFromGroup(group._id, removeFlags),
+        getConnectedScenes(nextScene, role, true),
+      ]);
+    }
   }
 
   const [stateVariables, stateVersion] = await updateStateVariables(
