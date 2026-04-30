@@ -186,7 +186,14 @@ const updateStateVariables = async (group, component) => {
 };
 
 export const groupNavigate = async (req) => {
-  const { uid, currentScene, addFlags, removeFlags, componentId, directAdvance } = req.body;
+  const {
+    uid,
+    currentScene,
+    addFlags,
+    removeFlags,
+    componentId,
+    directAdvance,
+  } = req.body;
 
   const group = await getGroupByIdAndUser(req.params.groupId, uid);
   const { role } = group.users[0];
@@ -225,7 +232,7 @@ export const groupNavigate = async (req) => {
   // Validate that the user is allowed to move to this scene
   await getSceneConsideringRole(currentScene, role);
 
-    const component = componentId
+  const component = componentId
     ? await getComponent(currentScene, componentId)
     : null;
 
@@ -243,7 +250,10 @@ export const groupNavigate = async (req) => {
     const current = await getSceneConsideringRole(currentScene, role);
 
     if (!current.directLink || !current.directLinkScene) {
-      throw new HttpError("Direct advance not allowed on this scene", STATUS.FORBIDDEN);
+      throw new HttpError(
+        "Direct advance not allowed on this scene",
+        STATUS.FORBIDDEN
+      );
     }
 
     const nextScene = current.directLinkScene;

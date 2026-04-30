@@ -159,15 +159,14 @@ export default function SceneSettings() {
                 }
               }}
             />
-            <span className="label-text">
-              Direct Link
-            </span>
+            <span className="label-text">Direct Link</span>
           </label>
 
           {/* warning */}
           {directLinkDisabled && (
             <p className="text-xs text-warning mt-1">
-              Direct Link is disabled because this scene has multiple linked elements.
+              Direct Link is disabled because this scene has multiple linked
+              elements.
             </p>
           )}
 
@@ -176,7 +175,9 @@ export default function SceneSettings() {
             className="select select-bordered"
             disabled={!directLink || directLinkDisabled}
             value={directLinkScene ?? ""}
-            onChange={(e) => modifySceneProp("directLinkScene", e.target.value || null)}
+            onChange={(e) =>
+              modifySceneProp("directLinkScene", e.target.value || null)
+            }
           >
             <option value="">No direct link target</option>
 

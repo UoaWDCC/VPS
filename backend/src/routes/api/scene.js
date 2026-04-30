@@ -97,7 +97,8 @@ router.put("/reorder", async (req, res) => {
 
 // Update a scene
 router.put("/:sceneId", async (req, res) => {
-  const { name, components, roles, time, directLink, directLinkScene } = req.body;
+  const { name, components, roles, time, directLink, directLinkScene } =
+    req.body;
 
   const scene = await updateScene(req.params.sceneId, {
     name,

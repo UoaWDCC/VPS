@@ -28,14 +28,14 @@ const useVisualScene = create<VisualSceneState>((set) => ({
   directLinkScene: null,
 
   setVisualScene: (scene) =>
-  set((state) => ({
-    components: scene.components ?? state.components,
-    id: scene.id ?? state.id,
-    name: scene.name ?? state.name,
-    roles: scene.roles ?? state.roles,
-    directLink: scene.directLink ?? state.directLink,
-    directLinkScene: scene.directLinkScene ?? state.directLinkScene,
-  })),
+    set((state) => ({
+      components: scene.components ?? state.components,
+      id: scene.id ?? state.id,
+      name: scene.name ?? state.name,
+      roles: scene.roles ?? state.roles,
+      directLink: scene.directLink ?? state.directLink,
+      directLinkScene: scene.directLinkScene ?? state.directLinkScene,
+    })),
   setComponents: (components) => set({ components }),
   updateComponent: (component) =>
     set((state) => ({
