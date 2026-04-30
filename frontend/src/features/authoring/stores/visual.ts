@@ -11,6 +11,7 @@ export interface VisualSceneState {
   name: string | null;
   roles: string[] | null;
   directLink: boolean;
+  directLinkScene: string | null;
 
   setVisualScene: (scene: Partial<VisualSceneState>) => void;
   setComponents: (components: VisualComponents) => void;
@@ -24,6 +25,7 @@ const useVisualScene = create<VisualSceneState>((set) => ({
   name: null,
   roles: null,
   directLink: false,
+  directLinkScene: null,
 
   setVisualScene: (scene) =>
   set((state) => ({
@@ -32,6 +34,7 @@ const useVisualScene = create<VisualSceneState>((set) => ({
     name: scene.name ?? state.name,
     roles: scene.roles ?? state.roles,
     directLink: scene.directLink ?? state.directLink,
+    directLinkScene: scene.directLinkScene ?? state.directLinkScene,
   })),
   setComponents: (components) => set({ components }),
   updateComponent: (component) =>

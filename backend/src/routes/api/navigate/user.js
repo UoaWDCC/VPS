@@ -8,7 +8,7 @@ import { HttpError } from "../../../util/error.js";
 import { applyStateOperations } from "../../../util/statevariables/stateOperations.js";
 import STATUS from "../../../util/status.js";
 
-import { getScenarioFirstScene, getSimpleScene, getNextSceneInScenario } from "./group.js";
+import { getScenarioFirstScene, getSimpleScene } from "./group.js";
 
 const getConnectedScenes = async (sceneID, active = true) => {
   const scene = await getSimpleScene(sceneID);
@@ -18,7 +18,7 @@ const getConnectedScenes = async (sceneID, active = true) => {
     .filter(Boolean);
   const connected = await Scene.find(
     { _id: { $in: connectedIds } },
-    { components: 1, directLink: 1, roles: 1 }
+    { components: 1, directLink: 1, directLinkScene: 1, roles: 1 }
   ).lean();
   return {
     active: scene._id,
@@ -140,18 +140,16 @@ export const userNavigate = async (req) => {
   } else if (directAdvance) {
     const current = await getSimpleScene(currentScene);
 
-    if (!current.directLink) {
+    if (!current.directLink || !current.directLinkScene) {
       throw new HttpError("Direct advance not allowed on this scene", STATUS.FORBIDDEN);
     }
 
-    const nextScene = await getNextSceneInScenario(scenarioId, currentScene);
+    const nextScene = current.directLinkScene;
 
-    if (nextScene && nextScene.toString() !== currentScene.toString()) {
-      [, scenes] = await Promise.all([
-        addSceneToPath(user._id, scenarioId, currentScene, nextScene),
-        getConnectedScenes(nextScene, true),
-      ]);
-    }
+    [, scenes] = await Promise.all([
+      addSceneToPath(user._id, scenarioId, currentScene, nextScene),
+      getConnectedScenes(nextScene, true),
+    ]);
   }
 
   const [stateVariables, stateVersion] = await updateStateVariables(
