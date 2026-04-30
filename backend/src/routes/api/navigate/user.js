@@ -125,7 +125,7 @@ export const userNavigate = async (req) => {
   if (path[0] !== currentScene)
     throw new HttpError("Scene mismatch has occured", STATUS.CONFLICT);
 
-    const component = componentId
+  const component = componentId
     ? await getComponent(currentScene, componentId)
     : null;
 
@@ -135,13 +135,16 @@ export const userNavigate = async (req) => {
     const nextScene = component.nextScene;
     [, scenes] = await Promise.all([
       addSceneToPath(user._id, scenarioId, currentScene, nextScene),
-      getConnectedScenes(nextScene, true)
+      getConnectedScenes(nextScene, true),
     ]);
   } else if (directAdvance) {
     const current = await getSimpleScene(currentScene);
 
     if (!current.directLink || !current.directLinkScene) {
-      throw new HttpError("Direct advance not allowed on this scene", STATUS.FORBIDDEN);
+      throw new HttpError(
+        "Direct advance not allowed on this scene",
+        STATUS.FORBIDDEN
+      );
     }
 
     const nextScene = current.directLinkScene;

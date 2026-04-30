@@ -148,7 +148,7 @@ export default function PlayScenarioPageMulti({ group }) {
       }
     }
     try {
-      navigate(user, group._id, sceneId, addFlags, removeFlags, null, true)
+      navigate(user, group._id, sceneId, addFlags, removeFlags, null, true);
       const newResources = await getResources(user, group._id);
       const filteredResources = filterResourcesByConditions(
         newResources,
