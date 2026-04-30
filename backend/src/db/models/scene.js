@@ -29,6 +29,11 @@ const sceneSchema = new Schema({
     type: Boolean,
     default: false,
   },
+  directLinkScene: {
+    type: Schema.Types.ObjectId,
+    ref: "Scene",
+    default: null,
+  },
 });
 
 // before removal of scene from the database, first attempt to delete all user-uploaded images from firebase

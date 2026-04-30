@@ -25,6 +25,32 @@ export default function SceneSettings() {
   const [selectedRoles, setSelectedRoles] = useState(roles ?? []);
   const [sceneName, setSceneName] = useState(name ?? "");
 
+  const components = useVisualScene((scene) => scene.components);
+  const directLinkScene = useVisualScene((scene) => scene.directLinkScene);
+
+  // find all linked scenes from clickable components
+  const linkedScenes = Object.values(components ?? {})
+    .filter((c) => c.clickable && c.nextScene)
+    .map((c) => c.nextScene);
+
+  // remove duplicates
+  const uniqueLinkedScenes = [...new Set(linkedScenes)];
+
+  // disable if more than 1 possible link
+  const directLinkDisabled = uniqueLinkedScenes.length > 1;
+
+  // default target if exactly 1 link exists
+  const defaultDirectLinkScene =
+    uniqueLinkedScenes.length === 1 ? uniqueLinkedScenes[0] : null;
+
+  // auto-disable if invalid
+  useEffect(() => {
+    if (directLinkDisabled && directLink) {
+      modifySceneProp("directLink", false);
+      modifySceneProp("directLinkScene", null);
+    }
+  }, [directLinkDisabled]);
+
   useEffect(() => {
     if (!name || name === sceneName) return;
     setSceneName(name);
@@ -117,13 +143,51 @@ export default function SceneSettings() {
             <input
               type="checkbox"
               className="checkbox"
-              checked={!!directLink}
-              onChange={(e) => modifySceneProp("directLink", e.target.checked)}
+              checked={!!directLink && !directLinkDisabled}
+              disabled={directLinkDisabled}
+              onChange={(e) => {
+                const checked = e.target.checked;
+
+                modifySceneProp("directLink", checked);
+
+                if (checked && !directLinkScene) {
+                  modifySceneProp("directLinkScene", defaultDirectLinkScene);
+                }
+
+                if (!checked) {
+                  modifySceneProp("directLinkScene", null);
+                }
+              }}
             />
             <span className="label-text">
               Direct Link
             </span>
           </label>
+
+          {/* warning */}
+          {directLinkDisabled && (
+            <p className="text-xs text-warning mt-1">
+              Direct Link is disabled because this scene has multiple linked elements.
+            </p>
+          )}
+
+          {/* dropdown for selecting target scene */}
+          <select
+            className="select select-bordered"
+            disabled={!directLink || directLinkDisabled}
+            value={directLinkScene ?? ""}
+            onChange={(e) => modifySceneProp("directLinkScene", e.target.value || null)}
+          >
+            <option value="">No direct link target</option>
+
+            {scenes
+              ?.filter((scene) => scene._id !== useVisualScene.getState().id)
+              .map((scene) => (
+                <option key={scene._id} value={scene._id}>
+                  {scene.name}
+                </option>
+              ))}
+          </select>
         </fieldset>
       </div>
     </div>

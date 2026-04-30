@@ -19,7 +19,7 @@ const createInvalidError = (roles) =>
 export const getSimpleScene = async (sceneId) => {
   const scene = await Scene.findOne(
     { _id: sceneId },
-    { roles: 1, components: 1, directLink: 1 }
+    { roles: 1, components: 1, directLink: 1, directLinkScene: 1 }
   ).lean();
   if (!scene)
     throw new HttpError("No scene exists with that id", STATUS.NOT_FOUND);
@@ -80,7 +80,7 @@ const getConnectedScenes = async (sceneID, role, active = true) => {
     .filter(Boolean);
   const connectedScenes = await Scene.find(
     { _id: { $in: connectedIds } },
-    { roles: 1, components: 1, directLink: 1 }
+    { roles: 1, components: 1, directLink: 1, directLinkScene: 1 }
   ).lean();
   const filtered = connectedScenes.map((s) => {
     if (s.roles.includes(role) || !s.roles.length) return s;
@@ -104,23 +104,6 @@ const addSceneToPath = async (groupId, currentSceneId, sceneId) => {
   );
   if (!res) throw new HttpError("Scene mismatch has occured", STATUS.CONFLICT);
   return STATUS.OK;
-};
-
-export const getNextSceneInScenario = async (scenarioId, currentSceneId) => {
-  const scenario = await Scenario.findById(scenarioId, { scenes: 1 }).lean();
-  if (!scenario) {
-    throw new HttpError("Scenario not found", STATUS.NOT_FOUND);
-  }
-
-  const index = scenario.scenes.findIndex(
-    (id) => id.toString() === currentSceneId.toString()
-  );
-
-  if (index === -1) {
-    throw new HttpError("Current scene not found in scenario", STATUS.NOT_FOUND);
-  }
-
-  return scenario.scenes[index + 1] ?? null;
 };
 
 // Adds flags to group on scene change
@@ -259,22 +242,20 @@ export const groupNavigate = async (req) => {
   } else if (directAdvance) {
     const current = await getSceneConsideringRole(currentScene, role);
 
-    if (!current.directLink) {
+    if (!current.directLink || !current.directLinkScene) {
       throw new HttpError("Direct advance not allowed on this scene", STATUS.FORBIDDEN);
     }
 
-    const nextScene = await getNextSceneInScenario(group.scenarioId, currentScene);
+    const nextScene = current.directLinkScene;
 
-    if (nextScene && nextScene.toString() !== currentScene.toString()) {
-      await getSceneConsideringRole(nextScene, role);
+    await getSceneConsideringRole(nextScene, role);
 
-      [, , , scenes] = await Promise.all([
-        addSceneToPath(group._id, currentScene, nextScene),
-        addFlagsToGroup(group._id, addFlags),
-        removeFlagsFromGroup(group._id, removeFlags),
-        getConnectedScenes(nextScene, role, true),
-      ]);
-    }
+    [, , , scenes] = await Promise.all([
+      addSceneToPath(group._id, currentScene, nextScene),
+      addFlagsToGroup(group._id, addFlags),
+      removeFlagsFromGroup(group._id, removeFlags),
+      getConnectedScenes(nextScene, role, true),
+    ]);
   }
 
   const [stateVariables, stateVersion] = await updateStateVariables(
