@@ -13,8 +13,14 @@ import {
   sendBackward,
   sendToBack,
 } from "../../scene/operations/component";
+import useEditorStore from "../../stores/editor";
 
 const ComponentMenu = ({ id }: { id: string }) => {
+  function removeAndDeselect(id: string) {
+    remove(id);
+    useEditorStore.getState().setSelected(null);
+  }
+
   return (
     <ul className="menu bg-base-200 rounded-box w-fit">
       <li>
@@ -24,7 +30,7 @@ const ComponentMenu = ({ id }: { id: string }) => {
         </a>
       </li>
       <li>
-        <a onClick={handle(remove, id)}>
+        <a onClick={handle(removeAndDeselect, id)}>
           <Trash2Icon size={16} />
           Delete
         </a>
