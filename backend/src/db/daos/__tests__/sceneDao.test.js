@@ -13,8 +13,6 @@ import mongoose from "mongoose";
 
 import Scene from "../../models/scene.js";
 import { patchScene } from "../sceneDao.js";
-
-jest.setTimeout(30000);
 describe("Scene DAO patchScene tests", () => {
   let mongoServer;
 

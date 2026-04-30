@@ -14,7 +14,6 @@ import mongoose from "mongoose";
 import Scenario from "../../db/models/scenario.js";
 import scenarioAuth from "../scenarioAuth.js";
 
-jest.setTimeout(30000);
 describe("Scenario Auth Middleware tests", () => {
   const HTTP_UNAUTHORISED = 401;
   const HTTP_NOT_FOUND = 404;
