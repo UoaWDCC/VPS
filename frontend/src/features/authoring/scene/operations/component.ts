@@ -3,7 +3,6 @@ import { getComponent, getComponentProp, getScene } from "../scene";
 import { mutate, subtract, translate } from "../../util";
 import { getObject, merge } from "../util";
 import { add, modify } from "./modifiers";
-import zIndex from "@material-ui/core/styles/zIndex";
 
 export const defaults = {
   textbox: {
