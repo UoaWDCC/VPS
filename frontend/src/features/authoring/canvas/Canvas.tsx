@@ -48,7 +48,6 @@ function Canvas() {
   }
 
   function handleMouseMove(e: React.MouseEvent) {
-    if (e.button === 2) return;
     handleMouseMoveGlobal(e, toSVGSpace(e.clientX, e.clientY));
   }
 

@@ -192,16 +192,17 @@ export function sendBackward(id: string) {
 export function bringToFront(id: string) {
   const components = Object.values(getScene().components) as Component[];
   const max = components.reduce(
-    (p, c) => (c.zIndex > p ? c.zIndex : p),
+    (p, c) => (c.zIndex >= p ? c.zIndex : p),
     -Infinity
   );
+
   modifyComponentProp(id, "zIndex", max + 1);
 }
 
 export function sendToBack(id: string) {
   const components = Object.values(getScene().components) as Component[];
   const min = components.reduce(
-    (p, c) => (c.zIndex < p ? c.zIndex : p),
+    (p, c) => (c.zIndex <= p ? c.zIndex : p),
     Infinity
   );
   modifyComponentProp(id, "zIndex", min - 1);
