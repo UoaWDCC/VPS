@@ -53,7 +53,6 @@ function ContextableThumb({
   const history = useHistory();
 
   const { reFetch, saveScenePatch, deleteScene } = useContext(SceneContext);
-  const patch = structuredClone(getScenePatch());
 
   const duplicateScene = async (id: string) => {
     api
@@ -65,7 +64,7 @@ function ContextableThumb({
   async function switchScene(scene: Record<string, any>) {
     if (active) return;
 
-    const patch = structuredClone(getScenePatch());
+    const patch = getScenePatch();
 
     if (
       Object.keys(patch.fields).length > 0 ||

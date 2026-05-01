@@ -83,7 +83,7 @@ export default function AuthoringToolPage() {
     if (saving) return; // we dont want to interrupt in progress saves (usually uploading media)
     setSaving(true);
 
-    const patch = structuredClone(getScenePatch());
+    const patch = getScenePatch();
 
     const hasChanges =
       Object.keys(patch.fields).length > 0 ||

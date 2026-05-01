@@ -248,7 +248,7 @@ describe("Scene API tests", () => {
 
     const dbScene = await Scene.findById(scene1._id).lean();
     expect(dbScene.name).toBe("Test Scene 1 updated name");
-    expect(dbScene.components).toEqual([]);
+    expect(dbScene.components).toEqual(scene1.components);
   });
 
   it("DELETE api/scenario/:scenarioId/scene/:sceneId deletes a valid scene", async () => {
