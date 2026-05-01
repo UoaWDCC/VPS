@@ -3,6 +3,7 @@ import { getComponent, getComponentProp, getScene } from "../scene";
 import { mutate, subtract, translate } from "../../util";
 import { getObject, merge } from "../util";
 import { add, modify } from "./modifiers";
+import zIndex from "@material-ui/core/styles/zIndex";
 
 export const defaults = {
   textbox: {
@@ -32,6 +33,7 @@ export const defaults = {
         },
       ],
     },
+    zIndex: 0,
   },
   line: {
     type: "line",
@@ -43,6 +45,7 @@ export const defaults = {
         { x: 100, y: 100 },
       ],
     },
+    zIndex: 0,
   },
   speech: {
     type: "speech",
@@ -56,6 +59,7 @@ export const defaults = {
       ],
       rotation: 0,
     },
+    zIndex: 0,
   },
   box: {
     type: "box",
@@ -69,6 +73,7 @@ export const defaults = {
       ],
       rotation: 0,
     },
+    zIndex: 0,
   },
   ellipse: {
     type: "ellipse",
@@ -82,6 +87,7 @@ export const defaults = {
       ],
       rotation: 0,
     },
+    zIndex: 0,
   },
   image: {
     type: "image",
@@ -94,6 +100,7 @@ export const defaults = {
       ],
       rotation: 0,
     },
+    zIndex: 0,
   },
 };
 
@@ -123,6 +130,10 @@ export function createComponentFromBounds(
   const component = structuredClone(defaults[type]);
   const dims = mutate(subtract(bounds.verts[1], bounds.verts[0]), Math.abs);
   if (dims.x > 50 && dims.y > 50) component.bounds = bounds;
+
+  // Set zIndex to the current number of components on the canvas
+  const componentsCount = Object.keys(getScene().components).length;
+  component.zIndex = componentsCount;
   return add(component);
 }
 
@@ -183,7 +194,6 @@ export function sendBackward(id: string) {
     );
 
   if (!targetComponent) return;
-
   const belowZIndex = targetComponent.zIndex;
   modifyComponentProp(id, "zIndex", belowZIndex);
   modifyComponentProp(targetComponent.id, "zIndex", currentZIndex);
@@ -195,7 +205,7 @@ export function bringToFront(id: string) {
     (p, c) => (c.zIndex >= p ? c.zIndex : p),
     -Infinity
   );
-
+  if (max == -Infinity) return;
   modifyComponentProp(id, "zIndex", max + 1);
 }
 
@@ -205,5 +215,6 @@ export function sendToBack(id: string) {
     (p, c) => (c.zIndex <= p ? c.zIndex : p),
     Infinity
   );
+  if (min == Infinity) return;
   modifyComponentProp(id, "zIndex", min - 1);
 }
