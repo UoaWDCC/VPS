@@ -7,7 +7,6 @@ import {
   incrementVisisted,
   retrieveScene,
   retrieveSceneList,
-  updateScene,
   updateSceneOrder,
   patchScene,
 } from "../../db/daos/sceneDao.js";
@@ -72,7 +71,11 @@ router.put("/roles", async (req, res) => {
 
   await Promise.all(
     updatedRoles.map(async (scene) => {
-      await updateScene(scene._id, scene);
+      await patchScene(scene._id, {
+        fields: {},
+        components: scene.components,
+        deletedComponentIds: [],
+      });
     })
   );
 
@@ -92,20 +95,6 @@ router.put("/reorder", async (req, res) => {
     sceneIds
   );
   res.status(HTTP_OK).json(updatedScenario);
-});
-
-// Update a scene
-router.put("/:sceneId", async (req, res) => {
-  const { name, components, roles, time } = req.body;
-
-  const scene = await updateScene(req.params.sceneId, {
-    name,
-    components,
-    time,
-    roles,
-  });
-
-  res.status(HTTP_OK).json(scene);
 });
 
 // Delete a scene

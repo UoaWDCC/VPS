@@ -23,15 +23,6 @@ function deleteScene(user, scenarioId, sceneId) {
   api.delete(user, `/api/scenario/${scenarioId}/scene/${sceneId}`);
 }
 
-async function saveScene(user, scenarioId, scene) {
-  const components = scene.components;
-  const parsed = await parseMedia(components, scenarioId, scene._id);
-  await api.put(user, `/api/scenario/${scenarioId}/scene/${scene._id}`, {
-    ...scene,
-    components: parsed,
-  });
-}
-
 async function saveScenePatch(user, scenarioId, patch) {
   const parsedComponents = await parseMedia(
     patch.components,
@@ -102,30 +93,9 @@ export default function SceneContextProvider({ children }) {
     },
   });
 
-  function saveSceneWrapper(scene) {
-    scene.components = Object.values(scene.components);
-    saveSceneMutation.mutate(scene);
-  }
-
   function saveScenePatchWrapper(patch) {
     return saveScenePatchMutation.mutateAsync(patch);
   }
-
-  const saveSceneMutation = useMutation({
-    mutationFn: (scene) => saveScene(user, scenarioId, scene),
-    onMutate: async (scene) => {
-      await queryClient.cancelQueries(["scenes", scenarioId]);
-      queryClient.setQueryData(["scenes", scenarioId], (prev = []) => {
-        const index = prev.findIndex((s) => s._id === scene._id);
-        return index === -1 ? prev : prev.toSpliced(index, 1, scene);
-      });
-    },
-    onError: () => {
-      toast.error(
-        "Something went wrong updating the scenes, your last changes weren't saved"
-      );
-    },
-  });
 
   const saveScenePatchMutation = useMutation({
     mutationFn: (patch) => saveScenePatch(user, scenarioId, patch),
@@ -150,7 +120,6 @@ export default function SceneContextProvider({ children }) {
       value={{
         scenes: scenesQuery.data,
         reorderScenes: reorderMutation.mutate,
-        saveScene: saveSceneWrapper,
         saveScenePatch: saveScenePatchWrapper,
         deleteScene: deleteMutation.mutate,
         reFetch: scenesQuery.refetch,
