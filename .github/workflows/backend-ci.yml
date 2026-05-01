@@ -1,0 +1,50 @@
+name: Backend CI
+
+on:
+  push:
+    branches: [ master ]
+    paths:
+      - "backend/**"
+      - ".github/workflows/backend-ci.yml"
+      - ".prettierrc.json"
+  pull_request:
+    branches: [ master ]
+    paths:
+      - "backend/**"
+      - ".github/workflows/backend-ci.yml"
+      - ".prettierrc.json"
+
+jobs:
+  lint-format:
+    name: lint & format
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'yarn'
+          cache-dependency-path: backend/yarn.lock
+      - run: yarn install --frozen-lockfile
+      - run: yarn prettier
+      - run: yarn lint
+
+  test:
+    name: test
+    needs: lint-format
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'yarn'
+          cache-dependency-path: backend/yarn.lock
+      - run: yarn install --frozen-lockfile
+      - run: yarn test
