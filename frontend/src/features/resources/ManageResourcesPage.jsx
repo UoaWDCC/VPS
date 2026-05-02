@@ -493,7 +493,9 @@ function Preview({ file, makeDownloadUrl }) {
             className="w-full h-full min-h-[60vh] rounded-xl border"
           />
         </div>
-      ) : isText && (textLoading || (text == null && downloadUrl == null && fetchErr == null)) ? (
+      ) : isText &&
+        (textLoading ||
+          (text == null && downloadUrl == null && fetchErr == null)) ? (
         <div className="space-y-2">
           <div className="skeleton h-6 w-1/2" />
           <div className="skeleton h-48 w-full" />
