@@ -32,6 +32,7 @@ export const defaults = {
         },
       ],
     },
+    zIndex: 0,
   },
   line: {
     type: "line",
@@ -43,6 +44,7 @@ export const defaults = {
         { x: 100, y: 100 },
       ],
     },
+    zIndex: 0,
   },
   speech: {
     type: "speech",
@@ -56,6 +58,7 @@ export const defaults = {
       ],
       rotation: 0,
     },
+    zIndex: 0,
   },
   box: {
     type: "box",
@@ -69,6 +72,7 @@ export const defaults = {
       ],
       rotation: 0,
     },
+    zIndex: 0,
   },
   ellipse: {
     type: "ellipse",
@@ -82,6 +86,7 @@ export const defaults = {
       ],
       rotation: 0,
     },
+    zIndex: 0,
   },
   image: {
     type: "image",
@@ -94,6 +99,7 @@ export const defaults = {
       ],
       rotation: 0,
     },
+    zIndex: 0,
   },
 };
 
@@ -123,6 +129,10 @@ export function createComponentFromBounds(
   const component = structuredClone(defaults[type]);
   const dims = mutate(subtract(bounds.verts[1], bounds.verts[0]), Math.abs);
   if (dims.x > 50 && dims.y > 50) component.bounds = bounds;
+
+  // Set zIndex to the current number of components on the canvas
+  const componentsCount = Object.keys(getScene().components).length;
+  component.zIndex = componentsCount;
   return add(component);
 }
 
@@ -144,29 +154,66 @@ export function modifyComponentBounds(id: string, bounds: Partial<Bounds>) {
 }
 
 export function bringForward(id: string) {
-  modifyComponentProp(id, "zIndex", (val: number) => val + 1);
+  const currentZIndex = getComponentProp(id, "zIndex") as number;
+  const components = Object.values(getScene().components) as Component[];
+
+  // 1. Find the highest zIndex that is strictly greater than the current one
+
+  const targetComponent = components
+    .filter((curr) => curr.zIndex > currentZIndex)
+    .reduce(
+      (prev, curr) => {
+        return prev == null || prev.zIndex > curr.zIndex ? curr : prev;
+      },
+      null as Component | null
+    );
+
+  // Return if component is at the top already
+  if (!targetComponent) return;
+
+  const aboveZIndex = targetComponent.zIndex;
+
+  // Swap Zindexs
+  modifyComponentProp(id, "zIndex", aboveZIndex);
+  modifyComponentProp(targetComponent.id, "zIndex", currentZIndex);
 }
 
 export function sendBackward(id: string) {
-  modifyComponentProp(id, "zIndex", (val: number) => val - 1);
+  const currentZIndex = getComponentProp(id, "zIndex") as number;
+  const components = Object.values(getScene().components) as Component[];
+
+  // 1. Find the highest zIndex that is strictly less than the current one
+  const targetComponent = components
+    .filter((curr) => curr.zIndex < currentZIndex)
+    .reduce(
+      (prev, curr) => {
+        return prev == null || prev.zIndex < curr.zIndex ? curr : prev;
+      },
+      null as Component | null
+    );
+
+  if (!targetComponent) return;
+  const belowZIndex = targetComponent.zIndex;
+  modifyComponentProp(id, "zIndex", belowZIndex);
+  modifyComponentProp(targetComponent.id, "zIndex", currentZIndex);
 }
 
 export function bringToFront(id: string) {
   const components = Object.values(getScene().components) as Component[];
   const max = components.reduce(
-    (p, c) => (c.zIndex > p ? c.zIndex : p),
+    (p, c) => (c.zIndex >= p ? c.zIndex : p),
     -Infinity
   );
-  if (getComponentProp(id, "zIndex") === max) return;
+  if (max == -Infinity) return;
   modifyComponentProp(id, "zIndex", max + 1);
 }
 
 export function sendToBack(id: string) {
   const components = Object.values(getScene().components) as Component[];
   const min = components.reduce(
-    (p, c) => (c.zIndex < p ? c.zIndex : p),
+    (p, c) => (c.zIndex <= p ? c.zIndex : p),
     Infinity
   );
-  if (getComponentProp(id, "zIndex") === min) return;
+  if (min == Infinity) return;
   modifyComponentProp(id, "zIndex", min - 1);
 }

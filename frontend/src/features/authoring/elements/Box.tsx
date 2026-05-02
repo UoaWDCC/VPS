@@ -16,7 +16,6 @@ function Box(component: BoxComponent) {
     bounds.rotation
   );
   const path = constructPath(verts);
-
   return <path d={path} {...filterComponent(component)} />;
 }
 
