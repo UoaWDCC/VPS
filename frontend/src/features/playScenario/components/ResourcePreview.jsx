@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import toast from "react-hot-toast";
+import FileViewer from "./FileViewer";
 
 export default function ResourcePreview({ file, getDownloadUrl }) {
   const [url, setUrl] = useState(null);
@@ -24,12 +25,13 @@ export default function ResourcePreview({ file, getDownloadUrl }) {
         // Fetch text content only for text-like types
         const isText =
           file.type?.startsWith("text/") ||
-          /json|xml|csv/.test(file.type || "");
+          /json|xml|csv/.test(file.type || "") ||
+          /\.md$|\.html?$/i.test(file.name || "");
         if (isText) {
           const resp = await fetch(u);
           if (!resp.ok) throw new Error(`Failed to fetch (${resp.status})`);
           const t = await resp.text();
-          if (!cancelled) setText(t.slice(0, 5000)); // safety cap
+          if (!cancelled) setText(t);
         }
       } catch (err) {
         console.error(err);
@@ -54,8 +56,8 @@ export default function ResourcePreview({ file, getDownloadUrl }) {
         <div>
           <div className="text-sm">Select a file to preview.</div>
           <div className="text-xs">
-            Images and PDFs show inline; text/CSV/JSON render below; other files
-            provide a download.
+            Select a file to preview. Images and PDFs files show inline;
+            text/CSV/JSON/Markdown render below; other files provide a download.
           </div>
         </div>
       </div>
@@ -65,7 +67,9 @@ export default function ResourcePreview({ file, getDownloadUrl }) {
   const isImage = file.type?.startsWith("image/");
   const isPDF = file.type === "application/pdf";
   const isText =
-    file.type?.startsWith("text/") || /json|xml|csv/.test(file.type || "");
+    file.type?.startsWith("text/") ||
+    /\.md$|\.html?$/i.test(file.name || "") ||
+    /json|xml|csv/.test(file.type || "");
 
   return (
     <div className="p-3 h-full flex flex-col gap-3 font-ibm">
@@ -115,9 +119,7 @@ export default function ResourcePreview({ file, getDownloadUrl }) {
             />
           </div>
         ) : isText && url ? (
-          <pre className="mockup-code whitespace-pre-wrap text-xs max-h-[60vh] overflow-auto p-3">
-            {text || "(empty)"}
-          </pre>
+          <FileViewer file={file} content={text} />
         ) : url ? (
           <div className="h-full flex items-center justify-center">
             <div className="text-sm opacity-70">

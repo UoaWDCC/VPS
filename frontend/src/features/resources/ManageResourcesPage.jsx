@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import AddGroup from "./components/AddGroup";
 import StateConditionalMenu from "../../components/StateVariables/StateConditionalMenu";
+import FileViewer from "../playScenario/components/FileViewer";
 
 function normaliseFile(f) {
   return {
@@ -30,39 +31,6 @@ function normaliseFile(f) {
 export default function ManageResourcesPage() {
   const { scenarioId } = useParams();
   const history = useHistory();
-
-  const [setResources] = useState([]);
-
-  useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      try {
-        const user = getAuth().currentUser;
-        if (!user) {
-          toast.error("You must be logged in to view resources.");
-          return;
-        }
-        const idToken = await user.getIdToken();
-        const { data } = await axios.get(
-          `/api/resources/scenario/${scenarioId}`,
-          {
-            headers: { Authorization: `Bearer ${idToken}` },
-          }
-        );
-        if (!cancelled) setResources(data);
-      } catch (err) {
-        if (!cancelled) {
-          toast.error(
-            "Error fetching resources: " + (err?.message || String(err))
-          );
-        }
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, [scenarioId]);
-
   function goBack() {
     history.push(`/scenario/${scenarioId}`);
   }
@@ -420,6 +388,8 @@ function UploadButton({ onFiles, multiple = true, className = "" }) {
 function Preview({ file, makeDownloadUrl }) {
   const [downloadUrl, setDownloadUrl] = useState(null);
   const [text, setText] = useState(null);
+  const [textLoading, setTextLoading] = useState(false);
+  const [fetchErr, setFetchErr] = useState(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -442,20 +412,36 @@ function Preview({ file, makeDownloadUrl }) {
     (async () => {
       if (!file || !downloadUrl) {
         setText(null);
+        setFetchErr(null);
+        setTextLoading(false);
         return;
       }
       const isText =
-        file.type?.startsWith("text/") || /json|xml|csv/.test(file.type || "");
+        file.type?.startsWith("text/") ||
+        /\.md$|\.html?$/i.test(file.name || "") ||
+        /json|xml|csv/.test(file.type || "");
+
       if (!isText) {
         setText(null);
+        setFetchErr(null);
         return;
       }
+
+      setTextLoading(true);
+      setFetchErr(null);
       try {
         const resp = await fetch(downloadUrl);
+        if (!resp.ok)
+          throw new Error(`Failed to load preview (${resp.status})`);
         const t = await resp.text();
         if (!cancelled) setText(t);
-      } catch {
-        if (!cancelled) setText("Failed to load text preview");
+      } catch (err) {
+        if (!cancelled) {
+          setFetchErr(err?.message || "Failed to load preview");
+          setText(null);
+        }
+      } finally {
+        if (!cancelled) setTextLoading(false);
       }
     })();
     return () => {
@@ -468,14 +454,19 @@ function Preview({ file, makeDownloadUrl }) {
       <div className="prose max-w-none opacity-70">
         <h3>Preview</h3>
         <p>
-          Select a file to preview. Images and PDFs are shown inline. Text is
-          rendered below. For other files, a download link appears.
+          Select a file to preview. Images and PDFs files show inline;
+          text/CSV/JSON/Markdown render below; other files provide a download.
         </p>
       </div>
     );
 
+  // logic is consistent with resource panel
   const isImage = file.type?.startsWith("image/");
   const isPDF = file.type === "application/pdf";
+  const isText =
+    file.type?.startsWith("text/") ||
+    /\.md$|\.html?$/i.test(file.name || "") ||
+    /json|xml|csv/.test(file.type || "");
 
   return (
     <div className="space-y-3">
@@ -502,10 +493,19 @@ function Preview({ file, makeDownloadUrl }) {
             className="w-full h-full min-h-[60vh] rounded-xl border"
           />
         </div>
-      ) : text != null ? (
-        <pre className="mockup-code whitespace-pre-wrap text-xs max-h-80 overflow-auto p-4">
-          {text}
-        </pre>
+      ) : isText &&
+        (textLoading ||
+          (text == null && downloadUrl == null && fetchErr == null)) ? (
+        <div className="space-y-2">
+          <div className="skeleton h-6 w-1/2" />
+          <div className="skeleton h-48 w-full" />
+        </div>
+      ) : isText && fetchErr ? (
+        <div className="alert alert-warning">
+          <span>{fetchErr}</span>
+        </div>
+      ) : isText ? (
+        <FileViewer file={file} content={text} />
       ) : (
         <div className="alert">
           <span>Preview not supported. You can download the file instead.</span>
