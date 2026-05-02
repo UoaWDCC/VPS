@@ -3,6 +3,7 @@ import type { BaseTextStyle, RelativeBounds } from "../types";
 export interface VisualSpan {
   text: string;
   style: BaseTextStyle;
+  highlightColor?: HexString;
   x: number;
   width: number;
   charOffsets: number[];
