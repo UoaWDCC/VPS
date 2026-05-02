@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 
-const OFFSET = 5;
+const OFFSET = -5;
 
 let listener;
 
