@@ -23,11 +23,45 @@ export function handleTextMode(e: KeyboardEvent) {
   const { selected } = useEditorStore.getState();
   if (!selected) return;
 
-  if (e.key.startsWith("Arrow") || ["Home", "End"].includes(e.key)) {
+  if ((e.metaKey || e.ctrlKey) && e.key == "a") {
+    handleSelectAll(selected);
+  } else if (e.key.startsWith("Arrow") || ["Home", "End"].includes(e.key)) {
     handleNavigation(e, selected);
   } else {
     handleEditing(e, selected);
   }
+}
+
+export function handleSelectAll(selected: string) {
+  const { setVisualSelection } = useEditorStore.getState();
+  const scene = useVisualScene.getState().components;
+  const component = scene[selected];
+
+  const blocks = component.document.blocks;
+
+  if (!blocks || blocks.length === 0) return;
+
+  // Find the position of first character in textbox
+  const startCursor = {
+    blockI: 0,
+    lineI: 0,
+    spanI: 0,
+    charI: 0,
+  };
+
+  // Find the position of last character in textbox
+  const endCursor = {
+    blockI: blocks.length - 1,
+    lineI: blocks.at(-1).lines.length - 1,
+    spanI: blocks.at(-1).lines.at(-1).spans.length - 1,
+    charI: blocks.at(-1).lines.at(-1).spans.at(-1).text.length,
+  };
+
+  // Change visually
+  setVisualSelection({ start: startCursor, end: endCursor });
+
+  // Sync Highlight
+  syncModelSelection();
 }
 
 function handleEditing(e: KeyboardEvent, selected: string) {

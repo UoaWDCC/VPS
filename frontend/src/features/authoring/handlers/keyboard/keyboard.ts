@@ -21,14 +21,15 @@ export function handleGlobal(e: KeyboardEvent) {
   const target = e.target as HTMLElement;
   if (target.tagName === "INPUT" || target.tagName === "TEXTAREA") return;
 
-  if (e.ctrlKey) handleCtrlOperations(e);
-  else if (mode.includes("text")) handleTextMode(e);
+  if (mode.includes("text")) handleTextMode(e);
+  else if (e.ctrlKey || e.metaKey) handleCtrlOperations(e);
   else if (selected) handleComponentOperations(e, selected);
 }
 
 function handleCtrlOperations(e: KeyboardEvent) {
   const { selected, setSelected } = useEditorStore.getState();
 
+  // TODO ADD e.key === "a" for all components or create new function for cmd
   if (e.key === "z") undo();
   else if (e.key === "y") redo();
   else if (e.key === "d" && selected) {
