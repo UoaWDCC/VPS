@@ -9,7 +9,6 @@ import GenericErrorPage from "../status/GenericErrorPage";
 import LoadingPage from "../status/LoadingPage";
 
 import PlayScenarioPage from "./PlayScenarioPage";
-import PlayScenarioPageMulti from "./PlayScenarioPageMulti";
 import PlayLandingPage from "./PlayLandingPage"; // Import the new landing page
 
 const getGroup = async (user, scenarioId) => {
@@ -64,7 +63,7 @@ export default function PlayScenarioResolver() {
         <InvalidRolePage group={group} />
       </Route>
       <Route path="/play/:scenarioId/multiplayer/:sceneId?">
-        <PlayScenarioPageMulti group={group} />
+        <PlayScenarioPage group={group} />
       </Route>
       <Route path="/play/:scenarioId/singleplayer/:sceneId?">
         <PlayScenarioPage />
