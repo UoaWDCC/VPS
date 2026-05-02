@@ -2,7 +2,7 @@ import { v4 } from "uuid";
 import { buildVisualComponent, buildVisualScene } from "../../pipeline";
 import useVisualScene, { type VisualSceneState } from "../../stores/visual";
 import { updateHistory } from "../history";
-import { getComponent, getScene, setScene } from "../scene";
+import { commitSavedScene, getComponent, getScene, setScene } from "../scene";
 import type { Component, Scene } from "../../types";
 import { arrayToObject } from "../util";
 
@@ -10,6 +10,7 @@ export function replace(scene: Record<string, any>) {
   const clone = structuredClone(scene);
   clone.components = arrayToObject(clone.components);
   setScene(clone as Scene);
+  commitSavedScene();
   useVisualScene.getState().setVisualScene(buildVisualScene(clone as Scene));
 }
 
@@ -18,7 +19,13 @@ export function modifySceneProp<K extends keyof VisualSceneState>(
   value: VisualSceneState[K]
 ) {
   getScene()[prop] = value;
-  useVisualScene.setState({ [prop]: value } as Partial<VisualSceneState>);
+  if (prop === "name") {
+    useVisualScene.setState({ name: value as string | null });
+  }
+
+  if (prop === "roles") {
+    useVisualScene.setState({ roles: value as string[] | null });
+  }
 }
 
 // wrapper for state mutating functions, will capture both state and operation

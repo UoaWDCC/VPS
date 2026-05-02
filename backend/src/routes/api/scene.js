@@ -7,8 +7,8 @@ import {
   incrementVisisted,
   retrieveScene,
   retrieveSceneList,
-  updateScene,
   updateSceneOrder,
+  patchScene,
 } from "../../db/daos/sceneDao.js";
 import auth from "../../middleware/firebaseAuth.js";
 import scenarioAuth from "../../middleware/scenarioAuth.js";
@@ -71,7 +71,11 @@ router.put("/roles", async (req, res) => {
 
   await Promise.all(
     updatedRoles.map(async (scene) => {
-      await updateScene(scene._id, scene);
+      await patchScene(scene._id, {
+        fields: {},
+        components: scene.components,
+        deletedComponentIds: [],
+      });
     })
   );
 
@@ -91,20 +95,6 @@ router.put("/reorder", async (req, res) => {
     sceneIds
   );
   res.status(HTTP_OK).json(updatedScenario);
-});
-
-// Update a scene
-router.put("/:sceneId", async (req, res) => {
-  const { name, components, roles, time } = req.body;
-
-  const scene = await updateScene(req.params.sceneId, {
-    name,
-    components,
-    time,
-    roles,
-  });
-
-  res.status(HTTP_OK).json(scene);
 });
 
 // Delete a scene
@@ -127,6 +117,18 @@ router.post("/duplicate/:sceneId", async (req, res) => {
 // Update a scene's visited field by incrementing by 1
 router.put("/visited/:sceneId", async (req, res) => {
   const scene = await incrementVisisted(req.params.sceneId);
+  res.status(HTTP_OK).json(scene);
+});
+
+router.patch("/:sceneId", async (req, res) => {
+  const { fields = {}, components = [], deletedComponentIds = [] } = req.body;
+
+  const scene = await patchScene(req.params.sceneId, {
+    fields,
+    components,
+    deletedComponentIds,
+  });
+
   res.status(HTTP_OK).json(scene);
 });
 

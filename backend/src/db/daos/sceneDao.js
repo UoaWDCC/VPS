@@ -195,10 +195,84 @@ const updateSceneOrder = async (scenarioId, sceneIds) => {
   return updatedScenario;
 };
 
+const patchScene = async (sceneId, patch) => {
+  const { fields = {}, components = [], deletedComponentIds = [] } = patch;
+
+  const allowedFields = {};
+  ["name", "roles", "time"].forEach((field) => {
+    if (Object.prototype.hasOwnProperty.call(fields, field)) {
+      allowedFields[field] = fields[field];
+    }
+  });
+
+  const operations = [];
+
+  if (Object.keys(allowedFields).length > 0) {
+    operations.push({
+      updateOne: {
+        filter: { _id: sceneId },
+        update: { $set: allowedFields },
+      },
+    });
+  }
+
+  if (deletedComponentIds.length > 0) {
+    operations.push({
+      updateOne: {
+        filter: { _id: sceneId },
+        update: {
+          $pull: {
+            components: { id: { $in: deletedComponentIds } },
+          },
+        },
+      },
+    });
+  }
+
+  for (const component of components) {
+    // Update existing component
+    operations.push({
+      updateOne: {
+        filter: {
+          _id: sceneId,
+          "components.id": component.id,
+        },
+        update: {
+          $set: {
+            "components.$": component,
+          },
+        },
+      },
+    });
+
+    // Insert component if it does not already exist
+    operations.push({
+      updateOne: {
+        filter: {
+          _id: sceneId,
+          "components.id": { $ne: component.id },
+        },
+        update: {
+          $push: {
+            components: component,
+          },
+        },
+      },
+    });
+  }
+
+  if (operations.length > 0) {
+    await Scene.bulkWrite(operations, { ordered: true });
+  }
+
+  return Scene.findById(sceneId);
+};
+
 export {
   createScene,
   retrieveSceneList,
   retrieveScene,
+  patchScene,
   deleteScene,
   updateScene,
   duplicateScene,

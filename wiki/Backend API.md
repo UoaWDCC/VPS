@@ -96,31 +96,41 @@ Returns:
 
 ```
 
-**Update a Scene for a given Scene Id:\***
+***Patch/update a Scene for a given Scene Id:\***
 
-`PUT /api/scenario/:scenarioId/scene/:sceneId`
+`PATCH /api/scenario/:scenarioId/scene/:sceneId`
 
 Body:
 
-```
-
+```json
 {
-    "name": "Scene 1",
-    "components": []
+    "fields": {
+        "name": "Scene 1",
+        "time": 60
+    },
+    "components": [
+        {
+            "_id": "component-id",
+            "properties": {},
+            "stateOperations": []
+        }
+    ],
+    "deletedComponentIds": []
 }
-
 ```
+
+Notes:
+
+- `fields`: top-level scene fields to update (e.g. `name`, `time`)
+- `components`: components to update or insert
+- `deletedComponentIds`: list of component IDs to remove
 
 Returns:
 
-```
-
+```json
 {
-    "_id": "000001",
-    "name": "Scene 1",
-    "components": []
+    "message": "Scene updated successfully"
 }
-
 ```
 
 **Delete scene for a given scenario Id with a given scene Id:\***
@@ -311,5 +321,24 @@ Returns:
 ```
 {
     "note deleted"
+}
+```
+**Reorder scenes for a given Scenario Id:\***
+
+`PUT /api/scenario/:scenarioId/scene/reorder`
+
+Body:
+
+```json
+{
+    "sceneIds": ["000001", "000002", "000003"]
+}
+```
+
+Returns:
+
+```json
+{
+    "message": "Scenes reordered successfully"
 }
 ```

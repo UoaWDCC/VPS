@@ -11,9 +11,10 @@ const EditStateVariable = ({ stateVariable, scenarioId }) => {
   const { user } = useContext(AuthenticationContext);
   const { setStateVariables } = useContext(ScenarioContext);
   const sceneContext = useContext(SceneContext);
-  const { scenes, setScenes } = sceneContext || {
+  const { scenes, saveScenePatch, reFetch } = sceneContext || {
     scenes: [],
-    setScenes: () => {},
+    saveScenePatch: async () => {},
+    reFetch: async () => {},
   };
 
   const { name, type, value } = stateVariable;
@@ -70,7 +71,7 @@ const EditStateVariable = ({ stateVariable, scenarioId }) => {
 
       // Clean up all state operations that reference this deleted state variable
       // Only do this if we have access to scenes (SceneContext is available)
-      if (scenes && scenes.length > 0 && setScenes) {
+      if (scenes && scenes.length > 0 && saveScenePatch) {
         const updatedScenes = scenes.map((scene) => ({
           ...scene,
           components: scene.components.map((component) => {
@@ -96,19 +97,17 @@ const EditStateVariable = ({ stateVariable, scenarioId }) => {
           }),
         }));
 
-        // Update each scene in the backend
         const updatePromises = updatedScenes.map((scene) =>
-          api.put(user, `api/scenario/${scenarioId}/scene/${scene._id}`, {
-            name: scene.name,
+          saveScenePatch({
+            _id: scene._id,
+            fields: {},
             components: scene.components,
-            time: scene.time,
+            deletedComponentIds: [],
           })
         );
 
         await Promise.all(updatePromises);
-
-        // Update the local state
-        setScenes(updatedScenes);
+        await reFetch();
 
         toast.success(
           "State variable deleted and removed from all components!"
