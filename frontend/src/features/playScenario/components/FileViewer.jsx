@@ -15,7 +15,7 @@ function renderHTML(content) {
 }
 
 // Text and Markdown rendering fucntion (Not really fileviewer there is probably better name since its not universal)
-export default function FileViewer({ file, content, loading, error }) {
+export default function FileViewer({ file, content }) {
   if (!file) return null;
 
   // networking tab showed backend returning type html so I check for both
@@ -29,23 +29,6 @@ export default function FileViewer({ file, content, loading, error }) {
     if (isHTML) return renderHTML(content);
     return null;
   }, [content, isMarkdown, isHTML]);
-
-  if (loading) {
-    return (
-      <div className="space-y-2">
-        <div className="skeleton h-6 w-1/2" />
-        <div className="skeleton h-48 w-full" />
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="alert alert-warning">
-        <span>{error}</span>
-      </div>
-    );
-  }
 
   if (isMarkdown || isHTML) {
     return (

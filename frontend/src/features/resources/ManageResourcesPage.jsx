@@ -31,46 +31,6 @@ function normaliseFile(f) {
 export default function ManageResourcesPage() {
   const { scenarioId } = useParams();
   const history = useHistory();
-
-  // Im not sure what this does beside cause an error?
-  // const [resources, setResources] = useState([]);
-
-  // Im not even sure if anything inside this useEffect is ever used? someone review
-  // useEffect(() => {
-  //   let cancelled = false;
-  //   (async () => {
-  //     try {
-  //       const user = getAuth().currentUser;
-  //       if (!user) {
-  //         toast.error("You must be logged in to view resources.");
-  //         return;
-  //       }
-
-  //       // const idToken = await user.getIdToken();
-
-  //       // const { data } = await axios.get(
-  //       //   `/api/resources/scenario/${scenarioId}`,
-  //       //   {
-  //       //     headers: { Authorization: `Bearer ${idToken}` },
-  //       //   }
-  //       // );
-
-  //       // setResources is never used defined/used same as before
-  //       // if (!cancelled) setResources(data);
-
-  //     } catch (err) {
-  //       if (!cancelled) {
-  //         toast.error(
-  //           "Error fetching resources: " + (err?.message || String(err))
-  //         );
-  //       }
-  //     }
-  //   })();
-  //   return () => {
-  //     cancelled = true;
-  //   };
-  // }, [scenarioId]);
-
   function goBack() {
     history.push(`/scenario/${scenarioId}`);
   }
@@ -533,16 +493,17 @@ function Preview({ file, makeDownloadUrl }) {
             className="w-full h-full min-h-[60vh] rounded-xl border"
           />
         </div>
+      ) : isText && (textLoading || (text == null && downloadUrl == null && fetchErr == null)) ? (
+        <div className="space-y-2">
+          <div className="skeleton h-6 w-1/2" />
+          <div className="skeleton h-48 w-full" />
+        </div>
+      ) : isText && fetchErr ? (
+        <div className="alert alert-warning">
+          <span>{fetchErr}</span>
+        </div>
       ) : isText ? (
-        <FileViewer
-          file={file}
-          content={text}
-          loading={
-            textLoading ||
-            (text == null && downloadUrl == null && fetchErr == null)
-          }
-          error={fetchErr}
-        />
+        <FileViewer file={file} content={text} />
       ) : (
         <div className="alert">
           <span>Preview not supported. You can download the file instead.</span>

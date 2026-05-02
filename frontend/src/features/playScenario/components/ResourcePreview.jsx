@@ -67,10 +67,9 @@ export default function ResourcePreview({ file, getDownloadUrl }) {
   const isImage = file.type?.startsWith("image/");
   const isPDF = file.type === "application/pdf";
   const isText =
-    file.type?.startsWith("text/") || /json|xml|csv/.test(file.type || "");
-  const isMarkdown =
-    file.type === "text/markdown" || /\.md$/i.test(file.name || "");
-  const isHTML = file.type === "text/html" || /\.html?$/i.test(file.name || "");
+    file.type?.startsWith("text/") ||
+    /\.md$|\.html?$/i.test(file.name || "") ||
+    /json|xml|csv/.test(file.type || "");
 
   return (
     <div className="p-3 h-full flex flex-col gap-3 font-ibm">
@@ -119,13 +118,8 @@ export default function ResourcePreview({ file, getDownloadUrl }) {
               className="w-full h-full min-h-[60vh] rounded-xl border"
             />
           </div>
-        ) : (isText || isMarkdown || isHTML) && url ? (
-          <FileViewer
-            file={file}
-            content={text}
-            loading={loading}
-            error={fetchErr}
-          />
+        ) : isText && url ? (
+          <FileViewer file={file} content={text} />
         ) : url ? (
           <div className="h-full flex items-center justify-center">
             <div className="text-sm opacity-70">
