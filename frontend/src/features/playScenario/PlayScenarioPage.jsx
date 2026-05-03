@@ -185,7 +185,11 @@ export default function PlayScenarioPage({ group }) {
 
   useEffect(() => {
     onSceneChange();
-  }, []);
+    return () => {
+      // Clear cached scenes when leaving or switching scenarios.
+      sceneCache.clear();
+    };
+  }, [scenarioId]);
 
   const buttonPressed = async (component) => {
     const currentSceneId = sceneId;
