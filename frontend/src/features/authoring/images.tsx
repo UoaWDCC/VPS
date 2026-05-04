@@ -31,7 +31,7 @@ interface Image {
   url: string;
 }
 
-function addExistingImage(image: Image | null) {
+async function addExistingImage(image: Image | null) {
   if (!image?.url) {
     console.error("invalid image object:", image);
     return;
@@ -39,6 +39,12 @@ function addExistingImage(image: Image | null) {
 
   const newImage = structuredClone(defaults.image) as Partial<ImageComponent>;
   newImage.href = image.url;
+  const DEFAULT_HEIGHT = 300;
+  const { width, height } = await getImageDimensions(image.url);
+  newImage.bounds!.verts[1] = {
+    x: width * (DEFAULT_HEIGHT / height),
+    y: DEFAULT_HEIGHT,
+  };
   add(newImage);
 }
 
@@ -79,7 +85,20 @@ async function addNewImage(fileObject: File) {
 
   const newImage = structuredClone(defaults.image) as Partial<ImageComponent>;
   newImage.href = downloadURL;
+  const DEFAULT_HEIGHT = 300;
+  const { width, height } = await getImageDimensions(downloadURL);                                                                                                                                                                                                                                                                                                         
+  newImage.bounds!.verts[1] = {
+    x: width * (DEFAULT_HEIGHT / height),
+    y: DEFAULT_HEIGHT,
+  };
   add(newImage);
+}
+
+async function getImageDimensions(url: string) {
+  const img = new Image();
+  img.src = url;
+  await img.decode();
+  return { width: img.naturalWidth, height: img.naturalHeight };
 }
 
 async function fetchImages() {
@@ -130,7 +149,7 @@ function ImageCreateMenu() {
   }
 
   function handleSubmit() {
-    addExistingImage(selectedImage);
+    addExistingImage(selectedImage).catch(handleGeneric);  
   }
 
   return (
