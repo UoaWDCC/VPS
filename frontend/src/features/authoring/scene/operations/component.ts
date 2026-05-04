@@ -90,7 +90,7 @@ export const defaults = {
     bounds: {
       verts: [
         { x: 0, y: 0 },
-        { x: 100, y: 100 },
+        { x: 300, y: 300 },
       ],
       rotation: 0,
     },
