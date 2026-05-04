@@ -39,12 +39,7 @@ async function addExistingImage(image: Image | null) {
 
   const newImage = structuredClone(defaults.image) as Partial<ImageComponent>;
   newImage.href = image.url;
-  const DEFAULT_HEIGHT = 300;
-  const { width, height } = await getImageDimensions(image.url);
-  newImage.bounds!.verts[1] = {
-    x: width * (DEFAULT_HEIGHT / height),
-    y: DEFAULT_HEIGHT,
-  };
+  newImage.bounds!.verts = await getImageDimensions(image.url);
   add(newImage);
 }
 
@@ -85,20 +80,19 @@ async function addNewImage(fileObject: File) {
 
   const newImage = structuredClone(defaults.image) as Partial<ImageComponent>;
   newImage.href = downloadURL;
-  const DEFAULT_HEIGHT = 300;
-  const { width, height } = await getImageDimensions(downloadURL);
-  newImage.bounds!.verts[1] = {
-    x: width * (DEFAULT_HEIGHT / height),
-    y: DEFAULT_HEIGHT,
-  };
+  newImage.bounds!.verts = await getImageDimensions(downloadURL);
   add(newImage);
 }
 
-async function getImageDimensions(url: string) {
+async function getImageDimensions(url: string, defaultHeight = 300) {
   const img = new Image();
   img.src = url;
   await img.decode();
-  return { width: img.naturalWidth, height: img.naturalHeight };
+  const scaledWidth = img.naturalWidth * (defaultHeight / img.naturalHeight);
+  return [
+    { x: 0, y: 0 },
+    { x: scaledWidth, y: defaultHeight },
+  ];
 }
 
 async function fetchImages() {
