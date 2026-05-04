@@ -86,7 +86,7 @@ async function addNewImage(fileObject: File) {
   const newImage = structuredClone(defaults.image) as Partial<ImageComponent>;
   newImage.href = downloadURL;
   const DEFAULT_HEIGHT = 300;
-  const { width, height } = await getImageDimensions(downloadURL);                                                                                                                                                                                                                                                                                                         
+  const { width, height } = await getImageDimensions(downloadURL);
   newImage.bounds!.verts[1] = {
     x: width * (DEFAULT_HEIGHT / height),
     y: DEFAULT_HEIGHT,
@@ -149,7 +149,7 @@ function ImageCreateMenu() {
   }
 
   function handleSubmit() {
-    addExistingImage(selectedImage).catch(handleGeneric);  
+    addExistingImage(selectedImage).catch(handleGeneric);
   }
 
   return (
