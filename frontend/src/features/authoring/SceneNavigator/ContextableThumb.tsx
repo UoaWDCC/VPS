@@ -93,7 +93,7 @@ function ContextableThumb({
       })}
     >
       <div className="flex">
-        <p className="w-6.5 text--1 text-right mr-1">{index + 1}</p>
+        <p className="w-5.5 text--1 text-right mr-1.5">{index + 100}</p> // if width/margin is increased padding for create thumbnail needs to increased relativly
         <button
           type="button"
           onMouseDown={() => switchScene(scene)}
