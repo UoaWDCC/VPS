@@ -105,6 +105,9 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
       <td align="center" valign="top" width="16.66%"><a href="https://github.com/glybrio"><img src="https://avatars.githubusercontent.com/u/179700217?v=4?s=100" width="100px;" alt="glybrio"/><br /><sub><b>glybrio</b></sub></a><br /><a href="https://github.com/UoaWDCC/VPS/commits?author=glybrio" title="Code">💻</a></td>
       <td align="center" valign="top" width="16.66%"><a href="https://github.com/rgin216"><img src="https://avatars.githubusercontent.com/u/100395589?v=4?s=100" width="100px;" alt="rgin216"/><br /><sub><b>rgin216</b></sub></a><br /><a href="https://github.com/UoaWDCC/VPS/commits?author=rgin216" title="Code">💻</a></td>
     </tr>
+    <tr>
+      <td align="center" valign="top" width="16.66%"><a href="https://github.com/justinedagreat"><img src="https://avatars.githubusercontent.com/u/202360294?v=4?s=100" width="100px;" alt="justinedagreat"/><br /><sub><b>justinedagreat</b></sub></a><br /><a href="https://github.com/UoaWDCC/VPS/commits?author=justinedagreat" title="Code">💻</a> <a href="#design-justinedagreat" title="Design">🎨</a></td>
+    </tr>
   </tbody>
 </table>
 
