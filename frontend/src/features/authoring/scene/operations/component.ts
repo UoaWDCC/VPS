@@ -11,7 +11,7 @@ export const defaults = {
     clickable: true,
     fill: "#ffffffff", // default fill alpha 100
     stroke: "#ffffffff", // default stroke alpha 100
-    strokeWidth: 3, // default stroke width 3 
+    strokeWidth: 3, // default stroke width 3
     bounds: {
       verts: [
         { x: 0, y: 0 },
