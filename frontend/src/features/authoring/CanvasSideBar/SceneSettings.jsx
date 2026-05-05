@@ -9,6 +9,7 @@ import {
 import useVisualScene from "../stores/visual";
 import { modifySceneProp } from "../scene/operations/modifiers";
 import shallow from "zustand/shallow";
+import toast from "react-hot-toast";
 
 /**
  * This component displays the settings of a scene, such as the scene name
@@ -51,8 +52,8 @@ export default function SceneSettings() {
     const { id: sceneId } = useVisualScene.getState();
     if (isSceneNameDuplicate(name, scenes, sceneId)) {
       console.log("duplicate found, generating unique name...");
-      const unique = generateUniqueSceneName(scenes, name);
-      alert(`"${name}" already exists, renamed to "${unique}".`);
+      const unique = generateUniqueSceneName(scenes, name, sceneId);
+      toast.error(`"${name}" already exists, renamed to "${unique}".`);
       final = unique;
     }
 
