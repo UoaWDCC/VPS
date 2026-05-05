@@ -14,7 +14,7 @@ import {
 } from "lucide-react";
 import AddGroup from "./components/AddGroup";
 import StateConditionalMenu from "../../components/StateVariables/StateConditionalMenu";
-import FileViewer from "../playScenario/components/FileViewer";
+import MDTextViewer from "../playScenario/components/MDTextViewer";
 
 function normaliseFile(f) {
   return {
@@ -505,7 +505,7 @@ function Preview({ file, makeDownloadUrl }) {
           <span>{fetchErr}</span>
         </div>
       ) : isText ? (
-        <FileViewer file={file} content={text} />
+        <MDTextViewer file={file} content={text} />
       ) : (
         <div className="alert">
           <span>Preview not supported. You can download the file instead.</span>

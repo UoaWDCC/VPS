@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import toast from "react-hot-toast";
-import FileViewer from "./FileViewer";
+import MDTextViewer from "./MDTextViewer";
 
 export default function ResourcePreview({ file, getDownloadUrl }) {
   const [url, setUrl] = useState(null);
@@ -119,7 +119,7 @@ export default function ResourcePreview({ file, getDownloadUrl }) {
             />
           </div>
         ) : isText && url ? (
-          <FileViewer file={file} content={text} />
+          <MDTextViewer file={file} content={text} />
         ) : url ? (
           <div className="h-full flex items-center justify-center">
             <div className="text-sm opacity-70">

@@ -14,8 +14,8 @@ function renderHTML(content) {
   return DOMPurify.sanitize(content);
 }
 
-// Text and Markdown rendering fucntion (Not really fileviewer there is probably better name since its not universal)
-export default function FileViewer({ file, content }) {
+// Text and Markdown rendering fucntion
+export default function MDTextViewer({ file, content }) {
   if (!file) return null;
 
   // networking tab showed backend returning type html so I check for both
