@@ -96,7 +96,7 @@ const SceneNavigator = () => {
                   active={scene._id === activeId}
                 />
               ))}
-              <div className="w-full pr-3"> 
+              <div className="w-full pr-3">
                 <button className="float-right" onClick={addScene}>
                   <div className="text-primary hover:text-secondary w-[160px] h-[94px] border-3 border-primary hover:border-secondary rounded-sm flex justify-center items-center">
                     <PlusIcon />
