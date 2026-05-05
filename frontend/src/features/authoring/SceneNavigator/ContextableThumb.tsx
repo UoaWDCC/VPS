@@ -93,7 +93,7 @@ function ContextableThumb({
       })}
     >
       <div className="flex">
-        <p className="w-4 text--1">{index + 1}</p>
+        <p className="w-6.5 text--1 text-right mr-1">{index + 1}</p>
         <button
           type="button"
           onMouseDown={() => switchScene(scene)}
