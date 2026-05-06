@@ -16,7 +16,8 @@ function TextHighlight({ doc }: { doc: VisualDocument }) {
       const line = block.lines[j];
       for (let k = 0; k < line.spans.length; k++) {
         const span = line.spans[k];
-        if (!span.highlightColor) continue;
+        const highlightColor = span.style.highlightColor;
+        if (!highlightColor) continue;
 
         highlights.push(
           <path
@@ -29,7 +30,7 @@ function TextHighlight({ doc }: { doc: VisualDocument }) {
               rotation: bounds.rotation,
               origin,
             })}
-            fill={span.highlightColor}
+            fill={highlightColor}
             pointerEvents="none"
           />
         );

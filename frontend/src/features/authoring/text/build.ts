@@ -18,7 +18,7 @@ const fallback: BaseTextStyle = {
   fontStyle: "normal",
   textDecoration: "none",
   textColor: "#000000",
-  highlightColor: "#000000",
+  highlightColor: "#00000000",
 };
 
 function measure(text: string) {
@@ -28,14 +28,6 @@ function measure(text: string) {
 function buildFont(styles: Partial<BaseTextStyle>) {
   const { fontFamily, fontSize, fontWeight, fontStyle, lineHeight } = styles;
   return `${fontStyle} ${fontWeight} ${fontSize}px/${lineHeight! * fontSize!}px "${fontFamily}"`;
-}
-
-function getHighlightColor(
-  docStyle?: Partial<BaseTextStyle>,
-  blockStyle?: Partial<BaseTextStyle>,
-  spanStyle?: Partial<BaseTextStyle>
-) {
-  return spanStyle?.highlightColor ?? blockStyle?.highlightColor ?? docStyle?.highlightColor;
 }
 
 function setFont(style?: Partial<BaseTextStyle>) {
@@ -103,9 +95,7 @@ interface SpanRef {
 function buildVisualLines(
   spans: ModelSpan[],
   maxWidth: number,
-  blockStyle: BaseTextStyle,
-  docStyle?: Partial<BaseTextStyle>,
-  rawBlockStyle?: Partial<BaseTextStyle>
+  blockStyle: BaseTextStyle
 ) {
   const lines: VisualLine[] = [];
   const { alignment, lineHeight } = blockStyle;
@@ -146,7 +136,6 @@ function buildVisualLines(
         text: ref.text,
         charOffsets: generateOffsets(ref.text, style),
         style,
-        highlightColor: getHighlightColor(docStyle, rawBlockStyle, ref.span.style),
         width: metrics.width,
         x: currentLine.width,
         parentId: ref.index,
@@ -181,7 +170,6 @@ function buildVisualLines(
         currentLine.spans.push({
           text: token,
           style,
-          highlightColor: getHighlightColor(docStyle, rawBlockStyle, span.style),
           width: spaceWidth,
           x: currentLine.width,
           parentId: j,
@@ -220,8 +208,7 @@ function buildBlock(
   block: ModelBlock,
   offset: number,
   maxWidth: number,
-  blockStyle: BaseTextStyle,
-  docStyle?: Partial<BaseTextStyle>
+  blockStyle: BaseTextStyle
 ) {
   const visualBlock: VisualBlock = {
     lines: [],
@@ -230,7 +217,7 @@ function buildBlock(
     height: 0,
   };
 
-  const lines = buildVisualLines(block.spans, maxWidth, blockStyle, docStyle, block.style);
+  const lines = buildVisualLines(block.spans, maxWidth, blockStyle);
 
   const { y, height } = lines[lines.length - 1];
   visualBlock.height = y + height;
@@ -246,7 +233,7 @@ export function buildVisualDocument(doc: ModelDocument): VisualDocument {
   let offset = 0;
   for (let i = 0; i < blocks.length; i++) {
     const squashed = squash(style, blocks[i].style);
-    const visual = buildBlock(blocks[i], offset, bounds.width, squashed, style);
+    const visual = buildBlock(blocks[i], offset, bounds.width, squashed);
     offset += visual.height;
     visualBlocks.push(visual);
   }
