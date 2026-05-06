@@ -16,7 +16,6 @@ import {
   handleMouseUpGlobal,
 } from "../handlers/pointer/pointer";
 import { handleContextGlobal } from "../handlers/pointer/context";
-import { handleGlobal } from "../handlers/keyboard/keyboard";
 import LoadingOverlay from "./LoadingOverlay.tsx";
 import useEditorStore from "../stores/editor.ts";
 
@@ -80,7 +79,9 @@ function Canvas() {
   return (
     <CanvasContext.Provider value={{ toSVGSpace, canvasRef }}>
       <div
-        className={`flex-grow relative ${loading ? "pointer-events-none" : ""}`}
+        className={`flex-grow relative ${loading ? "pointer-events-none" : ""} ${
+          mode.includes("create") ? "cursor-crosshair" : ""
+        }`}
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
         onMouseDown={handleMouseDown}
@@ -88,7 +89,7 @@ function Canvas() {
       >
         {mode.includes("create") && (
           <div className="absolute top-20 left-1/2 z-50 -translate-x-1/2 rounded bg-base-300 px-4 py-2 shadow-lg">
-              Creating{createType}
+              Creating {createType}
           </div>
         )}
         <Overlay />
