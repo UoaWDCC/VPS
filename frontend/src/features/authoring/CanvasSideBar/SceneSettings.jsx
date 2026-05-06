@@ -1,10 +1,7 @@
 import { useContext, useState, useEffect } from "react";
 import ScenarioContext from "context/ScenarioContext";
 import SceneContext from "context/SceneContext";
-import {
-  isSceneNameDuplicate,
-  generateUniqueSceneName,
-} from "../../../utils/sceneUtils";
+import { generateUniqueSceneName } from "../../../utils/sceneUtils";
 
 import useVisualScene from "../stores/visual";
 import { modifySceneProp } from "../scene/operations/modifiers";
@@ -48,16 +45,15 @@ export default function SceneSettings() {
       return;
     }
 
-    let final = name;
     const { id: sceneId } = useVisualScene.getState();
-    if (isSceneNameDuplicate(name, scenes, sceneId)) {
+    const safeName = generateUniqueSceneName(scenes, name, sceneId);
+    
+    if (safeName !== name) {
       console.log("duplicate found, generating unique name...");
-      const unique = generateUniqueSceneName(scenes, name, sceneId);
-      toast.error(`"${name}" already exists, renamed to "${unique}".`);
-      final = unique;
+      toast.error(`"${name}" already exists, renamed to "${safeName}".`);
     }
 
-    modifySceneProp("name", final);
+    modifySceneProp("name", safeName);
   }
 
   function changeSceneName(e) {

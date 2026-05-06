@@ -42,38 +42,6 @@ export function generateUniqueSceneName(scenes, baseName = "Scene", excludeId = 
 }
 
 /**
- * Checks if a scene name already exists (case-insensitive)
- * @param {String} name - Name to check
- * @param {Array} scenes - Array of existing scenes
- * @param {String} excludeId - Scene ID to exclude from check (for editing)
- * @returns {Boolean} - True if name already exists
- */
-export function isSceneNameDuplicate(name, scenes, excludeId = null) {
-  // handle empty or non-existing scenes array
-  if (!scenes || scenes.length === 0) {
-    console.log("Invalid scenes or name provided for duplicate checking");
-    return false;
-  }
-
-  // normalise the name to check
-  const normalisedName = name ? name.toLowerCase().trim() : "";
-
-  for (const scene of scenes) {
-    // skip the scene if its ID matches the excludeId
-    if (scene._id === excludeId) {
-      continue;
-    }
-
-    // check if the scene name matches the normalised name
-    if (scene.name && scene.name.toLowerCase().trim() === normalisedName) {
-      return true;
-    }
-  }
-
-  return false;
-}
-
-/**
  * Generates a unique name for a duplicated scene
  * @param {String} originalName - Original scene name
  * @param {Array} scenes - Array of existing scenes
