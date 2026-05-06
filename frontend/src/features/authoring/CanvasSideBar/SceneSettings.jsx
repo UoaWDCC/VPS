@@ -62,6 +62,7 @@ export default function SceneSettings() {
       commitSavedScene();
       await reFetch();
     } catch (error) {
+      console.error(error);
       toast.error("Could not save the scene name.");
     }
   }
