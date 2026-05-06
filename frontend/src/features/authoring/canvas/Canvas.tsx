@@ -9,6 +9,7 @@ import Box from "../elements/Box";
 import Image from "../elements/Image";
 import Line from "../elements/Line";
 import useVisualScene from "../stores/visual";
+import useEditorStore from "../stores/editor.ts";
 import {
   handleMouseDownGlobal,
   handleMouseMoveGlobal,
@@ -36,6 +37,9 @@ function resolve(component: Component) {
 
 function Canvas() {
   const scene = useVisualScene((state) => state.components);
+
+  const mode = useEditorStore((state) => state.mode);
+  const createType = useEditorStore((state) => state.createType);
 
   const canvasRef = useRef<SVGSVGElement | null>(null);
 
@@ -82,6 +86,11 @@ function Canvas() {
         onMouseDown={handleMouseDown}
         onContextMenu={handleContextMenu}
       >
+        {mode.includes("create") && (
+          <div className="absolute top-20 left-1/2 z-50 -translate-x-1/2 rounded bg-base-300 px-4 py-2 shadow-lg">
+              Creating{createType}
+          </div>
+        )}
         <Overlay />
         {loading && <LoadingOverlay />}
 
