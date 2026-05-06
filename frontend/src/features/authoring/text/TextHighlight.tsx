@@ -42,4 +42,3 @@ function TextHighlight({ doc }: { doc: VisualDocument }) {
 }
 
 export default TextHighlight;
-
