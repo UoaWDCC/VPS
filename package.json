@@ -11,6 +11,6 @@
   "dependencies": {},
   "devDependencies": {
     "all-contributors-cli": "^6.26.1",
-    "concurrently": "^9.1.2"
+    "concurrently": "^9.2.1"
   }
 }
