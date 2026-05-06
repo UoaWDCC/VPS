@@ -26,8 +26,10 @@ yarn-error.log*
 
 # ide files
 .idea
+.vscode
 
-# docs folder
-docs/_site
-docs/Gemfile.*.lock
-docs/.sass-cache
+# user docs
+learn/_site
+learn/assets/__dummy_content
+learn/_data/envlocal.json
+.cache
