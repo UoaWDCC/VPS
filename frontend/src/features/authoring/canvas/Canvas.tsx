@@ -89,7 +89,7 @@ function Canvas() {
       >
         {mode.includes("create") && (
           <div className="absolute top-20 left-1/2 z-50 -translate-x-1/2 rounded bg-base-300 px-4 py-2 shadow-lg">
-              Creating {createType}
+            Creating {createType}
           </div>
         )}
         <Overlay />
