@@ -8,7 +8,11 @@
  * @param {String} baseName - Base name to use (default: "Scene")
  * @returns {String} - Unique scene name
  */
-export function generateUniqueSceneName(scenes, baseName = "Scene", excludeId = null) {
+export function generateUniqueSceneName(
+  scenes,
+  baseName = "Scene",
+  excludeId = null
+) {
   // handle empty or non-existing scenes array
   if (!scenes || scenes.length === 0) {
     return baseName;

@@ -38,13 +38,12 @@ const SceneNavigator = () => {
   const [activeIdDragging, setActiveIdDragging] = useState(null);
 
   async function addScene() {
-
     let nextNum = scenes.length;
 
-    while (scenes.some(scene => scene.name === `Scene ${nextNum}`)) {
+    while (scenes.some((scene) => scene.name === `Scene ${nextNum}`)) {
       nextNum++;
     }
-    
+
     api
       .post(user, `/api/scenario/${scenarioId}/scene`, {
         name: `Scene ${nextNum}`,

@@ -2,6 +2,7 @@ import { useContext, useState, useEffect } from "react";
 import ScenarioContext from "context/ScenarioContext";
 import SceneContext from "context/SceneContext";
 import { generateUniqueSceneName } from "../../../utils/sceneUtils";
+import { getScenePatch, commitSavedScene } from "../scene/scene";
 
 import useVisualScene from "../stores/visual";
 import { modifySceneProp } from "../scene/operations/modifiers";
@@ -13,7 +14,7 @@ import toast from "react-hot-toast";
  * @component
  */
 export default function SceneSettings() {
-  const { scenes } = useContext(SceneContext);
+  const { scenes, saveScenePatch, reFetch } = useContext(SceneContext);
   const { roleList } = useContext(ScenarioContext);
 
   const name = useVisualScene((scene) => scene.name);
@@ -37,7 +38,7 @@ export default function SceneSettings() {
     modifySceneProp("roles", selectedRoles);
   }
 
-  function saveSceneName() {
+  async function saveSceneName() {
     const name = sceneName.trim();
 
     if (!name?.length) {
@@ -47,13 +48,22 @@ export default function SceneSettings() {
 
     const { id: sceneId } = useVisualScene.getState();
     const safeName = generateUniqueSceneName(scenes, name, sceneId);
-    
+
     if (safeName !== name) {
       console.log("duplicate found, generating unique name...");
       toast.error(`"${name}" already exists, renamed to "${safeName}".`);
     }
 
     modifySceneProp("name", safeName);
+    setSceneName(safeName);
+
+    try {
+      await saveScenePatch(getScenePatch());
+      commitSavedScene();
+      await reFetch();
+    } catch (error) {
+      toast.error("Could not save the scene name.");
+    }
   }
 
   function changeSceneName(e) {
