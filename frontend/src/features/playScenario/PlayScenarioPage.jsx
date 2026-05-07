@@ -208,7 +208,7 @@ export default function PlayScenarioPage({ group }) {
         e.preventDefault();
         try {
           const { newSceneId, stateVariables, newStateVersion } =
-            await navigate(
+            await navigateSingleplayer(
               user,
               scenarioId,
               sceneId,
