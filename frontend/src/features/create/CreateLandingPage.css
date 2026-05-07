@@ -3,12 +3,12 @@
   top: 0;
   left: 0;
   right: 0;
-  background-color: var(--color-base);
+  background-color: var(--color-black);
   padding: 1rem 2rem;
   display: flex;
   align-items: center;
   z-index: 1000;
-  margin-bottom: var(--spacing-xl);
+  margin-bottom: var(--spacing-xl)
 }
 
 .nav-btn {
