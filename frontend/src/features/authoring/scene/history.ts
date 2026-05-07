@@ -1,12 +1,15 @@
 import { fastIsEqual } from "fast-is-equal";
-import type { Component } from "../types";
-import { getComponent, getScene, getSceneId } from "./scene";
-import { merge } from "./util";
+import type { Component, Scene } from "../types";
+import { getComponent, getScene, getSceneId, setScene } from "./scene";
+import { arrayToObject } from "./util";
 import useVisualScene from "../stores/visual";
-import { buildVisualComponent } from "../pipeline";
-import { add, remove, replace } from "./operations/modifiers";
+import { buildVisualComponent, buildVisualScene } from "../pipeline";
 import useEditorStore from "../stores/editor";
-import useAuthoringStore from "../stores/authoring";
+
+interface SceneRef {
+  _id: string;
+  components: Record<string, any>[];
+}
 
 interface HistoryObject {
   sceneId: string;
@@ -16,60 +19,67 @@ interface HistoryObject {
 
 let undoStack: HistoryObject[] = [];
 let redoStack: HistoryObject[] = [];
+let scenes: SceneRef[] = [];
+let scenarioId: string | null = null;
+let saveScene: ((scene: Record<string, any>) => void) | null = null;
+
+export function init(
+  _scenes: SceneRef[],
+  _scenarioId: string,
+  _saveScene: (scene: Record<string, any>) => void
+) {
+  scenes = _scenes;
+  scenarioId = _scenarioId;
+  saveScene = _saveScene;
+  undoStack = [];
+  redoStack = [];
+}
 
 export function updateHistory(id: string, prevState: Component | null) {
   if (fastIsEqual(prevState, getComponent(id))) return;
   const sceneId = getSceneId();
   undoStack.push({ sceneId, id, state: prevState });
-  redoStack = redoStack.filter((entry) => entry.sceneId !== sceneId);
+  redoStack = [];
 }
 
 export function undo() {
   const prev = undoStack.pop();
   if (!prev) return;
-  switchToHistoryScene(prev.sceneId);
+  switchToScene(prev.sceneId);
   const current = structuredClone(getComponent(prev.id));
-  if (current == null) add(prev.state!, false);
-  else if (prev.state == null) remove(prev.id, false);
-  else modifyComponent(prev.id, prev.state);
+  restoreComponent(prev.id, prev.state);
   redoStack.push({ sceneId: prev.sceneId, id: prev.id, state: current });
 }
 
 export function redo() {
-  const subs = redoStack.pop();
-  if (!subs) return;
-  switchToHistoryScene(subs.sceneId);
-  const current = structuredClone(getComponent(subs.id));
-  if (current == null) add(subs.state!, false);
-  else if (subs.state == null) remove(subs.id, false);
-  else modifyComponent(subs.id, subs.state);
-  undoStack.push({ sceneId: subs.sceneId, id: subs.id, state: current });
+  const entry = redoStack.pop();
+  if (!entry) return;
+  switchToScene(entry.sceneId);
+  const current = structuredClone(getComponent(entry.id));
+  restoreComponent(entry.id, entry.state);
+  undoStack.push({ sceneId: entry.sceneId, id: entry.id, state: current });
 }
 
-//ensure redo/undo applies to correct scene
-function switchToHistoryScene(sceneId: string) {
-  if (sceneId === getSceneId()) return;
-  const nextScene = useAuthoringStore
-    .getState()
-    .scenes.find((scene) => scene._id === sceneId);
-  if (!nextScene) return;
-
-  //clones current scene and switches editor state
-  const saveScene = useAuthoringStore.getState().sceneSaveRef;
+function switchToScene(targetSceneId: string) {
+  if (targetSceneId === getSceneId()) return;
+  const targetScene = scenes.find((s) => s._id === targetSceneId);
+  if (!targetScene) return;
   if (saveScene) saveScene(structuredClone(getScene()));
-  replace(nextScene);
-  const scenarioId = useAuthoringStore.getState().scenarioId;
-  if (scenarioId) {
-    localStorage.setItem(`${scenarioId}:activeScene`, sceneId);
-  }
-
+  const clone: Record<string, any> = structuredClone(targetScene);
+  clone.components = arrayToObject(clone.components);
+  setScene(clone as Scene);
+  useVisualScene.getState().setVisualScene(buildVisualScene(clone as Scene));
+  if (scenarioId)
+    localStorage.setItem(`${scenarioId}:activeScene`, targetSceneId);
   useEditorStore.getState().clear();
 }
 
-function modifyComponent(id: string, props: Record<string, any>) {
-  const component = getScene().components[id];
-  if (!component) return;
-  const newComponent = merge(component, props) as Component;
-  getScene().components[id] = newComponent;
-  useVisualScene.getState().updateComponent(buildVisualComponent(newComponent));
+function restoreComponent(id: string, state: Component | null) {
+  if (state === null) {
+    delete getScene().components[id];
+    useVisualScene.getState().deleteComponent(id);
+  } else {
+    getScene().components[id] = structuredClone(state);
+    useVisualScene.getState().updateComponent(buildVisualComponent(state));
+  }
 }

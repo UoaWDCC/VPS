@@ -13,7 +13,6 @@ import { getScene } from "./scene/scene";
 import { handleGlobal } from "./handlers/keyboard/keyboard";
 import { copy, cut, paste } from "./handlers/keyboard/clipboard";
 import useEditorStore from "./stores/editor";
-import useAuthoringStore from "./stores/authoring";
 import { useHistory } from "react-router-dom";
 import { replace } from "./scene/operations/modifiers";
 import { ArrowLeftIcon, FilesIcon, PlayIcon, UsersIcon } from "lucide-react";
@@ -47,18 +46,6 @@ export default function AuthoringToolPage() {
     const autosave = setInterval(save, AUTOSAVE_INTERVAL);
     return () => clearInterval(autosave);
   }, [sceneId]);
-
-  useEffect(() => {
-    useAuthoringStore.getState().setScenes(scenes);
-  }, [scenes]);
-  useEffect(() => {
-    useAuthoringStore.getState().setSceneSaveRef(saveScene);
-    return () => useAuthoringStore.getState().setSceneSaveRef(null);
-  }, [saveScene]);
-  useEffect(() => {
-    useAuthoringStore.getState().setScenarioId(scenarioId);
-    return () => useAuthoringStore.getState().setScenarioId(null);
-  }, [scenarioId]);
 
   useEffect(() => {
     const activeScene = localStorage.getItem(`${scenarioId}:activeScene`);

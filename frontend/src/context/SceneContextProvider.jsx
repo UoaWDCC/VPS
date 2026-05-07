@@ -1,4 +1,4 @@
-import { useContext } from "react";
+import { useCallback, useContext, useEffect } from "react";
 import AuthenticationContext from "./AuthenticationContext";
 import ScenarioContext from "./ScenarioContext";
 import SceneContext from "./SceneContext";
@@ -9,6 +9,7 @@ import LoadingPage from "../features/status/LoadingPage";
 import GenericErrorPage from "../features/status/GenericErrorPage";
 import toast from "react-hot-toast";
 import { parseMedia } from "../firebase/storage";
+import { init } from "../features/authoring/scene/history";
 
 async function getAllScenes(user, id) {
   const res = await api.get(user, `api/scenario/${id}/scene/all`);
@@ -88,11 +89,6 @@ export default function SceneContextProvider({ children }) {
     },
   });
 
-  function saveSceneWrapper(scene) {
-    scene.components = Object.values(scene.components);
-    saveSceneMutation.mutate(scene);
-  }
-
   const saveSceneMutation = useMutation({
     mutationFn: (scene) => saveScene(user, scenarioId, scene),
     onMutate: async (scene) => {
@@ -108,6 +104,20 @@ export default function SceneContextProvider({ children }) {
       );
     },
   });
+
+  const saveSceneWrapper = useCallback(
+    (scene) => {
+      scene.components = Object.values(scene.components);
+      saveSceneMutation.mutate(scene);
+    },
+    [saveSceneMutation.mutate]
+  );
+
+  useEffect(() => {
+    if (scenesQuery.data && scenarioId) {
+      init(scenesQuery.data, scenarioId, saveSceneWrapper);
+    }
+  }, [scenesQuery.data, scenarioId, saveSceneWrapper]);
 
   if (scenesQuery.isLoading) {
     return <LoadingPage text="Getting scenes..." />;
