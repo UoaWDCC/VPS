@@ -25,7 +25,8 @@ const useVisualScene = create<VisualSceneState>((set) => ({
   roles: null,
   directLink: null,
 
-  setVisualScene: (scene) => set((state) => ({ ...state, ...scene } as VisualSceneState)),
+  setVisualScene: (scene) =>
+    set((state) => ({ ...state, ...scene }) as VisualSceneState),
   setComponents: (components) => set({ components }),
   updateComponent: (component) =>
     set((state) => ({

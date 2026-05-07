@@ -20,7 +20,11 @@ export default function SceneSettings() {
 
   const name = useVisualScene((scene) => scene.name);
   const roles = useVisualScene((scene) => scene.roles);
-  const { directLink, disabled: directLinkDisabled, defaultTarget: defaultDirectLinkScene } = useDirectLink();
+  const {
+    directLink,
+    disabled: directLinkDisabled,
+    defaultTarget: defaultDirectLinkScene,
+  } = useDirectLink();
 
   const [selectedRoles, setSelectedRoles] = useState(roles ?? []);
   const [sceneName, setSceneName] = useState(name ?? "");
@@ -82,7 +86,8 @@ export default function SceneSettings() {
     ];
 
     const disabled = uniqueLinkedScenes.length > 1;
-    const defaultTarget = uniqueLinkedScenes.length === 1 ? uniqueLinkedScenes[0] : null;
+    const defaultTarget =
+      uniqueLinkedScenes.length === 1 ? uniqueLinkedScenes[0] : null;
 
     useEffect(() => {
       if (disabled && directLink) modifySceneProp("directLink", null);
@@ -108,14 +113,24 @@ export default function SceneSettings() {
           />
           <label className="label">Roles</label>
           <div className="dropdown" onBlur={saveSceneRoles}>
-            <div tabIndex={0} role="button" className="justify-start input mb-1 font-normal">
+            <div
+              tabIndex={0}
+              role="button"
+              className="justify-start input mb-1 font-normal"
+            >
               {selectedRoles?.join(", ") || "All"}
             </div>
-            <ul tabIndex={0} className="dropdown-content menu bg-base-300 rounded-box z-1 w-52 p-2 shadow-sm">
+            <ul
+              tabIndex={0}
+              className="dropdown-content menu bg-base-300 rounded-box z-1 w-52 p-2 shadow-sm"
+            >
               {roleList?.map((role, i) => {
                 const active = selectedRoles.includes(role);
                 return (
-                  <li className={active ? "text-secondary" : "text-primary"} key={i}>
+                  <li
+                    className={active ? "text-secondary" : "text-primary"}
+                    key={i}
+                  >
                     <a onClick={() => changeRole(role, !active)}>{role}</a>
                   </li>
                 );
@@ -130,9 +145,16 @@ export default function SceneSettings() {
               disabled={directLinkDisabled}
               onChange={(e) => {
                 const checked = e.target.checked;
-                if (!checked) { modifySceneProp("directLink", null); return; }
+                if (!checked) {
+                  modifySceneProp("directLink", null);
+                  return;
+                }
                 const selfId = useVisualScene.getState().id;
-                const target = directLink ?? defaultDirectLinkScene ?? scenes?.find((s) => s._id !== selfId)?._id ?? null;
+                const target =
+                  directLink ??
+                  defaultDirectLinkScene ??
+                  scenes?.find((s) => s._id !== selfId)?._id ??
+                  null;
                 modifySceneProp("directLink", target);
               }}
             />
@@ -150,7 +172,9 @@ export default function SceneSettings() {
             className="select select-bordered"
             disabled={!directLink || directLinkDisabled}
             value={directLink ?? ""}
-            onChange={(e) => modifySceneProp("directLink", e.target.value || null)}
+            onChange={(e) =>
+              modifySceneProp("directLink", e.target.value || null)
+            }
           >
             <option value="">No direct link target</option>
             {scenes

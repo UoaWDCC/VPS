@@ -207,15 +207,25 @@ export default function PlayScenarioPage({ group }) {
       if (e.code === "Space" || e.key === "ArrowRight") {
         e.preventDefault();
         try {
-          const { newSceneId, stateVariables, newStateVersion } = await navigate(
-            user, scenarioId, sceneId, addFlags, removeFlags, null, currScene.directLink
-          );
+          const { newSceneId, stateVariables, newStateVersion } =
+            await navigate(
+              user,
+              scenarioId,
+              sceneId,
+              addFlags,
+              removeFlags,
+              null,
+              currScene.directLink
+            );
           if (stateVersion < newStateVersion) {
             setStateVariables(stateVariables);
             setStateVersion(newStateVersion);
           }
           if (newSceneId) {
-            if (sceneCache.get(newSceneId)?.error) { handleError(sceneCache.get(newSceneId)); return; }
+            if (sceneCache.get(newSceneId)?.error) {
+              handleError(sceneCache.get(newSceneId));
+              return;
+            }
             setSceneId(newSceneId);
           }
         } catch (e) {

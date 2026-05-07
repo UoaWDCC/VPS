@@ -119,7 +119,10 @@ const deleteScene = async (scenarioId, sceneId) => {
     return false;
   }
 
-  await Scene.updateMany({ directLink: sceneId }, { $set: { directLink: null } });
+  await Scene.updateMany(
+    { directLink: sceneId },
+    { $set: { directLink: null } }
+  );
   const res = await Scene.findOneAndDelete({ _id: sceneId });
   return res !== null;
 };

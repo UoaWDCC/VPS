@@ -58,7 +58,9 @@ export default function AuthoringToolPage() {
 
   useEffect(() => {
     const activeScene = localStorage.getItem(`${scenarioId}:activeScene`);
-    const found = activeScene ? scenes.find((s) => s._id === activeScene) : null;
+    const found = activeScene
+      ? scenes.find((s) => s._id === activeScene)
+      : null;
     const target = found ?? scenes[0];
     if (target) replace(target);
 
