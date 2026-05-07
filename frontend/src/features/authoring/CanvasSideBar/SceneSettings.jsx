@@ -130,7 +130,10 @@ export default function SceneSettings() {
               disabled={directLinkDisabled}
               onChange={(e) => {
                 const checked = e.target.checked;
-                modifySceneProp("directLink", checked ? directLink ?? defaultDirectLinkScene : null);
+                if (!checked) { modifySceneProp("directLink", null); return; }
+                const selfId = useVisualScene.getState().id;
+                const target = directLink ?? defaultDirectLinkScene ?? scenes?.find((s) => s._id !== selfId)?._id ?? null;
+                modifySceneProp("directLink", target);
               }}
             />
             <span className="label-text">Direct Link</span>
