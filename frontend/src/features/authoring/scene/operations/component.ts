@@ -9,8 +9,9 @@ export const defaults = {
     type: "textbox",
     padding: 20,
     clickable: true,
-    fill: "#00000000",
-    strokeWidth: 0,
+    fill: "#ffffffff", // default fill alpha 100
+    stroke: "#ffffffff", // default stroke alpha 100
+    strokeWidth: 3, // default stroke width 3
     bounds: {
       verts: [
         { x: 0, y: 0 },
@@ -47,7 +48,8 @@ export const defaults = {
   speech: {
     type: "speech",
     fill: "#b7b7b7ff",
-    strokeWidth: 0,
+    stroke: "#ffffffff",
+    strokewidth: 3,
     bounds: {
       verts: [
         { x: 0, y: 0 },
@@ -61,7 +63,8 @@ export const defaults = {
     type: "box",
     clickable: true,
     fill: "#b7b7b7ff",
-    strokeWidth: 0,
+    stroke: "#ffffffff",
+    strokewidth: 3,
     bounds: {
       verts: [
         { x: 0, y: 0 },
@@ -74,7 +77,8 @@ export const defaults = {
     type: "ellipse",
     fill: "#b7b7b7ff",
     clickable: true,
-    strokeWidth: 0,
+    stroke: "#ffffffff",
+    strokewidth: 3,
     bounds: {
       verts: [
         { x: 0, y: 0 },
