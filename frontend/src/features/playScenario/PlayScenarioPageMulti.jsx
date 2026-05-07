@@ -24,7 +24,7 @@ const navigate = async (
   addFlags,
   removeFlags,
   componentId,
-  directAdvance = false
+  nextScene = null
 ) => {
   const token = await user.getIdToken();
   const config = {
@@ -34,7 +34,7 @@ const navigate = async (
       "Content-Type": "application/json",
       Authorization: `Bearer ${token}`,
     },
-    data: { currentScene, addFlags, removeFlags, componentId, directAdvance },
+    data: { currentScene, addFlags, removeFlags, componentId, nextScene },
   };
   const res = await axios.request(config);
   if (res.data.scenes) {
@@ -83,40 +83,6 @@ export default function PlayScenarioPageMulti({ group }) {
   const [resources, setResources] = useState([]);
 
   const currScene = sceneCache.get(sceneId);
-
-  const directAdvance = async () => {
-    if (!sceneId || !currScene?.directLink) return;
-
-    try {
-      const { newSceneId, stateVariables, newStateVersion } = await navigate(
-        user,
-        group._id,
-        sceneId,
-        addFlags,
-        removeFlags,
-        null,
-        true
-      );
-
-      const newResources = await getResources(user, group._id);
-      const filteredResources = filterResourcesByConditions(
-        newResources,
-        stateVariables
-      );
-      setResources(filteredResources);
-
-      if (stateVersion < newStateVersion) {
-        setStateVariables(stateVariables);
-        setStateVersion(newStateVersion);
-      }
-
-      if (newSceneId) {
-        setSceneId(newSceneId);
-      }
-    } catch (e) {
-      handleError(e?.response?.data);
-    }
-  };
 
   const handleError = (error) => {
     if (!error) return;
@@ -183,9 +149,8 @@ export default function PlayScenarioPageMulti({ group }) {
   }, []);
 
   useEffect(() => {
-    const onKeyDown = (e) => {
-      if (e.repeat) return;
-      if (!currScene?.directLink) return;
+    const onKeyDown = async (e) => {
+      if (e.repeat || !sceneId || !currScene?.directLink) return;
 
       const tag = document.activeElement?.tagName;
       const isTyping =
@@ -197,7 +162,20 @@ export default function PlayScenarioPageMulti({ group }) {
 
       if (e.code === "Space" || e.key === "ArrowRight") {
         e.preventDefault();
-        directAdvance();
+        try {
+          const { newSceneId, stateVariables, newStateVersion } = await navigate(
+            user, group._id, sceneId, addFlags, removeFlags, null, currScene.directLink
+          );
+          const newResources = await getResources(user, group._id);
+          setResources(filterResourcesByConditions(newResources, stateVariables));
+          if (stateVersion < newStateVersion) {
+            setStateVariables(stateVariables);
+            setStateVersion(newStateVersion);
+          }
+          if (newSceneId) setSceneId(newSceneId);
+        } catch (e) {
+          handleError(e?.response?.data);
+        }
       }
     };
 

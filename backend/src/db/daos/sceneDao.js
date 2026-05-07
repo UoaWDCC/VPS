@@ -64,6 +64,7 @@ const updateScene = async (sceneId, updatedScene) => {
   // makes sure when we update components is not null
   if (updatedScene.components) {
     const prevDbScene = await Scene.findById(sceneId);
+    if (!prevDbScene) return null;
 
     // if previous firebase media component no longer exists, try to delete file from firebase storage
     prevDbScene.components.forEach((c) => {
@@ -86,6 +87,7 @@ const updateScene = async (sceneId, updatedScene) => {
 
   // if we are updating name only, components will be null
   let dbScene = await Scene.findById(sceneId);
+  if (!dbScene) return null;
 
   // store temp variable incase new name is invalid
   const previousName = dbScene.name;
@@ -117,6 +119,7 @@ const deleteScene = async (scenarioId, sceneId) => {
     return false;
   }
 
+  await Scene.updateMany({ directLink: sceneId }, { $set: { directLink: null } });
   const res = await Scene.findOneAndDelete({ _id: sceneId });
   return res !== null;
 };
@@ -133,7 +136,7 @@ const duplicateScene = async (scenarioId, sceneId) => {
     name: `${sceneToCopy.name} Copy`,
     components: sceneToCopy.components,
     time: sceneToCopy.time,
-    directLink: sceneToCopy.directLink,
+    directLink: sceneToCopy.directLink ?? null,
   };
   const dbScene = new Scene(newScene);
   await dbScene.save();

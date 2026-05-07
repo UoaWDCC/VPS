@@ -26,10 +26,6 @@ const sceneSchema = new Schema({
     },
   ],
   directLink: {
-    type: Boolean,
-    default: false,
-  },
-  directLinkScene: {
     type: Schema.Types.ObjectId,
     ref: "Scene",
     default: null,

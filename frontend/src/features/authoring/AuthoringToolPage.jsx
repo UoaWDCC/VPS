@@ -47,6 +47,15 @@ export default function AuthoringToolPage() {
     return () => clearInterval(autosave);
   }, [sceneId]);
 
+  // if the active scene was deleted, switch to the first available scene
+  useEffect(() => {
+    if (!sceneId || !scenes) return;
+    if (!scenes.find((s) => s._id === sceneId)) {
+      const next = scenes[0];
+      if (next) replace(next);
+    }
+  }, [scenes]);
+
   useEffect(() => {
     const activeScene = localStorage.getItem(`${scenarioId}:activeScene`);
     if (activeScene) replace(scenes.find((s) => s._id === activeScene));

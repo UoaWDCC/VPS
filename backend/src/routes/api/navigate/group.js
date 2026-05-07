@@ -19,7 +19,7 @@ const createInvalidError = (roles) =>
 export const getSimpleScene = async (sceneId) => {
   const scene = await Scene.findOne(
     { _id: sceneId },
-    { roles: 1, components: 1, directLink: 1, directLinkScene: 1 }
+    { roles: 1, components: 1, directLink: 1 }
   ).lean();
   if (!scene)
     throw new HttpError("No scene exists with that id", STATUS.NOT_FOUND);
@@ -80,7 +80,7 @@ const getConnectedScenes = async (sceneID, role, active = true) => {
     .filter(Boolean);
   const connectedScenes = await Scene.find(
     { _id: { $in: connectedIds } },
-    { roles: 1, components: 1, directLink: 1, directLinkScene: 1 }
+    { roles: 1, components: 1, directLink: 1 }
   ).lean();
   const filtered = connectedScenes.map((s) => {
     if (s.roles.includes(role) || !s.roles.length) return s;
@@ -192,7 +192,7 @@ export const groupNavigate = async (req) => {
     addFlags,
     removeFlags,
     componentId,
-    directAdvance,
+    nextScene: bodyNextScene,
   } = req.body;
 
   const group = await getGroupByIdAndUser(req.params.groupId, uid);
@@ -238,28 +238,9 @@ export const groupNavigate = async (req) => {
 
   let scenes = null;
 
-  if (component?.nextScene && component.nextScene !== currentScene) {
-    const nextScene = component.nextScene;
-    [, , , scenes] = await Promise.all([
-      addSceneToPath(group._id, currentScene, nextScene),
-      addFlagsToGroup(group._id, addFlags),
-      removeFlagsFromGroup(group._id, removeFlags),
-      getConnectedScenes(nextScene, role, true),
-    ]);
-  } else if (directAdvance) {
-    const current = await getSceneConsideringRole(currentScene, role);
+  const nextScene = component?.nextScene ?? bodyNextScene;
 
-    if (!current.directLink || !current.directLinkScene) {
-      throw new HttpError(
-        "Direct advance not allowed on this scene",
-        STATUS.FORBIDDEN
-      );
-    }
-
-    const nextScene = current.directLinkScene;
-
-    await getSceneConsideringRole(nextScene, role);
-
+  if (nextScene && nextScene !== currentScene) {
     [, , , scenes] = await Promise.all([
       addSceneToPath(group._id, currentScene, nextScene),
       addFlagsToGroup(group._id, addFlags),

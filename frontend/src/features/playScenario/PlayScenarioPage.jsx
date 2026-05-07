@@ -20,7 +20,7 @@ const navigate = async (
   addFlags,
   removeFlags,
   componentId,
-  directAdvance = false
+  nextScene = null
 ) => {
   const token = await user.getIdToken();
   const config = {
@@ -30,7 +30,7 @@ const navigate = async (
       "Content-Type": "application/json",
       Authorization: `Bearer ${token}`,
     },
-    data: { currentScene, addFlags, removeFlags, componentId, directAdvance },
+    data: { currentScene, addFlags, removeFlags, componentId, nextScene },
   };
   const res = await axios.request(config);
   if (res.data.scenes) {
@@ -62,37 +62,6 @@ export default function PlayScenarioPage() {
   const [resourcesOpen, setResourcesOpen] = useState(false);
 
   const currScene = sceneCache.get(sceneId);
-
-  const directAdvance = async () => {
-    if (!sceneId || !currScene?.directLink) return;
-
-    try {
-      const { newSceneId, stateVariables, newStateVersion } = await navigate(
-        user,
-        scenarioId,
-        sceneId,
-        addFlags,
-        removeFlags,
-        null,
-        true
-      );
-
-      if (stateVersion < newStateVersion) {
-        setStateVariables(stateVariables);
-        setStateVersion(newStateVersion);
-      }
-
-      if (newSceneId) {
-        if (sceneCache.get(newSceneId)?.error) {
-          handleError(sceneCache.get(newSceneId));
-          return;
-        }
-        setSceneId(newSceneId);
-      }
-    } catch (e) {
-      handleError(e?.response?.data);
-    }
-  };
 
   const handleError = (error) => {
     if (!error) return;
@@ -147,9 +116,8 @@ export default function PlayScenarioPage() {
   }, []);
 
   useEffect(() => {
-    const onKeyDown = (e) => {
-      if (e.repeat) return;
-      if (!currScene?.directLink) return;
+    const onKeyDown = async (e) => {
+      if (e.repeat || !sceneId || !currScene?.directLink) return;
 
       const tag = document.activeElement?.tagName;
       const isTyping =
@@ -161,7 +129,21 @@ export default function PlayScenarioPage() {
 
       if (e.code === "Space" || e.key === "ArrowRight") {
         e.preventDefault();
-        directAdvance();
+        try {
+          const { newSceneId, stateVariables, newStateVersion } = await navigate(
+            user, scenarioId, sceneId, addFlags, removeFlags, null, currScene.directLink
+          );
+          if (stateVersion < newStateVersion) {
+            setStateVariables(stateVariables);
+            setStateVersion(newStateVersion);
+          }
+          if (newSceneId) {
+            if (sceneCache.get(newSceneId)?.error) { handleError(sceneCache.get(newSceneId)); return; }
+            setSceneId(newSceneId);
+          }
+        } catch (e) {
+          handleError(e?.response?.data);
+        }
       }
     };
 
