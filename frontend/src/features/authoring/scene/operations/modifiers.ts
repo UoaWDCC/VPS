@@ -26,6 +26,10 @@ export function modifySceneProp<K extends keyof VisualSceneState>(
   if (prop === "roles") {
     useVisualScene.setState({ roles: value as string[] | null });
   }
+
+  if (prop === "directLink") {
+    useVisualScene.setState({ directLink: value as string | null });
+  }
 }
 
 // wrapper for state mutating functions, will capture both state and operation
