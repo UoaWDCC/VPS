@@ -24,15 +24,17 @@ let scenarioId: string | null = null;
 let saveScene: ((scene: Record<string, any>) => void) | null = null;
 
 export function init(
-  _scenes: SceneRef[],
+  _scenes: SceneRef[],                                                                                                                                   
   _scenarioId: string,
-  _saveScene: (scene: Record<string, any>) => void
-) {
+  _saveScene: (scene: Record<string, any>) => void                                                                                                       
+) {             
+  if (_scenarioId !== scenarioId) {
+    undoStack = [];                                                                                                                                      
+    redoStack = [];
+  }                                                                                                                                                      
   scenes = _scenes;
   scenarioId = _scenarioId;
   saveScene = _saveScene;
-  undoStack = [];
-  redoStack = [];
 }
 
 export function updateHistory(id: string, prevState: Component | null) {
