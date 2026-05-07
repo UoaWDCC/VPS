@@ -1,4 +1,5 @@
 import { useContext, useState, useEffect } from "react";
+import { Check } from "lucide-react";
 import ScenarioContext from "context/ScenarioContext";
 import SceneContext from "context/SceneContext";
 import {
@@ -105,7 +106,10 @@ export default function SceneSettings() {
                     className={active ? "text-secondary" : "text-primary"}
                     key={i}
                   >
-                    <a onClick={() => changeRole(role, !active)}>{role}</a>
+                    <a onClick={() => changeRole(role, !active)}>
+                      {role}
+                      {active && <Check className="ml-auto" size={14} />}
+                    </a>
                   </li>
                 );
               })}
