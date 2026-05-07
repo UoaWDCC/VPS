@@ -1,4 +1,4 @@
-import React, { useRef } from "react";
+import React, { useEffect, useRef } from "react";
 import CanvasContext from "./CanvasContext";
 import Overlay from "./Overlay";
 import type { Component } from "../types";
@@ -15,6 +15,7 @@ import {
   handleMouseUpGlobal,
 } from "../handlers/pointer/pointer";
 import { handleContextGlobal } from "../handlers/pointer/context";
+import { handleGlobal } from "../handlers/keyboard/keyboard";
 
 const componentMap: Record<string, React.FC<any>> = {
   textbox: (props) => <TextBox {...props} editable={true} />,
@@ -51,17 +52,33 @@ function Canvas() {
     handleMouseMoveGlobal(e, toSVGSpace(e.clientX, e.clientY));
   }
 
-  function handleMouseUp() {
+  function handleMouseUp(e: React.MouseEvent) {
+    if (e.button === 2) return;
     handleMouseUpGlobal();
   }
 
   function handleMouseDown(e: React.MouseEvent) {
+    if (e.button === 2) return;
     handleMouseDownGlobal(e, toSVGSpace(e.clientX, e.clientY));
   }
 
   function handleContextMenu(e: React.MouseEvent) {
     handleContextGlobal(e, toSVGSpace(e.clientX, e.clientY));
   }
+
+  useEffect(() => {
+    const handleCanvasKeyDown = (e: KeyboardEvent) => {
+      e.preventDefault();
+      handleGlobal(e);
+    };
+
+    window.addEventListener("keydown", handleCanvasKeyDown);
+
+    // Cleanup function
+    return () => {
+      window.removeEventListener("keydown", handleCanvasKeyDown);
+    };
+  }, []);
 
   const components = Object.values(scene)
     .sort((a, b) => a.zIndex - b.zIndex)
