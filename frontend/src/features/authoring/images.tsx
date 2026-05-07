@@ -172,14 +172,22 @@ function ImageCreateMenu() {
       <ModalDialog
         title="Select Image"
         open={modalOpen}
-        onClose={() => { setModalOpen(false); setSelectionError(false); }}
+        onClose={() => {
+          setModalOpen(false);
+          setSelectionError(false);
+        }}
       >
         <ImageListContainer
           data={imagesQuery.data}
           selectedId={selectedImage?.id}
-          onItemSelected={(img) => { setSelectedImage(img); setSelectionError(false); }}
+          onItemSelected={(img) => {
+            setSelectedImage(img);
+            setSelectionError(false);
+          }}
         />
-        <p className={`text-error text-sm mt-2 ${selectionError ? "visible" : "invisible"}`}>
+        <p
+          className={`text-error text-sm mt-2 ${selectionError ? "visible" : "invisible"}`}
+        >
           Please select an image first.
         </p>
         <div className="modal-action">
