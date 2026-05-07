@@ -131,8 +131,11 @@ export function createComponentFromBounds(
   if (dims.x > 50 && dims.y > 50) component.bounds = bounds;
 
   // Set zIndex to the current number of components on the canvas
-  const componentsCount = Object.keys(getScene().components).length;
-  component.zIndex = componentsCount;
+  const components = Object.values(getScene().components) as Component[];
+  const maxComponent = components.reduce((prev, curr) => {
+    return prev.zIndex > curr.zIndex ? prev : curr;
+  });
+  component.zIndex = maxComponent.zIndex + 1;
   return add(component);
 }
 
