@@ -14,6 +14,7 @@ import NotesDisplayCard from "./modals/NotesModal/NotesModal";
 import ResourcesModal from "./modals/ResourcesModal/ResourcesModal";
 import PlayPageSideButton from "./components/PlayPageSideButton/PlayPageSideButton";
 import ResourcesPanel from "./components/ResourcesPanel";
+import SceneTimer from "./components/SceneTimer";
 
 const sceneCache = new Map();
 
@@ -191,6 +192,13 @@ export default function PlayScenarioPage({ group }) {
     };
   }, [scenarioId]);
 
+  const handleTimerTimeout = () => {
+    const timerStateOperations = currScene?.timerStateOperations;
+    if (!timerStateOperations?.length) return;
+    setStateVersion((v) => v + 1);
+    setStateVariables((prev) => applyStateOperations(prev, timerStateOperations));
+  };
+
   const buttonPressed = async (component) => {
     const currentSceneId = sceneId;
     const nextSceneId = component.nextScene;
@@ -238,6 +246,15 @@ export default function PlayScenarioPage({ group }) {
 
   return (
     <div className="w-full h-full relative">
+      {currScene?.time > 0 && (
+        <div className="absolute top-4 left-1/2 -translate-x-1/2 z-30">
+          <SceneTimer
+            key={sceneId}
+            duration={currScene.time}
+            onTimeout={handleTimerTimeout}
+          />
+        </div>
+      )}
       <PlayScenarioCanvas
         scene={currScene}
         incrementor={isMultiplayer ? incrementor : undefined}
