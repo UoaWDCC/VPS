@@ -41,6 +41,7 @@ export function updateHistory(id: string, prevState: Component | null) {
   if (fastIsEqual(prevState, getComponent(id))) return;
   const sceneId = getSceneId();
   undoStack.push({ sceneId, id, state: prevState });
+  if (undoStack.length > 100) undoStack.shift();
   redoStack = [];
 }
 

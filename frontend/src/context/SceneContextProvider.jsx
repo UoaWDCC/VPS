@@ -109,15 +109,15 @@ export default function SceneContextProvider({ children }) {
 
   const saveSceneWrapper = useCallback(
     (scene) => {
-      const { _id, components, ...fields } = scene;                                                                                                
-      saveScenePatchMutation.mutate({                                                                                                              
-        _id,                                                                                                                                       
-        fields,                                                                                                                                    
-        components: Object.values(components),                                                                                                     
-        deletedComponentIds: [],                                                                                                                   
-      });   
+      const { _id, components, ...fields } = scene;
+      saveScenePatchMutation.mutate({
+        _id,
+        fields,
+        components: Object.values(components),
+        deletedComponentIds: [],
+      });
     },
-    [saveScenePatchMutation.mutate] 
+    [saveScenePatchMutation.mutate]
   );
 
   useEffect(() => {
