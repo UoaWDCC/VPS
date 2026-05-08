@@ -4,30 +4,26 @@ import DiamondPlayButton from "./components/DiamondPlayButton";
 import Thumbnail from "../authoring/components/Thumbnail";
 import ScenarioContext from "../../context/ScenarioContext";
 import AuthenticationContext from "../../context/AuthenticationContext";
-import { usePatch } from "../../hooks/crudHooks";
 import FabMenu from "../../components/FabMenu";
 import { ArrowLeftIcon, SearchIcon } from "lucide-react";
 import ModalDialog from "../../components/ModalDialogue";
 import DetailEditModal from "./components/DetailEditModal";
-import toast from "react-hot-toast";
 
 function ScenarioInfo() {
   const [searchTerm, setSearchTerm] = useState("");
-
-  const { VpsUser, getUserIdToken } = useContext(AuthenticationContext);
-  const {
-    scenarios: ownedScenarios,
-    assignedScenarios,
-    reFetch,
-  } = useContext(ScenarioContext);
+  const { user } = useContext(AuthenticationContext);
+  const { allScenarios, updateScenarioDetails } = useContext(ScenarioContext);
 
   const history = useHistory();
   const location = useLocation();
 
   const [showEditModal, setShowEditModal] = useState(false);
 
-  const scenarios = [...(ownedScenarios ?? []), ...(assignedScenarios ?? [])];
-  const username = VpsUser.firebaseUserObj.displayName || "User";
+  const scenarios = [
+    allScenarios.owned,
+    allScenarios.accessible,
+    allScenarios.assigned,
+  ].flat();
 
   const selectedScenarioId = new URLSearchParams(location.search).get("id");
   const selectedScenario = scenarios.find((s) => s._id === selectedScenarioId);
@@ -52,20 +48,7 @@ function ScenarioInfo() {
     setShowEditModal(true);
   };
 
-  // TODO: should use optimistic updating here
-  async function saveScenarioDetails(name, description, estimatedTime) {
-    try {
-      await usePatch(
-        `/api/scenario/${selectedScenario._id}`,
-        { name, description, estimatedTime },
-        getUserIdToken
-      );
-      reFetch();
-    } catch (error) {
-      console.error("Error saving scenario details:", error);
-      toast.error("Failed to save changes. Please try again.");
-    }
-  }
+  const isEditable = selectedScenario?.user.uid === user.uid;
 
   return (
     <div className="bg-base-100 text-base-content">
@@ -129,12 +112,14 @@ function ScenarioInfo() {
                     <h1 className="text-base-content font-light text-xl font-ibm">
                       {selectedScenario.name}
                     </h1>
-                    <button
-                      onClick={openEditModal}
-                      className="btn btn-sm btn-ghost text-base-content border border-base-content/20 hover:bg-base-content/10 hover:border-base-content/40 font-dm flex-shrink-0"
-                    >
-                      Edit Details
-                    </button>
+                    {isEditable && (
+                      <button
+                        onClick={openEditModal}
+                        className="btn btn-sm btn-ghost text-base-content border border-base-content/20 hover:bg-base-content/10 hover:border-base-content/40 font-dm flex-shrink-0"
+                      >
+                        Edit Details
+                      </button>
+                    )}
                   </div>
                 </div>
 
@@ -144,8 +129,13 @@ function ScenarioInfo() {
                     <span className="text-m text-primary mb-[1vh] font-dm">
                       Created By
                     </span>
-                    <span className="text-s text-base-content font-dm">
-                      {username}
+                    <span className="text-s text-base-content font-dm flex items-center gap-1">
+                      <img
+                        className="w-5 h-5 rounded-full"
+                        src={selectedScenario.user.pictureURL}
+                        referrerPolicy="no-referrer"
+                      />
+                      <span>{selectedScenario.user.name}</span>
                     </span>
                   </div>
                   <div className="flex flex-col items-start">
@@ -219,7 +209,9 @@ function ScenarioInfo() {
       >
         <DetailEditModal
           scenario={selectedScenario}
-          onSave={saveScenarioDetails}
+          onSave={(details) =>
+            updateScenarioDetails({ id: selectedScenarioId, details })
+          }
         />
       </ModalDialog>
 

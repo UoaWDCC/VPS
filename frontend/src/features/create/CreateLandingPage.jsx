@@ -1,13 +1,13 @@
 import { useState, useContext } from "react";
 import { useHistory } from "react-router-dom";
-import AuthenticationContext from "../../context/AuthenticationContext";
 import ScenarioContext from "../../context/ScenarioContext";
-import { useDelete, usePost } from "../../hooks/crudHooks";
 import Thumbnail from "../authoring/components/Thumbnail";
 import CreateScenarioCard from "../../components/CreateScenarioCard/CreateScenarioCard";
 import TopNavBar from "../../features/TopNavBar/TopNavBar";
 import FabMenu from "../../components/FabMenu";
 import { PlusIcon, SearchIcon, Trash2Icon } from "lucide-react";
+import "../playScenario/PlayLandingPage.css";
+import "./CreateLandingPage.css";
 import { handle } from "../../components/ContextMenu/portal";
 import RightContextMenu from "../../components/ContextMenu/RightContextMenu";
 
@@ -26,9 +26,9 @@ const ScenarioMenu = ({ id, deleteScenario }) => {
 };
 
 export default function CreateLandingPage() {
-  const { allScenarios, reFetch } = useContext(ScenarioContext);
+  const { allScenarios, deleteScenario, createScenario } =
+    useContext(ScenarioContext);
 
-  const { getUserIdToken } = useContext(AuthenticationContext);
   const history = useHistory();
 
   const [search, setSearch] = useState("");
@@ -38,12 +38,11 @@ export default function CreateLandingPage() {
     scenario.name.toLowerCase().includes(search.toLowerCase())
   );
 
-  const deleteScenario = async (scenarioId) => {
-    await useDelete(`/api/scenario/${scenarioId}`, getUserIdToken);
-    reFetch();
-  };
-
-  const handleCreate = () => setShowCreateModal(true);
+  async function handleCreate(name) {
+    setShowCreateModal(false);
+    const scenarioId = await createScenario(name);
+    history.push(`/scenario/${scenarioId}`);
+  }
 
   return (
     <div className="bg-base-100 h-full text-base-content pt-5xl px-xl max-w-[1500px] mx-auto">
@@ -89,29 +88,12 @@ export default function CreateLandingPage() {
         ))}
       </div>
       {/* Create Scenario Modal */}
-      {
-        showCreateModal && (
-          <CreateScenarioCard
-            className="create-scenario-card"
-            onCreate={async (name) => {
-              const newScenario = await usePost(
-                `/api/scenario`,
-                { name },
-                getUserIdToken
-              );
-              await usePost(
-                `/api/scenario/${newScenario._id}/scene`,
-                { name: "Scene 1" },
-                getUserIdToken
-              );
-              history.push(`/scenario/${newScenario._id}`);
-              reFetch();
-              setShowCreateModal(false);
-            }}
-            onClose={() => setShowCreateModal(false)}
-          />
-        )
-      }
+      {showCreateModal && (
+        <CreateScenarioCard
+          onCreate={handleCreate}
+          onClose={() => setShowCreateModal(false)}
+        />
+      )}
 
       <FabMenu />
     </div >

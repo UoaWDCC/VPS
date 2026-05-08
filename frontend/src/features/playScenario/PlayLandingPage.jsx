@@ -1,11 +1,6 @@
-import { useState, useContext, useEffect } from "react";
+import { useState, useContext } from "react";
 import { useHistory } from "react-router-dom";
-import MenuItem from "@material-ui/core/MenuItem";
-import ContextMenu from "../../components/ContextMenu";
-import AuthenticationContext from "../../context/AuthenticationContext";
 import ScenarioContext from "../../context/ScenarioContext";
-import AccessLevel from "../../enums/route.access.level";
-import { useDelete } from "../../hooks/crudHooks";
 import Thumbnail from "../authoring/components/Thumbnail";
 import TopNavBar from "../../features/TopNavBar/TopNavBar";
 import FabMenu from "../../components/FabMenu";
@@ -14,12 +9,15 @@ import { SearchIcon } from "lucide-react";
 export default function PlayLandingPage() {
   const { allScenarios } = useContext(ScenarioContext);
 
-  const { getUserIdToken, VpsUser } = useContext(AuthenticationContext); // Added signOut
   const history = useHistory();
 
   const [search, setSearch] = useState("");
 
-  const scenarios = [allScenarios.owned, allScenarios.assigned, allScenarios.accessible].flat();
+  const scenarios = [
+    allScenarios.owned,
+    allScenarios.assigned,
+    allScenarios.accessible,
+  ].flat();
 
   const filteredScenarios = scenarios.filter((scenario) =>
     scenario.name.toLowerCase().includes(search.toLowerCase())

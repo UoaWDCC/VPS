@@ -2,7 +2,7 @@ import { useState } from "react";
 
 function DetailEditModal({ scenario, onSave }) {
   const [description, setDescription] = useState(scenario.description);
-  const [title, setTitle] = useState(scenario.name);
+  const [name, setName] = useState(scenario.name);
   const [estimatedTime, setEstimatedTime] = useState(scenario.estimatedTime);
 
   function handleEstimatedTimeChange(e) {
@@ -12,24 +12,24 @@ function DetailEditModal({ scenario, onSave }) {
 
   return (
     <>
-      {/* Title Field */}
+      {/* Name Field */}
       <div className="form-control mb-6">
         <label className="label">
           <span className="label-text text-base-content/80 font-ibm text-sm">
-            Scenario Title
+            Scenario Name
           </span>
         </label>
         <input
           type="text"
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-          placeholder="Enter scenario title..."
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          placeholder="Enter scenario name..."
           className="input input-bordered border-primary/30 bg-base-100 text-base-content font-dm text-base w-full focus:border-primary focus:outline-none placeholder:text-base-content/40"
           maxLength={100}
         />
         <label className="label">
           <span className="label-text-alt text-base-content/50 font-ibm">
-            {title.length}/100 characters
+            {name.length}/100 characters
           </span>
         </label>
       </div>
@@ -83,7 +83,7 @@ function DetailEditModal({ scenario, onSave }) {
           Cancel
         </button>
         <button
-          onClick={() => onSave(title, description, estimatedTime)}
+          onClick={() => onSave({ name, description, estimatedTime })}
           className={`btn btn-ghost text-base-content border border-base-content/20 hover:bg-base-content/10 hover:border-base-content/40 font-dm`}
         >
           Save Changes

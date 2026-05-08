@@ -53,13 +53,11 @@ router.get("/all", async (req, res) => {
     retrieveAccessibleScenarios(req.body.uid) ?? [],
   ]);
 
-  res
-    .status(HTTP_OK)
-    .json({
-      owned: scenarios[0],
-      assigned: scenarios[1],
-      accessible: scenarios[2],
-    });
+  res.status(HTTP_OK).json({
+    owned: scenarios[0],
+    assigned: scenarios[1],
+    accessible: scenarios[2],
+  });
 });
 
 // Create a scenario for a user
