@@ -1,14 +1,15 @@
 import { useContext, useEffect, useState } from "react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import toast from "react-hot-toast";
 
 import { useGet } from "../hooks/crudHooks";
 import useLocalStorage from "../hooks/useLocalStorage";
+import { ensureStateVariableUUIDs } from "../components/StateVariables/migrationUtils";
+import { api } from "../util/api";
+
 import AuthenticationContext from "./AuthenticationContext";
 import ScenarioContext from "./ScenarioContext";
-import { api } from "../util/api";
-import { ensureStateVariableUUIDs } from "../components/StateVariables/migrationUtils";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import LoadingPage from "../features/status/LoadingPage";
-import toast from "react-hot-toast";
 
 async function getAllScenarios(user) {
   const res = await api.get(user, `api/scenario/all`);
@@ -41,7 +42,7 @@ export default function ScenarioContextProvider({ children }) {
 
   const queryClient = useQueryClient();
 
-  // INFO: purely for back compat, delete alongside old home page
+  // INFO: purely for compat with old components, delete alongside old home page
   const [currentScenario, setCurrentScenario] = useLocalStorage(
     "currentScenario",
     null
@@ -97,6 +98,7 @@ export default function ScenarioContextProvider({ children }) {
     },
   });
 
+  // TODO: this should be divorced from the "uploaded" groups and exist as prop of the scenario instead
   useGet(
     `api/group/${currentScenario?._id}/roleList`,
     setRoleList,
@@ -104,6 +106,7 @@ export default function ScenarioContextProvider({ children }) {
     !currentScenario // Skip request if there is no current scenario.
   );
 
+  // TODO: this should also exist as prop of the scenario instead
   useEffect(() => {
     if (currentScenario?._id && user) {
       api
@@ -125,27 +128,28 @@ export default function ScenarioContextProvider({ children }) {
     return <LoadingPage text="Getting scenarios..." />;
   }
 
-  // TODO: expose purely as data object
   return (
     <ScenarioContext.Provider
       value={{
-        scenarios: scenarioQuery.data?.owned,
         allScenarios: scenarioQuery.data,
-        reFetch: scenarioQuery.refetch,
-        accessScenarios: scenarioQuery.data?.accessible,
-        dashAccessReFetch: scenarioQuery.refetch,
-        assignedScenarios: scenarioQuery.data?.assigned,
-        reFetch2: scenarioQuery.refetch,
 
         deleteScenario: deleteMutation.mutate,
         updateScenarioDetails: updateDetailsMutation.mutate,
         createScenario: createMutation.mutateAsync,
 
-        currentScenario,
-        setCurrentScenario,
         roleList,
         stateVariables,
         setStateVariables,
+
+        // INFO: compat with old stuff only, delete alongside
+        scenarios: scenarioQuery.data?.owned,
+        accessScenarios: scenarioQuery.data?.accessible,
+        dashAccessReFetch: scenarioQuery.refetch,
+        assignedScenarios: scenarioQuery.data?.assigned,
+        reFetch: scenarioQuery.refetch,
+        reFetch2: scenarioQuery.refetch,
+        currentScenario,
+        setCurrentScenario,
       }}
     >
       {children}
