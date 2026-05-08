@@ -21,8 +21,8 @@ export function handleGlobal(e: KeyboardEvent) {
   const target = e.target as HTMLElement;
   if (target.tagName === "INPUT" || target.tagName === "TEXTAREA") return;
 
-  if (e.ctrlKey || e.metaKey) handleCtrlOperations(e);
-  else if (mode.includes("text")) handleTextMode(e);
+  if (mode.includes("text")) handleTextMode(e);
+  else if (e.ctrlKey || e.metaKey) handleCtrlOperations(e);
   else if (selected) handleComponentOperations(e, selected);
 }
 
