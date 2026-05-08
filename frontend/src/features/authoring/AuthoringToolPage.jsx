@@ -15,11 +15,13 @@ import useEditorStore from "./stores/editor";
 import { useHistory } from "react-router-dom";
 import { replace } from "./scene/operations/modifiers";
 import { ArrowLeftIcon, FilesIcon, PlayIcon, UsersIcon } from "lucide-react";
+import { handleGlobal } from "./handlers/keyboard/keyboard";
 
 const listeners = [
   ["copy", copy],
   ["cut", cut],
   ["paste", paste],
+  ["keydown", handleGlobal],
 ];
 
 const AUTOSAVE_INTERVAL = 30000; // 30 secs
