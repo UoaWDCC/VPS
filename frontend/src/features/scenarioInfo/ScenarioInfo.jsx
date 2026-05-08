@@ -1,4 +1,4 @@
-import { useState, useEffect, useContext } from "react";
+import { useState, useContext } from "react";
 import { useHistory, useLocation } from "react-router-dom";
 import DiamondPlayButton from "./components/DiamondPlayButton";
 import Thumbnail from "../authoring/components/Thumbnail";
@@ -7,48 +7,36 @@ import AuthenticationContext from "../../context/AuthenticationContext";
 import { usePatch } from "../../hooks/crudHooks";
 import FabMenu from "../../components/FabMenu";
 import { ArrowLeftIcon, SearchIcon } from "lucide-react";
+import ModalDialog from "../../components/ModalDialogue";
+import DetailEditModal from "./components/DetailEditModal";
+import toast from "react-hot-toast";
 
 function ScenarioInfo() {
-  const [selectedScenario, setSelectedScenario] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
-  const [editableTitle, setEditableTitle] = useState("");
-  const [editableDescription, setEditableDescription] = useState("");
-  const [editableEstimatedTime, setEditableEstimatedTime] = useState("");
-  const [showEditModal, setShowEditModal] = useState(false);
-  const [isSaving, setIsSaving] = useState(false);
+
+  const { VpsUser, getUserIdToken } = useContext(AuthenticationContext);
+  const {
+    scenarios: ownedScenarios,
+    assignedScenarios,
+    reFetch,
+  } = useContext(ScenarioContext);
+
   const history = useHistory();
   const location = useLocation();
-  const scenarioContext = useContext(ScenarioContext);
-  const { VpsUser, getUserIdToken } = useContext(AuthenticationContext);
 
-  const scenarios = scenarioContext?.scenarios || [];
+  const [showEditModal, setShowEditModal] = useState(false);
+
+  const scenarios = [...(ownedScenarios ?? []), ...(assignedScenarios ?? [])];
   const username = VpsUser.firebaseUserObj.displayName || "User";
 
-  // Get scenario ID from URL and set that as the selected scenario
-  useEffect(() => {
-    const searchParams = new URLSearchParams(location.search);
-    const scenarioId = searchParams.get("id");
-
-    if (scenarioId && scenarios.length > 0) {
-      const scenario = scenarios.find((s) => s._id === scenarioId);
-      if (scenario) {
-        setSelectedScenario(scenario);
-        setEditableTitle(scenario.name || "");
-        setEditableDescription(scenario.description || "");
-        setEditableEstimatedTime(scenario.estimatedTime || "");
-      }
-    }
-  }, [location.search, scenarios]);
+  const selectedScenarioId = new URLSearchParams(location.search).get("id");
+  const selectedScenario = scenarios.find((s) => s._id === selectedScenarioId);
 
   const filteredScenarios = scenarios.filter((scenario) =>
     scenario.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const handleScenarioSelect = (scenario) => {
-    setSelectedScenario(scenario);
-    setEditableTitle(scenario.name || "");
-    setEditableDescription(scenario.description || "");
-    setEditableEstimatedTime(scenario.estimatedTime || "");
     history.replace(`/scenario-info?id=${scenario._id}`);
   };
 
@@ -64,59 +52,20 @@ function ScenarioInfo() {
     setShowEditModal(true);
   };
 
-  const closeEditModal = () => {
-    setShowEditModal(false);
-
-    if (selectedScenario) {
-      setEditableTitle(selectedScenario.name || "");
-      setEditableDescription(selectedScenario.description || "");
-      setEditableEstimatedTime(selectedScenario.estimatedTime || "");
-    }
-  };
-
-  const handleEstimatedTimeChange = (e) => {
-    const value = e.target.value.replace(/\D/g, "");
-    setEditableEstimatedTime(value);
-  };
-
-  const saveScenarioDetails = async () => {
-    if (!selectedScenario) return;
-
-    setIsSaving(true);
-
+  // TODO: should use optimistic updating here
+  async function saveScenarioDetails(name, description, estimatedTime) {
     try {
-      // Save all changes in a single PATCH request
       await usePatch(
         `/api/scenario/${selectedScenario._id}`,
-        {
-          name: editableTitle,
-          description: editableDescription,
-          estimatedTime: editableEstimatedTime,
-        },
+        { name, description, estimatedTime },
         getUserIdToken
       );
-
-      // Update local state
-      const updatedScenario = {
-        ...selectedScenario,
-        name: editableTitle,
-        description: editableDescription,
-        estimatedTime: editableEstimatedTime,
-      };
-      setSelectedScenario(updatedScenario);
-
-      // Refetch scenarios to sync with context
-      scenarioContext?.reFetch?.();
-
-      // Close modal
-      setShowEditModal(false);
+      reFetch();
     } catch (error) {
       console.error("Error saving scenario details:", error);
-      alert("Failed to save changes. Please try again.");
-    } finally {
-      setIsSaving(false);
+      toast.error("Failed to save changes. Please try again.");
     }
-  };
+  }
 
   return (
     <div className="bg-base-100 text-base-content">
@@ -156,11 +105,10 @@ function ScenarioInfo() {
               {filteredScenarios.map((scenario) => (
                 <div
                   key={scenario._id}
-                  className={`mb-2xs cursor-pointer transition-colors text-s font-dm truncate ${
-                    scenario._id === selectedScenario?._id
+                  className={`mb-2xs cursor-pointer transition-colors text-s font-dm truncate ${scenario._id === selectedScenario?._id
                       ? "text-base-content"
                       : "text-primary hover:text-base-content"
-                  }`}
+                    }`}
                   onClick={() => handleScenarioSelect(scenario)}
                 >
                   {scenario.name}
@@ -213,8 +161,8 @@ function ScenarioInfo() {
                       Estimated Time
                     </span>
                     <span className="text-s text-base-content font-dm">
-                      {editableEstimatedTime
-                        ? `${editableEstimatedTime} min`
+                      {selectedScenario.estimatedTime
+                        ? `${selectedScenario.estimatedTime} min`
                         : "Not set"}
                     </span>
                   </div>
@@ -222,10 +170,10 @@ function ScenarioInfo() {
               </div>
 
               {/* Scenario Thumbnail */}
-              <div className="w-full max-w-[750px] flex-shrink-0">
+              <div className="w-full max-w-[45vw] mb-[3vh] flex-shrink-0">
                 <div className="w-full aspect-video bg-white border border-gray-600 rounded-lg overflow-hidden flex items-center justify-center">
                   <Thumbnail
-                    components={selectedScenario.thumbnail?.components || []}
+                    components={selectedScenario.thumbnail.components}
                   />
                 </div>
               </div>
@@ -237,8 +185,8 @@ function ScenarioInfo() {
                     Description
                   </h3>
                   <p className="text-s text-base-content text-left min-h-[4em] font-dm break-words text-wrap">
-                    {editableDescription ||
-                      "No description available. Click 'Edit Details' to add one."}
+                    {selectedScenario.description ||
+                      "This scenario doesn't have a description."}
                   </p>
                 </div>
                 {/* Play Button */}
@@ -255,8 +203,8 @@ function ScenarioInfo() {
                 Select a scenario to get started
               </h2>
               <p className="text-m text-base-content/60 font-ibm">
-                Choose from the medical scenarios on the left to view details
-                and begin training.
+                Choose from the scenarios on the left to view details and begin
+                training.
               </p>
             </div>
           )}
@@ -264,105 +212,17 @@ function ScenarioInfo() {
       </div>
 
       {/* Edit Details Modal */}
-      {showEditModal && (
-        <dialog open className="modal modal-open fixed inset-0 z-[9999]">
-          <div className="modal-box bg-base-100 border border-primary/20 w-[600px] max-w-[90vw] p-8">
-            <h3 className="font-bold text-2xl mb-6 text-base-content font-dm">
-              Edit Scenario Details
-            </h3>
+      <ModalDialog
+        title="Edit Scenario Details"
+        open={showEditModal}
+        onClose={() => setShowEditModal(false)}
+      >
+        <DetailEditModal
+          scenario={selectedScenario}
+          onSave={saveScenarioDetails}
+        />
+      </ModalDialog>
 
-            {/* Title Field */}
-            <div className="form-control mb-6">
-              <label className="label">
-                <span className="label-text text-base-content/80 font-ibm text-sm">
-                  Scenario Title
-                </span>
-              </label>
-              <input
-                type="text"
-                value={editableTitle}
-                onChange={(e) => setEditableTitle(e.target.value)}
-                placeholder="Enter scenario title..."
-                className="input input-bordered border-primary/30 bg-base-100 text-base-content font-dm text-base w-full focus:border-primary focus:outline-none placeholder:text-base-content/40"
-                maxLength={100}
-              />
-              <label className="label">
-                <span className="label-text-alt text-base-content/50 font-ibm">
-                  {editableTitle.length}/100 characters
-                </span>
-              </label>
-            </div>
-
-            {/* Description Field */}
-            <div className="form-control mb-6">
-              <label className="label">
-                <span className="label-text text-base-content/80 font-ibm text-sm">
-                  Description
-                </span>
-              </label>
-              <textarea
-                value={editableDescription}
-                onChange={(e) => setEditableDescription(e.target.value)}
-                placeholder="Enter scenario description..."
-                className="textarea textarea-bordered border-primary/30 bg-base-100 text-base-content h-32 font-ibm text-base w-full focus:border-primary focus:outline-none placeholder:text-base-content/40"
-                maxLength={200}
-              />
-              <label className="label">
-                <span className="label-text-alt text-base-content/50 font-ibm">
-                  {editableDescription.length}/200 characters
-                </span>
-              </label>
-            </div>
-
-            {/* Estimated Time Field */}
-            <div className="form-control mb-6">
-              <label className="label">
-                <span className="label-text text-base-content/80 font-ibm text-sm">
-                  Estimated Time (minutes)
-                </span>
-              </label>
-              <input
-                type="text"
-                value={editableEstimatedTime}
-                onChange={handleEstimatedTimeChange}
-                placeholder="e.g., 30"
-                className="input input-bordered border-primary/30 bg-base-100 text-base-content font-dm text-base w-full focus:border-primary focus:outline-none placeholder:text-base-content/40"
-                maxLength={4}
-              />
-              <label className="label">
-                <span className="label-text-alt text-base-content/50 font-ibm">
-                  Numbers only (e.g., 30 for 30 minutes)
-                </span>
-              </label>
-            </div>
-
-            {/* Modal Actions */}
-            <div className="modal-action">
-              <button
-                onClick={closeEditModal}
-                className="btn btn-ghost text-primary hover:text-base-content hover:bg-primary/10 font-dm"
-                disabled={isSaving}
-              >
-                Cancel
-              </button>
-              <button
-                onClick={saveScenarioDetails}
-                className={`btn btn-ghost text-base-content border border-base-content/20 hover:bg-base-content/10 hover:border-base-content/40 font-dm ${isSaving ? "loading" : ""}`}
-                disabled={isSaving}
-              >
-                {isSaving ? "Saving..." : "Save Changes"}
-              </button>
-            </div>
-          </div>
-          <form
-            method="dialog"
-            className="modal-backdrop bg-black/60"
-            onClick={closeEditModal}
-          >
-            <button className="cursor-default">close</button>
-          </form>
-        </dialog>
-      )}
       <FabMenu />
     </div>
   );
