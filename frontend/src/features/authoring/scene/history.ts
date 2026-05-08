@@ -1,10 +1,14 @@
 import { fastIsEqual } from "fast-is-equal";
-import type { Component, Scene } from "../types";
-import { getComponent, getScene, getSceneId, setScene } from "./scene";
-import { arrayToObject } from "./util";
+import type { Component } from "../types";
+import {
+  applySceneSwitch,
+  getComponent,
+  getScene,
+  getSceneId,
+  saveCurrentScene,
+} from "./scene";
 import useVisualScene from "../stores/visual";
-import { buildVisualComponent, buildVisualScene } from "../pipeline";
-import useEditorStore from "../stores/editor";
+import { buildVisualComponent } from "../pipeline";
 
 interface SceneRef {
   _id: string;
@@ -21,12 +25,12 @@ let undoStack: HistoryObject[] = [];
 let redoStack: HistoryObject[] = [];
 let scenes: SceneRef[] = [];
 let scenarioId: string | null = null;
-let saveScene: ((scene: Record<string, any>) => void) | null = null;
+let saveScene: ((patch: Record<string, any>) => Promise<void>) | null = null;
 
 export function init(
   _scenes: SceneRef[],
   _scenarioId: string,
-  _saveScene: (scene: Record<string, any>) => void
+  _saveScene: (patch: Record<string, any>) => Promise<void>
 ) {
   if (_scenarioId !== scenarioId) {
     undoStack = [];
@@ -67,14 +71,8 @@ function switchToScene(targetSceneId: string) {
   if (targetSceneId === getSceneId()) return;
   const targetScene = scenes.find((s) => s._id === targetSceneId);
   if (!targetScene) return;
-  if (saveScene) saveScene(structuredClone(getScene()));
-  const clone: Record<string, any> = structuredClone(targetScene);
-  clone.components = arrayToObject(clone.components);
-  setScene(clone as Scene);
-  useVisualScene.getState().setVisualScene(buildVisualScene(clone as Scene));
-  if (scenarioId)
-    localStorage.setItem(`${scenarioId}:activeScene`, targetSceneId);
-  useEditorStore.getState().clear();
+  if (saveScene) void saveCurrentScene(saveScene);
+  applySceneSwitch(targetScene, scenarioId!);
 }
 
 function restoreComponent(id: string, state: Component | null) {

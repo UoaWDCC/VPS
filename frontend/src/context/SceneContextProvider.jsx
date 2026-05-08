@@ -94,10 +94,6 @@ export default function SceneContextProvider({ children }) {
     },
   });
 
-  function saveScenePatchWrapper(patch) {
-    return saveScenePatchMutation.mutateAsync(patch);
-  }
-
   const saveScenePatchMutation = useMutation({
     mutationFn: (patch) => saveScenePatch(user, scenarioId, patch),
     onError: () => {
@@ -107,24 +103,16 @@ export default function SceneContextProvider({ children }) {
     },
   });
 
-  const saveSceneWrapper = useCallback(
-    (scene) => {
-      const { _id, components, ...fields } = scene;
-      saveScenePatchMutation.mutate({
-        _id,
-        fields,
-        components: Object.values(components),
-        deletedComponentIds: [],
-      });
-    },
-    [saveScenePatchMutation.mutate]
+  const saveScenePatchWrapper = useCallback(
+    (patch) => saveScenePatchMutation.mutateAsync(patch),
+    [saveScenePatchMutation.mutateAsync]
   );
 
   useEffect(() => {
     if (scenesQuery.data && scenarioId) {
-      init(scenesQuery.data, scenarioId, saveSceneWrapper);
+      init(scenesQuery.data, scenarioId, saveScenePatchWrapper);
     }
-  }, [scenesQuery.data, scenarioId, saveSceneWrapper]);
+  }, [scenesQuery.data, scenarioId, saveScenePatchWrapper]);
 
   if (scenesQuery.isLoading) {
     return <LoadingPage text="Getting scenes..." />;
