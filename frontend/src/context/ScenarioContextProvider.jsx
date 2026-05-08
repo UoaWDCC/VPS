@@ -6,6 +6,13 @@ import AuthenticationContext from "./AuthenticationContext";
 import ScenarioContext from "./ScenarioContext";
 import { api } from "../util/api";
 import { ensureStateVariableUUIDs } from "../components/StateVariables/migrationUtils";
+import { useQuery } from "@tanstack/react-query";
+import LoadingPage from "../features/status/LoadingPage";
+
+async function getAllScenarios(user) {
+  const res = await api.get(user, `api/scenario/all`);
+  return res.data;
+}
 
 /**
  * This is a Context Provider made with the React Context API
@@ -13,29 +20,19 @@ import { ensureStateVariableUUIDs } from "../components/StateVariables/migration
  */
 export default function ScenarioContextProvider({ children }) {
   const { user } = useContext(AuthenticationContext);
+
   const [currentScenario, setCurrentScenario] = useLocalStorage(
     "currentScenario",
     null
   );
-  const [scenarios, setScenarios] = useState();
-  const [accessScenarios, setAccessScenarios] = useState();
-  const [assignedScenarios, setAssignedScenarios] = useState();
+
   const [roleList, setRoleList] = useState();
   const [stateVariables, setStateVariables] = useState();
 
-  const { reFetch } = useGet(`api/scenario`, setScenarios, true, !user);
-  const { reFetch: dashAccessReFetch } = useGet(
-    `api/access/`,
-    setAccessScenarios,
-    true,
-    !user
-  );
-  const { reFetch: reFetch2 } = useGet(
-    `api/scenario/assigned`,
-    setAssignedScenarios,
-    true,
-    !user
-  );
+  const scenarioQuery = useQuery({
+    queryKey: ["scenarios"],
+    queryFn: () => getAllScenarios(user),
+  });
 
   const { reFetch: reFetch3 } = useGet(
     `api/group/${currentScenario?._id}/roleList`,
@@ -43,40 +40,6 @@ export default function ScenarioContextProvider({ children }) {
     true,
     !currentScenario // Skip request if there is no current scenario.
   );
-
-  // We may load before the auth is ready, refetch if we did.
-  useEffect(() => {
-    if (user) {
-      // Clear existing scenarios state before refetching to ensure fresh data
-      setScenarios(null);
-      setAssignedScenarios(null);
-      setRoleList(null);
-
-      // Add a small delay to ensure token is properly refreshed
-      const timeoutId = setTimeout(() => {
-        reFetch();
-        dashAccessReFetch();
-        reFetch2();
-        reFetch3();
-      }, 100);
-
-      return () => clearTimeout(timeoutId);
-    }
-  }, [user]);
-
-  // Additional effect to handle scenarios not loading after authentication
-  useEffect(() => {
-    if (user && (!scenarios || !assignedScenarios)) {
-      // If user is available but scenarios haven't loaded, retry after a delay
-      const retryTimeoutId = setTimeout(() => {
-        if (!scenarios) reFetch();
-        if (!assignedScenarios) reFetch2();
-        if (!accessScenarios) dashAccessReFetch();
-      }, 1000);
-
-      return () => clearTimeout(retryTimeoutId);
-    }
-  }, [user, scenarios, assignedScenarios]);
 
   useEffect(() => {
     if (currentScenario?._id && user) {
@@ -95,18 +58,20 @@ export default function ScenarioContextProvider({ children }) {
     }
   }, [currentScenario, user]);
 
+  if (scenarioQuery.isLoading) {
+    return <LoadingPage text="Getting scenarios..." />;
+  };
+
+  // TODO: expose purely as data object
   return (
     <ScenarioContext.Provider
       value={{
-        scenarios,
-        setScenarios,
-        reFetch,
-        accessScenarios,
-        setAccessScenarios,
-        dashAccessReFetch,
-        assignedScenarios,
-        setAssignedScenarios,
-        reFetch2,
+        scenarios: scenarioQuery.data.owned,
+        reFetch: scenarioQuery.refetch,
+        accessScenarios: scenarioQuery.data.accessible,
+        dashAccessReFetch: scenarioQuery.refetch,
+        assignedScenarios: scenarioQuery.data.assigned,
+        reFetch2: scenarioQuery.refetch,
         currentScenario,
         setCurrentScenario,
         roleList,
