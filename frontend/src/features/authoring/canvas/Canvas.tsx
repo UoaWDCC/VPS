@@ -66,20 +66,6 @@ function Canvas() {
     handleContextGlobal(e, toSVGSpace(e.clientX, e.clientY));
   }
 
-  useEffect(() => {
-    const handleCanvasKeyDown = (e: KeyboardEvent) => {
-      e.preventDefault();
-      handleGlobal(e);
-    };
-
-    window.addEventListener("keydown", handleCanvasKeyDown);
-
-    // Cleanup function
-    return () => {
-      window.removeEventListener("keydown", handleCanvasKeyDown);
-    };
-  }, []);
-
   const components = Object.values(scene)
     .sort((a, b) => a.zIndex - b.zIndex)
     .map(resolve);
