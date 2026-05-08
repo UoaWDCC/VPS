@@ -5,9 +5,7 @@ import Thumbnail from "../components/Thumbnail";
 import AuthenticationContext from "../../../context/AuthenticationContext";
 import SceneContext from "../../../context/SceneContext";
 import { useParams, useHistory } from "react-router-dom";
-import { commitSavedScene, getScenePatch } from "../scene/scene";
-import useEditorStore from "../stores/editor";
-import { replace } from "../scene/operations/modifiers";
+import { applySceneSwitch, saveCurrentScene } from "../scene/scene";
 import { handle } from "../../../components/ContextMenu/portal";
 import { CopyPlusIcon, Trash2Icon } from "lucide-react";
 
@@ -64,24 +62,11 @@ function ContextableThumb({
   async function switchScene(scene: Record<string, any>) {
     if (active) return;
 
-    const patch = getScenePatch();
+    await saveCurrentScene(saveScenePatch);
+    await reFetch();
 
-    if (
-      Object.keys(patch.fields).length > 0 ||
-      patch.components.length > 0 ||
-      patch.deletedComponentIds.length > 0
-    ) {
-      await saveScenePatch(patch);
-      commitSavedScene();
-      await reFetch();
-    }
-    useEditorStore.getState().clear();
-    replace(scene);
-
-    localStorage.setItem(`${scenarioId}:activeScene`, scene._id);
-
-    const pathname = `/scenario/${scenarioId}/scene/${scene._id}`;
-    history.push({ pathname });
+    applySceneSwitch(scene, scenarioId);
+    history.push({ pathname: `/scenario/${scenarioId}/scene/${scene._id}` });
   }
 
   return (

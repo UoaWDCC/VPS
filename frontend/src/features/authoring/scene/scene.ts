@@ -1,4 +1,8 @@
-import { getObject } from "./util";
+import { arrayToObject, getObject } from "./util";
+import type { Scene } from "../types";
+import useVisualScene from "../stores/visual";
+import { buildVisualScene } from "../pipeline";
+import useEditorStore from "../stores/editor";
 
 let scene = {} as any;
 let savedScene = {} as any;
@@ -32,6 +36,33 @@ export function getComponentProp(id: string, prop: string) {
 //Adds a saved baseline alongside the current scene, and use it to calculate a patch of changes when committing the scene
 export function commitSavedScene() {
   savedScene = structuredClone(scene);
+}
+
+export async function saveCurrentScene(
+  saveFn: (patch: ReturnType<typeof getScenePatch>) => Promise<void>
+): Promise<void> {
+  const patch = getScenePatch();
+  if (
+    Object.keys(patch.fields).length === 0 &&
+    patch.components.length === 0 &&
+    patch.deletedComponentIds.length === 0
+  )
+    return;
+  await saveFn(patch);
+  commitSavedScene();
+}
+
+export function applySceneSwitch(
+  targetScene: Record<string, any>,
+  scenarioId: string
+) {
+  const clone = structuredClone(targetScene);
+  clone.components = arrayToObject(clone.components);
+  setScene(clone);
+  commitSavedScene();
+  useEditorStore.getState().clear();
+  useVisualScene.getState().setVisualScene(buildVisualScene(clone as Scene));
+  localStorage.setItem(`${scenarioId}:activeScene`, targetScene._id);
 }
 
 export function getScenePatch() {

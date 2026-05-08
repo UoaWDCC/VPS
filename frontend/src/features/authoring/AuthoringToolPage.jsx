@@ -10,7 +10,6 @@ import Canvas from "./canvas/Canvas";
 import Topbar from "./topbar/Topbar";
 import useVisualScene from "./stores/visual";
 import { getScenePatch, commitSavedScene } from "./scene/scene";
-import { handleGlobal } from "./handlers/keyboard/keyboard";
 import { copy, cut, paste } from "./handlers/keyboard/clipboard";
 import useEditorStore from "./stores/editor";
 import { useHistory } from "react-router-dom";
@@ -21,7 +20,6 @@ const listeners = [
   ["copy", copy],
   ["cut", cut],
   ["paste", paste],
-  ["keydown", handleGlobal],
 ];
 
 const AUTOSAVE_INTERVAL = 30000; // 30 secs
