@@ -12,64 +12,18 @@ import FabMenu from "../../components/FabMenu";
 import { SearchIcon } from "lucide-react";
 
 export default function PlayLandingPage() {
-  const {
-    scenarios: userScenarios,
-    reFetch,
-    assignedScenarios,
-    reFetch2,
-    currentScenario,
-    setCurrentScenario,
-  } = useContext(ScenarioContext);
+  const { allScenarios } = useContext(ScenarioContext);
+
   const { getUserIdToken, VpsUser } = useContext(AuthenticationContext); // Added signOut
   const history = useHistory();
 
   const [search, setSearch] = useState("");
-  const [contextMenuPosition, setContextMenuPosition] = useState(null);
 
-  useEffect(() => {
-    reFetch();
-    reFetch2();
-  }, []);
+  const scenarios = [allScenarios.owned, allScenarios.assigned, allScenarios.accessible].flat();
 
-  const allScenarios = [
-    ...(userScenarios || []),
-    ...(assignedScenarios || []).filter(
-      (as) => !userScenarios.some((us) => us._id === as._id)
-    ),
-  ];
-
-  const filteredScenarios = allScenarios.filter((scenario) =>
+  const filteredScenarios = scenarios.filter((scenario) =>
     scenario.name.toLowerCase().includes(search.toLowerCase())
   );
-
-  const handleContextMenu = (event, scenario) => {
-    event.preventDefault();
-    setCurrentScenario(scenario);
-    setContextMenuPosition({ x: event.clientX, y: event.clientY });
-  };
-
-  const openDashboardModal = () => {
-    history.push("/dashboard");
-  };
-
-  const deleteScenario = async () => {
-    await useDelete(`/api/scenario/${currentScenario._id}`, getUserIdToken);
-    setCurrentScenario(null);
-    reFetch();
-    reFetch2();
-  };
-
-  const playScenario = () => {
-    if (currentScenario) {
-      history.push(`/scenario-info?id=${currentScenario._id}`);
-    }
-  };
-
-  const editScenario = () => {
-    if (currentScenario) {
-      history.push(`/scenario/${currentScenario._id}`);
-    }
-  };
 
   const handleScenarioPlay = (scenario) => {
     history.push(`/scenario-info?id=${scenario._id}`);
@@ -94,27 +48,6 @@ export default function PlayLandingPage() {
         <SearchIcon size={20} />
       </label>
 
-      {/* Context Menu */}
-      <ContextMenu
-        position={contextMenuPosition}
-        setPosition={setContextMenuPosition}
-      >
-        <MenuItem onClick={playScenario} disabled={!currentScenario}>
-          Play
-        </MenuItem>
-        <MenuItem onClick={editScenario} disabled={!currentScenario}>
-          Edit
-        </MenuItem>
-        <MenuItem onClick={deleteScenario} disabled={!currentScenario}>
-          Delete
-        </MenuItem>
-        {VpsUser?.role === AccessLevel.STAFF && (
-          <MenuItem onClick={openDashboardModal} disabled={!currentScenario}>
-            Dashboard
-          </MenuItem>
-        )}
-      </ContextMenu>
-
       {/* Scenarios Grid */}
       <div className="grid grid-cols-[repeat(auto-fill,minmax(250px,1fr))] xl:grid-cols-4 gap-x-l gap-y-xl pb-2xl">
         {filteredScenarios.map((scenario) => (
@@ -122,7 +55,6 @@ export default function PlayLandingPage() {
             key={scenario._id}
             className="cursor-pointer hover:-translate-y-1 duration-100 ease"
             onClick={() => handleScenarioPlay(scenario)}
-            onContextMenu={(e) => handleContextMenu(e, scenario)}
           >
             <div className="aspect-16/9 rounded overflow-hidden mb-s border-primary/10 border-1">
               <Thumbnail components={scenario.thumbnail?.components || []} />

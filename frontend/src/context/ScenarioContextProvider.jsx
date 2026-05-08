@@ -62,16 +62,20 @@ export default function ScenarioContextProvider({ children }) {
     return <LoadingPage text="Getting scenarios..." />;
   };
 
+  console.log(scenarioQuery.data);
+
   // TODO: expose purely as data object
   return (
     <ScenarioContext.Provider
       value={{
-        scenarios: scenarioQuery.data.owned,
+        scenarios: scenarioQuery.data?.owned,
+        allScenarios: scenarioQuery.data,
         reFetch: scenarioQuery.refetch,
-        accessScenarios: scenarioQuery.data.accessible,
+        accessScenarios: scenarioQuery.data?.accessible,
         dashAccessReFetch: scenarioQuery.refetch,
-        assignedScenarios: scenarioQuery.data.assigned,
+        assignedScenarios: scenarioQuery.data?.assigned,
         reFetch2: scenarioQuery.refetch,
+
         currentScenario,
         setCurrentScenario,
         roleList,
