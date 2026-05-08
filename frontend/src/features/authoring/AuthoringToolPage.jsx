@@ -26,8 +26,6 @@ const listeners = [
 
 const AUTOSAVE_INTERVAL = 30000; // 30 secs
 
-// test
-
 /**
  * This page allows the user to edit a scene.
  * @container
