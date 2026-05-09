@@ -27,7 +27,7 @@ const useVisualScene = create<VisualSceneState>((set) => ({
   time: null,
   timerStateOperations: null,
 
-  setVisualScene: (scene) => set({ ...scene }),
+  setVisualScene: (scene) => set({ time: null, timerStateOperations: null, ...scene }),
   setComponents: (components) => set({ components }),
   updateComponent: (component) =>
     set((state) => ({
