@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { TimerIcon } from "lucide-react";
 
 export default function SceneTimer({ duration, onTimeout }) {
   const [secondsLeft, setSecondsLeft] = useState(duration);
@@ -21,7 +22,8 @@ export default function SceneTimer({ duration, onTimeout }) {
   const minutes = Math.floor(secondsLeft / 60);
   const seconds = secondsLeft % 60;
   const display = `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
-  const isLow = secondsLeft > 0 && secondsLeft <= Math.min(10, Math.floor(duration * 0.2));
+  const isLow =
+    secondsLeft > 0 && secondsLeft <= Math.min(10, Math.floor(duration * 0.2));
 
   return (
     <div
@@ -29,14 +31,14 @@ export default function SceneTimer({ duration, onTimeout }) {
         secondsLeft === 0
           ? "bg-error text-error-content"
           : isLow
-          ? "bg-error text-error-content animate-pulse"
-          : "bg-neutral text-neutral-content"
+            ? "bg-error text-error-content animate-pulse"
+            : "bg-neutral text-neutral-content"
       }`}
       role="timer"
       aria-live="off"
       aria-label={`Time remaining: ${display}`}
     >
-      <span>⏱</span>
+      <TimerIcon size={16} className="-mt-px" />
       <span>{display}</span>
     </div>
   );
