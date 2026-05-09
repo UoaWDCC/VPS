@@ -50,6 +50,7 @@ export default function SceneSettings() {
     const { id: sceneId } = useVisualScene.getState();
     const safeName = generateUniqueSceneName(scenes, name, sceneId);
 
+    // handle dupes, update local state, and save to db
     if (safeName !== name) {
       console.log("duplicate found, generating unique name...");
       toast.error(`"${name}" already exists, renamed to "${safeName}".`);
@@ -61,7 +62,7 @@ export default function SceneSettings() {
     try {
       await saveScenePatch(getScenePatch());
       commitSavedScene();
-      await reFetch();
+      await reFetch(); // sync ui with db
     } catch (error) {
       console.error(error);
       toast.error("Could not save the scene name.");

@@ -38,7 +38,7 @@ const SceneNavigator = () => {
   const [activeIdDragging, setActiveIdDragging] = useState(null);
 
   async function addScene() {
-    let nextNum = scenes.length;
+    let nextNum = Math.max(1, scenes.length);
 
     while (scenes.some((scene) => scene.name === `Scene ${nextNum}`)) {
       nextNum++;
