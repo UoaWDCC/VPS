@@ -42,7 +42,7 @@ export default function DashboardLandingPage() {
   };
 
   return (
-    <div className="play-container" data-theme="dark">
+    <div className="play-container">
       <TopNavBar activeTab="dashboard" />
 
       <div className="play-header">

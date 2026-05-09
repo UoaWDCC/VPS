@@ -65,7 +65,7 @@ export default function CreateLandingPage() {
   };
 
   return (
-    <div className="play-container" data-theme="dark">
+    <div className="play-container">
       {/* Top Nav - Using extracted component */}
       <TopNavBar activeTab="create" />
 

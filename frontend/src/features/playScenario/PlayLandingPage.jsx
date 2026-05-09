@@ -7,8 +7,9 @@ import ScenarioContext from "../../context/ScenarioContext";
 import AccessLevel from "../../enums/route.access.level";
 import { useDelete } from "../../hooks/crudHooks";
 import Thumbnail from "../authoring/components/Thumbnail";
-import "./PlayLandingPage.css";
 import TopNavBar from "../../features/TopNavBar/TopNavBar";
+import FabMenu from "../../components/FabMenu";
+import { SearchIcon } from "lucide-react";
 
 export default function PlayLandingPage() {
   const {
@@ -75,45 +76,23 @@ export default function PlayLandingPage() {
   };
 
   return (
-    <div className="play-container" data-theme="dark">
-      <TopNavBar activeTab="play" />
+    <div className="bg-base-100 h-full text-base-content pt-5xl px-xl max-w-[1500px] mx-auto">
+      <TopNavBar />
 
       {/* Header */}
-      <div className="play-header">
-        <h1 className="play-title">Play</h1>
-      </div>
+      <h1 className="font-ibm text-xl mb-l">Play</h1>
 
       {/* Search Section */}
-      <div className="search-section">
-        <div className="search-container-play">
-          <label className="search-input-wrapper-play">
-            <svg
-              className="search-icon-play"
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 24 24"
-            >
-              <g
-                strokeLinejoin="round"
-                strokeLinecap="round"
-                strokeWidth="2.5"
-                fill="none"
-                stroke="currentColor"
-              >
-                <circle cx="11" cy="11" r="8"></circle>
-                <path d="m21 21-4.3-4.3"></path>
-              </g>
-            </svg>
-            <input
-              type="search"
-              placeholder="Search scenario"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="search-input-play"
-              required
-            />
-          </label>
-        </div>
-      </div>
+      <label className="input search w-full max-w-[40vw] mb-m ">
+        <input
+          type="search"
+          placeholder="Search scenario"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          required
+        />
+        <SearchIcon size={20} />
+      </label>
 
       {/* Context Menu */}
       <ContextMenu
@@ -137,23 +116,23 @@ export default function PlayLandingPage() {
       </ContextMenu>
 
       {/* Scenarios Grid */}
-      <div className="scenarios-grid">
+      <div className="grid grid-cols-4 gap-x-l gap-y-xl pb-2xl">
         {filteredScenarios.map((scenario) => (
           <div
             key={scenario._id}
-            className="scenario-card"
+            className="cursor-pointer hover:-translate-y-1 duration-100 ease"
             onClick={() => handleScenarioPlay(scenario)}
             onContextMenu={(e) => handleContextMenu(e, scenario)}
           >
-            <div className="scenario-card-thumbnail">
+            <div className="aspect-ratio-16/9 rounded overflow-hidden mb-s border-primary/10 border-1">
               <Thumbnail components={scenario.thumbnail?.components || []} />
             </div>
-            <div className="scenario-card-name">
-              <p className="scenario-name-text">{scenario.name}</p>
-            </div>
+            <p className="font-ibm text-l text-nowrap truncate">{scenario.name}</p>
           </div>
         ))}
       </div>
+
+      <FabMenu />
     </div>
   );
 }
