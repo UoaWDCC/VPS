@@ -30,16 +30,18 @@ function TimerOperationRow({ operation, index }) {
 
   function saveOperation(v) {
     setLocalOperation(v);
-    modifySceneProp("timerStateOperations", getCurrent().map((op, i) =>
-      i === index ? { ...op, operation: v } : op
-    ));
+    modifySceneProp(
+      "timerStateOperations",
+      getCurrent().map((op, i) => (i === index ? { ...op, operation: v } : op))
+    );
   }
 
   function saveValue(v) {
     setLocalValue(v);
-    modifySceneProp("timerStateOperations", getCurrent().map((op, i) =>
-      i === index ? { ...op, value: v } : op
-    ));
+    modifySceneProp(
+      "timerStateOperations",
+      getCurrent().map((op, i) => (i === index ? { ...op, value: v } : op))
+    );
   }
 
   function deleteOperation() {
@@ -73,7 +75,9 @@ function TimerOperationRow({ operation, index }) {
             />
           ) : (
             <input
-              type={stateVariable.type === stateTypes.STRING ? "text" : "number"}
+              type={
+                stateVariable.type === stateTypes.STRING ? "text" : "number"
+              }
               value={localValue}
               onChange={(e) => setLocalValue(e.target.value)}
               onBlur={() => saveValue(localValue)}

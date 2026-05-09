@@ -196,7 +196,9 @@ export default function PlayScenarioPage({ group }) {
     const timerStateOperations = currScene?.timerStateOperations;
     if (!timerStateOperations?.length) return;
     setStateVersion((v) => v + 1);
-    setStateVariables((prev) => applyStateOperations(prev, timerStateOperations));
+    setStateVariables((prev) =>
+      applyStateOperations(prev, timerStateOperations)
+    );
   };
 
   const buttonPressed = async (component) => {
