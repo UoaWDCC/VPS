@@ -2,21 +2,20 @@ import { useContext, useState, useEffect } from "react";
 import { Check } from "lucide-react";
 import ScenarioContext from "context/ScenarioContext";
 import SceneContext from "context/SceneContext";
-import {
-  isSceneNameDuplicate,
-  generateUniqueSceneName,
-} from "../../../utils/sceneUtils";
+import { generateUniqueSceneName } from "../../../utils/sceneUtils";
+import { getScenePatch, commitSavedScene } from "../scene/scene";
 
 import useVisualScene from "../stores/visual";
 import { modifySceneProp } from "../scene/operations/modifiers";
 import shallow from "zustand/shallow";
+import toast from "react-hot-toast";
 
 /**
  * This component displays the settings of a scene, such as the scene name
  * @component
  */
 export default function SceneSettings() {
-  const { scenes } = useContext(SceneContext);
+  const { scenes, saveScenePatch, reFetch } = useContext(SceneContext);
   const { roleList } = useContext(ScenarioContext);
 
   const name = useVisualScene((scene) => scene.name);
@@ -40,7 +39,7 @@ export default function SceneSettings() {
     modifySceneProp("roles", selectedRoles);
   }
 
-  function saveSceneName() {
+  async function saveSceneName() {
     const name = sceneName.trim();
 
     if (!name?.length) {
@@ -48,16 +47,26 @@ export default function SceneSettings() {
       return;
     }
 
-    let final = name;
     const { id: sceneId } = useVisualScene.getState();
-    if (isSceneNameDuplicate(name, scenes, sceneId)) {
+    const safeName = generateUniqueSceneName(scenes, name, sceneId);
+
+    // handle dupes, update local state, and save to db
+    if (safeName !== name) {
       console.log("duplicate found, generating unique name...");
-      const unique = generateUniqueSceneName(scenes, name);
-      alert(`"${name}" already exists, renamed to "${unique}".`);
-      final = unique;
+      toast.error(`"${name}" already exists, renamed to "${safeName}".`);
     }
 
-    modifySceneProp("name", final);
+    modifySceneProp("name", safeName);
+    setSceneName(safeName);
+
+    try {
+      await saveScenePatch(getScenePatch());
+      commitSavedScene();
+      await reFetch(); // sync ui with db
+    } catch (error) {
+      console.error(error);
+      toast.error("Could not save the scene name.");
+    }
   }
 
   function changeSceneName(e) {
