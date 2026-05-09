@@ -84,7 +84,7 @@ export function getScenePatch() {
 
   const fields: Record<string, any> = {};
 
-  ["name", "roles", "time"].forEach((field) => {
+  ["name", "roles", "time", "timerStateOperations"].forEach((field) => {
     if (JSON.stringify(scene[field]) !== JSON.stringify(savedScene[field])) {
       fields[field] = structuredClone(scene[field]);
     }

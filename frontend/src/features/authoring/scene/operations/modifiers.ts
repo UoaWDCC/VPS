@@ -26,6 +26,14 @@ export function modifySceneProp<K extends keyof VisualSceneState>(
   if (prop === "roles") {
     useVisualScene.setState({ roles: value as string[] | null });
   }
+
+  if (prop === "time") {
+    useVisualScene.setState({ time: value as number | null });
+  }
+
+  if (prop === "timerStateOperations") {
+    useVisualScene.setState({ timerStateOperations: value as any[] | null });
+  }
 }
 
 // wrapper for state mutating functions, will capture both state and operation
