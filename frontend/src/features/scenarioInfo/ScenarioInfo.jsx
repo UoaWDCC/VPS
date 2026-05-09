@@ -6,6 +6,7 @@ import ScenarioContext from "../../context/ScenarioContext";
 import AuthenticationContext from "../../context/AuthenticationContext";
 import { usePatch } from "../../hooks/crudHooks";
 import FabMenu from "../../components/FabMenu";
+import { SearchIcon } from "lucide-react";
 
 function ScenarioInfo() {
   const [selectedScenario, setSelectedScenario] = useState(null);
@@ -121,59 +122,41 @@ function ScenarioInfo() {
     <div className="bg-base-100 text-base-content min-h-screen relative overflow-x-hidden">
       {/* Back Button */}
       <button
-        className="absolute z-50 bg-transparent border-none text-primary cursor-pointer hover:text-base-content transition-colors px-8 py-6 top-0 left-0 font-dm text-s"
+        className="z-50 bg-transparent border-none text-primary cursor-pointer hover:text-base-content transition-colors pl-xl pt-l font-dm text-s fixed"
         onClick={handleBackToPlay}
       >
         ← Back
       </button>
       {/* Responsive Container optimised for 1024x768 min to 1600x900 max */}
-      <div className="min-w-[1024px] max-w-[1600px] mx-auto px-8 lg:px-16 xl:px-24 h-screen flex relative overflow-hidden">
+      <div className="min-w-[1024px] max-w-[1600px] mx-auto overflow-hidden">
         {/* Sidebar */}
-        <div className="w-[27%] bg-base-100 flex flex-col relative h-full overflow-hidden flex-shrink-0">
-          {/* Spacer to push content down */}
-          <div className="h-[35vh] flex-shrink-0"></div>
-
+        <div className="w-[calc(20%+var(--spacing-2xl))] left-[max(0px,calc(50vw-800px))] pl-2xl bg-base-100 flex flex-col fixed h-full overflow-hidden flex-shrink-0 gap-m pt-[calc(var(--spacing-4xl)+var(--spacing-xl)+var(--spacing-l))]">
           {/* Search Container - Positioned above the list */}
-          <div className="bg-transparent px-[5%] py-[2vh] absolute top-[20vh] left-0 right-0 z-10 flex-shrink-0">
-            <label className="bg-transparent gap-[2vw] flex items-center flex-row-reverse">
-              <svg
-                className="h-m w-m opacity-50 flex-shrink-0 stroke-current"
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 24 24"
-              >
-                <g
-                  strokeLinejoin="round"
-                  strokeLinecap="round"
-                  strokeWidth="2.5"
-                  fill="none"
-                  stroke="currentColor"
-                >
-                  <circle cx="11" cy="11" r="8"></circle>
-                  <path d="m21 21-4.3-4.3"></path>
-                </g>
-              </svg>
+          <div className="bg-transparent">
+            <label className="bg-transparent gap-1 flex items-center flex-row-reverse">
+              <SearchIcon size={18} className="text-primary flex-shrink-0" />
               <input
                 type="search"
                 placeholder="Search scenario"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="flex-1 bg-transparent border-none outline-none text-base-content text-s placeholder:text-primary/60 font-ibm"
+                className="flex-1 bg-transparent border-none outline-none text-base-content text-s placeholder:text-primary font-dm min-w-0"
                 required
               />
             </label>
             {/* Simple line under search bar */}
-            <div className="h-px bg-primary/20 mt-3"></div>
+            <div className="h-px bg-primary mt-2xs"></div>
           </div>
 
           {/* Scenario List */}
-          <div className="overflow-y-auto px-[5%] absolute top-[28vh] left-0 right-0 bottom-0">
+          <div className="overflow-y-auto">
             {filteredScenarios.map((scenario) => (
               <div
                 key={scenario._id}
-                className={`p-[2%_3%] my-[1px] rounded-[3px] cursor-pointer transition-colors text-s font-dm ${
+                className={`mb-2xs cursor-pointer transition-colors text-s font-dm ${
                   scenario._id === selectedScenario?._id
-                    ? "text-base-content bg-primary/10"
-                    : "text-primary hover:bg-primary/5 hover:text-base-content"
+                    ? "text-base-content"
+                    : "text-primary hover:text-base-content"
                 }`}
                 onClick={() => handleScenarioSelect(scenario)}
               >
@@ -184,13 +167,13 @@ function ScenarioInfo() {
         </div>
 
         {/* Main Content */}
-        <div className="flex-1 flex items-center justify-center overflow-hidden min-w-0">
+        <div className="left-[calc(max(0px,calc(50vw-800px))+20%+var(--spacing-2xl))] right-[max(0px,calc(50vw-800px))] pr-2xl absolute pl-3xl pt-4xl pb-2xl">
           {selectedScenario ? (
-            <div className="w-full h-full flex flex-col overflow-y-auto overflow-x-hidden">
+            <div className="w-full h-full flex flex-col overflow-y-auto overflow-x-hidden gap-m">
               {/* Scenario Header */}
-              <div className="text-left pb-[3vh] pl-[6vw] pt-[6vh] pr-[4vw] flex-shrink-0 max-w-full">
-                <div className="mb-[3vh]">
-                  <div className="flex items-center gap-3 mb-[1vh]">
+              <div className="text-left flex-shrink-0 max-w-full">
+                <div className="mb-l">
+                  <div className="flex items-center gap-3">
                     <h1 className="text-base-content font-light text-xl font-dm">
                       {selectedScenario.name}
                     </h1>
@@ -206,7 +189,7 @@ function ScenarioInfo() {
                 {/* Scenario Meta */}
                 <div className="flex justify-start gap-[3vw] flex-wrap">
                   <div className="flex flex-col items-start">
-                    <span className="text--1 text-base-content/60 mb-[1vh] font-ibm">
+                    <span className="text-m text-primary mb-[1vh] font-dm">
                       Created By
                     </span>
                     <span className="text-s text-base-content font-dm">
@@ -214,7 +197,7 @@ function ScenarioInfo() {
                     </span>
                   </div>
                   <div className="flex flex-col items-start">
-                    <span className="text--1 text-base-content/60 mb-[1vh] font-ibm">
+                    <span className="text-m text-primary mb-[1vh] font-dm">
                       Mode
                     </span>
                     <span className="text-s text-base-content font-dm">
@@ -222,7 +205,7 @@ function ScenarioInfo() {
                     </span>
                   </div>
                   <div className="flex flex-col items-start">
-                    <span className="text--1 text-base-content/60 mb-[1vh] font-ibm">
+                    <span className="text-m text-primary mb-[1vh] font-dm">
                       Estimated Time
                     </span>
                     <span className="text-s text-base-content font-dm">
@@ -234,36 +217,31 @@ function ScenarioInfo() {
                 </div>
               </div>
 
-              {/* Scenario Content */}
-              <div className="flex-1 flex flex-col items-start p-[0_4vw_4vh_6vw] overflow-y-hidden overflow-x-hidden max-w-full">
-                {/* Scenario Thumbnail */}
-                <div className="w-full max-w-[45vw] mb-[3vh] flex-shrink-0">
-                  <div className="w-full aspect-video bg-white border border-gray-600 rounded-lg overflow-hidden flex items-center justify-center">
-                    <Thumbnail
-                      components={selectedScenario.thumbnail?.components || []}
-                    />
-                  </div>
+              {/* Scenario Thumbnail */}
+              <div className="w-full max-w-[750px] flex-shrink-0">
+                <div className="w-full aspect-video bg-white border border-gray-600 rounded-lg overflow-hidden flex items-center justify-center">
+                  <Thumbnail
+                    components={selectedScenario.thumbnail?.components || []}
+                  />
                 </div>
+              </div>
 
+              <div className="w-full relative flex flex-shrink-0 gap-2xl">
                 {/* Scenario Description */}
-                <div className="w-full max-w-[50vw] pt-[2vh] relative flex-shrink-0 pb-[2vh]">
-                  <h3 className="text-text-m text-base-content text-left font-dm mb-[1vh]">
+                <div className="flex-1 min-w-0">
+                  <h3 className="text-m text-primary mb-3xs font-dm">
                     Description
                   </h3>
-                  <div className="mt-[1vh] flex items-start gap-6 flex-wrap">
-                    <p className="text-[clamp(0.875rem,1vw,1.125rem)] leading-relaxed text-base-content/80 text-left font-ibm min-h-[4em] break-words flex-1 max-w-[35vw] min-w-[200px]">
-                      {editableDescription ||
-                        "No description available. Click 'Edit Details' to add one."}
-                    </p>
-
-                    {/* Play Button */}
-                    <div className="flex-shrink-0 ml-8 -mt-4">
-                      <DiamondPlayButton
-                        size={100}
-                        onClick={() => handlePlayScenario(selectedScenario)}
-                      />
-                    </div>
-                  </div>
+                  <p className="text-s text-base-content text-left min-h-[4em] font-dm break-words text-wrap">
+                    {editableDescription ||
+                      "No description available. Click 'Edit Details' to add one."}
+                  </p>
+                </div>
+                {/* Play Button */}
+                <div className="p-8">
+                  <DiamondPlayButton
+                    onClick={() => handlePlayScenario(selectedScenario)}
+                  />
                 </div>
               </div>
             </div>
