@@ -33,7 +33,9 @@ export default function SceneSettings() {
   }, [name]);
 
   useEffect(() => {
-    setTimerDuration(time ?? "");
+    const stored = time ?? "";
+    if (stored == timerDuration) return;
+    setTimerDuration(stored);
   }, [time]);
 
   useEffect(() => {
@@ -97,7 +99,6 @@ export default function SceneSettings() {
         <div className="collapse-title">Scene Details</div>
         <div className="collapse-content text--1 bg-base-200">
           <fieldset className="fieldset pt-2">
-            {/* input for scene name */}
             <label className="label">Name</label>
             <input
               type="text"
@@ -107,7 +108,6 @@ export default function SceneSettings() {
               className="input"
               placeholder="Awesome Scene"
             />
-            {/* input for timer duration */}
             <label className="label">Timer Duration (seconds)</label>
             <input
               type="number"
@@ -118,7 +118,6 @@ export default function SceneSettings() {
               className="input"
               placeholder="No timer"
             />
-            {/* input for scene roles */}
             <label className="label">Roles</label>
             <div className="dropdown" onBlur={saveSceneRoles}>
               <div
