@@ -7,7 +7,7 @@ import SelectInput from "../../features/authoring/components/Select";
 import ModalDialog from "../ModalDialogue";
 import useVisualScene from "../../features/authoring/stores/visual";
 
-function TimerOperationRow({ operation, index, operations }) {
+function TimerOperationRow({ operation, index }) {
   const { stateVariables } = useContext(ScenarioContext);
 
   const stateVariable = stateVariables?.find(
@@ -24,27 +24,26 @@ function TimerOperationRow({ operation, index, operations }) {
 
   if (!stateVariable) return null;
 
+  function getCurrent() {
+    return useVisualScene.getState().timerStateOperations ?? [];
+  }
+
   function saveOperation(v) {
     setLocalOperation(v);
-    const updated = operations.map((op, i) =>
+    modifySceneProp("timerStateOperations", getCurrent().map((op, i) =>
       i === index ? { ...op, operation: v } : op
-    );
-    modifySceneProp("timerStateOperations", updated);
+    ));
   }
 
   function saveValue(v) {
     setLocalValue(v);
-    const updated = operations.map((op, i) =>
+    modifySceneProp("timerStateOperations", getCurrent().map((op, i) =>
       i === index ? { ...op, value: v } : op
-    );
-    modifySceneProp("timerStateOperations", updated);
+    ));
   }
 
   function deleteOperation() {
-    modifySceneProp(
-      "timerStateOperations",
-      operations.toSpliced(index, 1)
-    );
+    modifySceneProp("timerStateOperations", getCurrent().toSpliced(index, 1));
   }
 
   return (
@@ -141,12 +140,7 @@ export default function TimerStateOperationMenu() {
         </div>
         <div className="collapse-content text--1 bg-base-200 px-0">
           {ops.map((op, i) => (
-            <TimerOperationRow
-              key={i}
-              operation={op}
-              index={i}
-              operations={ops}
-            />
+            <TimerOperationRow key={i} operation={op} index={i} />
           ))}
         </div>
       </div>
