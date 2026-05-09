@@ -247,11 +247,12 @@ body,
 
 .border-gradient {
   border-image: linear-gradient(
-    to right,
-    transparent 0%,
-    color-mix(in srgb, var(--color-secondary) 30%, transparent) 50%,
-    transparent 100%
-  ) 1;
+      to right,
+      transparent 0%,
+      color-mix(in srgb, var(--color-secondary) 30%, transparent) 50%,
+      transparent 100%
+    )
+    1;
 }
 
 .input.search {

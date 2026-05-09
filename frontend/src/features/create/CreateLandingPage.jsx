@@ -84,7 +84,10 @@ export default function CreateLandingPage() {
       </label>
 
       <div className="grid grid-cols-4 gap-x-l gap-y-xl pb-2xl">
-        <div className="flex items-center justify-center bg-transparent border-1 border-primary text-secondary aspect-16/9 rounded cursor-pointer hover:-translate-y-1 duration-100 ease" onClick={handleCreate}>
+        <div
+          className="flex items-center justify-center bg-transparent border-1 border-primary text-secondary aspect-16/9 rounded cursor-pointer hover:-translate-y-1 duration-100 ease"
+          onClick={handleCreate}
+        >
           <PlusIcon size={48} absoluteStrokeWidth={2} />
         </div>
         {filteredScenarios.map((scenario) => (
@@ -97,7 +100,9 @@ export default function CreateLandingPage() {
             <div className="aspect-16/9 rounded overflow-hidden mb-s border-primary/10 border-1">
               <Thumbnail components={scenario.thumbnail?.components || []} />
             </div>
-            <p className="font-ibm text-l text-nowrap truncate">{scenario.name}</p>
+            <p className="font-ibm text-l text-nowrap truncate">
+              {scenario.name}
+            </p>
           </div>
         ))}
       </div>

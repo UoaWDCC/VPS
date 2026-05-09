@@ -127,7 +127,9 @@ export default function PlayLandingPage() {
             <div className="aspect-ratio-16/9 rounded overflow-hidden mb-s border-primary/10 border-1">
               <Thumbnail components={scenario.thumbnail?.components || []} />
             </div>
-            <p className="font-ibm text-l text-nowrap truncate">{scenario.name}</p>
+            <p className="font-ibm text-l text-nowrap truncate">
+              {scenario.name}
+            </p>
           </div>
         ))}
       </div>
