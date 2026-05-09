@@ -9,8 +9,8 @@ import { useDelete, usePost } from "../../hooks/crudHooks";
 import Thumbnail from "../authoring/components/Thumbnail";
 import CreateScenarioCard from "../../components/CreateScenarioCard/CreateScenarioCard";
 import TopNavBar from "../../features/TopNavBar/TopNavBar";
-import "../playScenario/PlayLandingPage.css";
-import "./CreateLandingPage.css";
+import FabMenu from "../../components/FabMenu";
+import { PlusIcon, SearchIcon } from "lucide-react";
 
 export default function CreateLandingPage() {
   const {
@@ -65,68 +65,41 @@ export default function CreateLandingPage() {
   };
 
   return (
-    <div className="play-container">
-      {/* Top Nav - Using extracted component */}
-      <TopNavBar activeTab="create" />
+    <div className="bg-base-100 h-full text-base-content pt-5xl px-xl max-w-[1500px] mx-auto">
+      <TopNavBar />
 
-      {/* Rest of your component remains the same */}
-      {/* Edit Section */}
-      <div className="section-block">
-        <h2 className="section-header">Create & Edit</h2>
+      {/* Header */}
+      <h1 className="font-ibm text-xl mb-l">Create & Edit</h1>
 
-        <div className="search-section">
-          <div className="search-container-play">
-            <label className="search-input-wrapper-play">
-              <svg
-                className="search-icon-play"
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 24 24"
-              >
-                <g
-                  strokeLinejoin="round"
-                  strokeLinecap="round"
-                  strokeWidth="2.5"
-                  fill="none"
-                  stroke="currentColor"
-                >
-                  <circle cx="11" cy="11" r="8"></circle>
-                  <path d="m21 21-4.3-4.3"></path>
-                </g>
-              </svg>
-              <input
-                type="search"
-                placeholder="Search scenario"
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                className="search-input-play"
-                required
-              />
-            </label>
-          </div>
+      {/* Search Section */}
+      <label className="input search w-full max-w-[40vw] mb-m">
+        <input
+          type="search"
+          placeholder="Search scenarios"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          required
+        />
+        <SearchIcon size={20} />
+      </label>
+
+      <div className="grid grid-cols-4 gap-x-l gap-y-xl pb-2xl">
+        <div className="flex items-center justify-center bg-transparent border-1 border-primary text-secondary aspect-16/9 rounded cursor-pointer hover:-translate-y-1 duration-100 ease" onClick={handleCreate}>
+          <PlusIcon size={48} absoluteStrokeWidth={2} />
         </div>
-
-        <div className="scenarios-grid">
-          <div className="scenario-card create-card" onClick={handleCreate}>
-            <div className="scenario-card-thumbnail create-thumbnail">
-              <span className="create-plus">+</span>
+        {filteredScenarios.map((scenario) => (
+          <div
+            key={scenario._id}
+            className="cursor-pointer hover:-translate-y-1 duration-100 ease"
+            onClick={() => history.push(`/scenario/${scenario._id}`)}
+            onContextMenu={(e) => handleContextMenu(e, scenario)}
+          >
+            <div className="aspect-16/9 rounded overflow-hidden mb-s border-primary/10 border-1">
+              <Thumbnail components={scenario.thumbnail?.components || []} />
             </div>
+            <p className="font-ibm text-l text-nowrap truncate">{scenario.name}</p>
           </div>
-          {filteredScenarios.map((scenario) => (
-            <div
-              key={scenario._id}
-              className="scenario-card"
-              onClick={() => history.push(`/scenario/${scenario._id}`)}
-              onContextMenu={(e) => handleContextMenu(e, scenario)}
-            >
-              <div className="scenario-card-thumbnail">
-                <Thumbnail components={scenario.thumbnail?.components || []} />
-              </div>
-              <div className="scenario-card-name">
-                <p className="scenario-name-text">{scenario.name}</p>
-              </div>
-            </div>
-          ))}
-        </div>
+        ))}
       </div>
 
       {/* Context Menu */}
@@ -174,7 +147,7 @@ export default function CreateLandingPage() {
         />
       )}
 
-      {/* Dashboard Modal */}
+      <FabMenu />
     </div>
   );
 }

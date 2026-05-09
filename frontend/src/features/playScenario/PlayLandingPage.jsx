@@ -86,7 +86,7 @@ export default function PlayLandingPage() {
       <label className="input search w-full max-w-[40vw] mb-m ">
         <input
           type="search"
-          placeholder="Search scenario"
+          placeholder="Search scenarios"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           required
