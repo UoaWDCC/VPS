@@ -119,11 +119,11 @@ function ScenarioInfo() {
   };
 
   return (
-    <div className="bg-base-100 text-base-content h-screen overflow-hidden">
+    <div className="bg-base-100 text-base-content">
       {/* Responsive Container optimised for 900x500 min to 1600x900 max */}
-      <div className="min-w-[900px] max-w-[1600px] mx-auto flex h-full">
+      <div className="min-w-[900px] max-w-[1600px] mx-auto flex">
         {/* Sidebar */}
-        <div className="w-1/5 min-w-[320px] flex-shrink-0 h-full overflow-hidden bg-base-100">
+        <div className="w-1/5 min-w-[320px] flex-shrink-0 sticky top-0 h-screen overflow-hidden bg-base-100">
           {/* Back Button */}
           <button
             className="z-50 bg-transparent border-none text-primary cursor-pointer hover:text-base-content transition-colors pl-xl pt-l font-dm text-s fixed"
@@ -169,7 +169,7 @@ function ScenarioInfo() {
         </div>
 
         {/* Main Content */}
-        <div className="flex-1 min-w-0 overflow-y-auto pl-3xl pr-2xl pt-4xl pb-2xl">
+        <div className="flex-1 min-w-0 pl-3xl pr-2xl pt-4xl pb-2xl">
           {selectedScenario ? (
             <div className="w-full flex flex-col overflow-x-hidden gap-m">
               {/* Scenario Header */}
