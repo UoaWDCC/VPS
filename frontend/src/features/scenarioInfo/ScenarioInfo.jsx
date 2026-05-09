@@ -119,61 +119,63 @@ function ScenarioInfo() {
   };
 
   return (
-    <div className="bg-base-100 text-base-content min-h-screen relative overflow-x-hidden">
-      {/* Back Button */}
-      <button
-        className="z-50 bg-transparent border-none text-primary cursor-pointer hover:text-base-content transition-colors pl-xl pt-l font-dm text-s fixed"
-        onClick={handleBackToPlay}
-      >
-        ← Back
-      </button>
-      {/* Responsive Container optimised for 1024x768 min to 1600x900 max */}
-      <div className="min-w-[1024px] max-w-[1600px] mx-auto overflow-hidden">
+    <div className="bg-base-100 text-base-content h-screen overflow-hidden">
+      {/* Responsive Container optimised for 900x500 min to 1600x900 max */}
+      <div className="min-w-[900px] max-w-[1600px] mx-auto flex h-full">
         {/* Sidebar */}
-        <div className="w-[calc(20%+var(--spacing-2xl))] left-[max(0px,calc(50vw-800px))] pl-2xl bg-base-100 flex flex-col fixed h-full overflow-hidden flex-shrink-0 gap-m pt-[calc(var(--spacing-4xl)+var(--spacing-xl)+var(--spacing-l))]">
-          {/* Search Container - Positioned above the list */}
-          <div className="bg-transparent">
-            <label className="bg-transparent gap-1 flex items-center flex-row-reverse">
-              <SearchIcon size={18} className="text-primary flex-shrink-0" />
-              <input
-                type="search"
-                placeholder="Search scenario"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="flex-1 bg-transparent border-none outline-none text-base-content text-s placeholder:text-primary font-dm min-w-0"
-                required
-              />
-            </label>
-            {/* Simple line under search bar */}
-            <div className="h-px bg-primary mt-2xs"></div>
-          </div>
+        <div className="w-1/5 min-w-[320px] flex-shrink-0 h-full overflow-hidden bg-base-100">
+          {/* Back Button */}
+          <button
+            className="z-50 bg-transparent border-none text-primary cursor-pointer hover:text-base-content transition-colors pl-xl pt-l font-dm text-s fixed"
+            onClick={handleBackToPlay}
+          >
+            ← Back
+          </button>
+          <div className="pl-2xl pr-l h-full flex flex-col gap-m pt-4xl">
+            {/* Search Container - Positioned above the list */}
+            <div className="bg-transparent flex-shrink-0">
+              <label className="bg-transparent gap-1 flex items-center flex-row-reverse">
+                <SearchIcon size={18} className="text-primary flex-shrink-0" />
+                <input
+                  type="search"
+                  placeholder="Search scenario"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="flex-1 bg-transparent border-none outline-none text-base-content text-s placeholder:text-primary font-dm min-w-0"
+                  required
+                />
+              </label>
+              {/* Simple line under search bar */}
+              <div className="h-px bg-primary mt-2xs"></div>
+            </div>
 
-          {/* Scenario List */}
-          <div className="overflow-y-auto">
-            {filteredScenarios.map((scenario) => (
-              <div
-                key={scenario._id}
-                className={`mb-2xs cursor-pointer transition-colors text-s font-dm ${
-                  scenario._id === selectedScenario?._id
-                    ? "text-base-content"
-                    : "text-primary hover:text-base-content"
-                }`}
-                onClick={() => handleScenarioSelect(scenario)}
-              >
-                {scenario.name}
-              </div>
-            ))}
+            {/* Scenario List */}
+            <div className="overflow-y-auto flex-1">
+              {filteredScenarios.map((scenario) => (
+                <div
+                  key={scenario._id}
+                  className={`mb-2xs cursor-pointer transition-colors text-s font-dm truncate ${
+                    scenario._id === selectedScenario?._id
+                      ? "text-base-content"
+                      : "text-primary hover:text-base-content"
+                  }`}
+                  onClick={() => handleScenarioSelect(scenario)}
+                >
+                  {scenario.name}
+                </div>
+              ))}
+            </div>
           </div>
         </div>
 
         {/* Main Content */}
-        <div className="left-[calc(max(0px,calc(50vw-800px))+20%+var(--spacing-2xl))] right-[max(0px,calc(50vw-800px))] pr-2xl absolute pl-3xl pt-4xl pb-2xl">
+        <div className="flex-1 min-w-0 overflow-y-auto pl-3xl pr-2xl pt-4xl pb-2xl">
           {selectedScenario ? (
-            <div className="w-full h-full flex flex-col overflow-y-auto overflow-x-hidden gap-m">
+            <div className="w-full flex flex-col overflow-x-hidden gap-m">
               {/* Scenario Header */}
               <div className="text-left flex-shrink-0 max-w-full">
                 <div className="mb-l">
-                  <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-3 flex-wrap">
                     <h1 className="text-base-content font-light text-xl font-dm">
                       {selectedScenario.name}
                     </h1>
@@ -226,7 +228,7 @@ function ScenarioInfo() {
                 </div>
               </div>
 
-              <div className="w-full relative flex flex-shrink-0 gap-2xl">
+              <div className="w-full flex flex-shrink-0 flex-wrap gap-2xl">
                 {/* Scenario Description */}
                 <div className="flex-1 min-w-0">
                   <h3 className="text-m text-primary mb-3xs font-dm">
