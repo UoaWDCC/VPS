@@ -122,7 +122,7 @@ function ScenarioInfo() {
     <div className="bg-base-100 text-base-content">
       {/* Responsive Container optimised for 900x500 min to 1600x900 max */}
       <button
-        className="fixed btn btn-phantom text-m ml-xl mt-l font-dm px-0"
+        className="fixed z-10 btn btn-phantom text-m ml-xl mt-l font-dm px-0"
         onClick={handleBackToPlay}
       >
         <ArrowLeftIcon size={20} />
