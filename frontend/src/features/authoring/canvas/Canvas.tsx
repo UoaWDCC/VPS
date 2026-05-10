@@ -80,6 +80,25 @@ function Canvas() {
         onContextMenu={handleContextMenu}
       >
         <Overlay />
+
+        {/* scene outline */}
+        <svg
+          id="outline"
+          className="w-full h-full absolute pointer-events-none"
+          viewBox={`-50 -50 ${1920 + 50 * 2} ${1080 + 50 * 2}`}
+          style={{ mixBlendMode: "difference" }}
+        >
+          <rect
+            x="0"
+            y="0"
+            width="1920"
+            height="1080"
+            fill="none"
+            stroke="white"
+            strokeWidth="1"
+          />
+        </svg>
+
         <svg
           id="main"
           className="w-full h-full"
