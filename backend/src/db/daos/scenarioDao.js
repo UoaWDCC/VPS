@@ -29,7 +29,7 @@ const addThumbs = async (scenarios) => {
           name: scenario.name,
           description: scenario.description,
           estimatedTime: scenario.estimatedTime,
-          user: scenario.user ?? scenario.uid,
+          user: scenario.user ?? { uid: scenario.uid },
         };
       const thumbnail = await Scene.findById(scenario.scenes[0], {
         components: 1,
@@ -41,7 +41,7 @@ const addThumbs = async (scenarios) => {
         thumbnail,
         description: scenario.description,
         estimatedTime: scenario.estimatedTime,
-        user: scenario.user ?? scenario.uid,
+        user: scenario.user ?? { uid: scenario.uid },
       };
     })
   );

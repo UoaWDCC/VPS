@@ -47,16 +47,16 @@ router.get("/assigned", async (req, res) => {
 
 // TODO: we can perform this more efficiently by using better querying
 router.get("/all", async (req, res) => {
-  const scenarios = await Promise.all([
-    retrieveScenarioList(req.body.uid) ?? [],
-    retrieveAssignedScenarioList(req.body.uid) ?? [],
-    retrieveAccessibleScenarios(req.body.uid) ?? [],
+  const [owned, assigned, accessible] = await Promise.all([
+    retrieveScenarioList(req.body.uid),
+    retrieveAssignedScenarioList(req.body.uid),
+    retrieveAccessibleScenarios(req.body.uid),
   ]);
 
   res.status(HTTP_OK).json({
-    owned: scenarios[0],
-    assigned: scenarios[1],
-    accessible: scenarios[2],
+    owned: owned ?? [],
+    assigned: assigned ?? [],
+    accessible: accessible ?? [],
   });
 });
 
