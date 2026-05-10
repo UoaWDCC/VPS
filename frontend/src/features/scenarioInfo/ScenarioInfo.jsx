@@ -6,7 +6,7 @@ import ScenarioContext from "../../context/ScenarioContext";
 import AuthenticationContext from "../../context/AuthenticationContext";
 import { usePatch } from "../../hooks/crudHooks";
 import FabMenu from "../../components/FabMenu";
-import { SearchIcon } from "lucide-react";
+import { ArrowLeftIcon, SearchIcon } from "lucide-react";
 
 function ScenarioInfo() {
   const [selectedScenario, setSelectedScenario] = useState(null);
@@ -121,18 +121,20 @@ function ScenarioInfo() {
   return (
     <div className="bg-base-100 text-base-content">
       {/* Responsive Container optimised for 900x500 min to 1600x900 max */}
-      <div className="min-w-[900px] max-w-[1600px] mx-auto flex">
+      <button
+        className="fixed btn btn-phantom text-m ml-xl mt-l font-dm px-0"
+        onClick={handleBackToPlay}
+      >
+        <ArrowLeftIcon size={20} />
+        Back
+      </button>
+      <div className="min-w-[900px] max-w-[1500px] mx-auto flex gap-3xl px-xl">
         {/* Sidebar */}
-        <div className="w-1/5 min-w-[320px] flex-shrink-0 sticky top-0 h-screen overflow-hidden bg-base-100">
-          {/* Back Button */}
-          <button
-            className="z-50 bg-transparent border-none text-primary cursor-pointer hover:text-base-content transition-colors pl-xl pt-l font-dm text-s fixed"
-            onClick={handleBackToPlay}
-          >
-            ← Back
-          </button>
-          <div className="pl-2xl pr-l h-full flex flex-col gap-m pt-4xl">
+        {/* the calc used in the padding top is to get the searchbar to align with the scenario metadata, by imitating the same sizing flow */}
+        <div className="w-1/5 min-w-[320px] flex-shrink-0 sticky top-0 h-screen overflow-hidden pt-[calc(var(--spacing-4xl)+var(--spacing-xl)+var(--spacing-l))]">
+          <div className="h-full flex flex-col gap-m">
             {/* Search Container - Positioned above the list */}
+            {/* TODO: for future person, replace this with the .search class if its available */}
             <div className="bg-transparent flex-shrink-0">
               <label className="bg-transparent gap-1 flex items-center flex-row-reverse">
                 <SearchIcon size={18} className="text-primary flex-shrink-0" />
@@ -169,14 +171,14 @@ function ScenarioInfo() {
         </div>
 
         {/* Main Content */}
-        <div className="flex-1 min-w-0 pl-3xl pr-2xl pt-4xl pb-2xl">
+        <div className="flex-1 min-w-0 pt-4xl pb-2xl">
           {selectedScenario ? (
             <div className="w-full flex flex-col overflow-x-hidden gap-m">
               {/* Scenario Header */}
-              <div className="text-left flex-shrink-0 max-w-full">
+              <div>
                 <div className="mb-l">
                   <div className="flex items-center gap-3 flex-wrap">
-                    <h1 className="text-base-content font-light text-xl font-dm">
+                    <h1 className="text-base-content font-light text-xl font-ibm">
                       {selectedScenario.name}
                     </h1>
                     <button
