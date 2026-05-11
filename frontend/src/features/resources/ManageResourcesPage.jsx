@@ -18,12 +18,30 @@ import MDTextViewer from "../playScenario/components/MDTextViewer";
 
 function normaliseFile(f) {
   return {
-    id: f._id,
+    id: f._id || f.id,
+    groupId: f.groupId,
+    groupName: f.groupName,
     name: f.name,
     size: f.size,
     type: f.type,
     createdAt: f.createdAt,
-    stateConditionals: f.stateConditionals,
+    stateConditionals: f.stateConditionals || [],
+  };
+}
+
+function normaliseGroup(g) {
+  return {
+    id: g._id || g.id,
+    name: g.name,
+    order: g.order ?? 0,
+    stateConditionals: g.stateConditionals || [],
+    files: (g.files || []).map((f) =>
+      normaliseFile({
+        ...f,
+        groupId: g._id || g.id,
+        groupName: g.name,
+      })
+    ),
   };
 }
 
@@ -45,6 +63,7 @@ export default function ManageResourcesPage() {
 
   // Groups (each with files)
   const [groups, setGroups] = useState([]);
+  const [selectedGroup, setSelectedGroup] = useState(null);
   const [selectedFile, setSelectedFile] = useState(null);
 
   // Load groups and files
@@ -65,13 +84,7 @@ export default function ManageResourcesPage() {
           }
         );
 
-        const normalized =
-          (data || []).map((g) => ({
-            id: g._id,
-            name: g.name,
-            order: g.order ?? 0,
-            files: (g.files || []).map((f) => normaliseFile(f)),
-          })) || [];
+        const normalized = (data || []).map((g) => normaliseGroup(g)) || [];
         if (!cancelled) setGroups(normalized);
       } catch (err) {
         console.error(err);
@@ -117,10 +130,12 @@ export default function ManageResourcesPage() {
 
       const normalizedUploaded = uploaded.map((f) => ({
         id: f._id,
+        groupId,
         name: f.name,
         size: f.size,
         type: f.type,
         createdAt: f.createdAt,
+        stateConditionals: f.stateConditionals || [],
       }));
 
       setGroups((prev) =>
@@ -185,6 +200,7 @@ export default function ManageResourcesPage() {
 
       if (selectedFile && selectedFile.groupId === groupId)
         setSelectedFile(null);
+      if (selectedGroup?.id === groupId) setSelectedGroup(null);
 
       toast.success("Group deleted");
     } catch (err) {
@@ -194,7 +210,10 @@ export default function ManageResourcesPage() {
   }
 
   function updateFile(updatedFile) {
-    const normalisedFile = normaliseFile(updatedFile);
+    const normalisedFile = normaliseFile({
+      ...updatedFile,
+      groupName: selectedFile?.groupName,
+    });
     setSelectedFile(normalisedFile);
     setGroups((prev) =>
       prev.map((g) =>
@@ -209,6 +228,37 @@ export default function ManageResourcesPage() {
       )
     );
   }
+
+  function updateGroup(updatedGroup) {
+    const normalisedGroup = normaliseGroup(updatedGroup);
+    setSelectedGroup((prev) => ({
+      ...normalisedGroup,
+      files: prev?.files || normalisedGroup.files,
+    }));
+    setGroups((prev) =>
+      prev.map((g) =>
+        g.id === normalisedGroup.id
+          ? {
+              ...g,
+              ...normalisedGroup,
+              files: g.files || [],
+            }
+          : g
+      )
+    );
+  }
+
+  const selectedTarget = selectedFile || selectedGroup;
+  const selectedTargetType = selectedFile
+    ? "File"
+    : selectedGroup
+      ? "Collection"
+      : null;
+  const selectedTargetEndpoint = selectedFile
+    ? `/api/files/state-conditionals/${selectedFile.id}`
+    : selectedGroup
+      ? `/api/collections/groups/${selectedGroup.id}/state-conditionals`
+      : "";
 
   return (
     <ScreenContainer vertical>
@@ -261,6 +311,7 @@ export default function ManageResourcesPage() {
                               id: data._id,
                               name: data.name,
                               order: data.order ?? 0,
+                              stateConditionals: data.stateConditionals || [],
                               files: [],
                             },
                           ]);
@@ -277,7 +328,17 @@ export default function ManageResourcesPage() {
                     {groups.map((group) => (
                       <li key={group.id}>
                         <details>
-                          <summary className="flex items-center">
+                          <summary
+                            className={`flex items-center ${
+                              selectedGroup?.id === group.id && !selectedFile
+                                ? "bg-base-200"
+                                : ""
+                            }`}
+                            onClick={() => {
+                              setSelectedGroup(group);
+                              setSelectedFile(null);
+                            }}
+                          >
                             <span className="text--1 truncate">
                               {group.name}
                             </span>
@@ -340,9 +401,19 @@ export default function ManageResourcesPage() {
               {/* RIGHT: File list and preview */}
               <div className="card col-span-2">
                 <div className="card-body gap-4">
+                  {selectedTarget ? (
+                    <div>
+                      <div className="text-xs text-primary">
+                        {selectedTargetType}
+                      </div>
+                      <h2 className="text-m">{selectedTarget.name}</h2>
+                    </div>
+                  ) : null}
                   <StateConditionalMenu
-                    file={selectedFile}
-                    updateFile={updateFile}
+                    target={selectedTarget}
+                    title={`${selectedTargetType || "Resource"} State Conditionals`}
+                    endpoint={selectedTargetEndpoint}
+                    updateTarget={selectedFile ? updateFile : updateGroup}
                   />
                   <Preview
                     file={selectedFile}

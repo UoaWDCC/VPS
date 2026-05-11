@@ -1,6 +1,6 @@
 interface SelectInputProps {
-  values: string[];
-  value: string | null;
+  values: unknown[];
+  value: unknown | null;
   display?: (v: SelectInputProps["value"]) => string;
   onChange: (v: SelectInputProps["value"]) => void;
   nullable?: boolean;
@@ -13,7 +13,7 @@ function SelectInput({
   nullable = false,
   onChange,
 }: SelectInputProps) {
-  const render = display ? display : (v: string) => v;
+  const render = display ? display : (v: SelectInputProps["value"]) => String(v);
 
   function handleClick(v: typeof value) {
     (document.activeElement as HTMLDivElement).blur();
@@ -27,13 +27,13 @@ function SelectInput({
         role="button"
         className="justify-start input mb-1 font-normal join-item w-full"
       >
-        {value ? render(value) : "None"}
+        {value != null ? render(value) : "None"}
       </div>
       <ul
         tabIndex={0}
         className="dropdown-content menu bg-base-300 rounded-box z-1 w-52 p-2 shadow-sm"
       >
-        {values.map((v: string, i: number) => (
+        {values.map((v, i: number) => (
           <li key={i}>
             <a onClick={() => handleClick(v)}>{render(v)}</a>
           </li>

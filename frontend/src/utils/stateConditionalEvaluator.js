@@ -122,6 +122,9 @@ export function filterTreeByConditions(tree, stateVariables) {
   if (!tree) return [];
 
   return tree
+    .filter((group) =>
+      evaluateResourceConditions(group.stateConditionals, stateVariables)
+    )
     .map((group) => ({
       ...group,
       files: filterResourcesByConditions(group.files, stateVariables),

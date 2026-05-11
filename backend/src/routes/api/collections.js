@@ -114,4 +114,77 @@ router.delete("/groups/:groupId", async (req, res) => {
   }
 });
 
+/**
+ * @route POST /api/collections/groups/:groupId/state-conditionals
+ * @desc Add a state conditional to a collection group
+ */
+router.post("/groups/:groupId/state-conditionals", async (req, res) => {
+  try {
+    const { groupId } = req.params;
+    const { stateConditional } = req.body;
+    const group = await CollectionGroup.findById(groupId);
+    if (!group) return res.status(404).json({ error: "Group not found" });
+
+    group.stateConditionals.push(stateConditional);
+    await group.save();
+
+    return res.json(group);
+  } catch (err) {
+    return res.status(500).json({ error: err.message });
+  }
+});
+
+/**
+ * @route PUT /api/collections/groups/:groupId/state-conditionals
+ * @desc Update a state conditional on a collection group
+ */
+router.put("/groups/:groupId/state-conditionals", async (req, res) => {
+  try {
+    const { groupId } = req.params;
+    const { stateConditional } = req.body;
+    const group = await CollectionGroup.findById(groupId);
+    if (!group) return res.status(404).json({ error: "Group not found" });
+
+    group.stateConditionals = group.stateConditionals.map((sc) =>
+      sc._id.toString() === stateConditional._id ? stateConditional : sc
+    );
+
+    await group.save();
+
+    return res.json(group);
+  } catch (err) {
+    return res.status(500).json({ error: err.message });
+  }
+});
+
+/**
+ * @route DELETE /api/collections/groups/:groupId/state-conditionals/:stateConditionalId
+ * @desc Delete a state conditional from a collection group
+ */
+router.delete(
+  "/groups/:groupId/state-conditionals/:stateConditionalId",
+  async (req, res) => {
+    try {
+      const { groupId, stateConditionalId } = req.params;
+      const group = await CollectionGroup.findById(groupId);
+      if (!group) return res.status(404).json({ error: "Group not found" });
+
+      const originalLength = group.stateConditionals.length;
+      group.stateConditionals = group.stateConditionals.filter(
+        (sc) => sc._id.toString() !== stateConditionalId
+      );
+
+      if (group.stateConditionals.length === originalLength) {
+        return res.status(404).json({ error: "State conditional not found" });
+      }
+
+      await group.save();
+
+      return res.json(group);
+    } catch (err) {
+      return res.status(500).json({ error: err.message });
+    }
+  }
+);
+
 export default router;
