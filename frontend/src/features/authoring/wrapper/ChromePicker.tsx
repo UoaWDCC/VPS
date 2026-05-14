@@ -11,6 +11,7 @@ function ChromePicker({
 }>) {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement | null>(null);
+  const prevBase = useRef<string | null>(null); // prev hex color 
 
   useEffect(() => {
     function handleClick(event: MouseEvent) {
@@ -43,9 +44,14 @@ function ChromePicker({
             color={value}
             onChange={(val) => {
               const color = val.hexa;
+              const base = color.slice(0, 7);
+              const isNewColor = prevBase.current !== base; // if new color is the same as prev only alpha changes then doesnt update alpha when its == 0 
+              prevBase.current = base;
+
               const fixedColour =
-                color.slice(-2) == "00" ? `${color.slice(0, 7)}ff` : color; // if no alpha is selected then it sets it to 100 else keeps whatever is passed
-              onChange(fixedColour); // sets the fixedcolour val
+                isNewColor && color.slice(-2) === "00" ? `${base}ff` : color;
+
+              onChange(fixedColour);
             }}
           />
         </div>
