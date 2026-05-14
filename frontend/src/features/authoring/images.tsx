@@ -143,6 +143,8 @@ function ImageCreateMenu() {
   }
 
   function handleSubmit() {
+    if (!selectedImage) return;
+    setModalOpen(false);
     addExistingImage(selectedImage).catch(handleGeneric);
   }
 
@@ -177,22 +179,29 @@ function ImageCreateMenu() {
       <ModalDialog
         title="Select Image"
         open={modalOpen}
-        onClose={() => setModalOpen(false)}
+        onClose={() => {
+          setModalOpen(false);
+          setSelectedImage(null);
+        }}
       >
         <ImageListContainer
           data={imagesQuery.data}
           selectedId={selectedImage?.id}
-          onItemSelected={setSelectedImage}
+          onItemSelected={(img: Image) => setSelectedImage(img)}
         />
         <div className="modal-action">
           <form method="dialog">
             <button className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">
               ✕
             </button>
-            <button className="btn" onClick={handleSubmit}>
-              Add
-            </button>
           </form>
+          <button
+            className="btn"
+            disabled={!selectedImage}
+            onClick={handleSubmit}
+          >
+            Add
+          </button>
         </div>
       </ModalDialog>
     </>
