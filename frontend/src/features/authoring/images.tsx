@@ -125,7 +125,6 @@ function ImageCreateMenu() {
   const [selectedImage, setSelectedImage] = useState<Image | null>(null);
 
   const [modalOpen, setModalOpen] = useState(false);
-  const [selectionError, setSelectionError] = useState(false);
 
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
@@ -182,29 +181,21 @@ function ImageCreateMenu() {
         open={modalOpen}
         onClose={() => {
           setModalOpen(false);
-          setSelectionError(false);
+          setSelectedImage(null);
         }}
       >
         <ImageListContainer
           data={imagesQuery.data}
           selectedId={selectedImage?.id}
-          onItemSelected={(img) => {
-            setSelectedImage(img);
-            setSelectionError(false);
-          }}
+          onItemSelected={(img: Image) => setSelectedImage(img)}
         />
-        <p
-          className={`text-error text-sm mt-2 ${selectionError ? "visible" : "invisible"}`}
-        >
-          Please select an image first.
-        </p>
         <div className="modal-action">
           <form method="dialog">
             <button className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">
               ✕
             </button>
           </form>
-          <button className="btn" onClick={handleSubmit}>
+          <button className="btn" disabled={!selectedImage} onClick={handleSubmit}>
             Add
           </button>
         </div>
