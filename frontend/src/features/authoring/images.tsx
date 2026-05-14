@@ -31,7 +31,7 @@ interface Image {
   url: string;
 }
 
-function addExistingImage(image: Image | null) {
+async function addExistingImage(image: Image | null) {
   if (!image?.url) {
     console.error("invalid image object:", image);
     return;
@@ -39,6 +39,7 @@ function addExistingImage(image: Image | null) {
 
   const newImage = structuredClone(defaults.image) as Partial<ImageComponent>;
   newImage.href = image.url;
+  newImage.bounds!.verts = await getImageDimensions(image.url);
   add(newImage);
 }
 
@@ -79,7 +80,19 @@ async function addNewImage(fileObject: File) {
 
   const newImage = structuredClone(defaults.image) as Partial<ImageComponent>;
   newImage.href = downloadURL;
+  newImage.bounds!.verts = await getImageDimensions(downloadURL);
   add(newImage);
+}
+
+async function getImageDimensions(url: string, defaultHeight = 300) {
+  const img = new Image();
+  img.src = url;
+  await img.decode();
+  const scaledWidth = img.naturalWidth * (defaultHeight / img.naturalHeight);
+  return [
+    { x: 0, y: 0 },
+    { x: scaledWidth, y: defaultHeight },
+  ];
 }
 
 async function fetchImages() {
@@ -130,15 +143,10 @@ function ImageCreateMenu() {
     setModalOpen(true);
   }
 
-  function handleSubmit(e: React.MouseEvent) {
-    e.preventDefault();
-    if (!selectedImage) {
-      setSelectionError(true);
-      return;
-    }
-    setSelectionError(false);
+  function handleSubmit() {
+    if (!selectedImage) return;
     setModalOpen(false);
-    addExistingImage(selectedImage);
+    addExistingImage(selectedImage).catch(handleGeneric);
   }
 
   return (

@@ -3,16 +3,17 @@
 ![GitHub contributors from allcontributors.org](https://img.shields.io/github/all-contributors/UoaWDCC/VPS?style=for-the-badge&color=orange)
 ![GitHub commit activity (branch)](https://img.shields.io/github/commit-activity/t/UoaWDCC/VPS/master?style=for-the-badge)
 ![GitHub Issues or Pull Requests](https://img.shields.io/github/issues-pr-closed-raw/UoaWDCC/VPS?style=for-the-badge)
-![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/UoaWDCC/VPS/fly-deploy.yml?style=for-the-badge)
+![GitHub Actions Frontend Workflow Status](https://img.shields.io/github/actions/workflow/status/UoaWDCC/VPS/frontend-deploy.yml?style=for-the-badge&label=Frontend%20Build)
+![GitHub Actions Backend Workflow Status](https://img.shields.io/github/actions/workflow/status/UoaWDCC/VPS/backend-deploy.yml?style=for-the-badge&label=Backend%20Build)
 
 This project aims to provide students and faculty at the University of Auckland with a tool that supports interactive and immersive education through scene based branching scenarios.
 
 ![VPS login page](/images/login.png)
 ![VPS authoring page](/images/authoring.png)
 
-This project was initally associated with The University of Auckland SOFTENG 761 in 2021, but since 2022, is being developed by WDCC project teams. The repo located here for this project is a bare clone of the original repo, which no longer exists. The project has grown immensely over that time, and the result you can see here is a culmination of the hard work of all of the many teams who put hundreds of collective hours into this each year.
+This project was initially associated with The University of Auckland SOFTENG 761 in 2021, but since 2022, is being developed by WDCC project teams. The repo located here for this project is a bare clone of the original repo, which no longer exists. The project has grown immensely over that time, and the result you can see here is a culmination of the hard work of all the many teams who put hundreds of collective hours into this each year.
 
-# Live deployment
+# Live Deployment
 
 The deployment of this project is done using fly.io, you can access the latest at [vps.wdcc.co.nz](https://vps.wdcc.co.nz/).
 
@@ -24,7 +25,7 @@ Try to use the [conventional commits](https://www.conventionalcommits.org) speci
 
 # Contributors ✨
 
-For a more detailed list of the contributors and project teams, visit the [about us](https://wdcc-vps-staging.fly.dev/aboutus) page.
+For a more detailed list of the contributors and project teams, visit the [about us](https://vps.wdcc.co.nz/aboutus) page.
 
 Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/docs/en/emoji-key)):
 
