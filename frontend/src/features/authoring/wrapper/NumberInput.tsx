@@ -21,12 +21,12 @@ function NumberInput({
     <div className="join">
       <button
         className="btn btn-xs h-[28px] join-item bg-base-100 shadow-none border-none"
-        onClick={increment}
+        onClick={decrement}
       >
-        <Plus size={14} />
+        <Minus size={14} />
       </button>
       <input
-        className="input input-sm h-[28px] join-item w-10"
+        className="input input-sm h-[28px] join-item w-12 no-number-spinner"
         value={value}
         onChange={(e) => onChange(Number(e.target.value))}
         type="number"
@@ -35,9 +35,9 @@ function NumberInput({
       />
       <button
         className="btn btn-xs h-[28px] join-item bg-base-100 shadow-none border-none"
-        onClick={decrement}
+        onClick={increment}
       >
-        <Minus size={14} />
+        <Plus size={14} />
       </button>
     </div>
   );

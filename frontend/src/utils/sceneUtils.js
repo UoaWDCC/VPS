@@ -8,59 +8,41 @@
  * @param {String} baseName - Base name to use (default: "Scene")
  * @returns {String} - Unique scene name
  */
-export function generateUniqueSceneName(scenes, baseName = "Scene") {
-  // handle empty or non-eixting scenes array
+export function generateUniqueSceneName(
+  scenes,
+  baseName = "Scene",
+  excludeId = null
+) {
+  // handle empty or non-existing scenes array
   if (!scenes || scenes.length === 0) {
-    return `${baseName} 1`;
+    return baseName;
   }
 
-  // get all existing names, filtering out invalid scenes
+  // get all existing names, filtering out invalid scenes and the excluded ID
   const existingNames = scenes
-    .filter((scene) => scene && scene.name && typeof scene.name === "string")
+    .filter(
+      (scene) =>
+        scene &&
+        scene.name &&
+        typeof scene.name === "string" &&
+        scene._id !== excludeId
+    )
     .map((scene) => scene.name.toLowerCase().trim());
 
-  let counter = 1;
-  let newName = `${baseName} ${counter}`;
+  // Check if baseName already ends with a number
+  const match = baseName.match(/^(.*?)(\s*\d+)?$/);
+  const namePrefix = match[1].trim() || "Scene";
+  let counter = match[2] ? parseInt(match[2].trim(), 10) : 1;
+
+  let newName = baseName;
 
   // keep adding until we get a unique name
   while (existingNames.includes(newName.toLowerCase())) {
     counter++;
-    newName = `${baseName} ${counter}`;
+    newName = `${namePrefix} ${counter}`;
   }
 
   return newName;
-}
-
-/**
- * Checks if a scene name already exists (case-insensitive)
- * @param {String} name - Name to check
- * @param {Array} scenes - Array of existing scenes
- * @param {String} excludeId - Scene ID to exclude from check (for editing)
- * @returns {Boolean} - True if name already exists
- */
-export function isSceneNameDuplicate(name, scenes, excludeId = null) {
-  // handle empty or non-existing scenes array
-  if (!scenes || scenes.length === 0) {
-    console.log("Invalid scenes or name provided for duplicate checking");
-    return false;
-  }
-
-  // normalise the name to check
-  const normalisedName = name ? name.toLowerCase().trim() : "";
-
-  for (const scene of scenes) {
-    // skip the scene if its ID matches the excludeId
-    if (scene._id === excludeId) {
-      continue;
-    }
-
-    // check if the scene name matches the normalised name
-    if (scene.name && scene.name.toLowerCase().trim() === normalisedName) {
-      return true;
-    }
-  }
-
-  return false;
 }
 
 /**
