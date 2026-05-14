@@ -10,12 +10,12 @@ import Canvas from "./canvas/Canvas";
 import Topbar from "./topbar/Topbar";
 import useVisualScene from "./stores/visual";
 import { getScenePatch, commitSavedScene } from "./scene/scene";
-import { handleGlobal } from "./handlers/keyboard/keyboard";
 import { copy, cut, paste } from "./handlers/keyboard/clipboard";
 import useEditorStore from "./stores/editor";
 import { useHistory } from "react-router-dom";
 import { replace } from "./scene/operations/modifiers";
 import { ArrowLeftIcon, FilesIcon, PlayIcon, UsersIcon } from "lucide-react";
+import { handleGlobal } from "./handlers/keyboard/keyboard";
 
 const listeners = [
   ["copy", copy],

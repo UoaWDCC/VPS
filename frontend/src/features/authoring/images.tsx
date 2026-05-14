@@ -31,7 +31,7 @@ interface Image {
   url: string;
 }
 
-function addExistingImage(image: Image | null) {
+async function addExistingImage(image: Image | null) {
   if (!image?.url) {
     console.error("invalid image object:", image);
     return;
@@ -39,6 +39,7 @@ function addExistingImage(image: Image | null) {
 
   const newImage = structuredClone(defaults.image) as Partial<ImageComponent>;
   newImage.href = image.url;
+  newImage.bounds!.verts = await getImageDimensions(image.url);
   add(newImage);
 }
 
@@ -79,7 +80,19 @@ async function addNewImage(fileObject: File) {
 
   const newImage = structuredClone(defaults.image) as Partial<ImageComponent>;
   newImage.href = downloadURL;
+  newImage.bounds!.verts = await getImageDimensions(downloadURL);
   add(newImage);
+}
+
+async function getImageDimensions(url: string, defaultHeight = 300) {
+  const img = new Image();
+  img.src = url;
+  await img.decode();
+  const scaledWidth = img.naturalWidth * (defaultHeight / img.naturalHeight);
+  return [
+    { x: 0, y: 0 },
+    { x: scaledWidth, y: defaultHeight },
+  ];
 }
 
 async function fetchImages() {
@@ -130,7 +143,9 @@ function ImageCreateMenu() {
   }
 
   function handleSubmit() {
-    addExistingImage(selectedImage);
+    if (!selectedImage) return;
+    setModalOpen(false);
+    addExistingImage(selectedImage).catch(handleGeneric);
   }
 
   return (
@@ -164,22 +179,29 @@ function ImageCreateMenu() {
       <ModalDialog
         title="Select Image"
         open={modalOpen}
-        onClose={() => setModalOpen(false)}
+        onClose={() => {
+          setModalOpen(false);
+          setSelectedImage(null);
+        }}
       >
         <ImageListContainer
           data={imagesQuery.data}
           selectedId={selectedImage?.id}
-          onItemSelected={setSelectedImage}
+          onItemSelected={(img: Image) => setSelectedImage(img)}
         />
         <div className="modal-action">
           <form method="dialog">
             <button className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">
               ✕
             </button>
-            <button className="btn" onClick={handleSubmit}>
-              Add
-            </button>
           </form>
+          <button
+            className="btn"
+            disabled={!selectedImage}
+            onClick={handleSubmit}
+          >
+            Add
+          </button>
         </div>
       </ModalDialog>
     </>
