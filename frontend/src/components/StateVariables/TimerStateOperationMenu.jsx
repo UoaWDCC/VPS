@@ -4,7 +4,9 @@ import ScenarioContext from "context/ScenarioContext";
 import { stateTypes } from "./stateTypes";
 import { modifySceneProp } from "../../features/authoring/scene/operations/modifiers";
 import useVisualScene from "../../features/authoring/stores/visual";
-import CreateTimerOperationModal, { OperationField } from "./CreateTimerOperationModal";
+import CreateTimerOperationModal, {
+  OperationField,
+} from "./CreateTimerOperationModal";
 
 function TimerOperationRow({ operation, index }) {
   const { stateVariables } = useContext(ScenarioContext);
@@ -88,7 +90,11 @@ export default function TimerStateOperationMenu() {
         <input type="checkbox" />
         <div className="collapse-title flex items-center justify-between">
           On Timeout
-          <PlusIcon size={18} onClick={() => setCreateOpen(true)} className="z-1" />
+          <PlusIcon
+            size={18}
+            onClick={() => setCreateOpen(true)}
+            className="z-1"
+          />
         </div>
         <div className="collapse-content text--1 bg-base-200 px-0">
           {ops.map((op, i) => (

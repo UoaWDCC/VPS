@@ -6,7 +6,14 @@ import SelectInput from "../../features/authoring/components/Select";
 import ModalDialog from "../ModalDialogue";
 import useVisualScene from "../../features/authoring/stores/visual";
 
-export function OperationField({ type, operation, value, onOperationChange, onValueChange, onValueBlur }) {
+export function OperationField({
+  type,
+  operation,
+  value,
+  onOperationChange,
+  onValueChange,
+  onValueBlur,
+}) {
   return (
     <div className="join">
       <SelectInput
@@ -15,7 +22,11 @@ export function OperationField({ type, operation, value, onOperationChange, onVa
         onChange={onOperationChange}
       />
       {type === stateTypes.BOOLEAN ? (
-        <SelectInput values={[true, false]} value={value} onChange={onValueChange} />
+        <SelectInput
+          values={[true, false]}
+          value={value}
+          onChange={onValueChange}
+        />
       ) : (
         <input
           type={type === stateTypes.STRING ? "text" : "number"}
@@ -71,11 +82,15 @@ export default function CreateTimerOperationModal({ open, onClose }) {
   const isSubmittable = selectedState && operation && value != null;
 
   return (
-    <ModalDialog title="Add Timeout State Operation" open={open} onClose={onClose}>
+    <ModalDialog
+      title="Add Timeout State Operation"
+      open={open}
+      onClose={onClose}
+    >
       {!stateVariables?.length ? (
         <div className="text-s">
-          No state variables found for this scenario. You can create some in
-          the &apos;State Variables&apos; menu in the toolbar above.
+          No state variables found for this scenario. You can create some in the
+          &apos;State Variables&apos; menu in the toolbar above.
         </div>
       ) : (
         <fieldset className="fieldset">
