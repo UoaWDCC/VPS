@@ -1,11 +1,10 @@
 import { useContext, useEffect, useState } from "react";
 import { PlusIcon } from "lucide-react";
 import ScenarioContext from "context/ScenarioContext";
-import { getDefaultValue, stateTypes, validOperations } from "./stateTypes";
+import { stateTypes } from "./stateTypes";
 import { modifySceneProp } from "../../features/authoring/scene/operations/modifiers";
-import SelectInput from "../../features/authoring/components/Select";
-import ModalDialog from "../ModalDialogue";
 import useVisualScene from "../../features/authoring/stores/visual";
+import CreateTimerOperationModal, { OperationField } from "./CreateTimerOperationModal";
 
 function TimerOperationRow({ operation, index }) {
   const { stateVariables } = useContext(ScenarioContext);
@@ -37,11 +36,15 @@ function TimerOperationRow({ operation, index }) {
   }
 
   function saveValue(v) {
-    setLocalValue(v);
     modifySceneProp(
       "timerStateOperations",
       getCurrent().map((op, i) => (i === index ? { ...op, value: v } : op))
     );
+  }
+
+  function handleValueChange(v) {
+    setLocalValue(v);
+    if (stateVariable.type === stateTypes.BOOLEAN) saveValue(v);
   }
 
   function deleteOperation() {
@@ -61,77 +64,22 @@ function TimerOperationRow({ operation, index }) {
         </button>
       </div>
       <fieldset className="fieldset mt-[0.5rem]">
-        <div className="join">
-          <SelectInput
-            values={validOperations[stateVariable.type]}
-            value={localOperation}
-            onChange={saveOperation}
-          />
-          {stateVariable.type === stateTypes.BOOLEAN ? (
-            <SelectInput
-              values={[true, false]}
-              value={localValue}
-              onChange={saveValue}
-            />
-          ) : (
-            <input
-              type={
-                stateVariable.type === stateTypes.STRING ? "text" : "number"
-              }
-              value={localValue}
-              onChange={(e) => setLocalValue(e.target.value)}
-              onBlur={() => saveValue(localValue)}
-              placeholder="Value"
-              className="input join-item"
-            />
-          )}
-        </div>
+        <OperationField
+          type={stateVariable.type}
+          operation={localOperation}
+          value={localValue}
+          onOperationChange={saveOperation}
+          onValueChange={handleValueChange}
+          onValueBlur={() => saveValue(localValue)}
+        />
       </fieldset>
     </div>
   );
 }
 
 export default function TimerStateOperationMenu() {
-  const { stateVariables } = useContext(ScenarioContext);
   const timerStateOperations = useVisualScene((s) => s.timerStateOperations);
   const [createOpen, setCreateOpen] = useState(false);
-
-  const [selectedState, setSelectedState] = useState(null);
-  const [operation, setOperation] = useState(null);
-  const [value, setValue] = useState(null);
-
-  function openCreate() {
-    setSelectedState(null);
-    setOperation(null);
-    setValue(null);
-    setCreateOpen(true);
-  }
-
-  function onVariableChange(variable) {
-    setSelectedState(variable);
-    setOperation(null);
-    setValue(getDefaultValue(variable.type));
-  }
-
-  function handleCreate() {
-    if (!selectedState?.id || !operation) return;
-
-    const newOperation = {
-      stateVariableId: selectedState.id,
-      displayName: selectedState.name,
-      operation,
-      value: selectedState.type === stateTypes.NUMBER ? Number(value) : value,
-    };
-
-    modifySceneProp("timerStateOperations", [
-      ...(timerStateOperations ?? []),
-      newOperation,
-    ]);
-
-    setCreateOpen(false);
-  }
-
-  const isSubmittable = selectedState && operation && value != null;
   const ops = timerStateOperations ?? [];
 
   return (
@@ -140,7 +88,7 @@ export default function TimerStateOperationMenu() {
         <input type="checkbox" />
         <div className="collapse-title flex items-center justify-between">
           On Timeout
-          <PlusIcon size={18} onClick={openCreate} className="z-1" />
+          <PlusIcon size={18} onClick={() => setCreateOpen(true)} className="z-1" />
         </div>
         <div className="collapse-content text--1 bg-base-200 px-0">
           {ops.map((op, i) => (
@@ -149,67 +97,10 @@ export default function TimerStateOperationMenu() {
         </div>
       </div>
 
-      <ModalDialog
-        title="Add Timeout State Operation"
+      <CreateTimerOperationModal
         open={createOpen}
         onClose={() => setCreateOpen(false)}
-      >
-        {!stateVariables?.length ? (
-          <div className="text-s">
-            No state variables found for this scenario. You can create some in
-            the &apos;State Variables&apos; menu in the toolbar above.
-          </div>
-        ) : (
-          <fieldset className="fieldset">
-            <label className="label">State Variable</label>
-            <SelectInput
-              values={stateVariables}
-              value={selectedState}
-              display={(s) => s.name}
-              onChange={onVariableChange}
-            />
-            {selectedState && (
-              <>
-                <label className="label">Operation</label>
-                <div className="join">
-                  <SelectInput
-                    values={validOperations[selectedState.type]}
-                    value={operation}
-                    onChange={setOperation}
-                  />
-                  {selectedState.type === stateTypes.BOOLEAN ? (
-                    <SelectInput
-                      values={[true, false]}
-                      value={value}
-                      onChange={setValue}
-                    />
-                  ) : (
-                    <input
-                      type={
-                        selectedState.type === stateTypes.STRING
-                          ? "text"
-                          : "number"
-                      }
-                      value={value ?? ""}
-                      onChange={(e) => setValue(e.target.value)}
-                      placeholder="Value"
-                      className="input join-item"
-                    />
-                  )}
-                </div>
-              </>
-            )}
-          </fieldset>
-        )}
-        <div className="modal-action flex gap-2">
-          <button
-            className={`btn ${!isSubmittable ? "btn-disabled" : ""}`}
-            onClick={handleCreate}
-          >
-            Add
-          </button>
-        </div>
-      </ModalDialog>
+      />
     </>
   );
 }
