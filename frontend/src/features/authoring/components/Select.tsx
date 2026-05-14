@@ -13,7 +13,9 @@ function SelectInput({
   nullable = false,
   onChange,
 }: SelectInputProps) {
-  const render = display ? display : (v: SelectInputProps["value"]) => String(v);
+  const render = display
+    ? display
+    : (v: SelectInputProps["value"]) => String(v);
 
   function handleClick(v: typeof value) {
     (document.activeElement as HTMLDivElement).blur();
