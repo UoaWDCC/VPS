@@ -195,7 +195,11 @@ function ImageCreateMenu() {
               ✕
             </button>
           </form>
-          <button className="btn" disabled={!selectedImage} onClick={handleSubmit}>
+          <button
+            className="btn"
+            disabled={!selectedImage}
+            onClick={handleSubmit}
+          >
             Add
           </button>
         </div>
