@@ -39,12 +39,12 @@ function ChromePicker({
       </li>
       {open && (
         <div ref={ref} className="z-1 absolute top-[40px]">
-          <Chrome 
+          <Chrome
             color={value}
             onChange={(val) => {
               const color = val.hexa;
               const fixedColour =
-                color.slice(-2) == "00" ? `${color.slice(0, 7)}ff` : color; // if no alpha is selected then it sets it to 100 else keeps whatever is passed 
+                color.slice(-2) == "00" ? `${color.slice(0, 7)}ff` : color; // if no alpha is selected then it sets it to 100 else keeps whatever is passed
               onChange(fixedColour); // sets the fixedcolour val
             }}
           />
