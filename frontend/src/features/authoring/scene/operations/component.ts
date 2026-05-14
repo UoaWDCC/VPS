@@ -9,8 +9,8 @@ export const defaults = {
     type: "textbox",
     padding: 20,
     clickable: true,
-    fill: "#00000000",
-    stroke: "#00000000", 
+    fill: "#00000000", // default value is rgba 0 
+    stroke: "#00000000",
     strokeWidth: 3, // default stroke width 3
     bounds: {
       verts: [
