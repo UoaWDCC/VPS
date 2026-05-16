@@ -83,7 +83,12 @@ const updateStateVariables = async (user, scenarioId, component) => {
 };
 
 export const userNavigate = async (req) => {
-  const { uid, currentScene, componentId, startScene: startSceneParam } = req.body;
+  const {
+    uid,
+    currentScene,
+    componentId,
+    startScene: startSceneParam,
+  } = req.body;
   const { scenarioId } = req.params;
 
   const [user, authorised] = await Promise.all([
@@ -101,7 +106,8 @@ export const userNavigate = async (req) => {
 
   // the first time the user is navigating
   if (!path) {
-    const firstSceneId = startScene || (await getScenarioFirstScene(scenarioId));
+    const firstSceneId =
+      startScene || (await getScenarioFirstScene(scenarioId));
     const [, scenes, [stateVariables, stateVersion]] = await Promise.all([
       addSceneToPath(user._id, scenarioId, null, firstSceneId),
       getConnectedScenes(firstSceneId),
@@ -120,10 +126,16 @@ export const userNavigate = async (req) => {
     // Replace the entire path rather than appending: the prior history is invalid after jumping to an arbitrary scene.
     const updatePromise =
       startScene && startScene !== path[0]
-        ? User.updateOne({ uid }, { $set: { [`paths.${scenarioId}`]: [startScene] } })
+        ? User.updateOne(
+            { uid },
+            { $set: { [`paths.${scenarioId}`]: [startScene] } }
+          )
         : Promise.resolve();
 
-    const [, scenes] = await Promise.all([updatePromise, getConnectedScenes(activeSceneId)]);
+    const [, scenes] = await Promise.all([
+      updatePromise,
+      getConnectedScenes(activeSceneId),
+    ]);
 
     const [stateVariables, stateVersion] = await syncStateVariables(
       user,
