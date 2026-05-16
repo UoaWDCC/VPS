@@ -323,6 +323,82 @@ Returns:
     "note deleted"
 }
 ```
+---
+
+## Navigate
+
+All navigate endpoints require an authorisation header.
+
+**Navigate (singleplayer):\***
+
+`POST /api/navigate/user/:scenarioId`
+
+Body:
+
+```json
+{
+    "currentScene": "scene-id-or-null",
+    "componentId":  "component-id-or-null",
+    "addFlags":     [],
+    "removeFlags":  [],
+    "startScene":   "scene-id-or-null"
+}
+```
+
+- `currentScene`: the scene the user is currently on. `null` on the first request of a session.
+- `componentId`: the component the user interacted with. `null` on the first request of a session.
+- `startScene`: _(authors only)_ override the starting scene for this session. Ignored for non-authors. When provided, the user's path is reset to this scene so subsequent navigation stays consistent.
+
+Returns:
+
+```json
+{
+    "active": "scene-id",
+    "scenes": [],
+    "stateVariables": [],
+    "stateVersion": 1
+}
+```
+
+- `active`: the scene the user should now be on.
+- `scenes`: the current scene plus directly reachable next scenes, preloaded for the client cache.
+
+**Reset (singleplayer):\***
+
+`POST /api/navigate/user/reset/:scenarioId`
+
+Body:
+
+```json
+{
+    "currentScene": "scene-id"
+}
+```
+
+Clears the user's path for this scenario, allowing them to start from the beginning. Only valid when the current scene contains a `RESET_BUTTON` component.
+
+Returns: `200 OK` (no body)
+
+**Navigate (multiplayer):\***
+
+`POST /api/navigate/group/:groupId`
+
+Same body and response shape as the singleplayer navigate endpoint, operating on the group's shared state instead of an individual user's path. Does not support `startScene`.
+
+**Reset (multiplayer):\***
+
+`POST /api/navigate/group/reset/:groupId`
+
+Same behaviour as the singleplayer reset, applied to the group.
+
+**Get multiplayer resources:\***
+
+`GET /api/navigate/group/resources/:groupId`
+
+Returns the resources available to the group filtered by the current state variables.
+
+---
+
 **Reorder scenes for a given Scenario Id:\***
 
 `PUT /api/scenario/:scenarioId/scene/reorder`
