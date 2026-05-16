@@ -337,14 +337,14 @@ Body:
 
 ```json
 {
+    "uid":          "firebase-uid",
     "currentScene": "scene-id-or-null",
     "componentId":  "component-id-or-null",
-    "addFlags":     [],
-    "removeFlags":  [],
     "startScene":   "scene-id-or-null"
 }
 ```
 
+- `uid`: the Firebase UID of the authenticated user.
 - `currentScene`: the scene the user is currently on. `null` on the first request of a session.
 - `componentId`: the component the user interacted with. `null` on the first request of a session.
 - `startScene`: _(authors only)_ override the starting scene for this session. Ignored for non-authors. When provided, the user's path is reset to this scene so subsequent navigation stays consistent.
@@ -362,6 +362,7 @@ Returns:
 
 - `active`: the scene the user should now be on.
 - `scenes`: the current scene plus directly reachable next scenes, preloaded for the client cache.
+- `active` and `scenes` are omitted when the interacted component does not lead to a different scene.
 
 **Reset (singleplayer):\***
 
@@ -371,6 +372,7 @@ Body:
 
 ```json
 {
+    "uid":          "firebase-uid",
     "currentScene": "scene-id"
 }
 ```
@@ -383,19 +385,46 @@ Returns: `200 OK` (no body)
 
 `POST /api/navigate/group/:groupId`
 
-Same body and response shape as the singleplayer navigate endpoint, operating on the group's shared state instead of an individual user's path. Does not support `startScene`.
+Body:
+
+```json
+{
+    "uid":          "firebase-uid",
+    "currentScene": "scene-id-or-null",
+    "componentId":  "component-id-or-null",
+    "addFlags":     [],
+    "removeFlags":  []
+}
+```
+
+- `uid`: the Firebase UID of the authenticated user.
+- `currentScene`: the scene the user is currently on. `null` on the first request of a session.
+- `componentId`: the component the user interacted with. `null` on the first request of a session.
+- `addFlags`: flags to add to the group's current flags on this navigation step.
+- `removeFlags`: flags to remove from the group's current flags on this navigation step.
+
+Response shape is the same as the singleplayer navigate endpoint, operating on the group's shared state instead of an individual user's path. Does not support `startScene`.
 
 **Reset (multiplayer):\***
 
 `POST /api/navigate/group/reset/:groupId`
 
-Same behaviour as the singleplayer reset, applied to the group.
+Body:
+
+```json
+{
+    "uid":          "firebase-uid",
+    "currentScene": "scene-id"
+}
+```
+
+Same behaviour as the singleplayer reset, applied to the group. Additionally clears all notes for the group and resets the group's current flags.
 
 **Get multiplayer resources:\***
 
 `GET /api/navigate/group/resources/:groupId`
 
-Returns the resources available to the group filtered by the current state variables.
+Returns the resources available to the group filtered by the group's current flags.
 
 ---
 
