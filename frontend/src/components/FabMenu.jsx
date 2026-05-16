@@ -25,8 +25,7 @@ const FabMenu = () => {
 
   return (
     <div
-      className="fixed bottom-xl right-xl z-3"
-      onMouseEnter={() => setOpen(true)}
+      className={`fixed bottom-xl right-xl z-3 ${open ? "pointer-events-auto" : "pointer-events-none"}`}
       onMouseLeave={() => setOpen(false)}
     >
       <div className="flex flex-col items-end gap-4">
@@ -45,7 +44,7 @@ const FabMenu = () => {
         </div>
         <div className="p-2">
           <button
-            className={`flex items-center justify-center transition-all duration-300 w-12 h-12 rounded-xs rotate-45 cursor-pointer bg-base-100 border-1 border-primary ${open ? "opacity-100" : "opacity-0"} `}
+            className={`flex items-center justify-center transition-all duration-300 w-12 h-12 rounded-xs rotate-45 cursor-pointer bg-base-100 border-1 border-primary ${open ? "opacity-100" : "opacity-0 pointer-events-none"} `}
             onClick={() => history.push("/aboutus")}
             aria-label="About Us"
           >
@@ -54,7 +53,8 @@ const FabMenu = () => {
         </div>
         <div className="p-2">
           <button
-            className={`flex items-center justify-center transition-all duration-300 w-12 h-12 rounded-xs rotate-45 cursor-pointer border-1 ${open ? "border-secondary bg-secondary text-base-100" : "border-primary bg-base-100"}`}
+            onMouseEnter={() => setOpen(true)}
+            className={`flex items-center justify-center transition-all duration-300 w-12 h-12 rounded-xs rotate-45 cursor-pointer border-1 pointer-events-auto ${open ? "border-secondary bg-secondary text-base-100" : "border-primary bg-base-100"}`}
             aria-label="Open Menu"
           >
             <EllipsisVerticalIcon size={20} className="-rotate-45" />
