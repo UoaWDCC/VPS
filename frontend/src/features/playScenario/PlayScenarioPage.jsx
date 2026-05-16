@@ -1,5 +1,5 @@
-import { useContext, useEffect, useState } from "react";
-import { useParams, useHistory } from "react-router-dom";
+import { useContext, useEffect, useRef, useState } from "react";
+import { useParams, useHistory, useLocation } from "react-router-dom";
 import axios from "axios";
 import { toast } from "react-hot-toast";
 
@@ -23,7 +23,8 @@ const navigateSingleplayer = async (
   currentScene,
   addFlags,
   removeFlags,
-  componentId
+  componentId,
+  startScene
 ) => {
   const token = await user.getIdToken();
   const config = {
@@ -33,7 +34,7 @@ const navigateSingleplayer = async (
       "Content-Type": "application/json",
       Authorization: `Bearer ${token}`,
     },
-    data: { currentScene, addFlags, removeFlags, componentId },
+    data: { currentScene, addFlags, removeFlags, componentId, startScene },
   };
   const res = await axios.request(config);
   if (res.data.scenes) {
@@ -98,7 +99,10 @@ export default function PlayScenarioPage({ group }) {
   const { user, loading, error: authError } = useContext(AuthenticationContext);
   const { scenarioId } = useParams();
   const history = useHistory();
-  const isMultiplayer = history.location.pathname.includes("/multiplayer/");
+  const location = useLocation();
+  const isMultiplayer = location.pathname.includes("/multiplayer/");
+  // Ref so it survives re-renders without triggering them; consumed once by the initial navigate call and then cleared.
+  const startSceneRef = useRef(new URLSearchParams(location.search).get("startScene"));
 
   const [sceneId, setSceneId] = useState(null);
   const [stateVariables, setStateVariables] = useState([]);
@@ -143,6 +147,9 @@ export default function PlayScenarioPage({ group }) {
       }
     }
 
+    const startScene = startSceneRef.current;
+    startSceneRef.current = null; // Clear before the await so a concurrent retry (409 handler) never replays it.
+
     try {
       const { newSceneId, stateVariables, newStateVersion } = isMultiplayer
         ? await navigateMultiplayer(
@@ -159,7 +166,8 @@ export default function PlayScenarioPage({ group }) {
             sceneId,
             addFlags,
             removeFlags,
-            componentId
+            componentId,
+            startScene
           );
 
       if (isMultiplayer) {
