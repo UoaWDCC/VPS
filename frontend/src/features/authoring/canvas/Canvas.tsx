@@ -83,7 +83,7 @@ function Canvas() {
         onContextMenu={handleContextMenu}
       >
         <Overlay />
-        <LoadingOverlay />
+        {loading && <LoadingOverlay />}
 
         {/* scene outline */}
         <svg
