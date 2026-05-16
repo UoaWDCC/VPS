@@ -1,6 +1,12 @@
 import axios from "axios";
 import { useContext, useEffect, useState } from "react";
-import { Route, Switch, useHistory, useLocation, useParams } from "react-router-dom";
+import {
+  Route,
+  Switch,
+  useHistory,
+  useLocation,
+  useParams,
+} from "react-router-dom";
 
 import AuthenticationContext from "context/AuthenticationContext";
 
@@ -41,10 +47,14 @@ export default function PlayScenarioResolver() {
       const fetchedGroup = await getGroup(user, scenarioId);
       if (!fetchedGroup) {
         setGroup("none");
-        return history.replace(`/play/${scenarioId}/singleplayer${location.search}`);
+        return history.replace(
+          `/play/${scenarioId}/singleplayer${location.search}`
+        );
       }
       setGroup(fetchedGroup);
-      return history.replace(`/play/${scenarioId}/multiplayer${location.search}`);
+      return history.replace(
+        `/play/${scenarioId}/multiplayer${location.search}`
+      );
     };
     resolveType();
   }, [scenarioId]);
