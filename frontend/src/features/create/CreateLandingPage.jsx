@@ -83,7 +83,7 @@ export default function CreateLandingPage() {
         <SearchIcon size={20} />
       </label>
 
-      <div className="grid grid-cols-4 gap-x-l gap-y-xl pb-2xl">
+      <div className="grid grid-cols-[repeat(auto-fill,minmax(250px,1fr))] xl:grid-cols-4 gap-x-l gap-y-xl pb-2xl">
         <div
           className="flex items-center justify-center bg-transparent border-1 border-primary text-secondary aspect-16/9 rounded cursor-pointer hover:-translate-y-1 duration-100 ease"
           onClick={handleCreate}

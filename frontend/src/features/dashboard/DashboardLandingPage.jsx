@@ -62,14 +62,14 @@ export default function DashboardLandingPage() {
       </label>
 
       {/* Scenarios Grid */}
-      <div className="grid grid-cols-4 gap-x-l gap-y-xl pb-2xl">
+      <div className="grid grid-cols-[repeat(auto-fill,minmax(250px,1fr))] xl:grid-cols-4 gap-x-l gap-y-xl pb-2xl">
         {filteredScenarios.map((scenario) => (
           <div
             key={scenario._id}
             className="cursor-pointer hover:-translate-y-1 duration-100 ease"
             onClick={() => selectDashboardScenario(scenario)}
           >
-            <div className="aspect-ratio-16/9 rounded overflow-hidden mb-s border-primary/10 border-1">
+            <div className="aspect-16/9 rounded overflow-hidden mb-s border-primary/10 border-1">
               <Thumbnail components={scenario.thumbnail?.components || []} />
             </div>
             <p className="font-ibm text-l text-nowrap truncate">

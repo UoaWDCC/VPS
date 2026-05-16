@@ -32,7 +32,7 @@ const FabMenu = () => {
       <div className="flex flex-col items-end gap-4">
         <div className="p-2">
           <label
-            className={`swap swap-rotate transition-all duration-300 w-12 h-12 rounded-xs rotate-45 cursor-pointer bg-base-100 border-1 border-primary ${open ? "opacity-100" : "opacity-0"} `}
+            className={`swap swap-rotate transition-all duration-300 w-12 h-12 rounded-xs rotate-45 cursor-pointer bg-base-100 border-1 border-primary ${open ? "opacity-100" : "opacity-0 pointer-events-none"} `}
           >
             <input
               type="checkbox"
