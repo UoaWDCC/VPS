@@ -22,7 +22,7 @@ function PlayPage() {
   };
 
   return (
-    <div className="play-container" data-theme="dark">
+    <div className="play-container">
       {/* Top Navigation Bar */}
       <div className="top-nav-bar">
         <div className="nav-left">
