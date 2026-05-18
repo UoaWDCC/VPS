@@ -206,11 +206,13 @@ const patchScene = async (sceneId, patch) => {
   const { fields = {}, components = [], deletedComponentIds = [] } = patch;
 
   const allowedFields = {};
-  ["name", "roles", "time", "directLink", "timerStateOperations"].forEach((field) => {
-    if (Object.prototype.hasOwnProperty.call(fields, field)) {
-      allowedFields[field] = fields[field];
+  ["name", "roles", "time", "directLink", "timerStateOperations"].forEach(
+    (field) => {
+      if (Object.prototype.hasOwnProperty.call(fields, field)) {
+        allowedFields[field] = fields[field];
+      }
     }
-  });
+  );
 
   const operations = [];
 

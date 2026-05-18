@@ -179,7 +179,9 @@ export default function SceneSettings() {
               {directLinkDisabled && (
                 <span
                   className="tooltip tooltip-warning tooltip-top cursor-help text-warning text-xs before:!whitespace-normal before:!max-w-[150px]"
-                  data-tip={"Disabled: scene has buttons leading to multiple different scenes"}
+                  data-tip={
+                    "Disabled: scene has buttons leading to multiple different scenes"
+                  }
                 >
                   ⚠
                 </span>

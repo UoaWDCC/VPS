@@ -36,7 +36,14 @@ const navigateSingleplayer = async (
       "Content-Type": "application/json",
       Authorization: `Bearer ${token}`,
     },
-    data: { currentScene, addFlags, removeFlags, componentId, nextScene, startScene },
+    data: {
+      currentScene,
+      addFlags,
+      removeFlags,
+      componentId,
+      nextScene,
+      startScene,
+    },
   };
   const res = await axios.request(config);
   if (res.data.scenes) {
