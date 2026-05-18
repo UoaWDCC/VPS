@@ -323,6 +323,111 @@ Returns:
     "note deleted"
 }
 ```
+---
+
+## Navigate
+
+All navigate endpoints require an authorisation header.
+
+**Navigate (singleplayer):\***
+
+`POST /api/navigate/user/:scenarioId`
+
+Body:
+
+```json
+{
+    "uid":          "firebase-uid",
+    "currentScene": "scene-id-or-null",
+    "componentId":  "component-id-or-null",
+    "startScene":   "scene-id-or-null"
+}
+```
+
+- `uid`: the Firebase UID of the authenticated user.
+- `currentScene`: the scene the user is currently on. `null` on the first request of a session.
+- `componentId`: the component the user interacted with. `null` on the first request of a session.
+- `startScene`: _(authors only)_ override the starting scene for this session. Ignored for non-authors. When provided, the user's path is reset to this scene so subsequent navigation stays consistent.
+
+Returns:
+
+```json
+{
+    "active": "scene-id",
+    "scenes": [],
+    "stateVariables": [],
+    "stateVersion": 1
+}
+```
+
+- `active`: the scene the user should now be on.
+- `scenes`: the current scene plus directly reachable next scenes, preloaded for the client cache.
+- `active` and `scenes` are omitted when the interacted component does not lead to a different scene.
+
+**Reset (singleplayer):\***
+
+`POST /api/navigate/user/reset/:scenarioId`
+
+Body:
+
+```json
+{
+    "uid":          "firebase-uid",
+    "currentScene": "scene-id"
+}
+```
+
+Clears the user's path for this scenario, allowing them to start from the beginning. Only valid when the current scene contains a `RESET_BUTTON` component.
+
+Returns: `200 OK` (no body)
+
+**Navigate (multiplayer):\***
+
+`POST /api/navigate/group/:groupId`
+
+Body:
+
+```json
+{
+    "uid":          "firebase-uid",
+    "currentScene": "scene-id-or-null",
+    "componentId":  "component-id-or-null",
+    "addFlags":     [],
+    "removeFlags":  []
+}
+```
+
+- `uid`: the Firebase UID of the authenticated user.
+- `currentScene`: the scene the user is currently on. `null` on the first request of a session.
+- `componentId`: the component the user interacted with. `null` on the first request of a session.
+- `addFlags`: flags to add to the group's current flags on this navigation step.
+- `removeFlags`: flags to remove from the group's current flags on this navigation step.
+
+Response shape is the same as the singleplayer navigate endpoint, operating on the group's shared state instead of an individual user's path. Does not support `startScene`.
+
+**Reset (multiplayer):\***
+
+`POST /api/navigate/group/reset/:groupId`
+
+Body:
+
+```json
+{
+    "uid":          "firebase-uid",
+    "currentScene": "scene-id"
+}
+```
+
+Same behaviour as the singleplayer reset, applied to the group. Additionally clears all notes for the group and resets the group's current flags.
+
+**Get multiplayer resources:\***
+
+`GET /api/navigate/group/resources/:groupId`
+
+Returns the resources available to the group filtered by the group's current flags.
+
+---
+
 **Reorder scenes for a given Scenario Id:\***
 
 `PUT /api/scenario/:scenarioId/scene/reorder`
