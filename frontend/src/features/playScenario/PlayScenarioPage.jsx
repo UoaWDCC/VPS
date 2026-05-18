@@ -55,7 +55,8 @@ const navigateMultiplayer = async (
   currentScene,
   addFlags,
   removeFlags,
-  componentId
+  componentId,
+  nextScene = null
 ) => {
   const token = await user.getIdToken();
   const config = {
@@ -65,7 +66,7 @@ const navigateMultiplayer = async (
       "Content-Type": "application/json",
       Authorization: `Bearer ${token}`,
     },
-    data: { currentScene, addFlags, removeFlags, componentId },
+    data: { currentScene, addFlags, removeFlags, componentId, nextScene },
   };
   const res = await axios.request(config);
   if (res.data.scenes) {
@@ -219,16 +220,33 @@ export default function PlayScenarioPage({ group }) {
       if (e.code === "Space" || e.key === "ArrowRight") {
         e.preventDefault();
         try {
-          const { newSceneId, stateVariables, newStateVersion } =
-            await navigateSingleplayer(
-              user,
-              scenarioId,
-              sceneId,
-              addFlags,
-              removeFlags,
-              null,
-              currScene.directLink
+          const { newSceneId, stateVariables, newStateVersion } = isMultiplayer
+            ? await navigateMultiplayer(
+                user,
+                group._id,
+                sceneId,
+                addFlags,
+                removeFlags,
+                null,
+                currScene.directLink
+              )
+            : await navigateSingleplayer(
+                user,
+                scenarioId,
+                sceneId,
+                addFlags,
+                removeFlags,
+                null,
+                currScene.directLink
+              );
+          if (isMultiplayer) {
+            const newResources = await getMultiplayerResources(user, group._id);
+            const filteredResources = filterResourcesByConditions(
+              newResources,
+              stateVariables
             );
+            setResources(filteredResources);
+          }
           if (stateVersion < newStateVersion) {
             setStateVariables(stateVariables);
             setStateVersion(newStateVersion);
