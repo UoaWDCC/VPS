@@ -20,6 +20,7 @@ import { getDownloadURL, getStorage, ref, uploadBytes } from "firebase/storage";
 import { api, handleGeneric } from "../../util/api";
 import ModalDialog from "../../components/ModalDialogue";
 import useEditorStore from "./stores/editor.ts";
+import toast from "react-hot-toast";
 
 const storage = getStorage();
 const db = getFirestore();
@@ -88,6 +89,9 @@ async function addNewImage(fileObject: File) {
     newImage.href = downloadURL;
     newImage.bounds!.verts = await getImageDimensions(downloadURL);
     add(newImage);
+  } catch (e) {
+    console.error(e);
+    toast.error("Image upload failed");
   } finally {
     setLoading(false);
   }
