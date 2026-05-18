@@ -173,11 +173,17 @@ function ImageCreateMenu() {
           tabIndex={0}
           className="dropdown-content menu bg-base-300 rounded-box z-1 w-52 p-2 shadow-sm top-[38px]"
         >
-          <li>
-            <a onClick={showFilePicker}>Upload Image</a>
+          <li
+            className="tooltip tooltip-right tooltip-primary"
+            data-tip="Upload a new image from your device"
+          >
+            <a onClick={showFilePicker}>Upload New Image</a>
           </li>
-          <li>
-            <a onClick={showModal}>Choose Image</a>
+          <li
+            className="tooltip tooltip-right tooltip-primary"
+            data-tip="Select an existing image from your uploads"
+          >
+            <a onClick={showModal}>Select Existing Image</a>
           </li>
         </ul>
       </div>
