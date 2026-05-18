@@ -3,6 +3,7 @@ import { getAuth } from "firebase/auth";
 import axios from "axios";
 import toast from "react-hot-toast";
 import AuthenticationContext from "context/AuthenticationContext";
+import MDTextViewer from "./MDTextViewer";
 
 export default function NoteDetail({
   note,
@@ -140,9 +141,7 @@ export default function NoteDetail({
             onChange={(e) => setText(e.target.value)}
           />
         ) : (
-          <p className="text-sm whitespace-pre-wrap">
-            {note.text || <span className="opacity-50">No content.</span>}
-          </p>
+          <MDTextViewer file={{ type: "text/markdown", name: "note.md" }} content={note.text || ""} />
         )}
       </div>
 

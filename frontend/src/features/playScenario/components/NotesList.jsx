@@ -20,7 +20,7 @@ export default function NotesList({
               className={`cursor-pointer w-full text-left p-4 border border-primary 
                 transition-colors hover:bg-base-200 ${
                   isSelected ? "bg-base-200" : ""
-                }`}              
+                }`}
               onClick={() => onSelectNote(note)}
             >
               <h3 className="font-medium text-sm truncate">
