@@ -7,6 +7,7 @@ import { getScenePatch, commitSavedScene } from "../scene/scene";
 
 import useVisualScene from "../stores/visual";
 import { modifySceneProp } from "../scene/operations/modifiers";
+import useDirectLink from "./useDirectLink";
 import shallow from "zustand/shallow";
 import toast from "react-hot-toast";
 
@@ -81,29 +82,6 @@ export default function SceneSettings() {
   function changeRole(role, value) {
     if (value) setSelectedRoles((prev) => [...prev, role]);
     else setSelectedRoles((prev) => prev.filter((r) => r !== role));
-  }
-
-  function useDirectLink() {
-    const directLink = useVisualScene((scene) => scene.directLink);
-    const components = useVisualScene((scene) => scene.components);
-
-    const uniqueLinkedScenes = [
-      ...new Set(
-        Object.values(components ?? {})
-          .filter((c) => c.clickable && c.nextScene)
-          .map((c) => c.nextScene)
-      ),
-    ];
-
-    const disabled = uniqueLinkedScenes.length > 1;
-    const defaultTarget =
-      uniqueLinkedScenes.length === 1 ? uniqueLinkedScenes[0] : null;
-
-    useEffect(() => {
-      if (disabled && directLink) modifySceneProp("directLink", null);
-    }, [disabled]);
-
-    return { directLink, disabled, defaultTarget };
   }
 
   return (
