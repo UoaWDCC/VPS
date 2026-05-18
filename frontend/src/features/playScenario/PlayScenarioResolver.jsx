@@ -73,10 +73,10 @@ export default function PlayScenarioResolver() {
       <Route exact path="/play/:scenarioId/invalid-role">
         <InvalidRolePage group={group} />
       </Route>
-      <Route path="/play/:scenarioId/multiplayer/:sceneId?">
+      <Route path="/play/:scenarioId/multiplayer">
         <PlayScenarioPage group={group} />
       </Route>
-      <Route path="/play/:scenarioId/singleplayer/:sceneId?">
+      <Route path="/play/:scenarioId/singleplayer">
         <PlayScenarioPage />
       </Route>
     </Switch>
