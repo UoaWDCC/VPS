@@ -89,8 +89,8 @@ function ScenarioInfo() {
                 <div
                   key={scenario._id}
                   className={`mb-2xs cursor-pointer transition-colors text-s font-dm truncate ${scenario._id === selectedScenario?._id
-                      ? "text-base-content"
-                      : "text-primary hover:text-base-content"
+                    ? "text-base-content"
+                    : "text-primary hover:text-base-content"
                     }`}
                   onClick={() => handleScenarioSelect(scenario)}
                 >
@@ -160,7 +160,7 @@ function ScenarioInfo() {
               </div>
 
               {/* Scenario Thumbnail */}
-              <div className="w-full max-w-[45vw] mb-[3vh] flex-shrink-0">
+              <div className="w-full max-w-[750px] flex-shrink-0">
                 <div className="w-full aspect-video bg-white border border-gray-600 rounded-lg overflow-hidden flex items-center justify-center">
                   <Thumbnail
                     components={selectedScenario.thumbnail.components}

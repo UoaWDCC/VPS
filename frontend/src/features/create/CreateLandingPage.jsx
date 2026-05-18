@@ -6,8 +6,6 @@ import CreateScenarioCard from "../../components/CreateScenarioCard/CreateScenar
 import TopNavBar from "../../features/TopNavBar/TopNavBar";
 import FabMenu from "../../components/FabMenu";
 import { PlusIcon, SearchIcon, Trash2Icon } from "lucide-react";
-import "../playScenario/PlayLandingPage.css";
-import "./CreateLandingPage.css";
 import { handle } from "../../components/ContextMenu/portal";
 import RightContextMenu from "../../components/ContextMenu/RightContextMenu";
 
@@ -66,7 +64,7 @@ export default function CreateLandingPage() {
       <div className="grid grid-cols-[repeat(auto-fill,minmax(250px,1fr))] xl:grid-cols-4 gap-x-l gap-y-xl pb-2xl">
         <div
           className="flex items-center justify-center bg-transparent border-1 border-primary text-secondary aspect-16/9 rounded cursor-pointer hover:-translate-y-1 duration-100 ease"
-          onClick={handleCreate}
+          onClick={() => setShowCreateModal(true)}
         >
           <PlusIcon size={48} absoluteStrokeWidth={2} />
         </div>

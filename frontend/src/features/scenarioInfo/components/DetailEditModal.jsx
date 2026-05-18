@@ -79,6 +79,7 @@ function DetailEditModal({ scenario, onSave }) {
 
       {/* Modal Actions */}
       <div className="modal-action">
+        {/* buttons will automatically close the dialog */}
         <button className="btn btn-ghost text-primary hover:text-base-content hover:bg-primary/10 font-dm">
           Cancel
         </button>
