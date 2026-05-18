@@ -88,10 +88,11 @@ function ScenarioInfo() {
               {filteredScenarios.map((scenario) => (
                 <div
                   key={scenario._id}
-                  className={`mb-2xs cursor-pointer transition-colors text-s font-dm truncate ${scenario._id === selectedScenario?._id
-                    ? "text-base-content"
-                    : "text-primary hover:text-base-content"
-                    }`}
+                  className={`mb-2xs cursor-pointer transition-colors text-s font-dm truncate ${
+                    scenario._id === selectedScenario?._id
+                      ? "text-base-content"
+                      : "text-primary hover:text-base-content"
+                  }`}
                   onClick={() => handleScenarioSelect(scenario)}
                 >
                   {scenario.name}

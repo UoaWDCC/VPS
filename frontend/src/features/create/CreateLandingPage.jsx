@@ -70,7 +70,9 @@ export default function CreateLandingPage() {
         </div>
         {filteredScenarios.map((scenario) => (
           <RightContextMenu
-            menu={<ScenarioMenu id={scenario._id} deleteScenario={deleteScenario} />}
+            menu={
+              <ScenarioMenu id={scenario._id} deleteScenario={deleteScenario} />
+            }
             key={scenario._id}
           >
             <div
@@ -80,7 +82,9 @@ export default function CreateLandingPage() {
               <div className="aspect-16/9 rounded overflow-hidden mb-s border-primary/10 border-1">
                 <Thumbnail components={scenario.thumbnail?.components || []} />
               </div>
-              <p className="font-ibm text-l text-nowrap truncate">{scenario.name}</p>
+              <p className="font-ibm text-l text-nowrap truncate">
+                {scenario.name}
+              </p>
             </div>
           </RightContextMenu>
         ))}
@@ -94,6 +98,6 @@ export default function CreateLandingPage() {
       )}
 
       <FabMenu />
-    </div >
+    </div>
   );
 }
