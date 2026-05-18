@@ -141,7 +141,10 @@ export default function NoteDetail({
             onChange={(e) => setText(e.target.value)}
           />
         ) : (
-          <MDTextViewer file={{ type: "text/markdown", name: "note.md" }} content={note.text || ""} />
+          <MDTextViewer
+            file={{ type: "text/markdown", name: "note.md" }}
+            content={note.text || ""}
+          />
         )}
       </div>
 
