@@ -10,6 +10,7 @@ import {
   getStateVariables,
   retrieveScenario,
   retrieveScenarioList,
+  retrieveAccessibleScenarios,
   updateDurations,
   updateScenario,
   editStateVariable,
@@ -40,9 +41,23 @@ router.get("/", async (req, res) => {
 
 // get assigned scenarios for an user
 router.get("/assigned", async (req, res) => {
-  const userId = req.body.uid;
-  const assignedScenarios = await retrieveAssignedScenarioList(userId);
+  const assignedScenarios = await retrieveAssignedScenarioList(req.body.uid);
   res.status(HTTP_OK).json(assignedScenarios);
+});
+
+// TODO: we can perform this more efficiently by using better querying
+router.get("/all", async (req, res) => {
+  const [owned, assigned, accessible] = await Promise.all([
+    retrieveScenarioList(req.body.uid),
+    retrieveAssignedScenarioList(req.body.uid),
+    retrieveAccessibleScenarios(req.body.uid),
+  ]);
+
+  res.status(HTTP_OK).json({
+    owned: owned ?? [],
+    assigned: assigned ?? [],
+    accessible: accessible ?? [],
+  });
 });
 
 // Create a scenario for a user

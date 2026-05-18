@@ -1,180 +1,103 @@
-import { useState, useContext, useEffect } from "react";
+import { useState, useContext } from "react";
 import { useHistory } from "react-router-dom";
-import MenuItem from "@material-ui/core/MenuItem";
-import ContextMenu from "../../components/ContextMenu";
-import AuthenticationContext from "../../context/AuthenticationContext";
 import ScenarioContext from "../../context/ScenarioContext";
-import AccessLevel from "../../enums/route.access.level";
-import { useDelete, usePost } from "../../hooks/crudHooks";
 import Thumbnail from "../authoring/components/Thumbnail";
 import CreateScenarioCard from "../../components/CreateScenarioCard/CreateScenarioCard";
 import TopNavBar from "../../features/TopNavBar/TopNavBar";
-import "../playScenario/PlayLandingPage.css";
-import "./CreateLandingPage.css";
+import FabMenu from "../../components/FabMenu";
+import { PlusIcon, SearchIcon, Trash2Icon } from "lucide-react";
+import { handle } from "../../components/ContextMenu/portal";
+import RightContextMenu from "../../components/ContextMenu/RightContextMenu";
+
+// TODO: delete should be in a better place than this
+const ScenarioMenu = ({ id, deleteScenario }) => {
+  return (
+    <ul className="menu bg-base-200 rounded-box w-fit">
+      <li>
+        <a onClick={handle(deleteScenario, id)}>
+          <Trash2Icon size={16} />
+          Delete
+        </a>
+      </li>
+    </ul>
+  );
+};
 
 export default function CreateLandingPage() {
-  const {
-    scenarios: userScenarios,
-    reFetch,
-    currentScenario,
-    setCurrentScenario,
-  } = useContext(ScenarioContext);
-  const { getUserIdToken, VpsUser } = useContext(AuthenticationContext);
+  const { allScenarios, deleteScenario, createScenario } =
+    useContext(ScenarioContext);
+
   const history = useHistory();
 
   const [search, setSearch] = useState("");
-  const [contextMenuPosition, setContextMenuPosition] = useState(null);
   const [showCreateModal, setShowCreateModal] = useState(false);
 
-  useEffect(() => {
-    reFetch();
-  }, []);
-
-  const filteredScenarios = (userScenarios || []).filter((scenario) =>
+  const filteredScenarios = allScenarios.owned.filter((scenario) =>
     scenario.name.toLowerCase().includes(search.toLowerCase())
   );
 
-  const handleContextMenu = (event, scenario) => {
-    event.preventDefault();
-    setCurrentScenario(scenario);
-    setContextMenuPosition({ x: event.clientX, y: event.clientY });
-  };
-
-  const deleteScenario = async () => {
-    await useDelete(`/api/scenario/${currentScenario._id}`, getUserIdToken);
-    setCurrentScenario(null);
-    reFetch();
-  };
-
-  const handleCreate = () => setShowCreateModal(true);
-
-  const playScenario = () => {
-    if (currentScenario) {
-      history.push(`/scenario-info?id=${currentScenario._id}`);
-    }
-  };
-
-  const editScenario = () => {
-    if (currentScenario) {
-      history.push(`/scenario/${currentScenario._id}`);
-    }
-  };
-
-  const openDashboardModal = () => {
-    history.push("/dashboard");
-  };
+  async function handleCreate(name) {
+    setShowCreateModal(false);
+    const scenarioId = await createScenario(name);
+    history.push(`/scenario/${scenarioId}`);
+  }
 
   return (
-    <div className="play-container" data-theme="dark">
-      {/* Top Nav - Using extracted component */}
-      <TopNavBar activeTab="create" />
+    <div className="bg-base-100 h-full text-base-content pt-5xl px-xl max-w-[1500px] mx-auto">
+      <TopNavBar />
 
-      {/* Rest of your component remains the same */}
-      {/* Edit Section */}
-      <div className="section-block">
-        <h2 className="section-header">Create & Edit</h2>
+      {/* Header */}
+      <h1 className="font-ibm text-xl mb-l">Create & Edit</h1>
 
-        <div className="search-section">
-          <div className="search-container-play">
-            <label className="search-input-wrapper-play">
-              <svg
-                className="search-icon-play"
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 24 24"
-              >
-                <g
-                  strokeLinejoin="round"
-                  strokeLinecap="round"
-                  strokeWidth="2.5"
-                  fill="none"
-                  stroke="currentColor"
-                >
-                  <circle cx="11" cy="11" r="8"></circle>
-                  <path d="m21 21-4.3-4.3"></path>
-                </g>
-              </svg>
-              <input
-                type="search"
-                placeholder="Search scenario"
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                className="search-input-play"
-                required
-              />
-            </label>
-          </div>
+      {/* Search Section */}
+      <label className="input search w-full max-w-[40vw] mb-m">
+        <input
+          type="search"
+          placeholder="Search scenarios"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          required
+        />
+        <SearchIcon size={20} />
+      </label>
+
+      <div className="grid grid-cols-[repeat(auto-fill,minmax(250px,1fr))] xl:grid-cols-4 gap-x-l gap-y-xl pb-2xl">
+        <div
+          className="flex items-center justify-center bg-transparent border-1 border-primary text-secondary aspect-16/9 rounded cursor-pointer hover:-translate-y-1 duration-100 ease"
+          onClick={() => setShowCreateModal(true)}
+        >
+          <PlusIcon size={48} absoluteStrokeWidth={2} />
         </div>
-
-        <div className="scenarios-grid">
-          <div className="scenario-card create-card" onClick={handleCreate}>
-            <div className="scenario-card-thumbnail create-thumbnail">
-              <span className="create-plus">+</span>
-            </div>
-          </div>
-          {filteredScenarios.map((scenario) => (
+        {filteredScenarios.map((scenario) => (
+          <RightContextMenu
+            menu={
+              <ScenarioMenu id={scenario._id} deleteScenario={deleteScenario} />
+            }
+            key={scenario._id}
+          >
             <div
-              key={scenario._id}
-              className="scenario-card"
+              className="cursor-pointer hover:-translate-y-1 duration-100 ease"
               onClick={() => history.push(`/scenario/${scenario._id}`)}
-              onContextMenu={(e) => handleContextMenu(e, scenario)}
             >
-              <div className="scenario-card-thumbnail">
+              <div className="aspect-16/9 rounded overflow-hidden mb-s border-primary/10 border-1">
                 <Thumbnail components={scenario.thumbnail?.components || []} />
               </div>
-              <div className="scenario-card-name">
-                <p className="scenario-name-text">{scenario.name}</p>
-              </div>
+              <p className="font-ibm text-l text-nowrap truncate">
+                {scenario.name}
+              </p>
             </div>
-          ))}
-        </div>
+          </RightContextMenu>
+        ))}
       </div>
-
-      {/* Context Menu */}
-      <ContextMenu
-        position={contextMenuPosition}
-        setPosition={setContextMenuPosition}
-      >
-        <MenuItem onClick={playScenario} disabled={!currentScenario}>
-          Play
-        </MenuItem>
-        <MenuItem onClick={editScenario} disabled={!currentScenario}>
-          Edit
-        </MenuItem>
-        <MenuItem onClick={deleteScenario} disabled={!currentScenario}>
-          Delete
-        </MenuItem>
-        {VpsUser?.role === AccessLevel.STAFF && (
-          <MenuItem onClick={openDashboardModal} disabled={!currentScenario}>
-            Dashboard
-          </MenuItem>
-        )}
-      </ContextMenu>
-
       {/* Create Scenario Modal */}
       {showCreateModal && (
         <CreateScenarioCard
-          className="create-scenario-card"
-          onCreate={async (name) => {
-            const newScenario = await usePost(
-              `/api/scenario`,
-              { name },
-              getUserIdToken
-            );
-            await usePost(
-              `/api/scenario/${newScenario._id}/scene`,
-              { name: "Scene 1" },
-              getUserIdToken
-            );
-            setCurrentScenario(newScenario);
-            history.push(`/scenario/${newScenario._id}`);
-            reFetch();
-            setShowCreateModal(false);
-          }}
+          onCreate={handleCreate}
           onClose={() => setShowCreateModal(false)}
         />
       )}
 
-      {/* Dashboard Modal */}
+      <FabMenu />
     </div>
   );
 }

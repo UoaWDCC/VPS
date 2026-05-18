@@ -19,7 +19,7 @@ const createInvalidError = (roles) =>
 export const getSimpleScene = async (sceneId) => {
   const scene = await Scene.findOne(
     { _id: sceneId },
-    { roles: 1, components: 1, directLink: 1 }
+    { roles: 1, components: 1, directLink: 1, time: 1, timerStateOperations: 1 }
   ).lean();
   if (!scene)
     throw new HttpError("No scene exists with that id", STATUS.NOT_FOUND);

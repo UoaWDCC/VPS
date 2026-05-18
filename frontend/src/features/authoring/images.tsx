@@ -19,6 +19,8 @@ import type { ImageComponent } from "./types";
 import { getDownloadURL, getStorage, ref, uploadBytes } from "firebase/storage";
 import { api, handleGeneric } from "../../util/api";
 import ModalDialog from "../../components/ModalDialogue";
+import useEditorStore from "./stores/editor.ts";
+import toast from "react-hot-toast";
 
 const storage = getStorage();
 const db = getFirestore();
@@ -46,42 +48,53 @@ async function addExistingImage(image: Image | null) {
 // NOTE: this should be handled in the backend instead, and asynchronously (uploaded on save)
 
 async function addNewImage(fileObject: File) {
-  const auth = getAuth();
-  const user = auth.currentUser;
+  const { setLoading } = useEditorStore.getState();
 
-  if (!user) return;
+  setLoading(true);
 
-  // Upload image to Firebase Storage
-  const storageRef = ref(storage, `uploads/${fileObject.name}_${Date.now()}`);
-  const snapshot = await uploadBytes(storageRef, fileObject);
-  const downloadURL = await getDownloadURL(snapshot.ref);
+  try {
+    const auth = getAuth();
+    const user = auth.currentUser;
 
-  // Save image URL and metadata in Firestore
-  const uploadedAt = new Date().toISOString();
-  const docRef = await addDoc(collection(db, "uploadedImages"), {
-    url: downloadURL,
-    uploadedAt,
-    fileName: fileObject.name,
-    uid: user.uid,
-  });
-  await setDoc(docRef, { id: docRef.id }, { merge: true });
+    if (!user) return;
 
-  // Notify your backend using centralized axios client (auth handled)
-  await api.post(user, "/api/image", {
-    images: [
-      {
-        id: docRef.id,
-        url: downloadURL,
-        fileName: fileObject.name,
-        uploadedAt,
-      },
-    ],
-  });
+    // Upload image to Firebase Storage
+    const storageRef = ref(storage, `uploads/${fileObject.name}_${Date.now()}`);
+    const snapshot = await uploadBytes(storageRef, fileObject);
+    const downloadURL = await getDownloadURL(snapshot.ref);
 
-  const newImage = structuredClone(defaults.image) as Partial<ImageComponent>;
-  newImage.href = downloadURL;
-  newImage.bounds!.verts = await getImageDimensions(downloadURL);
-  add(newImage);
+    // Save image URL and metadata in Firestore
+    const uploadedAt = new Date().toISOString();
+    const docRef = await addDoc(collection(db, "uploadedImages"), {
+      url: downloadURL,
+      uploadedAt,
+      fileName: fileObject.name,
+      uid: user.uid,
+    });
+    await setDoc(docRef, { id: docRef.id }, { merge: true });
+
+    // Notify your backend using centralized axios client (auth handled)
+    await api.post(user, "/api/image", {
+      images: [
+        {
+          id: docRef.id,
+          url: downloadURL,
+          fileName: fileObject.name,
+          uploadedAt,
+        },
+      ],
+    });
+
+    const newImage = structuredClone(defaults.image) as Partial<ImageComponent>;
+    newImage.href = downloadURL;
+    newImage.bounds!.verts = await getImageDimensions(downloadURL);
+    add(newImage);
+  } catch (e) {
+    console.error(e);
+    toast.error("Image upload failed");
+  } finally {
+    setLoading(false);
+  }
 }
 
 async function getImageDimensions(url: string, defaultHeight = 300) {
@@ -160,11 +173,17 @@ function ImageCreateMenu() {
           tabIndex={0}
           className="dropdown-content menu bg-base-300 rounded-box z-1 w-52 p-2 shadow-sm top-[38px]"
         >
-          <li>
-            <a onClick={showFilePicker}>Upload Image</a>
+          <li
+            className="tooltip tooltip-right tooltip-primary"
+            data-tip="Upload a new image from your device"
+          >
+            <a onClick={showFilePicker}>Upload New Image</a>
           </li>
-          <li>
-            <a onClick={showModal}>Choose Image</a>
+          <li
+            className="tooltip tooltip-right tooltip-primary"
+            data-tip="Select an existing image from your uploads"
+          >
+            <a onClick={showModal}>Select Existing Image</a>
           </li>
         </ul>
       </div>

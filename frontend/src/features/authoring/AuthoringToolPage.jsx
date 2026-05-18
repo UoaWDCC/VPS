@@ -76,7 +76,8 @@ export default function AuthoringToolPage() {
   }, []);
 
   function playScenario() {
-    window.open(`/play/${scenarioId}`, "_blank");
+    const startScene = sceneId ? `?startScene=${sceneId}` : "";
+    window.open(`/play/${scenarioId}${startScene}`, "_blank");
   }
 
   function goToGroups() {

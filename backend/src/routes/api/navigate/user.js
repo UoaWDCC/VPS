@@ -1,6 +1,7 @@
 import { getStateVariables } from "../../../db/daos/scenarioDao.js";
 import { getComponent } from "../../../db/daos/sceneDao.js";
 import { setUserStateVariables } from "../../../db/daos/userDao.js";
+import { isAuthor } from "../../../db/daos/accessDao.js";
 import Scene from "../../../db/models/scene.js";
 import User from "../../../db/models/user.js";
 
@@ -18,7 +19,7 @@ const getConnectedScenes = async (sceneID, active = true) => {
     .filter(Boolean);
   const connected = await Scene.find(
     { _id: { $in: connectedIds } },
-    { components: 1, directLink: 1, roles: 1 }
+    { components: 1, directLink: 1, roles: 1, time: 1, timerStateOperations: 1 }
   ).lean();
   return {
     active: scene._id,
@@ -82,18 +83,32 @@ const updateStateVariables = async (user, scenarioId, component) => {
 };
 
 export const userNavigate = async (req) => {
-  const { uid, currentScene, componentId, nextScene: bodyNextScene } = req.body;
+  const {
+    uid,
+    currentScene,
+    componentId,
+    nextScene: bodyNextScene,
+    startScene: startSceneParam,
+  } = req.body;
   const { scenarioId } = req.params;
 
-  const user = await User.findOne(
-    { uid },
-    { paths: 1, _id: 1, stateVariables: 1, stateVersions: 1 }
-  ).lean();
+  const [user, authorised] = await Promise.all([
+    User.findOne(
+      { uid },
+      { paths: 1, _id: 1, stateVariables: 1, stateVersions: 1 }
+    ).lean(),
+    // Only hit the access list when startScene is present — avoids an extra DB query on every normal player request.
+    startSceneParam ? isAuthor(scenarioId, uid) : false,
+  ]);
+
+  // Non-authors cannot jump to an arbitrary scene even if they manually craft a URL with startScene.
+  const startScene = authorised ? startSceneParam : null;
   const path = user.paths[scenarioId];
 
-  // the first time the user  is navigating
+  // the first time the user is navigating
   if (!path) {
-    const firstSceneId = await getScenarioFirstScene(scenarioId);
+    const firstSceneId =
+      startScene || (await getScenarioFirstScene(scenarioId));
     const [, scenes, [stateVariables, stateVersion]] = await Promise.all([
       addSceneToPath(user._id, scenarioId, null, firstSceneId),
       getConnectedScenes(firstSceneId),
@@ -107,7 +122,21 @@ export const userNavigate = async (req) => {
 
   // the first time the user is navigating in their session
   if (!currentScene) {
-    const scenes = await getConnectedScenes(path[0]);
+    const activeSceneId = startScene || path[0];
+
+    // Replace the entire path rather than appending: the prior history is invalid after jumping to an arbitrary scene.
+    const updatePromise =
+      startScene && startScene !== path[0]
+        ? User.updateOne(
+            { uid },
+            { $set: { [`paths.${scenarioId}`]: [startScene] } }
+          )
+        : Promise.resolve();
+
+    const [, scenes] = await Promise.all([
+      updatePromise,
+      getConnectedScenes(activeSceneId),
+    ]);
 
     const [stateVariables, stateVersion] = await syncStateVariables(
       user,

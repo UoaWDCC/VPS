@@ -16,6 +16,11 @@ const sceneSchema = new Schema({
   time: {
     type: Number,
   },
+  timerStateOperations: [
+    {
+      type: Object,
+    },
+  ],
   visited: {
     type: Number,
     default: 0,

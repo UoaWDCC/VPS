@@ -19,17 +19,7 @@ export function modifySceneProp<K extends keyof VisualSceneState>(
   value: VisualSceneState[K]
 ) {
   getScene()[prop] = value;
-  if (prop === "name") {
-    useVisualScene.setState({ name: value as string | null });
-  }
-
-  if (prop === "roles") {
-    useVisualScene.setState({ roles: value as string[] | null });
-  }
-
-  if (prop === "directLink") {
-    useVisualScene.setState({ directLink: value as string | null });
-  }
+  useVisualScene.setState({ [prop]: value } as Pick<VisualSceneState, K>);
 }
 
 // wrapper for state mutating functions, will capture both state and operation

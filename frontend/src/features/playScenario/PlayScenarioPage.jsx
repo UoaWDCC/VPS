@@ -1,5 +1,5 @@
-import { useContext, useEffect, useState } from "react";
-import { useParams, useHistory } from "react-router-dom";
+import { useContext, useEffect, useRef, useState } from "react";
+import { useParams, useHistory, useLocation } from "react-router-dom";
 import axios from "axios";
 import { toast } from "react-hot-toast";
 
@@ -14,6 +14,7 @@ import NotesDisplayCard from "./modals/NotesModal/NotesModal";
 import ResourcesModal from "./modals/ResourcesModal/ResourcesModal";
 import PlayPageSideButton from "./components/PlayPageSideButton/PlayPageSideButton";
 import ResourcesPanel from "./components/ResourcesPanel";
+import SceneTimer from "./components/SceneTimer";
 
 const sceneCache = new Map();
 
@@ -24,7 +25,8 @@ const navigateSingleplayer = async (
   addFlags,
   removeFlags,
   componentId,
-  nextScene = null
+  nextScene = null,
+  startScene
 ) => {
   const token = await user.getIdToken();
   const config = {
@@ -34,7 +36,7 @@ const navigateSingleplayer = async (
       "Content-Type": "application/json",
       Authorization: `Bearer ${token}`,
     },
-    data: { currentScene, addFlags, removeFlags, componentId, nextScene },
+    data: { currentScene, addFlags, removeFlags, componentId, nextScene, startScene },
   };
   const res = await axios.request(config);
   if (res.data.scenes) {
@@ -99,7 +101,12 @@ export default function PlayScenarioPage({ group }) {
   const { user, loading, error: authError } = useContext(AuthenticationContext);
   const { scenarioId } = useParams();
   const history = useHistory();
-  const isMultiplayer = history.location.pathname.includes("/multiplayer/");
+  const location = useLocation();
+  const isMultiplayer = location.pathname.includes("/multiplayer");
+  // Ref so it survives re-renders without triggering them; consumed once by the initial navigate call and then cleared.
+  const startSceneRef = useRef(
+    new URLSearchParams(location.search).get("startScene")
+  );
 
   const [sceneId, setSceneId] = useState(null);
   const [stateVariables, setStateVariables] = useState([]);
@@ -144,6 +151,9 @@ export default function PlayScenarioPage({ group }) {
       }
     }
 
+    const startScene = startSceneRef.current;
+    startSceneRef.current = null; // Clear before the await so a concurrent retry (409 handler) never replays it.
+
     try {
       const { newSceneId, stateVariables, newStateVersion } = isMultiplayer
         ? await navigateMultiplayer(
@@ -160,7 +170,9 @@ export default function PlayScenarioPage({ group }) {
             sceneId,
             addFlags,
             removeFlags,
-            componentId
+            componentId,
+            null,
+            startScene
           );
 
       if (isMultiplayer) {
@@ -238,6 +250,15 @@ export default function PlayScenarioPage({ group }) {
     return () => window.removeEventListener("keydown", onKeyDown);
   }, [currScene, sceneId, stateVariables, stateVersion, addFlags, removeFlags]);
 
+  const handleTimerTimeout = () => {
+    const timerStateOperations = currScene?.timerStateOperations;
+    if (!timerStateOperations?.length) return;
+    setStateVersion((v) => v + 1);
+    setStateVariables((prev) =>
+      applyStateOperations(prev, timerStateOperations)
+    );
+  };
+
   const buttonPressed = async (component) => {
     const currentSceneId = sceneId;
     const nextSceneId = component.nextScene;
@@ -285,6 +306,15 @@ export default function PlayScenarioPage({ group }) {
 
   return (
     <div className="w-full h-full relative">
+      {currScene?.time > 0 && (
+        <div className="absolute top-4 left-1/2 -translate-x-1/2 z-30">
+          <SceneTimer
+            key={sceneId}
+            duration={currScene.time}
+            onTimeout={handleTimerTimeout}
+          />
+        </div>
+      )}
       <PlayScenarioCanvas
         scene={currScene}
         incrementor={isMultiplayer ? incrementor : undefined}
