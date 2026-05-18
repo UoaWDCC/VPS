@@ -1,4 +1,4 @@
-import React, { useRef } from "react";
+import React, { useEffect, useRef } from "react";
 import CanvasContext from "./CanvasContext";
 import Overlay from "./Overlay";
 import type { Component } from "../types";
@@ -15,6 +15,7 @@ import {
   handleMouseUpGlobal,
 } from "../handlers/pointer/pointer";
 import { handleContextGlobal } from "../handlers/pointer/context";
+import { handleGlobal } from "../handlers/keyboard/keyboard";
 
 const componentMap: Record<string, React.FC<any>> = {
   textbox: (props) => <TextBox {...props} editable={true} />,
@@ -51,11 +52,13 @@ function Canvas() {
     handleMouseMoveGlobal(e, toSVGSpace(e.clientX, e.clientY));
   }
 
-  function handleMouseUp() {
+  function handleMouseUp(e: React.MouseEvent) {
+    if (e.button === 2) return;
     handleMouseUpGlobal();
   }
 
   function handleMouseDown(e: React.MouseEvent) {
+    if (e.button === 2) return;
     handleMouseDownGlobal(e, toSVGSpace(e.clientX, e.clientY));
   }
 
@@ -77,6 +80,25 @@ function Canvas() {
         onContextMenu={handleContextMenu}
       >
         <Overlay />
+
+        {/* scene outline */}
+        <svg
+          id="outline"
+          className="w-full h-full absolute pointer-events-none"
+          viewBox={`-50 -50 ${1920 + 50 * 2} ${1080 + 50 * 2}`}
+          style={{ mixBlendMode: "difference" }}
+        >
+          <rect
+            x="0"
+            y="0"
+            width="1920"
+            height="1080"
+            fill="none"
+            stroke="white"
+            strokeWidth="1"
+          />
+        </svg>
+
         <svg
           id="main"
           className="w-full h-full"

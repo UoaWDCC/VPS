@@ -9,13 +9,13 @@ import SceneNavigator from "./SceneNavigator/SceneNavigator";
 import Canvas from "./canvas/Canvas";
 import Topbar from "./topbar/Topbar";
 import useVisualScene from "./stores/visual";
-import { getScene } from "./scene/scene";
-import { handleGlobal } from "./handlers/keyboard/keyboard";
+import { getScenePatch, commitSavedScene } from "./scene/scene";
 import { copy, cut, paste } from "./handlers/keyboard/clipboard";
 import useEditorStore from "./stores/editor";
 import { useHistory } from "react-router-dom";
 import { replace } from "./scene/operations/modifiers";
 import { ArrowLeftIcon, FilesIcon, PlayIcon, UsersIcon } from "lucide-react";
+import { handleGlobal } from "./handlers/keyboard/keyboard";
 
 const listeners = [
   ["copy", copy],
@@ -31,7 +31,7 @@ const AUTOSAVE_INTERVAL = 30000; // 30 secs
  * @container
  */
 export default function AuthoringToolPage() {
-  const { scenes, saveScene } = useContext(SceneContext);
+  const { scenes, saveScenePatch } = useContext(SceneContext);
   const { scenarioId } = useParams();
 
   const sceneId = useVisualScene((scene) => scene.id);
@@ -64,7 +64,8 @@ export default function AuthoringToolPage() {
   }, []);
 
   function playScenario() {
-    window.open(`/play/${scenarioId}`, "_blank");
+    const startScene = sceneId ? `?startScene=${sceneId}` : "";
+    window.open(`/play/${scenarioId}${startScene}`, "_blank");
   }
 
   function goToGroups() {
@@ -82,9 +83,23 @@ export default function AuthoringToolPage() {
   async function save() {
     if (saving) return; // we dont want to interrupt in progress saves (usually uploading media)
     setSaving(true);
-    const clone = structuredClone(getScene());
-    await saveScene(clone);
-    setTimeout(() => setSaving(false), 5000); // debounce saves
+
+    const patch = getScenePatch();
+
+    const hasChanges =
+      Object.keys(patch.fields).length > 0 ||
+      patch.components.length > 0 ||
+      patch.deletedComponentIds.length > 0;
+
+    if (!hasChanges) {
+      setSaving(false);
+      return;
+    }
+
+    await saveScenePatch(patch);
+    commitSavedScene();
+
+    setTimeout(() => setSaving(false), 5000);
   }
 
   return (

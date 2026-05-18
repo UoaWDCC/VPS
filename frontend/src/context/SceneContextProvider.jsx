@@ -1,4 +1,4 @@
-import { useContext } from "react";
+import { useCallback, useContext, useEffect } from "react";
 import AuthenticationContext from "./AuthenticationContext";
 import ScenarioContext from "./ScenarioContext";
 import SceneContext from "./SceneContext";
@@ -9,6 +9,7 @@ import LoadingPage from "../features/status/LoadingPage";
 import GenericErrorPage from "../features/status/GenericErrorPage";
 import toast from "react-hot-toast";
 import { parseMedia } from "../firebase/storage";
+import { init } from "../features/authoring/scene/history";
 
 async function getAllScenes(user, id) {
   const res = await api.get(user, `api/scenario/${id}/scene/all`);
@@ -23,12 +24,17 @@ function deleteScene(user, scenarioId, sceneId) {
   api.delete(user, `/api/scenario/${scenarioId}/scene/${sceneId}`);
 }
 
-async function saveScene(user, scenarioId, scene) {
-  const components = scene.components;
-  const parsed = await parseMedia(components, scenarioId, scene._id);
-  await api.put(user, `/api/scenario/${scenarioId}/scene/${scene._id}`, {
-    ...scene,
-    components: parsed,
+async function saveScenePatch(user, scenarioId, patch) {
+  const parsedComponents = await parseMedia(
+    patch.components,
+    scenarioId,
+    patch._id
+  );
+
+  await api.patch(user, `/api/scenario/${scenarioId}/scene/${patch._id}`, {
+    fields: patch.fields,
+    components: parsedComponents,
+    deletedComponentIds: patch.deletedComponentIds,
   });
 }
 
@@ -88,26 +94,25 @@ export default function SceneContextProvider({ children }) {
     },
   });
 
-  function saveSceneWrapper(scene) {
-    scene.components = Object.values(scene.components);
-    saveSceneMutation.mutate(scene);
-  }
-
-  const saveSceneMutation = useMutation({
-    mutationFn: (scene) => saveScene(user, scenarioId, scene),
-    onMutate: async (scene) => {
-      await queryClient.cancelQueries(["scenes", scenarioId]);
-      queryClient.setQueryData(["scenes", scenarioId], (prev = []) => {
-        const index = prev.findIndex((s) => s._id === scene._id);
-        return index === -1 ? prev : prev.toSpliced(index, 1, scene);
-      });
-    },
+  const saveScenePatchMutation = useMutation({
+    mutationFn: (patch) => saveScenePatch(user, scenarioId, patch),
     onError: () => {
       toast.error(
-        "Something went wrong updating the scenes, your last changes weren't saved"
+        "Something went wrong updating the scene, your last changes weren't saved"
       );
     },
   });
+
+  const saveScenePatchWrapper = useCallback(
+    (patch) => saveScenePatchMutation.mutateAsync(patch),
+    [saveScenePatchMutation.mutateAsync]
+  );
+
+  useEffect(() => {
+    if (scenesQuery.data && scenarioId) {
+      init(scenesQuery.data, scenarioId, saveScenePatchWrapper);
+    }
+  }, [scenesQuery.data, scenarioId, saveScenePatchWrapper]);
 
   if (scenesQuery.isLoading) {
     return <LoadingPage text="Getting scenes..." />;
@@ -123,7 +128,7 @@ export default function SceneContextProvider({ children }) {
       value={{
         scenes: scenesQuery.data,
         reorderScenes: reorderMutation.mutate,
-        saveScene: saveSceneWrapper,
+        saveScenePatch: saveScenePatchWrapper,
         deleteScene: deleteMutation.mutate,
         reFetch: scenesQuery.refetch,
       }}

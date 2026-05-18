@@ -38,9 +38,15 @@ const SceneNavigator = () => {
   const [activeIdDragging, setActiveIdDragging] = useState(null);
 
   async function addScene() {
+    let nextNum = Math.max(1, scenes.length);
+
+    while (scenes.some((scene) => scene.name === `Scene ${nextNum}`)) {
+      nextNum++;
+    }
+
     api
       .post(user, `/api/scenario/${scenarioId}/scene`, {
-        name: `Scene ${scenes.length}`,
+        name: `Scene ${nextNum}`,
       })
       .then(reFetch)
       .catch(handleGeneric);
@@ -85,24 +91,33 @@ const SceneNavigator = () => {
       collisionDetection={closestCenter}
     >
       <SortableContext items={sceneIds} strategy={verticalListSortingStrategy}>
-        <div className="h-full overflow-y-auto no-scrollbar">
-          <ul className="flex flex-col gap-s pb-m">
-            {scenes.map((scene, index) => (
-              <SceneListItem
-                scene={scene}
-                index={index}
-                key={scene._id}
-                active={scene._id === activeId}
+        <div className="flex h-full">
+          <div className="flex-shrink-0 w-[200px] overflow-y-auto no-scrollbar">
+            <ul className="flex flex-col gap-s pb-m">
+              {scenes.map((scene, index) => (
+                <SceneListItem
+                  scene={scene}
+                  index={index}
+                  key={scene._id}
+                  active={scene._id === activeId}
+                />
+              ))}
+              <div className="w-full pr-3">
+                <button className="float-right" onClick={addScene}>
+                  <div className="text-primary hover:text-secondary w-[160px] h-[94px] border-3 border-primary hover:border-secondary rounded-sm flex justify-center items-center">
+                    <PlusIcon />
+                  </div>
+                </button>
+              </div>
+            </ul>
+          </div>
+          <div className="flex-1 p-4 bg-base-100">
+            {scenes.find((s) => s._id === activeId) && (
+              <Thumbnail
+                components={scenes.find((s) => s._id === activeId).components}
               />
-            ))}
-            <div className="w-full">
-              <button className="float-right" onClick={addScene}>
-                <div className="text-primary hover:text-secondary w-[160px] h-[94px] border-3 border-primary hover:border-secondary rounded-sm flex justify-center items-center">
-                  <PlusIcon />
-                </div>
-              </button>
-            </div>
-          </ul>
+            )}
+          </div>
         </div>
       </SortableContext>
       <DragOverlay dropAnimation={null}>

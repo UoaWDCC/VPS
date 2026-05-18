@@ -1,6 +1,12 @@
 import axios from "axios";
 import { useContext, useEffect, useState } from "react";
-import { Route, Switch, useHistory, useParams } from "react-router-dom";
+import {
+  Route,
+  Switch,
+  useHistory,
+  useLocation,
+  useParams,
+} from "react-router-dom";
 
 import AuthenticationContext from "context/AuthenticationContext";
 
@@ -9,7 +15,6 @@ import GenericErrorPage from "../status/GenericErrorPage";
 import LoadingPage from "../status/LoadingPage";
 
 import PlayScenarioPage from "./PlayScenarioPage";
-import PlayScenarioPageMulti from "./PlayScenarioPageMulti";
 import PlayLandingPage from "./PlayLandingPage"; // Import the new landing page
 
 const getGroup = async (user, scenarioId) => {
@@ -27,6 +32,7 @@ export default function PlayScenarioResolver() {
   const { user, loading, error: authError } = useContext(AuthenticationContext);
   const { scenarioId } = useParams();
   const history = useHistory();
+  const location = useLocation();
   const [group, setGroup] = useState(null);
 
   if (loading) return <LoadingPage text="Loading Scenario..." />;
@@ -41,10 +47,14 @@ export default function PlayScenarioResolver() {
       const fetchedGroup = await getGroup(user, scenarioId);
       if (!fetchedGroup) {
         setGroup("none");
-        return history.replace(`/play/${scenarioId}/singleplayer/`);
+        return history.replace(
+          `/play/${scenarioId}/singleplayer${location.search}`
+        );
       }
       setGroup(fetchedGroup);
-      return history.replace(`/play/${scenarioId}/multiplayer/`);
+      return history.replace(
+        `/play/${scenarioId}/multiplayer${location.search}`
+      );
     };
     resolveType();
   }, [scenarioId]);
@@ -64,7 +74,7 @@ export default function PlayScenarioResolver() {
         <InvalidRolePage group={group} />
       </Route>
       <Route path="/play/:scenarioId/multiplayer/:sceneId?">
-        <PlayScenarioPageMulti group={group} />
+        <PlayScenarioPage group={group} />
       </Route>
       <Route path="/play/:scenarioId/singleplayer/:sceneId?">
         <PlayScenarioPage />

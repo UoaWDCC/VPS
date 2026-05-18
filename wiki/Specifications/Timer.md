@@ -1,6 +1,6 @@
 # Timer
 
-This is the feature that will allow authors to do two things: 
+This is the feature that will allow authors to do two things:
 
 - Simulate the idea of "pressure" within a scene or group of scenes
 - Provide deadlines for members of groups, or full groups, to have completed sections of the scenario by
@@ -41,8 +41,8 @@ To avoid a situation like this, we can lock the scene(s) to a certain role, disa
 
 When a timer ends, the author probably wants to perform some meaningful action. The most likely "actions" in this case are scene and state transitions. For example:
 
-- *decrement health by 20*
-- *set out_of_time to true*
+- _decrement health by 20_
+- _set out_of_time to true_
 
 The second one might seem useless, but it could be an important metric used by the author when reviewing the stats for players of the scenario. Especially if its used for grading an educational scenario.
 
@@ -62,3 +62,67 @@ Since the scene graph can get fairly complex, we need to validate a few things b
 This way, cycling between the roles is actually possible within the section. We can just traverse the graph from the start point and switch the role assigned to every scene we encounter. If we didn't do this validation, we might end up overwriting roles on scenes unrelated to the critical section, due to a mistake on the author's part.
 
 The switching order should just cycle between the roles based on the definition order, aka the order they are stored in the scenario properties. Fine control over this order is unnecessary, and would introduce too much complexity.
+
+---
+
+## Implementation
+
+### What Is Implemented
+
+The **single-scene timer** is implemented. Authors can set a countdown duration on any scene and attach a list of state variable operations that fire when the timer reaches zero.
+
+#### Authoring
+
+**Scene Settings sidebar** (`SceneSettings.jsx`)
+
+- A "Timer Duration (seconds)" number input. Saving on blur calls `modifySceneProp("time", ...)`, which persists the value via autosave.
+- When `time > 0`, an "On Timeout" collapse panel appears below the scene details panel.
+
+**On Timeout panel** (`TimerStateOperationMenu.jsx`)
+
+- Lists the current timeout state operations for the scene.
+- A `+` button opens a modal to add a new operation (same action schema as button state operations: variable → operation → value).
+- Each row can edit or delete its operation inline.
+- All changes call `modifySceneProp("timerStateOperations", ...)` and are included in the autosave patch.
+
+#### Data Model
+
+Scene document (MongoDB):
+
+```js
+{
+  time: Number,                 // countdown duration in seconds; null = no timer
+  timerStateOperations: [{      // operations applied on timeout
+    stateVariableId: String,
+    displayName: String,
+    operation: String,          // e.g. "set", "add"
+    value: Any                  // string | number | boolean
+  }]
+}
+```
+
+Both fields are included in the `patchScene` allowlist and projected by the play navigation routes (`getSimpleScene`, `getConnectedScenes`).
+
+#### Play
+
+**`SceneTimer` component** (`SceneTimer.jsx`)
+
+- Counts down from `duration` seconds using `setInterval`.
+- Visual states:
+  - **Neutral** — more than the warning threshold remains
+  - **Pulsing red** — within the warning window: `min(10s, 20% of duration)`
+  - **Solid red** — timer has reached zero
+- Mounted with `key={sceneId}` in `PlayScenarioPage`, so it resets automatically on every scene transition.
+- Fires `onTimeout` exactly once when `secondsLeft` reaches zero.
+
+**`handleTimerTimeout`** (in `PlayScenarioPage.jsx`)
+
+- Reads `currScene.timerStateOperations` and calls `applyStateOperations`.
+- Increments `stateVersion` to trigger a re-render with updated state.
+
+### What Is Not Yet Implemented
+
+- **Multi-scene and global timers** — only per-scene timers exist.
+- **Scene transition on timeout** — only state variable operations are supported; navigating to a specific scene on timeout is not wired up.
+- **Backend timer for multiplayer sync** — the timer runs entirely client-side. In multiplayer, each player's timer is independent; there is no shared server-side source of truth.
+- **Role switch action** — not implemented.

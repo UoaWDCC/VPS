@@ -229,24 +229,26 @@ describe("Scene API tests", () => {
     expect(scene._id).toBe(scene1._id.toString());
   });
 
-  it("updates and returns the newly updated scene", async () => {
+  it("PATCH api/scenario/:scenarioId/scene/:sceneId updates a scene", async () => {
     const reqData = {
-      name: "Test Scene 1 updated name",
+      fields: {
+        name: "Test Scene 1 updated name",
+      },
       components: [],
+      deletedComponentIds: [],
     };
 
-    const response = await axios.put(
+    const response = await axios.patch(
       `http://localhost:${port}/api/scenario/${scenario2._id}/scene/${scene1._id}`,
       reqData,
       authHeaders("user1")
     );
+
     expect(response.status).toBe(HTTP_OK);
 
-    // check correct scene is returned
-    const responseScene = response.data;
-    expect(responseScene._id).toBe(scene1._id.toString());
-    expect(responseScene.name).toEqual(reqData.name);
-    expect(responseScene.components).toEqual(reqData.components);
+    const dbScene = await Scene.findById(scene1._id).lean();
+    expect(dbScene.name).toBe("Test Scene 1 updated name");
+    expect(dbScene.components).toEqual(scene1.components);
   });
 
   it("DELETE api/scenario/:scenarioId/scene/:sceneId deletes a valid scene", async () => {
