@@ -7,6 +7,7 @@ import { getStyleForSelection } from "../scene/operations/text";
 type Mode = "normal" | "resize" | "create" | "text" | "mutation";
 
 interface EditorState {
+  loading: boolean;
   selected: string | null;
   createType: string | null;
   mouseDown: boolean;
@@ -25,6 +26,7 @@ interface EditorState {
   desiredColumn: number | null;
   activeStyle: BaseTextStyle | null;
 
+  setLoading: (loading: boolean) => void;
   setSelection: (selection: ModelSelection) => void;
   setVisualSelection: Dynamic<VisualSelection>;
   setDesiredColumn: (column: number | null) => void;
@@ -52,12 +54,14 @@ function setter<K extends keyof EditorState>(set: Function, prop: K) {
 }
 
 const useEditorStore = create<EditorState>((set) => ({
+  loading: false,
   selected: null,
   createType: null,
   mouseDown: false,
   mutationBounds: { verts: [], rotation: 0 },
   offset: { x: 0, y: 0 },
 
+  setLoading: (value: boolean) => set({ loading: value }),
   setSelected: (id) => set({ selected: id }),
   setCreateType: (type: string) => set({ createType: type }),
   setMouseDown: (mouseDown) => set({ mouseDown }),
