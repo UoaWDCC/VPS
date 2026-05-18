@@ -154,6 +154,12 @@ export const userNavigate = async (req) => {
   if (path[0] !== currentScene)
     throw new HttpError("Scene mismatch has occured", STATUS.CONFLICT);
 
+  if (bodyNextScene) {
+    const scene = await Scene.findById(currentScene, { directLink: 1 }).lean();
+    if (!scene?.directLink?.equals(bodyNextScene))
+      throw new HttpError("Invalid direct link target", STATUS.FORBIDDEN);
+  }
+
   const component = componentId
     ? await getComponent(currentScene, componentId)
     : null;

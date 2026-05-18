@@ -22,6 +22,7 @@ export default function SceneSettings() {
 
   const name = useVisualScene((scene) => scene.name);
   const roles = useVisualScene((scene) => scene.roles);
+  const sceneId = useVisualScene((scene) => scene.id);
   const {
     directLink,
     disabled: directLinkDisabled,
@@ -178,7 +179,7 @@ export default function SceneSettings() {
               {directLinkDisabled && (
                 <span
                   className="tooltip tooltip-warning tooltip-top cursor-help text-warning text-xs before:!whitespace-normal before:!max-w-[150px]"
-                  data-tip={"Disabled: scene has multiple buttons leading to different scenes"}
+                  data-tip={"Disabled: scene has buttons leading to multiple different scenes"}
                 >
                   ⚠
                 </span>
@@ -194,7 +195,7 @@ export default function SceneSettings() {
             >
               <option value="">No direct link target</option>
               {scenes
-                ?.filter((scene) => scene._id !== useVisualScene.getState().id)
+                ?.filter((scene) => scene._id !== sceneId)
                 .map((scene) => (
                   <option key={scene._id} value={scene._id}>
                     {scene.name}
