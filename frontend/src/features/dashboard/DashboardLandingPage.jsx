@@ -1,4 +1,4 @@
-import { useState, useContext, useEffect, useMemo } from "react";
+import { useState, useContext } from "react";
 import { useHistory } from "react-router-dom";
 import ScenarioContext from "../../context/ScenarioContext";
 import TopNavBar from "../TopNavBar/TopNavBar";
@@ -7,38 +7,18 @@ import { SearchIcon } from "lucide-react";
 import FabMenu from "../../components/FabMenu";
 
 export default function DashboardLandingPage() {
-  const {
-    scenarios: userScenarios,
-    assignedScenarios,
-    reFetch,
-    reFetch2,
-    setCurrentScenario,
-  } = useContext(ScenarioContext);
+  const { allScenarios } = useContext(ScenarioContext);
   const history = useHistory();
 
   const [search, setSearch] = useState("");
 
-  useEffect(() => {
-    reFetch();
-    reFetch2();
-  }, []);
+  const scenarios = [allScenarios.owned, allScenarios.accessible].flat();
 
-  const allScenarios = useMemo(
-    () => [
-      ...(userScenarios || []),
-      ...(assignedScenarios || []).filter(
-        (as) => !userScenarios?.some((us) => us._id === as._id)
-      ),
-    ],
-    [userScenarios, assignedScenarios]
-  );
-
-  const filteredScenarios = allScenarios.filter((scenario) =>
+  const filteredScenarios = scenarios.filter((scenario) =>
     scenario.name.toLowerCase().includes(search.toLowerCase())
   );
 
   const selectDashboardScenario = (scenario) => {
-    setCurrentScenario(scenario);
     history.push(`/dashboard/${scenario._id}`);
   };
 
