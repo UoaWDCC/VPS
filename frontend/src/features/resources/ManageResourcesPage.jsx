@@ -15,6 +15,7 @@ import {
 import AddGroup from "./components/AddGroup";
 import StateConditionalMenu from "../../components/StateVariables/StateConditionalMenu";
 import MDTextViewer from "../playScenario/components/MDTextViewer";
+import { getDownloadUrl } from "../playScenario/hooks/useDownloadUrl";
 
 function normaliseFile(f) {
   return {
@@ -41,7 +42,7 @@ export default function ManageResourcesPage() {
 
   function playScenario() {
     window.open(`/play/${scenarioId}`, "_blank");
-  }
+  } 
 
   // Groups (each with files)
   const [groups, setGroups] = useState([]);
@@ -83,12 +84,6 @@ export default function ManageResourcesPage() {
       cancelled = true;
     };
   }, [scenarioId]);
-
-  async function makeDownloadUrl(fileId) {
-    const user = getAuth().currentUser;
-    const token = await user.getIdToken();
-    return `/api/files/download/${fileId}?token=${encodeURIComponent(token)}`;
-  }
 
   // Upload directly to group
   async function addFilesTo(groupId, files) {
@@ -346,7 +341,7 @@ export default function ManageResourcesPage() {
                   />
                   <Preview
                     file={selectedFile}
-                    makeDownloadUrl={makeDownloadUrl}
+                    getDownloadUrl={getDownloadUrl}
                   />
                 </div>
               </div>
@@ -385,7 +380,7 @@ function UploadButton({ onFiles, multiple = true, className = "" }) {
   );
 }
 
-function Preview({ file, makeDownloadUrl }) {
+function Preview({ file, getDownloadUrl }) {
   const [downloadUrl, setDownloadUrl] = useState(null);
   const [text, setText] = useState(null);
   const [textLoading, setTextLoading] = useState(false);
@@ -399,13 +394,13 @@ function Preview({ file, makeDownloadUrl }) {
         setText(null);
         return;
       }
-      const url = await makeDownloadUrl(file.id);
+      const url = await getDownloadUrl(file.id);
       if (!cancelled) setDownloadUrl(url);
     })();
     return () => {
       cancelled = true;
     };
-  }, [file, makeDownloadUrl]);
+  }, [file, getDownloadUrl]);
 
   useEffect(() => {
     let cancelled = false;
