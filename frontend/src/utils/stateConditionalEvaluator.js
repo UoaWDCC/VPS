@@ -23,55 +23,15 @@ function evaluateStateConditional(conditional, stateVariables) {
   const { comparator, value: expectedValue } = conditional;
   const currentValue = stateVariable.value;
 
-  // Handle different comparison types based on state variable type
-  switch (stateVariable.type) {
-    case stateTypes.BOOLEAN: {
-      switch (comparator) {
-        case "=":
-          return currentValue === expectedValue;
-        case "!=":
-          return currentValue !== expectedValue;
-        default:
-          return false;
-      }
-    }
-
-    case stateTypes.NUMBER: {
-      const numExpected = parseFloat(expectedValue);
-      const numCurrent = parseFloat(currentValue);
-
-      if (isNaN(numExpected) || isNaN(numCurrent)) {
-        return false;
-      }
-
-      switch (comparator) {
-        case "=":
-          return numCurrent === numExpected;
-        case "!=":
-          return numCurrent !== numExpected;
-        case ">":
-          return numCurrent > numExpected;
-        case "<":
-          return numCurrent < numExpected;
-        default:
-          return false;
-      }
-    }
-
-    case stateTypes.STRING: {
-      const strExpected = String(expectedValue);
-      const strCurrent = String(currentValue);
-
-      switch (comparator) {
-        case "=":
-          return strCurrent === strExpected;
-        case "!=":
-          return strCurrent !== strExpected;
-        default:
-          return false;
-      }
-    }
-
+  switch (comparator) {
+    case "=":
+      return currentValue === expectedValue;
+    case "!=":
+      return currentValue !== expectedValue;
+    case ">":
+      return currentValue > expectedValue;
+    case "<":
+      return currentValue < expectedValue;
     default:
       return false;
   }
