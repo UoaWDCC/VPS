@@ -101,7 +101,7 @@ export default function PlayScenarioPage({ group }) {
   const { scenarioId } = useParams();
   const history = useHistory();
   const location = useLocation();
-  const isMultiplayer = location.pathname.includes("/multiplayer/");
+  const isMultiplayer = location.pathname.includes("/multiplayer");
   // Ref so it survives re-renders without triggering them; consumed once by the initial navigate call and then cleared.
   const startSceneRef = useRef(
     new URLSearchParams(location.search).get("startScene")
