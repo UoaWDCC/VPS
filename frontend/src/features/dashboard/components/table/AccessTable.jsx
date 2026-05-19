@@ -437,17 +437,15 @@ const AccessTable = ({ token, ownerUid }) => {
       >
         <form method="dialog" className="modal-box relative">
           <button
-            className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2 text-black"
+            className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2"
             onClick={() => setStudentPendingRemoval(null)}
           >
             X
           </button>
 
-          <h3 className="font-bold text-lg text-center text-black">
-            Remove Student
-          </h3>
+          <h3 className="font-bold text-lg text-center">Remove Student</h3>
 
-          <p className="py-4 text-center text-black">
+          <p className="py-4 text-center">
             Are you sure you want to remove{" "}
             {studentPendingRemoval?.name || studentPendingRemoval?.email} from
             this group?
@@ -459,7 +457,7 @@ const AccessTable = ({ token, ownerUid }) => {
               className="btn important"
               onClick={confirmStudentRemoval}
             >
-              Remove
+              Remove Student
             </button>
             <button
               type="button"
