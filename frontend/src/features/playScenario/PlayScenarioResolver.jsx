@@ -1,6 +1,12 @@
 import axios from "axios";
 import { useContext, useEffect, useState } from "react";
-import { Route, Switch, useHistory, useParams } from "react-router-dom";
+import {
+  Route,
+  Switch,
+  useHistory,
+  useLocation,
+  useParams,
+} from "react-router-dom";
 
 import AuthenticationContext from "context/AuthenticationContext";
 
@@ -26,6 +32,7 @@ export default function PlayScenarioResolver() {
   const { user, loading, error: authError } = useContext(AuthenticationContext);
   const { scenarioId } = useParams();
   const history = useHistory();
+  const location = useLocation();
   const [group, setGroup] = useState(null);
 
   if (loading) return <LoadingPage text="Loading Scenario..." />;
@@ -40,10 +47,14 @@ export default function PlayScenarioResolver() {
       const fetchedGroup = await getGroup(user, scenarioId);
       if (!fetchedGroup) {
         setGroup("none");
-        return history.replace(`/play/${scenarioId}/singleplayer/`);
+        return history.replace(
+          `/play/${scenarioId}/singleplayer${location.search}`
+        );
       }
       setGroup(fetchedGroup);
-      return history.replace(`/play/${scenarioId}/multiplayer/`);
+      return history.replace(
+        `/play/${scenarioId}/multiplayer${location.search}`
+      );
     };
     resolveType();
   }, [scenarioId]);
@@ -62,10 +73,10 @@ export default function PlayScenarioResolver() {
       <Route exact path="/play/:scenarioId/invalid-role">
         <InvalidRolePage group={group} />
       </Route>
-      <Route path="/play/:scenarioId/multiplayer/:sceneId?">
+      <Route path="/play/:scenarioId/multiplayer">
         <PlayScenarioPage group={group} />
       </Route>
-      <Route path="/play/:scenarioId/singleplayer/:sceneId?">
+      <Route path="/play/:scenarioId/singleplayer">
         <PlayScenarioPage />
       </Route>
     </Switch>

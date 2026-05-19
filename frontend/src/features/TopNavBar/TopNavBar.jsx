@@ -1,15 +1,13 @@
 import React, { useContext } from "react";
-import { useHistory } from "react-router-dom";
-import { ArrowLeftIcon } from "lucide-react";
+import { useHistory, useLocation } from "react-router-dom";
 import AuthenticationContext from "../../context/AuthenticationContext";
+import { LogOutIcon } from "lucide-react";
 
-export default function TopNavBar({ activeTab = "create" }) {
-  const history = useHistory();
+export default function TopNavBar() {
   const { signOut } = useContext(AuthenticationContext);
 
-  function goBack() {
-    history.push("/");
-  }
+  const history = useHistory();
+  const { pathname } = useLocation();
 
   const handleLogout = async () => {
     try {
@@ -21,50 +19,33 @@ export default function TopNavBar({ activeTab = "create" }) {
   };
 
   return (
-    <div className="top-nav-bar">
-      <div className="nav-left">
-        <button className="back-btn" onClick={goBack}>
-          <ArrowLeftIcon size={20} />
-          Back
-        </button>
-        <button className="logout-btn" onClick={handleLogout}>
-          <svg
-            className="logout-icon"
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 24 24"
-          >
-            <path
-              fill="currentColor"
-              d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.59L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"
-            />
-          </svg>
+    <div className="fixed top-0 left-0 right-0 bg-base-100 pl-xl pr-[calc(var(--spacing-xl)+7.5rem)] flex border-b-1 font-dm border-gradient z-1">
+      <div className="py-m w-30 -mb-[1px]">
+        <button onClick={handleLogout} className="btn btn-phantom text-m">
+          <LogOutIcon size={20} />
           <span>Logout</span>
         </button>
       </div>
-
-      <div className="nav-center">
+      <div className="flex mx-auto items-center gap-2xl pt-xl -mb-[1px]">
         <button
-          className={`nav-btn ${activeTab === "play" ? "nav-btn-active" : ""}`}
+          className={`btn btn-phantom px-10 pb-3 border-0 border-b-4 border-transparent rounded-none border-solid! text-m ${pathname === "/play" ? "text-secondary! border-secondary!" : ""}`}
           onClick={() => history.push("/play")}
         >
           Play
         </button>
         <button
-          className={`nav-btn ${activeTab === "dashboard" ? "nav-btn-active" : ""}`}
+          className={`btn btn-phantom px-10 pb-3 border-0 border-b-4 border-transparent rounded-none border-solid! text-m ${pathname === "/dashboard" ? "text-secondary! border-secondary!" : ""}`}
           onClick={() => history.push("/dashboard")}
         >
           Dashboard
         </button>
         <button
-          className={`nav-btn ${activeTab === "create" ? "nav-btn-active" : ""}`}
+          className={`btn btn-phantom px-10 pb-3 border-0 border-b-4 border-transparent rounded-none border-solid! text-m ${pathname === "/create" ? "text-secondary! border-secondary!" : ""}`}
           onClick={() => history.push("/create")}
         >
           Create & Edit
         </button>
       </div>
-
-      {/* Logout button should be in nav-right */}
-      <div className="nav-right"></div>
     </div>
   );
 }

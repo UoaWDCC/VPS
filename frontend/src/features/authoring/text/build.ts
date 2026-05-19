@@ -18,7 +18,7 @@ const fallback: BaseTextStyle = {
   fontStyle: "normal",
   textDecoration: "none",
   textColor: "#000000",
-  highlightColor: "#000000",
+  highlightColor: "#00000000",
 };
 
 function measure(text: string) {

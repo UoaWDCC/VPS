@@ -2,6 +2,7 @@ import Access from "../models/access.js";
 import Scenario from "../models/scenario.js";
 import Scene from "../models/scene.js";
 import { v4 as uuidv4 } from "uuid";
+import User from "../models/user.js";
 
 /**
  * Creates a scenario in the database with an initial scene
@@ -41,6 +42,7 @@ const addThumbs = async (scenarios) => {
           name: scenario.name,
           description: scenario.description,
           estimatedTime: scenario.estimatedTime,
+          user: scenario.user ?? { uid: scenario.uid },
         };
       const thumbnail = await Scene.findById(scenario.scenes[0], {
         components: 1,
@@ -52,6 +54,7 @@ const addThumbs = async (scenarios) => {
         thumbnail,
         description: scenario.description,
         estimatedTime: scenario.estimatedTime,
+        user: scenario.user ?? { uid: scenario.uid },
       };
     })
   );
@@ -73,14 +76,7 @@ const retrieveAccessibleScenarios = async (uid) => {
   const scenarioIds = [...access.map((s) => s.scenarioId)];
   if (scenarioIds.length == 0) return [];
 
-  const scenarios = await Scenario.find(
-    { _id: { $in: scenarioIds } },
-    { name: 1, scenes: { $slice: 1 } }
-  )
-    .sort({ _id: 1 })
-    .lean();
-
-  return addThumbs(scenarios);
+  return retrieveScenarios(scenarioIds);
 };
 
 /**
@@ -91,11 +87,15 @@ const retrieveAccessibleScenarios = async (uid) => {
 const retrieveScenarioList = async (uid) => {
   const scenarios = await Scenario.find(
     { uid },
-    { name: 1, scenes: { $slice: 1 }, description: 1, estimatedTime: 1 }
+    { name: 1, scenes: { $slice: 1 }, description: 1, estimatedTime: 1, uid: 1 }
   )
     .sort({ _id: 1 })
     .lean();
-  return addThumbs(scenarios);
+  const user = await User.findOne(
+    { uid },
+    { name: 1, uid: 1, pictureURL: 1 }
+  ).lean();
+  return addThumbs(scenarios.map((s) => ({ ...s, user })));
 };
 
 /**
@@ -116,9 +116,22 @@ const retrieveScenario = async (scenarioId) => {
 const retrieveScenarios = async (scenarioIds) => {
   const scenarios = await Scenario.find(
     { _id: { $in: scenarioIds } },
-    { name: 1, scenes: { $slice: 1 }, description: 1, estimatedTime: 1 }
-  );
-  return addThumbs(scenarios);
+    { name: 1, scenes: { $slice: 1 }, description: 1, estimatedTime: 1, uid: 1 }
+  ).lean();
+
+  const uids = [...new Set(scenarios.map((s) => s.uid))];
+  const users = await User.find(
+    { uid: { $in: uids } },
+    { name: 1, uid: 1, pictureURL: 1 }
+  ).lean();
+  const userMap = Object.fromEntries(users.map((u) => [u.uid, u]));
+
+  const scenariosWithUser = scenarios.map((s) => ({
+    ...s,
+    user: userMap[s.uid],
+  }));
+
+  return addThumbs(scenariosWithUser);
 };
 
 /**

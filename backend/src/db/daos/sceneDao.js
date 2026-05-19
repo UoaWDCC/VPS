@@ -216,7 +216,7 @@ const patchScene = async (sceneId, patch) => {
   const { fields = {}, components = [], deletedComponentIds = [] } = patch;
 
   const allowedFields = {};
-  ["name", "roles", "time"].forEach((field) => {
+  ["name", "roles", "time", "timerStateOperations"].forEach((field) => {
     if (Object.prototype.hasOwnProperty.call(fields, field)) {
       allowedFields[field] = fields[field];
     }
