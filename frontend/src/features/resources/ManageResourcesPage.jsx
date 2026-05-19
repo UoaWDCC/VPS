@@ -42,7 +42,7 @@ export default function ManageResourcesPage() {
 
   function playScenario() {
     window.open(`/play/${scenarioId}`, "_blank");
-  } 
+  }
 
   // Groups (each with files)
   const [groups, setGroups] = useState([]);
@@ -339,10 +339,7 @@ export default function ManageResourcesPage() {
                     file={selectedFile}
                     updateFile={updateFile}
                   />
-                  <Preview
-                    file={selectedFile}
-                    getDownloadUrl={getDownloadUrl}
-                  />
+                  <Preview file={selectedFile} />
                 </div>
               </div>
             </div>
@@ -380,7 +377,7 @@ function UploadButton({ onFiles, multiple = true, className = "" }) {
   );
 }
 
-function Preview({ file, getDownloadUrl }) {
+function Preview({ file }) {
   const [downloadUrl, setDownloadUrl] = useState(null);
   const [text, setText] = useState(null);
   const [textLoading, setTextLoading] = useState(false);
@@ -400,7 +397,7 @@ function Preview({ file, getDownloadUrl }) {
     return () => {
       cancelled = true;
     };
-  }, [file, getDownloadUrl]);
+  }, [file]);
 
   useEffect(() => {
     let cancelled = false;

@@ -6,6 +6,5 @@ export async function getDownloadUrl(fileId) {
   const idToken = await user.getIdToken();
   const path = `/api/files/download/${fileId}?token=${encodeURIComponent(idToken)}`;
   const backendUrl = new URL(path, import.meta.env.VITE_SERVER_URL).href;
-  console.log(backendUrl)
   return backendUrl;
 }
