@@ -29,6 +29,7 @@ const AccessTable = ({ token, ownerUid }) => {
   const [options, setOptions] = useState([]);
   const [data, setData] = useState([]);
   const [selectedUserIndex, setSelectedUserIndex] = useState();
+  const [studentPendingRemoval, setStudentPendingRemoval] = useState(null);
   // const {isLoading: listLoading, reFetch: accessReFetch} = useGet(`api/access/${scenarioId}/users`, setAccessList, true);
 
   const [listLoading, setListLoading] = useState(false);
@@ -121,6 +122,13 @@ const AccessTable = ({ token, ownerUid }) => {
     }
   };
 
+  const confirmStudentRemoval = async () => {
+    if (!studentPendingRemoval) return;
+
+    await handleDelete(studentPendingRemoval.uid);
+    setStudentPendingRemoval(null);
+  };
+
   const createAccessList = async () => {
     // console.log("Create button pressed")
     try {
@@ -174,8 +182,8 @@ const AccessTable = ({ token, ownerUid }) => {
         if (ownerUid == item.uid) return <p>(You)</p>;
         return (
           <button
-            onClick={() => handleDelete(item.uid)}
-            aria-label={`Delete ${item.name}`}
+            onClick={() => setStudentPendingRemoval(item)}
+            aria-label={`Revoke ${item.name}`}
             className="btn btn-ghost btn-sm"
           >
             <DeleteForeverIcon fontSize="small" />
@@ -423,6 +431,46 @@ const AccessTable = ({ token, ownerUid }) => {
           </tfoot>
         </table>
       </div>
+      <dialog
+        id="revoke_student_modal"
+        className={`modal ${studentPendingRemoval ? "modal-open" : ""}`}
+      >
+        <form method="dialog" className="modal-box relative">
+          <button
+            className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2 text-black"
+            onClick={() => setStudentPendingRemoval(null)}
+          >
+            X
+          </button>
+
+          <h3 className="font-bold text-lg text-center text-black">
+            Remove Student
+          </h3>
+
+          <p className="py-4 text-center text-black">
+            Are you sure you want to remove{" "}
+            {studentPendingRemoval?.name || studentPendingRemoval?.email} from
+            this group?
+          </p>
+
+          <div className="modal-action flex justify-center gap-2">
+            <button
+              type="button"
+              className="btn important"
+              onClick={confirmStudentRemoval}
+            >
+              Remove
+            </button>
+            <button
+              type="button"
+              className="btn vps"
+              onClick={() => setStudentPendingRemoval(null)}
+            >
+              Cancel
+            </button>
+          </div>
+        </form>
+      </dialog>
     </>
   );
 };
