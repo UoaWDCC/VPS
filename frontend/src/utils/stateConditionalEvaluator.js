@@ -1,5 +1,3 @@
-import { stateTypes } from "../components/StateVariables/stateTypes";
-
 /**
  * Evaluates a single state conditional against current state variables
  * @param {Object} conditional - The state conditional to evaluate
