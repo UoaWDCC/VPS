@@ -160,11 +160,6 @@ export default function CreateLandingPage() {
               { name },
               getUserIdToken
             );
-            await usePost(
-              `/api/scenario/${newScenario._id}/scene`,
-              { name: "Scene 1" },
-              getUserIdToken
-            );
             setCurrentScenario(newScenario);
             history.push(`/scenario/${newScenario._id}`);
             reFetch();

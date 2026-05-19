@@ -17,11 +17,11 @@ async function getAllScenes(user, id) {
 }
 
 function updateScenes(user, id, sceneIds) {
-  api.put(user, `/api/scenario/${id}/scene/reorder`, { sceneIds });
+  return api.put(user, `/api/scenario/${id}/scene/reorder`, { sceneIds });
 }
 
 function deleteScene(user, scenarioId, sceneId) {
-  api.delete(user, `/api/scenario/${scenarioId}/scene/${sceneId}`);
+  return api.delete(user, `/api/scenario/${scenarioId}/scene/${sceneId}`);
 }
 
 async function saveScenePatch(user, scenarioId, patch) {
@@ -83,13 +83,22 @@ export default function SceneContextProvider({ children }) {
     mutationFn: (id) => deleteScene(user, scenarioId, id),
     onMutate: async (id) => {
       await queryClient.cancelQueries(["scenes", scenarioId]);
+      const previousScenes = queryClient.getQueryData(["scenes", scenarioId]);
+
       queryClient.setQueryData(["scenes", scenarioId], (prev) =>
         prev ? prev.filter((s) => s._id !== id) : []
       );
+
+      return { previousScenes };
     },
-    onError: () => {
+    onError: (error, _id, context) => {
+      if (context?.previousScenes) {
+        queryClient.setQueryData(["scenes", scenarioId], context.previousScenes);
+      }
+
       toast.error(
-        "Something went wrong updating the scenes, your last changes weren't saved"
+        error?.response?.data?.error ||
+          "Something went wrong updating the scenes, your last changes weren't saved"
       );
     },
   });

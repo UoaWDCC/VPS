@@ -13,11 +13,13 @@ import {
 import auth from "../../middleware/firebaseAuth.js";
 import scenarioAuth from "../../middleware/scenarioAuth.js";
 import validScenarioId from "../../middleware/validScenarioId.js";
+import status from "../../util/status.js";
 
 const router = Router({ mergeParams: true });
 
 const HTTP_OK = 200;
 const HTTP_NOT_FOUND = 404;
+const LAST_SCENE_DELETE_MESSAGE = "A scenario must have at least one scene.";
 
 // Apply auth middleware to all routes below this point
 router.use(auth);
@@ -99,9 +101,11 @@ router.put("/reorder", async (req, res) => {
 
 // Delete a scene
 router.delete("/:sceneId", async (req, res) => {
-  const deleted = await deleteScene(req.params.scenarioId, req.params.sceneId);
-  if (deleted) {
+  const result = await deleteScene(req.params.scenarioId, req.params.sceneId);
+  if (result.deleted) {
     res.sendStatus(HTTP_OK);
+  } else if (result.reason === "last_scene") {
+    res.status(status.CONFLICT).json({ error: LAST_SCENE_DELETE_MESSAGE });
   } else {
     res.sendStatus(HTTP_NOT_FOUND);
   }
