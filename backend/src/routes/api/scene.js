@@ -124,11 +124,15 @@ router.put("/visited/:sceneId", async (req, res) => {
 router.patch("/:sceneId", async (req, res) => {
   const { fields = {}, components = [], deletedComponentIds = [] } = req.body;
 
-  const scene = await patchScene(req.params.sceneId, {
-    fields,
-    components,
-    deletedComponentIds,
-  });
+  const scene = await patchScene(
+    req.params.sceneId,
+    {
+      fields,
+      components,
+      deletedComponentIds,
+    },
+    req.params.scenarioId
+  );
 
   res.status(HTTP_OK).json(scene);
 });

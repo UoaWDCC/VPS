@@ -4,6 +4,21 @@ import { tryDeleteFile, updateFileMetadata } from "../../firebase/storage.js";
 import { HttpError } from "../../util/error.js";
 import status from "../../util/status.js";
 
+// enforce direct links between scenes to be in the same scenario
+const assertDirectLinkInScenario = async (scenarioId, directLinkId) => {
+  if (directLinkId == null) return;
+  const inScenario = await Scenario.exists({
+    _id: scenarioId,
+    scenes: directLinkId,
+  });
+  if (!inScenario) {
+    throw new HttpError(
+      "directLink target must belong to the same scenario",
+      status.BAD_REQUEST
+    );
+  }
+};
+
 /**
  * Creates a scene in the database, and updates its parent scenario to contain the scene
  * @param {String} scenarioId MongoDB ID of parent scenario
@@ -11,6 +26,7 @@ import status from "../../util/status.js";
  * @returns the created database scene object
  */
 const createScene = async (scenarioId, scene) => {
+  await assertDirectLinkInScenario(scenarioId, scene.directLink);
   const dbScene = new Scene(scene);
   await dbScene.save();
 
@@ -202,7 +218,7 @@ const updateSceneOrder = async (scenarioId, sceneIds) => {
   return updatedScenario;
 };
 
-const patchScene = async (sceneId, patch) => {
+const patchScene = async (sceneId, patch, scenarioId) => {
   const { fields = {}, components = [], deletedComponentIds = [] } = patch;
 
   const allowedFields = {};
@@ -213,6 +229,10 @@ const patchScene = async (sceneId, patch) => {
       }
     }
   );
+
+  if ("directLink" in allowedFields) {
+    await assertDirectLinkInScenario(scenarioId, allowedFields.directLink);
+  }
 
   const operations = [];
 
