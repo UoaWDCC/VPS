@@ -10,6 +10,8 @@ export interface VisualSceneState {
   id: string | null;
   name: string | null;
   roles: string[] | null;
+  time: number | null;
+  timerStateOperations: any[] | null;
 
   setVisualScene: (scene: { id: string; components: VisualComponents }) => void;
   setComponents: (components: VisualComponents) => void;
@@ -22,8 +24,11 @@ const useVisualScene = create<VisualSceneState>((set) => ({
   id: null,
   name: null,
   roles: null,
+  time: null,
+  timerStateOperations: null,
 
-  setVisualScene: (scene) => set({ ...scene }),
+  setVisualScene: (scene) =>
+    set({ time: null, timerStateOperations: null, ...scene }),
   setComponents: (components) => set({ components }),
   updateComponent: (component) =>
     set((state) => ({

@@ -31,7 +31,7 @@ export default function ImageListContainer({
                 opacity: "0.5",
                 cursor: "pointer",
               },
-              backgroundImage: `url(${item.url})`,
+              backgroundImage: `url("${item.url}")`,
               backgroundSize: "cover",
               backgroundPosition: "center",
               boxSizing: "border-box",

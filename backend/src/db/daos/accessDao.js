@@ -105,10 +105,17 @@ const revokeAccess = async (scenarioId, userId) => {
   return { status: 200, message: "Revoked" };
 };
 
+const isAuthor = async (scenarioId, uid) => {
+  const accessList = await getAccessList(scenarioId);
+  if (!accessList) return false;
+  return accessList.ownerId === uid || accessList.users.has(uid);
+};
+
 export {
   getAccessList,
   createAccessList,
   deleteAccessList,
   grantAccess,
   revokeAccess,
+  isAuthor,
 };

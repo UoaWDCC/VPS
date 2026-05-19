@@ -244,3 +244,21 @@ body,
 .btn.btn-phantom {
   @apply btn-ghost font-normal text-primary hover:text-secondary border-none shadow-none bg-transparent;
 }
+
+.border-gradient {
+  border-image: linear-gradient(
+      to right,
+      transparent 0%,
+      color-mix(in srgb, var(--color-secondary) 30%, transparent) 50%,
+      transparent 100%
+    )
+    1;
+}
+
+.input.search {
+  @apply font-dm text-s text-primary pb-2xs border-0 border-b-1 rounded-none border-primary px-0 outline-none shadow-none;
+}
+
+.input.search input {
+  @apply grow placeholder:text-primary text-secondary;
+}

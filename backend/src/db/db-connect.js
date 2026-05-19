@@ -14,4 +14,3 @@ export default function connectToDatabase(
 ) {
   return mongoose.connect(connectionString);
 }
-1;

@@ -16,6 +16,8 @@ import {
 } from "../handlers/pointer/pointer";
 import { handleContextGlobal } from "../handlers/pointer/context";
 import { handleGlobal } from "../handlers/keyboard/keyboard";
+import LoadingOverlay from "./LoadingOverlay.tsx";
+import useEditorStore from "../stores/editor.ts";
 
 const componentMap: Record<string, React.FC<any>> = {
   textbox: (props) => <TextBox {...props} editable={true} />,
@@ -70,16 +72,37 @@ function Canvas() {
     .sort((a, b) => a.zIndex - b.zIndex)
     .map(resolve);
 
+  const loading = useEditorStore((state) => state.loading);
   return (
     <CanvasContext.Provider value={{ toSVGSpace, canvasRef }}>
       <div
-        className="flex-grow relative"
+        className={`flex-grow relative ${loading ? "pointer-events-none" : ""}`}
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
         onMouseDown={handleMouseDown}
         onContextMenu={handleContextMenu}
       >
         <Overlay />
+        {loading && <LoadingOverlay />}
+
+        {/* scene outline */}
+        <svg
+          id="outline"
+          className="w-full h-full absolute pointer-events-none"
+          viewBox={`-50 -50 ${1920 + 50 * 2} ${1080 + 50 * 2}`}
+          style={{ mixBlendMode: "difference" }}
+        >
+          <rect
+            x="0"
+            y="0"
+            width="1920"
+            height="1080"
+            fill="none"
+            stroke="white"
+            strokeWidth="1"
+          />
+        </svg>
+
         <svg
           id="main"
           className="w-full h-full"

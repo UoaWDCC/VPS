@@ -1,101 +1,65 @@
-import { useState, useContext, useEffect, useMemo } from "react";
+import { useState, useContext } from "react";
 import { useHistory } from "react-router-dom";
 import ScenarioContext from "../../context/ScenarioContext";
 import TopNavBar from "../TopNavBar/TopNavBar";
 import Thumbnail from "../authoring/components/Thumbnail";
-import "../playScenario/PlayLandingPage.css";
+import { SearchIcon } from "lucide-react";
+import FabMenu from "../../components/FabMenu";
 
 export default function DashboardLandingPage() {
-  const {
-    scenarios: userScenarios,
-    assignedScenarios,
-    reFetch,
-    reFetch2,
-    setCurrentScenario,
-  } = useContext(ScenarioContext);
+  const { allScenarios } = useContext(ScenarioContext);
   const history = useHistory();
 
   const [search, setSearch] = useState("");
 
-  useEffect(() => {
-    reFetch();
-    reFetch2();
-  }, []);
+  const scenarios = [allScenarios.owned, allScenarios.accessible].flat();
 
-  const allScenarios = useMemo(
-    () => [
-      ...(userScenarios || []),
-      ...(assignedScenarios || []).filter(
-        (as) => !userScenarios?.some((us) => us._id === as._id)
-      ),
-    ],
-    [userScenarios, assignedScenarios]
-  );
-
-  const filteredScenarios = allScenarios.filter((scenario) =>
+  const filteredScenarios = scenarios.filter((scenario) =>
     scenario.name.toLowerCase().includes(search.toLowerCase())
   );
 
   const selectDashboardScenario = (scenario) => {
-    setCurrentScenario(scenario);
     history.push(`/dashboard/${scenario._id}`);
   };
 
   return (
-    <div className="play-container" data-theme="dark">
-      <TopNavBar activeTab="dashboard" />
+    <div className="bg-base-100 h-full text-base-content pt-5xl px-xl max-w-[1500px] mx-auto">
+      <TopNavBar />
 
-      <div className="play-header">
-        <h1 className="play-title">Dashboard</h1>
-      </div>
+      {/* Header */}
+      <h1 className="font-ibm text-xl mb-l">Dashboard</h1>
 
-      <div className="search-section">
-        <div className="search-container-play">
-          <label className="search-input-wrapper-play">
-            <svg
-              className="search-icon-play"
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 24 24"
-            >
-              <g
-                strokeLinejoin="round"
-                strokeLinecap="round"
-                strokeWidth="2.5"
-                fill="none"
-                stroke="currentColor"
-              >
-                <circle cx="11" cy="11" r="8"></circle>
-                <path d="m21 21-4.3-4.3"></path>
-              </g>
-            </svg>
-            <input
-              type="search"
-              placeholder="Search scenario"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="search-input-play"
-              required
-            />
-          </label>
-        </div>
-      </div>
+      {/* Search Section */}
+      <label className="input search w-full max-w-[40vw] mb-m">
+        <input
+          type="search"
+          placeholder="Search scenarios"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          required
+        />
+        <SearchIcon size={20} />
+      </label>
 
-      <div className="scenarios-grid">
+      {/* Scenarios Grid */}
+      <div className="grid grid-cols-[repeat(auto-fill,minmax(250px,1fr))] xl:grid-cols-4 gap-x-l gap-y-xl pb-2xl">
         {filteredScenarios.map((scenario) => (
           <div
             key={scenario._id}
-            className="scenario-card"
+            className="cursor-pointer hover:-translate-y-1 duration-100 ease"
             onClick={() => selectDashboardScenario(scenario)}
           >
-            <div className="scenario-card-thumbnail">
+            <div className="aspect-16/9 rounded overflow-hidden mb-s border-primary/10 border-1">
               <Thumbnail components={scenario.thumbnail?.components || []} />
             </div>
-            <div className="scenario-card-name">
-              <p className="scenario-name-text">{scenario.name}</p>
-            </div>
+            <p className="font-ibm text-l text-nowrap truncate">
+              {scenario.name}
+            </p>
           </div>
         ))}
       </div>
+
+      <FabMenu />
     </div>
   );
 }
