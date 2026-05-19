@@ -263,6 +263,29 @@ describe("Scene API tests", () => {
     expect(dbScene.components).toEqual(scene1.components);
   });
 
+  it("PUT api/scenario/:scenarioId/scene/reorder prevents removing all scenes", async () => {
+    let error;
+
+    try {
+      await axios.put(
+        `http://localhost:${port}/api/scenario/${scenario2._id}/scene/reorder`,
+        { sceneIds: [] },
+        authHeaders("user1")
+      );
+    } catch (err) {
+      error = err;
+    }
+
+    expect(error).toBeDefined();
+    expect(error.response.status).toBe(409);
+    expect(error.response.data.error).toBe(
+      "A scenario must have at least one scene."
+    );
+
+    const dbScenario = await Scenario.findById(scenario2._id).lean();
+    expect(dbScenario.scenes).toEqual([scene1._id, scene2._id]);
+  });
+
   it("DELETE api/scenario/:scenarioId/scene/:sceneId deletes a valid scene", async () => {
     const response = await axios.delete(
       `http://localhost:${port}/api/scenario/${scenario2._id}/scene/${scene1._id}/`,

@@ -92,6 +92,12 @@ router.put("/reorder", async (req, res) => {
     return res.status(400).json({ error: "sceneIds must be an array" });
   }
 
+  if (sceneIds.length === 0) {
+    return res.status(status.CONFLICT).json({
+      error: "A scenario must have at least one scene.",
+    });
+  }
+
   const updatedScenario = await updateSceneOrder(
     req.params.scenarioId,
     sceneIds
