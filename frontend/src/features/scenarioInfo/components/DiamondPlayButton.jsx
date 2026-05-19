@@ -8,7 +8,7 @@ const DiamondPlayButton = ({ onClick }) => {
       <style>{`
         /* Diamond Play Button Styles */
         .diamond-play-button:hover {
-          transform: scale(1.1);
+          transform: scale(1.05);
         }
 
         .diamond-shape {

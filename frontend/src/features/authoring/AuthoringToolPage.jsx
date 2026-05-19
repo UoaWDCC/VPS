@@ -15,11 +15,13 @@ import useEditorStore from "./stores/editor";
 import { useHistory } from "react-router-dom";
 import { replace } from "./scene/operations/modifiers";
 import { ArrowLeftIcon, FilesIcon, PlayIcon, UsersIcon } from "lucide-react";
+import { handleGlobal } from "./handlers/keyboard/keyboard";
 
 const listeners = [
   ["copy", copy],
   ["cut", cut],
   ["paste", paste],
+  ["keydown", handleGlobal],
 ];
 
 const AUTOSAVE_INTERVAL = 30000; // 30 secs
@@ -62,7 +64,8 @@ export default function AuthoringToolPage() {
   }, []);
 
   function playScenario() {
-    window.open(`/play/${scenarioId}`, "_blank");
+    const startScene = sceneId ? `?startScene=${sceneId}` : "";
+    window.open(`/play/${scenarioId}${startScene}`, "_blank");
   }
 
   function goToGroups() {

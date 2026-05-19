@@ -38,9 +38,15 @@ const SceneNavigator = () => {
   const [activeIdDragging, setActiveIdDragging] = useState(null);
 
   async function addScene() {
+    let nextNum = Math.max(1, scenes.length);
+
+    while (scenes.some((scene) => scene.name === `Scene ${nextNum}`)) {
+      nextNum++;
+    }
+
     api
       .post(user, `/api/scenario/${scenarioId}/scene`, {
-        name: `Scene ${scenes.length}`,
+        name: `Scene ${nextNum}`,
       })
       .then(reFetch)
       .catch(handleGeneric);
