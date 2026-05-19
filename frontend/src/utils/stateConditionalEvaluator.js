@@ -26,14 +26,11 @@ function evaluateStateConditional(conditional, stateVariables) {
   // Handle different comparison types based on state variable type
   switch (stateVariable.type) {
     case stateTypes.BOOLEAN: {
-      const boolExpected = expectedValue === "true";
-      const boolCurrent = currentValue === "true";
-
       switch (comparator) {
         case "=":
-          return boolCurrent === boolExpected;
+          return currentValue === expectedValue;
         case "!=":
-          return boolCurrent !== boolExpected;
+          return currentValue !== expectedValue;
         default:
           return false;
       }
