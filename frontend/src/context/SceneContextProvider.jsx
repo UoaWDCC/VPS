@@ -93,7 +93,10 @@ export default function SceneContextProvider({ children }) {
     },
     onError: (error, _id, context) => {
       if (context?.previousScenes) {
-        queryClient.setQueryData(["scenes", scenarioId], context.previousScenes);
+        queryClient.setQueryData(
+          ["scenes", scenarioId],
+          context.previousScenes
+        );
       }
 
       toast.error(
