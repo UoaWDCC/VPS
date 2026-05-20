@@ -58,7 +58,7 @@ const EditStateConditional = ({
     const stateConditional = {
       ...conditional,
       comparator,
-      value,
+      value: stateVariable.type === stateTypes.NUMBER ? Number(value) : value,
     };
 
     api
