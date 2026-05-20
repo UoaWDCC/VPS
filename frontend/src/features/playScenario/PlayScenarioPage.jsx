@@ -122,7 +122,6 @@ export default function PlayScenarioPage({ group }) {
   const handleError = (error) => {
     if (!error) return;
     if (error.status === 409) {
-      onSceneChange();
       toast.success(
         isMultiplayer
           ? "Someone else made a move first, but you're back on track!"
@@ -136,7 +135,7 @@ export default function PlayScenarioPage({ group }) {
     }
   };
 
-  const onSceneChange = async (componentId) => {
+  const onSceneChange = async (componentId, currentSceneOverride = sceneId) => {
     if (componentId) {
       const component = currScene?.components?.find(
         (comp) => comp.id === componentId
@@ -151,14 +150,14 @@ export default function PlayScenarioPage({ group }) {
     }
 
     const startScene = startSceneRef.current;
-    startSceneRef.current = null; // Clear before the await so a concurrent retry (409 handler) never replays it.
+    startSceneRef.current = null; // Clear after first use so the startScene override is only consumed once.
 
     try {
       const { newSceneId, stateVariables, newStateVersion } = isMultiplayer
         ? await navigateMultiplayer(
             user,
             group._id,
-            sceneId,
+            currentSceneOverride,
             addFlags,
             removeFlags,
             componentId
@@ -166,7 +165,7 @@ export default function PlayScenarioPage({ group }) {
         : await navigateSingleplayer(
             user,
             scenarioId,
-            sceneId,
+            currentSceneOverride,
             addFlags,
             removeFlags,
             componentId,
