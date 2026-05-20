@@ -88,7 +88,24 @@ function Canvas() {
         onContextMenu={handleContextMenu}
       >
         {mode.includes("create") && (
-          <div className="absolute top-20 left-1/2 z-50 -translate-x-1/2 rounded bg-base-300 px-4 py-2 shadow-lg">
+          <div
+            className="
+              fixed
+              top-[120px]
+              left-1/2
+              -translate-x-1/2
+              bg-gray-600/45
+              text-white
+              text-sm
+              font-medium
+              px-4 py-2
+              rounded-full
+              backdrop-blur-sm
+              pointer-events-none
+              z-[9999]
+              opacity-75
+            "
+          >
             Creating {createType}
           </div>
         )}
