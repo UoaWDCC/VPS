@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from "react";
+import React, { useRef } from "react";
 import CanvasContext from "./CanvasContext";
 import Overlay from "./Overlay";
 import type { Component } from "../types";
@@ -15,7 +15,8 @@ import {
   handleMouseUpGlobal,
 } from "../handlers/pointer/pointer";
 import { handleContextGlobal } from "../handlers/pointer/context";
-import { handleGlobal } from "../handlers/keyboard/keyboard";
+import LoadingOverlay from "./LoadingOverlay.tsx";
+import useEditorStore from "../stores/editor.ts";
 
 const componentMap: Record<string, React.FC<any>> = {
   textbox: (props) => <TextBox {...props} editable={true} />,
@@ -34,6 +35,9 @@ function resolve(component: Component) {
 
 function Canvas() {
   const scene = useVisualScene((state) => state.components);
+
+  const mode = useEditorStore((state) => state.mode);
+  const createType = useEditorStore((state) => state.createType);
 
   const canvasRef = useRef<SVGSVGElement | null>(null);
 
@@ -70,16 +74,42 @@ function Canvas() {
     .sort((a, b) => a.zIndex - b.zIndex)
     .map(resolve);
 
+  const loading = useEditorStore((state) => state.loading);
   return (
     <CanvasContext.Provider value={{ toSVGSpace, canvasRef }}>
       <div
-        className="flex-grow relative"
+        className={`flex-grow relative ${loading ? "pointer-events-none" : ""} ${
+          mode.includes("create") ? "cursor-crosshair" : ""
+        }`}
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
         onMouseDown={handleMouseDown}
         onContextMenu={handleContextMenu}
       >
+        {mode.includes("create") && (
+          <div
+            className="
+              fixed
+              top-[120px]
+              left-1/2
+              -translate-x-1/2
+              bg-gray-600/45
+              text-white
+              text-sm
+              font-medium
+              px-4 py-2
+              rounded-full
+              backdrop-blur-sm
+              pointer-events-none
+              z-[9999]
+              opacity-75
+            "
+          >
+            Creating {createType}
+          </div>
+        )}
         <Overlay />
+        {loading && <LoadingOverlay />}
 
         {/* scene outline */}
         <svg

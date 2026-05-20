@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import styles from "../NotesModal/NotesModal.module.scss";
 import resourceStyles from "./ResourcesModal.module.scss";
 
 function ResourcesModal({ handleClose, resources }) {
@@ -42,7 +41,7 @@ function ResourcesModal({ handleClose, resources }) {
   return (
     <div>
       <button
-        className={styles.overlay}
+        className={"fixed inset-0 z-40 bg-black/50"}
         type="button"
         onClick={handleClose}
         aria-label="Close Card"

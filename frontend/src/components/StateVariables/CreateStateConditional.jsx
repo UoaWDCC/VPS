@@ -44,7 +44,7 @@ const CreateStateConditional = ({ fileId, open, setOpen, updateFile }) => {
     const stateConditional = {
       stateVariableId: selectedState.id,
       comparator,
-      value,
+      value: selectedState.type === stateTypes.NUMBER ? Number(value) : value,
     };
 
     api

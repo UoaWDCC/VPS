@@ -10,7 +10,7 @@ import LoadingPage from "../status/LoadingPage";
 import PlayScenarioCanvas from "./PlayScenarioCanvas";
 import { applyStateOperations } from "../../components/StateVariables/stateOperations";
 import { filterResourcesByConditions } from "../../utils/stateConditionalEvaluator";
-import NotesDisplayCard from "./modals/NotesModal/NotesModal";
+import NotesPanel from "./components/NotesPanel";
 import ResourcesModal from "./modals/ResourcesModal/ResourcesModal";
 import PlayPageSideButton from "./components/PlayPageSideButton/PlayPageSideButton";
 import ResourcesPanel from "./components/ResourcesPanel";
@@ -25,6 +25,7 @@ const navigateSingleplayer = async (
   addFlags,
   removeFlags,
   componentId,
+  nextScene = null,
   startScene
 ) => {
   const token = await user.getIdToken();
@@ -35,7 +36,14 @@ const navigateSingleplayer = async (
       "Content-Type": "application/json",
       Authorization: `Bearer ${token}`,
     },
-    data: { currentScene, addFlags, removeFlags, componentId, startScene },
+    data: {
+      currentScene,
+      addFlags,
+      removeFlags,
+      componentId,
+      nextScene,
+      startScene,
+    },
   };
   const res = await axios.request(config);
   if (res.data.scenes) {
@@ -54,7 +62,8 @@ const navigateMultiplayer = async (
   currentScene,
   addFlags,
   removeFlags,
-  componentId
+  componentId,
+  nextScene = null
 ) => {
   const token = await user.getIdToken();
   const config = {
@@ -64,7 +73,7 @@ const navigateMultiplayer = async (
       "Content-Type": "application/json",
       Authorization: `Bearer ${token}`,
     },
-    data: { currentScene, addFlags, removeFlags, componentId },
+    data: { currentScene, addFlags, removeFlags, componentId, nextScene },
   };
   const res = await axios.request(config);
   if (res.data.scenes) {
@@ -101,7 +110,7 @@ export default function PlayScenarioPage({ group }) {
   const { scenarioId } = useParams();
   const history = useHistory();
   const location = useLocation();
-  const isMultiplayer = location.pathname.includes("/multiplayer/");
+  const isMultiplayer = location.pathname.includes("/multiplayer");
   // Ref so it survives re-renders without triggering them; consumed once by the initial navigate call and then cleared.
   const startSceneRef = useRef(
     new URLSearchParams(location.search).get("startScene")
@@ -169,6 +178,7 @@ export default function PlayScenarioPage({ group }) {
             addFlags,
             removeFlags,
             componentId,
+            null,
             startScene
           );
 
@@ -200,6 +210,69 @@ export default function PlayScenarioPage({ group }) {
       sceneCache.clear();
     };
   }, [scenarioId]);
+
+  useEffect(() => {
+    const onKeyDown = async (e) => {
+      if (e.repeat || !sceneId || !currScene?.directLink) return;
+
+      const tag = document.activeElement?.tagName;
+      const isTyping =
+        tag === "INPUT" ||
+        tag === "TEXTAREA" ||
+        document.activeElement?.isContentEditable;
+
+      if (isTyping) return;
+
+      if (e.code === "Space" || e.key === "ArrowRight") {
+        e.preventDefault();
+        try {
+          const { newSceneId, stateVariables, newStateVersion } = isMultiplayer
+            ? await navigateMultiplayer(
+                user,
+                group._id,
+                sceneId,
+                addFlags,
+                removeFlags,
+                null,
+                currScene.directLink
+              )
+            : await navigateSingleplayer(
+                user,
+                scenarioId,
+                sceneId,
+                addFlags,
+                removeFlags,
+                null,
+                currScene.directLink
+              );
+          if (isMultiplayer) {
+            const newResources = await getMultiplayerResources(user, group._id);
+            const filteredResources = filterResourcesByConditions(
+              newResources,
+              stateVariables
+            );
+            setResources(filteredResources);
+          }
+          if (stateVersion < newStateVersion) {
+            setStateVariables(stateVariables);
+            setStateVersion(newStateVersion);
+          }
+          if (newSceneId) {
+            if (sceneCache.get(newSceneId)?.error) {
+              handleError(sceneCache.get(newSceneId));
+              return;
+            }
+            setSceneId(newSceneId);
+          }
+        } catch (e) {
+          handleError(e?.response?.data);
+        }
+      }
+    };
+
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [currScene, sceneId, stateVariables, stateVersion, addFlags, removeFlags]);
 
   const handleTimerTimeout = () => {
     const timerStateOperations = currScene?.timerStateOperations;
@@ -284,10 +357,10 @@ export default function PlayScenarioPage({ group }) {
           />
 
           {noteOpen && (
-            <NotesDisplayCard
+            <NotesPanel
               group={group}
-              user={user}
-              handleClose={() => setNoteOpen(false)}
+              open={noteOpen}
+              onClose={() => setNoteOpen(false)}
             />
           )}
           {resourcesOpen && (
