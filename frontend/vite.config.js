@@ -8,7 +8,7 @@ import { fileURLToPath } from "node:url";
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 export default ({ mode }) => {
-  const target = loadEnv(mode, process.cwd()).VITE_BACKEND_URL;
+  const target = loadEnv(mode, process.cwd()).VITE_SERVER_URL;
 
   return defineConfig({
     plugins: [react(), tailwindcss()],
