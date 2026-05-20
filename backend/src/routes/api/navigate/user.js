@@ -19,7 +19,7 @@ const getConnectedScenes = async (sceneID, active = true) => {
     .filter(Boolean);
   const connected = await Scene.find(
     { _id: { $in: connectedIds } },
-    { components: 1, time: 1, timerStateOperations: 1 }
+    { components: 1, directLink: 1, roles: 1, time: 1, timerStateOperations: 1 }
   ).lean();
   return {
     active: scene._id,
@@ -70,15 +70,15 @@ const syncStateVariables = async (user, scenarioId) => {
 
 // Update state variables for a user
 const updateStateVariables = async (user, scenarioId, component) => {
-  // If no update necessary, just return existing data
-
-  if (!component.stateOperations) {
+  if (!component || !component.stateOperations) {
     return [user.stateVariables[scenarioId], user.stateVersions[scenarioId]];
   }
+
   const stateVariables = applyStateOperations(
     user.stateVariables[scenarioId],
     component.stateOperations
   );
+
   return await setUserStateVariables(user._id, scenarioId, stateVariables);
 };
 
@@ -87,6 +87,7 @@ export const userNavigate = async (req) => {
     uid,
     currentScene,
     componentId,
+    nextScene: bodyNextScene,
     startScene: startSceneParam,
   } = req.body;
   const { scenarioId } = req.params;
@@ -153,15 +154,24 @@ export const userNavigate = async (req) => {
   if (path[0] !== currentScene)
     throw new HttpError("Scene mismatch has occured", STATUS.CONFLICT);
 
-  const component = await getComponent(currentScene, componentId);
+  if (bodyNextScene) {
+    const scene = await Scene.findById(currentScene, { directLink: 1 }).lean();
+    if (!scene?.directLink?.equals(bodyNextScene))
+      throw new HttpError("Invalid direct link target", STATUS.FORBIDDEN);
+  }
 
-  // if the button does not lead to another scene or component does not exist, stay in the current scene
+  const component = componentId
+    ? await getComponent(currentScene, componentId)
+    : null;
+
   let scenes = null;
-  if (component?.nextScene && component.nextScene !== currentScene) {
-    const nextScene = component.nextScene;
+
+  const nextScene = component?.nextScene ?? bodyNextScene;
+
+  if (nextScene && nextScene !== currentScene) {
     [, scenes] = await Promise.all([
       addSceneToPath(user._id, scenarioId, currentScene, nextScene),
-      getConnectedScenes(nextScene, false),
+      getConnectedScenes(nextScene, true),
     ]);
   }
 
