@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from "react";
+import React, { useRef } from "react";
 import CanvasContext from "./CanvasContext";
 import Overlay from "./Overlay";
 import type { Component } from "../types";
@@ -9,7 +9,6 @@ import Box from "../elements/Box";
 import Image from "../elements/Image";
 import Line from "../elements/Line";
 import useVisualScene from "../stores/visual";
-import useEditorStore from "../stores/editor.ts";
 import {
   handleMouseDownGlobal,
   handleMouseMoveGlobal,
