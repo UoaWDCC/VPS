@@ -10,7 +10,7 @@ import LoadingPage from "../status/LoadingPage";
 import PlayScenarioCanvas from "./PlayScenarioCanvas";
 import { applyStateOperations } from "../../components/StateVariables/stateOperations";
 import { filterResourcesByConditions } from "../../utils/stateConditionalEvaluator";
-import NotesDisplayCard from "./modals/NotesModal/NotesModal";
+import NotesPanel from "./components/NotesPanel";
 import ResourcesModal from "./modals/ResourcesModal/ResourcesModal";
 import PlayPageSideButton from "./components/PlayPageSideButton/PlayPageSideButton";
 import ResourcesPanel from "./components/ResourcesPanel";
@@ -285,10 +285,10 @@ export default function PlayScenarioPage({ group }) {
           />
 
           {noteOpen && (
-            <NotesDisplayCard
+            <NotesPanel
               group={group}
-              user={user}
-              handleClose={() => setNoteOpen(false)}
+              open={noteOpen}
+              onClose={() => setNoteOpen(false)}
             />
           )}
           {resourcesOpen && (
