@@ -12,6 +12,7 @@ import { applyStateOperations } from "../../components/StateVariables/stateOpera
 import NotesPanel from "./components/NotesPanel";
 import ResourcesPanel from "./components/ResourcesPanel";
 import SceneTimer from "./components/SceneTimer";
+import { PlayIcon } from "lucide-react";
 
 const sceneCache = new Map();
 
@@ -83,6 +84,23 @@ const navigateMultiplayer = async (
   };
 };
 
+function playAudios(scene) {
+  const audios = scene.components.filter(c => c.type === "audio");
+  const playables = [];
+  for (const audio of audios) {
+    const playable = new Audio(audio.url);
+    playable.loop = audio.loop;
+    playable.play();
+    playables.push(playable);
+  }
+  return () => {
+    for (const p of playables) {
+      p.pause();
+      p.currentTime = 0;
+    }
+  };
+}
+
 /**
  * This page allows users to play a scenario.
  *
@@ -107,6 +125,7 @@ export default function PlayScenarioPage({ group }) {
 
   const [resourcesOpen, setResourcesOpen] = useState(false);
   const [noteOpen, setNoteOpen] = useState(false);
+  const [audioAllowed, setAudioAllowed] = useState(false);
 
   const currScene = sceneCache.get(sceneId);
 
@@ -147,23 +166,23 @@ export default function PlayScenarioPage({ group }) {
     try {
       const { newSceneId, stateVariables, newStateVersion } = isMultiplayer
         ? await navigateMultiplayer(
-            user,
-            group._id,
-            sceneId,
-            addFlags,
-            removeFlags,
-            componentId
-          )
+          user,
+          group._id,
+          sceneId,
+          addFlags,
+          removeFlags,
+          componentId
+        )
         : await navigateSingleplayer(
-            user,
-            scenarioId,
-            sceneId,
-            addFlags,
-            removeFlags,
-            componentId,
-            null,
-            startScene
-          );
+          user,
+          scenarioId,
+          sceneId,
+          addFlags,
+          removeFlags,
+          componentId,
+          null,
+          startScene
+        );
 
       if (stateVersion < newStateVersion) {
         setStateVariables(stateVariables);
@@ -202,23 +221,23 @@ export default function PlayScenarioPage({ group }) {
         try {
           const { newSceneId, stateVariables, newStateVersion } = isMultiplayer
             ? await navigateMultiplayer(
-                user,
-                group._id,
-                sceneId,
-                addFlags,
-                removeFlags,
-                null,
-                currScene.directLink
-              )
+              user,
+              group._id,
+              sceneId,
+              addFlags,
+              removeFlags,
+              null,
+              currScene.directLink
+            )
             : await navigateSingleplayer(
-                user,
-                scenarioId,
-                sceneId,
-                addFlags,
-                removeFlags,
-                null,
-                currScene.directLink
-              );
+              user,
+              scenarioId,
+              sceneId,
+              addFlags,
+              removeFlags,
+              null,
+              currScene.directLink
+            );
           if (stateVersion < newStateVersion) {
             setStateVariables(stateVariables);
             setStateVersion(newStateVersion);
@@ -284,6 +303,17 @@ export default function PlayScenarioPage({ group }) {
     onSceneChange();
   };
 
+  useEffect(() => {
+    if (!currScene || !audioAllowed) return;
+    try {
+      const stop = playAudios(currScene);
+    } catch (e) {
+      toast.error("The audio on this scene failed to play")
+    }
+
+    return () => stop();
+  }, [currScene, audioAllowed])
+
   if (loading) return <LoadingPage text="Loading Scene..." />;
   if (authError) return <></>;
   if (isMultiplayer && !group) return <LoadingPage text="Loading Scene..." />;
@@ -303,6 +333,14 @@ export default function PlayScenarioPage({ group }) {
             duration={currScene.time}
             onTimeout={handleTimerTimeout}
           />
+        </div>
+      )}
+      {!audioAllowed && (
+        <div className="absolute top-4 left-4 z-30">
+          <button className="btn" onClick={() => setAudioAllowed(true)}>
+            <PlayIcon size={16} />
+            Enable Audio
+          </button>
         </div>
       )}
       <PlayScenarioCanvas
