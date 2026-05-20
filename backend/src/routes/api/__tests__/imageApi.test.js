@@ -24,7 +24,6 @@ describe("Image API tests", () => {
   let server;
   let port;
 
-  // setup in-memory mongodb and express API
   beforeAll(async () => {
     mongoServer = await MongoMemoryServer.create();
     const uri = mongoServer.getUri();
@@ -35,8 +34,7 @@ describe("Image API tests", () => {
     app.use(express.json());
     app.use("/", routes);
 
-    // Add safe error handler to avoid circular JSON errors
-    app.use((err, res) => {
+    app.use((err, req, res, _next) => {
       console.error("Unhandled Express error:", err.message);
       res.status(500).json({ error: "Internal Server Error" });
     });
@@ -45,12 +43,10 @@ describe("Image API tests", () => {
     port = server.address().port;
   });
 
-  // clear the database
   afterEach(async () => {
     await mongoose.connection.db.dropDatabase();
   });
 
-  // close the mongodb and express servers
   afterAll(async () => {
     server.close(async () => {
       await mongoose.disconnect();

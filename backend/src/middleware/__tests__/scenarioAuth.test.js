@@ -39,7 +39,6 @@ describe("Scenario Auth Middleware tests", () => {
 
   const nextFunction = jest.fn();
 
-  // setup in-memory mongodb and express API
   beforeAll(async () => {
     mongoServer = await MongoMemoryServer.create();
     const uri = mongoServer.getUri();
@@ -48,16 +47,14 @@ describe("Scenario Auth Middleware tests", () => {
   });
 
   beforeEach(async () => {
-    // Add scenario to database
+    nextFunction.mockClear();
     await Scenario.create(scenario1);
   });
 
-  // clear the database
   afterEach(async () => {
     await mongoose.connection.db.dropDatabase();
   });
 
-  // close the mongodb and express servers
   afterAll(async () => {
     await mongoose.disconnect();
     await mongoServer.stop();

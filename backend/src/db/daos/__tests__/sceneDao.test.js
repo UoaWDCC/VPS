@@ -13,6 +13,7 @@ import mongoose from "mongoose";
 
 import Scene from "../../models/scene.js";
 import { patchScene } from "../sceneDao.js";
+
 describe("Scene DAO patchScene tests", () => {
   let mongoServer;
 
@@ -43,17 +44,9 @@ describe("Scene DAO patchScene tests", () => {
   };
 
   beforeAll(async () => {
-    try {
-      mongoServer = await MongoMemoryServer.create();
-      const uri = mongoServer.getUri();
-      await mongoose.connect(uri, {
-        useNewUrlParser: true,
-        useUnifiedTopology: true,
-      });
-    } catch (err) {
-      console.error("MongoMemoryServer failed:", err);
-      throw err;
-    }
+    mongoServer = await MongoMemoryServer.create();
+    const uri = mongoServer.getUri();
+    await mongoose.connect(uri);
   });
 
   beforeEach(async () => {
@@ -61,19 +54,12 @@ describe("Scene DAO patchScene tests", () => {
   });
 
   afterEach(async () => {
-    if (mongoose.connection.readyState === 1) {
-      await mongoose.connection.db.dropDatabase();
-    }
+    await mongoose.connection.db.dropDatabase();
   });
 
   afterAll(async () => {
-    if (mongoose.connection.readyState === 1) {
-      await mongoose.disconnect();
-    }
-
-    if (mongoServer) {
-      await mongoServer.stop();
-    }
+    await mongoose.disconnect();
+    await mongoServer.stop();
   });
 
   it("updates multiple changed components in one patch", async () => {

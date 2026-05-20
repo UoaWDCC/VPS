@@ -85,7 +85,6 @@ describe("Scenario API tests", () => {
     users: {},
   };
 
-  // setup in-memory mongodb and express API
   beforeAll(async () => {
     mongoServer = await MongoMemoryServer.create();
     const uri = mongoServer.getUri();
@@ -101,18 +100,15 @@ describe("Scenario API tests", () => {
   });
 
   beforeEach(async () => {
-    // Add scenario to database
     await Scenario.create([scenario1, scenario2]);
     await Access.create([access1, access2]);
     await Scene.create([scene1, scene2]);
   });
 
-  // clear the database
   afterEach(async () => {
     await mongoose.connection.db.dropDatabase();
   });
 
-  // close the mongodb and express servers
   afterAll(async () => {
     server.close(async () => {
       await mongoose.disconnect();
@@ -187,6 +183,12 @@ describe("Scenario API tests", () => {
     const dbScene2 = await Scene.findById(scene2._id);
     expect(dbScene1).toEqual(null);
     expect(dbScene2).toEqual(null);
+
+    // check corresponding access list is removed
+    const dbAccess2 = await Access.findOne({
+      scenarioId: scenario2._id.toString(),
+    });
+    expect(dbAccess2).toBeNull();
 
     // TODO: check corresponding components are removed
   });
