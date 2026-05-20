@@ -1,21 +1,13 @@
-import {
-  describe,
-  beforeAll,
-  beforeEach,
-  afterEach,
-  afterAll,
-  it,
-  expect,
-} from "@jest/globals";
+import { describe, beforeEach, it, expect } from "@jest/globals";
 
-import { MongoMemoryServer } from "mongodb-memory-server";
 import mongoose from "mongoose";
 
 import Scene from "../../models/scene.js";
 import { patchScene } from "../sceneDao.js";
+import { useMongoMemoryServer } from "../../../test/mongoSetup.js";
 
 describe("Scene DAO patchScene tests", () => {
-  let mongoServer;
+  useMongoMemoryServer();
 
   const sceneId = new mongoose.Types.ObjectId("000000000000000000000001");
 
@@ -43,23 +35,8 @@ describe("Scene DAO patchScene tests", () => {
     ],
   };
 
-  beforeAll(async () => {
-    mongoServer = await MongoMemoryServer.create();
-    const uri = mongoServer.getUri();
-    await mongoose.connect(uri);
-  });
-
   beforeEach(async () => {
     await Scene.create(baseScene);
-  });
-
-  afterEach(async () => {
-    await mongoose.connection.db.dropDatabase();
-  });
-
-  afterAll(async () => {
-    await mongoose.disconnect();
-    await mongoServer.stop();
   });
 
   it("updates multiple changed components in one patch", async () => {

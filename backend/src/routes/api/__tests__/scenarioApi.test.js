@@ -1,15 +1,5 @@
-import {
-  jest,
-  describe,
-  beforeAll,
-  beforeEach,
-  afterEach,
-  afterAll,
-  it,
-  expect,
-} from "@jest/globals";
+import { jest, describe, beforeEach, it, expect } from "@jest/globals";
 
-import { MongoMemoryServer } from "mongodb-memory-server";
 import express from "express";
 import mongoose from "mongoose";
 import axios from "axios";
@@ -19,6 +9,10 @@ import Scene from "../../../db/models/scene.js";
 import auth from "../../../middleware/firebaseAuth.js";
 import scenarioAuth from "../../../middleware/scenarioAuth.js";
 import Access from "../../../db/models/access.js";
+import {
+  useMongoMemoryServer,
+  useExpressServer,
+} from "../../../test/mongoSetup.js";
 
 jest.mock("../../../middleware/firebaseAuth");
 jest.mock("../../../middleware/scenarioAuth");
@@ -45,9 +39,13 @@ function authHeaders(id) {
 describe("Scenario API tests", () => {
   const HTTP_OK = 200;
 
-  let mongoServer;
-  let server;
-  let port;
+  useMongoMemoryServer();
+  const ctx = useExpressServer(() => {
+    const app = express();
+    app.use(express.json());
+    app.use("/", routes);
+    return app;
+  });
 
   const scene1 = {
     _id: new mongoose.mongo.ObjectId("000000000000000000000003"),
@@ -85,35 +83,10 @@ describe("Scenario API tests", () => {
     users: {},
   };
 
-  beforeAll(async () => {
-    mongoServer = await MongoMemoryServer.create();
-    const uri = mongoServer.getUri();
-
-    await mongoose.connect(uri);
-
-    const app = express();
-    app.use(express.json());
-    app.use("/", routes);
-
-    server = app.listen(0);
-    port = server.address().port;
-  });
-
   beforeEach(async () => {
     await Scenario.create([scenario1, scenario2]);
     await Access.create([access1, access2]);
     await Scene.create([scene1, scene2]);
-  });
-
-  afterEach(async () => {
-    await mongoose.connection.db.dropDatabase();
-  });
-
-  afterAll(async () => {
-    server.close(async () => {
-      await mongoose.disconnect();
-      await mongoServer.stop();
-    });
   });
 
   it("creates and returns the newly persisted scenario", async () => {
@@ -122,7 +95,7 @@ describe("Scenario API tests", () => {
     };
 
     const response = await axios.post(
-      `http://localhost:${port}/api/scenario/`,
+      `http://localhost:${ctx.port}/api/scenario/`,
       reqData,
       authHeaders("user1")
     );
@@ -149,7 +122,7 @@ describe("Scenario API tests", () => {
 
   it("GET /scenario: retrieve all scenarios successfully", async () => {
     const response = await axios.get(
-      `http://localhost:${port}/api/scenario/`,
+      `http://localhost:${ctx.port}/api/scenario/`,
       authHeaders("user1")
     );
     expect(response.status).toBe(HTTP_OK);
@@ -169,7 +142,7 @@ describe("Scenario API tests", () => {
 
   it("DELETE api/scenario/:scenarioId deletes a valid scenario", async () => {
     const response = await axios.delete(
-      `http://localhost:${port}/api/scenario/${scenario2._id}/`,
+      `http://localhost:${ctx.port}/api/scenario/${scenario2._id}/`,
       authHeaders("user1")
     );
     expect(response.status).toBe(HTTP_OK);
@@ -197,7 +170,7 @@ describe("Scenario API tests", () => {
     // bad scenarioId
     await expect(
       axios.delete(
-        `http://localhost:${port}/api/scenario/000000000000000000000009/`,
+        `http://localhost:${ctx.port}/api/scenario/000000000000000000000009/`,
         authHeaders("user1")
       )
     ).rejects.toThrow();
@@ -205,7 +178,7 @@ describe("Scenario API tests", () => {
 
   it("update a scenarios name", async () => {
     const response = await axios.put(
-      `http://localhost:${port}/api/scenario/${scenario1._id}`,
+      `http://localhost:${ctx.port}/api/scenario/${scenario1._id}`,
       { name: "Scenario 2" },
       authHeaders("user1")
     );

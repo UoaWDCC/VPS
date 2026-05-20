@@ -46,9 +46,9 @@ router.get("/played/:scenarioId", async (req, res) => {
 // assign scenario to users
 router.patch("/assigned/:scenarioId", async (req, res) => {
   const { userEmails } = req.body;
-  const newAssigneeIds = (await User.find({ email: { $in: userEmails } }, "_id")).map(
-    (doc) => doc._id
-  );
+  const newAssigneeIds = (
+    await User.find({ email: { $in: userEmails } }, "_id")
+  ).map((doc) => doc._id);
 
   await assignScenarioToUsers(req.params.scenarioId, newAssigneeIds);
 

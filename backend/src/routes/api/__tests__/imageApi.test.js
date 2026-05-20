@@ -1,57 +1,29 @@
-import {
-  jest,
-  describe,
-  beforeAll,
-  afterEach,
-  afterAll,
-  it,
-  expect,
-} from "@jest/globals";
+import { jest, describe, it, expect } from "@jest/globals";
 
-import { MongoMemoryServer } from "mongodb-memory-server";
 import express from "express";
-import mongoose from "mongoose";
 import axios from "axios";
 import routes from "../../index.js";
 import Image from "../../../db/models/image.js";
+import {
+  useMongoMemoryServer,
+  useExpressServer,
+} from "../../../test/mongoSetup.js";
 
 jest.mock("firebase-admin"); // Needed to mock the firebase-admin dependency in firebase-auth.js which is in routes
 
 describe("Image API tests", () => {
   const HTTP_OK = 200;
 
-  let mongoServer;
-  let server;
-  let port;
-
-  beforeAll(async () => {
-    mongoServer = await MongoMemoryServer.create();
-    const uri = mongoServer.getUri();
-
-    await mongoose.connect(uri);
-
+  useMongoMemoryServer();
+  const ctx = useExpressServer(() => {
     const app = express();
     app.use(express.json());
     app.use("/", routes);
-
     app.use((err, req, res, _next) => {
       console.error("Unhandled Express error:", err.message);
       res.status(500).json({ error: "Internal Server Error" });
     });
-
-    server = app.listen(0);
-    port = server.address().port;
-  });
-
-  afterEach(async () => {
-    await mongoose.connection.db.dropDatabase();
-  });
-
-  afterAll(async () => {
-    server.close(async () => {
-      await mongoose.disconnect();
-      await mongoServer.stop();
-    });
+    return app;
   });
 
   it("creates images in the database", async () => {
@@ -73,7 +45,7 @@ describe("Image API tests", () => {
     };
 
     const response = await axios.post(
-      `http://localhost:${port}/api/image/`,
+      `http://localhost:${ctx.port}/api/image/`,
       body
     );
     expect(response.status).toBe(HTTP_OK);
@@ -94,7 +66,7 @@ describe("Image API tests", () => {
 
     await Promise.all(urls.map((url) => new Image({ url }).save()));
 
-    const response = await axios.get(`http://localhost:${port}/api/image/`);
+    const response = await axios.get(`http://localhost:${ctx.port}/api/image/`);
     expect(response.status).toBe(HTTP_OK);
 
     // check correct images are returned
@@ -119,7 +91,7 @@ describe("Image API tests", () => {
     await Image.create([image1, image2]);
 
     const response = await axios.get(
-      `http://localhost:${port}/api/image/${image2.id}`
+      `http://localhost:${ctx.port}/api/image/${image2.id}`
     );
     expect(response.status).toBe(HTTP_OK);
 
