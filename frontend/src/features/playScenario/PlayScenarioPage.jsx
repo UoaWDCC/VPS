@@ -85,7 +85,7 @@ const navigateMultiplayer = async (
 };
 
 function playAudios(scene) {
-  const audios = scene.components.filter(c => c.type === "audio");
+  const audios = scene.components.filter((c) => c.type === "audio");
   const playables = [];
   for (const audio of audios) {
     const playable = new Audio(audio.url);
@@ -166,23 +166,23 @@ export default function PlayScenarioPage({ group }) {
     try {
       const { newSceneId, stateVariables, newStateVersion } = isMultiplayer
         ? await navigateMultiplayer(
-          user,
-          group._id,
-          sceneId,
-          addFlags,
-          removeFlags,
-          componentId
-        )
+            user,
+            group._id,
+            sceneId,
+            addFlags,
+            removeFlags,
+            componentId
+          )
         : await navigateSingleplayer(
-          user,
-          scenarioId,
-          sceneId,
-          addFlags,
-          removeFlags,
-          componentId,
-          null,
-          startScene
-        );
+            user,
+            scenarioId,
+            sceneId,
+            addFlags,
+            removeFlags,
+            componentId,
+            null,
+            startScene
+          );
 
       if (stateVersion < newStateVersion) {
         setStateVariables(stateVariables);
@@ -221,23 +221,23 @@ export default function PlayScenarioPage({ group }) {
         try {
           const { newSceneId, stateVariables, newStateVersion } = isMultiplayer
             ? await navigateMultiplayer(
-              user,
-              group._id,
-              sceneId,
-              addFlags,
-              removeFlags,
-              null,
-              currScene.directLink
-            )
+                user,
+                group._id,
+                sceneId,
+                addFlags,
+                removeFlags,
+                null,
+                currScene.directLink
+              )
             : await navigateSingleplayer(
-              user,
-              scenarioId,
-              sceneId,
-              addFlags,
-              removeFlags,
-              null,
-              currScene.directLink
-            );
+                user,
+                scenarioId,
+                sceneId,
+                addFlags,
+                removeFlags,
+                null,
+                currScene.directLink
+              );
           if (stateVersion < newStateVersion) {
             setStateVariables(stateVariables);
             setStateVersion(newStateVersion);
@@ -306,13 +306,12 @@ export default function PlayScenarioPage({ group }) {
   useEffect(() => {
     if (!currScene || !audioAllowed) return;
     try {
-      const stop = playAudios(currScene);
-    } catch (e) {
-      toast.error("The audio on this scene failed to play")
+      const endPlayback = playAudios(currScene);
+      return () => endPlayback();
+    } catch {
+      toast.error("The audio on this scene failed to play");
     }
-
-    return () => stop();
-  }, [currScene, audioAllowed])
+  }, [currScene, audioAllowed]);
 
   if (loading) return <LoadingPage text="Loading Scene..." />;
   if (authError) return <></>;
