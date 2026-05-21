@@ -7,6 +7,7 @@ import { getScenePatch, commitSavedScene } from "../scene/scene";
 
 import useVisualScene from "../stores/visual";
 import { modifySceneProp } from "../scene/operations/modifiers";
+import useDirectLink from "./useDirectLink";
 import shallow from "zustand/shallow";
 import toast from "react-hot-toast";
 import TimerStateOperationMenu from "../../../components/StateVariables/TimerStateOperationMenu";
@@ -21,6 +22,12 @@ export default function SceneSettings() {
 
   const name = useVisualScene((scene) => scene.name);
   const roles = useVisualScene((scene) => scene.roles);
+  const sceneId = useVisualScene((scene) => scene.id);
+  const {
+    directLink,
+    disabled: directLinkDisabled,
+    defaultTarget: defaultDirectLinkScene,
+  } = useDirectLink();
   const time = useVisualScene((scene) => scene.time);
 
   const [selectedRoles, setSelectedRoles] = useState(roles ?? []);
@@ -147,6 +154,56 @@ export default function SceneSettings() {
                 })}
               </ul>
             </div>
+            <label className="label cursor-pointer justify-start gap-3 mt-2">
+              <input
+                type="checkbox"
+                className="toggle"
+                checked={!!directLink && !directLinkDisabled}
+                disabled={directLinkDisabled}
+                onChange={(e) => {
+                  const checked = e.target.checked;
+                  if (!checked) {
+                    modifySceneProp("directLink", null);
+                    return;
+                  }
+                  const selfId = useVisualScene.getState().id;
+                  const target =
+                    directLink ??
+                    defaultDirectLinkScene ??
+                    scenes?.find((s) => s._id !== selfId)?._id ??
+                    null;
+                  modifySceneProp("directLink", target);
+                }}
+              />
+              <span className="label-text">Direct Link</span>
+              {directLinkDisabled && (
+                <span
+                  className="tooltip tooltip-warning tooltip-top cursor-help text-warning text-xs before:!whitespace-normal before:!max-w-[150px]"
+                  data-tip={
+                    "Disabled: scene has buttons leading to multiple different scenes"
+                  }
+                >
+                  ⚠
+                </span>
+              )}
+            </label>
+            <select
+              className="select select-bordered"
+              disabled={!directLink || directLinkDisabled}
+              value={directLink ?? ""}
+              onChange={(e) =>
+                modifySceneProp("directLink", e.target.value || null)
+              }
+            >
+              <option value="">No direct link target</option>
+              {scenes
+                ?.filter((scene) => scene._id !== sceneId)
+                .map((scene) => (
+                  <option key={scene._id} value={scene._id}>
+                    {scene.name}
+                  </option>
+                ))}
+            </select>
           </fieldset>
         </div>
       </div>

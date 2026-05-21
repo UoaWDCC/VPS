@@ -4,6 +4,21 @@ import { tryDeleteFile, updateFileMetadata } from "../../firebase/storage.js";
 import { HttpError } from "../../util/error.js";
 import status from "../../util/status.js";
 
+// enforce direct links between scenes to be in the same scenario
+const assertDirectLinkInScenario = async (scenarioId, directLinkId) => {
+  if (directLinkId == null) return;
+  const inScenario = await Scenario.exists({
+    _id: scenarioId,
+    scenes: directLinkId,
+  });
+  if (!inScenario) {
+    throw new HttpError(
+      "directLink target must belong to the same scenario",
+      status.BAD_REQUEST
+    );
+  }
+};
+
 /**
  * Creates a scene in the database, and updates its parent scenario to contain the scene
  * @param {String} scenarioId MongoDB ID of parent scenario
@@ -11,6 +26,7 @@ import status from "../../util/status.js";
  * @returns the created database scene object
  */
 const createScene = async (scenarioId, scene) => {
+  await assertDirectLinkInScenario(scenarioId, scene.directLink);
   const dbScene = new Scene(scene);
   await dbScene.save();
 
@@ -64,6 +80,7 @@ const updateScene = async (sceneId, updatedScene) => {
   // makes sure when we update components is not null
   if (updatedScene.components) {
     const prevDbScene = await Scene.findById(sceneId);
+    if (!prevDbScene) return null;
 
     // if previous firebase media component no longer exists, try to delete file from firebase storage
     prevDbScene.components.forEach((c) => {
@@ -86,6 +103,7 @@ const updateScene = async (sceneId, updatedScene) => {
 
   // if we are updating name only, components will be null
   let dbScene = await Scene.findById(sceneId);
+  if (!dbScene) return null;
 
   // store temp variable incase new name is invalid
   const previousName = dbScene.name;
@@ -131,6 +149,10 @@ const deleteScene = async (scenarioId, sceneId) => {
     return { deleted: false, reason: "not_found" };
   }
 
+  await Scene.updateMany(
+    { directLink: sceneId },
+    { $set: { directLink: null } }
+  );
   const res = await Scene.findOneAndDelete({ _id: sceneId });
   return {
     deleted: res !== null,
@@ -150,6 +172,7 @@ const duplicateScene = async (scenarioId, sceneId) => {
     name: `${sceneToCopy.name} Copy`,
     components: sceneToCopy.components,
     time: sceneToCopy.time,
+    directLink: sceneToCopy.directLink ?? null,
   };
   const dbScene = new Scene(newScene);
   await dbScene.save();
@@ -215,15 +238,21 @@ const updateSceneOrder = async (scenarioId, sceneIds) => {
   return updatedScenario;
 };
 
-const patchScene = async (sceneId, patch) => {
+const patchScene = async (sceneId, patch, scenarioId) => {
   const { fields = {}, components = [], deletedComponentIds = [] } = patch;
 
   const allowedFields = {};
-  ["name", "roles", "time", "timerStateOperations"].forEach((field) => {
-    if (Object.prototype.hasOwnProperty.call(fields, field)) {
-      allowedFields[field] = fields[field];
+  ["name", "roles", "time", "directLink", "timerStateOperations"].forEach(
+    (field) => {
+      if (Object.prototype.hasOwnProperty.call(fields, field)) {
+        allowedFields[field] = fields[field];
+      }
     }
-  });
+  );
+
+  if ("directLink" in allowedFields) {
+    await assertDirectLinkInScenario(scenarioId, allowedFields.directLink);
+  }
 
   const operations = [];
 
