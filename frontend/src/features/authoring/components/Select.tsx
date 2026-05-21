@@ -35,7 +35,12 @@ function SelectInput({
       >
         {values.map((v: any, i: number) => (
           <li key={i}>
-            <a onClick={() => handleClick(v)} className="max-w-65 overflow-x-scroll">{render(v)}</a>
+            <a
+              onClick={() => handleClick(v)}
+              className="max-w-65 overflow-x-scroll"
+            >
+              {render(v)}
+            </a>
           </li>
         ))}
         {nullable ? (

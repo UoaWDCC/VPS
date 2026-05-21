@@ -9,7 +9,9 @@
     "lint": "eslint src",
     "lint:fix": "eslint --fix src",
     "prettier": "prettier --check src",
-    "prettier:write": "prettier --write src"
+    "prettier:write": "prettier --write src",
+    "prettierlint": "prettier --check src && eslint src",
+    "prettierlint:fix": "prettier --write src && eslint --fix src"
   },
   "dependencies": {
     "@babel/runtime": "^7.28.4",
