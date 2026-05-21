@@ -19,7 +19,6 @@ const router = Router({ mergeParams: true });
 
 const HTTP_OK = 200;
 const HTTP_NOT_FOUND = 404;
-const LAST_SCENE_DELETE_MESSAGE = "A scenario must have at least one scene.";
 
 // Apply auth middleware to all routes below this point
 router.use(auth);
@@ -92,16 +91,17 @@ router.put("/reorder", async (req, res) => {
     return res.status(400).json({ error: "sceneIds must be an array" });
   }
 
-  if (sceneIds.length === 0) {
-    return res.status(status.CONFLICT).json({
-      error: "A scenario must have at least one scene.",
-    });
-  }
-
   const updatedScenario = await updateSceneOrder(
     req.params.scenarioId,
     sceneIds
   );
+
+  if (!updatedScenario) {
+    return res.status(status.CONFLICT).json({
+      error: "Reordering must preserve the number of scenes.",
+    });
+  }
+
   res.status(HTTP_OK).json(updatedScenario);
 });
 
@@ -111,7 +111,9 @@ router.delete("/:sceneId", async (req, res) => {
   if (result.deleted) {
     res.sendStatus(HTTP_OK);
   } else if (result.reason === "last_scene") {
-    res.status(status.CONFLICT).json({ error: LAST_SCENE_DELETE_MESSAGE });
+    res
+      .status(status.CONFLICT)
+      .json({ error: "A scenario must have at least one scene." });
   } else {
     res.sendStatus(HTTP_NOT_FOUND);
   }

@@ -204,7 +204,10 @@ const getComponent = async (sceneId, componentId) => {
  */
 const updateSceneOrder = async (scenarioId, sceneIds) => {
   const updatedScenario = await Scenario.findOneAndUpdate(
-    { _id: scenarioId },
+    {
+      _id: scenarioId,
+      $expr: { $eq: [{ $size: "$scenes" }, sceneIds.length] },
+    },
     { scenes: sceneIds },
     { new: true }
   );

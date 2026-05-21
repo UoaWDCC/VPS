@@ -263,13 +263,31 @@ describe("Scene API tests", () => {
     expect(dbScene.components).toEqual(scene1.components);
   });
 
-  it("PUT api/scenario/:scenarioId/scene/reorder prevents removing all scenes", async () => {
+  it("PUT api/scenario/:scenarioId/scene/reorder updates scene order", async () => {
+    const reqData = {
+      sceneIds: [scene2._id.toString(), scene1._id.toString()],
+    };
+
+    const response = await axios.put(
+      `http://localhost:${port}/api/scenario/${scenario2._id}/scene/reorder`,
+      reqData,
+      authHeaders("user1")
+    );
+
+    expect(response.status).toBe(HTTP_OK);
+    expect(response.data.scenes).toEqual(reqData.sceneIds);
+
+    const dbScenario = await Scenario.findById(scenario2._id).lean();
+    expect(dbScenario.scenes).toEqual([scene2._id, scene1._id]);
+  });
+
+  it("PUT api/scenario/:scenarioId/scene/reorder prevents changing scene count", async () => {
     let error;
 
     try {
       await axios.put(
         `http://localhost:${port}/api/scenario/${scenario2._id}/scene/reorder`,
-        { sceneIds: [] },
+        { sceneIds: [scene1._id.toString()] },
         authHeaders("user1")
       );
     } catch (err) {
@@ -279,7 +297,7 @@ describe("Scene API tests", () => {
     expect(error).toBeDefined();
     expect(error.response.status).toBe(409);
     expect(error.response.data.error).toBe(
-      "A scenario must have at least one scene."
+      "Reordering must preserve the number of scenes."
     );
 
     const dbScenario = await Scenario.findById(scenario2._id).lean();
