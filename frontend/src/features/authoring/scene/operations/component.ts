@@ -141,23 +141,30 @@ export function createComponentFromBounds(
 }
 
 export const modifyComponentProp = modify(
-  (id: string, prop: string, val: any) => {
-    const component = getComponent(id);
-    if (!component) return;
+  (ids: string[], prop: string, val: any) => {
+    ids.forEach((id) => {
+      const component = getComponent(id);
+      if (!component) return;
 
-    const [object, key] = getObject(prop, component);
-    if (typeof val === "function") object[key] = val(object[key]);
-    else if (val !== null && typeof val === "object" && !Array.isArray(val))
-      object[key] = merge(object[key], val);
-    else object[key] = val;
+      const [object, key] = getObject(prop, component);
+      if (typeof val === "function") object[key] = val(object[key]);
+      else if (val !== null && typeof val === "object" && !Array.isArray(val))
+        object[key] = merge(object[key], val);
+      else object[key] = val;
+    });
   }
 );
 
-export function modifyComponentBounds(id: string, bounds: Partial<Bounds>) {
-  modifyComponentProp(id, "bounds", bounds);
+export function modifyComponentBounds(
+  ids: string[],
+  bounds: Partial<Bounds> | ((prev: Bounds) => Bounds)
+) {
+  modifyComponentProp(ids, "bounds", bounds);
 }
 
-export function bringForward(id: string) {
+export function bringForward(ids: string[]) {
+  if (ids.length > 1) return;
+  const id = ids[0];
   const currentZIndex = getComponentProp(id, "zIndex") as number;
   const components = Object.values(getScene().components) as Component[];
 
@@ -178,11 +185,13 @@ export function bringForward(id: string) {
   const aboveZIndex = targetComponent.zIndex;
 
   // Swap Zindexs
-  modifyComponentProp(id, "zIndex", aboveZIndex);
-  modifyComponentProp(targetComponent.id, "zIndex", currentZIndex);
+  modifyComponentProp([id], "zIndex", aboveZIndex);
+  modifyComponentProp([targetComponent.id], "zIndex", currentZIndex);
 }
 
-export function sendBackward(id: string) {
+export function sendBackward(ids: string[]) {
+  if (ids.length > 1) return;
+  const id = ids[0];
   const currentZIndex = getComponentProp(id, "zIndex") as number;
   const components = Object.values(getScene().components) as Component[];
 
@@ -198,26 +207,30 @@ export function sendBackward(id: string) {
 
   if (!targetComponent) return;
   const belowZIndex = targetComponent.zIndex;
-  modifyComponentProp(id, "zIndex", belowZIndex);
-  modifyComponentProp(targetComponent.id, "zIndex", currentZIndex);
+  modifyComponentProp([id], "zIndex", belowZIndex);
+  modifyComponentProp([targetComponent.id], "zIndex", currentZIndex);
 }
 
-export function bringToFront(id: string) {
+export function bringToFront(ids: string[]) {
+  if (ids.length > 1) return;
+  const id = ids[0];
   const components = Object.values(getScene().components) as Component[];
   const max = components.reduce(
     (p, c) => (c.zIndex >= p ? c.zIndex : p),
     -Infinity
   );
   if (max == -Infinity) return;
-  modifyComponentProp(id, "zIndex", max + 1);
+  modifyComponentProp([id], "zIndex", max + 1);
 }
 
-export function sendToBack(id: string) {
+export function sendToBack(ids: string[]) {
+  if (ids.length > 1) return;
+  const id = ids[0];
   const components = Object.values(getScene().components) as Component[];
   const min = components.reduce(
     (p, c) => (c.zIndex <= p ? c.zIndex : p),
     Infinity
   );
   if (min == Infinity) return;
-  modifyComponentProp(id, "zIndex", min - 1);
+  modifyComponentProp([id], "zIndex", min - 1);
 }

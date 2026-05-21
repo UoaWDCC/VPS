@@ -24,7 +24,6 @@ export function handleTextMode(e: KeyboardEvent) {
   if (!selected) return;
 
   if ((e.metaKey || e.ctrlKey) && e.key == "a") {
-    e.preventDefault();
     handleSelectAll(selected);
   } else if (e.key.startsWith("Arrow") || ["Home", "End"].includes(e.key)) {
     handleNavigation(e, selected);

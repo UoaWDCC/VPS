@@ -47,22 +47,10 @@ export default function AuthoringToolPage() {
     return () => clearInterval(autosave);
   }, [sceneId]);
 
-  // if the active scene was deleted, switch to the first available scene
-  useEffect(() => {
-    if (!sceneId || !scenes) return;
-    if (!scenes.find((s) => s._id === sceneId)) {
-      const next = scenes[0];
-      if (next) replace(next);
-    }
-  }, [scenes]);
-
   useEffect(() => {
     const activeScene = localStorage.getItem(`${scenarioId}:activeScene`);
-    const found = activeScene
-      ? scenes.find((s) => s._id === activeScene)
-      : null;
-    const target = found ?? scenes[0];
-    if (target) replace(target);
+    if (activeScene) replace(scenes.find((s) => s._id === activeScene));
+    else replace(scenes[0]);
 
     useEditorStore.getState().clear();
 
@@ -76,8 +64,7 @@ export default function AuthoringToolPage() {
   }, []);
 
   function playScenario() {
-    const startScene = sceneId ? `?startScene=${sceneId}` : "";
-    window.open(`/play/${scenarioId}${startScene}`, "_blank");
+    window.open(`/play/${scenarioId}`, "_blank");
   }
 
   function goToGroups() {

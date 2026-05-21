@@ -32,7 +32,9 @@ function Topbar({ saving, save }: { saving: boolean; save: () => void }) {
     setCreateType(type);
   };
 
-  const component = selected ? getComponent(selected) : null;
+  const hasSelection = selected && selected.length > 0;
+
+  const component = hasSelection ? getComponent(selected[0]) : null;
 
   return (
     <>
@@ -84,7 +86,7 @@ function Topbar({ saving, save }: { saving: boolean; save: () => void }) {
             </li>
 
             {/* shape properties */}
-            {component.type !== "image" && (
+            {component?.type !== "image" && (
               <>
                 <div className="divider divider-horizontal" />
                 <ShapeSection />
@@ -92,7 +94,7 @@ function Topbar({ saving, save }: { saving: boolean; save: () => void }) {
             )}
 
             {/* text content styles */}
-            {component.type === "textbox" && (
+            {component?.type === "textbox" && (
               <>
                 <div className="divider divider-horizontal" />
                 <TextSection />
