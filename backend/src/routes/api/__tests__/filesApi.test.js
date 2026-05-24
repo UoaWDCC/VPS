@@ -21,7 +21,6 @@ import CollectionGroup from "../../../db/models/CollectionGroup.js";
 import auth from "../../../middleware/firebaseAuth.js";
 import errorHandler from "../../../middleware/errorHandler.js";
 
-// Mock GridFS helpers — we don't want real GridFS calls in unit tests
 jest.mock("../../../util/gridfs.js");
 jest.mock("../../../middleware/firebaseAuth");
 jest.mock("firebase-admin");
@@ -31,6 +30,7 @@ import {
   streamGridFsToResponse,
   deleteGridFsById,
 } from "../../../util/gridfs.js";
+import { authHeaders } from "./testHelpers.js";
 
 auth.mockImplementation(async (req, res, next) => {
   req.body.uid = req.headers.authorization?.split(" ")[1];
@@ -45,10 +45,6 @@ streamGridFsToResponse.mockImplementation(({ res }) => {
   res.status(200).send("fake-file-data");
 });
 deleteGridFsById.mockResolvedValue(undefined);
-
-function authHeaders(id) {
-  return { headers: { Authorization: `Bearer ${id}` } };
-}
 
 describe("Files API tests", () => {
   let mongoServer;

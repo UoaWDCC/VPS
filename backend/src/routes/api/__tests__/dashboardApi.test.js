@@ -20,6 +20,7 @@ import Group from "../../../db/models/group.js";
 import Access from "../../../db/models/access.js";
 import auth from "../../../middleware/firebaseAuth.js";
 import dashboardAuth from "../../../middleware/dashboardAuth.js";
+import { authHeaders } from "./testHelpers.js";
 
 jest.mock("../../../middleware/firebaseAuth");
 jest.mock("../../../middleware/dashboardAuth");
@@ -33,10 +34,6 @@ auth.mockImplementation(async (req, res, next) => {
 dashboardAuth.mockImplementation(async (req, res, next) => {
   next();
 });
-
-function authHeaders(id) {
-  return { headers: { Authorization: `Bearer ${id}` } };
-}
 
 describe("Dashboard API tests", () => {
   let mongoServer;

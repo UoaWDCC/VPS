@@ -18,6 +18,7 @@ import Scenario from "../../../db/models/scenario.js";
 import Scene from "../../../db/models/scene.js";
 import User from "../../../db/models/user.js";
 import auth from "../../../middleware/firebaseAuth.js";
+import { authHeaders } from "./testHelpers.js";
 
 jest.mock("../../../middleware/firebaseAuth");
 jest.mock("firebase-admin");
@@ -26,10 +27,6 @@ auth.mockImplementation(async (req, res, next) => {
   req.body.uid = req.headers.authorization?.split(" ")[1];
   next();
 });
-
-function authHeaders(id) {
-  return { headers: { Authorization: `Bearer ${id}` } };
-}
 
 describe("Navigate User API tests", () => {
   let mongoServer;

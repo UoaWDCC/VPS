@@ -20,12 +20,12 @@ import StoredFile from "../../../db/models/StoredFile.js";
 import auth from "../../../middleware/firebaseAuth.js";
 import errorHandler from "../../../middleware/errorHandler.js";
 
-// Mock GridFS helpers — no real GridFS in unit tests
 jest.mock("../../../util/gridfs.js");
 jest.mock("../../../middleware/firebaseAuth");
 jest.mock("firebase-admin");
 
 import { deleteGridFsById } from "../../../util/gridfs.js";
+import { authHeaders } from "./testHelpers.js";
 
 auth.mockImplementation(async (req, res, next) => {
   req.body.uid = req.headers.authorization?.split(" ")[1];
@@ -33,10 +33,6 @@ auth.mockImplementation(async (req, res, next) => {
 });
 
 deleteGridFsById.mockResolvedValue(undefined);
-
-function authHeaders(id) {
-  return { headers: { Authorization: `Bearer ${id}` } };
-}
 
 describe("Collections API tests", () => {
   let mongoServer;

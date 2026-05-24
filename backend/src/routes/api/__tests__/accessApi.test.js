@@ -19,6 +19,7 @@ import Scenario from "../../../db/models/scenario.js";
 import User from "../../../db/models/user.js";
 import auth from "../../../middleware/firebaseAuth.js";
 import scenarioAuth from "../../../middleware/scenarioAuth.js";
+import { authHeaders } from "./testHelpers.js";
 
 jest.mock("../../../middleware/firebaseAuth");
 jest.mock("../../../middleware/scenarioAuth");
@@ -32,10 +33,6 @@ auth.mockImplementation(async (req, res, next) => {
 scenarioAuth.mockImplementation(async (req, res, next) => {
   next();
 });
-
-function authHeaders(id) {
-  return { headers: { Authorization: `Bearer ${id}` } };
-}
 
 describe("Access API tests", () => {
   let mongoServer;
@@ -99,7 +96,6 @@ describe("Access API tests", () => {
   });
 
   it("GET /access/ returns accessible scenarios for a non-owner user", async () => {
-    // retrieveAccessibleScenarios: scenarios where uid is on users list but NOT owner
     const response = await axios.get(
       `http://localhost:${port}/api/access/`,
       authHeaders("user2")

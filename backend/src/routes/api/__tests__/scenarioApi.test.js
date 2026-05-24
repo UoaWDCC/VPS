@@ -19,6 +19,7 @@ import Scene from "../../../db/models/scene.js";
 import auth from "../../../middleware/firebaseAuth.js";
 import scenarioAuth from "../../../middleware/scenarioAuth.js";
 import Access from "../../../db/models/access.js";
+import { authHeaders } from "./testHelpers.js";
 
 jest.mock("../../../middleware/firebaseAuth");
 jest.mock("../../../middleware/scenarioAuth");
@@ -33,14 +34,6 @@ auth.mockImplementation(async (req, res, next) => {
 scenarioAuth.mockImplementation(async (req, res, next) => {
   next();
 });
-
-function authHeaders(id) {
-  return {
-    headers: {
-      Authorization: `Bearer ${id}`,
-    },
-  };
-}
 
 describe("Scenario API tests", () => {
   const HTTP_OK = 200;
