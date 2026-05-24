@@ -105,7 +105,7 @@ router.post("/upload", upload.array("files"), async (req, res) => {
       groupId: groupObjId,
     });
 
-    const uploaderUid = req.user?.uid || "unknown";
+    const uploaderUid = req.body.uid;
 
     const results = [];
     for (const f of req.files) {
