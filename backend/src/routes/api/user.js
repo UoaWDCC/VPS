@@ -105,7 +105,6 @@ router.get("/:uid", async (req, res) => {
   res.json(user);
 });
 
-
 // update user's played array
 router.put("/:uid", async (req, res) => {
   const scenarioID = Object.values(req.body)[0];

@@ -55,7 +55,6 @@ const createUser = async (info) => {
   return new User(info).save();
 };
 
-
 /**
  * @deprecated 17/09/2024
  * We currently do not support play history - a larger refactor is likely required, at which point,

@@ -110,7 +110,10 @@ describe("Image API tests", () => {
 
     await Promise.all(urls.map((url) => new Image({ url }).save()));
 
-    const response = await axios.get(`http://localhost:${port}/api/image/`, authHeaders("user1"));
+    const response = await axios.get(
+      `http://localhost:${port}/api/image/`,
+      authHeaders("user1")
+    );
     expect(response.status).toBe(HTTP_OK);
 
     // check correct images are returned
