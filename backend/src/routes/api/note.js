@@ -9,6 +9,7 @@ import {
 import auth from "../../middleware/firebaseAuth.js";
 import { handle } from "../../util/error.js";
 import STATUS from "../../util/status.js";
+import User from "../../db/models/user.js";
 
 const router = Router();
 const HTTP_OK = 200;
@@ -31,14 +32,16 @@ router.get("/retrieve/:noteId", async (req, res) => {
 
 // Create an empty note
 router.post("/", async (req, res) => {
-  const { groupId, title, email } = req.body;
+  const { groupId, title } = req.body;
+  const { email } = await User.findOne({ uid: req.body.uid }, { email: 1 }).lean();
   await createNote(groupId, title, email);
   res.status(HTTP_OK).json("note created");
 });
 
 // Update a note
 router.put("/update", async (req, res) => {
-  const { noteId, text, title, groupId, email } = req.body;
+  const { noteId, text, title, groupId } = req.body;
+  const { email } = await User.findOne({ uid: req.body.uid }, { email: 1 }).lean();
   const date = new Date();
   await updateNote(noteId, { text, title, date }, groupId, email);
   res.status(HTTP_OK).json("note updated");
@@ -48,9 +51,11 @@ router.put("/update", async (req, res) => {
 router.delete(
   "/delete",
   handle(async (req, res) => {
-    const { noteId, groupId, email } = req.body;
+    const { noteId, groupId } = req.body;
+    const { email } = await User.findOne({ uid: req.body.uid }, { email: 1 }).lean();
     await deleteNote(noteId, groupId, email);
     res.status(STATUS.OK).json("note deleted");
   })
 );
+
 export default router;
