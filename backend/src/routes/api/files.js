@@ -20,6 +20,9 @@ router.use((req, _res, next) => {
   next();
 });
 
+// All routes below require Firebase auth
+router.use(auth);
+
 /**
  * @route GET /api/files/download/:fileId
  * @desc Stream a file directly from GridFS by ID
@@ -43,9 +46,6 @@ router.get("/download/:fileId", async (req, res) => {
     return res.status(500).json({ error: err.message });
   }
 });
-
-// All routes below require Firebase auth
-router.use(auth);
 
 // Upload configuration
 const MAX_FILE_SIZE_MB = parseInt(process.env.MAX_FILE_SIZE_MB || "50", 10);
