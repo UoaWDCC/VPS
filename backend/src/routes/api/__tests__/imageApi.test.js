@@ -14,8 +14,19 @@ import mongoose from "mongoose";
 import axios from "axios";
 import routes from "../../index.js";
 import Image from "../../../db/models/image.js";
+import auth from "../../../middleware/firebaseAuth.js";
 
-jest.mock("firebase-admin"); // Needed to mock the firebase-admin dependency in firebase-auth.js which is in routes
+jest.mock("../../../middleware/firebaseAuth");
+jest.mock("firebase-admin");
+
+auth.mockImplementation(async (req, res, next) => {
+  req.body.uid = req.headers.authorization?.split(" ")[1];
+  next();
+});
+
+function authHeaders(id) {
+  return { headers: { Authorization: `Bearer ${id}` } };
+}
 
 describe("Image API tests", () => {
   const HTTP_OK = 200;
@@ -78,7 +89,8 @@ describe("Image API tests", () => {
 
     const response = await axios.post(
       `http://localhost:${port}/api/image/`,
-      body
+      body,
+      authHeaders("user1")
     );
     expect(response.status).toBe(HTTP_OK);
 
@@ -98,7 +110,7 @@ describe("Image API tests", () => {
 
     await Promise.all(urls.map((url) => new Image({ url }).save()));
 
-    const response = await axios.get(`http://localhost:${port}/api/image/`);
+    const response = await axios.get(`http://localhost:${port}/api/image/`, authHeaders("user1"));
     expect(response.status).toBe(HTTP_OK);
 
     // check correct images are returned
@@ -123,7 +135,8 @@ describe("Image API tests", () => {
     await Image.create([image1, image2]);
 
     const response = await axios.get(
-      `http://localhost:${port}/api/image/${image2.id}`
+      `http://localhost:${port}/api/image/${image2.id}`,
+      authHeaders("user1")
     );
     expect(response.status).toBe(HTTP_OK);
 
