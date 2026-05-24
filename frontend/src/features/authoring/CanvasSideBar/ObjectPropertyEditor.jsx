@@ -1,3 +1,5 @@
+import { modifyVerts } from "../../authoring/handlers/pointer/resize";
+
 export function ObjectPropertyEditor({ component }) {
   // const [x, y] = component.bounds.verts[0];
   // const [width, height] = component.bounds.verts[1];
@@ -5,6 +7,8 @@ export function ObjectPropertyEditor({ component }) {
   console.log(component.bounds.verts)
 
   function saveProp(v, type) {
+    console.log(v, type)
+    modifyVerts()
   }
 
   
@@ -24,13 +28,13 @@ export function ObjectPropertyEditor({ component }) {
               type="number"
               className="input max-w-20"
               value={(component?.bounds.verts[1].x - component?.bounds.verts[0].x).toFixed(2)}
-              // onChange={(e) => saveProp()}
+              onChange={(e) => saveProp(e.target.value, 'width')}
             />
             <input
               type="number"
               className="input max-w-20"
               value={(component?.bounds.verts[1].y - component?.bounds.verts[0].y).toFixed(2)}
-              // onChange={(e) => saveProp()}
+              onChange={(e) => saveProp(e.target.value, 'height')}
             />
           </div>
 
@@ -43,13 +47,13 @@ export function ObjectPropertyEditor({ component }) {
               type="number"
               className="input max-w-20"
               value={Math.round(component?.bounds.verts[0].x * 100) / 100}
-              // onChange={(e) => saveProp()}
+              onChange={(e) => saveProp(e.target.value, 'x')}
             />
             <input
               type="number"
               className="input max-w-20"
               value={Math.round(component?.bounds.verts[0].y * 100) / 100}
-              // onChange={(e) => saveProp()}
+              onChange={(e) => saveProp(e.target.value, 'y')}
             />
           </div>
         </fieldset>
