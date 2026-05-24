@@ -69,7 +69,7 @@ router.post("/:scenarioId/create", async (req, res) => {
 
     if (!scenario) return res.status(404).json({ error: "Scenario not found" });
 
-    if (scenario.uid != uid) return res.status(403);
+    if (scenario.uid != uid) return res.status(403).json({ error: "Forbidden" });
 
     const name = scenario?.name || "Default name";
 
