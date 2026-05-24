@@ -10,6 +10,7 @@ import { retrieveRoleList, updateRoleList } from "../../db/daos/scenarioDao.js";
 import Group from "../../db/models/group.js";
 
 import auth from "../../middleware/firebaseAuth.js";
+import scenarioAuth from "../../middleware/scenarioAuth.js";
 import validScenarioId from "../../middleware/validScenarioId.js";
 
 const router = Router();
@@ -53,8 +54,8 @@ router.get("/retrieve/:groupId", async (req, res) => {
 });
 
 router.use("/:scenarioId", validScenarioId);
-// create a new group
-router.post("/:scenarioId", async (req, res) => {
+// create a new group — restricted to scenario owner
+router.post("/:scenarioId", scenarioAuth, async (req, res) => {
   const { groupList, roleList } = req.body;
   const { scenarioId } = req.params;
 
