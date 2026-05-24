@@ -97,7 +97,7 @@ router.patch("/assigned/:scenarioId", async (req, res) => {
 
   await assignScenarioToUsers(req.params.scenarioId, newAssigneeIds);
 
-  res.status(STATUS.OK);
+  res.status(STATUS.OK).send();
 });
 
 // get user by uid
