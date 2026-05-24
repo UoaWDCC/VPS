@@ -66,13 +66,20 @@ router.get("/min", async (req, res) => {
 });
 
 // fetch the user's group needed for a scenario upfront
-router.get("/group/:scenarioId", async (req, res) => {
-  const { scenarioId } = req.params;
-  const { uid } = req.body;
-  const { email } = await User.findOne({ uid }, { email: 1 }).lean();
-  const group = await Group.findOne({ scenarioId, "users.email": email });
-  return res.status(STATUS.OK).json({ group });
-});
+router.get(
+  "/group/:scenarioId",
+  handle(async (req, res) => {
+    const { scenarioId } = req.params;
+    const { uid } = req.body;
+    const user = await User.findOne({ uid }, { email: 1 }).lean();
+    if (!user) throw new HttpError("User not found", STATUS.UNAUTHORIZED);
+    const group = await Group.findOne({
+      scenarioId,
+      "users.email": user.email,
+    });
+    return res.status(STATUS.OK).json({ group });
+  })
+);
 
 // get users that played scenario
 router.get("/played/:scenarioId", async (req, res) => {
