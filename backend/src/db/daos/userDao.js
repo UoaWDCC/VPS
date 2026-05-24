@@ -55,20 +55,6 @@ const createUser = async (info) => {
   return new User(info).save();
 };
 
-/**
- * Deletes a user from the database
- * @param {String} uid user's unique id
- * @returns {Boolean} True if successfully deleted, False if error
- */
-const deleteUser = async (uid) => {
-  try {
-    const user = await User.find({ uid });
-    await user.remove();
-    return true;
-  } catch {
-    return false;
-  }
-};
 
 /**
  * @deprecated 17/09/2024
@@ -193,7 +179,6 @@ export {
   createUser,
   retrieveUser,
   retrieveUserByEmail,
-  deleteUser,
   addPlayed,
   retrievePlayedUsers,
   assignScenarioToUsers,

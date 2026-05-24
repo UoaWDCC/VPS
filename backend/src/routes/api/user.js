@@ -4,7 +4,6 @@ import {
   retrieveUserByEmail,
   createUser,
   retrieveUser,
-  deleteUser,
   addPlayed,
   retrievePlayedUsers,
   assignScenarioToUsers,
@@ -106,15 +105,6 @@ router.get("/:uid", async (req, res) => {
   res.json(user);
 });
 
-// delete user by uid
-router.delete("/:uid", async (req, res) => {
-  const deleted = await deleteUser(req.params.uid);
-  if (deleted) {
-    res.sendStatus(STATUS.NO_CONTENT);
-  } else {
-    res.sendStatus(STATUS.NOT_FOUND);
-  }
-});
 
 // update user's played array
 router.put("/:uid", async (req, res) => {
