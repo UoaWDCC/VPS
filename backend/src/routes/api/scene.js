@@ -13,6 +13,7 @@ import {
 import auth from "../../middleware/firebaseAuth.js";
 import scenarioAuth from "../../middleware/scenarioAuth.js";
 import validScenarioId from "../../middleware/validScenarioId.js";
+import status from "../../util/status.js";
 
 const router = Router({ mergeParams: true });
 
@@ -95,14 +96,25 @@ router.put("/reorder", async (req, res) => {
     req.params.scenarioId,
     sceneIds
   );
+
+  if (!updatedScenario) {
+    return res.status(status.CONFLICT).json({
+      error: "Reordering must preserve the number of scenes.",
+    });
+  }
+
   res.status(HTTP_OK).json(updatedScenario);
 });
 
 // Delete a scene
 router.delete("/:sceneId", async (req, res) => {
-  const deleted = await deleteScene(req.params.scenarioId, req.params.sceneId);
-  if (deleted) {
+  const result = await deleteScene(req.params.scenarioId, req.params.sceneId);
+  if (result.deleted) {
     res.sendStatus(HTTP_OK);
+  } else if (result.reason === "last_scene") {
+    res
+      .status(status.CONFLICT)
+      .json({ error: "A scenario must have at least one scene." });
   } else {
     res.sendStatus(HTTP_NOT_FOUND);
   }

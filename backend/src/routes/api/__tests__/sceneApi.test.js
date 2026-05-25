@@ -68,6 +68,11 @@ describe("Scene API tests", () => {
     name: "Test Scene 2",
   };
 
+  const scene3 = {
+    _id: new mongoose.mongo.ObjectId("000000000000000000000005"),
+    name: "Only Scene",
+  };
+
   const scenario1 = {
     _id: new mongoose.mongo.ObjectId("000000000000000000000001"),
     name: "Test Scenario 1",
@@ -78,6 +83,13 @@ describe("Scene API tests", () => {
     _id: new mongoose.mongo.ObjectId("000000000000000000000002"),
     name: "Test Scenario 2",
     scenes: [scene1._id, scene2._id],
+    uid: "user1",
+  };
+
+  const scenario3 = {
+    _id: new mongoose.mongo.ObjectId("000000000000000000000006"),
+    name: "Test Scenario 3",
+    scenes: [scene3._id],
     uid: "user1",
   };
 
@@ -98,8 +110,8 @@ describe("Scene API tests", () => {
 
   // populate database with dummy scenarios
   beforeEach(async () => {
-    await Scenario.create([scenario1, scenario2]);
-    await Scene.create([scene1, scene2]);
+    await Scenario.create([scenario1, scenario2, scenario3]);
+    await Scene.create([scene1, scene2, scene3]);
   });
 
   // clear the database
@@ -251,6 +263,47 @@ describe("Scene API tests", () => {
     expect(dbScene.components).toEqual(scene1.components);
   });
 
+  it("PUT api/scenario/:scenarioId/scene/reorder updates scene order", async () => {
+    const reqData = {
+      sceneIds: [scene2._id.toString(), scene1._id.toString()],
+    };
+
+    const response = await axios.put(
+      `http://localhost:${port}/api/scenario/${scenario2._id}/scene/reorder`,
+      reqData,
+      authHeaders("user1")
+    );
+
+    expect(response.status).toBe(HTTP_OK);
+    expect(response.data.scenes).toEqual(reqData.sceneIds);
+
+    const dbScenario = await Scenario.findById(scenario2._id).lean();
+    expect(dbScenario.scenes).toEqual([scene2._id, scene1._id]);
+  });
+
+  it("PUT api/scenario/:scenarioId/scene/reorder prevents changing scene count", async () => {
+    let error;
+
+    try {
+      await axios.put(
+        `http://localhost:${port}/api/scenario/${scenario2._id}/scene/reorder`,
+        { sceneIds: [scene1._id.toString()] },
+        authHeaders("user1")
+      );
+    } catch (err) {
+      error = err;
+    }
+
+    expect(error).toBeDefined();
+    expect(error.response.status).toBe(409);
+    expect(error.response.data.error).toBe(
+      "Reordering must preserve the number of scenes."
+    );
+
+    const dbScenario = await Scenario.findById(scenario2._id).lean();
+    expect(dbScenario.scenes).toEqual([scene1._id, scene2._id]);
+  });
+
   it("DELETE api/scenario/:scenarioId/scene/:sceneId deletes a valid scene", async () => {
     const response = await axios.delete(
       `http://localhost:${port}/api/scenario/${scenario2._id}/scene/${scene1._id}/`,
@@ -267,6 +320,31 @@ describe("Scene API tests", () => {
     expect(dbScenario2.scenes).toEqual([scene2._id]);
 
     // TODO: check corresponding components are removed
+  });
+
+  it("DELETE api/scenario/:scenarioId/scene/:sceneId prevents deleting the only scene", async () => {
+    let error;
+
+    try {
+      await axios.delete(
+        `http://localhost:${port}/api/scenario/${scenario3._id}/scene/${scene3._id}/`,
+        authHeaders("user1")
+      );
+    } catch (err) {
+      error = err;
+    }
+
+    expect(error).toBeDefined();
+    expect(error.response.status).toBe(409);
+    expect(error.response.data.error).toBe(
+      "A scenario must have at least one scene."
+    );
+
+    const dbScene = await Scene.findById(scene3._id);
+    expect(dbScene).toBeDefined();
+
+    const dbScenario = await Scenario.findById(scenario3._id).lean();
+    expect(dbScenario.scenes).toEqual([scene3._id]);
   });
 
   it("DELETE api/scenario/:scenarioId/scene/:sceneId returns 404 with invalid IDs", async () => {
