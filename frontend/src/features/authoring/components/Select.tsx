@@ -37,7 +37,7 @@ function SelectInput({
           <li key={i}>
             <a
               onClick={() => handleClick(v)}
-              className="max-w-65 overflow-x-scroll"
+              className="block max-w-65 break-words overflow-hidden"
             >
               {render(v)}
             </a>
