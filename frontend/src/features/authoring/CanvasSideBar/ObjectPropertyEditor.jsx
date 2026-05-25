@@ -1,17 +1,34 @@
-import { modifyVerts } from "../../authoring/handlers/pointer/resize";
+import { translate } from "../../authoring/util";
+// import { modifyVerts } from "../../authoring/handlers/pointer/resize";
+import { useState, useEffect } from "react";
+import { modifyComponentProp } from "../scene/operations/component";
 
 export function ObjectPropertyEditor({ component }) {
-  // const [x, y] = component.bounds.verts[0];
-  // const [width, height] = component.bounds.verts[1];
-  // console.log(x, y, width, height);
-  console.log(component.bounds.verts)
+  const [inputX, setInputX] = useState(
+    Math.round(component.bounds.verts[0].x * 100) / 100
+  );
+  const [inputY, setInputY] = useState(
+    Math.round(component.bounds.verts[0].y * 100) / 100
+  );
+  const [focused, setFocused] = useState(false);
+
+  useEffect(() => {
+    if (!focused) {
+      setInputX(Math.round(component.bounds.verts[0].x * 100) / 100);
+      setInputY(Math.round(component.bounds.verts[0].y * 100) / 100);
+    }
+  }, [component.bounds.verts]);
 
   function saveProp(v, type) {
-    console.log(v, type)
-    modifyVerts()
+    console.log(v, type);
+    if (type === "x") {
+      const verts = component.bounds.verts;
+      const diff = v - verts[0].x;
+      modifyComponentProp(component.id, "bounds.verts", (prev) =>
+        translate(prev, { x: diff, y: 0 })
+      );
+    }
   }
-
-  
 
   return (
     <div className="collapse overflow-visible collapse-arrow bg-base-300 rounded-sm text-s">
@@ -27,14 +44,18 @@ export function ObjectPropertyEditor({ component }) {
             <input
               type="number"
               className="input max-w-20"
-              value={(component?.bounds.verts[1].x - component?.bounds.verts[0].x).toFixed(2)}
-              onChange={(e) => saveProp(e.target.value, 'width')}
+              value={(
+                component?.bounds.verts[1].x - component?.bounds.verts[0].x
+              ).toFixed(2)}
+              onChange={(e) => saveProp(e.target.value, "width")}
             />
             <input
               type="number"
               className="input max-w-20"
-              value={(component?.bounds.verts[1].y - component?.bounds.verts[0].y).toFixed(2)}
-              onChange={(e) => saveProp(e.target.value, 'height')}
+              value={(
+                component?.bounds.verts[1].y - component?.bounds.verts[0].y
+              ).toFixed(2)}
+              onChange={(e) => saveProp(e.target.value, "height")}
             />
           </div>
 
@@ -46,14 +67,18 @@ export function ObjectPropertyEditor({ component }) {
             <input
               type="number"
               className="input max-w-20"
-              value={Math.round(component?.bounds.verts[0].x * 100) / 100}
-              onChange={(e) => saveProp(e.target.value, 'x')}
+              value={inputX}
+              onChange={(e) => setInputX(e.target.value)}
+              onFocus={() => setFocused(true)}
+              onBlur={(e) => {
+                setFocused(false), saveProp(e.target.value, "x");
+              }}
             />
             <input
               type="number"
               className="input max-w-20"
               value={Math.round(component?.bounds.verts[0].y * 100) / 100}
-              onChange={(e) => saveProp(e.target.value, 'y')}
+              onChange={(e) => saveProp(e.target.value, "y")}
             />
           </div>
         </fieldset>
