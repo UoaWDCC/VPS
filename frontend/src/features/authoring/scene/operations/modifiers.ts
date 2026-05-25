@@ -33,7 +33,7 @@ export function modify<A extends [string[], ...any[]], R>(
       const comp = getComponent(id);
       return {
         id,
-        prevState: comp ? structuredClone(comp) : null,
+        prevState: structuredClone(comp),
       };
     });
 
@@ -59,7 +59,7 @@ export function remove(ids: string[], history = true) {
     const comp = getComponent(id);
     return {
       id,
-      prevState: comp ? structuredClone(comp) : null,
+      prevState: structuredClone(comp),
     };
   });
 
@@ -68,7 +68,6 @@ export function remove(ids: string[], history = true) {
     useVisualScene.getState().deleteComponent(id);
   });
 
-  // ** IMPORTANT ** getComponents(ids[0]) is a place holder for prevState what does that do?
   if (history) updateHistory(previousStates);
 }
 

@@ -74,12 +74,16 @@ export function undo() {
 
   let redoChanges: HistoryObject[] = [];
 
-  batch.forEach((p) => {
-    const current = getComponent(p.id);
-    const stateToSave = current ? structuredClone(current) : null;
+  batch.forEach((prev) => {
+    const current = getComponent(prev.id);
+    const stateToSave = structuredClone(current);
 
-    restoreComponent(p.id, p.state);
-    redoChanges.push({ sceneId: p.sceneId, id: p.id, state: stateToSave });
+    restoreComponent(prev.id, prev.state);
+    redoChanges.push({
+      sceneId: prev.sceneId,
+      id: prev.id,
+      state: stateToSave,
+    });
   });
 
   redoStack.push(redoChanges);
@@ -93,12 +97,16 @@ export function redo() {
 
   let undoChanges: HistoryObject[] = [];
 
-  batch.forEach((e) => {
-    const current = getComponent(e.id);
-    const stateToSave = current ? structuredClone(current) : null;
+  batch.forEach((prev) => {
+    const current = getComponent(prev.id);
+    const stateToSave = structuredClone(current);
 
-    restoreComponent(e.id, e.state);
-    undoChanges.push({ sceneId: e.sceneId, id: e.id, state: stateToSave });
+    restoreComponent(prev.id, prev.state);
+    undoChanges.push({
+      sceneId: prev.sceneId,
+      id: prev.id,
+      state: stateToSave,
+    });
   });
 
   undoStack.push(undoChanges);

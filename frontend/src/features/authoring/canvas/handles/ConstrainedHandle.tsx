@@ -1,6 +1,6 @@
 import { getBoxCenter, rotate } from "../../util";
 import useEditorStore from "../../stores/editor";
-import useVisualScene from "../../stores/visual";
+import { getSelectedComponentBounds } from "../../handlers/pointer/pointer";
 
 interface Props {
   x: number;
@@ -8,19 +8,19 @@ interface Props {
 }
 
 const ResizeHandle = ({ x, y }: Props) => {
-  const selected = useEditorStore((state) => state.selected)!;
+  const selected = useEditorStore((state) => state.selected);
   const mode = useEditorStore((state) => state.mode);
-  const scene = useVisualScene((scene) => scene.components);
 
-  const bounds = scene[selected].bounds;
+  const bounds = getSelectedComponentBounds();
   const verts = bounds.verts;
+  const componentRotation = bounds.rotation;
 
   let point = {
     x: x === 0.5 ? (verts[0].x + verts[1].x) / 2 : verts[x].x,
     y: y === 0.5 ? (verts[0].y + verts[1].y) / 2 : verts[y].y,
   };
 
-  point = rotate(point, getBoxCenter(verts), bounds.rotation);
+  point = rotate(point, getBoxCenter(verts), componentRotation);
 
   return (
     <g

@@ -10,6 +10,7 @@ import SpeechHandles from "./handles/SpeechHandles";
 import Rectangle from "./Rectangle";
 import useEditorStore from "../stores/editor";
 import useVisualScene from "../stores/visual";
+import { getSelectedComponentBounds } from "../handlers/pointer/pointer";
 
 const componentMap: Record<string, React.FC<any>> = {
   speech: Speech,
@@ -23,25 +24,44 @@ function resolve(type: Component["type"], bounds: Bounds) {
   return <Fc bounds={bounds} fill="none" stroke="green" strokeWidth={3} />;
 }
 
-function Overlay() {
-  const selected = useEditorStore((state) => state.selected)!;
-  const bounds = useEditorStore((state) => state.mutationBounds);
-  const scene = useVisualScene((scene) => scene.components);
-  const mode = useEditorStore((scene) => scene.mode);
-  const createType = useEditorStore((scene) => scene.createType);
-
-  const component = scene[selected];
-
-  function ResolveHandles() {
-    switch (component.type) {
-      case "speech":
-        return <SpeechHandles />;
-      case "line":
-        return <LineHandles />;
-      default:
-        return <DragHandles />;
-    }
+function ResolveHandles({
+  type,
+  isMultiSelect,
+}: {
+  type: string;
+  isMultiSelect: boolean;
+}) {
+  if (isMultiSelect) return <DragHandles />;
+  switch (type) {
+    case "speech":
+      return <SpeechHandles />;
+    case "line":
+      return <LineHandles />;
+    default:
+      return <DragHandles />;
   }
+}
+
+function Overlay() {
+  const { selected, mode, createType, mutationBounds } =
+    useEditorStore.getState();
+
+  if (!selected || selected.length === 0) {
+    return (
+      <svg
+        id="overlay"
+        className="w-full h-full absolute pointer-events-none"
+        viewBox={`-50 -50 ${1920 + 50 * 2} ${1080 + 50 * 2}`}
+      />
+    );
+  }
+
+  const components = useVisualScene.getState().components;
+
+  const primaryComponent = components[selected[0]];
+
+  const bounds = getSelectedComponentBounds();
+  const verts = bounds.verts;
 
   return (
     <svg
@@ -49,20 +69,23 @@ function Overlay() {
       className="w-full h-full absolute pointer-events-none"
       viewBox={`-50 -50 ${1920 + 50 * 2} ${1080 + 50 * 2}`}
     >
-      {component && (
+      {components && (
         <>
           <Rectangle
-            bounds={component.bounds}
-            rotationOrigin={getBoxCenter(component.bounds.verts)}
+            bounds={bounds}
+            rotationOrigin={getBoxCenter(verts)}
             fill="none"
             stroke="blue"
             strokeWidth={3}
           />
-          <ResolveHandles />
+          <ResolveHandles
+            type={primaryComponent?.type}
+            isMultiSelect={selected.length > 1}
+          />
         </>
       )}
       {mode.includes("mutation") &&
-        resolve(component?.type ?? createType, bounds)}
+        resolve(primaryComponent?.type ?? createType, mutationBounds as Bounds)}
     </svg>
   );
 }

@@ -1,6 +1,4 @@
-import { render } from "../../../../components/ContextMenu/portal";
 import { modifyComponentBounds } from "../../scene/operations/component";
-import { getComponent } from "../../scene/scene";
 import useEditorStore from "../../stores/editor";
 import useVisualScene from "../../stores/visual";
 import {
@@ -10,7 +8,6 @@ import {
 } from "../../text/cursor";
 import type { Vec2 } from "../../types";
 import { subtract, translate } from "../../util";
-import ComponentMenu from "./ComponentContext";
 import { handleCreateDrag, handleCreateEnd, handleCreateStart } from "./create";
 import { handleResizeDrag, handleResizeStart } from "./resize";
 
@@ -86,9 +83,15 @@ function handleComponentClick(e: React.MouseEvent, position: Vec2) {
   const id = target.dataset.id as string;
 
   setOffset(position);
+
+  //! TEMPORARY
   if (!selected.includes(id)) {
     setSelected([...selected, id]);
   }
+
+  // ! Text Selection Broken
+  // ! Front back implementation
+  // ! Resize
 
   const component = scene[target.dataset.id as string];
   setMutationBounds({ ...component.bounds });
@@ -96,7 +99,64 @@ function handleComponentClick(e: React.MouseEvent, position: Vec2) {
   setMode(["normal"]);
 }
 
-function findMaxSelectedMinXY() {
+function handleComponentDrag(_: React.MouseEvent, position: Vec2) {
+  const { selected, setMutationBounds, offset, setMode } =
+    useEditorStore.getState();
+
+  if (!selected || selected.length === 0) return;
+
+  const [minX, minY, maxX, maxY] = findSelectedMinMaxXY();
+
+  // Get Box Dimensions
+  const initialGroupVerts = [
+    { x: minX, y: minY },
+    { x: maxX, y: maxY },
+  ];
+
+  // Translate the entire group box by the mouse movement offset
+  const delta = subtract(position, offset);
+  const verts = translate(initialGroupVerts, delta);
+
+  let componentRotation =
+    selected.length == 1 ? findComponentRotation(selected[0]) : 0;
+
+  setMutationBounds({ verts, rotation: componentRotation });
+  setMode(["mutation"]);
+}
+
+function handleMutationEnd() {
+  const { selected, mutationBounds, setMode } = useEditorStore.getState();
+
+  const [minX, minY, maxX, maxY] = findSelectedMinMaxXY();
+
+  const newVerts = mutationBounds.verts;
+  const deltaVec = {
+    x: newVerts[0].x - minX,
+    y: newVerts[0].y - minY,
+  };
+
+  if (selected.length == 1) {
+    modifyComponentBounds(selected, mutationBounds);
+  } else {
+    modifyComponentBounds(selected, (currentBounds) => {
+      const updatedBounds = {
+        ...currentBounds,
+        verts: translate(currentBounds.verts, deltaVec),
+      };
+
+      updatedBounds.x = currentBounds.x + deltaVec.x;
+      updatedBounds.y = currentBounds.y + deltaVec.y;
+
+      return updatedBounds;
+    });
+  }
+
+  setMode(["normal"]);
+}
+
+// Component Helper Functions
+
+function findSelectedMinMaxXY() {
   const { selected } = useEditorStore.getState();
   let minX = Infinity;
   let minY = Infinity;
@@ -120,57 +180,24 @@ function findMaxSelectedMinXY() {
   return [minX, minY, maxX, maxY];
 }
 
-function handleComponentDrag(_: React.MouseEvent, position: Vec2) {
-  const { selected, setMutationBounds, offset, setMode } =
-    useEditorStore.getState();
+function findComponentRotation(id: string) {
+  const components = useVisualScene.getState().components;
+  return components[id].bounds.rotation;
+}
 
-  if (!selected || selected.length === 0) return;
-
-  const [minX, minY, maxX, maxY] = findMaxSelectedMinXY();
-
-  const initialGroupVerts = [
+export function getSelectedComponentBounds() {
+  const { selected } = useEditorStore.getState();
+  const [minX, minY, maxX, maxY] = findSelectedMinMaxXY();
+  const verts = [
     { x: minX, y: minY },
     { x: maxX, y: maxY },
   ];
 
-  // 2. Translate the entire group box by the mouse movement offset
-  const delta = subtract(position, offset);
-  const verts = translate(initialGroupVerts, delta);
+  const componentRotation =
+    selected.length === 1 ? findComponentRotation(selected[0]) : 0;
 
-  setMutationBounds({ verts, rotation: 0 });
-  setMode(["mutation"]);
-}
-
-function handleMutationEnd() {
-  const { selected, mutationBounds, setMode } = useEditorStore.getState();
-
-  if (selected && selected.length > 0 && mutationBounds?.verts) {
-    const [minX, minY, maxX, maxY] = findMaxSelectedMinXY();
-
-    const newVerts = mutationBounds.verts;
-    const deltaVec = {
-      x: newVerts[0].x - minX,
-      y: newVerts[0].y - minY,
-    };
-
-    modifyComponentBounds(selected, (currentBounds) => {
-      const updatedBounds = {
-        ...currentBounds,
-        verts: translate(currentBounds.verts, deltaVec),
-      };
-
-      if (typeof currentBounds.x === "number") {
-        updatedBounds.x = currentBounds.x + deltaVec.x;
-      }
-      if (typeof currentBounds.y === "number") {
-        updatedBounds.y = currentBounds.y + deltaVec.y;
-      }
-      //
-      return updatedBounds;
-    });
-  }
-
-  setMode(["normal"]);
+  const bounds = { verts, rotation: componentRotation, x: minX, y: minY };
+  return bounds;
 }
 
 // document handlers
