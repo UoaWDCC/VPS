@@ -173,8 +173,13 @@ export default function ManageResourcesPage() {
 
   async function handleRenameSubmit() {
     const trimmed = renameInput.trim();
-    if (!trimmed) { setRenamingFileId(null); return; }
-    const current = groups.flatMap((g) => g.files).find((f) => f.id === renamingFileId);
+    if (!trimmed) {
+      setRenamingFileId(null);
+      return;
+    }
+    const current = groups
+      .flatMap((g) => g.files)
+      .find((f) => f.id === renamingFileId);
     if (current && trimmed !== current.name) {
       await renameFile(renamingFileId, trimmed);
     }
@@ -355,10 +360,14 @@ export default function ManageResourcesPage() {
                                       autoFocus
                                       className="input input-bordered input-xs flex-1 min-w-0"
                                       value={renameInput}
-                                      onChange={(e) => setRenameInput(e.target.value)}
+                                      onChange={(e) =>
+                                        setRenameInput(e.target.value)
+                                      }
                                       onKeyDown={(e) => {
-                                        if (e.key === "Enter") handleRenameSubmit();
-                                        if (e.key === "Escape") setRenamingFileId(null);
+                                        if (e.key === "Enter")
+                                          handleRenameSubmit();
+                                        if (e.key === "Escape")
+                                          setRenamingFileId(null);
                                       }}
                                     />
                                     <button
@@ -392,7 +401,10 @@ export default function ManageResourcesPage() {
                                     </a>
                                     <button
                                       className="btn btn-phantom btn-xs px-0"
-                                      onClick={() => { setRenameInput(f.name); setRenamingFileId(f.id); }}
+                                      onClick={() => {
+                                        setRenameInput(f.name);
+                                        setRenamingFileId(f.id);
+                                      }}
                                       title="Rename file"
                                     >
                                       <PencilIcon size={14} />
