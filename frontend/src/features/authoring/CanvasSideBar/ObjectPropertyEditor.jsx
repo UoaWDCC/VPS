@@ -1,9 +1,10 @@
 import { translate } from "../../authoring/util";
-// import { modifyVerts } from "../../authoring/handlers/pointer/resize";
 import { useState } from "react";
 import { modifyComponentProp } from "../scene/operations/component";
 
 export function ObjectPropertyEditor({ component }) {
+
+  // x and y vals used for setting and current
   const [inputX, setInputX] = useState(
     Math.round(component.bounds.verts[0].x * 100) / 100
   );
@@ -11,6 +12,8 @@ export function ObjectPropertyEditor({ component }) {
     Math.round(component.bounds.verts[0].y * 100) / 100
   );
 
+  //this could prolly be improved
+  // uses the same function as the drag box feat w modifyComponentProp
   function saveProp(v, type) {
     if (type === "x") {
       const verts = component.bounds.verts;
@@ -37,10 +40,10 @@ export function ObjectPropertyEditor({ component }) {
             <label className="label">Object Width</label>
             <label className="label">Object Height</label>
           </span>
-          <div className="flex gap-15">
+          <div className="flex gap-13">
             <input
               type="number"
-              className="input max-w-20"
+              className="input max-w-21"
               value={(
                 component?.bounds.verts[1].x - component?.bounds.verts[0].x
               ).toFixed(2)}
@@ -48,7 +51,7 @@ export function ObjectPropertyEditor({ component }) {
             />
             <input
               type="number"
-              className="input max-w-20"
+              className="input max-w-21"
               value={(
                 component?.bounds.verts[1].y - component?.bounds.verts[0].y
               ).toFixed(2)}
@@ -60,10 +63,10 @@ export function ObjectPropertyEditor({ component }) {
             <label className="label">Position X</label>
             <label className="label">Position Y</label>
           </span>
-          <div className="flex gap-15">
+          <div className="flex gap-13">
             <input
               type="number"
-              className="input max-w-20"
+              className="input max-w-21"
               value={inputX}
               onChange={(e) => {
                 setInputX(e.target.value),
@@ -72,7 +75,7 @@ export function ObjectPropertyEditor({ component }) {
             />
             <input
               type="number"
-              className="input max-w-20"
+              className="input max-w-21"
               value={inputY}
               onChange={(e) => {
                 setInputY(e.target.value),
