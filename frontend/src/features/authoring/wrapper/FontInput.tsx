@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useLayoutEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 
 function FontFinder(currentSearch: string = "") {
   const fonts = [
@@ -32,10 +33,21 @@ function FontInput({
 }) {
   const [open, setOpen] = useState(false);
   const [fonts, setFonts] = useState(FontFinder());
+  const inputRef = useRef<HTMLInputElement>(null);
+  const [position, setPosition] = useState({ top: 0, left: 0 });
+
+  useLayoutEffect(() => {
+    if (!open || !inputRef.current) return;
+    const rect = inputRef.current.getBoundingClientRect();
+    setPosition({ top: rect.bottom, left: rect.left });
+  }, [open]);
+
+  const portal = document.getElementById("modal-portal");
 
   return (
     <>
       <input
+        ref={inputRef}
         type="text"
         className="input input-sm h-[28px] w-30 relative"
         placeholder="Font Name"
@@ -45,21 +57,29 @@ function FontInput({
           onChange(e.target.value);
         }}
         onFocus={() => setOpen(true)}
-        onBlur={() => setOpen(false)}
       />
-      {open && (
-        <div className={"fixed top-0 left-0 w-full h-full"}>
-          <select
-            className={"absolute top-0 left-0 w-full h-full"}
-            value={value}
-            onChange={(e) => onChange(e.target.value)}
+      {open &&
+        portal &&
+        createPortal(
+          <div
+            className="absolute w-32 h-30 bg-base-300 rounded-box shadow-sm overflow-y-auto pointer-events-auto"
+            style={{ top: position.top + 10, left: position.left - 4 }}
           >
             {fonts.map((font, index) => (
-              <option key={index}>{font}</option>
+              <div
+                className="text-[0.8rem] pl-1 hover:bg-base-200 cursor-pointer w-32"
+                key={index}
+                onMouseDown={() => {
+                  onChange(font);
+                  setOpen(false);
+                }}
+              >
+                {font}
+              </div>
             ))}
-          </select>
-        </div>
-      )}
+          </div>,
+          portal
+        )}
     </>
   );
 }
