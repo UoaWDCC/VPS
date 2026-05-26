@@ -62,12 +62,12 @@ function FontInput({
         portal &&
         createPortal(
           <div
-            className="absolute w-32 h-30 bg-base-300 rounded-box shadow-sm overflow-y-auto pointer-events-auto"
+            className="absolute w-32 max-h-35 bg-base-300 rounded-box shadow-sm overflow-y-auto pointer-events-auto"
             style={{ top: position.top + 10, left: position.left - 4 }}
           >
             {fonts.map((font, index) => (
               <div
-                className="text-[0.8rem] pl-1 hover:bg-base-200 cursor-pointer w-32"
+                className="text-[0.8rem] pl-1 hover:bg-base-200 cursor-pointer w-32 mt-[2px] mb-[2px]" 
                 key={index}
                 onMouseDown={() => {
                   onChange(font);
