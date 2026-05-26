@@ -10,14 +10,6 @@ export function ObjectPropertyEditor({ component }) {
   const [inputY, setInputY] = useState(
     Math.round(component.bounds.verts[0].y * 100) / 100
   );
-  const [focused, setFocused] = useState(false);
-
-  useEffect(() => {
-    if (!focused) {
-      setInputX(Math.round(component.bounds.verts[0].x * 100) / 100);
-      setInputY(Math.round(component.bounds.verts[0].y * 100) / 100);
-    }
-  }, [component.bounds.verts]);
 
   function saveProp(v, type) {
     console.log(v, type);
@@ -68,10 +60,9 @@ export function ObjectPropertyEditor({ component }) {
               type="number"
               className="input max-w-20"
               value={inputX}
-              onChange={(e) => setInputX(e.target.value)}
-              onFocus={() => setFocused(true)}
-              onBlur={(e) => {
-                setFocused(false), saveProp(e.target.value, "x");
+              onChange={(e) => {
+                setInputX(e.target.value),
+                  setTimeout(() => saveProp(e.target.value, "x"), 120);
               }}
             />
             <input
