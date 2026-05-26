@@ -1,6 +1,6 @@
 import { ThemeProvider } from "@material-ui/core";
 import { useEffect } from "react";
-import { BrowserRouter, Route, Switch } from "react-router-dom";
+import { BrowserRouter, Redirect, Route, Switch } from "react-router-dom";
 
 import AuthenticationContextProvider from "./context/AuthenticationContextProvider";
 import ScenarioContextProvider from "./context/ScenarioContextProvider";
@@ -10,9 +10,7 @@ import LoginPage from "./features/login/LoginPage/LoginPage";
 import ManageGroupsPage from "./features/groups/ManageGroupsPage";
 import PlayScenarioResolver from "./features/playScenario/PlayScenarioResolver";
 import PlayLandingPage from "./features/playScenario/PlayLandingPage";
-import ScenarioSelectionPage from "./features/scenarioSelection/ScenarioSelectionPage";
 import ScenarioInfo from "./features/scenarioInfo/ScenarioInfo";
-import PlayPage from "./features/play/PlayPage";
 import Dashboard from "./features/dashboard/Dashboard";
 import DashboardLandingPage from "./features/dashboard/DashboardLandingPage";
 import AboutUsPage from "./features/aboutUs/AboutUsPage";
@@ -77,9 +75,7 @@ export default function App() {
                 <Route exact path="/login" component={LoginPage} />
 
                 <ProtectedRoute exact path="/">
-                  <ScenarioContextProvider>
-                    <ScenarioSelectionPage />
-                  </ScenarioContextProvider>
+                  <Redirect to="/play" />
                 </ProtectedRoute>
 
                 <ProtectedRoute path="/play/:scenarioId">
@@ -118,12 +114,6 @@ export default function App() {
                 </ProtectedRoute>
 
                 <Route path="/aboutus" component={AboutUsPage} />
-
-                <ProtectedRoute path="/play-page">
-                  <ScenarioContextProvider>
-                    <PlayPage />
-                  </ScenarioContextProvider>
-                </ProtectedRoute>
 
                 <ScenarioContextProvider>
                   <Switch>
