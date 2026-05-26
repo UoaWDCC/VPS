@@ -67,7 +67,7 @@ function FontInput({
           >
             {fonts.map((font, index) => (
               <div
-                className="text-[0.8rem] pl-1 hover:bg-base-200 cursor-pointer w-32 mt-[2px] mb-[2px]" 
+                className="text-[0.8rem] pl-1 hover:bg-base-200 cursor-pointer w-32 mt-[2px] mb-[2px]"
                 key={index}
                 onMouseDown={() => {
                   onChange(font);
