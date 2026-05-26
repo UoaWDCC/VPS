@@ -1,6 +1,6 @@
 import { translate } from "../../authoring/util";
 // import { modifyVerts } from "../../authoring/handlers/pointer/resize";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { modifyComponentProp } from "../scene/operations/component";
 
 export function ObjectPropertyEditor({ component }) {
@@ -12,12 +12,17 @@ export function ObjectPropertyEditor({ component }) {
   );
 
   function saveProp(v, type) {
-    console.log(v, type);
     if (type === "x") {
       const verts = component.bounds.verts;
       const diff = v - verts[0].x;
       modifyComponentProp(component.id, "bounds.verts", (prev) =>
         translate(prev, { x: diff, y: 0 })
+      );
+    } else if (type === "y") {
+      const verts = component.bounds.verts;
+      const diff = v - verts[0].y;
+      modifyComponentProp(component.id, "bounds.verts", (prev) =>
+        translate(prev, { x: 0, y: diff })
       );
     }
   }
@@ -68,8 +73,11 @@ export function ObjectPropertyEditor({ component }) {
             <input
               type="number"
               className="input max-w-20"
-              value={Math.round(component?.bounds.verts[0].y * 100) / 100}
-              onChange={(e) => saveProp(e.target.value, "y")}
+              value={inputY}
+              onChange={(e) => {
+                setInputY(e.target.value),
+                  setTimeout(() => saveProp(e.target.value, "y"), 120);
+              }}
             />
           </div>
         </fieldset>
