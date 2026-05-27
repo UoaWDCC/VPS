@@ -72,7 +72,6 @@ function Topbar({ saving, save }: { saving: boolean; save: () => void }) {
         {selected && (
           <>
             <div className="divider divider-horizontal" />
-
             {/* reorder */}
             <li>
               <a onClick={() => bringToFront(selected)}>
@@ -84,7 +83,6 @@ function Topbar({ saving, save }: { saving: boolean; save: () => void }) {
                 <SendToBack size={16} />
               </a>
             </li>
-
             {/* shape properties */}
             {component?.type !== "image" && (
               <>

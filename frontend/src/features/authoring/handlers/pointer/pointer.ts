@@ -93,8 +93,10 @@ function handleComponentClick(e: React.MouseEvent, position: Vec2) {
   // ! Clipboard text selection
   // ! Front back implementation
   // * DONE Resize
+  // * DONE Fix copy and paste
   // ! npm i --save-dev @types/uuid for another type
-  // ! Object creation
+  // * DONE Object creation
+  // ! fix object mutationbounds visual
   // ! MultiSelect rotation
 
   const component = scene[target.dataset.id as string];
