@@ -8,8 +8,7 @@ interface Props {
 }
 
 const ResizeHandle = ({ x, y }: Props) => {
-  const selected = useEditorStore((state) => state.selected);
-  const mode = useEditorStore((state) => state.mode);
+  const { mode } = useEditorStore.getState();
 
   const bounds = getSelectedComponentBounds();
   const verts = bounds.verts;

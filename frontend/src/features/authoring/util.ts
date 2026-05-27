@@ -35,6 +35,10 @@ export function divide(v1: Vec2, v2: Vec2) {
   return { x: v1.x / v2.x, y: v1.y / v2.y };
 }
 
+export function scaleVecByScaleVec(v: Vec2, scale: Vec2) {
+  return { x: v.x * scale.x, y: v.y * scale.y };
+}
+
 export function rotate(v: Vec2, origin: Vec2, angle: Degree) {
   if (!angle) return v;
   const relative = subtract(v, origin);

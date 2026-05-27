@@ -7,7 +7,7 @@ export function handleCreateStart(_: React.MouseEvent, position: Vec2) {
   const { setSelected, setOffset, setMutationBounds } =
     useEditorStore.getState();
 
-  setSelected(null);
+  setSelected([]);
   setOffset(position);
   setMutationBounds({ verts: [position, position], rotation: 0 });
 }

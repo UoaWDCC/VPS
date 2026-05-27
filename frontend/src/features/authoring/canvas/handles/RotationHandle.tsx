@@ -4,7 +4,7 @@ import useVisualScene from "../../stores/visual";
 import { getSelectedComponentBounds } from "../../handlers/pointer/pointer";
 
 const RotationHandle = () => {
-  const mode = useEditorStore((state) => state.mode);
+  const { mode } = useEditorStore.getState();
 
   const bounds = getSelectedComponentBounds();
   const verts = bounds.verts;

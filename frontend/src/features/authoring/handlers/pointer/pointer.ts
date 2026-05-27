@@ -92,7 +92,9 @@ function handleComponentClick(e: React.MouseEvent, position: Vec2) {
   // ! Text Selection Broken
   // ! Front back implementation
   // ! Resize
-
+  // ! npm i --save-dev @types/uuid for another type
+  // ! Object creation
+  // ! MultiSelect rotation
   const component = scene[target.dataset.id as string];
   setMutationBounds({ ...component.bounds });
 
@@ -105,7 +107,7 @@ function handleComponentDrag(_: React.MouseEvent, position: Vec2) {
 
   if (!selected || selected.length === 0) return;
 
-  const [minX, minY, maxX, maxY] = findSelectedMinMaxXY();
+  const [minX, minY, maxX, maxY] = getSelectedMinMaxXY();
 
   // Get Box Dimensions
   const initialGroupVerts = [
@@ -125,15 +127,23 @@ function handleComponentDrag(_: React.MouseEvent, position: Vec2) {
 }
 
 function handleMutationEnd() {
-  const { selected, mutationBounds, setMode } = useEditorStore.getState();
-
-  const [minX, minY, maxX, maxY] = findSelectedMinMaxXY();
+  const { selected, mutationBounds, setMode, mode } = useEditorStore.getState();
 
   const newVerts = mutationBounds.verts;
+
+  const [minX, minY] = getSelectedMinMaxXY();
+
   const deltaVec = {
     x: newVerts[0].x - minX,
     y: newVerts[0].y - minY,
   };
+
+  const origin = {
+    x: minX,
+    y: minY,
+  };
+
+  const scaleVec = getResizeScaleVec(newVerts);
 
   if (selected.length == 1) {
     modifyComponentBounds(selected, mutationBounds);
@@ -141,11 +151,15 @@ function handleMutationEnd() {
     modifyComponentBounds(selected, (currentBounds) => {
       const updatedBounds = {
         ...currentBounds,
-        verts: translate(currentBounds.verts, deltaVec),
+        verts: mode.includes("resize")
+          ? getNewResizePosition(
+              currentBounds.verts,
+              newVerts,
+              origin,
+              scaleVec
+            )
+          : translate(currentBounds.verts, deltaVec),
       };
-
-      updatedBounds.x = currentBounds.x + deltaVec.x;
-      updatedBounds.y = currentBounds.y + deltaVec.y;
 
       return updatedBounds;
     });
@@ -156,7 +170,42 @@ function handleMutationEnd() {
 
 // Component Helper Functions
 
-function findSelectedMinMaxXY() {
+function getResizeScaleVec(newVerts: Vec2[]) {
+  const [minX, minY, maxX, maxY] = getSelectedMinMaxXY();
+
+  const oldGroupWidth = maxX - minX;
+  const oldGroupHeight = maxY - minY;
+
+  const newGroupWidth = newVerts[1].x - newVerts[0].x;
+  const newGroupHeight = newVerts[1].y - newVerts[0].y;
+
+  const scaleX = oldGroupWidth === 0 ? 1 : newGroupWidth / oldGroupWidth;
+  const scaleY = oldGroupHeight === 0 ? 1 : newGroupHeight / oldGroupHeight;
+
+  return { x: scaleX, y: scaleY };
+}
+
+function getNewResizePosition(
+  verts: Vec2[],
+  newVerts: Vec2[],
+  origin: Vec2,
+  scaleVec: Vec2
+) {
+  for (let i = 0; i < 2; i++) {
+    const vert = verts[i];
+
+    // Vert.var - origin.var is the distance from original top-left corner
+    // This is then scaled based on change in size and is mapped to new top-left corner
+    vert.x = newVerts[0].x + (vert.x - origin.x) * scaleVec.x;
+    vert.y = newVerts[0].y + (vert.y - origin.y) * scaleVec.y;
+
+    verts[i] = vert;
+  }
+
+  return verts;
+}
+
+function getSelectedMinMaxXY() {
   const { selected } = useEditorStore.getState();
   let minX = Infinity;
   let minY = Infinity;
@@ -169,7 +218,7 @@ function findSelectedMinMaxXY() {
     const component = components[id];
     if (!component || !component.bounds || !component.bounds.verts) return;
 
-    component.bounds.verts.forEach((obj) => {
+    component.bounds.verts.forEach((obj: Vec2) => {
       minX = Math.min(minX, obj.x);
       minY = Math.min(minY, obj.y);
       maxX = Math.max(maxX, obj.x);
@@ -187,7 +236,7 @@ function findComponentRotation(id: string) {
 
 export function getSelectedComponentBounds() {
   const { selected } = useEditorStore.getState();
-  const [minX, minY, maxX, maxY] = findSelectedMinMaxXY();
+  const [minX, minY, maxX, maxY] = getSelectedMinMaxXY();
   const verts = [
     { x: minX, y: minY },
     { x: maxX, y: maxY },
