@@ -34,8 +34,8 @@ function handleCtrlOperations(e: KeyboardEvent) {
   else if (e.key === "y") redo();
   else if (e.key === "d" && selected) {
     e.preventDefault();
-    const id = duplicateComponent(selected);
-    setSelected(id);
+    const ids = duplicateComponent(selected);
+    setSelected(ids);
   } else if (e.key === "ArrowUp" && selected) {
     if (e.shiftKey) bringToFront(selected);
     else bringForward(selected);
@@ -45,12 +45,12 @@ function handleCtrlOperations(e: KeyboardEvent) {
   }
 }
 
-function handleComponentOperations(e: KeyboardEvent, selected: string) {
+function handleComponentOperations(e: KeyboardEvent, selected: string[]) {
   const { setSelected } = useEditorStore.getState();
 
   if (e.key === "Backspace") {
     remove(selected);
-    setSelected(null);
+    setSelected([]);
   } else if (e.key === "ArrowUp") {
     modifyComponentProp(selected, "bounds.verts", (prev: Vec2[]) =>
       translate(prev, { x: 0, y: -5 })

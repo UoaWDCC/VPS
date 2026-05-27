@@ -40,7 +40,7 @@ export function cut(e: ClipboardEvent) {
 
   addToClipboard(e, selected);
   remove(selected);
-  setSelected(null);
+  setSelected([]);
 }
 
 export function paste(e: ClipboardEvent) {
@@ -64,40 +64,44 @@ export function paste(e: ClipboardEvent) {
     }
     syncVisualCursor();
   } else {
+    let newSelection = [];
     if (app) {
       const obj = JSON.parse(app);
       if (obj.type) {
-        setSelected(parseComponent(obj));
+        newSelection.push(parseComponent(obj));
       } else {
         const component = structuredClone(defaults["textbox"]);
         component.document = structuredClone(obj);
-        setSelected(add(component));
+        newSelection.push(add(component));
       }
     } else if (text) {
       const doc = plainToDoc(text);
       const component = structuredClone(defaults["textbox"]);
       component.document = structuredClone(doc);
-      setSelected(add(component));
+      newSelection.push(add(component));
     }
+    setSelected(newSelection);
   }
 }
 
-function addToClipboard(e: ClipboardEvent, selected: string) {
+function addToClipboard(e: ClipboardEvent, selected: string[]) {
   const { mode, selection } = useEditorStore.getState();
-  if (mode.includes("text")) {
-    if (!selection.end) return;
+  selected.forEach((id: string) => {
+    if (mode.includes("text")) {
+      if (!selection.end) return;
 
-    const { text, doc } = getSelectionContent(selected, selection);
-    e.clipboardData?.setData("text/plain", text);
-    e.clipboardData?.setData("application/component", JSON.stringify(doc));
-  } else {
-    e.clipboardData?.setData(
-      "application/component",
-      stringifyComponent(selected) || ""
-    );
-    if (getComponent(selected).type === "textbox") {
-      const text = getDocumentText(selected);
+      const { text, doc } = getSelectionContent(id, selection);
       e.clipboardData?.setData("text/plain", text);
+      e.clipboardData?.setData("application/component", JSON.stringify(doc));
+    } else {
+      e.clipboardData?.setData(
+        "application/component",
+        stringifyComponent(id) || ""
+      );
+      if (getComponent(id).type === "textbox") {
+        const text = getDocumentText(id);
+        e.clipboardData?.setData("text/plain", text);
+      }
     }
-  }
+  });
 }

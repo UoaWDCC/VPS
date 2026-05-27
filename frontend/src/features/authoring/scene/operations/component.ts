@@ -121,9 +121,11 @@ export function parseComponent(component: Component) {
   return add(component);
 }
 
-export function duplicateComponent(id: string) {
-  const newComponent = structuredClone(getComponent(id));
-  return parseComponent(newComponent);
+export function duplicateComponent(ids: string[]) {
+  return ids.map((id: string) => {
+    const newComponent = structuredClone(getComponent(id));
+    return parseComponent(newComponent);
+  });
 }
 
 export function createComponentFromBounds(
@@ -147,6 +149,7 @@ export const modifyComponentProp = modify(
       if (!component) return;
 
       const [object, key] = getObject(prop, component);
+
       if (typeof val === "function") object[key] = val(object[key]);
       else if (val !== null && typeof val === "object" && !Array.isArray(val))
         object[key] = merge(object[key], val);

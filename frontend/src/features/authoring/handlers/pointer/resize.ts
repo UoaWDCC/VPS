@@ -1,6 +1,4 @@
-import { getComponent, getComponentProp } from "../../scene/scene";
 import useEditorStore from "../../stores/editor";
-import useVisualScene from "../../stores/visual";
 import type { Bounds, Vec2 } from "../../types";
 import {
   add,

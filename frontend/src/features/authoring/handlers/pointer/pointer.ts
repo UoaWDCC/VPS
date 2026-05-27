@@ -90,11 +90,13 @@ function handleComponentClick(e: React.MouseEvent, position: Vec2) {
   }
 
   // ! Text Selection Broken
+  // ! Clipboard text selection
   // ! Front back implementation
-  // ! Resize
+  // * DONE Resize
   // ! npm i --save-dev @types/uuid for another type
   // ! Object creation
   // ! MultiSelect rotation
+
   const component = scene[target.dataset.id as string];
   setMutationBounds({ ...component.bounds });
 
