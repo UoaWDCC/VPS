@@ -58,12 +58,12 @@ function TextSection() {
       />
 
       <div className="divider divider-horizontal" />
-
-      <NumberInput
-        value={Number(style.fontSize)}
-        onChange={(value) => modifyStyle("fontSize", value)}
-      />
-
+      <div className="tooltip tooltip-bottom" data-tip="Font size">
+        <NumberInput
+          value={Number(style.fontSize)}
+          onChange={(value) => modifyStyle("fontSize", value)}
+        />
+      </div>
       <div className="divider divider-horizontal" />
 
       <ToggleInput
@@ -71,6 +71,7 @@ function TextSection() {
         onToggle={(value) => modifyStyle("fontWeight", value)}
         enabled="bold"
         disabled="normal"
+        tooltip="Bold"
       >
         <Bold size={16} />
       </ToggleInput>
@@ -79,6 +80,7 @@ function TextSection() {
         onToggle={(value) => modifyStyle("fontStyle", value)}
         enabled="italic"
         disabled="normal"
+        tooltip="Italic"
       >
         <Italic size={16} />
       </ToggleInput>
@@ -87,18 +89,21 @@ function TextSection() {
         onToggle={(value) => modifyStyle("textDecoration", value)}
         enabled="underline"
         disabled="none"
+        tooltip="Underline"
       >
         <Underline size={16} />
       </ToggleInput>
       <ChromePicker
         value={style.textColor}
         onChange={(value) => modifyStyle("textColor", value)}
+        tooltip="Text color"
       >
         <span>A</span>
       </ChromePicker>
       <ChromePicker
         value={style.highlightColor}
         onChange={(value) => modifyStyle("highlightColor", value)}
+        tooltip="Highlight color"
       >
         <Highlighter size={14} />
       </ChromePicker>
@@ -114,6 +119,7 @@ function TextSection() {
           <AlignRight size={16} />,
         ]}
         onChange={(value) => modifyStyle("alignment", value)}
+        tooltip="Alignment"
       >
         <AlignLeft size={16} />
       </MultiInput>
@@ -122,6 +128,7 @@ function TextSection() {
         value={style.lineHeight}
         values={[1, 1.1, 1.25, 1.5, 1.75, 2]}
         onChange={(value) => modifyStyle("lineHeight", value)}
+        tooltip="Line height"
       >
         <ArrowDownNarrowWide size={16} />
       </MultiInput>
