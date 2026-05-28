@@ -12,7 +12,7 @@ import {
 import { getComponent } from "../../scene/scene";
 import useEditorStore from "../../stores/editor";
 import { syncVisualCursor } from "../../text/cursor";
-import type { ModelDocument } from "../../types";
+import type { Component, ModelDocument } from "../../types";
 
 function plainToDoc(text: string) {
   const plainBlocks = text.split("\n");
@@ -48,60 +48,94 @@ export function paste(e: ClipboardEvent) {
   const { mode, selected, selection, setSelected, setSelection } =
     useEditorStore.getState();
 
-  const app = e.clipboardData?.getData("application/component");
-  const text = e.clipboardData?.getData("text/plain");
+  const components = e.clipboardData?.getData("application/component");
+  const plainTexts = e.clipboardData?.getData("text/plain");
 
   if (selected && mode.includes("text")) {
-    if (app) {
-      const obj = JSON.parse(app);
-      const doc = obj.type === "textbox" ? obj.document : obj;
-      const cursor = mergeDocs(selected, selection.start!, doc);
-      setSelection({ start: cursor, end: null });
-    } else if (text) {
-      const doc = plainToDoc(text) as ModelDocument;
-      const cursor = mergeDocs(selected, selection.start!, doc);
-      setSelection({ start: cursor, end: null });
-    }
-    syncVisualCursor();
+    return;
+    // ! OLD
+    // if (components) {
+    //   const obj = JSON.parse(components);
+    //   const doc = obj.type === "textbox" ? obj.document : obj;
+    //   const cursor = mergeDocs(selected, selection.start!, doc);
+    //   setSelection({ start: cursor, end: null });
+    // } else if (plainTexts) {
+    //   const doc = plainToDoc(plainTexts) as ModelDocument;
+    //   const cursor = mergeDocs(selected, selection.start!, doc);
+    //   setSelection({ start: cursor, end: null });
+    // }
+    // syncVisualCursor();
+
+    // * GPT answer might be correct but no way to test without text selection
+    // let cursor = selection.start!;
+
+    // if (appData) {
+    //   const parsed = JSON.parse(appData);
+    //   // Ensure we are working with an array
+    //   const items = Array.isArray(parsed) ? parsed : [parsed];
+
+    //   // Merge all documents in the array sequentially
+    //   for (const item of items) {
+    //     const doc = item.type === "textbox" ? item.document : item;
+    //     cursor = mergeDocs(selected, cursor, doc);
+    //   }
+    //   setSelection({ start: cursor, end: null });
+    // } else if (textData) {
+    //   const doc = plainToDoc(textData) as ModelDocument;
+    //   cursor = mergeDocs(selected, cursor, doc);
+    //   setSelection({ start: cursor, end: null });
+    // }
+    // syncVisualCursor();
   } else {
-    let newSelection = [];
-    if (app) {
-      const obj = JSON.parse(app);
+    if (!components) return;
+
+    let newSelection: string[] = [];
+    const parsed = JSON.parse(components);
+    const items = Array.isArray(parsed) ? parsed : [parsed];
+
+    items.forEach((obj) => {
       if (obj.type) {
         newSelection.push(parseComponent(obj));
       } else {
+        //! IMPORTANT I dont think this will ever run because ever copied component has a type
         const component = structuredClone(defaults["textbox"]);
         component.document = structuredClone(obj);
         newSelection.push(add(component));
       }
-    } else if (text) {
-      const doc = plainToDoc(text);
-      const component = structuredClone(defaults["textbox"]);
-      component.document = structuredClone(doc);
-      newSelection.push(add(component));
-    }
+    });
+
     setSelected(newSelection);
   }
 }
 
 function addToClipboard(e: ClipboardEvent, selected: string[]) {
   const { mode, selection } = useEditorStore.getState();
+
+  const plainTextChunks: string[] = [];
+  const components: Component[] = [];
   selected.forEach((id: string) => {
     if (mode.includes("text")) {
       if (!selection.end) return;
 
       const { text, doc } = getSelectionContent(id, selection);
-      e.clipboardData?.setData("text/plain", text);
-      e.clipboardData?.setData("application/component", JSON.stringify(doc));
+      if (text) plainTextChunks.push(text);
+      if (doc) components.push(doc);
     } else {
-      e.clipboardData?.setData(
-        "application/component",
-        stringifyComponent(id) || ""
-      );
+      components.push(getComponent(id));
       if (getComponent(id).type === "textbox") {
         const text = getDocumentText(id);
-        e.clipboardData?.setData("text/plain", text);
+        if (text) plainTextChunks.push(text);
       }
     }
   });
+
+  if (plainTextChunks.length > 0) {
+    e.clipboardData?.setData("text/plain", plainTextChunks.join("\n"));
+  }
+  if (components.length > 0) {
+    e.clipboardData?.setData(
+      "application/component",
+      JSON.stringify(components)
+    );
+  }
 }
