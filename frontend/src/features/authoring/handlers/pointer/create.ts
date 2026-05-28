@@ -28,7 +28,6 @@ export function handleCreateDrag(_: React.MouseEvent, position: Vec2) {
 
   if (createType === "speech") verts.push(getTailVert(verts));
   setMutationBounds((prev) => ({ ...prev, verts }));
-
   addMode("mutation");
 }
 

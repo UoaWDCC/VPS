@@ -98,7 +98,8 @@ function handleComponentClick(e: React.MouseEvent, position: Vec2) {
   // * DONE Object creation
   // ! fix object mutationbounds visual
   // ! MultiSelect rotation
-  // ! fix delete
+  // * DONE fix delete
+  // * Fix Undo Redo
   // ! change add implementation to take in string of ids
 
   const component = scene[target.dataset.id as string];

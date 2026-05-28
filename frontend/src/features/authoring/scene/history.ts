@@ -9,6 +9,7 @@ import {
 } from "./scene";
 import useVisualScene from "../stores/visual";
 import { buildVisualComponent } from "../pipeline";
+import useEditorStore from "../stores/editor";
 
 interface SceneRef {
   _id: string;
@@ -66,50 +67,42 @@ export function updateHistory(incomingChanges: ChangeRecord[]) {
   redoStack = [];
 }
 
-export function undo() {
-  const batch = undoStack.pop();
+export function handleUndoRedo(isUndo: boolean) {
+  const batch = isUndo ? undoStack.pop() : redoStack.pop();
   if (!batch || batch.length === 0) return;
 
-  switchToScene(batch[0].sceneId);
+  const sceneID = batch[0].sceneId;
+  const ids = batch.map((obj) => obj.id);
+  const isDelete = batch[0].state === null;
 
-  let redoChanges: HistoryObject[] = [];
+  switchToScene(sceneID);
 
-  batch.forEach((prev) => {
-    const current = getComponent(prev.id);
-    const stateToSave = structuredClone(current);
-
-    restoreComponent(prev.id, prev.state);
-    redoChanges.push({
-      sceneId: prev.sceneId,
-      id: prev.id,
-      state: stateToSave,
-    });
+  const validChanges: HistoryObject[] = ids.map((id) => {
+    const comp = getComponent(id);
+    return {
+      sceneId: sceneID,
+      id,
+      state: structuredClone(comp),
+    };
   });
 
-  redoStack.push(redoChanges);
-}
-
-export function redo() {
-  const batch = redoStack.pop();
-  if (!batch || batch.length === 0) return;
-
-  switchToScene(batch[0].sceneId);
-
-  let undoChanges: HistoryObject[] = [];
-
-  batch.forEach((prev) => {
-    const current = getComponent(prev.id);
-    const stateToSave = structuredClone(current);
-
-    restoreComponent(prev.id, prev.state);
-    undoChanges.push({
-      sceneId: prev.sceneId,
-      id: prev.id,
-      state: stateToSave,
+  if (isDelete) {
+    useEditorStore.getState().setSelected([]);
+    ids.forEach((id) => {
+      delete getScene().components[id];
+      useVisualScene.getState().deleteComponent(id);
     });
-  });
+  } else {
+    batch.forEach((obj) => {
+      restoreComponent(obj.id, obj.state);
+    });
+  }
 
-  undoStack.push(undoChanges);
+  if (isUndo) {
+    redoStack.push(validChanges);
+  } else {
+    undoStack.push(validChanges);
+  }
 }
 
 function switchToScene(targetSceneId: string) {
@@ -121,11 +114,7 @@ function switchToScene(targetSceneId: string) {
 }
 
 function restoreComponent(id: string, state: Component | null) {
-  if (state === null) {
-    delete getScene().components[id];
-    useVisualScene.getState().deleteComponent(id);
-  } else {
-    getScene().components[id] = structuredClone(state);
-    useVisualScene.getState().updateComponent(buildVisualComponent(state));
-  }
+  if (state === null) return;
+  getScene().components[id] = structuredClone(state);
+  useVisualScene.getState().updateComponent(buildVisualComponent(state));
 }
