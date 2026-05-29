@@ -42,7 +42,6 @@ export function ObjectPropertyEditor({ component }) {
   // uses the same function as the drag box feat w modifyComponentProp
   function saveProp(v, type) {
     const value = Number(v);
-    if (Number.isNaN(value)) return;
 
     if (type === "x") {
       const verts = component.bounds.verts;
@@ -65,6 +64,7 @@ export function ObjectPropertyEditor({ component }) {
       const verts = component.bounds.verts;
       const xSign = Math.sign(verts[1].x - verts[0].x) || 1;
       const x = verts[0].x + xSign * value;
+      console.log(x);
       modifyComponentProp(component.id, "bounds.verts", (prev) =>
         modifyVerts(prev, [1, 0.5], { x, y: 0 })
       );
