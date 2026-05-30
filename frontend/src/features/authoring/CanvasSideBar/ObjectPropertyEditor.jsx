@@ -21,6 +21,7 @@ export function ObjectPropertyEditor({ component }) {
       (component.bounds.verts[1].y - component.bounds.verts[0].y) * 100
     ) / 100
   );
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     const width =
@@ -46,7 +47,12 @@ export function ObjectPropertyEditor({ component }) {
   // uses the same function as the drag box feat w modifyComponentProp
   function saveProp(v, type) {
     const value = parseFloat(String(v).trim());
-    if (isNaN(value)) return;
+    if (isNaN(value)) {
+      const message = `error: non-numeric value entered in ${type} input`;
+      setError(message);
+      return;
+    }
+    setError(null);
     const verts = component.bounds.verts;
     if (type === "x") {
       const diff = value - verts[0].x;
@@ -129,6 +135,7 @@ export function ObjectPropertyEditor({ component }) {
               }}
             />
           </div>
+          {error && <p className="text-red-500">{error}</p>}
         </fieldset>
       </div>
     </div>
