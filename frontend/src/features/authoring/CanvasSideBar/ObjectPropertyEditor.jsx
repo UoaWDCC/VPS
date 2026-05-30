@@ -23,12 +23,16 @@ export function ObjectPropertyEditor({ component }) {
   );
 
   useEffect(() => {
-    const width = Math.round(
-      Math.abs(component.bounds.verts[1].x - component.bounds.verts[0].x) * 100
-    ) / 100;
-    const height = Math.round(
-      Math.abs(component.bounds.verts[1].y - component.bounds.verts[0].y) * 100
-    ) / 100;
+    const width =
+      Math.round(
+        Math.abs(component.bounds.verts[1].x - component.bounds.verts[0].x) *
+          100
+      ) / 100;
+    const height =
+      Math.round(
+        Math.abs(component.bounds.verts[1].y - component.bounds.verts[0].y) *
+          100
+      ) / 100;
     const x = Math.round(component.bounds.verts[0].x * 100) / 100;
     const y = Math.round(component.bounds.verts[0].y * 100) / 100;
 
@@ -41,7 +45,8 @@ export function ObjectPropertyEditor({ component }) {
   //this could prolly be improved
   // uses the same function as the drag box feat w modifyComponentProp
   function saveProp(v, type) {
-    const value = Number(v);
+    const value = parseFloat(String(v).trim());
+    if (isNaN(value)) return;
     const verts = component.bounds.verts;
     if (type === "x") {
       const diff = value - verts[0].x;
@@ -53,16 +58,13 @@ export function ObjectPropertyEditor({ component }) {
       modifyComponentProp(component.id, "bounds.verts", (prev) =>
         translate(prev, { x: 0, y: diff })
       );
-
       // increase bottom y to expand height and same idea with x
     } else if (type === "width") {
-      setInputWidth(value);
       const x = verts[0].x + value;
       modifyComponentProp(component.id, "bounds.verts", (prev) =>
         modifyVerts(prev, [1, 0.5], { x, y: 0 })
       );
     } else if (type === "height") {
-      setInputHeight(value);
       const y = verts[0].y + value;
       modifyComponentProp(component.id, "bounds.verts", (prev) =>
         modifyVerts(prev, [0.5, 1], { x: 0, y })
@@ -86,14 +88,18 @@ export function ObjectPropertyEditor({ component }) {
               type="number"
               className="input max-w-21"
               value={inputWidth}
-              onChange={(e) => saveProp(e.target.value, "width")}
+              onChange={(e) => {
+                setInputWidth(e.target.value);
+                setTimeout(() => saveProp(e.target.value, "width"), 120);
+              }}
             />
             <input
               type="number"
               className="input max-w-21"
               value={inputHeight}
               onChange={(e) => {
-                saveProp(e.target.value, "height");
+                setInputHeight(e.target.value);
+                setTimeout(() => saveProp(e.target.value, "height"), 120);
               }}
             />
           </div>
