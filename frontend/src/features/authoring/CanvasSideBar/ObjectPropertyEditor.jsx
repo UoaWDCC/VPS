@@ -42,38 +42,28 @@ export function ObjectPropertyEditor({ component }) {
   // uses the same function as the drag box feat w modifyComponentProp
   function saveProp(v, type) {
     const value = Number(v);
-
+    const verts = component.bounds.verts;
     if (type === "x") {
-      const verts = component.bounds.verts;
       const diff = value - verts[0].x;
       modifyComponentProp(component.id, "bounds.verts", (prev) =>
         translate(prev, { x: diff, y: 0 })
       );
     } else if (type === "y") {
-      const verts = component.bounds.verts;
       const diff = value - verts[0].y;
       modifyComponentProp(component.id, "bounds.verts", (prev) =>
         translate(prev, { x: 0, y: diff })
       );
 
-      // idea is that because x and y are 2 diagonal corners
-      // increase bottom y to expand height and
+      // increase bottom y to expand height and same idea with x
     } else if (type === "width") {
-      if (value < 0) return;
       setInputWidth(value);
-      const verts = component.bounds.verts;
-      const xSign = Math.sign(verts[1].x - verts[0].x) || 1;
-      const x = verts[0].x + xSign * value;
-      console.log(x);
+      const x = verts[0].x + value;
       modifyComponentProp(component.id, "bounds.verts", (prev) =>
         modifyVerts(prev, [1, 0.5], { x, y: 0 })
       );
     } else if (type === "height") {
-      if (value < 0) return;
       setInputHeight(value);
-      const verts = component.bounds.verts;
-      const ySign = Math.sign(verts[1].y - verts[0].y) || 1;
-      const y = verts[0].y + ySign * value;
+      const y = verts[0].y + value;
       modifyComponentProp(component.id, "bounds.verts", (prev) =>
         modifyVerts(prev, [0.5, 1], { x: 0, y })
       );
