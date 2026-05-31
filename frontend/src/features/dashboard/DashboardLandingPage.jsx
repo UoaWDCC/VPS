@@ -24,7 +24,6 @@ export default function DashboardLandingPage() {
 
   return (
     <div className="bg-base-100 h-full text-base-content pt-5xl px-xl max-w-[1500px] mx-auto">
-      <TopNavBar />
 
       {/* Header */}
       <h1 className="font-ibm text-xl mb-l">Dashboard</h1>
