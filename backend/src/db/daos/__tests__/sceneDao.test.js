@@ -4,7 +4,7 @@ import mongoose from "mongoose";
 
 import Scene from "../../models/scene.js";
 import { patchScene } from "../sceneDao.js";
-import { useMongoMemoryServer } from "../../../test/mongoSetup.js";
+import { useMongoMemoryServer } from "../../../test/testSetup.js";
 
 describe("Scene DAO patchScene tests", () => {
   useMongoMemoryServer();

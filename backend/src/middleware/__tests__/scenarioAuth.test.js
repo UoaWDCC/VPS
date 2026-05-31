@@ -3,7 +3,7 @@ import { jest, describe, beforeEach, it, expect } from "@jest/globals";
 import mongoose from "mongoose";
 import Scenario from "../../db/models/scenario.js";
 import scenarioAuth from "../scenarioAuth.js";
-import { useMongoMemoryServer } from "../../test/mongoSetup.js";
+import { useMongoMemoryServer } from "../../test/testSetup.js";
 
 describe("Scenario Auth Middleware tests", () => {
   const HTTP_UNAUTHORISED = 401;

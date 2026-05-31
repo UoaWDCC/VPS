@@ -20,10 +20,10 @@ More information on Jest snapshot testing: <https://jestjs.io/docs/snapshot-test
 
 ## Writing backend tests
 
-Backend tests use an in-memory MongoDB instance. Use the shared helpers in `src/test/mongoSetup.js` rather than writing lifecycle boilerplate manually.
+Backend tests use an in-memory MongoDB instance. Use the shared helpers in `src/test/testSetup.js` rather than writing lifecycle boilerplate manually.
 
 ```js
-import { useMongoMemoryServer, useExpressServer } from "../../../test/mongoSetup.js";
+import { useMongoMemoryServer, useExpressServer } from "../../../test/testSetup.js";
 
 describe("My API tests", () => {
   useMongoMemoryServer();                      // handles DB connect/disconnect/cleanup

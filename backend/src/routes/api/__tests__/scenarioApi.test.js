@@ -12,7 +12,7 @@ import Access from "../../../db/models/access.js";
 import {
   useMongoMemoryServer,
   useExpressServer,
-} from "../../../test/mongoSetup.js";
+} from "../../../test/testSetup.js";
 
 jest.mock("../../../middleware/firebaseAuth");
 jest.mock("../../../middleware/scenarioAuth");
