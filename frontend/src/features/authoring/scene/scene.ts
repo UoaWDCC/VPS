@@ -23,11 +23,11 @@ export function setScene(newScene: Record<string, any>) {
 }
 
 export function getComponent(id: string) {
-  return scene.components[id] ?? null;
+  return scene.components?.[id] ?? null;
 }
 
 export function getComponentProp(id: string, prop: string) {
-  const component = scene.components[id];
+  const component = scene.components?.[id];
   if (!component) return;
   const [object, key] = getObject(prop, component);
   return object[key];

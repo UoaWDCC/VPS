@@ -1,4 +1,3 @@
-import { getComponent, getComponentProp } from "../../scene/scene";
 import useEditorStore from "../../stores/editor";
 import type { Bounds, Vec2 } from "../../types";
 import {
@@ -13,8 +12,10 @@ import {
   scale,
   subtract,
 } from "../../util";
+import { getSelectedComponentBounds } from "./pointer";
 
 type HandleType = "size" | "rotation";
+const BOX_CENTER_VALUE = 0.5;
 
 let type: HandleType;
 let coords: number[];
@@ -30,10 +31,10 @@ export function handleResizeStart(e: React.MouseEvent) {
 }
 
 export function handleResizeDrag(e: React.MouseEvent, position: Vec2) {
-  const { addMode, setMutationBounds, selected } = useEditorStore.getState();
+  const { addMode, setMutationBounds } = useEditorStore.getState();
   addMode("mutation");
 
-  const bounds = getComponentProp(selected!, "bounds");
+  const bounds = getSelectedComponentBounds();
 
   const newBounds: Partial<Bounds> = {};
 
@@ -67,13 +68,13 @@ function getNewTail(verts: Vec2[], newVerts: Vec2[], coords: number[]) {
   const inversePoint = { x: 0, y: 0 };
   const newPoint = { x: 0, y: 0 };
 
-  if (coords[0] !== 0.5) {
+  if (coords[0] !== BOX_CENTER_VALUE) {
     point.x = verts[coords[0]].x;
     inversePoint.x = verts[1 - coords[0]].x;
     newPoint.x = newVerts[coords[0]].x;
   }
 
-  if (coords[1] !== 0.5) {
+  if (coords[1] !== BOX_CENTER_VALUE) {
     point.y = verts[coords[1]].y;
     inversePoint.y = verts[1 - coords[1]].y;
     newPoint.y = newVerts[coords[1]].y;
@@ -119,16 +120,17 @@ function updateResize(
   anchorCenter: boolean,
   fixed: boolean
 ) {
-  const { selected } = useEditorStore.getState();
-  const { bounds, type } = getComponent(selected!);
+  const bounds = getSelectedComponentBounds();
+
   const center = getBoxCenter(bounds.verts);
 
+  let type = "box";
   let verts = modifyVerts(bounds.verts, coords, position);
 
   if (!coords.includes(2)) {
     // none of these apply to the speech triangle
     // shift modifier
-    if (fixed && !coords.includes(0.5)) {
+    if (fixed && !coords.includes(BOX_CENTER_VALUE)) {
       lockAspect(bounds.verts, verts, coords);
     }
 
@@ -157,7 +159,7 @@ function mirror(verts: Vec2[], center: Vec2, coords: number[]) {
 
 function modifyVerts(verts: Vec2[], coords: number[], v: Vec2) {
   const newVerts = verts.map((v) => ({ ...v }));
-  if (coords[1] !== 0.5) newVerts[coords[1]].y = v.y;
-  if (coords[0] !== 0.5) newVerts[coords[0]].x = v.x;
+  if (coords[1] !== BOX_CENTER_VALUE) newVerts[coords[1]].y = v.y;
+  if (coords[0] !== BOX_CENTER_VALUE) newVerts[coords[0]].x = v.x;
   return newVerts;
 }

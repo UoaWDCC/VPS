@@ -1,7 +1,7 @@
 import { v4 } from "uuid";
 import { buildVisualComponent, buildVisualScene } from "../../pipeline";
 import useVisualScene, { type VisualSceneState } from "../../stores/visual";
-import { updateHistory } from "../history";
+import { updateHistory, type ChangeRecord } from "../history";
 import { commitSavedScene, getComponent, getScene, setScene } from "../scene";
 import type { Component, Scene } from "../../types";
 import { arrayToObject } from "../util";
@@ -23,38 +23,59 @@ export function modifySceneProp<K extends keyof VisualSceneState>(
 }
 
 // wrapper for state mutating functions, will capture both state and operation
-export function modify<A extends [string, ...any[]], R>(fn: (...args: A) => R) {
+export function modify<A extends [string[], ...any[]], R>(
+  fn: (...args: A) => R
+) {
   return function (...args: A): R {
-    const id = args[0];
-    const component = getComponent(id);
+    const ids = args[0];
 
-    const prev = structuredClone(component);
+    const previousStates: ChangeRecord[] = ids.map((id) => {
+      const comp = getComponent(id);
+      return {
+        id,
+        prevState: structuredClone(comp),
+      };
+    });
+
     const output = fn(...args);
 
-    updateHistory(id, prev);
+    updateHistory(previousStates);
 
-    useVisualScene.getState().updateComponent(buildVisualComponent(component));
+    ids.forEach((id) => {
+      const component = getComponent(id);
+      if (component) {
+        useVisualScene
+          .getState()
+          .updateComponent(buildVisualComponent(component));
+      }
+    });
 
     return output;
   };
 }
 
-export function remove(id: string, history = true) {
-  const component = getComponent(id);
-  const prev = structuredClone(component);
+export function remove(ids: string[], history = true) {
+  const previousStates: ChangeRecord[] = ids.map((id) => {
+    const comp = getComponent(id);
+    return {
+      id,
+      prevState: structuredClone(comp),
+    };
+  });
 
-  delete getScene().components[id];
+  ids.forEach((id) => {
+    delete getScene().components[id];
+    useVisualScene.getState().deleteComponent(id);
+  });
 
-  if (history) updateHistory(id, prev);
-
-  useVisualScene.getState().deleteComponent(id);
+  if (history) updateHistory(previousStates);
 }
 
 export function add(props: Record<string, any>, history = true) {
   if (!props.id) props.id = v4();
   getScene().components[props.id] = props;
 
-  if (history) updateHistory(props.id, null);
+  if (history) updateHistory([{ id: props.id, prevState: null }]);
 
   useVisualScene
     .getState()

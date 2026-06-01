@@ -1,7 +1,6 @@
 import type { VisualDocument } from "./types";
 import Cursor from "./Cursor.tsx";
 import Highlight from "./Highlight";
-import TextHighlight from "./TextHighlight";
 import Rectangle from "../canvas/Rectangle";
 import { buildStyle } from "./build";
 import useEditorStore from "../stores/editor";
@@ -32,7 +31,7 @@ function Text({ doc, editable }: { doc: VisualDocument; editable?: boolean }) {
     editable ? state.selected : null
   );
 
-  const isSelected = editable && selected === doc.id;
+  const isSelected = editable && selected && selected[0] === doc.id;
 
   const { bounds } = doc;
   const center = {
@@ -58,7 +57,6 @@ function Text({ doc, editable }: { doc: VisualDocument; editable?: boolean }) {
 
   return (
     <g className="select-none">
-      <TextHighlight doc={doc} />
       {isSelected && <Highlight color="#4997ff80" bounds={bounds} />}
       <g className="select-none" transform={transformation}>
         {buildGroups(doc)}

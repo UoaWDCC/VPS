@@ -1,4 +1,4 @@
-import { redo, undo } from "../../scene/history";
+import { handleUndoRedo } from "../../scene/history";
 import {
   bringForward,
   bringToFront,
@@ -18,6 +18,7 @@ export function handleGlobal(e: KeyboardEvent) {
   const { selected } = useEditorStore.getState();
 
   // don't want to interfere with input elements
+
   const target = e.target as HTMLElement;
   if (target.tagName === "INPUT" || target.tagName === "TEXTAREA") return;
 
@@ -30,12 +31,12 @@ function handleCtrlOperations(e: KeyboardEvent) {
   const { selected, setSelected } = useEditorStore.getState();
 
   // TODO ADD e.key === "a" for all components or create new function for cmd
-  if (e.key === "z") undo();
-  else if (e.key === "y") redo();
+  if (e.key === "z") handleUndoRedo(true);
+  else if (e.key === "y") handleUndoRedo(false);
   else if (e.key === "d" && selected) {
     e.preventDefault();
-    const id = duplicateComponent(selected);
-    setSelected(id);
+    const ids = duplicateComponent(selected);
+    setSelected(ids);
   } else if (e.key === "ArrowUp" && selected) {
     if (e.shiftKey) bringToFront(selected);
     else bringForward(selected);
@@ -45,12 +46,12 @@ function handleCtrlOperations(e: KeyboardEvent) {
   }
 }
 
-function handleComponentOperations(e: KeyboardEvent, selected: string) {
+function handleComponentOperations(e: KeyboardEvent, selected: string[]) {
   const { setSelected } = useEditorStore.getState();
 
   if (e.key === "Backspace") {
+    setSelected([]);
     remove(selected);
-    setSelected(null);
   } else if (e.key === "ArrowUp") {
     modifyComponentProp(selected, "bounds.verts", (prev: Vec2[]) =>
       translate(prev, { x: 0, y: -5 })

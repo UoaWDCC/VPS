@@ -121,9 +121,11 @@ export function parseComponent(component: Component) {
   return add(component);
 }
 
-export function duplicateComponent(id: string) {
-  const newComponent = structuredClone(getComponent(id));
-  return parseComponent(newComponent);
+export function duplicateComponent(ids: string[]) {
+  return ids.map((id: string) => {
+    const newComponent = structuredClone(getComponent(id));
+    return parseComponent(newComponent);
+  });
 }
 
 export function createComponentFromBounds(
@@ -141,83 +143,121 @@ export function createComponentFromBounds(
 }
 
 export const modifyComponentProp = modify(
-  (id: string, prop: string, val: any) => {
-    const component = getComponent(id);
-    if (!component) return;
+  (ids: string[], prop: string, val: any) => {
+    ids.forEach((id) => {
+      const component = getComponent(id);
+      if (!component) return;
 
-    const [object, key] = getObject(prop, component);
-    if (typeof val === "function") object[key] = val(object[key]);
-    else if (val !== null && typeof val === "object" && !Array.isArray(val))
-      object[key] = merge(object[key], val);
-    else object[key] = val;
+      const [object, key] = getObject(prop, component);
+
+      if (typeof val === "function") object[key] = val(object[key]);
+      else if (val !== null && typeof val === "object" && !Array.isArray(val))
+        object[key] = merge(object[key], val);
+      else object[key] = val;
+    });
   }
 );
 
-export function modifyComponentBounds(id: string, bounds: Partial<Bounds>) {
-  modifyComponentProp(id, "bounds", bounds);
+export function modifyComponentBounds(
+  ids: string[],
+  bounds: Partial<Bounds> | ((prev: Bounds) => Bounds)
+) {
+  modifyComponentProp(ids, "bounds", bounds);
 }
 
-export function bringForward(id: string) {
-  const currentZIndex = getComponentProp(id, "zIndex") as number;
+export function bringForward(ids: string[]) {
+  if (!ids.length) return;
+
   const components = Object.values(getScene().components) as Component[];
+  const selectedIds = new Set(ids);
 
-  // 1. Find the highest zIndex that is strictly greater than the current one
+  const sortedComponents = components.sort((a, b) => a.zIndex - b.zIndex);
 
-  const targetComponent = components
-    .filter((curr) => curr.zIndex > currentZIndex)
-    .reduce(
-      (prev, curr) => {
-        return prev == null || prev.zIndex > curr.zIndex ? curr : prev;
-      },
-      null as Component | null
-    );
+  const zIndexScale = sortedComponents.map((c) => c.zIndex);
 
-  // Return if component is at the top already
-  if (!targetComponent) return;
+  for (let i = sortedComponents.length - 1; i >= 0; i--) {
+    if (selectedIds.has(sortedComponents[i].id)) {
+      if (
+        i < sortedComponents.length - 1 &&
+        !selectedIds.has(sortedComponents[i + 1].id)
+      ) {
+        const temp = sortedComponents[i];
+        sortedComponents[i] = sortedComponents[i + 1];
+        sortedComponents[i + 1] = temp;
+      }
+    }
+  }
 
-  const aboveZIndex = targetComponent.zIndex;
+  sortedComponents.forEach((comp, index) => {
+    const targetZIndex = zIndexScale[index];
 
-  // Swap Zindexs
-  modifyComponentProp(id, "zIndex", aboveZIndex);
-  modifyComponentProp(targetComponent.id, "zIndex", currentZIndex);
+    if (comp.zIndex !== targetZIndex) {
+      modifyComponentProp([comp.id], "zIndex", targetZIndex);
+    }
+  });
 }
 
-export function sendBackward(id: string) {
-  const currentZIndex = getComponentProp(id, "zIndex") as number;
+export function sendBackward(ids: string[]) {
+  if (!ids.length) return;
+
   const components = Object.values(getScene().components) as Component[];
+  const selectedIds = new Set(ids);
 
-  // 1. Find the highest zIndex that is strictly less than the current one
-  const targetComponent = components
-    .filter((curr) => curr.zIndex < currentZIndex)
-    .reduce(
-      (prev, curr) => {
-        return prev == null || prev.zIndex < curr.zIndex ? curr : prev;
-      },
-      null as Component | null
-    );
+  const sortedComponents = components.sort((a, b) => a.zIndex - b.zIndex);
 
-  if (!targetComponent) return;
-  const belowZIndex = targetComponent.zIndex;
-  modifyComponentProp(id, "zIndex", belowZIndex);
-  modifyComponentProp(targetComponent.id, "zIndex", currentZIndex);
+  const zIndexScale = sortedComponents.map((c) => c.zIndex);
+
+  for (let i = 0; i < sortedComponents.length; i++) {
+    if (selectedIds.has(sortedComponents[i].id)) {
+      if (i > 0 && !selectedIds.has(sortedComponents[i - 1].id)) {
+        const temp = sortedComponents[i];
+        sortedComponents[i] = sortedComponents[i - 1];
+        sortedComponents[i - 1] = temp;
+      }
+    }
+  }
+
+  sortedComponents.forEach((comp, index) => {
+    const targetZIndex = zIndexScale[index];
+
+    if (comp.zIndex !== targetZIndex) {
+      modifyComponentProp([comp.id], "zIndex", targetZIndex);
+    }
+  });
 }
+function moveComponentFrontAndBack(ids: string[], state: "front" | "back") {
+  if (!ids.length) return;
 
-export function bringToFront(id: string) {
   const components = Object.values(getScene().components) as Component[];
-  const max = components.reduce(
-    (p, c) => (c.zIndex >= p ? c.zIndex : p),
-    -Infinity
+  const selectedIds = new Set(ids);
+
+  const sortedComponents = components.sort((a, b) => a.zIndex - b.zIndex);
+  const zIndexScale = sortedComponents.map((c) => c.zIndex);
+  const selectedComponents = sortedComponents.filter((comp) =>
+    selectedIds.has(comp.id)
   );
-  if (max == -Infinity) return;
-  modifyComponentProp(id, "zIndex", max + 1);
+  const unselectedComponents = sortedComponents.filter(
+    (comp) => !selectedIds.has(comp.id)
+  );
+
+  const newSortedComponents =
+    state == "front"
+      ? [...unselectedComponents, ...selectedComponents]
+      : [...selectedComponents, ...unselectedComponents];
+
+  newSortedComponents.forEach((comp, index) => {
+    const targetZIndex = zIndexScale[index];
+
+    if (comp.zIndex !== targetZIndex) {
+      modifyComponentProp([comp.id], "zIndex", targetZIndex);
+    }
+  });
 }
 
-export function sendToBack(id: string) {
-  const components = Object.values(getScene().components) as Component[];
-  const min = components.reduce(
-    (p, c) => (c.zIndex <= p ? c.zIndex : p),
-    Infinity
-  );
-  if (min == Infinity) return;
-  modifyComponentProp(id, "zIndex", min - 1);
+export function bringToFront(ids: string[]) {
+  moveComponentFrontAndBack(ids, "front");
+}
+
+export function sendToBack(ids: string[]) {
+  moveComponentFrontAndBack(ids, "back");
 }

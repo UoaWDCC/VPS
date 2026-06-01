@@ -13,8 +13,8 @@ import shallow from "zustand/shallow";
 import { modify } from "./modifiers";
 
 export const insertChar = modify(
-  (id: string, cursor: ModelCursor, char: string) => {
-    const doc = getComponentProp(id, "document") as ModelDocument;
+  (id: string[], cursor: ModelCursor, char: string) => {
+    const doc = getComponentProp(id[0], "document") as ModelDocument;
 
     const diff = objectDiff(
       useEditorStore.getState().activeStyle!,
@@ -39,16 +39,16 @@ export const insertChar = modify(
       else block.spans.splice(cursor.spanI, 0, { text: char, style: diff }); // block start
     }
 
-    return moveCursor(id, cursor, 1);
+    return moveCursor(id[0], cursor, 1);
   }
 );
 
-export const deleteChar = modify((id: string, cursor: ModelCursor) => {
+export const deleteChar = modify((id: string[], cursor: ModelCursor) => {
   if (!cursor.blockI && !cursor.spanI && !cursor.charI) return cursor; // start of text
 
-  const newCursor = moveCursor(id, cursor, -1);
+  const newCursor = moveCursor(id[0], cursor, -1);
 
-  const doc = getComponentProp(id, `document`) as ModelDocument;
+  const doc = getComponentProp(id[0], `document`) as ModelDocument;
   const spans = doc.blocks[cursor.blockI].spans;
 
   if (newCursor.blockI === cursor.blockI && newCursor.spanI === cursor.spanI) {
@@ -81,16 +81,16 @@ export const deleteChar = modify((id: string, cursor: ModelCursor) => {
 
 // NOTE: will cause two distinct state operations in history
 export function insertSelection(id: string, sel: ModelSelection, char: string) {
-  const cursor = deleteSelection(id, sel);
-  return insertChar(id, cursor, char);
+  const cursor = deleteSelection([id], sel);
+  return insertChar([id], cursor, char);
 }
 
-export const deleteSelection = modify((id: string, sel: ModelSelection) => {
-  const doc = getComponentProp(id, `document`) as ModelDocument;
+export const deleteSelection = modify((id: string[], sel: ModelSelection) => {
+  const doc = getComponentProp(id[0], `document`) as ModelDocument;
   const { blocks } = doc;
 
   const normd = normaliseSelection(sel);
-  const { start, end } = isolateSelection(id, normd);
+  const { start, end } = isolateSelection(id[0], normd);
 
   const startBlock = blocks[start.blockI];
   const endBlock = blocks[end.blockI];
@@ -111,8 +111,8 @@ export const deleteSelection = modify((id: string, sel: ModelSelection) => {
   return normaliseDocument(doc, start);
 });
 
-export const createBlock = modify((id: string, cursor: ModelCursor) => {
-  const blocks = getComponentProp(id, `document.blocks`) as ModelBlock[];
+export const createBlock = modify((id: string[], cursor: ModelCursor) => {
+  const blocks = getComponentProp(id[0], `document.blocks`) as ModelBlock[];
   const block = blocks[cursor.blockI];
 
   splitSpan(blocks, cursor);
@@ -142,11 +142,11 @@ export const createBlock = modify((id: string, cursor: ModelCursor) => {
 });
 
 export const applySelectionStyle = modify(
-  (id: string, sel: ModelSelection, style: Partial<BaseTextStyle>) => {
-    const doc = getComponentProp(id, `document`) as ModelDocument;
+  (id: string[], sel: ModelSelection, style: Partial<BaseTextStyle>) => {
+    const doc = getComponentProp(id[0], `document`) as ModelDocument;
     const { blocks } = doc;
 
-    const { start, end } = isolateSelection(id, normaliseSelection(sel));
+    const { start, end } = isolateSelection(id[0], normaliseSelection(sel));
 
     if (style.alignment || style.lineHeight) {
       for (let i = sel.start!.blockI; i <= sel.end!.blockI; i++) {
@@ -449,8 +449,8 @@ function getExtremeCursor(doc: ModelDocument) {
 }
 
 export const mergeDocs = modify(
-  (id: string, cursor: ModelCursor, doc: ModelDocument) => {
-    const original = getComponentProp(id, "document") as ModelDocument;
+  (id: string[], cursor: ModelCursor, doc: ModelDocument) => {
+    const original = getComponentProp(id[0], "document") as ModelDocument;
     squashSpanStyles(doc);
 
     const extreme = getExtremeCursor(doc);

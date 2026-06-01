@@ -9,7 +9,7 @@ import ShapeSection from "./ShapeSection";
 import TextSection from "./TextSection";
 import useEditorStore from "../stores/editor";
 import { getComponent } from "../scene/scene";
-import { redo, undo } from "../scene/history";
+import { handleUndoRedo } from "../scene/history";
 import { bringToFront, sendToBack } from "../scene/operations/component";
 import { useState } from "react";
 import StateVariableMenu from "../../../components/StateVariables/StateVariableMenu";
@@ -32,7 +32,9 @@ function Topbar({ saving, save }: { saving: boolean; save: () => void }) {
     setCreateType(type);
   };
 
-  const component = selected ? getComponent(selected) : null;
+  const hasSelection = selected && selected.length > 0;
+
+  const component = hasSelection ? getComponent(selected[0]) : null;
 
   return (
     <>
@@ -45,12 +47,12 @@ function Topbar({ saving, save }: { saving: boolean; save: () => void }) {
         <div className="divider divider-horizontal" />
 
         <li>
-          <a onClick={undo}>
+          <a onClick={() => handleUndoRedo(true)}>
             <Undo2Icon size={16} />
           </a>
         </li>
         <li>
-          <a onClick={redo}>
+          <a onClick={() => handleUndoRedo(false)}>
             <Redo2Icon size={16} />
           </a>
         </li>
@@ -70,7 +72,6 @@ function Topbar({ saving, save }: { saving: boolean; save: () => void }) {
         {selected && (
           <>
             <div className="divider divider-horizontal" />
-
             {/* reorder */}
             <li>
               <a onClick={() => bringToFront(selected)}>
@@ -82,9 +83,8 @@ function Topbar({ saving, save }: { saving: boolean; save: () => void }) {
                 <SendToBack size={16} />
               </a>
             </li>
-
             {/* shape properties */}
-            {component.type !== "image" && (
+            {component?.type !== "image" && (
               <>
                 <div className="divider divider-horizontal" />
                 <ShapeSection />
@@ -92,7 +92,7 @@ function Topbar({ saving, save }: { saving: boolean; save: () => void }) {
             )}
 
             {/* text content styles */}
-            {component.type === "textbox" && (
+            {component?.type === "textbox" && (
               <>
                 <div className="divider divider-horizontal" />
                 <TextSection />

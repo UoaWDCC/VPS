@@ -21,15 +21,15 @@ import type { VisualBlock, VisualSelection } from "../../text/types";
 
 export function handleTextMode(e: KeyboardEvent) {
   const { selected } = useEditorStore.getState();
-  if (!selected) return;
+  if (!selected || selected.length != 1) return;
 
   if ((e.metaKey || e.ctrlKey) && e.key == "a") {
     e.preventDefault();
-    handleSelectAll(selected);
+    handleSelectAll(selected[0]);
   } else if (e.key.startsWith("Arrow") || ["Home", "End"].includes(e.key)) {
-    handleNavigation(e, selected);
+    handleNavigation(e, selected[0]);
   } else {
-    handleEditing(e, selected);
+    handleEditing(e, selected[0]);
   }
 }
 
@@ -75,17 +75,17 @@ function handleEditing(e: KeyboardEvent, selected: string) {
     // insert character at cursor
     const newCursor = end
       ? insertSelection(selected, selection, e.key)
-      : insertChar(selected, start, e.key);
+      : insertChar([selected], start, e.key);
     setSelection({ start: newCursor, end: null });
   } else if (e.key === "Backspace") {
     // delete character before cursor
     const newCursor = !end
-      ? deleteChar(selected, start)
-      : deleteSelection(selected, selection);
+      ? deleteChar([selected], start)
+      : deleteSelection([selected], selection);
     setSelection({ start: newCursor, end: null });
   } else if (e.key === "Enter") {
     // create a new block at cursor
-    const newCursor = createBlock(selected, start);
+    const newCursor = createBlock([selected], start);
     setSelection({ start: newCursor, end });
   } else if (e.key === "Escape") {
     // clear current selection

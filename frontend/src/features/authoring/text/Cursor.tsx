@@ -12,7 +12,7 @@ function Cursor({ bounds }: { bounds: RelativeBounds }) {
 
   const { selected } = useEditorStore.getState();
   const { components } = useVisualScene.getState();
-  const { blocks } = components[selected!].document;
+  const { blocks } = components[selected[0]!].document;
 
   const { start, end } = visualSelection;
   if (start == null || (end && !shallow(start, end))) return null;
@@ -35,7 +35,7 @@ function Cursor({ bounds }: { bounds: RelativeBounds }) {
     y: bounds.y + bounds.height / 2,
   };
   const path = expandToPath({ ...box, origin });
-  const color = getStyleForSelection(selected!, modelSelection)?.textColor;
+  const color = getStyleForSelection(selected[0]!, modelSelection)?.textColor;
   return <path d={path} fill={color ?? "#000000"} />;
 }
 

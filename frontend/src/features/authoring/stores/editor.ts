@@ -7,14 +7,13 @@ import { getStyleForSelection } from "../scene/operations/text";
 type Mode = "normal" | "resize" | "create" | "text" | "mutation";
 
 interface EditorState {
-  loading: boolean;
-  selected: string | null;
+  selected: string[];
   createType: string | null;
   mouseDown: boolean;
   mutationBounds: Bounds;
   offset: Vec2;
 
-  setSelected: (id: string | null) => void;
+  setSelected: (id: string[]) => void;
   setCreateType: (type: string) => void;
   setMouseDown: (mouseDown: boolean) => void;
   setMutationBounds: Dynamic<Bounds>;
@@ -26,7 +25,6 @@ interface EditorState {
   desiredColumn: number | null;
   activeStyle: BaseTextStyle | null;
 
-  setLoading: (loading: boolean) => void;
   setSelection: (selection: ModelSelection) => void;
   setVisualSelection: Dynamic<VisualSelection>;
   setDesiredColumn: (column: number | null) => void;
@@ -54,15 +52,13 @@ function setter<K extends keyof EditorState>(set: Function, prop: K) {
 }
 
 const useEditorStore = create<EditorState>((set) => ({
-  loading: false,
-  selected: null,
+  selected: [],
   createType: null,
   mouseDown: false,
   mutationBounds: { verts: [], rotation: 0 },
   offset: { x: 0, y: 0 },
 
-  setLoading: (value: boolean) => set({ loading: value }),
-  setSelected: (id) => set({ selected: id }),
+  setSelected: (ids) => set({ selected: ids }),
   setCreateType: (type: string) => set({ createType: type }),
   setMouseDown: (mouseDown) => set({ mouseDown }),
   setMutationBounds: setter(set, "mutationBounds"),
@@ -75,11 +71,12 @@ const useEditorStore = create<EditorState>((set) => ({
 
   setSelection: (selection) =>
     set(({ selected }) => {
-      if (selected && getComponent(selected).type === "textbox") {
-        const activeStyle = getStyleForSelection(selected, selection);
+      const mainTarget = selected[0];
+      if (mainTarget && getComponent(mainTarget).type === "textbox") {
+        const activeStyle = getStyleForSelection(mainTarget, selection);
         return { selection, activeStyle };
       }
-      return { selection };
+      return { selection, activeStyle: null };
     }),
   setVisualSelection: setter(set, "visualSelection"),
   setActiveStyle: (style: BaseTextStyle) => set({ activeStyle: style }),
@@ -93,7 +90,7 @@ const useEditorStore = create<EditorState>((set) => ({
 
   clear: () =>
     set({
-      selected: null,
+      selected: [],
       selection: { start: null, end: null },
       visualSelection: { start: null, end: null },
       mode: ["normal"],
