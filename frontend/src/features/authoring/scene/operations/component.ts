@@ -166,74 +166,98 @@ export function modifyComponentBounds(
 }
 
 export function bringForward(ids: string[]) {
-  if (ids.length > 1) return;
-  const id = ids[0];
-  const currentZIndex = getComponentProp(id, "zIndex") as number;
+  if (!ids.length) return;
+
   const components = Object.values(getScene().components) as Component[];
+  const selectedIds = new Set(ids);
 
-  // 1. Find the highest zIndex that is strictly greater than the current one
+  const sortedComponents = components.sort((a, b) => a.zIndex - b.zIndex);
 
-  const targetComponent = components
-    .filter((curr) => curr.zIndex > currentZIndex)
-    .reduce(
-      (prev, curr) => {
-        return prev == null || prev.zIndex > curr.zIndex ? curr : prev;
-      },
-      null as Component | null
-    );
+  const zIndexScale = sortedComponents.map((c) => c.zIndex);
 
-  // Return if component is at the top already
-  if (!targetComponent) return;
+  for (let i = sortedComponents.length - 1; i >= 0; i--) {
+    if (selectedIds.has(sortedComponents[i].id)) {
+      if (
+        i < sortedComponents.length - 1 &&
+        !selectedIds.has(sortedComponents[i + 1].id)
+      ) {
+        const temp = sortedComponents[i];
+        sortedComponents[i] = sortedComponents[i + 1];
+        sortedComponents[i + 1] = temp;
+      }
+    }
+  }
 
-  const aboveZIndex = targetComponent.zIndex;
+  sortedComponents.forEach((comp, index) => {
+    const targetZIndex = zIndexScale[index];
 
-  // Swap Zindexs
-  modifyComponentProp([id], "zIndex", aboveZIndex);
-  modifyComponentProp([targetComponent.id], "zIndex", currentZIndex);
+    if (comp.zIndex !== targetZIndex) {
+      modifyComponentProp([comp.id], "zIndex", targetZIndex);
+    }
+  });
 }
 
 export function sendBackward(ids: string[]) {
-  if (ids.length > 1) return;
-  const id = ids[0];
-  const currentZIndex = getComponentProp(id, "zIndex") as number;
+  if (!ids.length) return;
+
   const components = Object.values(getScene().components) as Component[];
+  const selectedIds = new Set(ids);
 
-  // 1. Find the highest zIndex that is strictly less than the current one
-  const targetComponent = components
-    .filter((curr) => curr.zIndex < currentZIndex)
-    .reduce(
-      (prev, curr) => {
-        return prev == null || prev.zIndex < curr.zIndex ? curr : prev;
-      },
-      null as Component | null
-    );
+  const sortedComponents = components.sort((a, b) => a.zIndex - b.zIndex);
 
-  if (!targetComponent) return;
-  const belowZIndex = targetComponent.zIndex;
-  modifyComponentProp([id], "zIndex", belowZIndex);
-  modifyComponentProp([targetComponent.id], "zIndex", currentZIndex);
+  const zIndexScale = sortedComponents.map((c) => c.zIndex);
+
+  for (let i = 0; i < sortedComponents.length; i++) {
+    if (selectedIds.has(sortedComponents[i].id)) {
+      if (i > 0 && !selectedIds.has(sortedComponents[i - 1].id)) {
+        const temp = sortedComponents[i];
+        sortedComponents[i] = sortedComponents[i - 1];
+        sortedComponents[i - 1] = temp;
+      }
+    }
+  }
+
+  sortedComponents.forEach((comp, index) => {
+    const targetZIndex = zIndexScale[index];
+
+    if (comp.zIndex !== targetZIndex) {
+      modifyComponentProp([comp.id], "zIndex", targetZIndex);
+    }
+  });
+}
+function moveComponentFrontAndBack(ids: string[], state: "front" | "back") {
+  if (!ids.length) return;
+
+  const components = Object.values(getScene().components) as Component[];
+  const selectedIds = new Set(ids);
+
+  const sortedComponents = components.sort((a, b) => a.zIndex - b.zIndex);
+  const zIndexScale = sortedComponents.map((c) => c.zIndex);
+  const selectedComponents = sortedComponents.filter((comp) =>
+    selectedIds.has(comp.id)
+  );
+  const unselectedComponents = sortedComponents.filter(
+    (comp) => !selectedIds.has(comp.id)
+  );
+
+  const newSortedComponents =
+    state == "front"
+      ? [...unselectedComponents, ...selectedComponents]
+      : [...selectedComponents, ...unselectedComponents];
+
+  newSortedComponents.forEach((comp, index) => {
+    const targetZIndex = zIndexScale[index];
+
+    if (comp.zIndex !== targetZIndex) {
+      modifyComponentProp([comp.id], "zIndex", targetZIndex);
+    }
+  });
 }
 
 export function bringToFront(ids: string[]) {
-  if (ids.length > 1) return;
-  const id = ids[0];
-  const components = Object.values(getScene().components) as Component[];
-  const max = components.reduce(
-    (p, c) => (c.zIndex >= p ? c.zIndex : p),
-    -Infinity
-  );
-  if (max == -Infinity) return;
-  modifyComponentProp([id], "zIndex", max + 1);
+  moveComponentFrontAndBack(ids, "front");
 }
 
 export function sendToBack(ids: string[]) {
-  if (ids.length > 1) return;
-  const id = ids[0];
-  const components = Object.values(getScene().components) as Component[];
-  const min = components.reduce(
-    (p, c) => (c.zIndex <= p ? c.zIndex : p),
-    Infinity
-  );
-  if (min == Infinity) return;
-  modifyComponentProp([id], "zIndex", min - 1);
+  moveComponentFrontAndBack(ids, "back");
 }

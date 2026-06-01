@@ -34,7 +34,7 @@ export function handleCreateDrag(_: React.MouseEvent, position: Vec2) {
 export function handleCreateEnd() {
   const { mutationBounds, setMode, setSelected, createType } =
     useEditorStore.getState();
-  const id = createComponentFromBounds(createType!, mutationBounds);
+  const id = createComponentFromBounds(createType, mutationBounds);
   setSelected([id]);
   setMode(["normal"]);
 }

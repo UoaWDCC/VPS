@@ -91,16 +91,17 @@ function handleComponentClick(e: React.MouseEvent, position: Vec2) {
 
   // ! Text Selection Broken
   // ! Clipboard text selection
-  // ! Front back implementation
+  // * DONE Front back implementation
   // * DONE Resize
   // * DONE Fix copy and paste
   // ! npm i --save-dev @types/uuid for another type
   // * DONE Object creation
-  // ! fix object mutationbounds visual
+  // * DONE  fix object mutationbounds visual
   // ! MultiSelect rotation
   // * DONE fix delete
-  // * Fix Undo Redo
-  // ! change add implementation to take in string of ids
+  // * DONE Fix Undo Redo
+  // * DONE Fix Copy Paste
+  // ! change add implementation to take in string of ids (dont need?)
 
   const component = scene[target.dataset.id as string];
   setMutationBounds({ ...component.bounds });

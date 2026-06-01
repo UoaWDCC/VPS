@@ -46,19 +46,10 @@ function Overlay() {
   const { selected, mode, createType, mutationBounds } =
     useEditorStore.getState();
 
-  if (!selected || selected.length === 0) {
-    return (
-      <svg
-        id="overlay"
-        className="w-full h-full absolute pointer-events-none"
-        viewBox={`-50 -50 ${1920 + 50 * 2} ${1080 + 50 * 2}`}
-      />
-    );
-  }
-
   const components = useVisualScene.getState().components;
 
-  const primaryComponent = components[selected[0]];
+  const primaryComponent =
+    selected.length === 0 ? null : components[selected[0]];
 
   const bounds = getSelectedComponentBounds();
   const verts = bounds.verts;
@@ -69,7 +60,7 @@ function Overlay() {
       className="w-full h-full absolute pointer-events-none"
       viewBox={`-50 -50 ${1920 + 50 * 2} ${1080 + 50 * 2}`}
     >
-      {components && (
+      {primaryComponent && (
         <>
           <Rectangle
             bounds={bounds}
