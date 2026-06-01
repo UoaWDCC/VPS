@@ -89,23 +89,6 @@ function handleComponentClick(e: React.MouseEvent, position: Vec2) {
     setSelected([...selected, id]);
   }
 
-  // * DONE Text Selection Broken
-  // * DONE Clipboard text selection
-  // * DONE Front back implementation
-  // * DONE Resize
-  // * DONE Fix copy and paste
-  // * DONE Object creation
-  // * DONE  fix object mutationbounds visual
-  // * DONE fix delete
-  // * DONE Fix Undo Redo
-  // * DONE Fix Copy Paste
-
-  // ! TODO MultiSelect rotation
-  // ! TODO Text mode needs undo redo support
-  // ! TODO Paste undo redo bug where undo only undos one at a time
-
-  // ! ERROR npm i --save-dev @types/uuid for another type
-
   const component = scene[target.dataset.id as string];
   setMutationBounds({ ...component.bounds });
 
