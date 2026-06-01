@@ -9,6 +9,7 @@ import {
 } from "./scene";
 import useVisualScene from "../stores/visual";
 import { buildVisualComponent } from "../pipeline";
+import useEditorStore from "../stores/editor";
 
 interface SceneRef {
   _id: string;
@@ -76,7 +77,9 @@ function switchToScene(targetSceneId: string) {
 }
 
 function restoreComponent(id: string, state: Component | null) {
+  const { setSelected } = useEditorStore.getState();
   if (state === null) {
+    setSelected(null);
     delete getScene().components[id];
     useVisualScene.getState().deleteComponent(id);
   } else {
