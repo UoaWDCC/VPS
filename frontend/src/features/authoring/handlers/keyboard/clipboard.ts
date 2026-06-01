@@ -1,8 +1,4 @@
-import {
-  defaults,
-  parseComponent,
-  stringifyComponent,
-} from "../../scene/operations/component";
+import { defaults, parseComponent } from "../../scene/operations/component";
 import { add, remove } from "../../scene/operations/modifiers";
 import {
   getDocumentText,
@@ -52,44 +48,30 @@ export function paste(e: ClipboardEvent) {
   const plainTexts = e.clipboardData?.getData("text/plain");
 
   if (selected && mode.includes("text")) {
-    return;
-    // ! OLD
-    // if (components) {
-    //   const obj = JSON.parse(components);
-    //   const doc = obj.type === "textbox" ? obj.document : obj;
-    //   const cursor = mergeDocs(selected, selection.start!, doc);
-    //   setSelection({ start: cursor, end: null });
-    // } else if (plainTexts) {
-    //   const doc = plainToDoc(plainTexts) as ModelDocument;
-    //   const cursor = mergeDocs(selected, selection.start!, doc);
-    //   setSelection({ start: cursor, end: null });
-    // }
-    // syncVisualCursor();
+    // This one I got gpt to write lowkey not to sure if its good
+    let cursor = selection.start!;
 
-    // * GPT answer might be correct but no way to test without text selection
-    // let cursor = selection.start!;
+    if (components) {
+      const parsed = JSON.parse(components);
+      const items = Array.isArray(parsed) ? parsed : [parsed];
 
-    // if (appData) {
-    //   const parsed = JSON.parse(appData);
-    //   // Ensure we are working with an array
-    //   const items = Array.isArray(parsed) ? parsed : [parsed];
-
-    //   // Merge all documents in the array sequentially
-    //   for (const item of items) {
-    //     const doc = item.type === "textbox" ? item.document : item;
-    //     cursor = mergeDocs(selected, cursor, doc);
-    //   }
-    //   setSelection({ start: cursor, end: null });
-    // } else if (textData) {
-    //   const doc = plainToDoc(textData) as ModelDocument;
-    //   cursor = mergeDocs(selected, cursor, doc);
-    //   setSelection({ start: cursor, end: null });
-    // }
-    // syncVisualCursor();
+      for (const item of items) {
+        const doc = item.type === "textbox" ? item.document : item;
+        cursor = mergeDocs(selected, cursor, doc);
+      }
+      setSelection({ start: cursor, end: null });
+    } else if (plainTexts) {
+      const doc = plainToDoc(plainTexts) as ModelDocument;
+      cursor = mergeDocs(selected, cursor, doc);
+      setSelection({ start: cursor, end: null });
+    }
+    syncVisualCursor();
   } else {
     if (!components) return;
+    setSelected([]);
 
     let newSelection: string[] = [];
+
     const parsed = JSON.parse(components);
     const items = Array.isArray(parsed) ? parsed : [parsed];
 
@@ -103,7 +85,6 @@ export function paste(e: ClipboardEvent) {
         newSelection.push(add(component));
       }
     });
-
     setSelected(newSelection);
   }
 }

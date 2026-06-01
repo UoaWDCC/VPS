@@ -18,6 +18,7 @@ export function handleGlobal(e: KeyboardEvent) {
   const { selected } = useEditorStore.getState();
 
   // don't want to interfere with input elements
+
   const target = e.target as HTMLElement;
   if (target.tagName === "INPUT" || target.tagName === "TEXTAREA") return;
 
