@@ -43,10 +43,11 @@ function ResolveHandles({
 }
 
 function Overlay() {
-  const { selected, mode, createType, mutationBounds } =
-    useEditorStore.getState();
-
-  const components = useVisualScene.getState().components;
+  const selected = useEditorStore((s) => s.selected);
+  const mode = useEditorStore((s) => s.mode);
+  const createType = useEditorStore((s) => s.createType);
+  const mutationBounds = useEditorStore((s) => s.mutationBounds);
+  const components = useVisualScene((s) => s.components);
 
   const primaryComponent =
     selected.length === 0 ? null : components[selected[0]];

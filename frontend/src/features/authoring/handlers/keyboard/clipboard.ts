@@ -49,10 +49,16 @@ export function paste(e: ClipboardEvent) {
 
   if (selected && mode.includes("text")) {
     // This one I got gpt to write lowkey not to sure if its good
-    let cursor = selection.start!;
+    if (!selection.start) return;
+    let cursor = selection.start;
 
     if (components) {
-      const parsed = JSON.parse(components);
+      let parsed: unknown;
+      try {
+        parsed = JSON.parse(components);
+      } catch {
+        return;
+      }
       const items = Array.isArray(parsed) ? parsed : [parsed];
 
       for (const item of items) {
@@ -72,7 +78,12 @@ export function paste(e: ClipboardEvent) {
 
     let newSelection: string[] = [];
 
-    const parsed = JSON.parse(components);
+    let parsed: unknown;
+    try {
+      parsed = JSON.parse(components);
+    } catch {
+      return;
+    }
     const items = Array.isArray(parsed) ? parsed : [parsed];
 
     items.forEach((obj) => {

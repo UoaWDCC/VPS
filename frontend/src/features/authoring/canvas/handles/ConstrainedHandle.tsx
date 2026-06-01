@@ -8,18 +8,24 @@ interface Props {
 }
 
 const ResizeHandle = ({ x, y }: Props) => {
-  const { mode } = useEditorStore.getState();
+  const mode = useEditorStore((s) => s.mode);
 
-  const bounds = getSelectedComponentBounds();
-  const verts = bounds.verts;
-  const componentRotation = bounds.rotation;
+  const componentBounds = getSelectedComponentBounds();
+  const componentVerts = componentBounds.verts;
+  const componentRotation = componentBounds.rotation;
 
   let point = {
-    x: x === 0.5 ? (verts[0].x + verts[1].x) / 2 : verts[x].x,
-    y: y === 0.5 ? (verts[0].y + verts[1].y) / 2 : verts[y].y,
+    x:
+      x === 0.5
+        ? (componentVerts[0].x + componentVerts[1].x) / 2
+        : componentVerts[x].x,
+    y:
+      y === 0.5
+        ? (componentVerts[0].y + componentVerts[1].y) / 2
+        : componentVerts[y].y,
   };
 
-  point = rotate(point, getBoxCenter(verts), componentRotation);
+  point = rotate(point, getBoxCenter(componentVerts), componentRotation);
 
   return (
     <g

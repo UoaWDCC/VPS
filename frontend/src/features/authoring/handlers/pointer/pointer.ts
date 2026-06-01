@@ -94,16 +94,17 @@ function handleComponentClick(e: React.MouseEvent, position: Vec2) {
   // * DONE Front back implementation
   // * DONE Resize
   // * DONE Fix copy and paste
-  // ! npm i --save-dev @types/uuid for another type
   // * DONE Object creation
   // * DONE  fix object mutationbounds visual
   // * DONE fix delete
   // * DONE Fix Undo Redo
   // * DONE Fix Copy Paste
 
-  // ! MultiSelect rotation
-  // ! Text mode needs undo redo support
-  // ! Paste undo redo bug where undo only undos one at a time
+  // ! TODO MultiSelect rotation
+  // ! TODO Text mode needs undo redo support
+  // ! TODO Paste undo redo bug where undo only undos one at a time
+
+  // ! ERROR npm i --save-dev @types/uuid for another type
 
   const component = scene[target.dataset.id as string];
   setMutationBounds({ ...component.bounds });
@@ -201,18 +202,16 @@ function getNewResizePosition(
   origin: Vec2,
   scaleVec: Vec2
 ) {
+  const result: Vec2[] = [];
   for (let i = 0; i < 2; i++) {
     const vert = verts[i];
-
-    // Vert.var - origin.var is the distance from original top-left corner
-    // This is then scaled based on change in size and is mapped to new top-left corner
-    vert.x = newVerts[0].x + (vert.x - origin.x) * scaleVec.x;
-    vert.y = newVerts[0].y + (vert.y - origin.y) * scaleVec.y;
-
-    verts[i] = vert;
+    result.push({
+      x: newVerts[0].x + (vert.x - origin.x) * scaleVec.x,
+      y: newVerts[0].y + (vert.y - origin.y) * scaleVec.y,
+    });
   }
 
-  return verts;
+  return result;
 }
 
 function getSelectedMinMaxXY() {
@@ -241,7 +240,7 @@ function getSelectedMinMaxXY() {
 
 function findComponentRotation(id: string) {
   const components = useVisualScene.getState().components;
-  return components[id].bounds.rotation;
+  return components[id]?.bounds?.rotation ?? 0;
 }
 
 export function getSelectedComponentBounds() {
@@ -293,6 +292,7 @@ function handleDocumentClick(e: React.MouseEvent, position: Vec2) {
 function handleTextSelection(_: React.MouseEvent, position: Vec2) {
   const { selected, setVisualSelection } = useEditorStore.getState();
 
+  if (!selected || selected.length === 0) return;
   const { document: doc } = useVisualScene.getState().components[selected[0]];
   const cursor = parseHit(
     getRelativePosition(position, doc.bounds),

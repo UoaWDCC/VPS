@@ -122,10 +122,13 @@ export function parseComponent(component: Component) {
 }
 
 export function duplicateComponent(ids: string[]) {
-  return ids.map((id: string) => {
-    const newComponent = structuredClone(getComponent(id));
-    return parseComponent(newComponent);
-  });
+  return ids
+    .map((id: string) => {
+      const newComponent = structuredClone(getComponent(id));
+      if (!newComponent) return null;
+      return parseComponent(newComponent);
+    })
+    .filter((id): id is string => id !== null);
 }
 
 export function createComponentFromBounds(

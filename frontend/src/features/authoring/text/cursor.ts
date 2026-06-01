@@ -128,13 +128,7 @@ export function syncVisualCursor() {
   const editorState = useEditorStore.getState();
 
   // Assume only one object is selected
-  if (
-    !editorState.selected ||
-    editorState.selected.length !== 1 ||
-    !editorState.visualSelection.start
-  )
-    return;
-  if (!editorState.selected || !editorState.selection.start) return;
+  if (!editorState.selected || editorState.selected.length !== 1) return;
   const blocks =
     useVisualScene.getState().components[editorState.selected[0]].document
       .blocks;

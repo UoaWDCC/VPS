@@ -75,14 +75,14 @@ export function handleUndoRedo(isUndo: boolean) {
   const ids = batch.map((obj) => obj.id);
   const isDelete = batch[0].state === null;
 
-  switchToScene(sceneID);
+  if (!switchToScene(sceneID)) return;
 
   const validChanges: HistoryObject[] = ids.map((id) => {
     const comp = getComponent(id);
     return {
       sceneId: sceneID,
       id,
-      state: structuredClone(comp),
+      state: comp ? structuredClone(comp) : null,
     };
   });
 
@@ -105,12 +105,13 @@ export function handleUndoRedo(isUndo: boolean) {
   }
 }
 
-function switchToScene(targetSceneId: string) {
-  if (targetSceneId === getSceneId()) return;
+function switchToScene(targetSceneId: string): boolean {
+  if (targetSceneId === getSceneId()) return true;
   const targetScene = scenes.find((s) => s._id === targetSceneId);
-  if (!targetScene) return;
+  if (!targetScene) return false;
   if (saveScene) void saveCurrentScene(saveScene);
   applySceneSwitch(targetScene, scenarioId!);
+  return true;
 }
 
 function restoreComponent(id: string, state: Component | null) {

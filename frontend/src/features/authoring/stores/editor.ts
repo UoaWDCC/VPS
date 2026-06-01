@@ -72,8 +72,9 @@ const useEditorStore = create<EditorState>((set) => ({
   setSelection: (selection) =>
     set(({ selected }) => {
       const mainTarget = selected[0];
-      if (mainTarget && getComponent(mainTarget).type === "textbox") {
-        const activeStyle = getStyleForSelection(mainTarget, selection);
+      const component = mainTarget ? getComponent(mainTarget) : null;
+      if (component?.type === "textbox") {
+        const activeStyle = getStyleForSelection(mainTarget!, selection);
         return { selection, activeStyle };
       }
       return { selection, activeStyle: null };

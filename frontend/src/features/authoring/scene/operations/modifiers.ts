@@ -29,17 +29,20 @@ export function modify<A extends [string[], ...any[]], R>(
   return function (...args: A): R {
     const ids = args[0];
 
-    const previousStates: ChangeRecord[] = ids.map((id) => {
-      const comp = getComponent(id);
-      return {
-        id,
-        prevState: structuredClone(comp),
-      };
-    });
+    const previousStates: ChangeRecord[] = ids
+      .map((id) => {
+        const comp = getComponent(id);
+        if (!comp) return null;
+        return {
+          id,
+          prevState: structuredClone(comp),
+        };
+      })
+      .filter((record): record is ChangeRecord => record !== null);
 
     const output = fn(...args);
 
-    updateHistory(previousStates);
+    if (previousStates.length) updateHistory(previousStates);
 
     ids.forEach((id) => {
       const component = getComponent(id);

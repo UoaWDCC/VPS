@@ -1,21 +1,28 @@
 import { getBoxCenter, rotate } from "../../util";
 import useEditorStore from "../../stores/editor";
-import useVisualScene from "../../stores/visual";
 import { getSelectedComponentBounds } from "../../handlers/pointer/pointer";
 
 const RotationHandle = () => {
-  const { mode } = useEditorStore.getState();
+  const mode = useEditorStore((s) => s.mode);
 
-  const bounds = getSelectedComponentBounds();
-  const verts = bounds.verts;
-  const componentRotation = bounds.rotation;
+  const componentBounds = getSelectedComponentBounds();
+  const componentVerts = componentBounds.verts;
+  const componentRotation = componentBounds.rotation;
 
-  const center = getBoxCenter(bounds.verts);
+  const componentCenter = getBoxCenter(componentBounds.verts);
 
-  const y = Math.min(verts[0].y, verts[1].y);
+  const y = Math.min(componentVerts[0].y, componentVerts[1].y);
 
-  const initial = rotate({ x: center.x, y }, center, componentRotation);
-  const point = rotate({ x: center.x, y: y - 40 }, center, componentRotation);
+  const initial = rotate(
+    { x: componentCenter.x, y },
+    componentCenter,
+    componentRotation
+  );
+  const point = rotate(
+    { x: componentCenter.x, y: y - 40 },
+    componentCenter,
+    componentRotation
+  );
 
   return (
     <g
