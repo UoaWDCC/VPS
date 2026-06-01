@@ -31,7 +31,7 @@ function Text({ doc, editable }: { doc: VisualDocument; editable?: boolean }) {
     editable ? state.selected : null
   );
 
-  const isSelected = editable && selected === doc.id;
+  const isSelected = editable && selected && selected[0] === doc.id;
 
   const { bounds } = doc;
   const center = {

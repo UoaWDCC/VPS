@@ -101,7 +101,6 @@ function handleComponentClick(e: React.MouseEvent, position: Vec2) {
   // * DONE fix delete
   // * DONE Fix Undo Redo
   // * DONE Fix Copy Paste
-  // ! change add implementation to take in string of ids (dont need?)
 
   const component = scene[target.dataset.id as string];
   setMutationBounds({ ...component.bounds });
@@ -290,10 +289,12 @@ function handleDocumentClick(e: React.MouseEvent, position: Vec2) {
 
 function handleTextSelection(_: React.MouseEvent, position: Vec2) {
   const { selected, setVisualSelection } = useEditorStore.getState();
+
   const { document: doc } = useVisualScene.getState().components[selected[0]];
   const cursor = parseHit(
     getRelativePosition(position, doc.bounds),
     doc.blocks
   );
+
   setVisualSelection((prev) => ({ start: prev.start, end: cursor }));
 }
