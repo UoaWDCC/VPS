@@ -48,7 +48,7 @@ export function paste(e: ClipboardEvent) {
   const plainTexts = e.clipboardData?.getData("text/plain");
 
   if (selected && mode.includes("text")) {
-    // This one I got gpt to write lowkey not to sure if its good
+    //! IMPORTANT This one I got gpt to write lowkey not to sure if its good
     if (!selection.start) return;
     let cursor = selection.start;
 
