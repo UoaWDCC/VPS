@@ -137,7 +137,7 @@ export default function ManageGroupsPage() {
 
   function downloadSample() {
     window.open(
-      "https://firebasestorage.googleapis.com/v0/b/virtual-patient-simulator.appspot.com/o/_manual-uploads%2Ftesting_group.xlsx?alt=media&token=a9c61c46-c317-4c8c-b8b8-ba049f8c9ff3",
+      "https://firebasestorage.googleapis.com/v0/b/virtual-patient-simulator.appspot.com/o/_manual-uploads%2Ftesting_group.csv?alt=media&token=a7afaae7-f4a6-4eb3-ba1d-634e849fcc6c",
       "_blank",
       "noopener,noreferrer"
     );

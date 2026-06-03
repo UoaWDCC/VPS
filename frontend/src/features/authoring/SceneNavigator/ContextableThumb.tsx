@@ -11,10 +11,12 @@ import { CopyPlusIcon, Trash2Icon } from "lucide-react";
 
 const SceneMenu = ({
   id,
+  canDelete,
   duplicateScene,
   deleteScene,
 }: {
   id: string;
+  canDelete: boolean;
   duplicateScene: (id: string) => void;
   deleteScene: (id: string) => void;
 }) => {
@@ -27,7 +29,10 @@ const SceneMenu = ({
         </a>
       </li>
       <li>
-        <a onClick={handle(deleteScene, id)}>
+        <a
+          className={canDelete ? "" : "pointer-events-none opacity-50"}
+          onClick={canDelete ? handle(deleteScene, id) : undefined}
+        >
           <Trash2Icon size={16} />
           Delete
         </a>
@@ -50,7 +55,8 @@ function ContextableThumb({
   const { scenarioId } = useParams<{ scenarioId: string }>();
   const history = useHistory();
 
-  const { reFetch, saveScenePatch, deleteScene } = useContext(SceneContext);
+  const { scenes, reFetch, saveScenePatch, deleteScene } =
+    useContext(SceneContext);
 
   const duplicateScene = async (id: string) => {
     api
@@ -73,6 +79,7 @@ function ContextableThumb({
     <RightContextMenu
       menu={SceneMenu({
         id: scene._id,
+        canDelete: scenes.length > 1,
         deleteScene,
         duplicateScene,
       })}

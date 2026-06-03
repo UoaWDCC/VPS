@@ -9,12 +9,10 @@ import { usePost } from "hooks/crudHooks";
 import LoadingPage from "../status/LoadingPage";
 import PlayScenarioCanvas from "./PlayScenarioCanvas";
 import { applyStateOperations } from "../../components/StateVariables/stateOperations";
-import { filterResourcesByConditions } from "../../utils/stateConditionalEvaluator";
 import NotesPanel from "./components/NotesPanel";
-import ResourcesModal from "./modals/ResourcesModal/ResourcesModal";
-import PlayPageSideButton from "./components/PlayPageSideButton/PlayPageSideButton";
 import ResourcesPanel from "./components/ResourcesPanel";
 import SceneTimer from "./components/SceneTimer";
+import { PlayIcon } from "lucide-react";
 
 const sceneCache = new Map();
 
@@ -86,19 +84,22 @@ const navigateMultiplayer = async (
   };
 };
 
-const getMultiplayerResources = async (user, groupId) => {
-  const token = await user.getIdToken();
-  const config = {
-    method: "get",
-    url: `/api/navigate/group/resources/${groupId}`,
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
-    },
+function playAudios(scene) {
+  const audios = scene.components.filter((c) => c.type === "audio");
+  const playables = [];
+  for (const audio of audios) {
+    const playable = new Audio(audio.url);
+    playable.loop = audio.loop;
+    playable.play();
+    playables.push(playable);
+  }
+  return () => {
+    for (const p of playables) {
+      p.pause();
+      p.currentTime = 0;
+    }
   };
-  const res = await axios.request(config);
-  return res.data;
-};
+}
 
 /**
  * This page allows users to play a scenario.
@@ -124,7 +125,7 @@ export default function PlayScenarioPage({ group }) {
 
   const [resourcesOpen, setResourcesOpen] = useState(false);
   const [noteOpen, setNoteOpen] = useState(false);
-  const [resources, setResources] = useState([]);
+  const [audioAllowed, setAudioAllowed] = useState(false);
 
   const currScene = sceneCache.get(sceneId);
 
@@ -183,15 +184,6 @@ export default function PlayScenarioPage({ group }) {
             startScene
           );
 
-      if (isMultiplayer) {
-        const newResources = await getMultiplayerResources(user, group._id);
-        const filteredResources = filterResourcesByConditions(
-          newResources,
-          stateVariables
-        );
-        setResources(filteredResources);
-      }
-
       if (stateVersion < newStateVersion) {
         setStateVariables(stateVariables);
         setStateVersion(newStateVersion);
@@ -246,14 +238,6 @@ export default function PlayScenarioPage({ group }) {
                 null,
                 currScene.directLink
               );
-          if (isMultiplayer) {
-            const newResources = await getMultiplayerResources(user, group._id);
-            const filteredResources = filterResourcesByConditions(
-              newResources,
-              stateVariables
-            );
-            setResources(filteredResources);
-          }
           if (stateVersion < newStateVersion) {
             setStateVariables(stateVariables);
             setStateVersion(newStateVersion);
@@ -319,6 +303,16 @@ export default function PlayScenarioPage({ group }) {
     onSceneChange();
   };
 
+  useEffect(() => {
+    if (!currScene || !audioAllowed) return;
+    try {
+      const endPlayback = playAudios(currScene);
+      return () => endPlayback();
+    } catch {
+      toast.error("The audio on this scene failed to play");
+    }
+  }, [currScene, audioAllowed]);
+
   if (loading) return <LoadingPage text="Loading Scene..." />;
   if (authError) return <></>;
   if (isMultiplayer && !group) return <LoadingPage text="Loading Scene..." />;
@@ -340,6 +334,14 @@ export default function PlayScenarioPage({ group }) {
           />
         </div>
       )}
+      {!audioAllowed && (
+        <div className="absolute top-4 left-4 z-30">
+          <button className="btn" onClick={() => setAudioAllowed(true)}>
+            <PlayIcon size={16} />
+            Enable Audio
+          </button>
+        </div>
+      )}
       <PlayScenarioCanvas
         scene={currScene}
         incrementor={isMultiplayer ? incrementor : undefined}
@@ -350,49 +352,38 @@ export default function PlayScenarioPage({ group }) {
         stateVariables={stateVariables}
       />
 
-      {isMultiplayer ? (
-        <>
-          <PlayPageSideButton
-            setNoteOpen={setNoteOpen}
-            setResourcesOpen={setResourcesOpen}
-          />
+      <div className="absolute top-2 right-2 z-30 flex items-center gap-2">
+        {isMultiplayer && (
+          <button
+            className="btn btn-sm"
+            onClick={() => setNoteOpen(true)}
+            aria-label="Open notes"
+          >
+            Notes
+          </button>
+        )}
+        <button
+          className="btn btn-sm"
+          onClick={() => setResourcesOpen(true)}
+          aria-label="Open resources"
+        >
+          Resources
+        </button>
+      </div>
 
-          {noteOpen && (
-            <NotesPanel
-              group={group}
-              open={noteOpen}
-              onClose={() => setNoteOpen(false)}
-            />
-          )}
-          {resourcesOpen && (
-            <ResourcesModal
-              resources={resources}
-              group={group}
-              user={user}
-              handleClose={() => setResourcesOpen(false)}
-            />
-          )}
-        </>
-      ) : (
-        <>
-          <div className="absolute top-2 right-2 z-30 flex items-center gap-2">
-            <button
-              className="btn btn-sm"
-              onClick={() => setResourcesOpen(true)}
-              aria-label="Open resources"
-            >
-              Resources
-            </button>
-          </div>
-
-          <ResourcesPanel
-            scenarioId={scenarioId}
-            stateVariables={stateVariables}
-            open={resourcesOpen}
-            onClose={() => setResourcesOpen(false)}
-          />
-        </>
+      {isMultiplayer && (
+        <NotesPanel
+          group={group}
+          open={noteOpen}
+          onClose={() => setNoteOpen(false)}
+        />
       )}
+      <ResourcesPanel
+        scenarioId={scenarioId}
+        stateVariables={stateVariables}
+        open={resourcesOpen}
+        onClose={() => setResourcesOpen(false)}
+      />
     </div>
   );
 }
