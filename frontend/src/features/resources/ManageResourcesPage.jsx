@@ -387,11 +387,24 @@ export default function ManageResourcesPage() {
                                     </button>
                                   </div>
                                 ) : (
-                                  <div style={{ display: "grid", gridTemplateColumns: "minmax(0, 1fr) auto auto", alignItems: "center", gap: "4px", overflow: "hidden" }}>
+                                  <div
+                                    style={{
+                                      display: "grid",
+                                      gridTemplateColumns:
+                                        "minmax(0, 1fr) auto auto",
+                                      alignItems: "center",
+                                      gap: "4px",
+                                      overflow: "hidden",
+                                    }}
+                                  >
                                     <a
                                       className="text--1"
                                       title={f.name}
-                                      style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}
+                                      style={{
+                                        overflow: "hidden",
+                                        textOverflow: "ellipsis",
+                                        whiteSpace: "nowrap",
+                                      }}
                                       onClick={() =>
                                         setSelectedFile({
                                           ...f,
@@ -561,10 +574,14 @@ function Preview({ file }) {
 
   return (
     <div className="space-y-3">
-      <div className="flex items-center justify-between">
-        <h3 className="text-m">{file.name}</h3>
+      <div className="flex items-start justify-between gap-2">
+        <h3 className="text-m break-all">{file.name}</h3>
         {downloadUrl && (
-          <a className="btn btn-phantom btn-xs" href={downloadUrl} download>
+          <a
+            className="btn btn-phantom btn-xs flex-shrink-0"
+            href={downloadUrl}
+            download
+          >
             Download
           </a>
         )}

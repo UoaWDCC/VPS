@@ -157,7 +157,9 @@ router.patch("/:fileId", async (req, res) => {
       return res.status(400).json({ error: "Name is required" });
     }
     if (name.trim().length > 255) {
-      return res.status(400).json({ error: "Name must be 255 characters or fewer" });
+      return res
+        .status(400)
+        .json({ error: "Name must be 255 characters or fewer" });
     }
     const meta = await StoredFile.findById(fileId);
     if (!meta) return res.status(404).json({ error: "File not found" });
