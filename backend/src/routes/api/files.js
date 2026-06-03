@@ -146,6 +146,34 @@ router.post("/upload", upload.array("files"), async (req, res) => {
 });
 
 /**
+ * @route PATCH /api/files/:fileId
+ * @desc Update the name of a stored file
+ */
+router.patch("/:fileId", async (req, res) => {
+  try {
+    const { fileId } = req.params;
+    const { name } = req.body;
+    if (!name || !name.trim()) {
+      return res.status(400).json({ error: "Name is required" });
+    }
+    if (name.trim().length > 255) {
+      return res
+        .status(400)
+        .json({ error: "Name must be 255 characters or fewer" });
+    }
+    const meta = await StoredFile.findById(fileId);
+    if (!meta) return res.status(404).json({ error: "File not found" });
+    meta.name = name.trim();
+    await meta.save();
+    const file = meta.toObject();
+    delete file.gridFsId;
+    return res.json(file);
+  } catch (err) {
+    return res.status(500).json({ error: err.message });
+  }
+});
+
+/**
  * @route DELETE /api/files/:fileId
  * @desc Delete a stored file and its GridFS data
  */

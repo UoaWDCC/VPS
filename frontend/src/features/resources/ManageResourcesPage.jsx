@@ -11,6 +11,8 @@ import {
   UsersIcon,
   PlusIcon,
   XIcon,
+  PencilIcon,
+  CheckIcon,
 } from "lucide-react";
 import AddGroup from "./components/AddGroup";
 import StateConditionalMenu from "../../components/StateVariables/StateConditionalMenu";
@@ -47,6 +49,8 @@ export default function ManageResourcesPage() {
   // Groups (each with files)
   const [groups, setGroups] = useState([]);
   const [selectedFile, setSelectedFile] = useState(null);
+  const [renamingFileId, setRenamingFileId] = useState(null);
+  const [renameInput, setRenameInput] = useState("");
 
   // Load groups and files
   useEffect(() => {
@@ -131,6 +135,55 @@ export default function ManageResourcesPage() {
       console.error(err);
       toast.error(err?.response?.data?.error || "Upload failed");
     }
+  }
+
+  async function renameFile(fileId, newName) {
+    try {
+      const user = getAuth().currentUser;
+      if (!user) {
+        toast.error("You must be logged in.");
+        return;
+      }
+      const idToken = await user.getIdToken();
+      const { data } = await axios.patch(
+        `/api/files/${fileId}`,
+        { name: newName },
+        { headers: { Authorization: `Bearer ${idToken}` } }
+      );
+
+      setGroups((prev) =>
+        prev.map((g) => ({
+          ...g,
+          files: (g.files || []).map((f) =>
+            f.id === fileId ? { ...f, name: data.name } : f
+          ),
+        }))
+      );
+
+      if (selectedFile?.id === fileId) {
+        setSelectedFile((prev) => ({ ...prev, name: data.name }));
+      }
+
+      toast.success("Renamed");
+    } catch (err) {
+      console.error(err);
+      toast.error(err?.response?.data?.error || "Rename failed");
+    }
+  }
+
+  async function handleRenameSubmit() {
+    const trimmed = renameInput.trim();
+    if (!trimmed) {
+      setRenamingFileId(null);
+      return;
+    }
+    const current = groups
+      .flatMap((g) => g.files)
+      .find((f) => f.id === renamingFileId);
+    if (current && trimmed !== current.name) {
+      await renameFile(renamingFileId, trimmed);
+    }
+    setRenamingFileId(null);
   }
 
   async function removeFile(fileId) {
@@ -234,7 +287,7 @@ export default function ManageResourcesPage() {
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
               {/* LEFT: Groups and files */}
-              <div className="card bg-base-100 shadow-md">
+              <div className="card bg-base-100 shadow-md overflow-hidden min-w-0">
                 <div className="card-body gap-4 px-0">
                   <div className="flex items-center justify-between gap-2">
                     <h2 className="text-m">Collections</h2>
@@ -271,7 +324,7 @@ export default function ManageResourcesPage() {
                   <ul className="menu bg-base-100 rounded-box w-full">
                     {groups.map((group) => (
                       <li key={group.id}>
-                        <details>
+                        <details style={{ overflow: "hidden" }}>
                           <summary className="flex items-center">
                             <span className="text--1 truncate">
                               {group.name}
@@ -294,34 +347,93 @@ export default function ManageResourcesPage() {
                             </div>
                           </summary>
 
-                          <ul>
+                          <ul className="overflow-hidden">
                             {group.files.length === 0 && (
                               <li className="opacity-60 p-2">No files yet</li>
                             )}
 
                             {group.files.map((f) => (
-                              <li key={f.id}>
-                                <div className="flex items-center justify-between">
-                                  <a
-                                    className="min-w-0 flex-1 text--1 truncate"
-                                    onClick={() =>
-                                      setSelectedFile({
-                                        ...f,
-                                        groupId: group.id,
-                                        groupName: group.name,
-                                      })
-                                    }
+                              <li key={f.id} className="overflow-hidden">
+                                {renamingFileId === f.id ? (
+                                  <div className="flex items-center gap-1 py-1">
+                                    <input
+                                      autoFocus
+                                      className="input input-bordered input-xs flex-1 min-w-0"
+                                      value={renameInput}
+                                      maxLength={255}
+                                      onChange={(e) =>
+                                        setRenameInput(e.target.value)
+                                      }
+                                      onKeyDown={(e) => {
+                                        if (e.key === "Enter")
+                                          handleRenameSubmit();
+                                        if (e.key === "Escape")
+                                          setRenamingFileId(null);
+                                      }}
+                                    />
+                                    <button
+                                      className="btn btn-primary btn-xs"
+                                      onClick={handleRenameSubmit}
+                                      title="Save"
+                                    >
+                                      <CheckIcon size={14} />
+                                    </button>
+                                    <button
+                                      className="btn btn-phantom btn-xs px-0"
+                                      onClick={() => setRenamingFileId(null)}
+                                      title="Cancel"
+                                    >
+                                      <XIcon size={14} />
+                                    </button>
+                                  </div>
+                                ) : (
+                                  <div
+                                    style={{
+                                      display: "grid",
+                                      gridTemplateColumns:
+                                        "minmax(0, 1fr) auto auto",
+                                      alignItems: "center",
+                                      gap: "4px",
+                                      overflow: "hidden",
+                                    }}
                                   >
-                                    {f.name}
-                                  </a>
-                                  <button
-                                    className="btn btn-phantom btn-xs px-0"
-                                    onClick={() => removeFile(f.id)}
-                                    title="Delete file"
-                                  >
-                                    <XIcon size={16} />
-                                  </button>
-                                </div>
+                                    <a
+                                      className="text--1"
+                                      title={f.name}
+                                      style={{
+                                        overflow: "hidden",
+                                        textOverflow: "ellipsis",
+                                        whiteSpace: "nowrap",
+                                      }}
+                                      onClick={() =>
+                                        setSelectedFile({
+                                          ...f,
+                                          groupId: group.id,
+                                          groupName: group.name,
+                                        })
+                                      }
+                                    >
+                                      {f.name}
+                                    </a>
+                                    <button
+                                      className="btn btn-phantom btn-xs px-0"
+                                      onClick={() => {
+                                        setRenameInput(f.name);
+                                        setRenamingFileId(f.id);
+                                      }}
+                                      title="Rename file"
+                                    >
+                                      <PencilIcon size={14} />
+                                    </button>
+                                    <button
+                                      className="btn btn-phantom btn-xs px-0"
+                                      onClick={() => removeFile(f.id)}
+                                      title="Delete file"
+                                    >
+                                      <XIcon size={16} />
+                                    </button>
+                                  </div>
+                                )}
                               </li>
                             ))}
                           </ul>
@@ -462,10 +574,14 @@ function Preview({ file }) {
 
   return (
     <div className="space-y-3">
-      <div className="flex items-center justify-between">
-        <h3 className="text-m">{file.name}</h3>
+      <div className="flex items-start justify-between gap-2">
+        <h3 className="text-m break-all">{file.name}</h3>
         {downloadUrl && (
-          <a className="btn btn-phantom btn-xs" href={downloadUrl} download>
+          <a
+            className="btn btn-phantom btn-xs flex-shrink-0"
+            href={downloadUrl}
+            download
+          >
             Download
           </a>
         )}
