@@ -287,7 +287,7 @@ export default function ManageResourcesPage() {
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
               {/* LEFT: Groups and files */}
-              <div className="card bg-base-100 shadow-md">
+              <div className="card bg-base-100 shadow-md overflow-hidden min-w-0">
                 <div className="card-body gap-4 px-0">
                   <div className="flex items-center justify-between gap-2">
                     <h2 className="text-m">Collections</h2>
@@ -324,7 +324,7 @@ export default function ManageResourcesPage() {
                   <ul className="menu bg-base-100 rounded-box w-full">
                     {groups.map((group) => (
                       <li key={group.id}>
-                        <details>
+                        <details style={{ overflow: "hidden" }}>
                           <summary className="flex items-center">
                             <span className="text--1 truncate">
                               {group.name}
@@ -347,19 +347,20 @@ export default function ManageResourcesPage() {
                             </div>
                           </summary>
 
-                          <ul>
+                          <ul className="overflow-hidden">
                             {group.files.length === 0 && (
                               <li className="opacity-60 p-2">No files yet</li>
                             )}
 
                             {group.files.map((f) => (
-                              <li key={f.id}>
+                              <li key={f.id} className="overflow-hidden">
                                 {renamingFileId === f.id ? (
                                   <div className="flex items-center gap-1 py-1">
                                     <input
                                       autoFocus
                                       className="input input-bordered input-xs flex-1 min-w-0"
                                       value={renameInput}
+                                      maxLength={255}
                                       onChange={(e) =>
                                         setRenameInput(e.target.value)
                                       }
@@ -386,9 +387,11 @@ export default function ManageResourcesPage() {
                                     </button>
                                   </div>
                                 ) : (
-                                  <div className="flex items-center justify-between">
+                                  <div style={{ display: "grid", gridTemplateColumns: "minmax(0, 1fr) auto auto", alignItems: "center", gap: "4px", overflow: "hidden" }}>
                                     <a
-                                      className="min-w-0 flex-1 text--1 truncate"
+                                      className="text--1"
+                                      title={f.name}
+                                      style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}
                                       onClick={() =>
                                         setSelectedFile({
                                           ...f,
