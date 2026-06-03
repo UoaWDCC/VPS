@@ -23,6 +23,7 @@ function Cursor({ bounds }: { bounds: RelativeBounds }) {
   const position = add(relativePosition, bounds);
   const line = blocks[start.blockI].lines[start.lineI];
   const span = line.spans[start.spanI];
+  if (!span?.style?.fontSize) return null;
   const cursorHeight = span.style.fontSize;
   const cursorBottomPadding = span.style.fontSize * 0.25;
 
