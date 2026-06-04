@@ -153,9 +153,17 @@ router.put("/groups/:groupId/state-conditionals", async (req, res) => {
     const group = await CollectionGroup.findById(groupId);
     if (!group) return res.status(404).json({ error: "Group not found" });
 
-    group.stateConditionals = group.stateConditionals.map((sc) =>
-      sc._id.toString() === stateConditional._id ? stateConditional : sc
-    );
+    let found = false;
+    group.stateConditionals = group.stateConditionals.map((sc) => {
+      if (sc._id.toString() === stateConditional._id) {
+        found = true;
+        return stateConditional;
+      }
+      return sc;
+    });
+    if (!found) {
+      return res.status(404).json({ error: "State conditional not found" });
+    }
 
     await group.save();
 
