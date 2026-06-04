@@ -13,8 +13,6 @@ const StateConditionalMenu = ({
   title = "State Conditionals",
   endpoint,
   updateTarget,
-  file,
-  updateFile,
 }) => {
   const [createOpen, setCreateOpen] = useState(false);
 
