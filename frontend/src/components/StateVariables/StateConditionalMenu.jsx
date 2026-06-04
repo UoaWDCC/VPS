@@ -16,10 +16,10 @@ const StateConditionalMenu = ({
 }) => {
   const [createOpen, setCreateOpen] = useState(false);
 
-  const subject = target || file;
+  const subject = target;
   const conditionEndpoint =
     endpoint || (subject ? `/api/files/state-conditionals/${subject.id}` : "");
-  const handleUpdate = updateTarget || updateFile;
+  const handleUpdate = updateTarget;
 
   if (!subject) {
     return null;
