@@ -128,7 +128,9 @@ router.post("/groups/:groupId/state-conditionals", async (req, res) => {
       !stateConditional.comparator ||
       stateConditional.value === undefined
     ) {
-      return res.status(400).json({ error: "Invalid stateConditional payload" });
+      return res
+        .status(400)
+        .json({ error: "Invalid stateConditional payload" });
     }
     const group = await CollectionGroup.findById(groupId);
     if (!group) return res.status(404).json({ error: "Group not found" });
