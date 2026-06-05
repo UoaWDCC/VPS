@@ -31,11 +31,16 @@ function SelectInput({
       </div>
       <ul
         tabIndex={0}
-        className="dropdown-content menu bg-base-300 rounded-box z-1 w-52 p-2 shadow-sm"
+        className="dropdown-content menu bg-base-300 rounded-box z-1 w-70 p-2 shadow-sm"
       >
         {values.map((v: any, i: number) => (
           <li key={i}>
-            <a onClick={() => handleClick(v)}>{render(v)}</a>
+            <a
+              onClick={() => handleClick(v)}
+              className="block max-w-65 break-words overflow-hidden"
+            >
+              {render(v)}
+            </a>
           </li>
         ))}
         {nullable ? (

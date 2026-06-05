@@ -17,3 +17,27 @@ To update the Jest snapshots (e.g. when updating the UI) and pass all the fronte
 4. Commit the updated snapshots before opening a PR
 
 More information on Jest snapshot testing: <https://jestjs.io/docs/snapshot-testing>
+
+## Writing backend tests
+
+Backend tests use an in-memory MongoDB instance. Use the shared helpers in `src/test/testSetup.js` rather than writing lifecycle boilerplate manually.
+
+```js
+import { useMongoMemoryServer, useExpressServer } from "../../../test/testSetup.js";
+
+describe("My API tests", () => {
+  useMongoMemoryServer();                      // handles DB connect/disconnect/cleanup
+  const ctx = useExpressServer(() => {         // handles server start/stop
+    const app = express();
+    app.use("/", routes);
+    return app;
+  });
+
+  it("does something", async () => {
+    const response = await axios.get(`http://localhost:${ctx.port}/api/...`);
+    // ...
+  });
+});
+```
+
+`useMongoMemoryServer()` registers `beforeAll`/`afterEach`/`afterAll` hooks that start the server, drop the database between tests, and disconnect on teardown. `useExpressServer(configureApp)` starts an Express app on a random port and returns a `ctx` object with a `port` property.

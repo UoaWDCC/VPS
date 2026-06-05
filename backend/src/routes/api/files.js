@@ -177,7 +177,7 @@ router.post("/state-conditionals/:fileId", async (req, res) => {
     meta.stateConditionals.push(stateConditional);
     await meta.save();
     const file = meta.toObject();
-    delete file.gridFdId;
+    delete file.gridFsId;
     return res.json(file);
   } catch (err) {
     return res.status(500).json({ error: err.message });
@@ -201,7 +201,7 @@ router.put("/state-conditionals/:fileId", async (req, res) => {
 
     await meta.save();
     const file = meta.toObject();
-    delete file.gridFdId;
+    delete file.gridFsId;
     return res.json(file);
   } catch (err) {
     return res.status(500).json({ error: err.message });
@@ -231,7 +231,7 @@ router.delete(
 
       await meta.save();
       const file = meta.toObject();
-      delete file.gridFdId;
+      delete file.gridFsId;
       return res.json(file);
     } catch (err) {
       return res.status(500).json({ error: err.message });
