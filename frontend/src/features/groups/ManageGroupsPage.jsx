@@ -1,12 +1,14 @@
 import axios from "axios";
 import Papa from "papaparse";
-import { useContext, useRef } from "react";
+import { useContext, useMemo, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
 import GroupsTable from "./GroupTable";
+import AddGroupMemberModal from "./AddGroupMemberModal";
 import {
   ArrowLeftIcon,
   DownloadIcon,
   FileSpreadsheetIcon,
+  PlusIcon,
   UploadIcon,
 } from "lucide-react";
 import toast from "react-hot-toast";
@@ -45,6 +47,8 @@ async function getGroups(user, scenarioId) {
 export default function ManageGroupsPage() {
   const { scenarioId } = useParams();
   const { user } = useContext(AuthenticationContext);
+  const [isAddMemberOpen, setIsAddMemberOpen] = useState(false);
+  const [isAddingMember, setIsAddingMember] = useState(false);
 
   const history = useHistory();
 
@@ -56,6 +60,26 @@ export default function ManageGroupsPage() {
     queryKey: ["groupData", scenarioId],
   });
 
+  const users = useMemo(() => data?.flatMap((g) => g.users) ?? [], [data]);
+  const groupNumbers = useMemo(
+    () =>
+      [
+        ...new Set(
+          users.map((member) => String(member.group).trim()).filter(Boolean)
+        ),
+      ].sort((a, b) => Number(a) - Number(b) || a.localeCompare(b)),
+    [users]
+  );
+  const roles = useMemo(
+    () =>
+      [
+        ...new Set(
+          users.map((member) => String(member.role).trim()).filter(Boolean)
+        ),
+      ].sort((a, b) => a.localeCompare(b)),
+    [users]
+  );
+
   if (isLoading) {
     return <LoadingPage text="Getting groups information..." />;
   }
@@ -64,8 +88,6 @@ export default function ManageGroupsPage() {
     console.error(error);
     return <GenericErrorPage />;
   }
-
-  const users = data.flatMap((g) => g.users);
 
   function handleFileUpload(event) {
     const file = event.target.files[0];
@@ -147,6 +169,24 @@ export default function ManageGroupsPage() {
     history.push(`/scenario/${scenarioId}`);
   }
 
+  async function addMember(member) {
+    setIsAddingMember(true);
+
+    try {
+      await api.post(user, `/api/group/${scenarioId}/member`, member);
+      await refetch();
+      setIsAddMemberOpen(false);
+      toast.success("Member added successfully!");
+    } catch (error) {
+      toast.error(
+        error.response?.data || "There was an error adding the member"
+      );
+      console.error("error adding group member:", error.response?.data);
+    } finally {
+      setIsAddingMember(false);
+    }
+  }
+
   return (
     <div className="font-ibm flex flex-col h-screen w-screen overflow-hidden gap-2xl">
       <div className="flex pt-l px-l">
@@ -154,7 +194,14 @@ export default function ManageGroupsPage() {
           <ArrowLeftIcon size={20} />
           Back
         </button>
-        <button onClick={upload} className="btn btn-phantom text-m ml-auto">
+        <button
+          onClick={() => setIsAddMemberOpen(true)}
+          className="btn btn-phantom text-m ml-auto"
+        >
+          <PlusIcon size={20} />
+          Add Member
+        </button>
+        <button onClick={upload} className="btn btn-phantom text-m">
           <UploadIcon size={20} />
           Upload
         </button>
@@ -178,6 +225,14 @@ export default function ManageGroupsPage() {
         <h1 className="text-xl mb-l">Uploaded Groups</h1>
         <GroupsTable data={users} />
       </div>
+      <AddGroupMemberModal
+        open={isAddMemberOpen}
+        onClose={() => setIsAddMemberOpen(false)}
+        onSubmit={addMember}
+        groupNumbers={groupNumbers}
+        roles={roles}
+        isSaving={isAddingMember}
+      />
     </div>
   );
 }
