@@ -16,6 +16,10 @@ import StateVariableMenu from "../../../components/StateVariables/StateVariableM
 import ImageCreateMenu from "../images";
 import ShapeCreateMenu from "./ShapeCreateMenu";
 
+function Separator() {
+  return <div className="topbar-separator" aria-hidden="true" />;
+}
+
 function Topbar({ saving, save }: { saving: boolean; save: () => void }) {
   const selected = useEditorStore((state) => state.selected);
   const setMode = useEditorStore((state) => state.setMode);
@@ -37,12 +41,12 @@ function Topbar({ saving, save }: { saving: boolean; save: () => void }) {
   return (
     <>
       <StateVariableMenu show={showSVMenu} setShow={setShowSVMenu} />
-      <ul className="topbar gap-0.5 menu menu-horizontal w-full bg-base-300 rounded-box p-1">
+      <ul className="topbar menu w-full bg-base-300 rounded-box p-1">
         <li className="text-xs">
           <a onClick={toggleSVMenu}>State Variables</a>
         </li>
 
-        <div className="divider divider-horizontal" />
+        <Separator />
 
         <li>
           <a onClick={undo}>
@@ -55,7 +59,7 @@ function Topbar({ saving, save }: { saving: boolean; save: () => void }) {
           </a>
         </li>
 
-        <div className="divider divider-horizontal" />
+        <Separator />
 
         {/* element creation */}
         <ImageCreateMenu />
@@ -69,7 +73,7 @@ function Topbar({ saving, save }: { saving: boolean; save: () => void }) {
         {/* element properties */}
         {selected && (
           <>
-            <div className="divider divider-horizontal" />
+            <Separator />
 
             {/* reorder */}
             <li>
@@ -86,7 +90,7 @@ function Topbar({ saving, save }: { saving: boolean; save: () => void }) {
             {/* shape properties */}
             {component.type !== "image" && (
               <>
-                <div className="divider divider-horizontal" />
+                <Separator />
                 <ShapeSection />
               </>
             )}
@@ -94,7 +98,7 @@ function Topbar({ saving, save }: { saving: boolean; save: () => void }) {
             {/* text content styles */}
             {component.type === "textbox" && (
               <>
-                <div className="divider divider-horizontal" />
+                <Separator />
                 <TextSection />
               </>
             )}
