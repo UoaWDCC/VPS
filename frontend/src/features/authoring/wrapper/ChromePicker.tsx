@@ -5,9 +5,11 @@ function ChromePicker({
   children,
   value,
   onChange,
+  tooltip,
 }: React.PropsWithChildren<{
   value: string;
   onChange: (value: string) => void;
+  tooltip?: string;
 }>) {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement | null>(null);
@@ -25,7 +27,10 @@ function ChromePicker({
 
   return (
     <div style={{ position: "relative", display: "flex" }}>
-      <li>
+      <li
+        className={tooltip ? "tooltip tooltip-bottom" : undefined}
+        data-tip={tooltip}
+      >
         <a
           className={`${open && "bg-base-100"}`}
           onClick={() => setOpen(!open)}

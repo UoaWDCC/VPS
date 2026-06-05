@@ -39,12 +39,14 @@ function ShapeSection() {
       <ChromePicker
         value={props.fill}
         onChange={(value) => modifyProps("fill", value)}
+        tooltip="Fill color"
       >
         <PaintBucket size={13} />
       </ChromePicker>
       <ChromePicker
         value={props.stroke}
         onChange={(value) => modifyProps("stroke", value)}
+        tooltip="Stroke color"
       >
         <Pencil size={13} />
       </ChromePicker>
@@ -52,6 +54,7 @@ function ShapeSection() {
         value={props.strokeWidth}
         values={widths}
         onChange={(v) => modifyProps("strokeWidth", v)}
+        tooltip="Stroke width"
       >
         <RulerIcon size={16} />
       </MultiInput>
