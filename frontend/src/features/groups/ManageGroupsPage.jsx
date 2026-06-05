@@ -174,9 +174,15 @@ export default function ManageGroupsPage() {
 
     try {
       await api.post(user, `/api/group/${scenarioId}/member`, member);
-      await refetch();
       setIsAddMemberOpen(false);
       toast.success("Member added successfully!");
+
+      try {
+        await refetch();
+      } catch (refetchError) {
+        toast("Member added but failed to refresh list");
+        console.error("error refreshing group members:", refetchError);
+      }
     } catch (error) {
       toast.error(
         error.response?.data || "There was an error adding the member"

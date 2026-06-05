@@ -117,6 +117,7 @@ export default function AddGroupMemberModal({
         <button
           type="button"
           className={`btn ${!isSubmittable || isSaving ? "btn-disabled" : ""}`}
+          disabled={!isSubmittable || isSaving}
           onClick={handleSubmit}
         >
           {isSaving ? "Adding..." : "Add Member"}

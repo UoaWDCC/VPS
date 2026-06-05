@@ -30,24 +30,59 @@ const createGroup = async (scenarioId, userList) => {
     notes: new Map(),
     path: [],
     scenarioId,
+    group: String(userList[0]?.group ?? ""),
   });
   await dbGroup.save();
   return dbGroup;
 };
 
 const addUserToGroup = async (scenarioId, user) => {
-  const group = await Group.findOne({
-    scenarioId,
-    "users.group": user.group,
-  });
+  const group = String(user.group);
+  const legacyGroup = await Group.findOneAndUpdate(
+    {
+      scenarioId,
+      group: { $exists: false },
+      "users.group": group,
+    },
+    {
+      $set: { group },
+      $push: { users: user },
+    },
+    { new: true }
+  );
 
-  if (!group) {
-    return createGroup(scenarioId, [user]);
+  if (legacyGroup) {
+    return legacyGroup;
   }
 
-  group.users.push(user);
-  await group.save();
-  return group;
+  const filter = {
+    scenarioId,
+    group,
+  };
+  const update = {
+    $setOnInsert: {
+      group,
+      notes: new Map(),
+      path: [],
+      scenarioId,
+    },
+    $push: { users: user },
+  };
+
+  try {
+    return await Group.findOneAndUpdate(filter, update, {
+      new: true,
+      upsert: true,
+    });
+  } catch (error) {
+    if (error.code !== 11000) throw error;
+
+    return Group.findOneAndUpdate(
+      filter,
+      { $push: { users: user } },
+      { new: true }
+    );
+  }
 };
 
 /**

@@ -16,6 +16,9 @@ const groupSchema = new Schema({
   scenarioId: {
     type: String,
   },
+  group: {
+    type: String,
+  },
   currentFlags: [String],
   stateVariables: [Schema.Types.Mixed],
   stateVersion: {
@@ -23,6 +26,11 @@ const groupSchema = new Schema({
     default: 0,
   },
 });
+
+groupSchema.index(
+  { scenarioId: 1, group: 1 },
+  { unique: true, partialFilterExpression: { group: { $exists: true } } }
+);
 
 const Group = mongoose.model("Group", groupSchema, "groups");
 

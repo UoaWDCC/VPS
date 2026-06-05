@@ -51,8 +51,11 @@ describe("Group API tests", () => {
       roleList: ["doctor"],
     });
 
+    await Group.syncIndexes();
+
     await Group.create({
       scenarioId: scenarioId.toString(),
+      group: "1",
       users: [
         {
           email: "alex@example.com",
@@ -71,10 +74,12 @@ describe("Group API tests", () => {
   });
 
   afterAll(async () => {
-    server.close(async () => {
-      await mongoose.disconnect();
-      await mongoServer.stop();
+    await new Promise((resolve, reject) => {
+      server.close((error) => (error ? reject(error) : resolve()));
+      server.closeAllConnections?.();
     });
+    await mongoose.disconnect();
+    await mongoServer.stop();
   });
 
   it("adds a member to an existing group without recreating the group", async () => {
@@ -121,7 +126,8 @@ describe("Group API tests", () => {
 
     const groups = await Group.find({ scenarioId }).sort({ _id: 1 }).lean();
     expect(groups).toHaveLength(2);
-    expect(groups[1].users).toEqual([
+    const group = groups.find((group) => group.group === "2");
+    expect(group.users).toEqual([
       expect.objectContaining({
         email: "casey@example.com",
         name: "Casey",
@@ -129,6 +135,32 @@ describe("Group API tests", () => {
         group: "2",
       }),
     ]);
+  });
+
+  it("handles concurrent additions to the same new group", async () => {
+    await Promise.all([
+      axios.post(`http://localhost:${port}/api/group/${scenarioId}/member`, {
+        email: "casey@example.com",
+        name: "Casey",
+        role: "Observer",
+        group: "2",
+      }),
+      axios.post(`http://localhost:${port}/api/group/${scenarioId}/member`, {
+        email: "sam@example.com",
+        name: "Sam",
+        role: "Nurse",
+        group: "2",
+      }),
+    ]);
+
+    const groups = await Group.find({ scenarioId, group: "2" }).lean();
+    expect(groups).toHaveLength(1);
+    expect(groups[0].users).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ email: "casey@example.com" }),
+        expect.objectContaining({ email: "sam@example.com" }),
+      ])
+    );
   });
 
   it("rejects duplicate emails in the scenario", async () => {
