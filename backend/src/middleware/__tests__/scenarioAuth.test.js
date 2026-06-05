@@ -1,24 +1,15 @@
-import {
-  jest,
-  describe,
-  beforeAll,
-  beforeEach,
-  afterEach,
-  afterAll,
-  it,
-  expect,
-} from "@jest/globals";
+import { jest, describe, beforeEach, it, expect } from "@jest/globals";
 
-import { MongoMemoryServer } from "mongodb-memory-server";
 import mongoose from "mongoose";
 import Scenario from "../../db/models/scenario.js";
 import scenarioAuth from "../scenarioAuth.js";
+import { useMongoMemoryServer } from "../../test/testSetup.js";
 
 describe("Scenario Auth Middleware tests", () => {
   const HTTP_UNAUTHORISED = 401;
   const HTTP_NOT_FOUND = 404;
 
-  let mongoServer;
+  useMongoMemoryServer();
 
   const scenario1 = {
     _id: new mongoose.mongo.ObjectId("000000000000000000000001"),
@@ -39,28 +30,9 @@ describe("Scenario Auth Middleware tests", () => {
 
   const nextFunction = jest.fn();
 
-  // setup in-memory mongodb and express API
-  beforeAll(async () => {
-    mongoServer = await MongoMemoryServer.create();
-    const uri = mongoServer.getUri();
-
-    await mongoose.connect(uri);
-  });
-
   beforeEach(async () => {
-    // Add scenario to database
+    nextFunction.mockClear();
     await Scenario.create(scenario1);
-  });
-
-  // clear the database
-  afterEach(async () => {
-    await mongoose.connection.db.dropDatabase();
-  });
-
-  // close the mongodb and express servers
-  afterAll(async () => {
-    await mongoose.disconnect();
-    await mongoServer.stop();
   });
 
   it("successfully authorise user for scenario", async () => {
