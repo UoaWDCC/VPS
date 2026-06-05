@@ -35,6 +35,21 @@ const createGroup = async (scenarioId, userList) => {
   return dbGroup;
 };
 
+const addUserToGroup = async (scenarioId, user) => {
+  const group = await Group.findOne({
+    scenarioId,
+    "users.group": user.group,
+  });
+
+  if (!group) {
+    return createGroup(scenarioId, [user]);
+  }
+
+  group.users.push(user);
+  await group.save();
+  return group;
+};
+
 /**
  * Sets the state variables for a group
  * @param {String} groupId MongoDB ID of group
@@ -64,6 +79,7 @@ export {
   getGroup,
   getCurrentScene,
   createGroup,
+  addUserToGroup,
   getGroupByScenarioId,
   setGroupStateVariables,
 };

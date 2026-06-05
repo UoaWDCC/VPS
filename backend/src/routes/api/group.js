@@ -1,5 +1,6 @@
 import { Router } from "express";
 import {
+  addUserToGroup,
   createGroup,
   getCurrentScene,
   getGroup,
@@ -16,6 +17,15 @@ const router = Router();
 const HTTP_OK = 200;
 const HTTP_BAD_REQUEST = 400;
 const HTTP_NOT_FOUND = 404;
+
+const normalizeRole = (role) => role.trim().toLowerCase();
+
+const trimUser = ({ email, name, role, group }) => ({
+  email: email?.trim(),
+  name: name?.trim(),
+  role: role?.trim(),
+  group: String(group ?? "").trim(),
+});
 
 // get the groups assigned to a scenario
 router.get("/scenario/:scenarioId", async (req, res) => {
@@ -52,6 +62,57 @@ router.get("/retrieve/:groupId", async (req, res) => {
 export default router;
 
 router.use("/:scenarioId", validScenarioId);
+
+router.post("/:scenarioId/member", async (req, res) => {
+  const { scenarioId } = req.params;
+  const user = trimUser(req.body);
+
+  if (!user.email || !user.name || !user.role || !user.group) {
+    return res
+      .status(HTTP_BAD_REQUEST)
+      .send("Member must have a name, email, role and group");
+  }
+
+  const groups = await getGroupByScenarioId(scenarioId);
+  const users = groups.flatMap((group) => group.users);
+  const email = user.email.toLowerCase();
+
+  if (users.some((member) => member.email?.toLowerCase() === email)) {
+    return res
+      .status(HTTP_BAD_REQUEST)
+      .send("A member with that email already exists in this scenario");
+  }
+
+  const targetGroup = groups.find((group) =>
+    group.users.some((member) => String(member.group).trim() === user.group)
+  );
+
+  if (
+    targetGroup?.users.some(
+      (member) => normalizeRole(member.role) === normalizeRole(user.role)
+    )
+  ) {
+    return res
+      .status(HTTP_BAD_REQUEST)
+      .send("All students must have different roles in a group");
+  }
+
+  const roleList = await retrieveRoleList(scenarioId);
+  const normalizedRole = normalizeRole(user.role);
+  const nextRoleList = roleList.some(
+    (role) => normalizeRole(role) === normalizedRole
+  )
+    ? roleList
+    : [...roleList, normalizedRole];
+
+  if (nextRoleList !== roleList) {
+    await updateRoleList(scenarioId, nextRoleList);
+  }
+
+  const group = await addUserToGroup(scenarioId, user);
+  return res.status(HTTP_OK).json(group);
+});
+
 // create a new group
 router.post("/:scenarioId", async (req, res) => {
   const { groupList, roleList } = req.body;
