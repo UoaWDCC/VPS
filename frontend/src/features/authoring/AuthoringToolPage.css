@@ -8,50 +8,11 @@ input[type="number"] {
   @apply p-1.5;
 }
 
-.topbar.menu {
-  display: flex;
-  flex-flow: row nowrap;
-  align-items: center;
-  gap: 0.125rem;
-  min-height: 2.5rem;
-  max-height: 2.75rem;
-  overflow-x: auto;
-  overflow-y: visible;
-}
-
-.topbar.menu > li,
-.topbar.menu > .dropdown,
-.topbar.menu > div:not(.topbar-separator) {
-  flex: 0 0 auto;
-}
-
-.topbar.menu li > a {
-  align-items: center;
-  display: flex;
-  height: 2rem;
-  min-height: 2rem;
-}
-
 .topbar.menu li > a:has(> div) {
   @apply p-1.25;
 }
-
-.topbar .topbar-separator,
-.topbar .divider.divider-horizontal {
-  align-self: center;
-  background: color-mix(in srgb, var(--color-base-content) 18%, transparent);
-  flex: 0 0 1px;
-  height: 1.5rem;
-  margin: 0 0.25rem;
-  min-height: 0;
-  width: 1px;
-}
-
-.topbar .topbar-separator::before,
-.topbar .topbar-separator::after,
-.topbar .divider.divider-horizontal::before,
-.topbar .divider.divider-horizontal::after {
-  content: none;
+.topbar .divider {
+  @apply m-0;
 }
 
 .topbar div.dropdown:focus-within > li > a {
