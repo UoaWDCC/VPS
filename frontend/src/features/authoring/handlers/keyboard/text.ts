@@ -17,7 +17,11 @@ import {
   syncModelSelection,
   syncVisualCursor,
 } from "../../text/cursor";
-import type { VisualBlock, VisualDocument, VisualSelection } from "../../text/types";
+import type {
+  VisualBlock,
+  VisualDocument,
+  VisualSelection,
+} from "../../text/types";
 
 export function handleTextMode(e: KeyboardEvent) {
   const { selected } = useEditorStore.getState();
@@ -38,7 +42,8 @@ export function handleSelectAll(selected: string) {
   const scene = useVisualScene.getState().components;
   const component = scene[selected];
 
-  const blocks = (component as unknown as { document: VisualDocument }).document.blocks;
+  const blocks = (component as unknown as { document: VisualDocument }).document
+    .blocks;
 
   if (!blocks || blocks.length === 0) return;
 
@@ -101,7 +106,11 @@ function handleNavigation(e: KeyboardEvent, selected: string) {
     useEditorStore.getState();
   if (!visualSelection.start) return;
 
-  const { blocks } = (useVisualScene.getState().components[selected] as unknown as { document: VisualDocument }).document;
+  const { blocks } = (
+    useVisualScene.getState().components[selected] as unknown as {
+      document: VisualDocument;
+    }
+  ).document;
 
   const handler = navigationHandlers[e.key];
   if (handler) {

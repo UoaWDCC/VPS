@@ -146,10 +146,17 @@ export const modifyComponentProp = modify(
     const component = getComponent(id);
     if (!component) return;
 
-    const [object, key] = getObject(prop, component as unknown as Record<PropertyKey, unknown>);
-    if (typeof val === "function") object[key] = (val as (prev: unknown) => unknown)(object[key]);
+    const [object, key] = getObject(
+      prop,
+      component as unknown as Record<PropertyKey, unknown>
+    );
+    if (typeof val === "function")
+      object[key] = (val as (prev: unknown) => unknown)(object[key]);
     else if (val !== null && typeof val === "object" && !Array.isArray(val))
-      object[key] = merge(object[key] as Record<PropertyKey, unknown>, val as Record<PropertyKey, unknown>);
+      object[key] = merge(
+        object[key] as Record<PropertyKey, unknown>,
+        val as Record<PropertyKey, unknown>
+      );
     else object[key] = val;
   }
 );

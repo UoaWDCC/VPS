@@ -53,8 +53,14 @@ export function paste(e: ClipboardEvent) {
 
   if (selected && mode.includes("text")) {
     if (app) {
-      const obj = JSON.parse(app) as { type?: string; document?: ModelDocument };
-      const doc = obj.type === "textbox" ? obj.document : (obj as unknown as ModelDocument);
+      const obj = JSON.parse(app) as {
+        type?: string;
+        document?: ModelDocument;
+      };
+      const doc =
+        obj.type === "textbox"
+          ? obj.document
+          : (obj as unknown as ModelDocument);
       if (!doc) return;
       const cursor = mergeDocs(selected, selection.start!, doc);
       setSelection({ start: cursor, end: null });
@@ -66,7 +72,10 @@ export function paste(e: ClipboardEvent) {
     syncVisualCursor();
   } else {
     if (app) {
-      const obj = JSON.parse(app) as { type?: string; document?: ModelDocument };
+      const obj = JSON.parse(app) as {
+        type?: string;
+        document?: ModelDocument;
+      };
       if (obj.type) {
         setSelected(parseComponent(obj as Component));
       } else {

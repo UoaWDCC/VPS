@@ -24,7 +24,9 @@ let undoStack: HistoryObject[] = [];
 let redoStack: HistoryObject[] = [];
 let scenes: SceneRef[] = [];
 let scenarioId: string | null = null;
-let saveScene: ((patch: ReturnType<typeof getScenePatch>) => Promise<void>) | null = null;
+let saveScene:
+  | ((patch: ReturnType<typeof getScenePatch>) => Promise<void>)
+  | null = null;
 
 export function init(
   _scenes: SceneRef[],

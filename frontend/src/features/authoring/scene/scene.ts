@@ -28,7 +28,10 @@ export function getComponent(id: string) {
 export function getComponentProp(id: string, prop: string): unknown {
   const component = scene.components[id];
   if (!component) return;
-  const [object, key] = getObject(prop, component as unknown as Record<PropertyKey, unknown>);
+  const [object, key] = getObject(
+    prop,
+    component as unknown as Record<PropertyKey, unknown>
+  );
   return object[key];
 }
 
@@ -50,12 +53,11 @@ export async function saveCurrentScene(
   commitSavedScene();
 }
 
-export function applySceneSwitch(
-  targetScene: SceneData,
-  scenarioId: string
-) {
+export function applySceneSwitch(targetScene: SceneData, scenarioId: string) {
   const clone = structuredClone(targetScene);
-  clone.components = arrayToObject(clone.components as unknown as { id: string }[]) as Record<string, Component>;
+  clone.components = arrayToObject(
+    clone.components as unknown as { id: string }[]
+  ) as Record<string, Component>;
   setScene(clone);
   commitSavedScene();
   useEditorStore.getState().clear();

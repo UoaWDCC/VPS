@@ -137,7 +137,10 @@ export function correct(verts: Vec2[], origin: Vec2, rotation: number) {
   return translate(verts, correction);
 }
 
-export function objectDiff(a: Record<string, unknown>, b: Record<string, unknown>) {
+export function objectDiff(
+  a: Record<string, unknown>,
+  b: Record<string, unknown>
+) {
   const diff: Record<string, unknown> = {};
   for (const key in a) {
     if (!(key in b) || a[key] !== b[key]) {

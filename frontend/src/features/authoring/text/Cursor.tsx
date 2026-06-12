@@ -13,7 +13,9 @@ function Cursor({ bounds }: { bounds: RelativeBounds }) {
 
   const { selected } = useEditorStore.getState();
   const { components } = useVisualScene.getState();
-  const { blocks } = (components[selected!] as unknown as { document: VisualDocument }).document;
+  const { blocks } = (
+    components[selected!] as unknown as { document: VisualDocument }
+  ).document;
 
   const { start, end } = visualSelection;
   if (start == null || (end && !shallow(start, end))) return null;

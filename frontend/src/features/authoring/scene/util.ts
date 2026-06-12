@@ -14,7 +14,14 @@ export function getObject(
 ): [Record<PropertyKey, unknown>, PropertyKey] {
   const keys = prop.split(".");
   const lastKey = keys.pop()!;
-  return [keys.reduce((n: Record<PropertyKey, unknown>, key) => n[key] as Record<PropertyKey, unknown>, obj), lastKey];
+  return [
+    keys.reduce(
+      (n: Record<PropertyKey, unknown>, key) =>
+        n[key] as Record<PropertyKey, unknown>,
+      obj
+    ),
+    lastKey,
+  ];
 }
 
 export function arrayToObject(arr: { id: string }[]) {

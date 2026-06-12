@@ -43,7 +43,9 @@ interface EditorState {
 
 type Dynamic<T> = (arg: T | ((prev: T) => T)) => void;
 
-type ZustandSet = (updater: (state: EditorState) => Partial<EditorState>) => void;
+type ZustandSet = (
+  updater: (state: EditorState) => Partial<EditorState>
+) => void;
 
 function setter<K extends keyof EditorState>(set: ZustandSet, prop: K) {
   return (arg: EditorState[K] | ((prev: EditorState[K]) => EditorState[K])) =>

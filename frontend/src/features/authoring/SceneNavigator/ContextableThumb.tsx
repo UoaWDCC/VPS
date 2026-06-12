@@ -64,13 +64,14 @@ function ContextableThumb({
   const { scenarioId } = useParams<{ scenarioId: string }>();
   const history = useHistory();
 
-  const { scenes, reFetch, saveScenePatch, deleteScene } =
-    useContext(SceneContext) as {
-      scenes: SceneData[];
-      reFetch: () => Promise<void>;
-      saveScenePatch: SaveScenePatch;
-      deleteScene: (id: string) => void;
-    };
+  const { scenes, reFetch, saveScenePatch, deleteScene } = useContext(
+    SceneContext
+  ) as {
+    scenes: SceneData[];
+    reFetch: () => Promise<void>;
+    saveScenePatch: SaveScenePatch;
+    deleteScene: (id: string) => void;
+  };
 
   const duplicateScene = (id: string): void => {
     void api
@@ -103,7 +104,9 @@ function ContextableThumb({
         <p className="w-5.5 text--1 text-right mr-1.5">{index + 1}</p>
         <button
           type="button"
-          onMouseDown={() => { void switchScene(scene); }}
+          onMouseDown={() => {
+            void switchScene(scene);
+          }}
           className="w-[160px] relative rounded-sm overflow-hidden border-3 hover:border-primary"
           style={active ? { border: "3px solid #035084" } : {}}
           key={scene._id}

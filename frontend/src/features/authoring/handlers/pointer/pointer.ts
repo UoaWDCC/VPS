@@ -123,8 +123,9 @@ function handleDocumentClick(e: React.MouseEvent, position: Vec2) {
   const scene = useVisualScene.getState().components;
 
   const target = e.target as HTMLElement;
-  const { document: doc } =
-    useVisualScene.getState().components[target.dataset.id as string] as unknown as { document: VisualDocument };
+  const { document: doc } = useVisualScene.getState().components[
+    target.dataset.id as string
+  ] as unknown as { document: VisualDocument };
   const cursor = parseHit(
     getRelativePosition(position, doc.bounds),
     doc.blocks
@@ -143,7 +144,9 @@ function handleDocumentClick(e: React.MouseEvent, position: Vec2) {
 
 function handleTextSelection(_: React.MouseEvent, position: Vec2) {
   const { selected, setVisualSelection } = useEditorStore.getState();
-  const { document: doc } = useVisualScene.getState().components[selected!] as unknown as { document: VisualDocument };
+  const { document: doc } = useVisualScene.getState().components[
+    selected!
+  ] as unknown as { document: VisualDocument };
   const cursor = parseHit(
     getRelativePosition(position, doc.bounds),
     doc.blocks

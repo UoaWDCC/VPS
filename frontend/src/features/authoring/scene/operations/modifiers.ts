@@ -8,7 +8,9 @@ import { arrayToObject } from "../util";
 
 export function replace(scene: SceneData) {
   const clone = structuredClone(scene);
-  clone.components = arrayToObject(clone.components as unknown as { id: string }[]) as Record<string, Component>;
+  clone.components = arrayToObject(
+    clone.components as unknown as { id: string }[]
+  ) as Record<string, Component>;
   setScene(clone);
   commitSavedScene();
   useVisualScene.getState().setVisualScene(buildVisualScene(clone));
@@ -23,7 +25,9 @@ export function modifySceneProp<K extends keyof VisualSceneState>(
 }
 
 // wrapper for state mutating functions, will capture both state and operation
-export function modify<A extends [string, ...unknown[]], R>(fn: (...args: A) => R) {
+export function modify<A extends [string, ...unknown[]], R>(
+  fn: (...args: A) => R
+) {
   return function (...args: A): R {
     const id = args[0];
     const component = getComponent(id);
