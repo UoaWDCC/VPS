@@ -134,7 +134,7 @@ const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
 };
 
 function ImageCreateMenu() {
-  const { scenarioId } = useParams();
+  const { scenarioId } = useParams<{ scenarioId?: string }>();
   const [selectedImage, setSelectedImage] = useState<Image | null>(null);
 
   const [modalOpen, setModalOpen] = useState(false);

@@ -1,5 +1,5 @@
 import { buildVisualDocument } from "./text/build";
-import type { Component, RelativeBounds, Scene, Vec2 } from "./types";
+import type { Component, RelativeBounds, SceneData, Vec2 } from "./types";
 import {
   add,
   getBoxCenter,
@@ -14,7 +14,7 @@ export function buildVisualComponents(components: Component[]) {
   return components.map(buildVisualComponent);
 }
 
-export function buildVisualScene(modelScene: Scene) {
+export function buildVisualScene(modelScene: SceneData) {
   const visualComponents: Record<string, Component> = {};
   for (const component of Object.values(modelScene.components)) {
     visualComponents[component.id] = buildVisualComponent(component);

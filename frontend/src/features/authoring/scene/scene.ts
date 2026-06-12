@@ -1,5 +1,5 @@
 import { arrayToObject, getObject } from "./util";
-import type { Component, Scene, SceneData } from "../types";
+import type { Component, SceneData } from "../types";
 import useVisualScene from "../stores/visual";
 import { buildVisualScene } from "../pipeline";
 import useEditorStore from "../stores/editor";
@@ -59,7 +59,7 @@ export function applySceneSwitch(
   setScene(clone);
   commitSavedScene();
   useEditorStore.getState().clear();
-  useVisualScene.getState().setVisualScene(buildVisualScene(clone as Scene));
+  useVisualScene.getState().setVisualScene(buildVisualScene(clone));
   localStorage.setItem(`${scenarioId}:activeScene`, targetScene._id);
 }
 

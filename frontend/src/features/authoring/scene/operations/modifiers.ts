@@ -1,9 +1,8 @@
-import { v4 } from "uuid";
 import { buildVisualComponent, buildVisualScene } from "../../pipeline";
 import useVisualScene, { type VisualSceneState } from "../../stores/visual";
 import { updateHistory } from "../history";
 import { commitSavedScene, getComponent, getScene, setScene } from "../scene";
-import type { Component, Scene, SceneData } from "../../types";
+import type { Component, SceneData } from "../../types";
 import { arrayToObject } from "../util";
 
 export function replace(scene: SceneData) {
@@ -11,14 +10,14 @@ export function replace(scene: SceneData) {
   clone.components = arrayToObject(clone.components as unknown as { id: string }[]) as Record<string, Component>;
   setScene(clone);
   commitSavedScene();
-  useVisualScene.getState().setVisualScene(buildVisualScene(clone as Scene));
+  useVisualScene.getState().setVisualScene(buildVisualScene(clone));
 }
 
 export function modifySceneProp<K extends keyof VisualSceneState>(
   prop: K,
   value: VisualSceneState[K]
 ) {
-  getScene()[prop as keyof SceneData] = value as SceneData[keyof SceneData];
+  (getScene() as unknown as Record<string, unknown>)[prop as string] = value;
   useVisualScene.setState({ [prop]: value } as Pick<VisualSceneState, K>);
 }
 
@@ -50,9 +49,10 @@ export function remove(id: string, history = true) {
   useVisualScene.getState().deleteComponent(id);
 }
 
-export function add(props: Record<string, unknown> & { id?: string }, history = true) {
-  const id = props.id ?? v4();
-  props.id = id;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function add(props: Record<string, any>, history = true) {
+  if (!props.id) props.id = crypto.randomUUID();
+  const id = props.id as string;
   getScene().components[id] = props as Component;
 
   if (history) updateHistory(id, null);
