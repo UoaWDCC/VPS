@@ -117,7 +117,7 @@ export function parseComponent(component: Component) {
   const offset = { x: 10, y: 10 };
   component.bounds.verts = translate(component.bounds.verts, offset);
   component.zIndex += 1;
-  delete (component as Record<string, any>).id;
+  delete (component as Record<string, unknown>).id;
   return add(component);
 }
 
@@ -141,14 +141,14 @@ export function createComponentFromBounds(
 }
 
 export const modifyComponentProp = modify(
-  (id: string, prop: string, val: any) => {
+  (id: string, prop: string, val: unknown) => {
     const component = getComponent(id);
     if (!component) return;
 
-    const [object, key] = getObject(prop, component);
-    if (typeof val === "function") object[key] = val(object[key]);
+    const [object, key] = getObject(prop, component as unknown as Record<PropertyKey, unknown>);
+    if (typeof val === "function") object[key] = (val as (prev: unknown) => unknown)(object[key]);
     else if (val !== null && typeof val === "object" && !Array.isArray(val))
-      object[key] = merge(object[key], val);
+      object[key] = merge(object[key] as Record<PropertyKey, unknown>, val as Record<PropertyKey, unknown>);
     else object[key] = val;
   }
 );
@@ -159,7 +159,7 @@ export function modifyComponentBounds(id: string, bounds: Partial<Bounds>) {
 
 export function bringForward(id: string) {
   const currentZIndex = getComponentProp(id, "zIndex") as number;
-  const components = Object.values(getScene().components) as Component[];
+  const components = Object.values(getScene().components);
 
   // 1. Find the highest zIndex that is strictly greater than the current one
 
@@ -184,7 +184,7 @@ export function bringForward(id: string) {
 
 export function sendBackward(id: string) {
   const currentZIndex = getComponentProp(id, "zIndex") as number;
-  const components = Object.values(getScene().components) as Component[];
+  const components = Object.values(getScene().components);
 
   // 1. Find the highest zIndex that is strictly less than the current one
   const targetComponent = components
@@ -203,7 +203,7 @@ export function sendBackward(id: string) {
 }
 
 export function bringToFront(id: string) {
-  const components = Object.values(getScene().components) as Component[];
+  const components = Object.values(getScene().components);
   const max = components.reduce(
     (p, c) => (c.zIndex >= p ? c.zIndex : p),
     -Infinity
@@ -213,7 +213,7 @@ export function bringToFront(id: string) {
 }
 
 export function sendToBack(id: string) {
-  const components = Object.values(getScene().components) as Component[];
+  const components = Object.values(getScene().components);
   const min = components.reduce(
     (p, c) => (c.zIndex <= p ? c.zIndex : p),
     Infinity

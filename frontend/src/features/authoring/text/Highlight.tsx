@@ -1,4 +1,5 @@
-import type { RelativeBounds, TextBoxComponent } from "../types";
+import type { RelativeBounds } from "../types";
+import type { VisualDocument } from "./types";
 import { expandToPath } from "../util";
 import { normalizeSelectionVisual } from "./cursor";
 import type {
@@ -111,7 +112,7 @@ function Highlight({ color }: HighlightProps) {
 
   const { selected } = useEditorStore.getState();
   const { components } = useVisualScene.getState();
-  const { blocks, bounds } = (components[selected!] as TextBoxComponent).document;
+  const { blocks, bounds } = (components[selected!] as unknown as { document: VisualDocument }).document;
 
   if (!isValidSelection(selection, blocks)) return null;
 

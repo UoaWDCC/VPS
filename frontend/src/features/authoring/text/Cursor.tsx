@@ -1,4 +1,5 @@
-import type { RelativeBounds, TextBoxComponent } from "../types";
+import type { RelativeBounds } from "../types";
+import type { VisualDocument } from "./types";
 import { add, expandToPath } from "../util";
 import { getVisualPosition } from "./cursor";
 import useEditorStore from "../stores/editor";
@@ -12,7 +13,7 @@ function Cursor({ bounds }: { bounds: RelativeBounds }) {
 
   const { selected } = useEditorStore.getState();
   const { components } = useVisualScene.getState();
-  const { blocks } = (components[selected!] as TextBoxComponent).document;
+  const { blocks } = (components[selected!] as unknown as { document: VisualDocument }).document;
 
   const { start, end } = visualSelection;
   if (start == null || (end && !shallow(start, end))) return null;

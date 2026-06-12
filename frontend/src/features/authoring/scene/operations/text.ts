@@ -169,7 +169,7 @@ export const applySelectionStyle = modify(
 );
 
 export function getStyleForSelection(id: string, sel: ModelSelection) {
-  const doc = getComponentProp(id, "document");
+  const doc = getComponentProp(id, "document") as ModelDocument;
   const { start, end } = sel;
 
   if (start == null) return squash(doc.style); // no selection
@@ -299,7 +299,7 @@ function splitSpan(blocks: ModelBlock[], cursor: ModelCursor) {
 }
 
 function isolateSelection(id: string, sel: ModelSelection) {
-  const blocks = getComponentProp(id, "document.blocks");
+  const blocks = getComponentProp(id, "document.blocks") as ModelBlock[];
   const end = splitSpan(blocks, sel.end!);
 
   const before = blocks[sel.start!.blockI].spans.length;
@@ -364,7 +364,7 @@ export function normaliseDocument(doc: ModelDocument, cursor: ModelCursor) {
 }
 
 export function getDocumentText(id: string) {
-  const blocks = getComponentProp(id, "document.blocks");
+  const blocks = getComponentProp(id, "document.blocks") as ModelBlock[];
 
   let text = "";
   for (const block of blocks) {
@@ -377,7 +377,7 @@ export function getDocumentText(id: string) {
 }
 
 export function getSelectionContent(id: string, sel: ModelSelection) {
-  const doc = getComponentProp(id, "document");
+  const doc = getComponentProp(id, "document") as ModelDocument;
   const { blocks } = doc;
   const { start, end } = normaliseSelection(sel) as {
     start: ModelCursor;
@@ -397,7 +397,7 @@ export function getSelectionContent(id: string, sel: ModelSelection) {
   }
 
   let text = "";
-  const newDoc = { ...doc, blocks: [] };
+  const newDoc = { ...doc, blocks: [] as ModelBlock[] };
 
   for (let b = start.blockI; b <= end.blockI; b++) {
     const startSpan = b === start.blockI ? start.spanI : 0;

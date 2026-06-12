@@ -1,4 +1,3 @@
-import { render } from "../../../../components/ContextMenu/portal";
 import { modifyComponentBounds } from "../../scene/operations/component";
 import useEditorStore from "../../stores/editor";
 import useVisualScene from "../../stores/visual";
@@ -8,8 +7,8 @@ import {
   syncModelSelection,
 } from "../../text/cursor";
 import type { Vec2 } from "../../types";
+import type { VisualDocument } from "../../text/types";
 import { subtract, translate } from "../../util";
-import ComponentMenu from "./ComponentContext";
 import { handleCreateDrag, handleCreateEnd, handleCreateStart } from "./create";
 import { handleResizeDrag, handleResizeStart } from "./resize";
 
@@ -125,7 +124,7 @@ function handleDocumentClick(e: React.MouseEvent, position: Vec2) {
 
   const target = e.target as HTMLElement;
   const { document: doc } =
-    useVisualScene.getState().components[target.dataset.id as string];
+    useVisualScene.getState().components[target.dataset.id as string] as unknown as { document: VisualDocument };
   const cursor = parseHit(
     getRelativePosition(position, doc.bounds),
     doc.blocks
@@ -144,7 +143,7 @@ function handleDocumentClick(e: React.MouseEvent, position: Vec2) {
 
 function handleTextSelection(_: React.MouseEvent, position: Vec2) {
   const { selected, setVisualSelection } = useEditorStore.getState();
-  const { document: doc } = useVisualScene.getState().components[selected!];
+  const { document: doc } = useVisualScene.getState().components[selected!] as unknown as { document: VisualDocument };
   const cursor = parseHit(
     getRelativePosition(position, doc.bounds),
     doc.blocks

@@ -1,20 +1,18 @@
 import { fastIsEqual } from "fast-is-equal";
-import type { Component } from "../types";
+import type { Component, SceneData } from "../types";
 import {
   applySceneSwitch,
   getComponent,
   getScene,
   getSceneId,
+  getScenePatch,
   saveCurrentScene,
 } from "./scene";
 import useVisualScene from "../stores/visual";
 import { buildVisualComponent } from "../pipeline";
 import useEditorStore from "../stores/editor";
 
-interface SceneRef {
-  _id: string;
-  components: Record<string, any>[];
-}
+type SceneRef = SceneData;
 
 interface HistoryObject {
   sceneId: string;
@@ -26,12 +24,12 @@ let undoStack: HistoryObject[] = [];
 let redoStack: HistoryObject[] = [];
 let scenes: SceneRef[] = [];
 let scenarioId: string | null = null;
-let saveScene: ((patch: Record<string, any>) => Promise<void>) | null = null;
+let saveScene: ((patch: ReturnType<typeof getScenePatch>) => Promise<void>) | null = null;
 
 export function init(
   _scenes: SceneRef[],
   _scenarioId: string,
-  _saveScene: (patch: Record<string, any>) => Promise<void>
+  _saveScene: (patch: ReturnType<typeof getScenePatch>) => Promise<void>
 ) {
   if (_scenarioId !== scenarioId) {
     undoStack = [];
