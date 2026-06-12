@@ -1,14 +1,13 @@
 import { arrayToObject, getObject } from "./util";
-import type { Scene } from "../types";
+import type { Component, Scene, SceneData } from "../types";
 import useVisualScene from "../stores/visual";
 import { buildVisualScene } from "../pipeline";
 import useEditorStore from "../stores/editor";
 
-let scene = {} as any;
-let savedScene = {} as any;
+let scene: SceneData = {} as SceneData;
+let savedScene: SceneData = {} as SceneData;
 
-// @ts-ignore
-window.scene = scene;
+(window as Window & { scene: SceneData }).scene = scene;
 
 export function getScene() {
   return scene;
@@ -18,22 +17,21 @@ export function getSceneId() {
   return scene._id;
 }
 
-export function setScene(newScene: Record<string, any>) {
-  scene = newScene as any;
+export function setScene(newScene: SceneData) {
+  scene = newScene;
 }
 
 export function getComponent(id: string) {
   return scene.components[id] ?? null;
 }
 
-export function getComponentProp(id: string, prop: string) {
+export function getComponentProp(id: string, prop: string): unknown {
   const component = scene.components[id];
   if (!component) return;
-  const [object, key] = getObject(prop, component);
+  const [object, key] = getObject(prop, component as unknown as Record<PropertyKey, unknown>);
   return object[key];
 }
 
-//Adds a saved baseline alongside the current scene, and use it to calculate a patch of changes when committing the scene
 export function commitSavedScene() {
   savedScene = structuredClone(scene);
 }
@@ -53,11 +51,11 @@ export async function saveCurrentScene(
 }
 
 export function applySceneSwitch(
-  targetScene: Record<string, any>,
+  targetScene: SceneData,
   scenarioId: string
 ) {
   const clone = structuredClone(targetScene);
-  clone.components = arrayToObject(clone.components);
+  clone.components = arrayToObject(clone.components as unknown as { id: string }[]) as Record<string, Component>;
   setScene(clone);
   commitSavedScene();
   useEditorStore.getState().clear();
@@ -66,7 +64,7 @@ export function applySceneSwitch(
 }
 
 export function getScenePatch() {
-  const components: any[] = [];
+  const components: Component[] = [];
   const deletedComponentIds: string[] = [];
 
   const currentComponents = scene.components ?? {};
@@ -82,12 +80,13 @@ export function getScenePatch() {
     if (!currentComponents[id]) deletedComponentIds.push(id);
   });
 
-  const fields: Record<string, any> = {};
+  const fields: Record<string, unknown> = {};
 
   ["name", "roles", "time", "directLink", "timerStateOperations"].forEach(
     (field) => {
-      if (JSON.stringify(scene[field]) !== JSON.stringify(savedScene[field])) {
-        fields[field] = structuredClone(scene[field]);
+      const key = field as keyof SceneData;
+      if (JSON.stringify(scene[key]) !== JSON.stringify(savedScene[key])) {
+        fields[field] = structuredClone(scene[key]);
       }
     }
   );

@@ -8,6 +8,16 @@ export type Component =
 
 export type Scene = { components: Record<string, Component> };
 
+export interface SceneData {
+  _id: string;
+  name: string;
+  components: Record<string, Component>;
+  roles: string[];
+  time: number | null;
+  directLink: string | null;
+  timerStateOperations: Record<string, unknown>[] | null;
+}
+
 export interface Vec2 {
   x: number;
   y: number;
