@@ -122,8 +122,9 @@ export function parseComponent(component: Component) {
 }
 
 export function duplicateComponent(id: string) {
-  const newComponent = structuredClone(getComponent(id));
-  return parseComponent(newComponent);
+  const component = getComponent(id);
+  if (!component) return;
+  return parseComponent(structuredClone(component));
 }
 
 export function createComponentFromBounds(

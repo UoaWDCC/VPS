@@ -53,8 +53,9 @@ export function paste(e: ClipboardEvent) {
 
   if (selected && mode.includes("text")) {
     if (app) {
-      const obj = JSON.parse(app) as { type?: string; document?: ModelDocument } & ModelDocument;
-      const doc = obj.type === "textbox" ? obj.document! : obj;
+      const obj = JSON.parse(app) as { type?: string; document?: ModelDocument };
+      const doc = obj.type === "textbox" ? obj.document : (obj as unknown as ModelDocument);
+      if (!doc) return;
       const cursor = mergeDocs(selected, selection.start!, doc);
       setSelection({ start: cursor, end: null });
     } else if (text) {
@@ -95,7 +96,7 @@ function addToClipboard(e: ClipboardEvent, selected: string) {
       "application/component",
       stringifyComponent(selected) || ""
     );
-    if (getComponent(selected).type === "textbox") {
+    if (getComponent(selected)?.type === "textbox") {
       const text = getDocumentText(selected);
       e.clipboardData?.setData("text/plain", text);
     }
