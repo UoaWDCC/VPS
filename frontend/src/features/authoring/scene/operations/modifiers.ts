@@ -1,3 +1,4 @@
+import { v4 } from "uuid";
 import { buildVisualComponent, buildVisualScene } from "../../pipeline";
 import useVisualScene, { type VisualSceneState } from "../../stores/visual";
 import { updateHistory } from "../history";
@@ -52,7 +53,7 @@ export function remove(id: string, history = true) {
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function add(props: Record<string, any>, history = true) {
-  if (!props.id) props.id = crypto.randomUUID();
+  if (!props.id) props.id = v4();
   const id = props.id as string;
   getScene().components[id] = props as Component;
 

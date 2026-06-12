@@ -48,7 +48,7 @@
     "react-router-dom": "^5.2.0",
     "react-select": "^5.10.2",
     "styled-components": "^6.1.19",
-    "uuid": "^10.0.0",
+    "uuid": "^14.0.0",
     "zustand": "3"
   },
   "devDependencies": {
