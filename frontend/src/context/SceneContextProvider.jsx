@@ -1,6 +1,5 @@
 import { useCallback, useContext, useEffect } from "react";
 import AuthenticationContext from "./AuthenticationContext";
-import ScenarioContext from "./ScenarioContext";
 import SceneContext from "./SceneContext";
 import { useParams } from "react-router-dom";
 import { api } from "../util/api";
@@ -43,20 +42,10 @@ async function saveScenePatch(user, scenarioId, patch) {
  * SceneContextProvider allows access to scene info and the refetch function
  */
 export default function SceneContextProvider({ children }) {
-  const { setCurrentScenario } = useContext(ScenarioContext);
   const { user } = useContext(AuthenticationContext);
   const { scenarioId } = useParams();
 
   const queryClient = useQueryClient();
-
-  // FIX: this is disgusting
-  useQuery({
-    queryKey: ["scenario", scenarioId],
-    queryFn: () =>
-      api.get(user, `api/scenario/${scenarioId}`).then((r) => r.data),
-    enabled: !!scenarioId,
-    onSuccess: (data) => setCurrentScenario(data),
-  });
 
   const scenesQuery = useQuery({
     queryKey: ["scenes", scenarioId],
