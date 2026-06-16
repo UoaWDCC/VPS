@@ -41,8 +41,6 @@ export default function ScenarioContextProvider({ children }) {
   const { user } = useContext(AuthenticationContext);
   const { scenarioId } = useParams();
 
-  console.log(scenarioId);
-
   const queryClient = useQueryClient();
 
   const [roleList, setRoleList] = useState();

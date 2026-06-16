@@ -271,7 +271,6 @@ export function useGet(url, setData, requireAuth = true, skipRequest = false) {
   }
 
   useEffect(() => {
-    console.log(skipRequest);
     let isMounted = true;
 
     async function fetchData() {

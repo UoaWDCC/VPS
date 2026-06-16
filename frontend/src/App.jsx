@@ -114,7 +114,7 @@ export default function App() {
 
                 <Route path="/aboutus" component={AboutUsPage} />
 
-                <Route path="/scenario/:scenarioId">
+                <ProtectedRoute path="/scenario/:scenarioId">
                   <ScenarioContextProvider>
                     <Switch>
                       <ProtectedRoute path="/scenario/:scenarioId/manage-resources">
@@ -125,14 +125,14 @@ export default function App() {
                         <ManageGroupsPage />
                       </ProtectedRoute>
 
-                      <ProtectedRoute index path="/scenario/:scenarioId">
+                      <ProtectedRoute path="/scenario/:scenarioId">
                         <SceneContextProvider>
                           <AuthoringToolPage />
                         </SceneContextProvider>
                       </ProtectedRoute>
                     </Switch>
                   </ScenarioContextProvider>
-                </Route>
+                </ProtectedRoute>
               </Switch>
             </BrowserRouter>
           </QueryClientProvider>
