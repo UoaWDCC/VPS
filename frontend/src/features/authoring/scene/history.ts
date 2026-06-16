@@ -12,7 +12,6 @@ import useVisualScene from "../stores/visual";
 import { buildVisualComponent } from "../pipeline";
 import useEditorStore from "../stores/editor";
 
-
 interface HistoryObject {
   sceneId: string;
   id: string;
