@@ -3,13 +3,13 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
 
 import { useGet } from "../hooks/crudHooks";
-import useLocalStorage from "../hooks/useLocalStorage";
 import { ensureStateVariableUUIDs } from "../components/StateVariables/migrationUtils";
 import { api } from "../util/api";
 
 import AuthenticationContext from "./AuthenticationContext";
 import ScenarioContext from "./ScenarioContext";
 import LoadingPage from "../features/status/LoadingPage";
+import { useParams } from "react-router-dom";
 
 async function getAllScenarios(user) {
   const res = await api.get(user, `api/scenario/all`);
@@ -39,14 +39,11 @@ function updateScenarioDetails(user, scenarioId, details) {
  */
 export default function ScenarioContextProvider({ children }) {
   const { user } = useContext(AuthenticationContext);
+  const { scenarioId } = useParams();
+
+  console.log(scenarioId);
 
   const queryClient = useQueryClient();
-
-  // INFO: purely for compat with old components, delete alongside old home page
-  const [currentScenario, setCurrentScenario] = useLocalStorage(
-    "currentScenario",
-    null
-  );
 
   const [roleList, setRoleList] = useState();
   const [stateVariables, setStateVariables] = useState();
@@ -100,17 +97,17 @@ export default function ScenarioContextProvider({ children }) {
 
   // TODO: this should be divorced from the "uploaded" groups and exist as prop of the scenario instead
   useGet(
-    `api/group/${currentScenario?._id}/roleList`,
+    `api/group/${scenarioId}/roleList`,
     setRoleList,
     true,
-    !currentScenario // Skip request if there is no current scenario.
+    !scenarioId // Skip request if there is no current scenario.
   );
 
   // TODO: this should also exist as prop of the scenario instead
   useEffect(() => {
-    if (currentScenario?._id && user) {
+    if (scenarioId && user) {
       api
-        .get(user, `api/scenario/${currentScenario._id}/stateVariables`)
+        .get(user, `api/scenario/${scenarioId}/stateVariables`)
         .then((res) => {
           // Ensure all state variables have UUIDs for backward compatibility
           const stateVariablesWithUUIDs = ensureStateVariableUUIDs(res.data);
@@ -122,7 +119,7 @@ export default function ScenarioContextProvider({ children }) {
     } else {
       setStateVariables([]);
     }
-  }, [currentScenario, user]);
+  }, [scenarioId, user]);
 
   if (scenarioQuery.isLoading) {
     return <LoadingPage text="Getting scenarios..." />;
@@ -140,16 +137,6 @@ export default function ScenarioContextProvider({ children }) {
         roleList,
         stateVariables,
         setStateVariables,
-
-        // INFO: compat with old stuff only, delete alongside
-        scenarios: scenarioQuery.data?.owned,
-        accessScenarios: scenarioQuery.data?.accessible,
-        dashAccessReFetch: scenarioQuery.refetch,
-        assignedScenarios: scenarioQuery.data?.assigned,
-        reFetch: scenarioQuery.refetch,
-        reFetch2: scenarioQuery.refetch,
-        currentScenario,
-        setCurrentScenario,
       }}
     >
       {children}

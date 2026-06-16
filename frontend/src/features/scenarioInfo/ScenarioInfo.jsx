@@ -10,7 +10,7 @@ import ModalDialog from "../../components/ModalDialogue";
 import DetailEditModal from "./components/DetailEditModal";
 
 function ScenarioInfo() {
-  const [searchTerm, setSearchTerm] = useState("");
+  const [search, setSearch] = useState("");
   const { user } = useContext(AuthenticationContext);
   const { allScenarios, updateScenarioDetails } = useContext(ScenarioContext);
 
@@ -29,7 +29,7 @@ function ScenarioInfo() {
   const selectedScenario = scenarios.find((s) => s._id === selectedScenarioId);
 
   const filteredScenarios = scenarios.filter((scenario) =>
-    scenario.name.toLowerCase().includes(searchTerm.toLowerCase())
+    scenario.name.toLowerCase().includes(search.toLowerCase())
   );
 
   const handleScenarioSelect = (scenario) => {
@@ -65,23 +65,17 @@ function ScenarioInfo() {
         {/* the calc used in the padding top is to get the searchbar to align with the scenario metadata, by imitating the same sizing flow */}
         <div className="w-1/5 min-w-[320px] flex-shrink-0 sticky top-0 h-screen overflow-hidden pt-[calc(var(--spacing-4xl)+var(--spacing-xl)+var(--spacing-l))]">
           <div className="h-full flex flex-col gap-m">
-            {/* Search Container - Positioned above the list */}
-            {/* TODO: for future person, replace this with the .search class if its available */}
-            <div className="bg-transparent flex-shrink-0">
-              <label className="bg-transparent gap-1 flex items-center flex-row-reverse">
-                <SearchIcon size={18} className="text-primary flex-shrink-0" />
-                <input
-                  type="search"
-                  placeholder="Search scenario"
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="flex-1 bg-transparent border-none outline-none text-base-content text-s placeholder:text-primary font-dm min-w-0"
-                  required
-                />
-              </label>
-              {/* Simple line under search bar */}
-              <div className="h-px bg-primary mt-2xs"></div>
-            </div>
+            {/* Search Section */}
+            <label className="input search">
+              <input
+                type="search"
+                placeholder="Search scenario"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                required
+              />
+              <SearchIcon size={20}/>
+            </label>
 
             {/* Scenario List */}
             <div className="overflow-y-auto flex-1">
