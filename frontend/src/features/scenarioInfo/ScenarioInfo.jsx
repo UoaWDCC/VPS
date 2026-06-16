@@ -74,7 +74,7 @@ function ScenarioInfo() {
                 onChange={(e) => setSearch(e.target.value)}
                 required
               />
-              <SearchIcon size={20}/>
+              <SearchIcon size={20} />
             </label>
 
             {/* Scenario List */}

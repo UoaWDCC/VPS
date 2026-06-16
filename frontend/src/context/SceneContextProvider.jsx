@@ -1,6 +1,5 @@
 import { useCallback, useContext, useEffect } from "react";
 import AuthenticationContext from "./AuthenticationContext";
-import ScenarioContext from "./ScenarioContext";
 import SceneContext from "./SceneContext";
 import { useParams } from "react-router-dom";
 import { api } from "../util/api";
@@ -91,7 +90,7 @@ export default function SceneContextProvider({ children }) {
 
       toast.error(
         error?.response?.data?.error ||
-        "Something went wrong updating the scenes, your last changes weren't saved"
+          "Something went wrong updating the scenes, your last changes weren't saved"
       );
     },
   });
