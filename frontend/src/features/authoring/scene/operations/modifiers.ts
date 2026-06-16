@@ -28,10 +28,10 @@ export function modifySceneProp<K extends keyof VisualSceneState>(
 export function modify<A extends [string, ...unknown[]], R>(
   fn: (...args: A) => R
 ) {
-  return function (...args: A): R {
+  return function (...args: A): R | undefined {
     const id = args[0];
     const component = getComponent(id);
-    if (!component) return undefined as unknown as R;
+    if (!component) return undefined;
 
     const prev = structuredClone(component);
     const output = fn(...args);

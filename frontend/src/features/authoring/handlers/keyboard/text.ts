@@ -81,16 +81,19 @@ function handleEditing(e: KeyboardEvent, selected: string) {
     const newCursor = end
       ? insertSelection(selected, selection, e.key)
       : insertChar(selected, start, e.key);
+    if (!newCursor) return;
     setSelection({ start: newCursor, end: null });
   } else if (e.key === "Backspace") {
     // delete character before cursor
     const newCursor = !end
       ? deleteChar(selected, start)
       : deleteSelection(selected, selection);
+    if (!newCursor) return;
     setSelection({ start: newCursor, end: null });
   } else if (e.key === "Enter") {
     // create a new block at cursor
     const newCursor = createBlock(selected, start);
+    if (!newCursor) return;
     setSelection({ start: newCursor, end });
   } else if (e.key === "Escape") {
     // clear current selection

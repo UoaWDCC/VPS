@@ -63,10 +63,12 @@ export function paste(e: ClipboardEvent) {
           : (obj as unknown as ModelDocument);
       if (!doc) return;
       const cursor = mergeDocs(selected, selection.start!, doc);
+      if (!cursor) return;
       setSelection({ start: cursor, end: null });
     } else if (text) {
       const doc = plainToDoc(text) as ModelDocument;
       const cursor = mergeDocs(selected, selection.start!, doc);
+      if (!cursor) return;
       setSelection({ start: cursor, end: null });
     }
     syncVisualCursor();

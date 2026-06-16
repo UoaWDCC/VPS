@@ -82,6 +82,7 @@ export const deleteChar = modify((id: string, cursor: ModelCursor) => {
 // NOTE: will cause two distinct state operations in history
 export function insertSelection(id: string, sel: ModelSelection, char: string) {
   const cursor = deleteSelection(id, sel);
+  if (!cursor) return;
   return insertChar(id, cursor, char);
 }
 

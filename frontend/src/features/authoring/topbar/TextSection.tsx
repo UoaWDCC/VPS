@@ -33,6 +33,7 @@ function TextSection() {
       const newSelection = applySelectionStyle(selected, selection, {
         [prop]: value,
       });
+      if (!newSelection) return;
       useEditorStore.getState().setSelection(newSelection);
       syncVisualCursor();
     } else if (selection?.start) {
