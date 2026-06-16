@@ -1,5 +1,5 @@
 import { fastIsEqual } from "fast-is-equal";
-import type { Component, SceneData } from "../types";
+import type { Component, Scene } from "../types";
 import {
   applySceneSwitch,
   getComponent,
@@ -12,7 +12,6 @@ import useVisualScene from "../stores/visual";
 import { buildVisualComponent } from "../pipeline";
 import useEditorStore from "../stores/editor";
 
-type SceneRef = SceneData;
 
 interface HistoryObject {
   sceneId: string;
@@ -22,14 +21,14 @@ interface HistoryObject {
 
 let undoStack: HistoryObject[] = [];
 let redoStack: HistoryObject[] = [];
-let scenes: SceneRef[] = [];
+let scenes: Scene[] = [];
 let scenarioId: string | null = null;
 let saveScene:
   | ((patch: ReturnType<typeof getScenePatch>) => Promise<void>)
   | null = null;
 
 export function init(
-  _scenes: SceneRef[],
+  _scenes: Scene[],
   _scenarioId: string,
   _saveScene: (patch: ReturnType<typeof getScenePatch>) => Promise<void>
 ) {

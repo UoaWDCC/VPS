@@ -3,10 +3,10 @@ import { buildVisualComponent, buildVisualScene } from "../../pipeline";
 import useVisualScene, { type VisualSceneState } from "../../stores/visual";
 import { updateHistory } from "../history";
 import { commitSavedScene, getComponent, getScene, setScene } from "../scene";
-import type { Component, SceneData } from "../../types";
+import type { Component, Scene } from "../../types";
 import { arrayToObject } from "../util";
 
-export function replace(scene: SceneData) {
+export function replace(scene: Scene) {
   const clone = structuredClone(scene);
   clone.components = arrayToObject(
     clone.components as unknown as { id: string }[]

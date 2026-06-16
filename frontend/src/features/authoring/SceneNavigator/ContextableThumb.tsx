@@ -9,7 +9,7 @@ import { applySceneSwitch, saveCurrentScene } from "../scene/scene";
 import { handle } from "../../../components/ContextMenu/portal";
 import { CopyPlusIcon, Trash2Icon } from "lucide-react";
 import type { User } from "firebase/auth";
-import type { SceneData, Component } from "../types";
+import type { Scene, Component } from "../types";
 
 type SaveScenePatch = (patch: {
   _id: string;
@@ -55,7 +55,7 @@ function ContextableThumb({
   index,
   active,
 }: {
-  scene: SceneData;
+  scene: Scene;
   index: number;
   active: boolean;
 }) {
@@ -67,7 +67,7 @@ function ContextableThumb({
   const { scenes, reFetch, saveScenePatch, deleteScene } = useContext(
     SceneContext
   ) as {
-    scenes: SceneData[];
+    scenes: Scene[];
     reFetch: () => Promise<void>;
     saveScenePatch: SaveScenePatch;
     deleteScene: (id: string) => void;
@@ -80,7 +80,7 @@ function ContextableThumb({
       .catch(handleGeneric);
   };
 
-  async function switchScene(s: SceneData) {
+  async function switchScene(s: Scene) {
     if (active) return;
 
     await saveCurrentScene(saveScenePatch);

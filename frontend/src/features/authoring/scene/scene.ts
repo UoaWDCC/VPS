@@ -1,13 +1,13 @@
 import { arrayToObject, getObject } from "./util";
-import type { Component, SceneData } from "../types";
+import type { Component, Scene } from "../types";
 import useVisualScene from "../stores/visual";
 import { buildVisualScene } from "../pipeline";
 import useEditorStore from "../stores/editor";
 
-let scene: SceneData = {} as SceneData;
-let savedScene: SceneData = {} as SceneData;
+let scene: Scene = {} as Scene;
+let savedScene: Scene = {} as Scene;
 
-(window as Window & { scene: SceneData }).scene = scene;
+(window as Window & { scene: Scene }).scene = scene;
 
 export function getScene() {
   return scene;
@@ -17,7 +17,7 @@ export function getSceneId() {
   return scene._id;
 }
 
-export function setScene(newScene: SceneData) {
+export function setScene(newScene: Scene) {
   scene = newScene;
 }
 
@@ -53,7 +53,7 @@ export async function saveCurrentScene(
   commitSavedScene();
 }
 
-export function applySceneSwitch(targetScene: SceneData, scenarioId: string) {
+export function applySceneSwitch(targetScene: Scene, scenarioId: string) {
   const clone = structuredClone(targetScene);
   clone.components = arrayToObject(
     clone.components as unknown as { id: string }[]
@@ -86,7 +86,7 @@ export function getScenePatch() {
 
   ["name", "roles", "time", "directLink", "timerStateOperations"].forEach(
     (field) => {
-      const key = field as keyof SceneData;
+      const key = field as keyof Scene;
       if (JSON.stringify(scene[key]) !== JSON.stringify(savedScene[key])) {
         fields[field] = structuredClone(scene[key]);
       }

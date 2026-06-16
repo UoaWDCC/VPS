@@ -6,9 +6,7 @@ export type Component =
   | SpeechComponent
   | LineComponent;
 
-export type Scene = { components: Record<string, Component> };
-
-export interface SceneData {
+export interface Scene {
   _id: string;
   name: string;
   components: Record<string, Component>;
