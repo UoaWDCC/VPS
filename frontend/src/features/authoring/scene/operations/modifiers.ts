@@ -31,7 +31,7 @@ export function modify<A extends [string, ...unknown[]], R>(
   return function (...args: A): R {
     const id = args[0];
     const component = getComponent(id);
-    if (!component) return fn(...args);
+    if (!component) return undefined as unknown as R;
 
     const prev = structuredClone(component);
     const output = fn(...args);
