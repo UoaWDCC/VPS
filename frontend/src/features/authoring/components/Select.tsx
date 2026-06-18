@@ -1,6 +1,6 @@
 interface SelectInputProps<T> {
   values: T[];
-  value: T;
+  value: T | null;
   display?: (v: T) => string;
   onChange: (v: T | null) => void;
   nullable?: boolean;
