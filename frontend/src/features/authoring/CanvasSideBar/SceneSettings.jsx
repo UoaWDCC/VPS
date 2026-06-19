@@ -3,7 +3,7 @@ import { Check } from "lucide-react";
 import ScenarioContext from "context/ScenarioContext";
 import SceneContext from "context/SceneContext";
 import { generateUniqueSceneName } from "../../../utils/sceneUtils";
-import { getScenePatch, commitSavedScene } from "../scene/scene";
+import { getScene } from "../scene/scene";
 
 import useVisualScene from "../stores/visual";
 import { modifySceneProp } from "../scene/operations/modifiers";
@@ -17,7 +17,7 @@ import TimerStateOperationMenu from "../../../components/StateVariables/TimerSta
  * @component
  */
 export default function SceneSettings() {
-  const { scenes, saveScenePatch, reFetch } = useContext(SceneContext);
+  const { scenes, modifyScene } = useContext(SceneContext);
   const { roleList } = useContext(ScenarioContext);
 
   const name = useVisualScene((scene) => scene.name);
@@ -81,9 +81,7 @@ export default function SceneSettings() {
     setSceneName(safeName);
 
     try {
-      await saveScenePatch(getScenePatch());
-      commitSavedScene();
-      await reFetch(); // sync ui with db
+      await modifyScene(getScene());
     } catch (error) {
       console.error(error);
       toast.error("Could not save the scene name.");

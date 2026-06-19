@@ -5005,6 +5005,11 @@ typescript-eslint@^8.30.1:
     "@typescript-eslint/typescript-estree" "8.44.1"
     "@typescript-eslint/utils" "8.44.1"
 
+typescript-event-target@^1.1.2:
+  version "1.1.2"
+  resolved "https://registry.yarnpkg.com/typescript-event-target/-/typescript-event-target-1.1.2.tgz#e9f71d416fb160b376fbfc26d8c933fdb3773a27"
+  integrity sha512-TvkrTUpv7gCPlcnSoEwUVUBwsdheKm+HF5u2tPAKubkIGMfovdSizCTaZRY/NhR8+Ijy8iZZUapbVQAsNrkFrw==
+
 typescript@~5.8.3:
   version "5.8.3"
   resolved "https://registry.yarnpkg.com/typescript/-/typescript-5.8.3.tgz#92f8a3e5e3cf497356f4178c34cd65a7f5e8440e"

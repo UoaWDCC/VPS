@@ -9,13 +9,15 @@ import SceneNavigator from "./SceneNavigator/SceneNavigator";
 import Canvas from "./canvas/Canvas";
 import Topbar from "./topbar/Topbar";
 import useVisualScene from "./stores/visual";
-import { getScenePatch, commitSavedScene } from "./scene/scene";
 import { copy, cut, paste } from "./handlers/keyboard/clipboard";
 import useEditorStore from "./stores/editor";
 import { useHistory } from "react-router-dom";
-import { replace } from "./scene/operations/modifiers";
+import { replace, replaceComponent } from "./scene/operations/modifiers";
 import { ArrowLeftIcon, FilesIcon, PlayIcon, UsersIcon } from "lucide-react";
 import { handleGlobal } from "./handlers/keyboard/keyboard";
+import { historyEvents } from "./scene/history";
+import { debounce } from "../../util/debounce";
+import { getScene } from "./scene/scene";
 
 const listeners = [
   ["copy", copy],
@@ -24,28 +26,44 @@ const listeners = [
   ["keydown", handleGlobal],
 ];
 
-const AUTOSAVE_INTERVAL = 30000; // 30 secs
+// const AUTOSAVE_INTERVAL = 30000; // 30 secs
 
 /**
  * This page allows the user to edit a scene.
  * @container
  */
 export default function AuthoringToolPage() {
-  const { scenes, saveScenePatch } = useContext(SceneContext);
+  const { scenes, modifyScene, switchScene } = useContext(SceneContext);
   const { scenarioId } = useParams();
 
   const sceneId = useVisualScene((scene) => scene.id);
+  const setSelected = useEditorStore((state) => state.setSelected);
 
   const history = useHistory();
 
   const [saving, setSaving] = useState(false);
 
-  // autosave setup
+  // NOTE: this is both the autosaver and the history actioner, which are distinct
+  // operations, but are both here due to the limitations of the scene context
   useEffect(() => {
-    if (!sceneId) return;
-    const autosave = setInterval(save, AUTOSAVE_INTERVAL);
-    return () => clearInterval(autosave);
-  }, [sceneId]);
+    const debounced = debounce(save, 2000);
+
+    const listener = async ({ operation, record }) => {
+      if (operation === "undo" || operation === "redo") {
+        if (record.sceneId !== sceneId)
+          await switchScene(getScene(), record.sceneId);
+        if (record.state === null) setSelected(null);
+        replaceComponent(record.id, record.state);
+        setSelected(record.id);
+      }
+
+      setSaving(true);
+      debounced();
+    };
+
+    historyEvents.addEventListener("update", listener);
+    return () => historyEvents.removeEventListener("update", listener);
+  }, []);
 
   // if the active scene was deleted, switch to the first available scene
   useEffect(() => {
@@ -93,25 +111,12 @@ export default function AuthoringToolPage() {
   }
 
   async function save() {
-    if (saving) return; // we dont want to interrupt in progress saves (usually uploading media)
+    // we dont want to interrupt in progress saves (usually uploading media)
+    if (saving) return;
+
     setSaving(true);
-
-    const patch = getScenePatch();
-
-    const hasChanges =
-      Object.keys(patch.fields).length > 0 ||
-      patch.components.length > 0 ||
-      patch.deletedComponentIds.length > 0;
-
-    if (!hasChanges) {
-      setSaving(false);
-      return;
-    }
-
-    await saveScenePatch(patch);
-    commitSavedScene();
-
-    setTimeout(() => setSaving(false), 5000);
+    await modifyScene(getScene());
+    setSaving(false);
   }
 
   return (
