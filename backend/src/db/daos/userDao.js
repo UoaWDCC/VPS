@@ -56,21 +56,6 @@ const createUser = async (info) => {
 };
 
 /**
- * Deletes a user from the database
- * @param {String} uid user's unique id
- * @returns {Boolean} True if successfully deleted, False if error
- */
-const deleteUser = async (uid) => {
-  try {
-    const user = await User.find({ uid });
-    await user.remove();
-    return true;
-  } catch {
-    return false;
-  }
-};
-
-/**
  * @deprecated 17/09/2024
  * We currently do not support play history - a larger refactor is likely required, at which point,
  * we should support both single and multiplayer
@@ -193,7 +178,6 @@ export {
   createUser,
   retrieveUser,
   retrieveUserByEmail,
-  deleteUser,
   addPlayed,
   retrievePlayedUsers,
   assignScenarioToUsers,
