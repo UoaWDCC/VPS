@@ -12,7 +12,7 @@ import {
 import { getComponent } from "../../scene/scene";
 import useEditorStore from "../../stores/editor";
 import { syncVisualCursor } from "../../text/cursor";
-import type { ModelDocument } from "../../types";
+import type { Component, ModelDocument } from "../../types";
 
 function plainToDoc(text: string) {
   const plainBlocks = text.split("\n");
@@ -61,24 +61,36 @@ export function paste(e: ClipboardEvent) {
 
   if (selected && mode.includes("text")) {
     if (app) {
-      const obj = JSON.parse(app);
-      const doc = obj.type === "textbox" ? obj.document : obj;
+      const obj = JSON.parse(app) as {
+        type?: string;
+        document?: ModelDocument;
+      };
+      const doc =
+        obj.type === "textbox"
+          ? obj.document
+          : (obj as unknown as ModelDocument);
+      if (!doc) return;
       const cursor = mergeDocs(selected, selection.start!, doc);
+      if (!cursor) return;
       setSelection({ start: cursor, end: null });
     } else if (text) {
       const doc = plainToDoc(text) as ModelDocument;
       const cursor = mergeDocs(selected, selection.start!, doc);
+      if (!cursor) return;
       setSelection({ start: cursor, end: null });
     }
     syncVisualCursor();
   } else {
     if (app) {
-      const obj = JSON.parse(app);
+      const obj = JSON.parse(app) as {
+        type?: string;
+        document?: ModelDocument;
+      };
       if (obj.type) {
-        setSelected(parseComponent(obj));
+        setSelected(parseComponent(obj as Component));
       } else {
         const component = structuredClone(defaults["textbox"]);
-        component.document = structuredClone(obj);
+        component.document = structuredClone(obj as ModelDocument);
         setSelected(add(component));
       }
     } else if (text) {
@@ -103,7 +115,7 @@ function addToClipboard(e: ClipboardEvent, selected: string) {
       "application/component",
       stringifyComponent(selected) || ""
     );
-    if (getComponent(selected).type === "textbox") {
+    if (getComponent(selected)?.type === "textbox") {
       const text = getDocumentText(selected);
       e.clipboardData?.setData("text/plain", text);
     }

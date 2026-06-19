@@ -33,6 +33,7 @@ function TextSection() {
       const newSelection = applySelectionStyle(selected, selection, {
         [prop]: value,
       });
+      if (!newSelection) return;
       useEditorStore.getState().setSelection(newSelection);
       syncVisualCursor();
     } else if (selection?.start) {
@@ -114,9 +115,9 @@ function TextSection() {
         value={style.alignment}
         values={["left", "center", "right"]}
         items={[
-          <AlignLeft size={16} />,
-          <AlignCenter size={16} />,
-          <AlignRight size={16} />,
+          <AlignLeft key={0} size={16} />,
+          <AlignCenter key={1} size={16} />,
+          <AlignRight key={2} size={16} />,
         ]}
         onChange={(value) => modifyStyle("alignment", value)}
         tooltip="Alignment"

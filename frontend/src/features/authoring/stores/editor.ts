@@ -43,7 +43,11 @@ interface EditorState {
 
 type Dynamic<T> = (arg: T | ((prev: T) => T)) => void;
 
-function setter<K extends keyof EditorState>(set: Function, prop: K) {
+type ZustandSet = (
+  updater: (state: EditorState) => Partial<EditorState>
+) => void;
+
+function setter<K extends keyof EditorState>(set: ZustandSet, prop: K) {
   return (arg: EditorState[K] | ((prev: EditorState[K]) => EditorState[K])) =>
     set((state: EditorState) => ({
       [prop]:
@@ -75,7 +79,7 @@ const useEditorStore = create<EditorState>((set) => ({
 
   setSelection: (selection) =>
     set(({ selected }) => {
-      if (selected && getComponent(selected).type === "textbox") {
+      if (selected && getComponent(selected)?.type === "textbox") {
         const activeStyle = getStyleForSelection(selected, selection);
         return { selection, activeStyle };
       }

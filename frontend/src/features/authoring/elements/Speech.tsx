@@ -12,7 +12,7 @@ import {
   scale,
   subtract,
 } from "../util";
-import type { Component, SpeechComponent, Vec2 } from "../types";
+import type { SpeechComponent, Vec2 } from "../types";
 
 interface Segment {
   grid: Vec2;
