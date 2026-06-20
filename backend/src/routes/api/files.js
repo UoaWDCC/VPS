@@ -20,6 +20,9 @@ router.use((req, _res, next) => {
   next();
 });
 
+// All routes below require Firebase auth
+router.use(auth);
+
 /**
  * @route GET /api/files/download/:fileId
  * @desc Stream a file directly from GridFS by ID
@@ -43,9 +46,6 @@ router.get("/download/:fileId", async (req, res) => {
     return res.status(500).json({ error: err.message });
   }
 });
-
-// All routes below require Firebase auth
-router.use(auth);
 
 // Upload configuration
 const MAX_FILE_SIZE_MB = parseInt(process.env.MAX_FILE_SIZE_MB || "50", 10);
@@ -105,7 +105,7 @@ router.post("/upload", upload.array("files"), async (req, res) => {
       groupId: groupObjId,
     });
 
-    const uploaderUid = req.user?.uid || "unknown";
+    const uploaderUid = req.body.uid;
 
     const results = [];
     for (const f of req.files) {
@@ -177,7 +177,7 @@ router.post("/state-conditionals/:fileId", async (req, res) => {
     meta.stateConditionals.push(stateConditional);
     await meta.save();
     const file = meta.toObject();
-    delete file.gridFdId;
+    delete file.gridFsId;
     return res.json(file);
   } catch (err) {
     return res.status(500).json({ error: err.message });
@@ -201,7 +201,7 @@ router.put("/state-conditionals/:fileId", async (req, res) => {
 
     await meta.save();
     const file = meta.toObject();
-    delete file.gridFdId;
+    delete file.gridFsId;
     return res.json(file);
   } catch (err) {
     return res.status(500).json({ error: err.message });
@@ -231,7 +231,7 @@ router.delete(
 
       await meta.save();
       const file = meta.toObject();
-      delete file.gridFdId;
+      delete file.gridFsId;
       return res.json(file);
     } catch (err) {
       return res.status(500).json({ error: err.message });

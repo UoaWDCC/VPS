@@ -12,7 +12,7 @@ import {
 import { getComponent } from "../../scene/scene";
 import useEditorStore from "../../stores/editor";
 import { syncVisualCursor } from "../../text/cursor";
-import type { ModelDocument } from "../../types";
+import type { Component, ModelDocument } from "../../types";
 
 function plainToDoc(text: string) {
   const plainBlocks = text.split("\n");
@@ -23,7 +23,13 @@ function plainToDoc(text: string) {
   return { style: {}, blocks };
 }
 
+function isInputTarget(e: ClipboardEvent) {
+  const tag = (e.target as HTMLElement)?.tagName;
+  return tag === "INPUT" || tag === "TEXTAREA";
+}
+
 export function copy(e: ClipboardEvent) {
+  if (isInputTarget(e)) return;
   const { selected } = useEditorStore.getState();
   if (!selected) return;
 
@@ -33,6 +39,7 @@ export function copy(e: ClipboardEvent) {
 }
 
 export function cut(e: ClipboardEvent) {
+  if (isInputTarget(e)) return;
   const { selected, setSelected } = useEditorStore.getState();
   if (!selected) return;
 
@@ -44,6 +51,7 @@ export function cut(e: ClipboardEvent) {
 }
 
 export function paste(e: ClipboardEvent) {
+  if (isInputTarget(e)) return;
   e.preventDefault();
   const { mode, selected, selection, setSelected, setSelection } =
     useEditorStore.getState();
@@ -53,24 +61,36 @@ export function paste(e: ClipboardEvent) {
 
   if (selected && mode.includes("text")) {
     if (app) {
-      const obj = JSON.parse(app);
-      const doc = obj.type === "textbox" ? obj.document : obj;
+      const obj = JSON.parse(app) as {
+        type?: string;
+        document?: ModelDocument;
+      };
+      const doc =
+        obj.type === "textbox"
+          ? obj.document
+          : (obj as unknown as ModelDocument);
+      if (!doc) return;
       const cursor = mergeDocs(selected, selection.start!, doc);
+      if (!cursor) return;
       setSelection({ start: cursor, end: null });
     } else if (text) {
       const doc = plainToDoc(text) as ModelDocument;
       const cursor = mergeDocs(selected, selection.start!, doc);
+      if (!cursor) return;
       setSelection({ start: cursor, end: null });
     }
     syncVisualCursor();
   } else {
     if (app) {
-      const obj = JSON.parse(app);
+      const obj = JSON.parse(app) as {
+        type?: string;
+        document?: ModelDocument;
+      };
       if (obj.type) {
-        setSelected(parseComponent(obj));
+        setSelected(parseComponent(obj as Component));
       } else {
         const component = structuredClone(defaults["textbox"]);
-        component.document = structuredClone(obj);
+        component.document = structuredClone(obj as ModelDocument);
         setSelected(add(component));
       }
     } else if (text) {
@@ -95,7 +115,7 @@ function addToClipboard(e: ClipboardEvent, selected: string) {
       "application/component",
       stringifyComponent(selected) || ""
     );
-    if (getComponent(selected).type === "textbox") {
+    if (getComponent(selected)?.type === "textbox") {
       const text = getDocumentText(selected);
       e.clipboardData?.setData("text/plain", text);
     }

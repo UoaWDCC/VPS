@@ -4,7 +4,6 @@ import {
   retrieveUserByEmail,
   createUser,
   retrieveUser,
-  deleteUser,
   addPlayed,
   retrievePlayedUsers,
   assignScenarioToUsers,
@@ -19,43 +18,6 @@ import { handle, HttpError } from "../../util/error.js";
 
 const router = Router();
 
-// gets all users
-router.get("/", async (req, res) => {
-  const dashboard = await retrieveAllUser();
-  res.json(dashboard);
-});
-
-// Only gets the uid, name and email.
-router.get("/min", async (req, res) => {
-  const users = await retrieveAllUserMinAsc();
-  res.json(users);
-});
-
-// get user by uid
-router.get("/:uid", async (req, res) => {
-  const user = await retrieveUser(req.params.uid);
-  res.json(user);
-});
-
-// get users that played scenario
-router.get("/played/:scenarioId", async (req, res) => {
-  const users = await retrievePlayedUsers(req.params.scenarioId);
-  return res.json(users);
-});
-
-// assign scenario to users
-router.patch("/assigned/:scenarioId", async (req, res) => {
-  const { userEmails } = req.body;
-  const newAssigneeIds = Object.entries(
-    await User.find({ email: { $in: userEmails } }, "_id")
-    // eslint-disable-next-line no-unused-vars
-  ).map(([_, userId]) => userId);
-
-  await assignScenarioToUsers(req.params.scenarioId, newAssigneeIds);
-
-  res.status(STATUS.OK);
-});
-
 const allowedDomains = new Set([
   "projects.wdcc.co.nz",
   "auckland.ac.nz",
@@ -69,7 +31,7 @@ const allowedEmails = new Set([
   "wdccvpstesting4@gmail.com",
 ]);
 
-// handles a sign in request
+// Sign-in: public — unauthenticated users call this to register/log in
 router.post(
   "/",
   handle(async (req, res) => {
@@ -87,14 +49,60 @@ router.post(
   })
 );
 
-// delete user by uid
-router.delete("/:uid", async (req, res) => {
-  const deleted = await deleteUser(req.params.uid);
-  if (deleted) {
-    res.sendStatus(STATUS.NO_CONTENT);
-  } else {
-    res.sendStatus(STATUS.NOT_FOUND);
-  }
+// All routes below require Firebase authentication
+router.use(auth);
+
+// gets all users
+router.get("/", async (req, res) => {
+  const dashboard = await retrieveAllUser();
+  res.json(dashboard);
+});
+
+// Only gets the uid, name and email.
+router.get("/min", async (req, res) => {
+  const users = await retrieveAllUserMinAsc();
+  res.json(users);
+});
+
+// fetch the user's group needed for a scenario upfront
+router.get(
+  "/group/:scenarioId",
+  handle(async (req, res) => {
+    const { scenarioId } = req.params;
+    const { uid } = req.body;
+    const user = await User.findOne({ uid }, { email: 1 }).lean();
+    if (!user) throw new HttpError("User not found", STATUS.UNAUTHORIZED);
+    const group = await Group.findOne({
+      scenarioId,
+      "users.email": user.email,
+    });
+    return res.status(STATUS.OK).json({ group });
+  })
+);
+
+// get users that played scenario
+router.get("/played/:scenarioId", async (req, res) => {
+  const users = await retrievePlayedUsers(req.params.scenarioId);
+  return res.json(users);
+});
+
+// assign scenario to users
+router.patch("/assigned/:scenarioId", async (req, res) => {
+  const { userEmails } = req.body;
+  const newAssigneeIds = Object.entries(
+    await User.find({ email: { $in: userEmails } }, "_id")
+    // eslint-disable-next-line no-unused-vars
+  ).map(([_, userId]) => userId);
+
+  await assignScenarioToUsers(req.params.scenarioId, newAssigneeIds);
+
+  res.status(STATUS.OK).send();
+});
+
+// get user by uid
+router.get("/:uid", async (req, res) => {
+  const user = await retrieveUser(req.params.uid);
+  res.json(user);
 });
 
 // update user's played array
@@ -123,17 +131,6 @@ router.post("/:uid/:scenarioId/path", async (req, res) => {
   );
 
   res.sendStatus(STATUS.OK);
-});
-
-router.use(auth);
-
-// fetch the user's group needed for a scenario upfront
-router.get("/group/:scenarioId", async (req, res) => {
-  const { scenarioId } = req.params;
-  const { uid } = req.body;
-  const { email } = await User.findOne({ uid }, { email: 1 }).lean();
-  const group = await Group.findOne({ scenarioId, "users.email": email });
-  return res.status(STATUS.OK).json({ group });
 });
 
 export default router;

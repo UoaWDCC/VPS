@@ -1,12 +1,27 @@
 import globals from "globals";
 import pluginJs from "@eslint/js";
 import pluginReact from "eslint-plugin-react";
+import tseslint from "typescript-eslint";
 
-/** @type {import('eslint').Linter.Config[]} */
-export default [
-  { files: ["**/*.{js,mjs,cjs,jsx}"] },
+export default tseslint.config(
+  { files: ["**/*.{js,mjs,cjs,jsx}"], ...pluginJs.configs.recommended },
+  {
+    files: ["**/*.{ts,tsx}"],
+    extends: tseslint.configs.recommendedTypeChecked,
+    rules: {
+      "no-undef": "off",
+      "no-unused-vars": "off",
+    },
+  },
   { languageOptions: { globals: globals.browser } },
-  pluginJs.configs.recommended,
+  {
+    languageOptions: {
+      parserOptions: {
+        projectService: true,
+        tsconfigRootDir: import.meta.dirname,
+      },
+    },
+  },
   pluginReact.configs.flat.recommended,
   {
     rules: {
@@ -15,4 +30,4 @@ export default [
     },
   },
   { settings: { react: { version: "detect" } } },
-];
+);

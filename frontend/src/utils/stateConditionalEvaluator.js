@@ -1,5 +1,3 @@
-import { stateTypes } from "../components/StateVariables/stateTypes";
-
 /**
  * Evaluates a single state conditional against current state variables
  * @param {Object} conditional - The state conditional to evaluate
@@ -23,58 +21,15 @@ function evaluateStateConditional(conditional, stateVariables) {
   const { comparator, value: expectedValue } = conditional;
   const currentValue = stateVariable.value;
 
-  // Handle different comparison types based on state variable type
-  switch (stateVariable.type) {
-    case stateTypes.BOOLEAN: {
-      const boolExpected = expectedValue === "true";
-      const boolCurrent = currentValue === "true";
-
-      switch (comparator) {
-        case "=":
-          return boolCurrent === boolExpected;
-        case "!=":
-          return boolCurrent !== boolExpected;
-        default:
-          return false;
-      }
-    }
-
-    case stateTypes.NUMBER: {
-      const numExpected = parseFloat(expectedValue);
-      const numCurrent = parseFloat(currentValue);
-
-      if (isNaN(numExpected) || isNaN(numCurrent)) {
-        return false;
-      }
-
-      switch (comparator) {
-        case "=":
-          return numCurrent === numExpected;
-        case "!=":
-          return numCurrent !== numExpected;
-        case ">":
-          return numCurrent > numExpected;
-        case "<":
-          return numCurrent < numExpected;
-        default:
-          return false;
-      }
-    }
-
-    case stateTypes.STRING: {
-      const strExpected = String(expectedValue);
-      const strCurrent = String(currentValue);
-
-      switch (comparator) {
-        case "=":
-          return strCurrent === strExpected;
-        case "!=":
-          return strCurrent !== strExpected;
-        default:
-          return false;
-      }
-    }
-
+  switch (comparator) {
+    case "=":
+      return currentValue === expectedValue;
+    case "!=":
+      return currentValue !== expectedValue;
+    case ">":
+      return currentValue > expectedValue;
+    case "<":
+      return currentValue < expectedValue;
     default:
       return false;
   }
@@ -122,6 +77,9 @@ export function filterTreeByConditions(tree, stateVariables) {
   if (!tree) return [];
 
   return tree
+    .filter((group) =>
+      evaluateResourceConditions(group.stateConditionals, stateVariables)
+    )
     .map((group) => ({
       ...group,
       files: filterResourcesByConditions(group.files, stateVariables),

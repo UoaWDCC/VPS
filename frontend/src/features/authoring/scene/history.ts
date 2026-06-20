@@ -1,19 +1,16 @@
 import { fastIsEqual } from "fast-is-equal";
-import type { Component } from "../types";
+import type { Component, Scene } from "../types";
 import {
   applySceneSwitch,
   getComponent,
   getScene,
   getSceneId,
+  getScenePatch,
   saveCurrentScene,
 } from "./scene";
 import useVisualScene from "../stores/visual";
 import { buildVisualComponent } from "../pipeline";
-
-interface SceneRef {
-  _id: string;
-  components: Record<string, any>[];
-}
+import useEditorStore from "../stores/editor";
 
 interface HistoryObject {
   sceneId: string;
@@ -23,14 +20,16 @@ interface HistoryObject {
 
 let undoStack: HistoryObject[] = [];
 let redoStack: HistoryObject[] = [];
-let scenes: SceneRef[] = [];
+let scenes: Scene[] = [];
 let scenarioId: string | null = null;
-let saveScene: ((patch: Record<string, any>) => Promise<void>) | null = null;
+let saveScene:
+  | ((patch: ReturnType<typeof getScenePatch>) => Promise<void>)
+  | null = null;
 
 export function init(
-  _scenes: SceneRef[],
+  _scenes: Scene[],
   _scenarioId: string,
-  _saveScene: (patch: Record<string, any>) => Promise<void>
+  _saveScene: (patch: ReturnType<typeof getScenePatch>) => Promise<void>
 ) {
   if (_scenarioId !== scenarioId) {
     undoStack = [];
@@ -76,7 +75,9 @@ function switchToScene(targetSceneId: string) {
 }
 
 function restoreComponent(id: string, state: Component | null) {
+  const { setSelected } = useEditorStore.getState();
   if (state === null) {
+    setSelected(null);
     delete getScene().components[id];
     useVisualScene.getState().deleteComponent(id);
   } else {
