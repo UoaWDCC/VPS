@@ -1,4 +1,4 @@
-import { useContext } from "react";
+import { useCallback, useContext } from "react";
 import AuthenticationContext from "./AuthenticationContext";
 import SceneContext from "./SceneContext";
 import { useParams, useHistory } from "react-router-dom";
@@ -182,21 +182,29 @@ export default function SceneContextProvider({ children }) {
   });
 
   function modifyMutationWrapper(scene) {
-    modifyMutation.mutate(
-      generatePatch(
-        scene,
-        scenesQuery.data.find((s) => s._id === scene._id)
-      )
-    );
+    const saved = scenesQuery.data?.find((s) => s._id === scene._id);
+    if (!saved) {
+      console.warn("scene not found in cache, skipping save");
+      return;
+    }
+    modifyMutation.mutate(generatePatch(scene, saved));
   }
 
-  async function switchScene(scene, id) {
-    await modifyMutationWrapper(scene);
-    useEditorStore.getState().clear();
-    replace(scenesQuery.data.find((s) => s._id === id));
-    history.push({ pathname: `/scenario/${scenarioId}/scene/${id}` });
-    localStorage.setItem(`${scenarioId}:activeScene`, id);
-  }
+  const switchScene = useCallback(
+    (scene, id) => {
+      modifyMutationWrapper(scene);
+      const target = scenesQuery.data.find((s) => s._id === id);
+      if (!target) {
+        console.warn("target scene for switch not found");
+        return;
+      }
+      useEditorStore.getState().clear();
+      replace(target);
+      history.push({ pathname: `/scenario/${scenarioId}/scene/${id}` });
+      localStorage.setItem(`${scenarioId}:activeScene`, id);
+    },
+    [scenesQuery.data]
+  );
 
   if (scenesQuery.isLoading) {
     return <LoadingPage text="Getting scenes..." />;

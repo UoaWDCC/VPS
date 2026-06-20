@@ -6,7 +6,8 @@ import { TypedEventTarget } from "typescript-event-target";
 interface HistoryObject {
   sceneId: string;
   id: string;
-  state: Component | null;
+  before: Component | null;
+  after: Component | null;
 }
 
 interface HistoryEventMap {
@@ -36,40 +37,34 @@ export function updateHistory(id: string, prevState: Component | null) {
   if (fastIsEqual(prevState, current)) return;
 
   const sceneId = getSceneId();
-  undoStack.push({ sceneId, id, state: prevState });
+  const record = {
+    sceneId,
+    id,
+    before: prevState,
+    after: structuredClone(current),
+  };
+
+  undoStack.push(record);
   if (undoStack.length > 100) undoStack.shift();
   redoStack = [];
 
-  historyEvents.dispatchTypedEvent(
-    "update",
-    new HistoryEvent("do", { sceneId, id, state: structuredClone(current) })
-  );
+  historyEvents.dispatchTypedEvent("update", new HistoryEvent("do", record));
 }
 
 export function undo() {
   const record = undoStack.pop();
   if (!record) return;
 
-  const { id, sceneId } = record;
-  const current = structuredClone(getComponent(id));
-  redoStack.push({ sceneId, id, state: current });
+  redoStack.push(record);
 
-  historyEvents.dispatchTypedEvent(
-    "update",
-    new HistoryEvent("undo", { sceneId, id, state: record.state })
-  );
+  historyEvents.dispatchTypedEvent("update", new HistoryEvent("undo", record));
 }
 
 export function redo() {
   const record = redoStack.pop();
   if (!record) return;
 
-  const { id, sceneId } = record;
-  const current = structuredClone(getComponent(id));
-  undoStack.push({ sceneId, id, state: current });
+  undoStack.push(record);
 
-  historyEvents.dispatchTypedEvent(
-    "update",
-    new HistoryEvent("redo", { sceneId, id, state: record.state })
-  );
+  historyEvents.dispatchTypedEvent("update", new HistoryEvent("redo", record));
 }
