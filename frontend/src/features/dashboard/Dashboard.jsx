@@ -7,8 +7,6 @@ import CreateGraphData from "./utils/GraphHelper";
 import ScenarioGraph from "./components/ScenarioGraph";
 import ProtectedRoute from "../../firebase/ProtectedRoute";
 import ViewGroup from "./components/ViewGroup";
-import LoadingPage from "../status/LoadingPage";
-import { ArrowLeftIcon } from "lucide-react";
 
 /**
  * Could maybe add some info about the scenario? Who created what time, last edited, thumbnail of the scenario and an overlay edit button * which directs you to the edit page?
@@ -17,78 +15,15 @@ import { ArrowLeftIcon } from "lucide-react";
  */
 
 export default function Dashboard() {
-  const { path, url } = useRouteMatch();
-  const { scenarioId } = useParams();
   const history = useHistory();
+  const { scenarioId } = useParams();
+  const { path, url } = useRouteMatch();
+
   const [scenarioGroupInfo, setScenarioGroupInfo] = useState([]);
   const [scenario, setCurrentScenario] = useState({});
   const [scenes, setScenes] = useState([]);
-  const [accessInfo, setAccessInfo] = useState({ allowed: false });
-  const [allowed, setAllowed] = useState(false);
-
-  const {
-    isLoading: accessLoading,
-    error: accessError,
-    res: accessRes,
-  } = useGet(`api/dashboard/scenarios/${scenarioId}/access`, setAccessInfo);
-  // console.log(accessRes)
-  useEffect(() => {
-    if (accessLoading || !accessRes) return;
-    // Middleware deny
-
-    if (accessRes.status == 401 || accessRes == null) {
-      setAllowed(false);
-      history.replace("/", {
-        toast: {
-          message:
-            "Access denied. If you believe this is an error, please contact the author of the scenario.",
-          type: "error",
-          options: { duration: 6000 },
-        },
-      });
-      return;
-    }
-
-    /**
-     * In practice this error should not occur as it's the middleware is currently running checks against an access list
-     * which would be created alongside when new scenarios are created. This error currently is in place due to an access list not existsing but will implement a check in the dashboard middleware to check for ownership against the scenario it self and not search for the access list to make it more robust and support legacy scenarios. Ideally, once this is implemented the dashboard page when there is no access list found, the author would be able to access it and it should have a button for them to create an access list, this would then allow them to add extra users for dashboard.
-     */
-    if (accessRes.status == 404) {
-      setAllowed(false);
-      history.replace("/", {
-        toast: {
-          message: "Not Found",
-          type: "error",
-          options: { duration: 6000 },
-        },
-      });
-      return;
-    }
-
-    if (accessInfo?.allowed == true) {
-      setAllowed(true);
-    }
-  }, [accessLoading, accessError, accessInfo, accessRes]);
-
-  useGet(
-    `api/dashboard/scenarios/${scenarioId}`,
-    setCurrentScenario,
-    true,
-    !allowed
-  );
-  useGet(
-    `api/dashboard/scenarios/${scenarioId}/scenes`,
-    setScenes,
-    true,
-    !allowed
-  );
-
-  const { isLoading } = useGet(
-    `/api/dashboard/scenarios/${scenarioId}/groups`,
-    setScenarioGroupInfo,
-    true,
-    !allowed
-  );
+  const [groupInfo, setGroupInfo] = useState({});
+  const [heading, setHeading] = useState("");
 
   function goBack() {
     history.push("/dashboard");
@@ -98,17 +33,26 @@ export default function Dashboard() {
   const matchViewGroup = useRouteMatch(`${path}/view-group/:groupId`);
   const isViewGroupMode = Boolean(matchViewGroup);
   const viewGroupId = matchViewGroup?.params.groupId || 0;
-  const [groupInfo, setGroupInfo] = useState({});
-  const [heading, setHeading] = useState("");
+
+  useGet(`api/dashboard/scenarios/${scenarioId}`, setCurrentScenario);
+
+  useGet(`api/dashboard/scenarios/${scenarioId}/scenes`, setScenes);
+
+  const { isLoading } = useGet(
+    `/api/dashboard/scenarios/${scenarioId}/groups`,
+    setScenarioGroupInfo
+  );
+
   useEffect(() => {
     setHeading(scenario.name);
   }, [scenario]);
+
   // Fetch group data if in view group mode, skips if not
   useGet(
     `/api/dashboard/groups/${viewGroupId}`,
     setGroupInfo,
     true,
-    !isViewGroupMode || !allowed
+    !isViewGroupMode
   );
 
   const viewGroup = async (groupId) => {
@@ -167,10 +111,6 @@ export default function Dashboard() {
       </div>
     );
   };
-  // Cheap way to block the user from seeing the dashboard page before permissions are fully checked.
-  // Could be a better way?
-
-  if (allowed == false) return <LoadingPage text="Checking permissions..." />;
 
   return (
     <div className="flex flex-col h-[100vh] w-[100vw]">

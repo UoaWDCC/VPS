@@ -4,118 +4,60 @@ import User from "../models/user.js";
 /**
  *
  * @param {string} scenarioId
- * @returns the access list of the given scenarioId ordered
+ * @returns access object or stub empty object
  */
-const getAccessList = async (scenarioId) => {
-  if (!scenarioId) return null;
-  const list = await Access.findOne({ scenarioId: scenarioId }).sort({
-    name: -1,
-  });
-  return list;
+export const getAccessList = async (scenarioId) => {
+  const access = Access.findOne({ scenarioId });
+  return access || { scenarioId, accessList: [] };
+};
+
+
+/**
+ *
+ * @param {string} scenarioId
+ * @returns {boolean}
+ */
+export const hasAccess = async (scenarioId, uid) => {
+  const access = await getAccessList(scenarioId);
+  const { email } = await User.findOne({ uid }, { email: 1 }).lean();
+  return access.accessList.includes(email);
 };
 
 /**
  *
  * @param {string} scenarioId
- * @param {string} name scenario name
- * @param {string} userId
- * @returns created database access object
+ * @param {string} email
+ * @returns upserted access object
  */
-const createAccessList = async (scenarioId, name, userId) => {
-  // Will need better checking and synergy with the creation to ensure that a scenario isnt created if an access list isn't created.
-  const uInfo = await User.findOne({ uid: userId }).select("name email -_id");
-  if (!uInfo) return null;
-  const dbAccess = new Access({
-    scenarioId: scenarioId,
-    name: name,
-    ownerId: userId,
-    users: {
-      [userId]: { name: uInfo.name, email: uInfo.email, date: new Date() },
-    },
-  });
-  await dbAccess.save();
-  return dbAccess;
-};
-
-const deleteAccessList = async (scenarioId, ownerId) => {
-  try {
-    const res = await Access.findOneAndDelete({
-      scenarioId: scenarioId,
-      ownerId: ownerId,
-    });
-
-    if (res) {
-      return true;
-    }
-    return false;
-  } catch {
-    return false;
-  }
+export const grantAccess = async (scenarioId, email) => {
+  const access = await Access.findOneAndUpdate(
+    { scenarioId },
+    { $addToSet: { accessList: email } },
+    { upsert: true, new: true }
+  );
+  return access;
 };
 
 /**
  *
  * @param {string} scenarioId
- * @param {string} userId
- * @returns updated access list
+ * @returns access object
  */
-const grantAccess = async (scenarioId, userId) => {
-  if (!scenarioId || !userId) return null;
-  const uInfo = await User.findOne({ uid: userId }).select("name email -_id");
-  if (!uInfo) return null;
-  const updateObj = {
-    [`users.${userId}`]: {
-      name: uInfo.name,
-      email: uInfo.email,
-      date: new Date(),
-    },
-  };
+export const deleteAccessList = async (scenarioId) => {
+  return await Access.findOneAndDelete({ scenarioId });
+};
 
-  const updatedList = await Access.findOneAndUpdate(
-    { scenarioId: scenarioId },
-    { $set: updateObj },
+/**
+ *
+ * @param {string} scenarioId
+ * @param {String} email
+ * @returns access object | null
+ */
+export const revokeAccess = async (scenarioId, email) => {
+  const access = await Access.findOneAndUpdate(
+    { scenarioId },
+    { $pull: { accessList: email } },
     { new: true }
   );
-  return updatedList;
-};
-
-/**
- *
- * @param {string} scenarioId
- * @param {String} userId
- * @returns
- */
-const revokeAccess = async (scenarioId, userId) => {
-  if (!scenarioId || !userId) return false;
-
-  const doc = await Access.findOne({ scenarioId }).select("ownerId").lean();
-  const isOwner = doc?.ownerId == userId;
-
-  if (isOwner) return { status: 403, message: "Protected" };
-
-  const updated = await Access.findOneAndUpdate(
-    { scenarioId: scenarioId },
-    { $unset: { [`users.${userId}`]: "" } },
-    { new: true }
-  );
-  const stillContains = updated.users.has(userId);
-
-  if (stillContains) return { status: 304, message: "No found or removed" };
-
-  return { status: 200, message: "Revoked" };
-};
-
-const isAuthor = async (scenarioId, uid) => {
-  const accessList = await getAccessList(scenarioId);
-  if (!accessList) return false;
-  return accessList.ownerId === uid || accessList.users.has(uid);
-};
-
-export {
-  getAccessList,
-  createAccessList,
-  deleteAccessList,
-  grantAccess,
-  revokeAccess,
-  isAuthor,
+  return access;
 };

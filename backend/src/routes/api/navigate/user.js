@@ -1,7 +1,7 @@
 import { getStateVariables } from "../../../db/daos/scenarioDao.js";
 import { getComponent } from "../../../db/daos/sceneDao.js";
 import { setUserStateVariables } from "../../../db/daos/userDao.js";
-import { isAuthor } from "../../../db/daos/accessDao.js";
+import { hasAccess } from "../../../db/daos/accessDao.js";
 import Scene from "../../../db/models/scene.js";
 import User from "../../../db/models/user.js";
 
@@ -98,7 +98,7 @@ export const userNavigate = async (req) => {
       { paths: 1, _id: 1, stateVariables: 1, stateVersions: 1 }
     ).lean(),
     // Only hit the access list when startScene is present — avoids an extra DB query on every normal player request.
-    startSceneParam ? isAuthor(scenarioId, uid) : false,
+    startSceneParam ? hasAccess(scenarioId, uid) : false,
   ]);
 
   // Non-authors cannot jump to an arbitrary scene even if they manually craft a URL with startScene.
@@ -128,9 +128,9 @@ export const userNavigate = async (req) => {
     const updatePromise =
       startScene && startScene !== path[0]
         ? User.updateOne(
-            { uid },
-            { $set: { [`paths.${scenarioId}`]: [startScene] } }
-          )
+          { uid },
+          { $set: { [`paths.${scenarioId}`]: [startScene] } }
+        )
         : Promise.resolve();
 
     const [, scenes] = await Promise.all([

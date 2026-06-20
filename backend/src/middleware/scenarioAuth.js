@@ -1,22 +1,31 @@
+import { HttpStatusCode } from "axios";
 import { retrieveScenario } from "../db/daos/scenarioDao.js";
-
-const HTTP_UNAUTHORISED = 401;
-const HTTP_NOT_FOUND = 404;
+import { hasAccess } from "../db/daos/accessDao.js";
 
 /**
- * Checks if the scenario belongs to the user
+ * Checks if the scenario is accessable by the user
  * @param {*} req params must have scenarioId
  */
 export default async function scenarioAuth(req, res, next) {
-  const dbScenario = await retrieveScenario(req.params.scenarioId);
+  const scenario = await retrieveScenario(req.params.scenarioId);
+  if (!scenario) return res.sendStatus(HttpStatusCode.NotFound);
 
-  if (dbScenario) {
-    if (req.body.uid === dbScenario.uid) {
-      next();
-    } else {
-      res.sendStatus(HTTP_UNAUTHORISED);
-    }
-  } else {
-    res.sendStatus(HTTP_NOT_FOUND);
-  }
+  // is direct owner or has been given access
+  const { uid } = req.body;
+  if (uid === scenario.uid || hasAccess(scenario._id, uid)) return next();
+
+  return res.sendStatus(HttpStatusCode.Unauthorized);
+}
+
+/**
+ * Checks if the scenario is owned by the user
+ * @param {*} req params must have scenarioId
+ */
+export async function scenarioOwnerAuth(req, res, next) {
+  const scenario = await retrieveScenario(req.params.scenarioId);
+  if (!scenario) return res.sendStatus(HttpStatusCode.NotFound);
+
+  if (req.body.uid === scenario.uid) return next();
+
+  return res.sendStatus(HttpStatusCode.Unauthorized);
 }
