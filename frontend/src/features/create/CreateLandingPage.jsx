@@ -14,10 +14,10 @@ const ScenarioMenu = ({ scenario, requestDelete }) => {
   return (
     <ul className="menu bg-base-200 rounded-box w-fit">
       <li>
-        <a onClick={handle(requestDelete, scenario)}>
+        <button type="button" onClick={handle(requestDelete, scenario)}>
           <Trash2Icon size={16} />
           Delete
-        </a>
+        </button>
       </li>
     </ul>
   );
@@ -88,7 +88,7 @@ export default function CreateLandingPage() {
             key={scenario._id}
           >
             <div
-              className="group relative cursor-pointer hover:-translate-y-1 duration-100 ease"
+              className="group relative cursor-pointer"
               onClick={() => history.push(`/scenario/${scenario._id}`)}
             >
               <button
@@ -112,8 +112,15 @@ export default function CreateLandingPage() {
       </div>
 
       {scenarioToDelete && (
-        <div className="modal modal-open modal-bottom sm:modal-middle">
-          <div className="modal-box text-base-content">
+        <div
+          className="modal modal-open modal-bottom sm:modal-middle"
+          role="dialog"
+          aria-modal="true"
+        >
+          <div
+            className="modal-box text-base-content"
+            aria-labelledby="delete-scenario-title"
+          >
             <button
               type="button"
               className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2"
@@ -122,7 +129,12 @@ export default function CreateLandingPage() {
             >
               <XIcon size={16} />
             </button>
-            <h2 className="font-ibm text-l font-semibold">Delete scenario</h2>
+            <h2
+              id="delete-scenario-title"
+              className="font-ibm text-l font-semibold"
+            >
+              Delete scenario
+            </h2>
             <p className="py-m">
               Are you sure you want to delete{" "}
               <span className="font-semibold">{scenarioToDelete.name}</span>?
