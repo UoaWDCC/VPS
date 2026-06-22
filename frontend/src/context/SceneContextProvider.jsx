@@ -148,7 +148,7 @@ export default function SceneContextProvider({ children }) {
 
       toast.error(
         error?.response?.data?.error ||
-        "Something went wrong updating the scenes, your last changes weren't saved"
+          "Something went wrong updating the scenes, your last changes weren't saved"
       );
     },
   });
