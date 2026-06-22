@@ -46,10 +46,13 @@ export default function AuthoringToolPage() {
   // NOTE: this is both the autosaver and the history actioner, which are distinct
   // operations, but are both here due to the limitations of the scene context
   useEffect(() => {
-    const debounced = debounce(() => {
+    const debounced = debounce(async () => {
       setSaving(true);
-      modifyScene(getScene());
-      setSaving(false);
+      try {
+        await modifyScene(getScene());
+      } finally {
+        setSaving(false);
+      }
     }, 5000);
 
     const listener = async ({ operation, record }) => {
@@ -114,10 +117,13 @@ export default function AuthoringToolPage() {
     history.push("/create");
   }
 
-  function save() {
+  async function save() {
     setSaving(true);
-    modifyScene(getScene());
-    setSaving(false);
+    try {
+      await modifyScene(getScene());
+    } finally {
+      setSaving(false);
+    }
   }
 
   return (

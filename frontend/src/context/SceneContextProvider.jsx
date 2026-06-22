@@ -148,7 +148,7 @@ export default function SceneContextProvider({ children }) {
 
       toast.error(
         error?.response?.data?.error ||
-          "Something went wrong updating the scenes, your last changes weren't saved"
+        "Something went wrong updating the scenes, your last changes weren't saved"
       );
     },
   });
@@ -158,6 +158,7 @@ export default function SceneContextProvider({ children }) {
     onMutate: async (patch) => {
       await queryClient.cancelQueries(["scenes", scenarioId]);
       const previousScenes = queryClient.getQueryData(["scenes", scenarioId]);
+      const previousScene = previousScenes.find((s) => s._id === patch._id);
 
       queryClient.setQueryData(["scenes", scenarioId], (prev) => {
         return prev.map((s) =>
@@ -165,14 +166,16 @@ export default function SceneContextProvider({ children }) {
         );
       });
 
-      return { previousScenes };
+      return { previousScene };
     },
     onError: (error, _id, context) => {
-      if (context?.previousScenes) {
-        queryClient.setQueryData(
-          ["scenes", scenarioId],
-          context.previousScenes
-        );
+      const previousScene = context?.previousScene;
+      if (previousScene) {
+        queryClient.setQueryData(["scenes", scenarioId], (prev) => {
+          return prev.map((s) =>
+            s._id === previousScene._id ? previousScene : s
+          );
+        });
       }
 
       toast.error(
@@ -181,7 +184,6 @@ export default function SceneContextProvider({ children }) {
     },
   });
 
-  // NOTE: this is optimistic on purpose, it assumes success and rolls back on failure
   const modifyMutationWrapper = useCallback(
     (scene) => {
       const saved = scenesQuery.data?.find((s) => s._id === scene._id);
@@ -189,7 +191,7 @@ export default function SceneContextProvider({ children }) {
         console.warn("scene not found in cache, skipping save");
         return;
       }
-      modifyMutation.mutate(generatePatch(scene, saved));
+      return modifyMutation.mutateAsync(generatePatch(scene, saved));
     },
     [scenesQuery.data]
   );

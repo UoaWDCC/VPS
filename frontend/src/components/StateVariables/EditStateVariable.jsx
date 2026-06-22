@@ -97,14 +97,7 @@ const EditStateVariable = ({ stateVariable, scenarioId }) => {
           }),
         }));
 
-        const updatePromises = updatedScenes.map((scene) =>
-          modifyScene({
-            _id: scene._id,
-            fields: {},
-            components: scene.components,
-            deletedComponentIds: [],
-          })
-        );
+        const updatePromises = updatedScenes.map(modifyScene);
 
         await Promise.all(updatePromises);
         await reFetch();

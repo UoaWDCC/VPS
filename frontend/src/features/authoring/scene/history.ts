@@ -27,6 +27,15 @@ class HistoryEvent extends Event {
   }
 }
 
+function cloneHistoryRecord(record: HistoryObject): HistoryObject {
+  return {
+    sceneId: record.sceneId,
+    id: record.id,
+    before: structuredClone(record.before),
+    after: structuredClone(record.after),
+  };
+}
+
 const undoStack: HistoryObject[] = [];
 let redoStack: HistoryObject[] = [];
 
@@ -40,7 +49,7 @@ export function updateHistory(id: string, prevState: Component | null) {
   const record = {
     sceneId,
     id,
-    before: prevState,
+    before: structuredClone(prevState),
     after: structuredClone(current),
   };
 
@@ -48,7 +57,10 @@ export function updateHistory(id: string, prevState: Component | null) {
   if (undoStack.length > 100) undoStack.shift();
   redoStack = [];
 
-  historyEvents.dispatchTypedEvent("update", new HistoryEvent("do", record));
+  historyEvents.dispatchTypedEvent(
+    "update",
+    new HistoryEvent("do", cloneHistoryRecord(record))
+  );
 }
 
 export function undo() {
@@ -57,7 +69,10 @@ export function undo() {
 
   redoStack.push(record);
 
-  historyEvents.dispatchTypedEvent("update", new HistoryEvent("undo", record));
+  historyEvents.dispatchTypedEvent(
+    "update",
+    new HistoryEvent("undo", cloneHistoryRecord(record))
+  );
 }
 
 export function redo() {
@@ -66,5 +81,8 @@ export function redo() {
 
   undoStack.push(record);
 
-  historyEvents.dispatchTypedEvent("update", new HistoryEvent("redo", record));
+  historyEvents.dispatchTypedEvent(
+    "update",
+    new HistoryEvent("redo", cloneHistoryRecord(record))
+  );
 }
