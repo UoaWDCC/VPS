@@ -46,7 +46,11 @@ export default function AuthoringToolPage() {
   // NOTE: this is both the autosaver and the history actioner, which are distinct
   // operations, but are both here due to the limitations of the scene context
   useEffect(() => {
-    const debounced = debounce(save, 5000);
+    const debounced = debounce(() => {
+      setSaving(true);
+      modifyScene(getScene());
+      setSaving(false);
+    }, 5000);
 
     const listener = async ({ operation, record }) => {
       if (operation === "undo" || operation === "redo") {
@@ -54,7 +58,7 @@ export default function AuthoringToolPage() {
         const state = operation === "undo" ? record.before : record.after;
         if (state === null) setSelected(null);
         replaceComponent(record.id, state);
-        setSelected(record.id);
+        if (state !== null) setSelected(record.id);
       }
 
       setSaving(true);
@@ -63,7 +67,7 @@ export default function AuthoringToolPage() {
 
     historyEvents.addEventListener("update", listener);
     return () => historyEvents.removeEventListener("update", listener);
-  }, [sceneId, switchScene, setSelected]);
+  }, [sceneId, switchScene, setSelected, modifyScene]);
 
   // if the active scene was deleted, switch to the first available scene
   useEffect(() => {
@@ -110,9 +114,9 @@ export default function AuthoringToolPage() {
     history.push("/create");
   }
 
-  async function save() {
+  function save() {
     setSaving(true);
-    await modifyScene(getScene());
+    modifyScene(getScene());
     setSaving(false);
   }
 

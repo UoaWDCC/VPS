@@ -11,7 +11,7 @@ const EditStateVariable = ({ stateVariable, scenarioId }) => {
   const { user } = useContext(AuthenticationContext);
   const { setStateVariables } = useContext(ScenarioContext);
   const sceneContext = useContext(SceneContext);
-  const { scenes, saveScenePatch, reFetch } = sceneContext || {
+  const { scenes, modifyScene, reFetch } = sceneContext || {
     scenes: [],
     saveScenePatch: async () => {},
     reFetch: async () => {},
@@ -71,7 +71,7 @@ const EditStateVariable = ({ stateVariable, scenarioId }) => {
 
       // Clean up all state operations that reference this deleted state variable
       // Only do this if we have access to scenes (SceneContext is available)
-      if (scenes && scenes.length > 0 && saveScenePatch) {
+      if (scenes && scenes.length > 0 && modifyScene) {
         const updatedScenes = scenes.map((scene) => ({
           ...scene,
           components: scene.components.map((component) => {
@@ -98,7 +98,7 @@ const EditStateVariable = ({ stateVariable, scenarioId }) => {
         }));
 
         const updatePromises = updatedScenes.map((scene) =>
-          saveScenePatch({
+          modifyScene({
             _id: scene._id,
             fields: {},
             components: scene.components,

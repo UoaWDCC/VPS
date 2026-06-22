@@ -181,19 +181,24 @@ export default function SceneContextProvider({ children }) {
     },
   });
 
-  function modifyMutationWrapper(scene) {
-    const saved = scenesQuery.data?.find((s) => s._id === scene._id);
-    if (!saved) {
-      console.warn("scene not found in cache, skipping save");
-      return;
-    }
-    modifyMutation.mutate(generatePatch(scene, saved));
-  }
+  // NOTE: this is optimistic on purpose, it assumes success and rolls back on failure
+  const modifyMutationWrapper = useCallback(
+    (scene) => {
+      const saved = scenesQuery.data?.find((s) => s._id === scene._id);
+      if (!saved) {
+        console.warn("scene not found in cache, skipping save");
+        return;
+      }
+      modifyMutation.mutate(generatePatch(scene, saved));
+    },
+    [scenesQuery.data]
+  );
 
   const switchScene = useCallback(
     (scene, id) => {
+      if (scene._id === id) return; // switch to same scene is a no-op
       modifyMutationWrapper(scene);
-      const target = scenesQuery.data.find((s) => s._id === id);
+      const target = scenesQuery.data?.find((s) => s._id === id);
       if (!target) {
         console.warn("target scene for switch not found");
         return;
@@ -203,7 +208,7 @@ export default function SceneContextProvider({ children }) {
       history.push({ pathname: `/scenario/${scenarioId}/scene/${id}` });
       localStorage.setItem(`${scenarioId}:activeScene`, id);
     },
-    [scenesQuery.data]
+    [scenesQuery.data, modifyMutationWrapper]
   );
 
   if (scenesQuery.isLoading) {

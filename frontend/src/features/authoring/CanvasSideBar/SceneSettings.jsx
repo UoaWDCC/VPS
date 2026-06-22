@@ -81,7 +81,7 @@ export default function SceneSettings() {
     setSceneName(safeName);
 
     try {
-      await modifyScene(getScene());
+      modifyScene(getScene());
     } catch (error) {
       console.error(error);
       toast.error("Could not save the scene name.");
