@@ -1,7 +1,7 @@
 import { v4 } from "uuid";
 import { buildVisualComponent, buildVisualScene } from "../../pipeline";
 import useVisualScene, { type VisualSceneState } from "../../stores/visual";
-import { updateHistory } from "../history";
+import { dispatchModification, updateHistory } from "../history";
 import { getComponent, getScene, setScene } from "../scene";
 import type { Component, Scene } from "../../types";
 import { arrayToObject } from "../util";
@@ -21,13 +21,14 @@ export function modifySceneProp<K extends keyof VisualSceneState>(
 ) {
   (getScene() as unknown as Record<string, unknown>)[prop as string] = value;
   useVisualScene.setState({ [prop]: value } as Pick<VisualSceneState, K>);
+  dispatchModification();
 }
 
 // wrapper for state mutating functions, will capture both state and operation
 export function modify<A extends [string, ...unknown[]], R>(
   fn: (...args: A) => R
 ) {
-  return function (...args: A): R | undefined {
+  return function(...args: A): R | undefined {
     const id = args[0];
     const component = getComponent(id);
     if (!component) return undefined;

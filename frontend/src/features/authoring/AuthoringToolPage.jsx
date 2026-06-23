@@ -15,7 +15,7 @@ import { useHistory } from "react-router-dom";
 import { replace, replaceComponent } from "./scene/operations/modifiers";
 import { ArrowLeftIcon, FilesIcon, PlayIcon, UsersIcon } from "lucide-react";
 import { handleGlobal } from "./handlers/keyboard/keyboard";
-import { historyEvents } from "./scene/history";
+import { clearHistory, historyEvents } from "./scene/history";
 import { debounce } from "../../util/debounce";
 import { getScene } from "./scene/scene";
 
@@ -90,6 +90,8 @@ export default function AuthoringToolPage() {
     if (target) replace(target);
 
     useEditorStore.getState().clear();
+
+    clearHistory();
 
     listeners.forEach(([event, fn]) => document.addEventListener(event, fn));
 

@@ -6,6 +6,7 @@ import ScenarioContext from "../../context/ScenarioContext";
 import SceneContext from "../../context/SceneContext";
 import SelectInput from "../../features/authoring/components/Select";
 import { stateTypes } from "./stateTypes";
+import { arrayToObject } from "../../features/authoring/scene/util";
 
 const EditStateVariable = ({ stateVariable, scenarioId }) => {
   const { user } = useContext(AuthenticationContext);
@@ -13,8 +14,8 @@ const EditStateVariable = ({ stateVariable, scenarioId }) => {
   const sceneContext = useContext(SceneContext);
   const { scenes, modifyScene, reFetch } = sceneContext || {
     scenes: [],
-    saveScenePatch: async () => {},
-    reFetch: async () => {},
+    saveScenePatch: async () => { },
+    reFetch: async () => { },
   };
 
   const { name, type, value } = stateVariable;
@@ -74,7 +75,7 @@ const EditStateVariable = ({ stateVariable, scenarioId }) => {
       if (scenes && scenes.length > 0 && modifyScene) {
         const updatedScenes = scenes.map((scene) => ({
           ...scene,
-          components: scene.components.map((component) => {
+          components: arrayToObject(scene.components.map((component) => {
             if (!component.stateOperations) return component;
 
             // Filter out state operations that reference the deleted state variable
@@ -94,7 +95,7 @@ const EditStateVariable = ({ stateVariable, scenarioId }) => {
               ...component,
               stateOperations: filteredOperations,
             };
-          }),
+          })),
         }));
 
         const updatePromises = updatedScenes.map(modifyScene);
@@ -125,9 +126,8 @@ const EditStateVariable = ({ stateVariable, scenarioId }) => {
     <>
       <fieldset
         key={stateVariable.name}
-        className={`fieldset bg-base-200 border-base-300 rounded-box border p-4 ${
-          isEditing ? "ring-2 ring-grey" : ""
-        }`}
+        className={`fieldset bg-base-200 border-base-300 rounded-box border p-4 ${isEditing ? "ring-2 ring-grey" : ""
+          }`}
       >
         <div className="flex wrap gap-xs">
           <div className="flex-1 flex flex-col">

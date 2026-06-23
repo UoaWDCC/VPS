@@ -148,7 +148,7 @@ export default function SceneContextProvider({ children }) {
 
       toast.error(
         error?.response?.data?.error ||
-          "Something went wrong updating the scenes, your last changes weren't saved"
+        "Something went wrong updating the scenes, your last changes weren't saved"
       );
     },
   });
@@ -168,6 +168,10 @@ export default function SceneContextProvider({ children }) {
 
       return { previousScene };
     },
+    // NOTE: on failure, the changes are wiped from the scenes context, but NOT the active scene,
+    // which means on the next save the changes will be retried. 
+    // However, if its a save triggered by a switch, then those changes are fully gone. A proper failure
+    // handler needs to be developed to prefer retry over rollback.
     onError: (error, _id, context) => {
       const previousScene = context?.previousScene;
       if (previousScene) {

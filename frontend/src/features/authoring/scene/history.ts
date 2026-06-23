@@ -10,17 +10,20 @@ interface HistoryObject {
   after: Component | null;
 }
 
-interface HistoryEventMap {
-  update: HistoryEvent;
-}
-
 type HistoryOperation = "do" | "undo" | "redo";
 
-class HistoryEvent extends Event {
-  operation: HistoryOperation;
-  record: HistoryObject;
+interface HistoryEventMap {
+  update: HistoryEvent<HistoryOperation>;
+}
 
-  constructor(operation: HistoryOperation, record: HistoryObject) {
+class HistoryEvent<T extends HistoryOperation> extends Event {
+  operation: T;
+  record: T extends "undo" | "redo" ? HistoryObject : HistoryObject | undefined;
+
+  constructor(
+    operation: T,
+    record: T extends "undo" | "redo" ? HistoryObject : HistoryObject | undefined
+  ) {
     super("update");
     this.operation = operation;
     this.record = record;
@@ -36,10 +39,23 @@ function cloneHistoryRecord(record: HistoryObject): HistoryObject {
   };
 }
 
-const undoStack: HistoryObject[] = [];
+let undoStack: HistoryObject[] = [];
 let redoStack: HistoryObject[] = [];
 
 export const historyEvents = new TypedEventTarget<HistoryEventMap>();
+
+export function clearHistory() {
+  undoStack = [];
+  redoStack = [];
+}
+
+// NOTE: this should only be used for scene modifications that don't support undo/redo
+export function dispatchModification() {
+  historyEvents.dispatchTypedEvent(
+    "update",
+    new HistoryEvent("do", undefined)
+  );
+}
 
 export function updateHistory(id: string, prevState: Component | null) {
   const current = getComponent(id);
