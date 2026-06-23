@@ -22,7 +22,9 @@ class HistoryEvent<T extends HistoryOperation> extends Event {
 
   constructor(
     operation: T,
-    record: T extends "undo" | "redo" ? HistoryObject : HistoryObject | undefined
+    record: T extends "undo" | "redo"
+      ? HistoryObject
+      : HistoryObject | undefined
   ) {
     super("update");
     this.operation = operation;
@@ -51,10 +53,7 @@ export function clearHistory() {
 
 // NOTE: this should only be used for scene modifications that don't support undo/redo
 export function dispatchModification() {
-  historyEvents.dispatchTypedEvent(
-    "update",
-    new HistoryEvent("do", undefined)
-  );
+  historyEvents.dispatchTypedEvent("update", new HistoryEvent("do", undefined));
 }
 
 export function updateHistory(id: string, prevState: Component | null) {

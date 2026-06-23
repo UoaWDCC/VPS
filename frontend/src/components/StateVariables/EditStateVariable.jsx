@@ -14,8 +14,8 @@ const EditStateVariable = ({ stateVariable, scenarioId }) => {
   const sceneContext = useContext(SceneContext);
   const { scenes, modifyScene, reFetch } = sceneContext || {
     scenes: [],
-    saveScenePatch: async () => { },
-    reFetch: async () => { },
+    saveScenePatch: async () => {},
+    reFetch: async () => {},
   };
 
   const { name, type, value } = stateVariable;
@@ -75,27 +75,29 @@ const EditStateVariable = ({ stateVariable, scenarioId }) => {
       if (scenes && scenes.length > 0 && modifyScene) {
         const updatedScenes = scenes.map((scene) => ({
           ...scene,
-          components: arrayToObject(scene.components.map((component) => {
-            if (!component.stateOperations) return component;
+          components: arrayToObject(
+            scene.components.map((component) => {
+              if (!component.stateOperations) return component;
 
-            // Filter out state operations that reference the deleted state variable
-            const filteredOperations = component.stateOperations.filter(
-              (operation) => {
-                // Check both UUID and name references
-                const referencesDeletedVariable =
-                  (operation.stateVariableId &&
-                    operation.stateVariableId === stateVariable.id) ||
-                  (!operation.stateVariableId && operation.name === name);
+              // Filter out state operations that reference the deleted state variable
+              const filteredOperations = component.stateOperations.filter(
+                (operation) => {
+                  // Check both UUID and name references
+                  const referencesDeletedVariable =
+                    (operation.stateVariableId &&
+                      operation.stateVariableId === stateVariable.id) ||
+                    (!operation.stateVariableId && operation.name === name);
 
-                return !referencesDeletedVariable;
-              }
-            );
+                  return !referencesDeletedVariable;
+                }
+              );
 
-            return {
-              ...component,
-              stateOperations: filteredOperations,
-            };
-          })),
+              return {
+                ...component,
+                stateOperations: filteredOperations,
+              };
+            })
+          ),
         }));
 
         const updatePromises = updatedScenes.map(modifyScene);
@@ -126,8 +128,9 @@ const EditStateVariable = ({ stateVariable, scenarioId }) => {
     <>
       <fieldset
         key={stateVariable.name}
-        className={`fieldset bg-base-200 border-base-300 rounded-box border p-4 ${isEditing ? "ring-2 ring-grey" : ""
-          }`}
+        className={`fieldset bg-base-200 border-base-300 rounded-box border p-4 ${
+          isEditing ? "ring-2 ring-grey" : ""
+        }`}
       >
         <div className="flex wrap gap-xs">
           <div className="flex-1 flex flex-col">
