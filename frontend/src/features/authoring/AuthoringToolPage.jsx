@@ -1,6 +1,6 @@
 import "./AuthoringToolPage.css";
 
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
 import SceneContext from "context/SceneContext";
 import CanvasSideBar from "./CanvasSideBar/CanvasSideBar";
@@ -43,15 +43,17 @@ export default function AuthoringToolPage() {
 
   const [saving, setSaving] = useState(false);
 
+  const pendingSavesRef = useRef(0);
+
   // NOTE: this is both the autosaver and the history actioner, which are distinct
   // operations, but are both here due to the limitations of the scene context
   useEffect(() => {
     const debounced = debounce(async () => {
-      setSaving(true);
       try {
         await modifyScene(getScene());
       } finally {
-        setSaving(false);
+        pendingSavesRef.current--;
+        if (pendingSavesRef.current === 0) setSaving(false);
       }
     }, 2500);
 
@@ -64,7 +66,8 @@ export default function AuthoringToolPage() {
         if (state !== null) setSelected(record.id);
       }
 
-      setSaving(true);
+      pendingSavesRef.current++;
+      if (pendingSavesRef.current > 0) setSaving(true);
       debounced();
     };
 
