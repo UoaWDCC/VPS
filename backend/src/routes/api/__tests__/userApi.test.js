@@ -129,16 +129,24 @@ describe("User API tests", () => {
 
   // --- GET /played/:scenarioId ---
 
-  it("GET /user/played/:scenarioId returns users who played the scenario", async () => {
-    // Note: the Scenario model does not define a 'users' field, so
-    // retrievePlayedUsers always reads undefined → $in: undefined → empty result.
-    // This test documents current (broken) behaviour.
-    const response = await axios.get(
-      `http://localhost:${port}/api/user/played/${scenario._id}`
-    );
-    expect(response.status).toBe(200);
-    expect(Array.isArray(response.data)).toBe(true);
-  });
+  // NOTE: retrievePlayedUsers reads Scenario.users, but the Scenario schema does
+  // not define a 'users' field, so it is stripped on write and the query returns
+  // nothing. The scenario in beforeEach is seeded with users uid-1 and uid-2, so
+  // this asserts the CORRECT behaviour and is marked `it.failing`: it stays green
+  // while the bug exists and turns red once the schema defines 'users' — signalling
+  // that it should be un-marked.
+  it.failing(
+    "GET /user/played/:scenarioId returns users who played the scenario",
+    async () => {
+      const response = await axios.get(
+        `http://localhost:${port}/api/user/played/${scenario._id}`
+      );
+      expect(response.status).toBe(200);
+      const uids = response.data.map((u) => u.uid);
+      expect(uids).toContain("uid-1");
+      expect(uids).toContain("uid-2");
+    }
+  );
 
   // --- POST / (sign-in) ---
 

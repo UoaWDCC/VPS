@@ -190,26 +190,37 @@ describe("Resources API tests", () => {
     ).rejects.toMatchObject({ response: { status: 400 } });
   });
 
-  // NOTE: deleteResourceById uses the deprecated findByIdAndRemove (removed in
-  // Mongoose 8) and therefore throws a 500 rather than the intended 204/404.
-  // These tests document current behaviour; fix the DAO to use findByIdAndDelete.
-  it("DELETE /resources/:resourceId returns 500 due to deprecated findByIdAndRemove in DAO", async () => {
-    await expect(
-      axios.delete(
+  // NOTE: deleteResourceById currently calls findByIdAndRemove, which was removed
+  // in Mongoose 8, so the route throws 500 instead of the intended 204/404. The
+  // two tests below assert the CORRECT behaviour and are marked `it.failing`, so
+  // they stay green while the bug exists and automatically turn red once the DAO
+  // is fixed (switch to findByIdAndDelete) — signalling that they should be
+  // un-marked.
+  it.failing(
+    "DELETE /resources/:resourceId deletes the resource and returns 204",
+    async () => {
+      const response = await axios.delete(
         `http://localhost:${port}/api/resources/${resource1._id}`,
         authHeaders("user1")
-      )
-    ).rejects.toMatchObject({ response: { status: 500 } });
-  });
+      );
+      expect(response.status).toBe(204);
 
-  it("DELETE /resources/:resourceId returns 500 for unknown resource (same DAO bug)", async () => {
-    await expect(
-      axios.delete(
-        `http://localhost:${port}/api/resources/000000000000000000000099`,
-        authHeaders("user1")
-      )
-    ).rejects.toMatchObject({ response: { status: 500 } });
-  });
+      const dbResource = await Resource.findById(resource1._id);
+      expect(dbResource).toBeNull();
+    }
+  );
+
+  it.failing(
+    "DELETE /resources/:resourceId returns 404 for unknown resource",
+    async () => {
+      await expect(
+        axios.delete(
+          `http://localhost:${port}/api/resources/000000000000000000000099`,
+          authHeaders("user1")
+        )
+      ).rejects.toMatchObject({ response: { status: 404 } });
+    }
+  );
 
   it("POST /resources/:scenarioId bulk creates resources and replaces existing", async () => {
     const resources = [
