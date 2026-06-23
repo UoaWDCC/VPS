@@ -37,6 +37,7 @@ scenarioAuth.mockImplementation(async (req, res, next) => {
 
 describe("Scenario API tests", () => {
   const HTTP_OK = 200;
+  const HTTP_BAD_REQUEST = 400;
 
   let mongoServer;
   let server;
@@ -209,5 +210,130 @@ describe("Scenario API tests", () => {
     expect(dbScenario).toBeDefined();
     expect(dbScenario.name).toEqual("Scenario 2");
     expect(dbScenario.scenes).toEqual([]);
+  });
+
+  it("GET /scenario/assigned returns assigned scenarios for a user", async () => {
+    const response = await axios.get(
+      `http://localhost:${port}/api/scenario/assigned`,
+      authHeaders("user1")
+    );
+    expect(response.status).toBe(HTTP_OK);
+    expect(Array.isArray(response.data)).toBe(true);
+  });
+
+  it("GET /scenario/all returns owned, assigned, and accessible scenario groups", async () => {
+    const response = await axios.get(
+      `http://localhost:${port}/api/scenario/all`,
+      authHeaders("user1")
+    );
+    expect(response.status).toBe(HTTP_OK);
+    expect(Array.isArray(response.data.owned)).toBe(true);
+    expect(Array.isArray(response.data.assigned)).toBe(true);
+    expect(Array.isArray(response.data.accessible)).toBe(true);
+  });
+
+  it("GET /scenario/:scenarioId returns the scenario", async () => {
+    const response = await axios.get(
+      `http://localhost:${port}/api/scenario/${scenario1._id}`,
+      authHeaders("user1")
+    );
+    expect(response.status).toBe(HTTP_OK);
+    expect(response.data._id).toBe(scenario1._id.toString());
+    expect(response.data.name).toBe(scenario1.name);
+  });
+
+  it("GET /scenario/:scenarioId returns 400 for a malformed id", async () => {
+    await expect(
+      axios.get(
+        `http://localhost:${port}/api/scenario/not-a-valid-id`,
+        authHeaders("user1")
+      )
+    ).rejects.toMatchObject({ response: { status: HTTP_BAD_REQUEST } });
+  });
+
+  it("PATCH /scenario/:scenarioId updates scenario fields", async () => {
+    const response = await axios.patch(
+      `http://localhost:${port}/api/scenario/${scenario1._id}`,
+      { name: "Patched Name", description: "New desc" },
+      authHeaders("user1")
+    );
+    expect(response.status).toBe(HTTP_OK);
+    const dbScenario = await Scenario.findById(scenario1._id).lean();
+    expect(dbScenario.name).toBe("Patched Name");
+    expect(dbScenario.description).toBe("New desc");
+  });
+
+  it("PATCH /scenario/:scenarioId returns 400 for a malformed id", async () => {
+    await expect(
+      axios.patch(
+        `http://localhost:${port}/api/scenario/not-a-valid-id`,
+        { name: "x" },
+        authHeaders("user1")
+      )
+    ).rejects.toMatchObject({ response: { status: HTTP_BAD_REQUEST } });
+  });
+
+  it("GET /scenario/:scenarioId/stateVariables returns state variables array", async () => {
+    const response = await axios.get(
+      `http://localhost:${port}/api/scenario/${scenario1._id}/stateVariables`,
+      authHeaders("user1")
+    );
+    expect(response.status).toBe(HTTP_OK);
+    expect(Array.isArray(response.data)).toBe(true);
+  });
+
+  it("POST /scenario/:scenarioId/stateVariables creates a state variable", async () => {
+    const newStateVariable = { name: "health", type: "number", defaultValue: 100 };
+    const response = await axios.post(
+      `http://localhost:${port}/api/scenario/${scenario1._id}/stateVariables`,
+      { newStateVariable },
+      authHeaders("user1")
+    );
+    expect(response.status).toBe(HTTP_OK);
+    expect(response.data).toEqual(
+      expect.arrayContaining([expect.objectContaining({ name: "health" })])
+    );
+    const dbScenario = await Scenario.findById(scenario1._id).lean();
+    expect(dbScenario.stateVariables).toEqual(
+      expect.arrayContaining([expect.objectContaining({ name: "health" })])
+    );
+  });
+
+  it("PUT /scenario/:scenarioId/stateVariables edits an existing state variable", async () => {
+    await axios.post(
+      `http://localhost:${port}/api/scenario/${scenario1._id}/stateVariables`,
+      { newStateVariable: { name: "health", type: "number", defaultValue: 100 } },
+      authHeaders("user1")
+    );
+
+    const response = await axios.put(
+      `http://localhost:${port}/api/scenario/${scenario1._id}/stateVariables`,
+      {
+        originalName: "health",
+        newStateVariable: { name: "health", type: "number", defaultValue: 50 },
+      },
+      authHeaders("user1")
+    );
+    expect(response.status).toBe(HTTP_OK);
+    expect(response.data).toEqual(
+      expect.arrayContaining([expect.objectContaining({ name: "health", defaultValue: 50 })])
+    );
+  });
+
+  it("DELETE /scenario/:scenarioId/stateVariables/:id removes a state variable", async () => {
+    await axios.post(
+      `http://localhost:${port}/api/scenario/${scenario1._id}/stateVariables`,
+      { newStateVariable: { name: "score", type: "number", defaultValue: 0 } },
+      authHeaders("user1")
+    );
+
+    const response = await axios.delete(
+      `http://localhost:${port}/api/scenario/${scenario1._id}/stateVariables/score`,
+      authHeaders("user1")
+    );
+    expect(response.status).toBe(HTTP_OK);
+    expect(response.data).not.toEqual(
+      expect.arrayContaining([expect.objectContaining({ name: "score" })])
+    );
   });
 });

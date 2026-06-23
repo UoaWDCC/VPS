@@ -19,6 +19,8 @@ jest.mock("firebase-admin"); // Needed to mock the firebase-admin dependency in 
 
 describe("Image API tests", () => {
   const HTTP_OK = 200;
+  const HTTP_BAD_REQUEST = 400;
+  const HTTP_NOT_FOUND = 404;
 
   let mongoServer;
   let server;
@@ -130,5 +132,39 @@ describe("Image API tests", () => {
     // check correct image is returned
     const image = response.data;
     expect(image.url).toEqual(image2.url);
+  });
+
+  it("POST /api/image/ returns 400 when body has no urls or images", async () => {
+    await expect(
+      axios.post(`http://localhost:${port}/api/image/`, {})
+    ).rejects.toMatchObject({ response: { status: HTTP_BAD_REQUEST } });
+  });
+
+  it("POST /api/image/ returns 400 when urls and images arrays are empty", async () => {
+    await expect(
+      axios.post(`http://localhost:${port}/api/image/`, { urls: [], images: [] })
+    ).rejects.toMatchObject({ response: { status: HTTP_BAD_REQUEST } });
+  });
+
+  it("POST /api/image/ accepts urls string array format", async () => {
+    const response = await axios.post(`http://localhost:${port}/api/image/`, {
+      urls: ["https://example.com/photo.jpg"],
+    });
+    expect(response.status).toBe(HTTP_OK);
+    const dbImages = await Image.find();
+    expect(dbImages).toHaveLength(1);
+    expect(dbImages[0].url).toBe("https://example.com/photo.jpg");
+  });
+
+  it("GET /api/image/undefined returns 400 for literal 'undefined' id", async () => {
+    await expect(
+      axios.get(`http://localhost:${port}/api/image/undefined`)
+    ).rejects.toMatchObject({ response: { status: HTTP_BAD_REQUEST } });
+  });
+
+  it("GET /api/image/:id returns 404 for unknown id", async () => {
+    await expect(
+      axios.get(`http://localhost:${port}/api/image/nonexistent-id`)
+    ).rejects.toMatchObject({ response: { status: HTTP_NOT_FOUND } });
   });
 });
