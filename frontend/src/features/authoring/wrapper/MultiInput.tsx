@@ -5,6 +5,7 @@ type MultiInputProps = React.PropsWithChildren<{
   values: MultiInputProps["value"][];
   items?: ReactElement[];
   onChange: (value: MultiInputProps["value"]) => void;
+  tooltip?: string;
 }>;
 
 function MultiInput({
@@ -13,10 +14,14 @@ function MultiInput({
   items,
   onChange,
   children,
+  tooltip,
 }: MultiInputProps) {
   return (
     <div className="dropdown">
-      <li>
+      <li
+        className={tooltip ? "tooltip tooltip-bottom" : undefined}
+        data-tip={tooltip}
+      >
         <a tabIndex={0}>{children}</a>
       </li>
       <ul

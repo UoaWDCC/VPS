@@ -35,7 +35,6 @@ describe("User API tests", () => {
   let port;
 
   let user1;
-  let user2;
   let scenario;
 
   beforeAll(async () => {
@@ -58,7 +57,7 @@ describe("User API tests", () => {
       pictureURL: "http://example.com/alice.png",
     });
 
-    user2 = await User.create({
+    await User.create({
       uid: "uid-2",
       name: "Bob",
       email: "bob@auckland.ac.nz",

@@ -1,14 +1,13 @@
 import { arrayToObject, getObject } from "./util";
-import type { Scene } from "../types";
+import type { Component, Scene } from "../types";
 import useVisualScene from "../stores/visual";
 import { buildVisualScene } from "../pipeline";
 import useEditorStore from "../stores/editor";
 
-let scene = {} as any;
-let savedScene = {} as any;
+let scene: Scene = {} as Scene;
+let savedScene: Scene = {} as Scene;
 
-// @ts-ignore
-window.scene = scene;
+(window as Window & { scene: Scene }).scene = scene;
 
 export function getScene() {
   return scene;
@@ -18,22 +17,24 @@ export function getSceneId() {
   return scene._id;
 }
 
-export function setScene(newScene: Record<string, any>) {
-  scene = newScene as any;
+export function setScene(newScene: Scene) {
+  scene = newScene;
 }
 
 export function getComponent(id: string) {
   return scene.components[id] ?? null;
 }
 
-export function getComponentProp(id: string, prop: string) {
+export function getComponentProp(id: string, prop: string): unknown {
   const component = scene.components[id];
   if (!component) return;
-  const [object, key] = getObject(prop, component);
+  const [object, key] = getObject(
+    prop,
+    component as unknown as Record<PropertyKey, unknown>
+  );
   return object[key];
 }
 
-//Adds a saved baseline alongside the current scene, and use it to calculate a patch of changes when committing the scene
 export function commitSavedScene() {
   savedScene = structuredClone(scene);
 }
@@ -52,21 +53,20 @@ export async function saveCurrentScene(
   commitSavedScene();
 }
 
-export function applySceneSwitch(
-  targetScene: Record<string, any>,
-  scenarioId: string
-) {
+export function applySceneSwitch(targetScene: Scene, scenarioId: string) {
   const clone = structuredClone(targetScene);
-  clone.components = arrayToObject(clone.components);
+  clone.components = arrayToObject(
+    clone.components as unknown as { id: string }[]
+  ) as Record<string, Component>;
   setScene(clone);
   commitSavedScene();
   useEditorStore.getState().clear();
-  useVisualScene.getState().setVisualScene(buildVisualScene(clone as Scene));
+  useVisualScene.getState().setVisualScene(buildVisualScene(clone));
   localStorage.setItem(`${scenarioId}:activeScene`, targetScene._id);
 }
 
 export function getScenePatch() {
-  const components: any[] = [];
+  const components: Component[] = [];
   const deletedComponentIds: string[] = [];
 
   const currentComponents = scene.components ?? {};
@@ -82,12 +82,13 @@ export function getScenePatch() {
     if (!currentComponents[id]) deletedComponentIds.push(id);
   });
 
-  const fields: Record<string, any> = {};
+  const fields: Record<string, unknown> = {};
 
   ["name", "roles", "time", "directLink", "timerStateOperations"].forEach(
     (field) => {
-      if (JSON.stringify(scene[field]) !== JSON.stringify(savedScene[field])) {
-        fields[field] = structuredClone(scene[field]);
+      const key = field as keyof Scene;
+      if (JSON.stringify(scene[key]) !== JSON.stringify(savedScene[key])) {
+        fields[field] = structuredClone(scene[key]);
       }
     }
   );

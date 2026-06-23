@@ -15,8 +15,16 @@ import mongoose from "mongoose";
 import axios from "axios";
 import routes from "../../index.js";
 import Staff from "../../../db/models/staff.js";
+import auth from "../../../middleware/firebaseAuth.js";
+import { authHeaders } from "./testHelpers.js";
 
+jest.mock("../../../middleware/firebaseAuth");
 jest.mock("firebase-admin");
+
+auth.mockImplementation(async (req, res, next) => {
+  req.body.uid = req.headers.authorization?.split(" ")[1];
+  next();
+});
 
 describe("Staff API tests", () => {
   let mongoServer;
@@ -58,7 +66,8 @@ describe("Staff API tests", () => {
 
   it("GET /staff/:firebaseID returns 'staff' when the firebase ID is in the staff list", async () => {
     const response = await axios.get(
-      `http://localhost:${port}/api/staff/${staffFirebaseId}`
+      `http://localhost:${port}/api/staff/${staffFirebaseId}`,
+      authHeaders("user1")
     );
     expect(response.status).toBe(200);
     expect(response.data).toBe("staff");
@@ -66,7 +75,8 @@ describe("Staff API tests", () => {
 
   it("GET /staff/:firebaseID returns 'user' when the firebase ID is not in the staff list", async () => {
     const response = await axios.get(
-      `http://localhost:${port}/api/staff/unknown-firebase-id`
+      `http://localhost:${port}/api/staff/unknown-firebase-id`,
+      authHeaders("user1")
     );
     expect(response.status).toBe(200);
     expect(response.data).toBe("user");
@@ -76,7 +86,8 @@ describe("Staff API tests", () => {
     await Staff.deleteMany({});
 
     const response = await axios.get(
-      `http://localhost:${port}/api/staff/${staffFirebaseId}`
+      `http://localhost:${port}/api/staff/${staffFirebaseId}`,
+      authHeaders("user1")
     );
     expect(response.status).toBe(200);
     expect(response.data).toBe("user");

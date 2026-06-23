@@ -19,7 +19,7 @@ function ShapeCreateMenu() {
   return (
     <>
       <div className="dropdown">
-        <li>
+        <li className="tooltip tooltip-bottom" data-tip="Add shape">
           <a tabIndex={0}>
             <ShapesIcon size={16} />
           </a>
@@ -28,22 +28,22 @@ function ShapeCreateMenu() {
           tabIndex={0}
           className="dropdown-content menu menu-horizontal bg-base-300 rounded-box z-1 p-2 shadow-sm top-[38px] w-max"
         >
-          <li>
+          <li className="tooltip tooltip-bottom" data-tip="Box">
             <a onClick={() => switchCreate("box")}>
               <VectorSquare size={16} />
             </a>
           </li>
-          <li>
+          <li className="tooltip tooltip-bottom" data-tip="Ellipse">
             <a onClick={() => switchCreate("ellipse")}>
               <Diameter size={16} />
             </a>
           </li>
-          <li>
+          <li className="tooltip tooltip-bottom" data-tip="Line">
             <a onClick={() => switchCreate("line")}>
               <Spline size={16} />
             </a>
           </li>
-          <li>
+          <li className="tooltip tooltip-bottom" data-tip="Speech bubble">
             <a onClick={() => switchCreate("speech")}>
               <MessageSquare size={16} />
             </a>

@@ -40,7 +40,6 @@ describe("Access API tests", () => {
   let port;
 
   let scenario;
-  let accessList;
   let ownerUser;
   let grantedUser;
 
@@ -73,7 +72,7 @@ describe("Access API tests", () => {
       pictureURL: "http://example.com/pic2.png",
     });
 
-    accessList = await Access.create({
+    await Access.create({
       scenarioId: scenario._id.toString(),
       name: scenario.name,
       ownerId: ownerUser.uid,

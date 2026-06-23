@@ -1,15 +1,5 @@
-import {
-  jest,
-  describe,
-  beforeAll,
-  beforeEach,
-  afterEach,
-  afterAll,
-  it,
-  expect,
-} from "@jest/globals";
+import { jest, describe, beforeEach, it, expect } from "@jest/globals";
 
-import { MongoMemoryServer } from "mongodb-memory-server";
 import express from "express";
 import mongoose from "mongoose";
 import axios from "axios";
@@ -19,6 +9,10 @@ import Scenario from "../../../db/models/scenario.js";
 import auth from "../../../middleware/firebaseAuth.js";
 import scenarioAuth from "../../../middleware/scenarioAuth.js";
 import { authHeaders } from "./testHelpers.js";
+import {
+  useMongoMemoryServer,
+  useExpressServer,
+} from "../../../test/testSetup.js";
 
 jest.mock("../../../middleware/firebaseAuth");
 jest.mock("../../../middleware/scenarioAuth");
@@ -37,9 +31,13 @@ scenarioAuth.mockImplementation(async (req, res, next) => {
 describe("Scene API tests", () => {
   const HTTP_OK = 200;
 
-  let mongoServer;
-  let server;
-  let port;
+  useMongoMemoryServer();
+  const ctx = useExpressServer(() => {
+    const app = express();
+    app.use(express.json());
+    app.use("/", routes);
+    return app;
+  });
 
   const scene1 = {
     _id: new mongoose.mongo.ObjectId("000000000000000000000003"),
@@ -61,6 +59,11 @@ describe("Scene API tests", () => {
     name: "Test Scene 2",
   };
 
+  const scene3 = {
+    _id: new mongoose.mongo.ObjectId("000000000000000000000005"),
+    name: "Only Scene",
+  };
+
   const scenario1 = {
     _id: new mongoose.mongo.ObjectId("000000000000000000000001"),
     name: "Test Scenario 1",
@@ -74,38 +77,16 @@ describe("Scene API tests", () => {
     uid: "user1",
   };
 
-  // setup in-memory mongodb and express API
-  beforeAll(async () => {
-    mongoServer = await MongoMemoryServer.create();
-    const uri = mongoServer.getUri();
+  const scenario3 = {
+    _id: new mongoose.mongo.ObjectId("000000000000000000000006"),
+    name: "Test Scenario 3",
+    scenes: [scene3._id],
+    uid: "user1",
+  };
 
-    await mongoose.connect(uri);
-
-    const app = express();
-    app.use(express.json());
-    app.use("/", routes);
-
-    server = app.listen(0);
-    port = server.address().port;
-  });
-
-  // populate database with dummy scenarios
   beforeEach(async () => {
-    await Scenario.create([scenario1, scenario2]);
-    await Scene.create([scene1, scene2]);
-  });
-
-  // clear the database
-  afterEach(async () => {
-    await mongoose.connection.db.dropDatabase();
-  });
-
-  // close the mongodb and express servers
-  afterAll(async () => {
-    server.close(async () => {
-      await mongoose.disconnect();
-      await mongoServer.stop();
-    });
+    await Scenario.create([scenario1, scenario2, scenario3]);
+    await Scene.create([scene1, scene2, scene3]);
   });
 
   it("creates and returns the newly persisted scene", async () => {
@@ -114,7 +95,7 @@ describe("Scene API tests", () => {
     };
 
     const response = await axios.post(
-      `http://localhost:${port}/api/scenario/${scenario1._id}/scene/`,
+      `http://localhost:${ctx.port}/api/scenario/${scenario1._id}/scene/`,
       reqData,
       authHeaders("user1")
     );
@@ -155,7 +136,7 @@ describe("Scene API tests", () => {
     };
 
     const response = await axios.post(
-      `http://localhost:${port}/api/scenario/${scenario1._id}/scene/`,
+      `http://localhost:${ctx.port}/api/scenario/${scenario1._id}/scene/`,
       reqData,
       authHeaders("user1")
     );
@@ -189,7 +170,7 @@ describe("Scene API tests", () => {
 
   it("GET api/scenario/:scenarioId/scene retrieve all scenes successfully", async () => {
     const response = await axios.get(
-      `http://localhost:${port}/api/scenario/${scenario2._id}/scene/`,
+      `http://localhost:${ctx.port}/api/scenario/${scenario2._id}/scene/`,
       authHeaders("user1")
     );
     expect(response.status).toBe(HTTP_OK);
@@ -209,7 +190,7 @@ describe("Scene API tests", () => {
 
   it("GET api/scenario/:scenarioId/scene/full/:sceneId retrieve scene successfully", async () => {
     const response = await axios.get(
-      `http://localhost:${port}/api/scenario/${
+      `http://localhost:${ctx.port}/api/scenario/${
         scenario2._id
       }/scene/full/${scene1._id.toString()}`,
       authHeaders("user1")
@@ -232,7 +213,7 @@ describe("Scene API tests", () => {
     };
 
     const response = await axios.patch(
-      `http://localhost:${port}/api/scenario/${scenario2._id}/scene/${scene1._id}`,
+      `http://localhost:${ctx.port}/api/scenario/${scenario2._id}/scene/${scene1._id}`,
       reqData,
       authHeaders("user1")
     );
@@ -244,9 +225,50 @@ describe("Scene API tests", () => {
     expect(dbScene.components).toEqual(scene1.components);
   });
 
+  it("PUT api/scenario/:scenarioId/scene/reorder updates scene order", async () => {
+    const reqData = {
+      sceneIds: [scene2._id.toString(), scene1._id.toString()],
+    };
+
+    const response = await axios.put(
+      `http://localhost:${ctx.port}/api/scenario/${scenario2._id}/scene/reorder`,
+      reqData,
+      authHeaders("user1")
+    );
+
+    expect(response.status).toBe(HTTP_OK);
+    expect(response.data.scenes).toEqual(reqData.sceneIds);
+
+    const dbScenario = await Scenario.findById(scenario2._id).lean();
+    expect(dbScenario.scenes).toEqual([scene2._id, scene1._id]);
+  });
+
+  it("PUT api/scenario/:scenarioId/scene/reorder prevents changing scene count", async () => {
+    let error;
+
+    try {
+      await axios.put(
+        `http://localhost:${ctx.port}/api/scenario/${scenario2._id}/scene/reorder`,
+        { sceneIds: [scene1._id.toString()] },
+        authHeaders("user1")
+      );
+    } catch (err) {
+      error = err;
+    }
+
+    expect(error).toBeDefined();
+    expect(error.response.status).toBe(409);
+    expect(error.response.data.error).toBe(
+      "Reordering must preserve the number of scenes."
+    );
+
+    const dbScenario = await Scenario.findById(scenario2._id).lean();
+    expect(dbScenario.scenes).toEqual([scene1._id, scene2._id]);
+  });
+
   it("DELETE api/scenario/:scenarioId/scene/:sceneId deletes a valid scene", async () => {
     const response = await axios.delete(
-      `http://localhost:${port}/api/scenario/${scenario2._id}/scene/${scene1._id}/`,
+      `http://localhost:${ctx.port}/api/scenario/${scenario2._id}/scene/${scene1._id}/`,
       authHeaders("user1")
     );
     expect(response.status).toBe(HTTP_OK);
@@ -262,11 +284,36 @@ describe("Scene API tests", () => {
     // TODO: check corresponding components are removed
   });
 
+  it("DELETE api/scenario/:scenarioId/scene/:sceneId prevents deleting the only scene", async () => {
+    let error;
+
+    try {
+      await axios.delete(
+        `http://localhost:${ctx.port}/api/scenario/${scenario3._id}/scene/${scene3._id}/`,
+        authHeaders("user1")
+      );
+    } catch (err) {
+      error = err;
+    }
+
+    expect(error).toBeDefined();
+    expect(error.response.status).toBe(409);
+    expect(error.response.data.error).toBe(
+      "A scenario must have at least one scene."
+    );
+
+    const dbScene = await Scene.findById(scene3._id);
+    expect(dbScene).toBeDefined();
+
+    const dbScenario = await Scenario.findById(scenario3._id).lean();
+    expect(dbScenario.scenes).toEqual([scene3._id]);
+  });
+
   it("DELETE api/scenario/:scenarioId/scene/:sceneId returns 404 with invalid IDs", async () => {
     // bad sceneId
     await expect(
       axios.delete(
-        `http://localhost:${port}/api/scenario/${scenario2._id}/scene/000000000000000000000009/`,
+        `http://localhost:${ctx.port}/api/scenario/${scenario2._id}/scene/000000000000000000000009/`,
         authHeaders("user1")
       )
     ).rejects.toThrow();
@@ -274,7 +321,7 @@ describe("Scene API tests", () => {
     // bad scenarioId
     await expect(
       axios.delete(
-        `http://localhost:${port}/api/scenario/000000000000000000000009/scene/${scene1._id}/`,
+        `http://localhost:${ctx.port}/api/scenario/000000000000000000000009/scene/${scene1._id}/`,
         authHeaders("user1")
       )
     ).rejects.toThrow();
@@ -282,7 +329,7 @@ describe("Scene API tests", () => {
 
   it("POST /duplicate: duplicates a scene and returns the newly persisted scene", async () => {
     const response = await axios.post(
-      `http://localhost:${port}/api/scenario/${scenario2._id}/scene/duplicate/${scene1._id}`,
+      `http://localhost:${ctx.port}/api/scenario/${scenario2._id}/scene/duplicate/${scene1._id}`,
       {},
       authHeaders("user1")
     );

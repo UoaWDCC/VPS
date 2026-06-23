@@ -36,7 +36,6 @@ describe("Navigate User API tests", () => {
   let scenario;
   let scene1;
   let scene2;
-  let player;
 
   beforeAll(async () => {
     mongoServer = await MongoMemoryServer.create();
@@ -70,7 +69,7 @@ describe("Navigate User API tests", () => {
       stateVariables: [],
     });
 
-    player = await User.create({
+    await User.create({
       uid: "uid-player",
       name: "Player",
       email: "player@auckland.ac.nz",

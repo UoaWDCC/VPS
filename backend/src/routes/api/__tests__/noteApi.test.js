@@ -16,6 +16,7 @@ import axios from "axios";
 import routes from "../../index.js";
 import Note from "../../../db/models/note.js";
 import Group from "../../../db/models/group.js";
+import User from "../../../db/models/user.js";
 import auth from "../../../middleware/firebaseAuth.js";
 import { authHeaders } from "./testHelpers.js";
 
@@ -51,6 +52,23 @@ describe("Note API tests", () => {
   });
 
   beforeEach(async () => {
+    // The note routes resolve the caller's email from their uid, so the
+    // authenticated user must exist and (to be a group member) share the
+    // group member's email.
+    await User.create({
+      uid: "user1",
+      name: "Doctor",
+      email: userEmail,
+      pictureURL: "http://example.com/doctor.png",
+    });
+
+    await User.create({
+      uid: "outsider",
+      name: "Outsider",
+      email: "outsider@example.com",
+      pictureURL: "http://example.com/outsider.png",
+    });
+
     note1 = await Note.create({
       title: "Note 1",
       text: "Some text",
@@ -122,7 +140,6 @@ describe("Note API tests", () => {
       {
         groupId: group._id.toString(),
         title: "New Note",
-        email: userEmail,
       },
       authHeaders("user1")
     );
@@ -136,15 +153,15 @@ describe("Note API tests", () => {
   });
 
   it("POST /note/ does nothing silently when user is not in group", async () => {
-    // User not in the group — createNote returns null but route still responds 200
+    // Authenticated as "outsider", whose email is not a group member —
+    // createNote returns null but the route still responds 200.
     const response = await axios.post(
       `http://localhost:${port}/api/note/`,
       {
         groupId: group._id.toString(),
         title: "Ghost Note",
-        email: "outsider@example.com",
       },
-      authHeaders("user1")
+      authHeaders("outsider")
     );
     expect(response.status).toBe(200);
     expect(response.data).toBe("note created");
@@ -161,7 +178,6 @@ describe("Note API tests", () => {
         title: "Updated Title",
         text: "Updated text",
         groupId: group._id.toString(),
-        email: userEmail,
       },
       authHeaders("user1")
     );
@@ -181,7 +197,6 @@ describe("Note API tests", () => {
         data: {
           noteId: note1._id.toString(),
           groupId: group._id.toString(),
-          email: userEmail,
         },
       }
     );

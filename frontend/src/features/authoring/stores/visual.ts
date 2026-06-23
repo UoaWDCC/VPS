@@ -6,13 +6,13 @@ type VisualComponent = Component;
 type VisualComponents = Record<string, VisualComponent>;
 
 export interface VisualSceneState {
-  components: Record<string, any>;
+  components: VisualComponents;
   id: string | null;
   name: string | null;
   roles: string[] | null;
   directLink: string | null;
   time: number | null;
-  timerStateOperations: any[] | null;
+  timerStateOperations: Record<string, unknown>[] | null;
 
   setVisualScene: (scene: Partial<VisualSceneState>) => void;
   setComponents: (components: VisualComponents) => void;

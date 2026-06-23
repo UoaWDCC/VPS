@@ -157,6 +157,8 @@ Returns:
 }
 ```
 
+All image endpoints require an authorisation header.
+
 **Store image urls in database - developer use only:**
 
 `POST /api/image`
@@ -214,7 +216,7 @@ Returns:
 
 ## Notes
 
-\* Requires authorisation header
+All note endpoints require an authorisation header.
 
 ```
 headers: {
@@ -222,7 +224,9 @@ headers: {
     }
 ```
 
-**Create note in a group with given groupId, title and a role**
+The caller's email is derived from their auth token — it does not need to be supplied in the request body. The role is derived from the caller's membership of the group.
+
+**Create a note in a group**
 
 `POST /api/note`
 
@@ -232,8 +236,7 @@ Body:
 
 {
     "groupId":  "f38u8d09j012",
-    "title":    "Doctor's note",
-    "role":     "Doctor"
+    "title":    "Doctor's note"
 }
 
 ```
@@ -241,21 +244,20 @@ Body:
 Returns:
 
 ```
-{
-    "note created"
-}
+"note created"
 ```
 
-**Update a note with given noteId, text and title**
+**Update a note**
 
-`POST /api/note/update`
+`PUT /api/note/update`
 
 Body:
 
 ```
 
 {
-    "noteId":  "f38u8d09j012",
+    "noteId":   "f38u8d09j012",
+    "groupId":  "f38u8d09j012",
     "title":    "Doctor's note",
     "text":     "Give him water"
 }
@@ -265,29 +267,17 @@ Body:
 Returns:
 
 ```
-{
-    "note updated"
-}
+"note updated"
 ```
 
-**Retrieve all notes in a group with given groupId**
+**Retrieve all notes in a group**
 
-`POST /api/note/retrieveList`
-
-Body:
-
-```
-
-{
-    "groupId":  "f38u8d09j012",
-}
-
-```
+`GET /api/note/retrieveAll/:groupId`
 
 Returns:
 
 ```
-{
+[
     {
         "_id":      "a8j3ih8f303",
         "title":    "Doctor's note",
@@ -295,15 +285,13 @@ Returns:
         "date":     "date object",
         "text":     "note content"
     },
-    {
-        more notes
-    }
-}
+    ...
+]
 ```
 
-**Delete a notes in a group with given noteId and groupId**
+**Delete a note**
 
-`POST /api/note/delete`
+`DELETE /api/note/delete`
 
 Body:
 
@@ -311,7 +299,7 @@ Body:
 
 {
     "noteId":   "f38u8d09j012",
-    "groupId":  "f38u8d09j012",
+    "groupId":  "f38u8d09j012"
 }
 
 ```
@@ -319,9 +307,7 @@ Body:
 Returns:
 
 ```
-{
-    "note deleted"
-}
+"note deleted"
 ```
 ---
 

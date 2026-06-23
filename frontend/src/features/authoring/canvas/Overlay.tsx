@@ -11,7 +11,7 @@ import Rectangle from "./Rectangle";
 import useEditorStore from "../stores/editor";
 import useVisualScene from "../stores/visual";
 
-const componentMap: Record<string, React.FC<any>> = {
+const componentMap: Record<string, React.FC<Record<string, unknown>>> = {
   speech: Speech,
   ellipse: Ellipse,
   box: Box,

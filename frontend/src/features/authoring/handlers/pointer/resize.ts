@@ -33,7 +33,7 @@ export function handleResizeDrag(e: React.MouseEvent, position: Vec2) {
   const { addMode, setMutationBounds, selected } = useEditorStore.getState();
   addMode("mutation");
 
-  const bounds = getComponentProp(selected!, "bounds");
+  const bounds = getComponentProp(selected!, "bounds") as Bounds;
 
   const newBounds: Partial<Bounds> = {};
 

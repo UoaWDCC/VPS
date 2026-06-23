@@ -1,6 +1,5 @@
 import { useCallback, useContext, useEffect } from "react";
 import AuthenticationContext from "./AuthenticationContext";
-import ScenarioContext from "./ScenarioContext";
 import SceneContext from "./SceneContext";
 import { useParams } from "react-router-dom";
 import { api } from "../util/api";
@@ -17,11 +16,11 @@ async function getAllScenes(user, id) {
 }
 
 function updateScenes(user, id, sceneIds) {
-  api.put(user, `/api/scenario/${id}/scene/reorder`, { sceneIds });
+  return api.put(user, `/api/scenario/${id}/scene/reorder`, { sceneIds });
 }
 
 function deleteScene(user, scenarioId, sceneId) {
-  api.delete(user, `/api/scenario/${scenarioId}/scene/${sceneId}`);
+  return api.delete(user, `/api/scenario/${scenarioId}/scene/${sceneId}`);
 }
 
 async function saveScenePatch(user, scenarioId, patch) {
@@ -43,20 +42,10 @@ async function saveScenePatch(user, scenarioId, patch) {
  * SceneContextProvider allows access to scene info and the refetch function
  */
 export default function SceneContextProvider({ children }) {
-  const { setCurrentScenario } = useContext(ScenarioContext);
   const { user } = useContext(AuthenticationContext);
   const { scenarioId } = useParams();
 
   const queryClient = useQueryClient();
-
-  // FIX: this is disgusting
-  useQuery({
-    queryKey: ["scenario", scenarioId],
-    queryFn: () =>
-      api.get(user, `api/scenario/${scenarioId}`).then((r) => r.data),
-    enabled: !!scenarioId,
-    onSuccess: (data) => setCurrentScenario(data),
-  });
 
   const scenesQuery = useQuery({
     queryKey: ["scenes", scenarioId],
@@ -83,13 +72,25 @@ export default function SceneContextProvider({ children }) {
     mutationFn: (id) => deleteScene(user, scenarioId, id),
     onMutate: async (id) => {
       await queryClient.cancelQueries(["scenes", scenarioId]);
+      const previousScenes = queryClient.getQueryData(["scenes", scenarioId]);
+
       queryClient.setQueryData(["scenes", scenarioId], (prev) =>
         prev ? prev.filter((s) => s._id !== id) : []
       );
+
+      return { previousScenes };
     },
-    onError: () => {
+    onError: (error, _id, context) => {
+      if (context?.previousScenes) {
+        queryClient.setQueryData(
+          ["scenes", scenarioId],
+          context.previousScenes
+        );
+      }
+
       toast.error(
-        "Something went wrong updating the scenes, your last changes weren't saved"
+        error?.response?.data?.error ||
+          "Something went wrong updating the scenes, your last changes weren't saved"
       );
     },
   });

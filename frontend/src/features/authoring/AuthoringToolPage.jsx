@@ -89,7 +89,7 @@ export default function AuthoringToolPage() {
   }
 
   function goBack() {
-    history.push("/");
+    history.push("/create");
   }
 
   async function save() {

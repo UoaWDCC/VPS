@@ -1,15 +1,5 @@
-import {
-  jest,
-  describe,
-  beforeAll,
-  beforeEach,
-  afterEach,
-  afterAll,
-  it,
-  expect,
-} from "@jest/globals";
+import { jest, describe, beforeEach, it, expect } from "@jest/globals";
 
-import { MongoMemoryServer } from "mongodb-memory-server";
 import express from "express";
 import mongoose from "mongoose";
 import axios from "axios";
@@ -20,6 +10,10 @@ import auth from "../../../middleware/firebaseAuth.js";
 import scenarioAuth from "../../../middleware/scenarioAuth.js";
 import Access from "../../../db/models/access.js";
 import { authHeaders } from "./testHelpers.js";
+import {
+  useMongoMemoryServer,
+  useExpressServer,
+} from "../../../test/testSetup.js";
 
 jest.mock("../../../middleware/firebaseAuth");
 jest.mock("../../../middleware/scenarioAuth");
@@ -39,9 +33,13 @@ describe("Scenario API tests", () => {
   const HTTP_OK = 200;
   const HTTP_BAD_REQUEST = 400;
 
-  let mongoServer;
-  let server;
-  let port;
+  useMongoMemoryServer();
+  const ctx = useExpressServer(() => {
+    const app = express();
+    app.use(express.json());
+    app.use("/", routes);
+    return app;
+  });
 
   const scene1 = {
     _id: new mongoose.mongo.ObjectId("000000000000000000000003"),
@@ -79,39 +77,10 @@ describe("Scenario API tests", () => {
     users: {},
   };
 
-  // setup in-memory mongodb and express API
-  beforeAll(async () => {
-    mongoServer = await MongoMemoryServer.create();
-    const uri = mongoServer.getUri();
-
-    await mongoose.connect(uri);
-
-    const app = express();
-    app.use(express.json());
-    app.use("/", routes);
-
-    server = app.listen(0);
-    port = server.address().port;
-  });
-
   beforeEach(async () => {
-    // Add scenario to database
     await Scenario.create([scenario1, scenario2]);
     await Access.create([access1, access2]);
     await Scene.create([scene1, scene2]);
-  });
-
-  // clear the database
-  afterEach(async () => {
-    await mongoose.connection.db.dropDatabase();
-  });
-
-  // close the mongodb and express servers
-  afterAll(async () => {
-    server.close(async () => {
-      await mongoose.disconnect();
-      await mongoServer.stop();
-    });
   });
 
   it("creates and returns the newly persisted scenario", async () => {
@@ -120,7 +89,7 @@ describe("Scenario API tests", () => {
     };
 
     const response = await axios.post(
-      `http://localhost:${port}/api/scenario/`,
+      `http://localhost:${ctx.port}/api/scenario/`,
       reqData,
       authHeaders("user1")
     );
@@ -130,20 +99,24 @@ describe("Scenario API tests", () => {
     const scenario = response.data;
     expect(scenario._id).toBeDefined();
     expect(scenario.name).toEqual(reqData.name);
-    expect(scenario.scenes).toEqual([]);
+    expect(scenario.scenes).toHaveLength(1);
     expect(scenario.uid).toEqual("user1");
 
     // check if scenario has been persisted to db
     const dbScenario = await Scenario.findById(scenario._id).lean();
     expect(dbScenario).toBeDefined();
     expect(dbScenario.name).toEqual(reqData.name);
-    expect(dbScenario.scenes).toEqual([]);
+    expect(dbScenario.scenes).toHaveLength(1);
     expect(dbScenario.uid).toEqual("user1");
+
+    const dbScene = await Scene.findById(dbScenario.scenes[0]).lean();
+    expect(dbScene).toBeDefined();
+    expect(dbScene.name).toEqual("Scene 1");
   });
 
   it("GET /scenario: retrieve all scenarios successfully", async () => {
     const response = await axios.get(
-      `http://localhost:${port}/api/scenario/`,
+      `http://localhost:${ctx.port}/api/scenario/`,
       authHeaders("user1")
     );
     expect(response.status).toBe(HTTP_OK);
@@ -163,7 +136,7 @@ describe("Scenario API tests", () => {
 
   it("DELETE api/scenario/:scenarioId deletes a valid scenario", async () => {
     const response = await axios.delete(
-      `http://localhost:${port}/api/scenario/${scenario2._id}/`,
+      `http://localhost:${ctx.port}/api/scenario/${scenario2._id}/`,
       authHeaders("user1")
     );
     expect(response.status).toBe(HTTP_OK);
@@ -178,6 +151,12 @@ describe("Scenario API tests", () => {
     expect(dbScene1).toEqual(null);
     expect(dbScene2).toEqual(null);
 
+    // check corresponding access list is removed
+    const dbAccess2 = await Access.findOne({
+      scenarioId: scenario2._id.toString(),
+    });
+    expect(dbAccess2).toBeNull();
+
     // TODO: check corresponding components are removed
   });
 
@@ -185,7 +164,7 @@ describe("Scenario API tests", () => {
     // bad scenarioId
     await expect(
       axios.delete(
-        `http://localhost:${port}/api/scenario/000000000000000000000009/`,
+        `http://localhost:${ctx.port}/api/scenario/000000000000000000000009/`,
         authHeaders("user1")
       )
     ).rejects.toThrow();
@@ -193,7 +172,7 @@ describe("Scenario API tests", () => {
 
   it("update a scenarios name", async () => {
     const response = await axios.put(
-      `http://localhost:${port}/api/scenario/${scenario1._id}`,
+      `http://localhost:${ctx.port}/api/scenario/${scenario1._id}`,
       { name: "Scenario 2" },
       authHeaders("user1")
     );
@@ -214,7 +193,7 @@ describe("Scenario API tests", () => {
 
   it("GET /scenario/assigned returns assigned scenarios for a user", async () => {
     const response = await axios.get(
-      `http://localhost:${port}/api/scenario/assigned`,
+      `http://localhost:${ctx.port}/api/scenario/assigned`,
       authHeaders("user1")
     );
     expect(response.status).toBe(HTTP_OK);
@@ -223,7 +202,7 @@ describe("Scenario API tests", () => {
 
   it("GET /scenario/all returns owned, assigned, and accessible scenario groups", async () => {
     const response = await axios.get(
-      `http://localhost:${port}/api/scenario/all`,
+      `http://localhost:${ctx.port}/api/scenario/all`,
       authHeaders("user1")
     );
     expect(response.status).toBe(HTTP_OK);
@@ -234,7 +213,7 @@ describe("Scenario API tests", () => {
 
   it("GET /scenario/:scenarioId returns the scenario", async () => {
     const response = await axios.get(
-      `http://localhost:${port}/api/scenario/${scenario1._id}`,
+      `http://localhost:${ctx.port}/api/scenario/${scenario1._id}`,
       authHeaders("user1")
     );
     expect(response.status).toBe(HTTP_OK);
@@ -245,7 +224,7 @@ describe("Scenario API tests", () => {
   it("GET /scenario/:scenarioId returns 400 for a malformed id", async () => {
     await expect(
       axios.get(
-        `http://localhost:${port}/api/scenario/not-a-valid-id`,
+        `http://localhost:${ctx.port}/api/scenario/not-a-valid-id`,
         authHeaders("user1")
       )
     ).rejects.toMatchObject({ response: { status: HTTP_BAD_REQUEST } });
@@ -253,7 +232,7 @@ describe("Scenario API tests", () => {
 
   it("PATCH /scenario/:scenarioId updates scenario fields", async () => {
     const response = await axios.patch(
-      `http://localhost:${port}/api/scenario/${scenario1._id}`,
+      `http://localhost:${ctx.port}/api/scenario/${scenario1._id}`,
       { name: "Patched Name", description: "New desc" },
       authHeaders("user1")
     );
@@ -266,7 +245,7 @@ describe("Scenario API tests", () => {
   it("PATCH /scenario/:scenarioId returns 400 for a malformed id", async () => {
     await expect(
       axios.patch(
-        `http://localhost:${port}/api/scenario/not-a-valid-id`,
+        `http://localhost:${ctx.port}/api/scenario/not-a-valid-id`,
         { name: "x" },
         authHeaders("user1")
       )
@@ -275,7 +254,7 @@ describe("Scenario API tests", () => {
 
   it("GET /scenario/:scenarioId/stateVariables returns state variables array", async () => {
     const response = await axios.get(
-      `http://localhost:${port}/api/scenario/${scenario1._id}/stateVariables`,
+      `http://localhost:${ctx.port}/api/scenario/${scenario1._id}/stateVariables`,
       authHeaders("user1")
     );
     expect(response.status).toBe(HTTP_OK);
@@ -283,9 +262,13 @@ describe("Scenario API tests", () => {
   });
 
   it("POST /scenario/:scenarioId/stateVariables creates a state variable", async () => {
-    const newStateVariable = { name: "health", type: "number", defaultValue: 100 };
+    const newStateVariable = {
+      name: "health",
+      type: "number",
+      defaultValue: 100,
+    };
     const response = await axios.post(
-      `http://localhost:${port}/api/scenario/${scenario1._id}/stateVariables`,
+      `http://localhost:${ctx.port}/api/scenario/${scenario1._id}/stateVariables`,
       { newStateVariable },
       authHeaders("user1")
     );
@@ -301,13 +284,15 @@ describe("Scenario API tests", () => {
 
   it("PUT /scenario/:scenarioId/stateVariables edits an existing state variable", async () => {
     await axios.post(
-      `http://localhost:${port}/api/scenario/${scenario1._id}/stateVariables`,
-      { newStateVariable: { name: "health", type: "number", defaultValue: 100 } },
+      `http://localhost:${ctx.port}/api/scenario/${scenario1._id}/stateVariables`,
+      {
+        newStateVariable: { name: "health", type: "number", defaultValue: 100 },
+      },
       authHeaders("user1")
     );
 
     const response = await axios.put(
-      `http://localhost:${port}/api/scenario/${scenario1._id}/stateVariables`,
+      `http://localhost:${ctx.port}/api/scenario/${scenario1._id}/stateVariables`,
       {
         originalName: "health",
         newStateVariable: { name: "health", type: "number", defaultValue: 50 },
@@ -316,19 +301,21 @@ describe("Scenario API tests", () => {
     );
     expect(response.status).toBe(HTTP_OK);
     expect(response.data).toEqual(
-      expect.arrayContaining([expect.objectContaining({ name: "health", defaultValue: 50 })])
+      expect.arrayContaining([
+        expect.objectContaining({ name: "health", defaultValue: 50 }),
+      ])
     );
   });
 
   it("DELETE /scenario/:scenarioId/stateVariables/:id removes a state variable", async () => {
     await axios.post(
-      `http://localhost:${port}/api/scenario/${scenario1._id}/stateVariables`,
+      `http://localhost:${ctx.port}/api/scenario/${scenario1._id}/stateVariables`,
       { newStateVariable: { name: "score", type: "number", defaultValue: 0 } },
       authHeaders("user1")
     );
 
     const response = await axios.delete(
-      `http://localhost:${port}/api/scenario/${scenario1._id}/stateVariables/score`,
+      `http://localhost:${ctx.port}/api/scenario/${scenario1._id}/stateVariables/score`,
       authHeaders("user1")
     );
     expect(response.status).toBe(HTTP_OK);

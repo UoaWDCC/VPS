@@ -1,63 +1,42 @@
-import {
-  jest,
-  describe,
-  beforeAll,
-  afterEach,
-  afterAll,
-  it,
-  expect,
-} from "@jest/globals";
+import { jest, describe, it, expect } from "@jest/globals";
 
-import { MongoMemoryServer } from "mongodb-memory-server";
 import express from "express";
-import mongoose from "mongoose";
 import axios from "axios";
 import routes from "../../index.js";
 import Image from "../../../db/models/image.js";
+import auth from "../../../middleware/firebaseAuth.js";
+import {
+  useMongoMemoryServer,
+  useExpressServer,
+} from "../../../test/testSetup.js";
 
-jest.mock("firebase-admin"); // Needed to mock the firebase-admin dependency in firebase-auth.js which is in routes
+jest.mock("../../../middleware/firebaseAuth");
+jest.mock("firebase-admin");
+
+auth.mockImplementation(async (req, res, next) => {
+  req.body.uid = req.headers.authorization?.split(" ")[1];
+  next();
+});
+
+function authHeaders(id) {
+  return { headers: { Authorization: `Bearer ${id}` } };
+}
 
 describe("Image API tests", () => {
   const HTTP_OK = 200;
   const HTTP_BAD_REQUEST = 400;
   const HTTP_NOT_FOUND = 404;
 
-  let mongoServer;
-  let server;
-  let port;
-
-  // setup in-memory mongodb and express API
-  beforeAll(async () => {
-    mongoServer = await MongoMemoryServer.create();
-    const uri = mongoServer.getUri();
-
-    await mongoose.connect(uri);
-
+  useMongoMemoryServer();
+  const ctx = useExpressServer(() => {
     const app = express();
     app.use(express.json());
     app.use("/", routes);
-
-    // Add safe error handler to avoid circular JSON errors
-    app.use((err, res) => {
+    app.use((err, req, res, _next) => {
       console.error("Unhandled Express error:", err.message);
       res.status(500).json({ error: "Internal Server Error" });
     });
-
-    server = app.listen(0);
-    port = server.address().port;
-  });
-
-  // clear the database
-  afterEach(async () => {
-    await mongoose.connection.db.dropDatabase();
-  });
-
-  // close the mongodb and express servers
-  afterAll(async () => {
-    server.close(async () => {
-      await mongoose.disconnect();
-      await mongoServer.stop();
-    });
+    return app;
   });
 
   it("creates images in the database", async () => {
@@ -79,8 +58,9 @@ describe("Image API tests", () => {
     };
 
     const response = await axios.post(
-      `http://localhost:${port}/api/image/`,
-      body
+      `http://localhost:${ctx.port}/api/image/`,
+      body,
+      authHeaders("user1")
     );
     expect(response.status).toBe(HTTP_OK);
 
@@ -100,7 +80,10 @@ describe("Image API tests", () => {
 
     await Promise.all(urls.map((url) => new Image({ url }).save()));
 
-    const response = await axios.get(`http://localhost:${port}/api/image/`);
+    const response = await axios.get(
+      `http://localhost:${ctx.port}/api/image/`,
+      authHeaders("user1")
+    );
     expect(response.status).toBe(HTTP_OK);
 
     // check correct images are returned
@@ -125,7 +108,8 @@ describe("Image API tests", () => {
     await Image.create([image1, image2]);
 
     const response = await axios.get(
-      `http://localhost:${port}/api/image/${image2.id}`
+      `http://localhost:${ctx.port}/api/image/${image2.id}`,
+      authHeaders("user1")
     );
     expect(response.status).toBe(HTTP_OK);
 
@@ -136,20 +120,30 @@ describe("Image API tests", () => {
 
   it("POST /api/image/ returns 400 when body has no urls or images", async () => {
     await expect(
-      axios.post(`http://localhost:${port}/api/image/`, {})
+      axios.post(
+        `http://localhost:${ctx.port}/api/image/`,
+        {},
+        authHeaders("user1")
+      )
     ).rejects.toMatchObject({ response: { status: HTTP_BAD_REQUEST } });
   });
 
   it("POST /api/image/ returns 400 when urls and images arrays are empty", async () => {
     await expect(
-      axios.post(`http://localhost:${port}/api/image/`, { urls: [], images: [] })
+      axios.post(
+        `http://localhost:${ctx.port}/api/image/`,
+        { urls: [], images: [] },
+        authHeaders("user1")
+      )
     ).rejects.toMatchObject({ response: { status: HTTP_BAD_REQUEST } });
   });
 
   it("POST /api/image/ accepts urls string array format", async () => {
-    const response = await axios.post(`http://localhost:${port}/api/image/`, {
-      urls: ["https://example.com/photo.jpg"],
-    });
+    const response = await axios.post(
+      `http://localhost:${ctx.port}/api/image/`,
+      { urls: ["https://example.com/photo.jpg"] },
+      authHeaders("user1")
+    );
     expect(response.status).toBe(HTTP_OK);
     const dbImages = await Image.find();
     expect(dbImages).toHaveLength(1);
@@ -158,13 +152,19 @@ describe("Image API tests", () => {
 
   it("GET /api/image/undefined returns 400 for literal 'undefined' id", async () => {
     await expect(
-      axios.get(`http://localhost:${port}/api/image/undefined`)
+      axios.get(
+        `http://localhost:${ctx.port}/api/image/undefined`,
+        authHeaders("user1")
+      )
     ).rejects.toMatchObject({ response: { status: HTTP_BAD_REQUEST } });
   });
 
   it("GET /api/image/:id returns 404 for unknown id", async () => {
     await expect(
-      axios.get(`http://localhost:${port}/api/image/nonexistent-id`)
+      axios.get(
+        `http://localhost:${ctx.port}/api/image/nonexistent-id`,
+        authHeaders("user1")
+      )
     ).rejects.toMatchObject({ response: { status: HTTP_NOT_FOUND } });
   });
 });

@@ -94,7 +94,7 @@ export default function NotesPanel({ group, open, onClose }) {
       const prevIds = new Set(notes.map((n) => n._id));
       await axios.post(
         "/api/note/",
-        { groupId: group._id, title: "New Note", email: user.email },
+        { groupId: group._id, title: "New Note" },
         { headers: { Authorization: `Bearer ${token}` } }
       );
 

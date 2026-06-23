@@ -238,7 +238,9 @@ describe("Files API tests", () => {
     await expect(
       axios.post(
         `http://localhost:${port}/api/files/state-conditionals/000000000000000000000099`,
-        { stateConditional: { stateVariableId: "x", comparator: "=", value: 1 } },
+        {
+          stateConditional: { stateVariableId: "x", comparator: "=", value: 1 },
+        },
         authHeaders("user1")
       )
     ).rejects.toMatchObject({ response: { status: 404 } });
