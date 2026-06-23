@@ -53,7 +53,7 @@ export default function AuthoringToolPage() {
       } finally {
         setSaving(false);
       }
-    }, 5000);
+    }, 2500);
 
     const listener = async ({ operation, record }) => {
       if (operation === "undo" || operation === "redo") {
