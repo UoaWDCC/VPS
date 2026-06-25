@@ -11,11 +11,18 @@ import { copy, cut, paste } from "./handlers/keyboard/clipboard";
 import useEditorStore from "./stores/editor";
 import { useHistory } from "react-router-dom";
 import { replace, replaceComponent } from "./scene/operations/modifiers";
-import { ArrowLeftIcon, FilesIcon, PlayIcon, UsersIcon } from "lucide-react";
+import {
+  ArrowLeftIcon,
+  FilesIcon,
+  PlayIcon,
+  UserPlusIcon,
+  UsersIcon,
+} from "lucide-react";
 import { handleGlobal } from "./handlers/keyboard/keyboard";
 import { clearHistory, historyEvents } from "./scene/history";
 import { debounce } from "../../util/debounce";
 import { getScene } from "./scene/scene";
+import ShareModal from "./components/ShareModal";
 
 const listeners = [
   ["copy", copy],
@@ -40,6 +47,7 @@ export default function AuthoringToolPage() {
   const history = useHistory();
 
   const [saving, setSaving] = useState(false);
+  const [shareModalOpen, setShareModalOpen] = useState(false);
 
   const pendingSavesRef = useRef(0);
 
@@ -148,6 +156,13 @@ export default function AuthoringToolPage() {
             <UsersIcon size={20} />
             Groups
           </button>
+          <button
+            onClick={() => setShareModalOpen(true)}
+            className="btn btn-phantom text-m"
+          >
+            <UserPlusIcon size={20} />
+            Share
+          </button>
           <button onClick={playScenario} className="btn btn-phantom text-m">
             <PlayIcon size={20} />
             Play
@@ -162,6 +177,7 @@ export default function AuthoringToolPage() {
           </div>
         </div>
       </div>
+      <ShareModal open={shareModalOpen} setOpen={setShareModalOpen} />
     </>
   );
 }
