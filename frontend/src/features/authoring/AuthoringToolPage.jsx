@@ -23,6 +23,7 @@ import { clearHistory, historyEvents } from "./scene/history";
 import { debounce } from "../../util/debounce";
 import { getScene } from "./scene/scene";
 import ShareModal from "./components/ShareModal";
+import ScenarioContext from "../../context/ScenarioContext";
 
 const listeners = [
   ["copy", copy],
@@ -39,6 +40,7 @@ const listeners = [
  */
 export default function AuthoringToolPage() {
   const { scenes, modifyScene, switchScene } = useContext(SceneContext);
+  const { allScenarios } = useContext(ScenarioContext);
   const { scenarioId } = useParams();
 
   const sceneId = useVisualScene((scene) => scene.id);
@@ -137,6 +139,8 @@ export default function AuthoringToolPage() {
     }
   }
 
+  const isScenarioOwner = allScenarios?.owned.find((s) => s._id === scenarioId);
+
   return (
     <>
       <div className="font-ibm flex flex-col h-screen w-screen overflow-hidden gap-m">
@@ -156,13 +160,15 @@ export default function AuthoringToolPage() {
             <UsersIcon size={20} />
             Groups
           </button>
-          <button
-            onClick={() => setShareModalOpen(true)}
-            className="btn btn-phantom text-m"
-          >
-            <UserPlusIcon size={20} />
-            Share
-          </button>
+          {isScenarioOwner && (
+            <button
+              onClick={() => setShareModalOpen(true)}
+              className="btn btn-phantom text-m"
+            >
+              <UserPlusIcon size={20} />
+              Share
+            </button>
+          )}
           <button onClick={playScenario} className="btn btn-phantom text-m">
             <PlayIcon size={20} />
             Play
@@ -177,7 +183,9 @@ export default function AuthoringToolPage() {
           </div>
         </div>
       </div>
-      <ShareModal open={shareModalOpen} setOpen={setShareModalOpen} />
+      {isScenarioOwner && (
+        <ShareModal open={shareModalOpen} setOpen={setShareModalOpen} />
+      )}
     </>
   );
 }
