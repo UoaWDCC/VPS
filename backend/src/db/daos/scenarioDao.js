@@ -66,9 +66,7 @@ const retrieveAccessibleScenarios = async (uid) => {
 
   const { email } = await User.findOne({ uid }, { email: 1 }).lean();
 
-  const access = await Access.find({
-    [`accessList.${email}`]: { $exists: true },
-  })
+  const access = await Access.find({ accessList: email })
     .sort({ _id: 1 })
     .select("scenarioId -_id")
     .lean();
