@@ -128,9 +128,9 @@ export const userNavigate = async (req) => {
     const updatePromise =
       startScene && startScene !== path[0]
         ? User.updateOne(
-          { uid },
-          { $set: { [`paths.${scenarioId}`]: [startScene] } }
-        )
+            { uid },
+            { $set: { [`paths.${scenarioId}`]: [startScene] } }
+          )
         : Promise.resolve();
 
     const [, scenes] = await Promise.all([
