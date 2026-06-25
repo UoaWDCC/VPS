@@ -1,8 +1,8 @@
 import { v4 } from "uuid";
 import { buildVisualComponent, buildVisualScene } from "../../pipeline";
 import useVisualScene, { type VisualSceneState } from "../../stores/visual";
-import { updateHistory } from "../history";
-import { commitSavedScene, getComponent, getScene, setScene } from "../scene";
+import { dispatchModification, updateHistory } from "../history";
+import { getComponent, getScene, setScene } from "../scene";
 import type { Component, Scene } from "../../types";
 import { arrayToObject } from "../util";
 
@@ -12,7 +12,6 @@ export function replace(scene: Scene) {
     clone.components as unknown as { id: string }[]
   ) as Record<string, Component>;
   setScene(clone);
-  commitSavedScene();
   useVisualScene.getState().setVisualScene(buildVisualScene(clone));
 }
 
@@ -22,6 +21,7 @@ export function modifySceneProp<K extends keyof VisualSceneState>(
 ) {
   (getScene() as unknown as Record<string, unknown>)[prop as string] = value;
   useVisualScene.setState({ [prop]: value } as Pick<VisualSceneState, K>);
+  dispatchModification();
 }
 
 // wrapper for state mutating functions, will capture both state and operation
@@ -68,4 +68,13 @@ export function add(props: Record<string, any>, history = true) {
     .updateComponent(buildVisualComponent(props as Component));
 
   return id;
+}
+
+export function replaceComponent(
+  id: string,
+  state: Component | null,
+  history = false
+) {
+  if (state === null) remove(id, history);
+  else add(state, history);
 }

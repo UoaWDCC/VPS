@@ -49,6 +49,7 @@
     "react-select": "^5.10.2",
     "styled-components": "^6.1.19",
     "uuid": "^14.0.0",
+    "typescript-event-target": "^1.1.2",
     "zustand": "3"
   },
   "devDependencies": {
