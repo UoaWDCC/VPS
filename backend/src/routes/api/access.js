@@ -8,6 +8,7 @@ import auth from "../../middleware/firebaseAuth.js";
 import { scenarioOwnerAuth } from "../../middleware/scenarioAuth.js";
 import { HttpStatusCode } from "axios";
 import { isValidEmail } from "../../util/email.js";
+import { normaliseString } from "../../util/normalise.js";
 import { handle, HttpError } from "../../util/error.js";
 
 // NOTE: these operations are locked to only the scenario owner
@@ -32,8 +33,8 @@ router.patch(
   "/:scenarioId/grant",
   handle(async (req, res) => {
     const { scenarioId } = req.params;
-    const { email } = req.body;
-    if (!isValidEmail(email))
+    const email = normaliseString(req.body.email);
+    if (!email || !isValidEmail(email))
       throw new HttpError(
         "email format is not valid",
         HttpStatusCode.BadRequest
@@ -57,15 +58,18 @@ router.patch(
         HttpStatusCode.BadRequest
       );
 
-    for (const email of emails) {
-      if (!isValidEmail(email))
-        throw new HttpError(
-          "email format is not valid",
-          HttpStatusCode.BadRequest
-        );
-    }
+    const normd = emails.map((email) => {
+      const normd = normaliseString(email);
+      return normd && isValidEmail(normd) ? normd : null;
+    });
 
-    const access = await revokeAccess(scenarioId, emails);
+    if (normd.some(!Boolean))
+      throw new HttpError(
+        "email format is not valid",
+        HttpStatusCode.BadRequest
+      );
+
+    const access = await revokeAccess(scenarioId, normd);
     if (!access)
       throw new HttpError(
         "access object not found for scenario",

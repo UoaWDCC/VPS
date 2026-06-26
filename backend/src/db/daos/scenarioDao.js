@@ -64,9 +64,10 @@ const addThumbs = async (scenarios) => {
 const retrieveAccessibleScenarios = async (uid) => {
   if (!uid) return [];
 
-  const { email } = await User.findOne({ uid }, { email: 1 }).lean();
+  const user = await User.findOne({ uid }, { email: 1 }).lean();
+  if (!user?.email) return [];
 
-  const access = await Access.find({ accessList: email })
+  const access = await Access.find({ accessList: user.email })
     .sort({ _id: 1 })
     .select("scenarioId -_id")
     .lean();

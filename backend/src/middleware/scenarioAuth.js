@@ -7,14 +7,26 @@ import { hasAccess } from "../db/daos/accessDao.js";
  * @param {*} req params must have scenarioId
  */
 export default async function scenarioAuth(req, res, next) {
-  const scenario = await retrieveScenario(req.params.scenarioId);
-  if (!scenario) return res.sendStatus(HttpStatusCode.NotFound);
+  try {
+    const scenario = await retrieveScenario(req.params.scenarioId);
+    if (!scenario) return res.sendStatus(HttpStatusCode.NotFound);
 
-  // is direct owner or has been given access
-  const { uid } = req.body;
-  if (uid === scenario.uid || hasAccess(scenario._id, uid)) return next();
+    // is direct owner or has been given access
+    const { uid } = req.body;
+    if (uid === scenario.uid || (await hasAccess(scenario._id, uid)))
+      return next();
 
-  return res.sendStatus(HttpStatusCode.Unauthorized);
+    return res.sendStatus(HttpStatusCode.Unauthorized);
+  } catch (err) {
+    return next(err);
+  }
+}
+
+export async function isAuthor(scenarioId, uid) {
+  const scenario = await retrieveScenario(scenarioId);
+  if (!scenario) return false;
+  if (uid === scenario.uid || (await hasAccess(scenario._id, uid))) return true;
+  return false;
 }
 
 /**
@@ -22,10 +34,14 @@ export default async function scenarioAuth(req, res, next) {
  * @param {*} req params must have scenarioId
  */
 export async function scenarioOwnerAuth(req, res, next) {
-  const scenario = await retrieveScenario(req.params.scenarioId);
-  if (!scenario) return res.sendStatus(HttpStatusCode.NotFound);
+  try {
+    const scenario = await retrieveScenario(req.params.scenarioId);
+    if (!scenario) return res.sendStatus(HttpStatusCode.NotFound);
 
-  if (req.body.uid === scenario.uid) return next();
+    if (req.body.uid === scenario.uid) return next();
 
-  return res.sendStatus(HttpStatusCode.Unauthorized);
+    return res.sendStatus(HttpStatusCode.Unauthorized);
+  } catch (err) {
+    return next(err);
+  }
 }
