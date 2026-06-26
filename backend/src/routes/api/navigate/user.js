@@ -98,7 +98,7 @@ export const userNavigate = async (req) => {
       { paths: 1, _id: 1, stateVariables: 1, stateVersions: 1 }
     ).lean(),
     // Only hit the access list when startScene is present — avoids an extra DB query on every normal player request.
-    startSceneParam ? isAuthor(scenarioId, uid) : false,
+    startSceneParam ? await isAuthor(scenarioId, uid) : false,
   ]);
 
   // Non-authors cannot jump to an arbitrary scene even if they manually craft a URL with startScene.
