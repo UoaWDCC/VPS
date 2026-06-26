@@ -74,11 +74,14 @@ function ShareModal({ open, setOpen }) {
   });
 
   function grantMutationWrapper(email) {
-    if (accessQuery.data?.includes(email)) {
+    const normd = email?.trim().toLowerCase();
+    if (!normd) return;
+
+    if (accessQuery.data?.includes(normd)) {
       toast.error("This email already has access");
       return;
     }
-    grantMutation.mutate(email);
+    grantMutation.mutate(normd);
   }
 
   function closeDialog() {
@@ -103,7 +106,10 @@ function ShareModal({ open, setOpen }) {
             className="btn join-item"
             type="button"
             onClick={() => grantMutationWrapper(value)}
-            disabled={!isValidEmail(value) || grantMutation.isPending}
+            disabled={
+              !isValidEmail(value?.trim().toLowerCase()) ||
+              grantMutation.isPending
+            }
           >
             {grantMutation.isPending ? "Sharing" : "Share"}
           </button>
@@ -122,6 +128,7 @@ function ShareModal({ open, setOpen }) {
                     struck={true}
                     onAction={() => unTentativelyRevoke(email)}
                     Icon={Undo2Icon}
+                    actionLabel={`undo remove access for ${email}`}
                   />
                 ) : (
                   <Chip
@@ -129,6 +136,7 @@ function ShareModal({ open, setOpen }) {
                     text={email}
                     onAction={() => tentativelyRevoke(email)}
                     Icon={XIcon}
+                    actionLabel={`remove access for ${email}`}
                   />
                 )
               )}

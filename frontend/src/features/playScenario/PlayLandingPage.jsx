@@ -13,11 +13,15 @@ export default function PlayLandingPage() {
 
   const [search, setSearch] = useState("");
 
-  const scenarios = [
-    allScenarios.owned,
-    allScenarios.assigned,
-    allScenarios.accessible,
-  ].flat();
+  const scenarios = Array.from(
+    new Map(
+      [
+        ...allScenarios.owned,
+        ...allScenarios.assigned,
+        ...allScenarios.accessible,
+      ].map((scenario) => [scenario._id, scenario])
+    ).values()
+  );
 
   const filteredScenarios = scenarios.filter((scenario) =>
     scenario.name.toLowerCase().includes(search.toLowerCase())
