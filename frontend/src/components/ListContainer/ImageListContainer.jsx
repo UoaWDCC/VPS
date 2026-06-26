@@ -11,7 +11,7 @@ export default function ImageListContainer({
       {data?.map((item) => (
         <button
           type="button"
-          key={item.id || item._id} // fallback if some have _id instead
+          key={item.id}
           onClick={() => onItemSelected(item)}
           className={item.id === selectedId ? "border-accent border-2" : ""}
         >
