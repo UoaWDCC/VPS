@@ -10,11 +10,11 @@
   "contributorsPerLine": 6,
   "contributors": [
     {
-      "login": "becky-n",
-      "name": "Becky Ngan",
-      "avatar_url": "https://avatars.githubusercontent.com/u/51529481?v=4",
-      "profile": "https://github.com/becky-n",
-      "contributions": ["projectManagement"]
+      "login": "hazikchaudhry",
+      "name": "Hazik Chaudhry",
+      "avatar_url": "https://avatars.githubusercontent.com/u/99319319?v=4",
+      "profile": "https://github.com/hazikchaudhry",
+      "contributions": ["code", "projectManagement"]
     },
     {
       "login": "harbassan",
@@ -22,6 +22,83 @@
       "avatar_url": "https://avatars.githubusercontent.com/u/84175605?v=4",
       "profile": "https://github.com/harbassan",
       "contributions": ["code", "projectManagement"]
+    },
+    {
+      "login": "br-Chan",
+      "name": "Brandon Chan",
+      "avatar_url": "https://avatars.githubusercontent.com/u/160544499?v=4",
+      "profile": "https://github.com/br-Chan",
+      "contributions": ["projectManagement"]
+    },
+    {
+      "login": "GogaIV",
+      "name": "Jauhar Goga",
+      "avatar_url": "https://avatars.githubusercontent.com/u/102565988?v=4",
+      "profile": "https://github.com/GogaIV",
+      "contributions": ["code"]
+    },
+    {
+      "login": "del-ereno",
+      "name": "Del Huang",
+      "avatar_url": "https://avatars.githubusercontent.com/u/154120298?v=4",
+      "profile": "https://github.com/del-ereno",
+      "contributions": ["code"]
+    },
+    {
+      "login": "K1mmyn",
+      "name": "Kim Ngor",
+      "avatar_url": "https://avatars.githubusercontent.com/u/125098192?v=4",
+      "profile": "https://github.com/K1mmyn",
+      "contributions": ["code", "userTesting"]
+    },
+    {
+      "login": "leowla",
+      "name": "Leo Wang",
+      "avatar_url": "https://avatars.githubusercontent.com/u/38830741?v=4",
+      "profile": "https://github.com/leowla",
+      "contributions": ["code"]
+    },
+    {
+      "login": "kmck133",
+      "name": "Kieran McKenna",
+      "avatar_url": "https://avatars.githubusercontent.com/u/160551320?v=4",
+      "profile": "https://github.com/kmck133",
+      "contributions": ["code"]
+    },
+    {
+      "login": "glybrio",
+      "name": "Allan Han",
+      "avatar_url": "https://avatars.githubusercontent.com/u/179700217?v=4",
+      "profile": "https://github.com/glybrio",
+      "contributions": ["code"]
+    },
+    {
+      "login": "rgin216",
+      "name": "Ryan Gin",
+      "avatar_url": "https://avatars.githubusercontent.com/u/100395589?v=4",
+      "profile": "https://github.com/rgin216",
+      "contributions": ["code"]
+    },
+    {
+      "login": "justinedagreat",
+      "name": "Justine Jacinto",
+      "avatar_url": "https://avatars.githubusercontent.com/u/202360294?v=4",
+      "profile": "https://github.com/justinedagreat",
+      "contributions": ["code", "design"]
+    },
+    {
+      "login": "",
+      "name": "Mekaella Millabas",
+      "avatar_url": "",
+      "profile": "",
+      "contributions": ["design"]
+    },
+    {
+      "login": "becky-n",
+      "name": "Becky Ngan",
+      "avatar_url": "https://avatars.githubusercontent.com/u/51529481?v=4",
+      "profile": "https://github.com/becky-n",
+      "contributions": ["projectManagement"]
     },
     {
       "login": "kelvinchen8",
@@ -49,13 +126,6 @@
       "name": "Rayen Lee",
       "avatar_url": "https://avatars.githubusercontent.com/u/159082701?v=4",
       "profile": "https://github.com/RLee64",
-      "contributions": ["code"]
-    },
-    {
-      "login": "hazikchaudhry",
-      "name": "Hazik Chaudhry",
-      "avatar_url": "https://avatars.githubusercontent.com/u/99319319?v=4",
-      "profile": "https://github.com/hazikchaudhry",
       "contributions": ["code"]
     },
     {
@@ -337,62 +407,6 @@
       "avatar_url": "https://avatars.githubusercontent.com/u/60560589?v=4",
       "profile": "https://github.com/afei088",
       "contributions": ["code"]
-    },
-    {
-      "login": "GogaIV",
-      "name": "Jauhar Goga",
-      "avatar_url": "https://avatars.githubusercontent.com/u/102565988?v=4",
-      "profile": "https://github.com/GogaIV",
-      "contributions": ["code"]
-    },
-    {
-      "login": "del-ereno",
-      "name": "del",
-      "avatar_url": "https://avatars.githubusercontent.com/u/154120298?v=4",
-      "profile": "https://github.com/del-ereno",
-      "contributions": ["code"]
-    },
-    {
-      "login": "K1mmyn",
-      "name": "Kim Ngor",
-      "avatar_url": "https://avatars.githubusercontent.com/u/125098192?v=4",
-      "profile": "https://github.com/K1mmyn",
-      "contributions": ["code", "userTesting"]
-    },
-    {
-      "login": "leowla",
-      "name": "Leo Wang",
-      "avatar_url": "https://avatars.githubusercontent.com/u/38830741?v=4",
-      "profile": "https://github.com/leowla",
-      "contributions": ["code"]
-    },
-    {
-      "login": "kmck133",
-      "name": "Kieran McKenna",
-      "avatar_url": "https://avatars.githubusercontent.com/u/160551320?v=4",
-      "profile": "https://github.com/kmck133",
-      "contributions": ["code"]
-    },
-    {
-      "login": "glybrio",
-      "name": "glybrio",
-      "avatar_url": "https://avatars.githubusercontent.com/u/179700217?v=4",
-      "profile": "https://github.com/glybrio",
-      "contributions": ["code"]
-    },
-    {
-      "login": "rgin216",
-      "name": "rgin216",
-      "avatar_url": "https://avatars.githubusercontent.com/u/100395589?v=4",
-      "profile": "https://github.com/rgin216",
-      "contributions": ["code"]
-    },
-    {
-      "login": "justinedagreat",
-      "name": "justinedagreat",
-      "avatar_url": "https://avatars.githubusercontent.com/u/202360294?v=4",
-      "profile": "https://github.com/justinedagreat",
-      "contributions": ["code", "design"]
     }
   ]
 }
