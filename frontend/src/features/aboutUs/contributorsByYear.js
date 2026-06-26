@@ -7,86 +7,86 @@ const contributorsByYear = [
         name: "Hazik Chaudhry",
         avatar_url: "https://avatars.githubusercontent.com/u/99319319?v=4",
         profile: "https://github.com/hazikchaudhry",
-        contributions: ["project manager"]
+        contributions: ["project manager"],
       },
       {
         login: "harbassan",
         name: "Hartej Bassan",
         avatar_url: "https://avatars.githubusercontent.com/u/84175605?v=4",
         profile: "https://github.com/harbassan",
-        contributions: ["tech lead"]
+        contributions: ["tech lead"],
       },
       {
         login: "br-Chan",
         name: "Brandon Chan",
         avatar_url: "https://avatars.githubusercontent.com/u/160544499?v=4",
         profile: "https://github.com/br-Chan",
-        contributions: ["projects executive"]
+        contributions: ["projects executive"],
       },
       {
         login: "GogaIV",
         name: "Jauhar Goga",
         avatar_url: "https://avatars.githubusercontent.com/u/102565988?v=4",
         profile: "https://github.com/GogaIV",
-        contributions: ["code"]
+        contributions: ["code"],
       },
       {
         login: "del-ereno",
         name: "Del Huang",
         avatar_url: "https://avatars.githubusercontent.com/u/154120298?v=4",
         profile: "https://github.com/del-ereno",
-        contributions: ["code", "user testing facilitator"]
+        contributions: ["code", "user testing facilitator"],
       },
       {
         login: "K1mmyn",
         name: "Kim Ngor",
         avatar_url: "https://avatars.githubusercontent.com/u/125098192?v=4",
         profile: "https://github.com/K1mmyn",
-        contributions: ["code", "user testing"]
+        contributions: ["code", "user testing"],
       },
       {
         login: "leowla",
         name: "Leo Wang",
         avatar_url: "https://avatars.githubusercontent.com/u/38830741?v=4",
         profile: "https://github.com/leowla",
-        contributions: ["code"]
+        contributions: ["code"],
       },
       {
         login: "kmck133",
         name: "Kieran McKenna",
         avatar_url: "https://avatars.githubusercontent.com/u/160551320?v=4",
         profile: "https://github.com/kmck133",
-        contributions: ["code"]
+        contributions: ["code"],
       },
       {
         login: "glybrio",
         name: "Allan Han",
         avatar_url: "https://avatars.githubusercontent.com/u/179700217?v=4",
         profile: "https://github.com/glybrio",
-        contributions: ["code", "user testing"]
+        contributions: ["code", "user testing"],
       },
       {
         login: "rgin216",
         name: "Ryan Gin",
         avatar_url: "https://avatars.githubusercontent.com/u/100395589?v=4",
         profile: "https://github.com/rgin216",
-        contributions: ["code"]
+        contributions: ["code"],
       },
       {
         login: "",
         name: "Mekaella Millabas",
         avatar_url: "",
         profile: "",
-        contributions: ["design lead"]
+        contributions: ["design lead"],
       },
       {
         login: "justinedagreat",
         name: "Justine Jacinto",
         avatar_url: "https://avatars.githubusercontent.com/u/202360294?v=4",
         profile: "https://github.com/justinedagreat",
-        contributions: ["code", "design"]
-      }
-    ]
+        contributions: ["code", "design"],
+      },
+    ],
   },
   {
     year: 2025,
