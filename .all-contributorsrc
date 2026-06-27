@@ -28,7 +28,7 @@
       "name": "Brandon Chan",
       "avatar_url": "https://avatars.githubusercontent.com/u/160544499?v=4",
       "profile": "https://github.com/br-Chan",
-      "contributions": ["projectManagement"]
+      "contributions": ["projectManagement", "eventOrganizing"]
     },
     {
       "login": "GogaIV",
@@ -42,21 +42,28 @@
       "name": "Del Huang",
       "avatar_url": "https://avatars.githubusercontent.com/u/154120298?v=4",
       "profile": "https://github.com/del-ereno",
-      "contributions": ["code"]
+      "contributions": ["code", "userTesting"]
     },
     {
       "login": "K1mmyn",
       "name": "Kim Ngor",
       "avatar_url": "https://avatars.githubusercontent.com/u/125098192?v=4",
       "profile": "https://github.com/K1mmyn",
-      "contributions": ["code", "userTesting"]
+      "contributions": ["code"]
+    },
+    {
+      "login": "FridgeProtector1",
+      "name": "Jim Zhou",
+      "avatar_url": "https://avatars.githubusercontent.com/u/81726935?v=4",
+      "profile": "https://github.com/FridgeProtector1",
+      "contributions": ["code"]
     },
     {
       "login": "leowla",
       "name": "Leo Wang",
       "avatar_url": "https://avatars.githubusercontent.com/u/38830741?v=4",
       "profile": "https://github.com/leowla",
-      "contributions": ["code"]
+      "contributions": ["code", "test"]
     },
     {
       "login": "kmck133",
@@ -70,14 +77,14 @@
       "name": "Allan Han",
       "avatar_url": "https://avatars.githubusercontent.com/u/179700217?v=4",
       "profile": "https://github.com/glybrio",
-      "contributions": ["code"]
+      "contributions": ["code", "userTesting"]
     },
     {
       "login": "rgin216",
       "name": "Ryan Gin",
       "avatar_url": "https://avatars.githubusercontent.com/u/100395589?v=4",
       "profile": "https://github.com/rgin216",
-      "contributions": ["code"]
+      "contributions": ["code", "test"]
     },
     {
       "login": "justinedagreat",
