@@ -15,6 +15,7 @@ const descs = {
   2023: "the backend overhaul",
   2024: "the year of multiplayer",
   2025: "the state, authoring and ui overhaul",
+  2026: "the push to completion",
 };
 
 const AboutUsPage = () => {
