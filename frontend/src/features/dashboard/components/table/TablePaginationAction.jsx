@@ -1,11 +1,9 @@
-/**
- * https://mui.com/material-ui/react-table/#custom-pagination-actions
- */
-
-import FirstPageIcon from "@mui/icons-material/FirstPage";
-import KeyboardArrowLeft from "@mui/icons-material/KeyboardArrowLeft";
-import KeyboardArrowRight from "@mui/icons-material/KeyboardArrowRight";
-import LastPageIcon from "@mui/icons-material/LastPage";
+import {
+  ArrowLeftIcon,
+  ArrowLeftToLineIcon,
+  ArrowRightIcon,
+  ArrowRightToLineIcon,
+} from "lucide-react";
 
 export default function TablePaginationActions(props) {
   const { count, page, rowsPerPage, onPageChange } = props;
@@ -34,7 +32,7 @@ export default function TablePaginationActions(props) {
         disabled={page === 0}
         aria-label="first page"
       >
-        <FirstPageIcon />
+        <ArrowLeftToLineIcon size={16} />
       </button>
       <button
         className="btn btn-xs"
@@ -42,7 +40,7 @@ export default function TablePaginationActions(props) {
         disabled={page === 0}
         aria-label="previous page"
       >
-        <KeyboardArrowLeft />
+        <ArrowLeftIcon size={16} />
       </button>
       <button
         className="btn btn-xs"
@@ -50,7 +48,7 @@ export default function TablePaginationActions(props) {
         disabled={page >= Math.ceil(count / rowsPerPage) - 1}
         aria-label="next page"
       >
-        <KeyboardArrowRight />
+        <ArrowRightIcon size={16} />
       </button>
       <button
         className="btn btn-xs"
@@ -58,7 +56,7 @@ export default function TablePaginationActions(props) {
         disabled={page >= Math.ceil(count / rowsPerPage) - 1}
         aria-label="last page"
       >
-        <LastPageIcon />
+        <ArrowRightToLineIcon size={16} />
       </button>
     </div>
   );

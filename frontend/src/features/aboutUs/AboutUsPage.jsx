@@ -1,8 +1,8 @@
-import CloseIcon from "@mui/icons-material/Close";
 import { useHistory, useLocation } from "react-router-dom";
 import FabMenu from "../../components/FabMenu";
 import contributorsByYear from "./contributorsByYear";
 import testers from "./testers";
+import { XIcon } from "lucide-react";
 
 function titlecase(value) {
   const words = value.split(" ");
@@ -37,7 +37,7 @@ const AboutUsPage = () => {
         onClick={goBack}
         aria-label="Close"
       >
-        <CloseIcon className="!w-8 !h-8 text-base-content" />
+        <XIcon size={32} />
       </button>
       <div className="w-1/2 flex flex-col justify-center items-center bg-base-100">
         <div className="flex flex-col items-start leading-tight text-base-content font-normal text-[5vw] mb-[10vh]">

@@ -1,5 +1,3 @@
-import "./AuthoringToolPage.css";
-
 import { useContext, useEffect, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
 import SceneContext from "context/SceneContext";
