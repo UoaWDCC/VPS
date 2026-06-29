@@ -48,6 +48,7 @@ export default function AuthoringToolPage() {
   useEffect(() => {
     const debounced = debounce(async () => {
       try {
+        pendingSavesRef.current++;
         await modifyScene(getScene());
       } finally {
         pendingSavesRef.current--;
@@ -64,8 +65,7 @@ export default function AuthoringToolPage() {
         if (state !== null) setSelected(record.id);
       }
 
-      pendingSavesRef.current++;
-      if (pendingSavesRef.current > 0) setSaving(true);
+      setSaving(true);
       debounced();
     };
 
