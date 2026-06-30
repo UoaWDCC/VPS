@@ -5,7 +5,7 @@ layout: libdoc_page.liquid
 eleventyNavigation:
   key: Assignment
   parent: Getting Started
-  order: 2
+  order: 4
 ---
 
 ## Assigning to Groups
