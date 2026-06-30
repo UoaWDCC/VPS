@@ -31,14 +31,14 @@ This table explains the different types:
 
 ## Actions
 
-To make tracked values useful, you need to update them as the player progresses through the scenario. To do this, you need to add actions to **scene elements**, just like adding links. After selecting an element, press the plus button on the **State Operations** section on the right, which should show a modal. On this dialog, select the tracked value you want to update and how you want to update it. This can be either:
+To make tracked values useful, you need to update them as the player progresses through the scenario. To do this, you need to add actions to **scene elements**, just like adding links. After selecting an element, press the plus button in the **State Operations** section on the right; a modal should appear. In this dialog box, select the tracked value you want to update and how to update it. This can be either:
 
 - Set
 - Add (number only)
 
-Set will just set the tracked value to the value you specify in the input. For example, you might set the tracked value character mood to "happy". The add action will just perform addition to the tracked value. To perform subtraction, use the add action with a negative value.
+Set will just set the tracked value to the value you specify in the input. For example, you might set the tracked value character mood to "happy". The add action will perform addition to the tracked value. To perform subtraction, use the add action with a negative value.
 
-A good way to think of actions are as sentences in the order _action type_, _tracked value_, _action value_, _scene element_:
+A good way to think of actions is as sentences in the order _action type_, _tracked value_, _action value_, _scene element_:
 
 - **Set** the **player-health** to **0**, when the player presses _the wrong option_.
 - **Set** whether the player **has-requested-scans** to **true**, when the player presses _the request scans button_.
@@ -52,7 +52,7 @@ To let the player know about their progress, you can embed a tracked value direc
 
 You can place this text in the top left of all your scenes so the player can always see it.
 
-A more complex example would be tracking user input for prescribing medicine. You would have buttons with increment and decrement actions on a tracked value for dosage of each medication, and then a text box with $$medicine-x-dosage$$ above each pair of buttons. This way, you can create a numerical input within the scenario.
+A more complex example would be tracking user input for prescribing medicine. You would have buttons with increment and decrement actions on a tracked value for the dosage of each medication, and a text box labelled $$medicine-x-dosage$$ above each pair of buttons. This way, you can create a numerical input within the scenario.
 
 ## Next Steps
 
