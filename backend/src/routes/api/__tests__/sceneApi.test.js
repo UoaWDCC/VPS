@@ -8,6 +8,7 @@ import Scene from "../../../db/models/scene.js";
 import Scenario from "../../../db/models/scenario.js";
 import auth from "../../../middleware/firebaseAuth.js";
 import scenarioAuth from "../../../middleware/scenarioAuth.js";
+import { authHeaders } from "./testHelpers.js";
 import {
   useMongoMemoryServer,
   useExpressServer,
@@ -26,14 +27,6 @@ auth.mockImplementation(async (req, res, next) => {
 scenarioAuth.mockImplementation(async (req, res, next) => {
   next();
 });
-
-function authHeaders(id) {
-  return {
-    headers: {
-      Authorization: `Bearer ${id}`,
-    },
-  };
-}
 
 describe("Scene API tests", () => {
   const HTTP_OK = 200;
