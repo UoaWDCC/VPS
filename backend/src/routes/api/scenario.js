@@ -62,9 +62,12 @@ router.get("/all", async (req, res) => {
 
 // Create a scenario for a user
 router.post("/", async (req, res) => {
-  const { name, uid } = req.body;
+  const { name, uid, description, estimatedTime } = req.body;
 
-  const scenario = await createScenario(name, uid);
+  const scenario = await createScenario(name, uid, {
+    description,
+    estimatedTime,
+  });
   await createAccessList(scenario._id, name, uid);
 
   res.status(HTTP_OK).json(scenario);

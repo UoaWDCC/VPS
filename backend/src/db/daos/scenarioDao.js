@@ -8,9 +8,10 @@ import User from "../models/user.js";
  * Creates a scenario in the database with an initial scene
  * @param {String} name name of scenario
  * @param {String} uid ID of authoring user
+ * @param {{description: String, estimatedTime: String}} [details] optional additional metadata
  * @returns database scenario object
  */
-const createScenario = async (name, uid) => {
+const createScenario = async (name, uid, details = {}) => {
   const firstScene = new Scene({
     name: "Scene 1",
   });
@@ -23,6 +24,12 @@ const createScenario = async (name, uid) => {
       name,
       uid,
       scenes: [firstScene._id],
+      ...(details.description !== undefined && {
+        description: details.description,
+      }),
+      ...(details.estimatedTime !== undefined && {
+        estimatedTime: details.estimatedTime,
+      }),
     });
     await dbScenario.save();
   } catch (err) {
