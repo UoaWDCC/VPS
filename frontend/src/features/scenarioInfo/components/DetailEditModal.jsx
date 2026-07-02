@@ -1,13 +1,34 @@
 import { useState } from "react";
 
-function DetailEditModal({ scenario, onSave }) {
-  const [description, setDescription] = useState(scenario.description);
-  const [name, setName] = useState(scenario.name);
-  const [estimatedTime, setEstimatedTime] = useState(scenario.estimatedTime);
+function DetailEditModal({
+  scenario,
+  onSave,
+  onClose,
+  submitLabel = "Save Changes",
+  pendingLabel = "Saving...",
+}) {
+  const [description, setDescription] = useState(scenario?.description ?? "");
+  const [name, setName] = useState(scenario?.name ?? "");
+  const [estimatedTime, setEstimatedTime] = useState(
+    scenario?.estimatedTime ?? ""
+  );
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   function handleEstimatedTimeChange(e) {
     const value = e.target.value.replace(/\D/g, "");
     setEstimatedTime(value);
+  }
+
+  async function handleSave() {
+    setIsSubmitting(true);
+    try {
+      await onSave({ name, description, estimatedTime });
+      onClose?.();
+    } catch {
+      // the mutation itself surfaces an error toast; keep the modal open to retry
+    } finally {
+      setIsSubmitting(false);
+    }
   }
 
   return (
@@ -79,15 +100,21 @@ function DetailEditModal({ scenario, onSave }) {
 
       {/* Modal Actions */}
       <div className="modal-action">
-        {/* buttons will automatically close the dialog */}
-        <button className="btn btn-ghost text-primary hover:text-base-content hover:bg-primary/10 font-dm">
+        {/* Cancel keeps the native dialog auto-close behaviour */}
+        <button
+          disabled={isSubmitting}
+          className="btn btn-ghost text-primary hover:text-base-content hover:bg-primary/10 font-dm"
+        >
           Cancel
         </button>
+        {/* type="button" so a click doesn't submit-close the dialog before the save resolves */}
         <button
-          onClick={() => onSave({ name, description, estimatedTime })}
+          type="button"
+          onClick={handleSave}
+          disabled={isSubmitting}
           className={`btn btn-ghost text-base-content border border-base-content/20 hover:bg-base-content/10 hover:border-base-content/40 font-dm`}
         >
-          Save Changes
+          {isSubmitting ? pendingLabel : submitLabel}
         </button>
       </div>
     </>

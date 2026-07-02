@@ -14,6 +14,7 @@ import { replace, replaceComponent } from "./scene/operations/modifiers";
 import {
   ArrowLeftIcon,
   FilesIcon,
+  PencilIcon,
   PlayIcon,
   UserPlusIcon,
   UsersIcon,
@@ -24,6 +25,8 @@ import { debounce } from "../../util/debounce";
 import { getScene } from "./scene/scene";
 import ShareModal from "./components/ShareModal";
 import ScenarioContext from "../../context/ScenarioContext";
+import ModalDialog from "../../components/ModalDialogue";
+import DetailEditModal from "../scenarioInfo/components/DetailEditModal";
 
 const listeners = [
   ["copy", copy],
@@ -40,7 +43,7 @@ const listeners = [
  */
 export default function AuthoringToolPage() {
   const { scenes, modifyScene, switchScene } = useContext(SceneContext);
-  const { allScenarios } = useContext(ScenarioContext);
+  const { allScenarios, updateScenarioDetails } = useContext(ScenarioContext);
   const { scenarioId } = useParams();
 
   const sceneId = useVisualScene((scene) => scene.id);
@@ -50,6 +53,7 @@ export default function AuthoringToolPage() {
 
   const [saving, setSaving] = useState(false);
   const [shareModalOpen, setShareModalOpen] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
 
   const pendingSavesRef = useRef(0);
 
@@ -149,6 +153,15 @@ export default function AuthoringToolPage() {
             <ArrowLeftIcon size={20} />
             Back
           </button>
+          {isScenarioOwner && (
+            <button
+              onClick={() => setShowEditModal(true)}
+              className="btn btn-phantom text-m"
+            >
+              <PencilIcon size={20} />
+              Details
+            </button>
+          )}
           <button
             onClick={goToResources}
             className="btn btn-phantom text-m ml-auto"
@@ -185,6 +198,21 @@ export default function AuthoringToolPage() {
       </div>
       {isScenarioOwner && (
         <ShareModal open={shareModalOpen} setOpen={setShareModalOpen} />
+      )}
+      {isScenarioOwner && (
+        <ModalDialog
+          title="Edit Scenario Details"
+          open={showEditModal}
+          onClose={() => setShowEditModal(false)}
+        >
+          <DetailEditModal
+            scenario={isScenarioOwner}
+            onSave={(details) =>
+              updateScenarioDetails({ id: scenarioId, details })
+            }
+            onClose={() => setShowEditModal(false)}
+          />
+        </ModalDialog>
       )}
     </>
   );
