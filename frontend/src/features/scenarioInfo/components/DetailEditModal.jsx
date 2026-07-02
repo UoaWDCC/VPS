@@ -1,9 +1,11 @@
 import { useState } from "react";
 
-function DetailEditModal({ scenario, onSave }) {
-  const [description, setDescription] = useState(scenario.description);
-  const [name, setName] = useState(scenario.name);
-  const [estimatedTime, setEstimatedTime] = useState(scenario.estimatedTime);
+function DetailEditModal({ scenario, onSave, submitLabel = "Save Changes" }) {
+  const [description, setDescription] = useState(scenario?.description ?? "");
+  const [name, setName] = useState(scenario?.name ?? "");
+  const [estimatedTime, setEstimatedTime] = useState(
+    scenario?.estimatedTime ?? ""
+  );
 
   function handleEstimatedTimeChange(e) {
     const value = e.target.value.replace(/\D/g, "");
@@ -87,7 +89,7 @@ function DetailEditModal({ scenario, onSave }) {
           onClick={() => onSave({ name, description, estimatedTime })}
           className={`btn btn-ghost text-base-content border border-base-content/20 hover:bg-base-content/10 hover:border-base-content/40 font-dm`}
         >
-          Save Changes
+          {submitLabel}
         </button>
       </div>
     </>

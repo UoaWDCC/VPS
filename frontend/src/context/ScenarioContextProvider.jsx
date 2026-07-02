@@ -17,8 +17,8 @@ async function getAllScenarios(user) {
 }
 
 // TODO: this should be unionised into a single endpoint for efficiency
-async function createScenario(user, name) {
-  const { data: scenario } = await api.post(user, `/api/scenario`, { name });
+async function createScenario(user, details) {
+  const { data: scenario } = await api.post(user, `/api/scenario`, details);
   await api.post(user, `/api/scenario/${scenario._id}/scene`, {
     name: "Scene 1",
   });
@@ -52,7 +52,7 @@ export default function ScenarioContextProvider({ children }) {
   });
 
   const createMutation = useMutation({
-    mutationFn: (name) => createScenario(user, name),
+    mutationFn: (details) => createScenario(user, details),
     onSuccess: () => {
       return queryClient.invalidateQueries(["scenarios"]);
     },
