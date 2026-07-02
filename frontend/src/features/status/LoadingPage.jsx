@@ -1,29 +1,9 @@
-import { CircularProgress, Grid, Typography } from "@material-ui/core";
-
 function LoadingPage({ text }) {
   return (
-    <Grid
-      container
-      spacing={0}
-      direction="column"
-      alignItems="center"
-      justifyContent="center"
-      style={{ minHeight: "100vh" }}
-    >
-      <Grid
-        container
-        direction="column"
-        alignItems="center"
-        justifyContent="center"
-      >
-        <Grid item>
-          <CircularProgress style={{ color: "#0080a7" }} />
-        </Grid>
-        <Grid item>
-          <Typography>{text}</Typography>
-        </Grid>
-      </Grid>
-    </Grid>
+    <div className="flex flex-col gap-4 items-center h-screen justify-center">
+      <span className="loading loading-ring loading-xl"></span>
+      <p className="text-s">{text}</p>
+    </div>
   );
 }
 

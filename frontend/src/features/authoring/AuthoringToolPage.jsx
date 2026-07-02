@@ -1,6 +1,4 @@
-import "./AuthoringToolPage.css";
-
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
 import SceneContext from "context/SceneContext";
 import CanvasSideBar from "./CanvasSideBar/CanvasSideBar";
@@ -9,13 +7,15 @@ import SceneNavigator from "./SceneNavigator/SceneNavigator";
 import Canvas from "./canvas/Canvas";
 import Topbar from "./topbar/Topbar";
 import useVisualScene from "./stores/visual";
-import { getScenePatch, commitSavedScene } from "./scene/scene";
 import { copy, cut, paste } from "./handlers/keyboard/clipboard";
 import useEditorStore from "./stores/editor";
 import { useHistory } from "react-router-dom";
-import { replace } from "./scene/operations/modifiers";
+import { replace, replaceComponent } from "./scene/operations/modifiers";
 import { ArrowLeftIcon, FilesIcon, PlayIcon, UsersIcon } from "lucide-react";
 import { handleGlobal } from "./handlers/keyboard/keyboard";
+import { clearHistory, historyEvents } from "./scene/history";
+import { debounce } from "../../util/debounce";
+import { getScene } from "./scene/scene";
 
 const listeners = [
   ["copy", copy],
@@ -24,28 +24,54 @@ const listeners = [
   ["keydown", handleGlobal],
 ];
 
-const AUTOSAVE_INTERVAL = 30000; // 30 secs
+// const AUTOSAVE_INTERVAL = 30000; // 30 secs
 
 /**
  * This page allows the user to edit a scene.
  * @container
  */
 export default function AuthoringToolPage() {
-  const { scenes, saveScenePatch } = useContext(SceneContext);
+  const { scenes, modifyScene, switchScene } = useContext(SceneContext);
   const { scenarioId } = useParams();
 
   const sceneId = useVisualScene((scene) => scene.id);
+  const setSelected = useEditorStore((state) => state.setSelected);
 
   const history = useHistory();
 
   const [saving, setSaving] = useState(false);
 
-  // autosave setup
+  const pendingSavesRef = useRef(0);
+
+  // NOTE: this is both the autosaver and the history actioner, which are distinct
+  // operations, but are both here due to the limitations of the scene context
   useEffect(() => {
-    if (!sceneId) return;
-    const autosave = setInterval(save, AUTOSAVE_INTERVAL);
-    return () => clearInterval(autosave);
-  }, [sceneId]);
+    const debounced = debounce(async () => {
+      try {
+        pendingSavesRef.current++;
+        await modifyScene(getScene());
+      } finally {
+        pendingSavesRef.current--;
+        if (pendingSavesRef.current === 0) setSaving(false);
+      }
+    }, 2500);
+
+    const listener = async ({ operation, record }) => {
+      if (operation === "undo" || operation === "redo") {
+        if (record.sceneId !== sceneId) switchScene(getScene(), record.sceneId);
+        const state = operation === "undo" ? record.before : record.after;
+        if (state === null) setSelected(null);
+        replaceComponent(record.id, state);
+        if (state !== null) setSelected(record.id);
+      }
+
+      setSaving(true);
+      debounced();
+    };
+
+    historyEvents.addEventListener("update", listener);
+    return () => historyEvents.removeEventListener("update", listener);
+  }, [sceneId, switchScene, setSelected, modifyScene]);
 
   // if the active scene was deleted, switch to the first available scene
   useEffect(() => {
@@ -65,6 +91,8 @@ export default function AuthoringToolPage() {
     if (target) replace(target);
 
     useEditorStore.getState().clear();
+
+    clearHistory();
 
     listeners.forEach(([event, fn]) => document.addEventListener(event, fn));
 
@@ -89,29 +117,16 @@ export default function AuthoringToolPage() {
   }
 
   function goBack() {
-    history.push("/");
+    history.push("/create");
   }
 
   async function save() {
-    if (saving) return; // we dont want to interrupt in progress saves (usually uploading media)
     setSaving(true);
-
-    const patch = getScenePatch();
-
-    const hasChanges =
-      Object.keys(patch.fields).length > 0 ||
-      patch.components.length > 0 ||
-      patch.deletedComponentIds.length > 0;
-
-    if (!hasChanges) {
+    try {
+      await modifyScene(getScene());
+    } finally {
       setSaving(false);
-      return;
     }
-
-    await saveScenePatch(patch);
-    commitSavedScene();
-
-    setTimeout(() => setSaving(false), 5000);
   }
 
   return (
