@@ -63,7 +63,7 @@ router.patch(
       return normd && isValidEmail(normd) ? normd : null;
     });
 
-    if (normd.some(!Boolean))
+    if (normd.some((x) => !x))
       throw new HttpError(
         "email format is not valid",
         HttpStatusCode.BadRequest
