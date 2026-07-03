@@ -1,17 +1,6 @@
-import {
-  jest,
-  describe,
-  beforeAll,
-  beforeEach,
-  afterEach,
-  afterAll,
-  it,
-  expect,
-} from "@jest/globals";
+import { jest, describe, beforeEach, it, expect } from "@jest/globals";
 
-import { MongoMemoryServer } from "mongodb-memory-server";
 import express from "express";
-import mongoose from "mongoose";
 import axios from "axios";
 import routes from "../../index.js";
 import Scenario from "../../../db/models/scenario.js";
@@ -19,6 +8,10 @@ import Scene from "../../../db/models/scene.js";
 import User from "../../../db/models/user.js";
 import auth from "../../../middleware/firebaseAuth.js";
 import { authHeaders } from "./testHelpers.js";
+import {
+  useMongoMemoryServer,
+  useExpressServer,
+} from "../../../test/testSetup.js";
 
 jest.mock("../../../middleware/firebaseAuth");
 jest.mock("firebase-admin");
@@ -29,25 +22,17 @@ auth.mockImplementation(async (req, res, next) => {
 });
 
 describe("Navigate User API tests", () => {
-  let mongoServer;
-  let server;
-  let port;
+  useMongoMemoryServer();
+  const ctx = useExpressServer(() => {
+    const app = express();
+    app.use(express.json());
+    app.use("/", routes);
+    return app;
+  });
 
   let scenario;
   let scene1;
   let scene2;
-
-  beforeAll(async () => {
-    mongoServer = await MongoMemoryServer.create();
-    await mongoose.connect(mongoServer.getUri());
-
-    const app = express();
-    app.use(express.json());
-    app.use("/", routes);
-
-    server = app.listen(0);
-    port = server.address().port;
-  });
 
   beforeEach(async () => {
     scene1 = await Scene.create({
@@ -77,22 +62,11 @@ describe("Navigate User API tests", () => {
     });
   });
 
-  afterEach(async () => {
-    await mongoose.connection.db.dropDatabase();
-  });
-
-  afterAll(async () => {
-    server.close(async () => {
-      await mongoose.disconnect();
-      await mongoServer.stop();
-    });
-  });
-
   // --- POST /navigate/user/:scenarioId (first navigation) ---
 
   it("POST /navigate/user/:scenarioId navigates to the first scene on initial visit", async () => {
     const response = await axios.post(
-      `http://localhost:${port}/api/navigate/user/${scenario._id}`,
+      `http://localhost:${ctx.port}/api/navigate/user/${scenario._id}`,
       { uid: "uid-player" },
       authHeaders("uid-player")
     );
@@ -115,7 +89,7 @@ describe("Navigate User API tests", () => {
     );
 
     const response = await axios.post(
-      `http://localhost:${port}/api/navigate/user/${scenario._id}`,
+      `http://localhost:${ctx.port}/api/navigate/user/${scenario._id}`,
       { uid: "uid-player" }, // no currentScene → re-entry
       authHeaders("uid-player")
     );
@@ -133,7 +107,7 @@ describe("Navigate User API tests", () => {
     // Supply an incorrect currentScene
     await expect(
       axios.post(
-        `http://localhost:${port}/api/navigate/user/${scenario._id}`,
+        `http://localhost:${ctx.port}/api/navigate/user/${scenario._id}`,
         {
           uid: "uid-player",
           currentScene: scene2._id.toString(), // wrong — path head is scene1
@@ -167,7 +141,7 @@ describe("Navigate User API tests", () => {
 
     // Navigate via componentId (not bodyNextScene — that triggers directLink validation)
     const response = await axios.post(
-      `http://localhost:${port}/api/navigate/user/${scenario._id}`,
+      `http://localhost:${ctx.port}/api/navigate/user/${scenario._id}`,
       {
         uid: "uid-player",
         currentScene: clickScene._id.toString(),
@@ -193,7 +167,7 @@ describe("Navigate User API tests", () => {
 
     await expect(
       axios.post(
-        `http://localhost:${port}/api/navigate/user/${scenario._id}`,
+        `http://localhost:${ctx.port}/api/navigate/user/${scenario._id}`,
         {
           uid: "uid-player",
           currentScene: scene1._id.toString(),
@@ -219,7 +193,7 @@ describe("Navigate User API tests", () => {
     );
 
     const response = await axios.post(
-      `http://localhost:${port}/api/navigate/user/reset/${scenario._id}`,
+      `http://localhost:${ctx.port}/api/navigate/user/reset/${scenario._id}`,
       { uid: "uid-player", currentScene: resetScene._id.toString() },
       authHeaders("uid-player")
     );
@@ -237,7 +211,7 @@ describe("Navigate User API tests", () => {
 
     await expect(
       axios.post(
-        `http://localhost:${port}/api/navigate/user/reset/${scenario._id}`,
+        `http://localhost:${ctx.port}/api/navigate/user/reset/${scenario._id}`,
         { uid: "uid-player", currentScene: scene1._id.toString() },
         authHeaders("uid-player")
       )
@@ -252,7 +226,7 @@ describe("Navigate User API tests", () => {
 
     await expect(
       axios.post(
-        `http://localhost:${port}/api/navigate/user/reset/${scenario._id}`,
+        `http://localhost:${ctx.port}/api/navigate/user/reset/${scenario._id}`,
         {
           uid: "uid-player",
           currentScene: scene2._id.toString(), // wrong

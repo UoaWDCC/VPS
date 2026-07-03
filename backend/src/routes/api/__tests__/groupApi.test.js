@@ -1,17 +1,6 @@
-import {
-  jest,
-  describe,
-  beforeAll,
-  beforeEach,
-  afterEach,
-  afterAll,
-  it,
-  expect,
-} from "@jest/globals";
+import { jest, describe, beforeEach, it, expect } from "@jest/globals";
 
-import { MongoMemoryServer } from "mongodb-memory-server";
 import express from "express";
-import mongoose from "mongoose";
 import axios from "axios";
 import routes from "../../index.js";
 import Group from "../../../db/models/group.js";
@@ -19,6 +8,10 @@ import Scenario from "../../../db/models/scenario.js";
 import Scene from "../../../db/models/scene.js";
 import auth from "../../../middleware/firebaseAuth.js";
 import { authHeaders } from "./testHelpers.js";
+import {
+  useMongoMemoryServer,
+  useExpressServer,
+} from "../../../test/testSetup.js";
 
 jest.mock("../../../middleware/firebaseAuth");
 jest.mock("firebase-admin");
@@ -29,25 +22,17 @@ auth.mockImplementation(async (req, res, next) => {
 });
 
 describe("Group API tests", () => {
-  let mongoServer;
-  let server;
-  let port;
+  useMongoMemoryServer();
+  const ctx = useExpressServer(() => {
+    const app = express();
+    app.use(express.json());
+    app.use("/", routes);
+    return app;
+  });
 
   let scenario;
   let scene;
   let group;
-
-  beforeAll(async () => {
-    mongoServer = await MongoMemoryServer.create();
-    await mongoose.connect(mongoServer.getUri());
-
-    const app = express();
-    app.use(express.json());
-    app.use("/", routes);
-
-    server = app.listen(0);
-    port = server.address().port;
-  });
 
   beforeEach(async () => {
     scene = await Scene.create({ name: "Scene 1", components: [] });
@@ -71,20 +56,9 @@ describe("Group API tests", () => {
     });
   });
 
-  afterEach(async () => {
-    await mongoose.connection.db.dropDatabase();
-  });
-
-  afterAll(async () => {
-    server.close(async () => {
-      await mongoose.disconnect();
-      await mongoServer.stop();
-    });
-  });
-
   it("GET /group/scenario/:scenarioId returns groups for a scenario", async () => {
     const response = await axios.get(
-      `http://localhost:${port}/api/group/scenario/${scenario._id}`,
+      `http://localhost:${ctx.port}/api/group/scenario/${scenario._id}`,
       authHeaders("user1")
     );
     expect(response.status).toBe(200);
@@ -99,7 +73,7 @@ describe("Group API tests", () => {
     });
 
     const response = await axios.get(
-      `http://localhost:${port}/api/group/scenario/${otherScenario._id}`,
+      `http://localhost:${ctx.port}/api/group/scenario/${otherScenario._id}`,
       authHeaders("user1")
     );
     expect(response.status).toBe(200);
@@ -108,7 +82,7 @@ describe("Group API tests", () => {
 
   it("GET /group/path/:groupId returns current scene when path is non-empty", async () => {
     const response = await axios.get(
-      `http://localhost:${port}/api/group/path/${group._id}`,
+      `http://localhost:${ctx.port}/api/group/path/${group._id}`,
       authHeaders("user1")
     );
     expect(response.status).toBe(200);
@@ -125,7 +99,7 @@ describe("Group API tests", () => {
     });
 
     const response = await axios.get(
-      `http://localhost:${port}/api/group/path/${emptyGroup._id}`,
+      `http://localhost:${ctx.port}/api/group/path/${emptyGroup._id}`,
       authHeaders("user1")
     );
     expect(response.status).toBe(200);
@@ -134,7 +108,7 @@ describe("Group API tests", () => {
 
   it("GET /group/retrieve/:groupId returns a group by id", async () => {
     const response = await axios.get(
-      `http://localhost:${port}/api/group/retrieve/${group._id}`,
+      `http://localhost:${ctx.port}/api/group/retrieve/${group._id}`,
       authHeaders("user1")
     );
     expect(response.status).toBe(200);
@@ -145,7 +119,7 @@ describe("Group API tests", () => {
   it("GET /group/retrieve/:groupId returns 404 for unknown group", async () => {
     await expect(
       axios.get(
-        `http://localhost:${port}/api/group/retrieve/000000000000000000000099`,
+        `http://localhost:${ctx.port}/api/group/retrieve/000000000000000000000099`,
         authHeaders("user1")
       )
     ).rejects.toMatchObject({ response: { status: 404 } });
@@ -153,7 +127,7 @@ describe("Group API tests", () => {
 
   it("GET /group/:scenarioId/roleList returns the role list for a scenario", async () => {
     const response = await axios.get(
-      `http://localhost:${port}/api/group/${scenario._id}/roleList`,
+      `http://localhost:${ctx.port}/api/group/${scenario._id}/roleList`,
       authHeaders("user1")
     );
     expect(response.status).toBe(200);
@@ -179,7 +153,7 @@ describe("Group API tests", () => {
     ];
 
     const response = await axios.post(
-      `http://localhost:${port}/api/group/${scenario._id}`,
+      `http://localhost:${ctx.port}/api/group/${scenario._id}`,
       { groupList, roleList: ["doctor", "nurse"] },
       authHeaders("user1")
     );
@@ -202,7 +176,7 @@ describe("Group API tests", () => {
 
     await expect(
       axios.post(
-        `http://localhost:${port}/api/group/${scenario._id}`,
+        `http://localhost:${ctx.port}/api/group/${scenario._id}`,
         { groupList, roleList: ["doctor"] },
         authHeaders("user1")
       )
@@ -224,7 +198,7 @@ describe("Group API tests", () => {
 
     await expect(
       axios.post(
-        `http://localhost:${port}/api/group/${scenario._id}`,
+        `http://localhost:${ctx.port}/api/group/${scenario._id}`,
         { groupList, roleList: ["doctor", "nurse"] },
         authHeaders("user1")
       )
@@ -251,7 +225,7 @@ describe("Group API tests", () => {
 
     await expect(
       axios.post(
-        `http://localhost:${port}/api/group/${scenario._id}`,
+        `http://localhost:${ctx.port}/api/group/${scenario._id}`,
         { groupList, roleList: ["doctor"] },
         authHeaders("user1")
       )

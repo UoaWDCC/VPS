@@ -1,17 +1,6 @@
-import {
-  jest,
-  describe,
-  beforeAll,
-  beforeEach,
-  afterEach,
-  afterAll,
-  it,
-  expect,
-} from "@jest/globals";
+import { jest, describe, beforeEach, it, expect } from "@jest/globals";
 
-import { MongoMemoryServer } from "mongodb-memory-server";
 import express from "express";
-import mongoose from "mongoose";
 import axios from "axios";
 import routes from "../../index.js";
 import Access from "../../../db/models/access.js";
@@ -20,6 +9,10 @@ import User from "../../../db/models/user.js";
 import auth from "../../../middleware/firebaseAuth.js";
 import scenarioAuth from "../../../middleware/scenarioAuth.js";
 import { authHeaders } from "./testHelpers.js";
+import {
+  useMongoMemoryServer,
+  useExpressServer,
+} from "../../../test/testSetup.js";
 
 jest.mock("../../../middleware/firebaseAuth");
 jest.mock("../../../middleware/scenarioAuth");
@@ -35,25 +28,17 @@ scenarioAuth.mockImplementation(async (req, res, next) => {
 });
 
 describe("Access API tests", () => {
-  let mongoServer;
-  let server;
-  let port;
+  useMongoMemoryServer();
+  const ctx = useExpressServer(() => {
+    const app = express();
+    app.use(express.json());
+    app.use("/", routes);
+    return app;
+  });
 
   let scenario;
   let ownerUser;
   let grantedUser;
-
-  beforeAll(async () => {
-    mongoServer = await MongoMemoryServer.create();
-    await mongoose.connect(mongoServer.getUri());
-
-    const app = express();
-    app.use(express.json());
-    app.use("/", routes);
-
-    server = app.listen(0);
-    port = server.address().port;
-  });
 
   beforeEach(async () => {
     scenario = await Scenario.create({ name: "Test Scenario", uid: "owner1" });
@@ -83,20 +68,9 @@ describe("Access API tests", () => {
     });
   });
 
-  afterEach(async () => {
-    await mongoose.connection.db.dropDatabase();
-  });
-
-  afterAll(async () => {
-    server.close(async () => {
-      await mongoose.disconnect();
-      await mongoServer.stop();
-    });
-  });
-
   it("GET /access/ returns accessible scenarios for a non-owner user", async () => {
     const response = await axios.get(
-      `http://localhost:${port}/api/access/`,
+      `http://localhost:${ctx.port}/api/access/`,
       authHeaders("user2")
     );
     expect(response.status).toBe(200);
@@ -106,7 +80,7 @@ describe("Access API tests", () => {
 
   it("GET /access/ returns empty array when user has no accessible scenarios", async () => {
     const response = await axios.get(
-      `http://localhost:${port}/api/access/`,
+      `http://localhost:${ctx.port}/api/access/`,
       authHeaders("unknown-user")
     );
     expect(response.status).toBe(200);
@@ -115,7 +89,7 @@ describe("Access API tests", () => {
 
   it("GET /access/:scenarioId/users returns the access list for a scenario", async () => {
     const response = await axios.get(
-      `http://localhost:${port}/api/access/${scenario._id}/users`,
+      `http://localhost:${ctx.port}/api/access/${scenario._id}/users`,
       authHeaders("owner1")
     );
     expect(response.status).toBe(200);
@@ -127,7 +101,7 @@ describe("Access API tests", () => {
   it("GET /access/:scenarioId/users returns 200 with 404 body when access list not found", async () => {
     // Route returns 200 { status: 404, error: "Not found" } instead of HTTP 404
     const response = await axios.get(
-      `http://localhost:${port}/api/access/000000000000000000000099/users`,
+      `http://localhost:${ctx.port}/api/access/000000000000000000000099/users`,
       authHeaders("owner1")
     );
     expect(response.status).toBe(200);
@@ -143,7 +117,7 @@ describe("Access API tests", () => {
     });
 
     const response = await axios.put(
-      `http://localhost:${port}/api/access/${scenario._id}/users/${newUser.uid}`,
+      `http://localhost:${ctx.port}/api/access/${scenario._id}/users/${newUser.uid}`,
       {},
       authHeaders("owner1")
     );
@@ -154,7 +128,7 @@ describe("Access API tests", () => {
 
   it("DELETE /access/:scenarioId/users/:userId revokes access for a non-owner", async () => {
     const response = await axios.delete(
-      `http://localhost:${port}/api/access/${scenario._id}/users/${grantedUser.uid}`,
+      `http://localhost:${ctx.port}/api/access/${scenario._id}/users/${grantedUser.uid}`,
       authHeaders("owner1")
     );
     expect(response.status).toBe(200);
@@ -169,7 +143,7 @@ describe("Access API tests", () => {
   it("DELETE /access/:scenarioId/users/:userId returns 403 when revoking the owner", async () => {
     await expect(
       axios.delete(
-        `http://localhost:${port}/api/access/${scenario._id}/users/${ownerUser.uid}`,
+        `http://localhost:${ctx.port}/api/access/${scenario._id}/users/${ownerUser.uid}`,
         authHeaders("owner1")
       )
     ).rejects.toMatchObject({ response: { status: 403 } });
@@ -177,7 +151,7 @@ describe("Access API tests", () => {
 
   it("DELETE /access/:scenarioId deletes the entire access list", async () => {
     const response = await axios.delete(
-      `http://localhost:${port}/api/access/${scenario._id}`,
+      `http://localhost:${ctx.port}/api/access/${scenario._id}`,
       { ...authHeaders("owner1"), data: { uid: "owner1" } }
     );
     expect(response.status).toBe(200);
@@ -193,7 +167,7 @@ describe("Access API tests", () => {
     await Access.deleteOne({ scenarioId: scenario._id.toString() });
 
     const response = await axios.post(
-      `http://localhost:${port}/api/access/${scenario._id}/create`,
+      `http://localhost:${ctx.port}/api/access/${scenario._id}/create`,
       {},
       authHeaders("owner1")
     );
@@ -210,7 +184,7 @@ describe("Access API tests", () => {
 
     await expect(
       axios.post(
-        `http://localhost:${port}/api/access/${scenario._id}/create`,
+        `http://localhost:${ctx.port}/api/access/${scenario._id}/create`,
         {},
         authHeaders("owner1")
       )
@@ -220,7 +194,7 @@ describe("Access API tests", () => {
   it("POST /access/:scenarioId/create returns 404 when scenario does not exist", async () => {
     await expect(
       axios.post(
-        `http://localhost:${port}/api/access/000000000000000000000099/create`,
+        `http://localhost:${ctx.port}/api/access/000000000000000000000099/create`,
         {},
         authHeaders("owner1")
       )

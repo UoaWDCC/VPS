@@ -1,17 +1,6 @@
-import {
-  jest,
-  describe,
-  beforeAll,
-  beforeEach,
-  afterEach,
-  afterAll,
-  it,
-  expect,
-} from "@jest/globals";
+import { jest, describe, beforeEach, it, expect } from "@jest/globals";
 
-import { MongoMemoryServer } from "mongodb-memory-server";
 import express from "express";
-import mongoose from "mongoose";
 import axios from "axios";
 import routes from "../../index.js";
 import Scenario from "../../../db/models/scenario.js";
@@ -22,6 +11,10 @@ import Note from "../../../db/models/note.js";
 import Resource from "../../../db/models/resource.js";
 import auth from "../../../middleware/firebaseAuth.js";
 import { authHeaders } from "./testHelpers.js";
+import {
+  useMongoMemoryServer,
+  useExpressServer,
+} from "../../../test/testSetup.js";
 
 jest.mock("../../../middleware/firebaseAuth");
 jest.mock("firebase-admin");
@@ -32,27 +25,19 @@ auth.mockImplementation(async (req, res, next) => {
 });
 
 describe("Navigate Group API tests", () => {
-  let mongoServer;
-  let server;
-  let port;
+  useMongoMemoryServer();
+  const ctx = useExpressServer(() => {
+    const app = express();
+    app.use(express.json());
+    app.use("/", routes);
+    return app;
+  });
 
   let scenario;
   let scene1;
   let scene2;
   let user;
   let group;
-
-  beforeAll(async () => {
-    mongoServer = await MongoMemoryServer.create();
-    await mongoose.connect(mongoServer.getUri());
-
-    const app = express();
-    app.use(express.json());
-    app.use("/", routes);
-
-    server = app.listen(0);
-    port = server.address().port;
-  });
 
   beforeEach(async () => {
     // scene1 links to scene2 via a clickable button component
@@ -93,22 +78,11 @@ describe("Navigate Group API tests", () => {
     });
   });
 
-  afterEach(async () => {
-    await mongoose.connection.db.dropDatabase();
-  });
-
-  afterAll(async () => {
-    server.close(async () => {
-      await mongoose.disconnect();
-      await mongoServer.stop();
-    });
-  });
-
   // --- POST /navigate/group/:groupId (first navigation) ---
 
   it("POST /navigate/group/:groupId initiates navigation when group path is empty", async () => {
     const response = await axios.post(
-      `http://localhost:${port}/api/navigate/group/${group._id}`,
+      `http://localhost:${ctx.port}/api/navigate/group/${group._id}`,
       { uid: "uid-player", addFlags: [], removeFlags: [] },
       authHeaders("uid-player")
     );
@@ -127,7 +101,7 @@ describe("Navigate Group API tests", () => {
     await Group.findByIdAndUpdate(group._id, { path: [scene1._id.toString()] });
 
     const response = await axios.post(
-      `http://localhost:${port}/api/navigate/group/${group._id}`,
+      `http://localhost:${ctx.port}/api/navigate/group/${group._id}`,
       { uid: "uid-player", addFlags: [], removeFlags: [] }, // no currentScene → session re-entry
       authHeaders("uid-player")
     );
@@ -138,7 +112,7 @@ describe("Navigate Group API tests", () => {
   it("POST /navigate/group/:groupId returns 404 for unknown group", async () => {
     await expect(
       axios.post(
-        `http://localhost:${port}/api/navigate/group/000000000000000000000099`,
+        `http://localhost:${ctx.port}/api/navigate/group/000000000000000000000099`,
         { uid: "uid-player", addFlags: [], removeFlags: [] },
         authHeaders("uid-player")
       )
@@ -156,7 +130,7 @@ describe("Navigate Group API tests", () => {
 
     await expect(
       axios.post(
-        `http://localhost:${port}/api/navigate/group/${group._id}`,
+        `http://localhost:${ctx.port}/api/navigate/group/${group._id}`,
         { uid: "uid-stranger", addFlags: [], removeFlags: [] },
         authHeaders("uid-stranger")
       )
@@ -177,7 +151,7 @@ describe("Navigate Group API tests", () => {
     });
 
     const response = await axios.get(
-      `http://localhost:${port}/api/navigate/group/resources/${group._id}`,
+      `http://localhost:${ctx.port}/api/navigate/group/resources/${group._id}`,
       authHeaders("uid-player")
     );
     expect(response.status).toBe(200);
@@ -197,7 +171,7 @@ describe("Navigate Group API tests", () => {
 
     // group has no currentFlags → gated resource is not returned
     const response = await axios.get(
-      `http://localhost:${port}/api/navigate/group/resources/${group._id}`,
+      `http://localhost:${ctx.port}/api/navigate/group/resources/${group._id}`,
       authHeaders("uid-player")
     );
     expect(response.status).toBe(200);
@@ -207,7 +181,7 @@ describe("Navigate Group API tests", () => {
   it("GET /navigate/group/resources/:groupId returns 404 for unknown group", async () => {
     await expect(
       axios.get(
-        `http://localhost:${port}/api/navigate/group/resources/000000000000000000000099`,
+        `http://localhost:${ctx.port}/api/navigate/group/resources/000000000000000000000099`,
         authHeaders("uid-player")
       )
     ).rejects.toMatchObject({ response: { status: 404 } });
@@ -227,7 +201,7 @@ describe("Navigate Group API tests", () => {
     });
 
     const response = await axios.post(
-      `http://localhost:${port}/api/navigate/group/reset/${group._id}`,
+      `http://localhost:${ctx.port}/api/navigate/group/reset/${group._id}`,
       { uid: "uid-player", currentScene: resetScene._id.toString() },
       authHeaders("uid-player")
     );
@@ -246,7 +220,7 @@ describe("Navigate Group API tests", () => {
     // scene1 has no RESET_BUTTON component
     await expect(
       axios.post(
-        `http://localhost:${port}/api/navigate/group/reset/${group._id}`,
+        `http://localhost:${ctx.port}/api/navigate/group/reset/${group._id}`,
         {
           uid: "uid-player",
           currentScene: scene1._id.toString(),
@@ -277,7 +251,7 @@ describe("Navigate Group API tests", () => {
     });
 
     await axios.post(
-      `http://localhost:${port}/api/navigate/group/reset/${group._id}`,
+      `http://localhost:${ctx.port}/api/navigate/group/reset/${group._id}`,
       { uid: "uid-player", currentScene: resetScene._id.toString() },
       authHeaders("uid-player")
     );

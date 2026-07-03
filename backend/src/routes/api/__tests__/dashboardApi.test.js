@@ -1,17 +1,6 @@
-import {
-  jest,
-  describe,
-  beforeAll,
-  beforeEach,
-  afterEach,
-  afterAll,
-  it,
-  expect,
-} from "@jest/globals";
+import { jest, describe, beforeEach, it, expect } from "@jest/globals";
 
-import { MongoMemoryServer } from "mongodb-memory-server";
 import express from "express";
-import mongoose from "mongoose";
 import axios from "axios";
 import routes from "../../index.js";
 import Scenario from "../../../db/models/scenario.js";
@@ -21,6 +10,10 @@ import Access from "../../../db/models/access.js";
 import auth from "../../../middleware/firebaseAuth.js";
 import dashboardAuth from "../../../middleware/dashboardAuth.js";
 import { authHeaders } from "./testHelpers.js";
+import {
+  useMongoMemoryServer,
+  useExpressServer,
+} from "../../../test/testSetup.js";
 
 jest.mock("../../../middleware/firebaseAuth");
 jest.mock("../../../middleware/dashboardAuth");
@@ -36,26 +29,18 @@ dashboardAuth.mockImplementation(async (req, res, next) => {
 });
 
 describe("Dashboard API tests", () => {
-  let mongoServer;
-  let server;
-  let port;
+  useMongoMemoryServer();
+  const ctx = useExpressServer(() => {
+    const app = express();
+    app.use(express.json());
+    app.use("/", routes);
+    return app;
+  });
 
   let scenario;
   let scene1;
   let scene2;
   let group;
-
-  beforeAll(async () => {
-    mongoServer = await MongoMemoryServer.create();
-    await mongoose.connect(mongoServer.getUri());
-
-    const app = express();
-    app.use(express.json());
-    app.use("/", routes);
-
-    server = app.listen(0);
-    port = server.address().port;
-  });
 
   beforeEach(async () => {
     scene1 = await Scene.create({ name: "Scene 1", components: [] });
@@ -83,20 +68,9 @@ describe("Dashboard API tests", () => {
     });
   });
 
-  afterEach(async () => {
-    await mongoose.connection.db.dropDatabase();
-  });
-
-  afterAll(async () => {
-    server.close(async () => {
-      await mongoose.disconnect();
-      await mongoServer.stop();
-    });
-  });
-
   it("GET /dashboard/ returns ok:true health check", async () => {
     const response = await axios.get(
-      `http://localhost:${port}/api/dashboard/`,
+      `http://localhost:${ctx.port}/api/dashboard/`,
       authHeaders("user1")
     );
     expect(response.status).toBe(200);
@@ -105,7 +79,7 @@ describe("Dashboard API tests", () => {
 
   it("GET /dashboard/scenarios/:scenarioId/access returns allowed:true", async () => {
     const response = await axios.get(
-      `http://localhost:${port}/api/dashboard/scenarios/${scenario._id}/access`,
+      `http://localhost:${ctx.port}/api/dashboard/scenarios/${scenario._id}/access`,
       authHeaders("user1")
     );
     expect(response.status).toBe(200);
@@ -114,7 +88,7 @@ describe("Dashboard API tests", () => {
 
   it("GET /dashboard/scenarios/:scenarioId returns the scenario", async () => {
     const response = await axios.get(
-      `http://localhost:${port}/api/dashboard/scenarios/${scenario._id}`,
+      `http://localhost:${ctx.port}/api/dashboard/scenarios/${scenario._id}`,
       authHeaders("user1")
     );
     expect(response.status).toBe(200);
@@ -126,7 +100,7 @@ describe("Dashboard API tests", () => {
     // retrieveScenario returns null (no throw) when not found,
     // so the route responds 200 with null body.
     const response = await axios.get(
-      `http://localhost:${port}/api/dashboard/scenarios/000000000000000000000099`,
+      `http://localhost:${ctx.port}/api/dashboard/scenarios/000000000000000000000099`,
       authHeaders("user1")
     );
     expect(response.status).toBe(200);
@@ -135,7 +109,7 @@ describe("Dashboard API tests", () => {
 
   it("GET /dashboard/scenarios/:scenarioId/scenes returns all scenes with components", async () => {
     const response = await axios.get(
-      `http://localhost:${port}/api/dashboard/scenarios/${scenario._id}/scenes`,
+      `http://localhost:${ctx.port}/api/dashboard/scenarios/${scenario._id}/scenes`,
       authHeaders("user1")
     );
     expect(response.status).toBe(200);
@@ -148,7 +122,7 @@ describe("Dashboard API tests", () => {
   it("GET /dashboard/scenarios/:scenarioId/scenes returns 404 for unknown scenario", async () => {
     await expect(
       axios.get(
-        `http://localhost:${port}/api/dashboard/scenarios/000000000000000000000099/scenes`,
+        `http://localhost:${ctx.port}/api/dashboard/scenarios/000000000000000000000099/scenes`,
         authHeaders("user1")
       )
     ).rejects.toMatchObject({ response: { status: 404 } });
@@ -156,7 +130,7 @@ describe("Dashboard API tests", () => {
 
   it("GET /dashboard/scenarios/:scenarioId/groups returns groups for the scenario", async () => {
     const response = await axios.get(
-      `http://localhost:${port}/api/dashboard/scenarios/${scenario._id}/groups`,
+      `http://localhost:${ctx.port}/api/dashboard/scenarios/${scenario._id}/groups`,
       authHeaders("user1")
     );
     expect(response.status).toBe(200);
@@ -166,7 +140,7 @@ describe("Dashboard API tests", () => {
 
   it("GET /dashboard/groups/:groupId returns the group", async () => {
     const response = await axios.get(
-      `http://localhost:${port}/api/dashboard/groups/${group._id}`,
+      `http://localhost:${ctx.port}/api/dashboard/groups/${group._id}`,
       authHeaders("user1")
     );
     expect(response.status).toBe(200);
@@ -177,7 +151,7 @@ describe("Dashboard API tests", () => {
   it("GET /dashboard/groups/:groupId returns 404 for unknown group", async () => {
     await expect(
       axios.get(
-        `http://localhost:${port}/api/dashboard/groups/000000000000000000000099`,
+        `http://localhost:${ctx.port}/api/dashboard/groups/000000000000000000000099`,
         authHeaders("user1")
       )
     ).rejects.toMatchObject({ response: { status: 404 } });

@@ -1,15 +1,5 @@
-import {
-  jest,
-  describe,
-  beforeAll,
-  beforeEach,
-  afterEach,
-  afterAll,
-  it,
-  expect,
-} from "@jest/globals";
+import { jest, describe, beforeEach, it, expect } from "@jest/globals";
 
-import { MongoMemoryServer } from "mongodb-memory-server";
 import express from "express";
 import mongoose from "mongoose";
 import axios from "axios";
@@ -18,6 +8,10 @@ import Resource from "../../../db/models/resource.js";
 import Group from "../../../db/models/group.js";
 import auth from "../../../middleware/firebaseAuth.js";
 import { authHeaders } from "./testHelpers.js";
+import {
+  useMongoMemoryServer,
+  useExpressServer,
+} from "../../../test/testSetup.js";
 
 jest.mock("../../../middleware/firebaseAuth");
 jest.mock("firebase-admin");
@@ -28,9 +22,13 @@ auth.mockImplementation(async (req, res, next) => {
 });
 
 describe("Resources API tests", () => {
-  let mongoServer;
-  let server;
-  let port;
+  useMongoMemoryServer();
+  const ctx = useExpressServer(() => {
+    const app = express();
+    app.use(express.json());
+    app.use("/", routes);
+    return app;
+  });
 
   const scenarioId = "scenario-abc-123";
 
@@ -63,37 +61,14 @@ describe("Resources API tests", () => {
     currentFlags: ["flag1"],
   };
 
-  beforeAll(async () => {
-    mongoServer = await MongoMemoryServer.create();
-    await mongoose.connect(mongoServer.getUri());
-
-    const app = express();
-    app.use(express.json());
-    app.use("/", routes);
-
-    server = app.listen(0);
-    port = server.address().port;
-  });
-
   beforeEach(async () => {
     await Resource.create([resource1, resource2]);
     await Group.create([group1]);
   });
 
-  afterEach(async () => {
-    await mongoose.connection.db.dropDatabase();
-  });
-
-  afterAll(async () => {
-    server.close(async () => {
-      await mongoose.disconnect();
-      await mongoServer.stop();
-    });
-  });
-
   it("GET /resources/scenario/:scenarioId returns resources for a scenario", async () => {
     const response = await axios.get(
-      `http://localhost:${port}/api/resources/scenario/${scenarioId}`,
+      `http://localhost:${ctx.port}/api/resources/scenario/${scenarioId}`,
       authHeaders("user1")
     );
     expect(response.status).toBe(200);
@@ -104,7 +79,7 @@ describe("Resources API tests", () => {
 
   it("GET /resources/scenario/:scenarioId returns empty array for unknown scenario", async () => {
     const response = await axios.get(
-      `http://localhost:${port}/api/resources/scenario/unknown-scenario`,
+      `http://localhost:${ctx.port}/api/resources/scenario/unknown-scenario`,
       authHeaders("user1")
     );
     expect(response.status).toBe(200);
@@ -113,7 +88,7 @@ describe("Resources API tests", () => {
 
   it("GET /resources/group/:groupId returns visible resources filtered by group flags", async () => {
     const response = await axios.get(
-      `http://localhost:${port}/api/resources/group/${group1._id}`,
+      `http://localhost:${ctx.port}/api/resources/group/${group1._id}`,
       authHeaders("user1")
     );
     expect(response.status).toBe(200);
@@ -133,7 +108,7 @@ describe("Resources API tests", () => {
     });
 
     const response = await axios.get(
-      `http://localhost:${port}/api/resources/group/${emptyGroup._id}`,
+      `http://localhost:${ctx.port}/api/resources/group/${emptyGroup._id}`,
       authHeaders("user1")
     );
     expect(response.status).toBe(200);
@@ -144,7 +119,7 @@ describe("Resources API tests", () => {
 
   it("GET /resources/:resourceId returns a specific resource", async () => {
     const response = await axios.get(
-      `http://localhost:${port}/api/resources/${resource1._id}`,
+      `http://localhost:${ctx.port}/api/resources/${resource1._id}`,
       authHeaders("user1")
     );
     expect(response.status).toBe(200);
@@ -156,7 +131,7 @@ describe("Resources API tests", () => {
   it("GET /resources/:resourceId returns 404 for unknown resource", async () => {
     await expect(
       axios.get(
-        `http://localhost:${port}/api/resources/000000000000000000000099`,
+        `http://localhost:${ctx.port}/api/resources/000000000000000000000099`,
         authHeaders("user1")
       )
     ).rejects.toMatchObject({ response: { status: 404 } });
@@ -164,7 +139,7 @@ describe("Resources API tests", () => {
 
   it("PUT /resources/:resourceId updates a resource", async () => {
     const response = await axios.put(
-      `http://localhost:${port}/api/resources/${resource1._id}`,
+      `http://localhost:${ctx.port}/api/resources/${resource1._id}`,
       {
         name: "Updated Resource",
         type: "text",
@@ -183,7 +158,7 @@ describe("Resources API tests", () => {
   it("PUT /resources/:resourceId returns 400 when missing name or type", async () => {
     await expect(
       axios.put(
-        `http://localhost:${port}/api/resources/${resource1._id}`,
+        `http://localhost:${ctx.port}/api/resources/${resource1._id}`,
         { content: "some content" },
         authHeaders("user1")
       )
@@ -200,7 +175,7 @@ describe("Resources API tests", () => {
     "DELETE /resources/:resourceId deletes the resource and returns 204",
     async () => {
       const response = await axios.delete(
-        `http://localhost:${port}/api/resources/${resource1._id}`,
+        `http://localhost:${ctx.port}/api/resources/${resource1._id}`,
         authHeaders("user1")
       );
       expect(response.status).toBe(204);
@@ -215,7 +190,7 @@ describe("Resources API tests", () => {
     async () => {
       await expect(
         axios.delete(
-          `http://localhost:${port}/api/resources/000000000000000000000099`,
+          `http://localhost:${ctx.port}/api/resources/000000000000000000000099`,
           authHeaders("user1")
         )
       ).rejects.toMatchObject({ response: { status: 404 } });
@@ -229,7 +204,7 @@ describe("Resources API tests", () => {
     ];
 
     const response = await axios.post(
-      `http://localhost:${port}/api/resources/${scenarioId}`,
+      `http://localhost:${ctx.port}/api/resources/${scenarioId}`,
       resources,
       authHeaders("user1")
     );
@@ -246,7 +221,7 @@ describe("Resources API tests", () => {
   it("POST /resources/:scenarioId returns 400 for empty resource list", async () => {
     await expect(
       axios.post(
-        `http://localhost:${port}/api/resources/${scenarioId}`,
+        `http://localhost:${ctx.port}/api/resources/${scenarioId}`,
         [],
         authHeaders("user1")
       )
@@ -256,7 +231,7 @@ describe("Resources API tests", () => {
   it("POST /resources/ returns 400 when missing required fields", async () => {
     await expect(
       axios.post(
-        `http://localhost:${port}/api/resources/`,
+        `http://localhost:${ctx.port}/api/resources/`,
         { type: "text" }, // missing name and scenarioId
         authHeaders("user1")
       )

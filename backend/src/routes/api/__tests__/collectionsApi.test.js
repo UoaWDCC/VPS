@@ -1,15 +1,12 @@
 import {
   jest,
   describe,
-  beforeAll,
   beforeEach,
   afterEach,
-  afterAll,
   it,
   expect,
 } from "@jest/globals";
 
-import { MongoMemoryServer } from "mongodb-memory-server";
 import express from "express";
 import mongoose from "mongoose";
 import axios from "axios";
@@ -26,6 +23,10 @@ jest.mock("firebase-admin");
 
 import { deleteGridFsById } from "../../../util/gridfs.js";
 import { authHeaders } from "./testHelpers.js";
+import {
+  useMongoMemoryServer,
+  useExpressServer,
+} from "../../../test/testSetup.js";
 
 auth.mockImplementation(async (req, res, next) => {
   req.body.uid = req.headers.authorization?.split(" ")[1];
@@ -35,28 +36,20 @@ auth.mockImplementation(async (req, res, next) => {
 deleteGridFsById.mockResolvedValue(undefined);
 
 describe("Collections API tests", () => {
-  let mongoServer;
-  let server;
-  let port;
-
-  const scenarioId = new mongoose.mongo.ObjectId("eee000000000000000000001");
-  let group;
-  let storedFile;
-  const fakeGridFsId = new mongoose.mongo.ObjectId("fff000000000000000000001");
-
-  beforeAll(async () => {
-    mongoServer = await MongoMemoryServer.create();
-    await mongoose.connect(mongoServer.getUri());
-
+  useMongoMemoryServer();
+  const ctx = useExpressServer(() => {
     // collections.js is mounted directly at /api/collections in production
     const app = express();
     app.use(express.json());
     app.use("/api/collections", collectionsRouter);
     app.use(errorHandler);
-
-    server = app.listen(0);
-    port = server.address().port;
+    return app;
   });
+
+  const scenarioId = new mongoose.mongo.ObjectId("eee000000000000000000001");
+  let group;
+  let storedFile;
+  const fakeGridFsId = new mongoose.mongo.ObjectId("fff000000000000000000001");
 
   beforeEach(async () => {
     group = await CollectionGroup.create({
@@ -76,23 +69,15 @@ describe("Collections API tests", () => {
     });
   });
 
-  afterEach(async () => {
+  afterEach(() => {
     jest.clearAllMocks();
-    await mongoose.connection.db.dropDatabase();
-  });
-
-  afterAll(async () => {
-    server.close(async () => {
-      await mongoose.disconnect();
-      await mongoServer.stop();
-    });
   });
 
   // --- POST /api/collections/groups ---
 
   it("POST /collections/groups creates a new collection group", async () => {
     const response = await axios.post(
-      `http://localhost:${port}/api/collections/groups`,
+      `http://localhost:${ctx.port}/api/collections/groups`,
       { scenarioId: scenarioId.toString(), name: "New Group", order: 2 },
       authHeaders("user1")
     );
@@ -108,7 +93,7 @@ describe("Collections API tests", () => {
   it("POST /collections/groups returns 400 when scenarioId is missing", async () => {
     await expect(
       axios.post(
-        `http://localhost:${port}/api/collections/groups`,
+        `http://localhost:${ctx.port}/api/collections/groups`,
         { name: "No Scenario" },
         authHeaders("user1")
       )
@@ -118,7 +103,7 @@ describe("Collections API tests", () => {
   it("POST /collections/groups returns 400 when name is missing", async () => {
     await expect(
       axios.post(
-        `http://localhost:${port}/api/collections/groups`,
+        `http://localhost:${ctx.port}/api/collections/groups`,
         { scenarioId: scenarioId.toString() },
         authHeaders("user1")
       )
@@ -129,7 +114,7 @@ describe("Collections API tests", () => {
 
   it("GET /collections/tree/:scenarioId returns groups with their files", async () => {
     const response = await axios.get(
-      `http://localhost:${port}/api/collections/tree/${scenarioId}`,
+      `http://localhost:${ctx.port}/api/collections/tree/${scenarioId}`,
       authHeaders("user1")
     );
     expect(response.status).toBe(200);
@@ -146,7 +131,7 @@ describe("Collections API tests", () => {
   it("GET /collections/tree/:scenarioId returns empty array for unknown scenario", async () => {
     const otherId = new mongoose.mongo.ObjectId("aaa000000000000000000099");
     const response = await axios.get(
-      `http://localhost:${port}/api/collections/tree/${otherId}`,
+      `http://localhost:${ctx.port}/api/collections/tree/${otherId}`,
       authHeaders("user1")
     );
     expect(response.status).toBe(200);
@@ -161,7 +146,7 @@ describe("Collections API tests", () => {
     });
 
     const response = await axios.get(
-      `http://localhost:${port}/api/collections/tree/${scenarioId}`,
+      `http://localhost:${ctx.port}/api/collections/tree/${scenarioId}`,
       authHeaders("user1")
     );
     expect(response.status).toBe(200);
@@ -174,7 +159,7 @@ describe("Collections API tests", () => {
 
   it("DELETE /collections/groups/:groupId deletes group and all its files", async () => {
     const response = await axios.delete(
-      `http://localhost:${port}/api/collections/groups/${group._id}`,
+      `http://localhost:${ctx.port}/api/collections/groups/${group._id}`,
       authHeaders("user1")
     );
     expect(response.status).toBe(200);
@@ -192,7 +177,7 @@ describe("Collections API tests", () => {
   it("DELETE /collections/groups/:groupId returns 404 when group not found", async () => {
     await expect(
       axios.delete(
-        `http://localhost:${port}/api/collections/groups/000000000000000000000099`,
+        `http://localhost:${ctx.port}/api/collections/groups/000000000000000000000099`,
         authHeaders("user1")
       )
     ).rejects.toMatchObject({ response: { status: 404 } });
@@ -206,7 +191,7 @@ describe("Collections API tests", () => {
     });
 
     const response = await axios.delete(
-      `http://localhost:${port}/api/collections/groups/${emptyGroup._id}`,
+      `http://localhost:${ctx.port}/api/collections/groups/${emptyGroup._id}`,
       authHeaders("user1")
     );
     expect(response.status).toBe(200);

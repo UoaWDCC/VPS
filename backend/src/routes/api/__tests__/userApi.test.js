@@ -1,17 +1,6 @@
-import {
-  jest,
-  describe,
-  beforeAll,
-  beforeEach,
-  afterEach,
-  afterAll,
-  it,
-  expect,
-} from "@jest/globals";
+import { jest, describe, beforeEach, it, expect } from "@jest/globals";
 
-import { MongoMemoryServer } from "mongodb-memory-server";
 import express from "express";
-import mongoose from "mongoose";
 import axios from "axios";
 import routes from "../../index.js";
 import User from "../../../db/models/user.js";
@@ -20,6 +9,10 @@ import Scenario from "../../../db/models/scenario.js";
 import Scene from "../../../db/models/scene.js";
 import auth from "../../../middleware/firebaseAuth.js";
 import { authHeaders } from "./testHelpers.js";
+import {
+  useMongoMemoryServer,
+  useExpressServer,
+} from "../../../test/testSetup.js";
 
 jest.mock("../../../middleware/firebaseAuth");
 jest.mock("firebase-admin");
@@ -30,24 +23,16 @@ auth.mockImplementation(async (req, res, next) => {
 });
 
 describe("User API tests", () => {
-  let mongoServer;
-  let server;
-  let port;
-
-  let user1;
-  let scenario;
-
-  beforeAll(async () => {
-    mongoServer = await MongoMemoryServer.create();
-    await mongoose.connect(mongoServer.getUri());
-
+  useMongoMemoryServer();
+  const ctx = useExpressServer(() => {
     const app = express();
     app.use(express.json());
     app.use("/", routes);
-
-    server = app.listen(0);
-    port = server.address().port;
+    return app;
   });
+
+  let user1;
+  let scenario;
 
   beforeEach(async () => {
     user1 = await User.create({
@@ -71,21 +56,10 @@ describe("User API tests", () => {
     });
   });
 
-  afterEach(async () => {
-    await mongoose.connection.db.dropDatabase();
-  });
-
-  afterAll(async () => {
-    server.close(async () => {
-      await mongoose.disconnect();
-      await mongoServer.stop();
-    });
-  });
-
   // --- GET / ---
 
   it("GET /user/ returns all users", async () => {
-    const response = await axios.get(`http://localhost:${port}/api/user/`);
+    const response = await axios.get(`http://localhost:${ctx.port}/api/user/`);
     expect(response.status).toBe(200);
     expect(response.data).toHaveLength(2);
     const uids = response.data.map((u) => u.uid);
@@ -96,7 +70,9 @@ describe("User API tests", () => {
   // --- GET /min ---
 
   it("GET /user/min returns minimal user fields sorted by name", async () => {
-    const response = await axios.get(`http://localhost:${port}/api/user/min`);
+    const response = await axios.get(
+      `http://localhost:${ctx.port}/api/user/min`
+    );
     expect(response.status).toBe(200);
     expect(response.data).toHaveLength(2);
     // Should be sorted by name ascending: Alice, Bob
@@ -111,7 +87,7 @@ describe("User API tests", () => {
 
   it("GET /user/:uid returns a user by uid", async () => {
     const response = await axios.get(
-      `http://localhost:${port}/api/user/${user1.uid}`
+      `http://localhost:${ctx.port}/api/user/${user1.uid}`
     );
     expect(response.status).toBe(200);
     expect(Array.isArray(response.data)).toBe(true);
@@ -120,7 +96,7 @@ describe("User API tests", () => {
 
   it("GET /user/:uid returns empty array for unknown uid", async () => {
     const response = await axios.get(
-      `http://localhost:${port}/api/user/unknown-uid`
+      `http://localhost:${ctx.port}/api/user/unknown-uid`
     );
     expect(response.status).toBe(200);
     expect(response.data).toHaveLength(0);
@@ -138,7 +114,7 @@ describe("User API tests", () => {
     "GET /user/played/:scenarioId returns users who played the scenario",
     async () => {
       const response = await axios.get(
-        `http://localhost:${port}/api/user/played/${scenario._id}`
+        `http://localhost:${ctx.port}/api/user/played/${scenario._id}`
       );
       expect(response.status).toBe(200);
       const uids = response.data.map((u) => u.uid);
@@ -150,12 +126,15 @@ describe("User API tests", () => {
   // --- POST / (sign-in) ---
 
   it("POST /user/ creates a new user with allowed email domain", async () => {
-    const response = await axios.post(`http://localhost:${port}/api/user/`, {
-      uid: "uid-new",
-      name: "New User",
-      email: "newuser@auckland.ac.nz",
-      pictureURL: "http://example.com/new.png",
-    });
+    const response = await axios.post(
+      `http://localhost:${ctx.port}/api/user/`,
+      {
+        uid: "uid-new",
+        name: "New User",
+        email: "newuser@auckland.ac.nz",
+        pictureURL: "http://example.com/new.png",
+      }
+    );
     expect(response.status).toBe(200);
 
     const dbUser = await User.findOne({ uid: "uid-new" });
@@ -165,12 +144,15 @@ describe("User API tests", () => {
 
   it("POST /user/ does not create duplicate user when user already exists", async () => {
     // user1 already exists with alice@auckland.ac.nz
-    const response = await axios.post(`http://localhost:${port}/api/user/`, {
-      uid: "uid-1",
-      name: "Alice Duplicate",
-      email: "alice@auckland.ac.nz",
-      pictureURL: "http://example.com/alice.png",
-    });
+    const response = await axios.post(
+      `http://localhost:${ctx.port}/api/user/`,
+      {
+        uid: "uid-1",
+        name: "Alice Duplicate",
+        email: "alice@auckland.ac.nz",
+        pictureURL: "http://example.com/alice.png",
+      }
+    );
     expect(response.status).toBe(200);
 
     const dbUsers = await User.find({ email: "alice@auckland.ac.nz" });
@@ -179,7 +161,7 @@ describe("User API tests", () => {
 
   it("POST /user/ returns 403 for disallowed email domain", async () => {
     await expect(
-      axios.post(`http://localhost:${port}/api/user/`, {
+      axios.post(`http://localhost:${ctx.port}/api/user/`, {
         uid: "uid-x",
         name: "External",
         email: "outsider@gmail.com",
@@ -189,12 +171,15 @@ describe("User API tests", () => {
   });
 
   it("POST /user/ allows whitelisted test emails", async () => {
-    const response = await axios.post(`http://localhost:${port}/api/user/`, {
-      uid: "uid-test",
-      name: "Test User",
-      email: "wdccvpstesting1@gmail.com",
-      pictureURL: "http://example.com/test.png",
-    });
+    const response = await axios.post(
+      `http://localhost:${ctx.port}/api/user/`,
+      {
+        uid: "uid-test",
+        name: "Test User",
+        email: "wdccvpstesting1@gmail.com",
+        pictureURL: "http://example.com/test.png",
+      }
+    );
     expect(response.status).toBe(200);
   });
 
@@ -203,7 +188,7 @@ describe("User API tests", () => {
   it("DELETE /user/:uid returns 404 for unknown uid", async () => {
     // deleteUser catches errors and returns false → sendStatus(404)
     await expect(
-      axios.delete(`http://localhost:${port}/api/user/unknown-uid`)
+      axios.delete(`http://localhost:${ctx.port}/api/user/unknown-uid`)
     ).rejects.toMatchObject({ response: { status: 404 } });
   });
 
@@ -211,7 +196,7 @@ describe("User API tests", () => {
 
   it("PUT /user/:uid updates the user's played array", async () => {
     const response = await axios.put(
-      `http://localhost:${port}/api/user/${user1.uid}`,
+      `http://localhost:${ctx.port}/api/user/${user1.uid}`,
       { scenarioId: scenario._id.toString() }
     );
     expect(response.status).toBe(200);
@@ -225,7 +210,7 @@ describe("User API tests", () => {
     const scene = await Scene.create({ name: "S1", components: [] });
 
     const response = await axios.post(
-      `http://localhost:${port}/api/user/${user1.uid}/${scenario._id}/path`,
+      `http://localhost:${ctx.port}/api/user/${user1.uid}/${scenario._id}/path`,
       { nextSceneId: scene._id.toString() }
     );
     expect(response.status).toBe(200);
@@ -248,7 +233,7 @@ describe("User API tests", () => {
     });
 
     const response = await axios.get(
-      `http://localhost:${port}/api/user/group/${scenario._id}`,
+      `http://localhost:${ctx.port}/api/user/group/${scenario._id}`,
       authHeaders("uid-1")
     );
     expect(response.status).toBe(200);
@@ -257,7 +242,7 @@ describe("User API tests", () => {
 
   it("GET /user/group/:scenarioId returns null group when user is not in any group", async () => {
     const response = await axios.get(
-      `http://localhost:${port}/api/user/group/${scenario._id}`,
+      `http://localhost:${ctx.port}/api/user/group/${scenario._id}`,
       authHeaders("uid-1")
     );
     expect(response.status).toBe(200);

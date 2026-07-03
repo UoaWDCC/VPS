@@ -1,15 +1,12 @@
 import {
   jest,
   describe,
-  beforeAll,
   beforeEach,
   afterEach,
-  afterAll,
   it,
   expect,
 } from "@jest/globals";
 
-import { MongoMemoryServer } from "mongodb-memory-server";
 import express from "express";
 import mongoose from "mongoose";
 import axios from "axios";
@@ -31,6 +28,10 @@ import {
   deleteGridFsById,
 } from "../../../util/gridfs.js";
 import { authHeaders } from "./testHelpers.js";
+import {
+  useMongoMemoryServer,
+  useExpressServer,
+} from "../../../test/testSetup.js";
 
 auth.mockImplementation(async (req, res, next) => {
   req.body.uid = req.headers.authorization?.split(" ")[1];
@@ -47,27 +48,19 @@ streamGridFsToResponse.mockImplementation(({ res }) => {
 deleteGridFsById.mockResolvedValue(undefined);
 
 describe("Files API tests", () => {
-  let mongoServer;
-  let server;
-  let port;
-
-  const scenarioId = new mongoose.mongo.ObjectId("ccc000000000000000000001");
-  let collectionGroup;
-  let storedFile;
-
-  beforeAll(async () => {
-    mongoServer = await MongoMemoryServer.create();
-    await mongoose.connect(mongoServer.getUri());
-
+  useMongoMemoryServer();
+  const ctx = useExpressServer(() => {
     // files.js and collections.js are mounted directly (not through routes/api/index.js)
     const app = express();
     app.use(express.json());
     app.use("/api/files", filesRouter);
     app.use(errorHandler);
-
-    server = app.listen(0);
-    port = server.address().port;
+    return app;
   });
+
+  const scenarioId = new mongoose.mongo.ObjectId("ccc000000000000000000001");
+  let collectionGroup;
+  let storedFile;
 
   beforeEach(async () => {
     collectionGroup = await CollectionGroup.create({
@@ -87,23 +80,15 @@ describe("Files API tests", () => {
     });
   });
 
-  afterEach(async () => {
+  afterEach(() => {
     jest.clearAllMocks();
-    await mongoose.connection.db.dropDatabase();
-  });
-
-  afterAll(async () => {
-    server.close(async () => {
-      await mongoose.disconnect();
-      await mongoServer.stop();
-    });
   });
 
   // --- Download ---
 
   it("GET /files/download/:fileId streams a file from GridFS", async () => {
     const response = await axios.get(
-      `http://localhost:${port}/api/files/download/${storedFile._id}`
+      `http://localhost:${ctx.port}/api/files/download/${storedFile._id}`
     );
     expect(response.status).toBe(200);
     expect(streamGridFsToResponse).toHaveBeenCalledTimes(1);
@@ -112,7 +97,7 @@ describe("Files API tests", () => {
   it("GET /files/download/:fileId returns 404 when file metadata not found", async () => {
     await expect(
       axios.get(
-        `http://localhost:${port}/api/files/download/000000000000000000000099`
+        `http://localhost:${ctx.port}/api/files/download/000000000000000000000099`
       )
     ).rejects.toMatchObject({ response: { status: 404 } });
   });
@@ -129,7 +114,7 @@ describe("Files API tests", () => {
     });
 
     const response = await axios.post(
-      `http://localhost:${port}/api/files/upload`,
+      `http://localhost:${ctx.port}/api/files/upload`,
       form,
       {
         headers: {
@@ -154,7 +139,7 @@ describe("Files API tests", () => {
     });
 
     await expect(
-      axios.post(`http://localhost:${port}/api/files/upload`, form, {
+      axios.post(`http://localhost:${ctx.port}/api/files/upload`, form, {
         headers: { ...form.getHeaders(), Authorization: "Bearer user1" },
       })
     ).rejects.toMatchObject({ response: { status: 400 } });
@@ -166,7 +151,7 @@ describe("Files API tests", () => {
     form.append("groupId", collectionGroup._id.toString());
 
     await expect(
-      axios.post(`http://localhost:${port}/api/files/upload`, form, {
+      axios.post(`http://localhost:${ctx.port}/api/files/upload`, form, {
         headers: { ...form.getHeaders(), Authorization: "Bearer user1" },
       })
     ).rejects.toMatchObject({ response: { status: 400 } });
@@ -185,7 +170,7 @@ describe("Files API tests", () => {
     });
 
     await expect(
-      axios.post(`http://localhost:${port}/api/files/upload`, form, {
+      axios.post(`http://localhost:${ctx.port}/api/files/upload`, form, {
         headers: { ...form.getHeaders(), Authorization: "Bearer user1" },
       })
     ).rejects.toMatchObject({ response: { status: 500 } });
@@ -195,7 +180,7 @@ describe("Files API tests", () => {
 
   it("DELETE /files/:fileId deletes the StoredFile and calls GridFS delete", async () => {
     const response = await axios.delete(
-      `http://localhost:${port}/api/files/${storedFile._id}`,
+      `http://localhost:${ctx.port}/api/files/${storedFile._id}`,
       authHeaders("user1")
     );
     expect(response.status).toBe(200);
@@ -209,7 +194,7 @@ describe("Files API tests", () => {
   it("DELETE /files/:fileId returns 404 when file not found", async () => {
     await expect(
       axios.delete(
-        `http://localhost:${port}/api/files/000000000000000000000099`,
+        `http://localhost:${ctx.port}/api/files/000000000000000000000099`,
         authHeaders("user1")
       )
     ).rejects.toMatchObject({ response: { status: 404 } });
@@ -225,7 +210,7 @@ describe("Files API tests", () => {
     };
 
     const response = await axios.post(
-      `http://localhost:${port}/api/files/state-conditionals/${storedFile._id}`,
+      `http://localhost:${ctx.port}/api/files/state-conditionals/${storedFile._id}`,
       { stateConditional: conditional },
       authHeaders("user1")
     );
@@ -237,7 +222,7 @@ describe("Files API tests", () => {
   it("POST /files/state-conditionals/:fileId returns 404 for unknown file", async () => {
     await expect(
       axios.post(
-        `http://localhost:${port}/api/files/state-conditionals/000000000000000000000099`,
+        `http://localhost:${ctx.port}/api/files/state-conditionals/000000000000000000000099`,
         {
           stateConditional: { stateVariableId: "x", comparator: "=", value: 1 },
         },
@@ -249,7 +234,7 @@ describe("Files API tests", () => {
   it("PUT /files/state-conditionals/:fileId updates an existing state conditional", async () => {
     // First add a conditional
     const addResp = await axios.post(
-      `http://localhost:${port}/api/files/state-conditionals/${storedFile._id}`,
+      `http://localhost:${ctx.port}/api/files/state-conditionals/${storedFile._id}`,
       {
         stateConditional: {
           stateVariableId: "var-1",
@@ -262,7 +247,7 @@ describe("Files API tests", () => {
     const addedId = addResp.data.stateConditionals[0]._id;
 
     const response = await axios.put(
-      `http://localhost:${port}/api/files/state-conditionals/${storedFile._id}`,
+      `http://localhost:${ctx.port}/api/files/state-conditionals/${storedFile._id}`,
       {
         stateConditional: {
           _id: addedId,
@@ -281,7 +266,7 @@ describe("Files API tests", () => {
   it("DELETE /files/state-conditionals/:fileId/:stateConditionalId removes a conditional", async () => {
     // Add a conditional first
     const addResp = await axios.post(
-      `http://localhost:${port}/api/files/state-conditionals/${storedFile._id}`,
+      `http://localhost:${ctx.port}/api/files/state-conditionals/${storedFile._id}`,
       {
         stateConditional: {
           stateVariableId: "var-1",
@@ -294,7 +279,7 @@ describe("Files API tests", () => {
     const conditionalId = addResp.data.stateConditionals[0]._id;
 
     const response = await axios.delete(
-      `http://localhost:${port}/api/files/state-conditionals/${storedFile._id}/${conditionalId}`,
+      `http://localhost:${ctx.port}/api/files/state-conditionals/${storedFile._id}/${conditionalId}`,
       authHeaders("user1")
     );
     expect(response.status).toBe(200);
@@ -304,7 +289,7 @@ describe("Files API tests", () => {
   it("DELETE /files/state-conditionals/:fileId/:id returns 404 for non-existent conditional", async () => {
     await expect(
       axios.delete(
-        `http://localhost:${port}/api/files/state-conditionals/${storedFile._id}/000000000000000000000099`,
+        `http://localhost:${ctx.port}/api/files/state-conditionals/${storedFile._id}/000000000000000000000099`,
         authHeaders("user1")
       )
     ).rejects.toMatchObject({ response: { status: 404 } });

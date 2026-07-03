@@ -1,17 +1,6 @@
-import {
-  jest,
-  describe,
-  beforeAll,
-  beforeEach,
-  afterEach,
-  afterAll,
-  it,
-  expect,
-} from "@jest/globals";
+import { jest, describe, beforeEach, it, expect } from "@jest/globals";
 
-import { MongoMemoryServer } from "mongodb-memory-server";
 import express from "express";
-import mongoose from "mongoose";
 import axios from "axios";
 import routes from "../../index.js";
 import Note from "../../../db/models/note.js";
@@ -19,6 +8,10 @@ import Group from "../../../db/models/group.js";
 import User from "../../../db/models/user.js";
 import auth from "../../../middleware/firebaseAuth.js";
 import { authHeaders } from "./testHelpers.js";
+import {
+  useMongoMemoryServer,
+  useExpressServer,
+} from "../../../test/testSetup.js";
 
 jest.mock("../../../middleware/firebaseAuth");
 jest.mock("firebase-admin");
@@ -29,27 +22,19 @@ auth.mockImplementation(async (req, res, next) => {
 });
 
 describe("Note API tests", () => {
-  let mongoServer;
-  let server;
-  let port;
+  useMongoMemoryServer();
+  const ctx = useExpressServer(() => {
+    const app = express();
+    app.use(express.json());
+    app.use("/", routes);
+    return app;
+  });
 
   const userEmail = "doctor@example.com";
   const userRole = "doctor";
 
   let group;
   let note1;
-
-  beforeAll(async () => {
-    mongoServer = await MongoMemoryServer.create();
-    await mongoose.connect(mongoServer.getUri());
-
-    const app = express();
-    app.use(express.json());
-    app.use("/", routes);
-
-    server = app.listen(0);
-    port = server.address().port;
-  });
 
   beforeEach(async () => {
     // The note routes resolve the caller's email from their uid, so the
@@ -85,20 +70,9 @@ describe("Note API tests", () => {
     });
   });
 
-  afterEach(async () => {
-    await mongoose.connection.db.dropDatabase();
-  });
-
-  afterAll(async () => {
-    server.close(async () => {
-      await mongoose.disconnect();
-      await mongoServer.stop();
-    });
-  });
-
   it("GET /note/retrieveAll/:groupId returns all notes for a group", async () => {
     const response = await axios.get(
-      `http://localhost:${port}/api/note/retrieveAll/${group._id}`,
+      `http://localhost:${ctx.port}/api/note/retrieveAll/${group._id}`,
       authHeaders("user1")
     );
     expect(response.status).toBe(200);
@@ -117,7 +91,7 @@ describe("Note API tests", () => {
     });
 
     const response = await axios.get(
-      `http://localhost:${port}/api/note/retrieveAll/${emptyGroup._id}`,
+      `http://localhost:${ctx.port}/api/note/retrieveAll/${emptyGroup._id}`,
       authHeaders("user1")
     );
     expect(response.status).toBe(200);
@@ -126,7 +100,7 @@ describe("Note API tests", () => {
 
   it("GET /note/retrieve/:noteId returns a specific note", async () => {
     const response = await axios.get(
-      `http://localhost:${port}/api/note/retrieve/${note1._id}`,
+      `http://localhost:${ctx.port}/api/note/retrieve/${note1._id}`,
       authHeaders("user1")
     );
     expect(response.status).toBe(200);
@@ -136,7 +110,7 @@ describe("Note API tests", () => {
 
   it("POST /note/ creates a note for a user in the group", async () => {
     const response = await axios.post(
-      `http://localhost:${port}/api/note/`,
+      `http://localhost:${ctx.port}/api/note/`,
       {
         groupId: group._id.toString(),
         title: "New Note",
@@ -156,7 +130,7 @@ describe("Note API tests", () => {
     // Authenticated as "outsider", whose email is not a group member —
     // createNote returns null but the route still responds 200.
     const response = await axios.post(
-      `http://localhost:${port}/api/note/`,
+      `http://localhost:${ctx.port}/api/note/`,
       {
         groupId: group._id.toString(),
         title: "Ghost Note",
@@ -172,7 +146,7 @@ describe("Note API tests", () => {
 
   it("PUT /note/update updates a note's title and text", async () => {
     const response = await axios.put(
-      `http://localhost:${port}/api/note/update`,
+      `http://localhost:${ctx.port}/api/note/update`,
       {
         noteId: note1._id.toString(),
         title: "Updated Title",
@@ -191,7 +165,7 @@ describe("Note API tests", () => {
 
   it("DELETE /note/delete removes the note and its reference from the group", async () => {
     const response = await axios.delete(
-      `http://localhost:${port}/api/note/delete`,
+      `http://localhost:${ctx.port}/api/note/delete`,
       {
         ...authHeaders("user1"),
         data: {
