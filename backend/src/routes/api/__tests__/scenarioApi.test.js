@@ -198,6 +198,8 @@ describe("Scenario API tests", () => {
     );
     expect(response.status).toBe(HTTP_OK);
     expect(Array.isArray(response.data)).toBe(true);
+    // user1 owns both scenarios, so none are "assigned" to them by someone else
+    expect(response.data).toHaveLength(0);
   });
 
   it("GET /scenario/all returns owned, assigned, and accessible scenario groups", async () => {
@@ -209,6 +211,12 @@ describe("Scenario API tests", () => {
     expect(Array.isArray(response.data.owned)).toBe(true);
     expect(Array.isArray(response.data.assigned)).toBe(true);
     expect(Array.isArray(response.data.accessible)).toBe(true);
+    expect(response.data.owned.map((s) => s._id)).toEqual(
+      expect.arrayContaining([
+        scenario1._id.toString(),
+        scenario2._id.toString(),
+      ])
+    );
   });
 
   it("GET /scenario/:scenarioId returns the scenario", async () => {
@@ -305,6 +313,12 @@ describe("Scenario API tests", () => {
         expect.objectContaining({ name: "health", defaultValue: 50 }),
       ])
     );
+    const dbScenario = await Scenario.findById(scenario1._id).lean();
+    expect(dbScenario.stateVariables).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ name: "health", defaultValue: 50 }),
+      ])
+    );
   });
 
   it("DELETE /scenario/:scenarioId/stateVariables/:id removes a state variable", async () => {
@@ -320,6 +334,10 @@ describe("Scenario API tests", () => {
     );
     expect(response.status).toBe(HTTP_OK);
     expect(response.data).not.toEqual(
+      expect.arrayContaining([expect.objectContaining({ name: "score" })])
+    );
+    const dbScenario = await Scenario.findById(scenario1._id).lean();
+    expect(dbScenario.stateVariables).not.toEqual(
       expect.arrayContaining([expect.objectContaining({ name: "score" })])
     );
   });
