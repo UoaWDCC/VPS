@@ -6,9 +6,8 @@ import routes from "../../index.js";
 import Scenario from "../../../db/models/scenario.js";
 import Scene from "../../../db/models/scene.js";
 import Group from "../../../db/models/group.js";
-import Access from "../../../db/models/access.js";
 import auth from "../../../middleware/firebaseAuth.js";
-import dashboardAuth from "../../../middleware/dashboardAuth.js";
+import scenarioAuth from "../../../middleware/scenarioAuth.js";
 import { authHeaders } from "./testHelpers.js";
 import {
   useMongoMemoryServer,
@@ -16,7 +15,7 @@ import {
 } from "../../../test/testSetup.js";
 
 jest.mock("../../../middleware/firebaseAuth");
-jest.mock("../../../middleware/dashboardAuth");
+jest.mock("../../../middleware/scenarioAuth");
 jest.mock("firebase-admin");
 
 auth.mockImplementation(async (req, res, next) => {
@@ -24,7 +23,7 @@ auth.mockImplementation(async (req, res, next) => {
   next();
 });
 
-dashboardAuth.mockImplementation(async (req, res, next) => {
+scenarioAuth.mockImplementation(async (req, res, next) => {
   next();
 });
 
@@ -59,31 +58,6 @@ describe("Dashboard API tests", () => {
       scenarioId: scenario._id.toString(),
       currentFlags: [],
     });
-
-    await Access.create({
-      scenarioId: scenario._id.toString(),
-      name: scenario.name,
-      ownerId: "user1",
-      users: { user1: { name: "Owner", email: "owner@example.com" } },
-    });
-  });
-
-  it("GET /dashboard/ returns ok:true health check", async () => {
-    const response = await axios.get(
-      `http://localhost:${ctx.port}/api/dashboard/`,
-      authHeaders("user1")
-    );
-    expect(response.status).toBe(200);
-    expect(response.data).toEqual({ ok: true });
-  });
-
-  it("GET /dashboard/scenarios/:scenarioId/access returns allowed:true", async () => {
-    const response = await axios.get(
-      `http://localhost:${ctx.port}/api/dashboard/scenarios/${scenario._id}/access`,
-      authHeaders("user1")
-    );
-    expect(response.status).toBe(200);
-    expect(response.data).toEqual({ allowed: true });
   });
 
   it("GET /dashboard/scenarios/:scenarioId returns the scenario", async () => {

@@ -5,9 +5,9 @@ import axios from "axios";
 import routes from "../../index.js";
 import Access from "../../../db/models/access.js";
 import Scenario from "../../../db/models/scenario.js";
-import User from "../../../db/models/user.js";
 import auth from "../../../middleware/firebaseAuth.js";
-import scenarioAuth from "../../../middleware/scenarioAuth.js";
+import { scenarioOwnerAuth } from "../../../middleware/scenarioAuth.js";
+import errorHandler from "../../../middleware/errorHandler.js";
 import { authHeaders } from "./testHelpers.js";
 import {
   useMongoMemoryServer,
@@ -23,7 +23,9 @@ auth.mockImplementation(async (req, res, next) => {
   next();
 });
 
-scenarioAuth.mockImplementation(async (req, res, next) => {
+// The access routes are locked to the scenario owner; the mock lets every
+// request through so the tests can focus on the route behaviour itself.
+scenarioOwnerAuth.mockImplementation(async (req, res, next) => {
   next();
 });
 
@@ -33,169 +35,121 @@ describe("Access API tests", () => {
     const app = express();
     app.use(express.json());
     app.use("/", routes);
+    app.use(errorHandler);
     return app;
   });
 
   let scenario;
-  let ownerUser;
-  let grantedUser;
 
   beforeEach(async () => {
     scenario = await Scenario.create({ name: "Test Scenario", uid: "owner1" });
+  });
 
-    ownerUser = await User.create({
-      uid: "owner1",
-      name: "Owner",
-      email: "owner@example.com",
-      pictureURL: "http://example.com/pic.png",
-    });
-
-    grantedUser = await User.create({
-      uid: "user2",
-      name: "Granted User",
-      email: "user2@example.com",
-      pictureURL: "http://example.com/pic2.png",
-    });
-
+  it("GET /access/:scenarioId returns the access list for a scenario", async () => {
     await Access.create({
       scenarioId: scenario._id.toString(),
-      name: scenario.name,
-      ownerId: ownerUser.uid,
-      users: {
-        [ownerUser.uid]: { name: ownerUser.name, email: ownerUser.email },
-        [grantedUser.uid]: { name: grantedUser.name, email: grantedUser.email },
-      },
-    });
-  });
-
-  it("GET /access/ returns accessible scenarios for a non-owner user", async () => {
-    const response = await axios.get(
-      `http://localhost:${ctx.port}/api/access/`,
-      authHeaders("user2")
-    );
-    expect(response.status).toBe(200);
-    expect(Array.isArray(response.data)).toBe(true);
-    expect(response.data.length).toBeGreaterThanOrEqual(1);
-  });
-
-  it("GET /access/ returns empty array when user has no accessible scenarios", async () => {
-    const response = await axios.get(
-      `http://localhost:${ctx.port}/api/access/`,
-      authHeaders("unknown-user")
-    );
-    expect(response.status).toBe(200);
-    expect(response.data).toEqual([]);
-  });
-
-  it("GET /access/:scenarioId/users returns the access list for a scenario", async () => {
-    const response = await axios.get(
-      `http://localhost:${ctx.port}/api/access/${scenario._id}/users`,
-      authHeaders("owner1")
-    );
-    expect(response.status).toBe(200);
-    expect(response.data.scenarioId).toBe(scenario._id.toString());
-    expect(response.data.ownerId).toBe("owner1");
-    expect(response.data.users[grantedUser.uid]).toBeDefined();
-  });
-
-  it("GET /access/:scenarioId/users returns 200 with 404 body when access list not found", async () => {
-    // Route returns 200 { status: 404, error: "Not found" } instead of HTTP 404
-    const response = await axios.get(
-      `http://localhost:${ctx.port}/api/access/000000000000000000000099/users`,
-      authHeaders("owner1")
-    );
-    expect(response.status).toBe(200);
-    expect(response.data.status).toBe(404);
-  });
-
-  it("PUT /access/:scenarioId/users/:userId grants access to a new user", async () => {
-    const newUser = await User.create({
-      uid: "user3",
-      name: "New User",
-      email: "user3@example.com",
-      pictureURL: "http://example.com/pic3.png",
+      accessList: ["user2@example.com"],
     });
 
-    const response = await axios.put(
-      `http://localhost:${ctx.port}/api/access/${scenario._id}/users/${newUser.uid}`,
-      {},
-      authHeaders("owner1")
-    );
-    expect(response.status).toBe(200);
-    expect(response.data.users[newUser.uid]).toBeDefined();
-    expect(response.data.users[newUser.uid].email).toBe(newUser.email);
-  });
-
-  it("DELETE /access/:scenarioId/users/:userId revokes access for a non-owner", async () => {
-    const response = await axios.delete(
-      `http://localhost:${ctx.port}/api/access/${scenario._id}/users/${grantedUser.uid}`,
-      authHeaders("owner1")
-    );
-    expect(response.status).toBe(200);
-    expect(response.data.status).toBe(200);
-
-    const dbAccess = await Access.findOne({
-      scenarioId: scenario._id.toString(),
-    });
-    expect(dbAccess.users.has(grantedUser.uid)).toBe(false);
-  });
-
-  it("DELETE /access/:scenarioId/users/:userId returns 403 when revoking the owner", async () => {
-    await expect(
-      axios.delete(
-        `http://localhost:${ctx.port}/api/access/${scenario._id}/users/${ownerUser.uid}`,
-        authHeaders("owner1")
-      )
-    ).rejects.toMatchObject({ response: { status: 403 } });
-  });
-
-  it("DELETE /access/:scenarioId deletes the entire access list", async () => {
-    const response = await axios.delete(
+    const response = await axios.get(
       `http://localhost:${ctx.port}/api/access/${scenario._id}`,
-      { ...authHeaders("owner1"), data: { uid: "owner1" } }
+      authHeaders("owner1")
     );
     expect(response.status).toBe(200);
-    expect(response.data).toBe(true);
+    expect(response.data.scenarioId).toBe(scenario._id.toString());
+    expect(response.data.accessList).toEqual(["user2@example.com"]);
+  });
+
+  it("GET /access/:scenarioId returns a stub with empty accessList when none exists", async () => {
+    const response = await axios.get(
+      `http://localhost:${ctx.port}/api/access/${scenario._id}`,
+      authHeaders("owner1")
+    );
+    expect(response.status).toBe(200);
+    expect(response.data.scenarioId).toBe(scenario._id.toString());
+    expect(response.data.accessList).toEqual([]);
+  });
+
+  it("PATCH /access/:scenarioId/grant adds an email to the access list", async () => {
+    const response = await axios.patch(
+      `http://localhost:${ctx.port}/api/access/${scenario._id}/grant`,
+      { email: "user3@example.com" },
+      authHeaders("owner1")
+    );
+    expect(response.status).toBe(200);
+    expect(response.data.accessList).toContain("user3@example.com");
 
     const dbAccess = await Access.findOne({
       scenarioId: scenario._id.toString(),
     });
-    expect(dbAccess).toBeNull();
+    expect(dbAccess.accessList).toContain("user3@example.com");
   });
 
-  it("POST /access/:scenarioId/create creates an access list", async () => {
-    await Access.deleteOne({ scenarioId: scenario._id.toString() });
-
-    const response = await axios.post(
-      `http://localhost:${ctx.port}/api/access/${scenario._id}/create`,
-      {},
+  it("PATCH /access/:scenarioId/grant normalises the email before storing it", async () => {
+    const response = await axios.patch(
+      `http://localhost:${ctx.port}/api/access/${scenario._id}/grant`,
+      { email: "  User3@Example.com " },
       authHeaders("owner1")
     );
-    expect(response.status).toBe(201);
-    expect(response.data.scenarioId).toBe(scenario._id.toString());
-    expect(response.data.ownerId).toBe("owner1");
+    expect(response.status).toBe(200);
+    expect(response.data.accessList).toEqual(["user3@example.com"]);
   });
 
-  it("POST /access/:scenarioId/create returns 401 when no uid is provided", async () => {
-    auth.mockImplementationOnce(async (req, res, next) => {
-      // uid intentionally omitted
-      next();
-    });
-
+  it("PATCH /access/:scenarioId/grant returns 400 for an invalid email", async () => {
     await expect(
-      axios.post(
-        `http://localhost:${ctx.port}/api/access/${scenario._id}/create`,
-        {},
+      axios.patch(
+        `http://localhost:${ctx.port}/api/access/${scenario._id}/grant`,
+        { email: "not-an-email" },
         authHeaders("owner1")
       )
-    ).rejects.toMatchObject({ response: { status: 401 } });
+    ).rejects.toMatchObject({ response: { status: 400 } });
   });
 
-  it("POST /access/:scenarioId/create returns 404 when scenario does not exist", async () => {
+  it("PATCH /access/:scenarioId/revoke removes emails from the access list", async () => {
+    await Access.create({
+      scenarioId: scenario._id.toString(),
+      accessList: ["user2@example.com", "user3@example.com"],
+    });
+
+    const response = await axios.patch(
+      `http://localhost:${ctx.port}/api/access/${scenario._id}/revoke`,
+      { emails: ["user2@example.com"] },
+      authHeaders("owner1")
+    );
+    expect(response.status).toBe(200);
+    expect(response.data.accessList).toEqual(["user3@example.com"]);
+
+    const dbAccess = await Access.findOne({
+      scenarioId: scenario._id.toString(),
+    });
+    expect(dbAccess.accessList).toEqual(["user3@example.com"]);
+  });
+
+  it("PATCH /access/:scenarioId/revoke returns 400 when emails is not a non-empty array", async () => {
     await expect(
-      axios.post(
-        `http://localhost:${ctx.port}/api/access/000000000000000000000099/create`,
-        {},
+      axios.patch(
+        `http://localhost:${ctx.port}/api/access/${scenario._id}/revoke`,
+        { emails: [] },
+        authHeaders("owner1")
+      )
+    ).rejects.toMatchObject({ response: { status: 400 } });
+  });
+
+  it("PATCH /access/:scenarioId/revoke returns 400 for an invalid email in the array", async () => {
+    await expect(
+      axios.patch(
+        `http://localhost:${ctx.port}/api/access/${scenario._id}/revoke`,
+        { emails: ["user2@example.com", "not-an-email"] },
+        authHeaders("owner1")
+      )
+    ).rejects.toMatchObject({ response: { status: 400 } });
+  });
+
+  it("PATCH /access/:scenarioId/revoke returns 404 when no access list exists", async () => {
+    await expect(
+      axios.patch(
+        `http://localhost:${ctx.port}/api/access/${scenario._id}/revoke`,
+        { emails: ["user2@example.com"] },
         authHeaders("owner1")
       )
     ).rejects.toMatchObject({ response: { status: 404 } });
