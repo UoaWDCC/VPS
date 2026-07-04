@@ -5,11 +5,11 @@ import Thumbnail from "../authoring/components/Thumbnail";
 import CreateScenarioCard from "../../components/CreateScenarioCard/CreateScenarioCard";
 import TopNavBar from "../../features/TopNavBar/TopNavBar";
 import FabMenu from "../../components/FabMenu";
-import { PlusIcon, SearchIcon, Trash2Icon, XIcon } from "lucide-react";
+import { PlusIcon, SearchIcon, Trash2Icon } from "lucide-react";
 import { handle } from "../../components/ContextMenu/portal";
 import RightContextMenu from "../../components/ContextMenu/RightContextMenu";
+import DeleteScenarioModal from "./DeleteScenarioModal";
 
-// TODO: delete should be in a better place than this
 const ScenarioMenu = ({ scenario, requestDelete }) => {
   return (
     <ul className="menu bg-base-200 rounded-box w-fit">
@@ -24,8 +24,7 @@ const ScenarioMenu = ({ scenario, requestDelete }) => {
 };
 
 export default function CreateLandingPage() {
-  const { allScenarios, deleteScenario, createScenario } =
-    useContext(ScenarioContext);
+  const { allScenarios, createScenario } = useContext(ScenarioContext);
 
   const history = useHistory();
 
@@ -46,12 +45,6 @@ export default function CreateLandingPage() {
   function requestDelete(scenario, event) {
     event?.stopPropagation();
     setScenarioToDelete(scenario);
-  }
-
-  function handleDelete() {
-    if (!scenarioToDelete) return;
-    deleteScenario(scenarioToDelete._id);
-    setScenarioToDelete(null);
   }
 
   return (
@@ -88,83 +81,38 @@ export default function CreateLandingPage() {
             key={scenario._id}
           >
             <div
-              className="group relative cursor-pointer"
+              className="relative cursor-pointer"
               onClick={() => history.push(`/scenario/${scenario._id}`)}
             >
               <button
                 type="button"
-                className="btn btn-circle btn-sm absolute right-s top-s z-10 bg-base-100/90 text-error shadow transition hover:bg-error hover:text-error-content"
+                className="btn btn-circle btn-sm absolute right-xs top-xs z-10 bg-base-100/80 text-error shadow-none border-none transition hover:bg-error hover:text-error-content"
                 onClick={(event) => requestDelete(scenario, event)}
                 aria-label={`Delete ${scenario.name}`}
                 title="Delete scenario"
               >
                 <Trash2Icon size={16} />
               </button>
-              <div className="aspect-16/9 rounded overflow-hidden mb-s border-primary/10 border-1">
-                <Thumbnail components={scenario.thumbnail?.components || []} />
+              <div className="hover:-translate-y-1 duration-100 ease">
+                <div className="aspect-16/9 rounded overflow-hidden mb-s border-primary/10 border-1">
+                  <Thumbnail
+                    components={scenario.thumbnail?.components || []}
+                  />
+                </div>
+                <p className="font-ibm text-l text-nowrap truncate">
+                  {scenario.name}
+                </p>
               </div>
-              <p className="font-ibm text-l text-nowrap truncate">
-                {scenario.name}
-              </p>
             </div>
           </RightContextMenu>
         ))}
       </div>
 
-      {scenarioToDelete && (
-        <div
-          className="modal modal-open modal-bottom sm:modal-middle"
-          role="dialog"
-          aria-modal="true"
-        >
-          <div
-            className="modal-box text-base-content"
-            aria-labelledby="delete-scenario-title"
-          >
-            <button
-              type="button"
-              className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2"
-              onClick={() => setScenarioToDelete(null)}
-              aria-label="Close delete confirmation"
-            >
-              <XIcon size={16} />
-            </button>
-            <h2
-              id="delete-scenario-title"
-              className="font-ibm text-l font-semibold"
-            >
-              Delete scenario
-            </h2>
-            <p className="py-m">
-              Are you sure you want to delete{" "}
-              <span className="font-semibold">{scenarioToDelete.name}</span>?
-              This cannot be undone.
-            </p>
-            <div className="modal-action">
-              <button
-                type="button"
-                className="btn"
-                onClick={() => setScenarioToDelete(null)}
-              >
-                Cancel
-              </button>
-              <button
-                type="button"
-                className="btn important"
-                onClick={handleDelete}
-              >
-                Delete
-              </button>
-            </div>
-          </div>
-          <button
-            type="button"
-            className="modal-backdrop"
-            onClick={() => setScenarioToDelete(null)}
-            aria-label="Close delete confirmation"
-          />
-        </div>
-      )}
+      <DeleteScenarioModal
+        scenario={scenarioToDelete}
+        open={!!scenarioToDelete}
+        setOpen={() => setScenarioToDelete(null)}
+      />
 
       {/* Create Scenario Modal */}
       {showCreateModal && (
