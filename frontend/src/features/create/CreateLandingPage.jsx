@@ -32,7 +32,16 @@ export default function CreateLandingPage() {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [scenarioToDelete, setScenarioToDelete] = useState(null);
 
-  const filteredScenarios = allScenarios.owned.filter((scenario) =>
+  const scenarios = Array.from(
+    new Map(
+      [...allScenarios.owned, ...allScenarios.accessible].map((scenario) => [
+        scenario._id,
+        scenario,
+      ])
+    ).values()
+  );
+
+  const filteredScenarios = scenarios.filter((scenario) =>
     scenario.name.toLowerCase().includes(search.toLowerCase())
   );
 
