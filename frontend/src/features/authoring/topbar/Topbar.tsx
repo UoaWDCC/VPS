@@ -16,6 +16,8 @@ import StateVariableMenu from "../../../components/StateVariables/StateVariableM
 import ImageCreateMenu from "../images";
 import ShapeCreateMenu from "./ShapeCreateMenu";
 
+import "./topbar.css";
+
 function Topbar({ saving, save }: { saving: boolean; save: () => void }) {
   const selected = useEditorStore((state) => state.selected);
   const setMode = useEditorStore((state) => state.setMode);

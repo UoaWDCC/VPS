@@ -1,87 +1,103 @@
 import { fastIsEqual } from "fast-is-equal";
-import type { Component, Scene } from "../types";
-import {
-  applySceneSwitch,
-  getComponent,
-  getScene,
-  getSceneId,
-  getScenePatch,
-  saveCurrentScene,
-} from "./scene";
-import useVisualScene from "../stores/visual";
-import { buildVisualComponent } from "../pipeline";
-import useEditorStore from "../stores/editor";
+import type { Component } from "../types";
+import { getComponent, getSceneId } from "./scene";
+import { TypedEventTarget } from "typescript-event-target";
 
 interface HistoryObject {
   sceneId: string;
   id: string;
-  state: Component | null;
+  before: Component | null;
+  after: Component | null;
+}
+
+type HistoryOperation = "do" | "undo" | "redo";
+
+interface HistoryEventMap {
+  update: HistoryEvent<HistoryOperation>;
+}
+
+class HistoryEvent<T extends HistoryOperation> extends Event {
+  operation: T;
+  record: T extends "undo" | "redo" ? HistoryObject : HistoryObject | undefined;
+
+  constructor(
+    operation: T,
+    record: T extends "undo" | "redo"
+      ? HistoryObject
+      : HistoryObject | undefined
+  ) {
+    super("update");
+    this.operation = operation;
+    this.record = record;
+  }
+}
+
+function cloneHistoryRecord(record: HistoryObject): HistoryObject {
+  return {
+    sceneId: record.sceneId,
+    id: record.id,
+    before: structuredClone(record.before),
+    after: structuredClone(record.after),
+  };
 }
 
 let undoStack: HistoryObject[] = [];
 let redoStack: HistoryObject[] = [];
-let scenes: Scene[] = [];
-let scenarioId: string | null = null;
-let saveScene:
-  | ((patch: ReturnType<typeof getScenePatch>) => Promise<void>)
-  | null = null;
 
-export function init(
-  _scenes: Scene[],
-  _scenarioId: string,
-  _saveScene: (patch: ReturnType<typeof getScenePatch>) => Promise<void>
-) {
-  if (_scenarioId !== scenarioId) {
-    undoStack = [];
-    redoStack = [];
-  }
-  scenes = _scenes;
-  scenarioId = _scenarioId;
-  saveScene = _saveScene;
-}
+export const historyEvents = new TypedEventTarget<HistoryEventMap>();
 
-export function updateHistory(id: string, prevState: Component | null) {
-  if (fastIsEqual(prevState, getComponent(id))) return;
-  const sceneId = getSceneId();
-  undoStack.push({ sceneId, id, state: prevState });
-  if (undoStack.length > 100) undoStack.shift();
+export function clearHistory() {
+  undoStack = [];
   redoStack = [];
 }
 
+// NOTE: this should only be used for scene modifications that don't support undo/redo
+export function dispatchModification() {
+  historyEvents.dispatchTypedEvent("update", new HistoryEvent("do", undefined));
+}
+
+export function updateHistory(id: string, prevState: Component | null) {
+  const current = getComponent(id);
+  if (fastIsEqual(prevState, current)) return;
+
+  const sceneId = getSceneId();
+  const record = {
+    sceneId,
+    id,
+    before: structuredClone(prevState),
+    after: structuredClone(current),
+  };
+
+  undoStack.push(record);
+  if (undoStack.length > 100) undoStack.shift();
+  redoStack = [];
+
+  historyEvents.dispatchTypedEvent(
+    "update",
+    new HistoryEvent("do", cloneHistoryRecord(record))
+  );
+}
+
 export function undo() {
-  const prev = undoStack.pop();
-  if (!prev) return;
-  switchToScene(prev.sceneId);
-  const current = structuredClone(getComponent(prev.id));
-  restoreComponent(prev.id, prev.state);
-  redoStack.push({ sceneId: prev.sceneId, id: prev.id, state: current });
+  const record = undoStack.pop();
+  if (!record) return;
+
+  redoStack.push(record);
+
+  historyEvents.dispatchTypedEvent(
+    "update",
+    new HistoryEvent("undo", cloneHistoryRecord(record))
+  );
 }
 
 export function redo() {
-  const entry = redoStack.pop();
-  if (!entry) return;
-  switchToScene(entry.sceneId);
-  const current = structuredClone(getComponent(entry.id));
-  restoreComponent(entry.id, entry.state);
-  undoStack.push({ sceneId: entry.sceneId, id: entry.id, state: current });
-}
+  const record = redoStack.pop();
+  if (!record) return;
 
-function switchToScene(targetSceneId: string) {
-  if (targetSceneId === getSceneId()) return;
-  const targetScene = scenes.find((s) => s._id === targetSceneId);
-  if (!targetScene) return;
-  if (saveScene) void saveCurrentScene(saveScene);
-  applySceneSwitch(targetScene, scenarioId!);
-}
+  undoStack.push(record);
 
-function restoreComponent(id: string, state: Component | null) {
-  const { setSelected } = useEditorStore.getState();
-  if (state === null) {
-    setSelected(null);
-    delete getScene().components[id];
-    useVisualScene.getState().deleteComponent(id);
-  } else {
-    getScene().components[id] = structuredClone(state);
-    useVisualScene.getState().updateComponent(buildVisualComponent(state));
-  }
+  historyEvents.dispatchTypedEvent(
+    "update",
+    new HistoryEvent("redo", cloneHistoryRecord(record))
+  );
 }

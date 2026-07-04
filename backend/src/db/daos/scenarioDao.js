@@ -64,17 +64,16 @@ const addThumbs = async (scenarios) => {
 const retrieveAccessibleScenarios = async (uid) => {
   if (!uid) return [];
 
-  //Get all access list where the user is on the list but not owner
-  const access = await Access.find({
-    ownerId: { $ne: uid },
-    [`users.${uid}`]: { $exists: true },
-  })
+  const user = await User.findOne({ uid }, { email: 1 }).lean();
+  if (!user?.email) return [];
+
+  const access = await Access.find({ accessList: user.email })
     .sort({ _id: 1 })
     .select("scenarioId -_id")
     .lean();
 
-  const scenarioIds = [...access.map((s) => s.scenarioId)];
-  if (scenarioIds.length == 0) return [];
+  const scenarioIds = access.map((a) => a.scenarioId);
+  if (scenarioIds.length === 0) return [];
 
   return retrieveScenarios(scenarioIds);
 };

@@ -1,6 +1,5 @@
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import styles from "./SceneNavigator.module.scss";
 import ContextableThumb from "./ContextableThumb";
 
 const SceneListItem = ({ scene, index, active }) => {
@@ -20,13 +19,7 @@ const SceneListItem = ({ scene, index, active }) => {
   };
 
   return (
-    <li
-      style={style}
-      className={styles.sceneListItem}
-      {...attributes}
-      {...listeners}
-      ref={setNodeRef}
-    >
+    <li style={style} {...attributes} {...listeners} ref={setNodeRef}>
       <ContextableThumb scene={scene} index={index} active={active} />
     </li>
   );

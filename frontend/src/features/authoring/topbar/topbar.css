@@ -11,6 +11,7 @@ input[type="number"] {
 .topbar.menu li > a:has(> div) {
   @apply p-1.25;
 }
+
 .topbar .divider {
   @apply m-0;
 }
