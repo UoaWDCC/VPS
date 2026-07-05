@@ -115,7 +115,7 @@ function Speech(component: SpeechComponent) {
   }
 
   return (
-    <g>
+    <g className="speech">
       <path d={constructPath()} {...filterComponent(component)} />
     </g>
   );
