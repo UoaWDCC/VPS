@@ -262,3 +262,14 @@ body,
 .input.search input {
   @apply grow placeholder:text-primary text-secondary;
 }
+
+svg#main .box,
+svg#main .speech,
+svg#main .ellipse,
+svg#main .image {
+  @apply cursor-move;
+}
+
+svg#main .text {
+  @apply cursor-text;
+}
