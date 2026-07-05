@@ -45,8 +45,6 @@ export function handleMouseMoveGlobal(e: React.MouseEvent, position: Vec2) {
     return;
   }
 
-  if (!mouseDown) return;
-
   if (mode.includes("resize")) {
     handleResizeDrag(e, position);
   } else if (mode.includes("text")) {

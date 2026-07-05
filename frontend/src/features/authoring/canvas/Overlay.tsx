@@ -33,7 +33,6 @@ function Overlay() {
 
   const component = scene[selected];
   const hoveredComponent = scene[hovered];
-  console.log(hoveredComponent);
 
   function ResolveHandles() {
     switch (component.type) {
