@@ -134,7 +134,7 @@ export default function SceneSettings() {
               </div>
               <ul
                 tabIndex={0}
-                className="dropdown-content menu bg-base-300 rounded-box z-1 w-52 p-2 shadow-sm"
+                className="dropdown-content menu bg-base-300 rounded-box z-1 w-full p-2 shadow-sm"
               >
                 {roleList?.map((role, i) => {
                   const active = selectedRoles.includes(role);
@@ -152,10 +152,10 @@ export default function SceneSettings() {
                 })}
               </ul>
             </div>
-            <label className="label cursor-pointer justify-start gap-3 mt-2">
+            <label className="label cursor-pointer justify-start gap-3 mt-2 mb-2">
               <input
                 type="checkbox"
-                className="toggle"
+                className="toggle" 
                 checked={!!directLink && !directLinkDisabled}
                 disabled={directLinkDisabled}
                 onChange={(e) => {
@@ -173,10 +173,11 @@ export default function SceneSettings() {
                   modifySceneProp("directLink", target);
                 }}
               />
+              
               <span className="label-text">Direct Link</span>
               {directLinkDisabled && (
                 <span
-                  className="tooltip tooltip-warning tooltip-top cursor-help text-warning text-xs before:!whitespace-normal before:!max-w-[150px]"
+                  className="tooltip tooltip-warning tooltip-top cursor-help text-warning text-xs before:!whitespace-normal before:!max-w-[150px] before:!text-[0.75rem]"
                   data-tip={
                     "Disabled: scene has buttons leading to multiple different scenes"
                   }
@@ -184,9 +185,16 @@ export default function SceneSettings() {
                   ⚠
                 </span>
               )}
+              <span
+                className="label-text tooltip tooltip-top cursor-help before:!whitespace-normal before:!max-w-[130px] before:!text-[0.75rem]"
+                data-tip="Directs the user to another scene automatically instead of waiting for a button click."
+              >
+                ⓘ
+              </span>
             </label>
+            
             <select
-              className="select select-bordered"
+              className="select select-bordered w-full"
               disabled={!directLink || directLinkDisabled}
               value={directLink ?? ""}
               onChange={(e) =>

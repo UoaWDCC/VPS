@@ -14,7 +14,7 @@ export default function CanvasSideBar() {
   const component = selected ? getComponent(selected) : null;
 
   return (
-    <div className="flex pb-m flex-col w-[18vw] gap-s overflow-y-auto no-scrollbar">
+    <div className="flex pb-m flex-col w-[18vw] gap-s overflow-y-auto overflow-x-hidden no-scrollbar">
       <SceneSettings />
       <AudioManager />
       <ComponentProperties component={component} />
