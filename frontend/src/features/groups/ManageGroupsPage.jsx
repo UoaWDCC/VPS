@@ -1,4 +1,3 @@
-import axios from "axios";
 import Papa from "papaparse";
 import { useContext, useRef } from "react";
 import { useParams } from "react-router-dom";
@@ -103,7 +102,7 @@ export default function ManageGroupsPage() {
 
         // Send the parsed JSON data to the backend
         try {
-          await axios.post(`/api/group/${scenarioId}`, jsonData);
+          await api.post(user, `/api/group/${scenarioId}`, jsonData);
 
           refetch();
 
