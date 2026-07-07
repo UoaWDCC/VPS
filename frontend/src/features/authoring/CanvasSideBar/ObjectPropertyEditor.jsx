@@ -21,7 +21,6 @@ export function ObjectPropertyEditor({ component }) {
       (component.bounds.verts[1].y - component.bounds.verts[0].y) * 100
     ) / 100
   );
-  const [error, setError] = useState(null);
 
   useEffect(() => {
     const width =
@@ -45,14 +44,16 @@ export function ObjectPropertyEditor({ component }) {
 
   //this could prolly be improved
   // uses the same function as the drag box feat w modifyComponentProp
-  function saveProp(v, type) {
-    const value = parseFloat(String(v).trim());
-    if (isNaN(value)) {
-      const message = `error: non-numeric value entered in ${type} input`;
-      setError(message);
+  function saveProp(v, type, set) {
+    if (v === "") {
+      set(0);
       return;
     }
-    setError(null);
+    const value = parseFloat(String(v).trim());
+    console.log(value);
+    if (isNaN(value)) return;
+    set(value);
+
     const verts = component.bounds.verts;
     if (type === "x") {
       const diff = value - verts[0].x;
@@ -91,21 +92,17 @@ export function ObjectPropertyEditor({ component }) {
           </span>
           <div className="flex gap-13">
             <input
-              type="number"
               className="input max-w-21"
               value={inputWidth}
               onChange={(e) => {
-                setInputWidth(e.target.value);
-                setTimeout(() => saveProp(e.target.value, "width"), 120);
+                saveProp(e.target.value, "width", setInputWidth);
               }}
             />
             <input
-              type="number"
               className="input max-w-21"
               value={inputHeight}
               onChange={(e) => {
-                setInputHeight(e.target.value);
-                setTimeout(() => saveProp(e.target.value, "height"), 120);
+                saveProp(e.target.value, "height", setInputHeight);
               }}
             />
           </div>
@@ -117,25 +114,20 @@ export function ObjectPropertyEditor({ component }) {
           </span>
           <div className="flex gap-13">
             <input
-              type="number"
               className="input max-w-21"
               value={inputX}
               onChange={(e) => {
-                setInputX(e.target.value);
-                setTimeout(() => saveProp(e.target.value, "x"), 120);
+                saveProp(e.target.value, "x", setInputX);
               }}
             />
             <input
-              type="number"
               className="input max-w-21"
               value={inputY}
               onChange={(e) => {
-                setInputY(e.target.value);
-                setTimeout(() => saveProp(e.target.value, "y"), 120);
+                saveProp(e.target.value, "y", setInputY);
               }}
             />
           </div>
-          {error && <p className="text-red-500">{error}</p>}
         </fieldset>
       </div>
     </div>
