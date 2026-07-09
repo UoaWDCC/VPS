@@ -70,7 +70,6 @@ export default function AuthoringToolPage() {
       if (operation === "undo" || operation === "redo") {
         if (record.sceneId !== sceneId) switchScene(getScene(), record.sceneId);
         const state = operation === "undo" ? record.before : record.after;
-        if (state === null) setSelected(null);
         replaceComponent(record.id, state);
         if (state !== null) setSelected(record.id);
       }

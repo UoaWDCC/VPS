@@ -48,9 +48,11 @@ export function modify<A extends [string, ...unknown[]], R>(
 export function remove(id: string, history = true) {
   const component = getComponent(id);
   const prev = structuredClone(component);
+
   if (useEditorStore.getState().selected === id) {
     useEditorStore.getState().setSelected(null);
   }
+
   delete getScene().components[id];
 
   if (history) updateHistory(id, prev);
