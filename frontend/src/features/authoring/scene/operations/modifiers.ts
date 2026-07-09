@@ -5,6 +5,7 @@ import { dispatchModification, updateHistory } from "../history";
 import { getComponent, getScene, setScene } from "../scene";
 import type { Component, Scene } from "../../types";
 import { arrayToObject } from "../util";
+import useEditorStore from "../../stores/editor";
 
 export function replace(scene: Scene) {
   const clone = structuredClone(scene);
@@ -47,7 +48,9 @@ export function modify<A extends [string, ...unknown[]], R>(
 export function remove(id: string, history = true) {
   const component = getComponent(id);
   const prev = structuredClone(component);
-
+  if (useEditorStore.getState().selected === id) {
+    useEditorStore.getState().setSelected(null);
+  }
   delete getScene().components[id];
 
   if (history) updateHistory(id, prev);

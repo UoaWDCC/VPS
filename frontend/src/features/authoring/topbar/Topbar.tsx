@@ -69,7 +69,7 @@ function Topbar({ saving, save }: { saving: boolean; save: () => void }) {
         <ShapeCreateMenu />
 
         {/* element properties */}
-        {selected && component && (
+        {selected && (
           <>
             <div className="divider divider-horizontal" />
 
