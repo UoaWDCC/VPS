@@ -13,8 +13,6 @@ export default function CanvasSideBar() {
   const component = useVisualScene((state) =>
     selected ? state.components[selected] : null
   );
-
-  console.log("component", component)
   return (
     <div className="flex pb-m flex-col w-[18vw] gap-s overflow-y-auto no-scrollbar">
       <SceneSettings />

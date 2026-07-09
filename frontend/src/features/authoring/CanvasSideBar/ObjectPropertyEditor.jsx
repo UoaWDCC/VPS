@@ -13,12 +13,12 @@ export function ObjectPropertyEditor({ component }) {
   );
   const [inputWidth, setInputWidth] = useState(
     Math.round(
-      (component.bounds.verts[1].x - component.bounds.verts[0].x) * 100
+      Math.abs(component.bounds.verts[1].x - component.bounds.verts[0].x) * 100
     ) / 100
   );
   const [inputHeight, setInputHeight] = useState(
     Math.round(
-      (component.bounds.verts[1].y - component.bounds.verts[0].y) * 100
+      Math.abs(component.bounds.verts[1].y - component.bounds.verts[0].y) * 100
     ) / 100
   );
 
@@ -45,14 +45,16 @@ export function ObjectPropertyEditor({ component }) {
   //this could prolly be improved
   // uses the same function as the drag box feat w modifyComponentProp
   function saveProp(v, type, set) {
+    let value; 
     if (v === "") {
-      set(0);
-      return;
+      // val to 10 if nothing is entered as 0 deletes the box 
+      value = 10; 
+      set(value);
+    } else { 
+      value = parseFloat(String(v).trim());
+      if (isNaN(value)) return;
+      set(value);
     }
-    const value = parseFloat(String(v).trim());
-    console.log(value);
-    if (isNaN(value)) return;
-    set(value);
 
     const verts = component.bounds.verts;
     if (type === "x") {
