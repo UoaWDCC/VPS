@@ -88,7 +88,10 @@ export default function AuthoringToolPage() {
     if (!sceneId || !scenes) return;
     if (!scenes.find((s) => s._id === sceneId)) {
       const next = scenes[0];
-      if (next) replace(next);
+      if (next){ 
+        useEditorStore.getState().clear();  
+        replace(next);
+      }
     }
   }, [scenes]);
 
