@@ -40,14 +40,13 @@ export function copy(e: ClipboardEvent) {
 
 export function cut(e: ClipboardEvent) {
   if (isInputTarget(e)) return;
-  const { selected, setSelected } = useEditorStore.getState();
+  const { selected } = useEditorStore.getState();
   if (!selected) return;
 
   e.preventDefault();
 
   addToClipboard(e, selected);
   remove(selected);
-  setSelected(null);
 }
 
 export function paste(e: ClipboardEvent) {
