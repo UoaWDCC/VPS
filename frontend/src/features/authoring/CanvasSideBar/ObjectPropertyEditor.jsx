@@ -47,7 +47,7 @@ export function ObjectPropertyEditor({ component }) {
   function saveProp(v, type, set) {
     let value; 
     if (v === "") {
-      // val to 10 if nothing is entered as 0 deletes the box 
+      // val to 10 if nothing is entered as 0 deletes the box  & 1 is too small
       value = 10; 
       set(value);
     } else { 
