@@ -45,12 +45,12 @@ export function ObjectPropertyEditor({ component }) {
   //this could prolly be improved
   // uses the same function as the drag box feat w modifyComponentProp
   function saveProp(v, type, set) {
-    let value; 
+    let value;
     if (v === "") {
       // val to 10 if nothing is entered as 0 deletes the box  & 1 is too small
-      value = 10; 
+      value = 10;
       set(value);
-    } else { 
+    } else {
       value = parseFloat(String(v).trim());
       if (isNaN(value)) return;
       set(value);
