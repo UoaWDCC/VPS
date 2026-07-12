@@ -24,6 +24,8 @@ function authHeaders(id) {
 
 describe("Image API tests", () => {
   const HTTP_OK = 200;
+  const HTTP_BAD_REQUEST = 400;
+  const HTTP_NOT_FOUND = 404;
 
   useMongoMemoryServer();
   const ctx = useExpressServer(() => {
@@ -114,5 +116,55 @@ describe("Image API tests", () => {
     // check correct image is returned
     const image = response.data;
     expect(image.url).toEqual(image2.url);
+  });
+
+  it("POST /api/image/ returns 400 when body has no urls or images", async () => {
+    await expect(
+      axios.post(
+        `http://localhost:${ctx.port}/api/image/`,
+        {},
+        authHeaders("user1")
+      )
+    ).rejects.toMatchObject({ response: { status: HTTP_BAD_REQUEST } });
+  });
+
+  it("POST /api/image/ returns 400 when urls and images arrays are empty", async () => {
+    await expect(
+      axios.post(
+        `http://localhost:${ctx.port}/api/image/`,
+        { urls: [], images: [] },
+        authHeaders("user1")
+      )
+    ).rejects.toMatchObject({ response: { status: HTTP_BAD_REQUEST } });
+  });
+
+  it("POST /api/image/ accepts urls string array format", async () => {
+    const response = await axios.post(
+      `http://localhost:${ctx.port}/api/image/`,
+      { urls: ["https://example.com/photo.jpg"] },
+      authHeaders("user1")
+    );
+    expect(response.status).toBe(HTTP_OK);
+    const dbImages = await Image.find();
+    expect(dbImages).toHaveLength(1);
+    expect(dbImages[0].url).toBe("https://example.com/photo.jpg");
+  });
+
+  it("GET /api/image/undefined returns 400 for literal 'undefined' id", async () => {
+    await expect(
+      axios.get(
+        `http://localhost:${ctx.port}/api/image/undefined`,
+        authHeaders("user1")
+      )
+    ).rejects.toMatchObject({ response: { status: HTTP_BAD_REQUEST } });
+  });
+
+  it("GET /api/image/:id returns 404 for unknown id", async () => {
+    await expect(
+      axios.get(
+        `http://localhost:${ctx.port}/api/image/nonexistent-id`,
+        authHeaders("user1")
+      )
+    ).rejects.toMatchObject({ response: { status: HTTP_NOT_FOUND } });
   });
 });
