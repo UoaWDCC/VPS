@@ -70,7 +70,6 @@ export default function AuthoringToolPage() {
       if (operation === "undo" || operation === "redo") {
         if (record.sceneId !== sceneId) switchScene(getScene(), record.sceneId);
         const state = operation === "undo" ? record.before : record.after;
-        if (state === null) setSelected(null);
         replaceComponent(record.id, state);
         if (state !== null) setSelected(record.id);
       }
@@ -88,7 +87,10 @@ export default function AuthoringToolPage() {
     if (!sceneId || !scenes) return;
     if (!scenes.find((s) => s._id === sceneId)) {
       const next = scenes[0];
-      if (next) replace(next);
+      if (next) {
+        useEditorStore.getState().clear();
+        replace(next);
+      }
     }
   }, [scenes]);
 

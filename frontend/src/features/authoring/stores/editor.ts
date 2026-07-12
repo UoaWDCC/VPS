@@ -9,12 +9,14 @@ type Mode = "normal" | "resize" | "create" | "text" | "mutation";
 interface EditorState {
   loading: boolean;
   selected: string | null;
+  hovered: string | null;
   createType: string | null;
   mouseDown: boolean;
   mutationBounds: Bounds;
   offset: Vec2;
 
   setSelected: (id: string | null) => void;
+  setHovered: (id: string | null) => void;
   setCreateType: (type: string) => void;
   setMouseDown: (mouseDown: boolean) => void;
   setMutationBounds: Dynamic<Bounds>;
@@ -60,6 +62,7 @@ function setter<K extends keyof EditorState>(set: ZustandSet, prop: K) {
 const useEditorStore = create<EditorState>((set) => ({
   loading: false,
   selected: null,
+  hovered: null,
   createType: null,
   mouseDown: false,
   mutationBounds: { verts: [], rotation: 0 },
@@ -67,6 +70,7 @@ const useEditorStore = create<EditorState>((set) => ({
 
   setLoading: (value: boolean) => set({ loading: value }),
   setSelected: (id) => set({ selected: id }),
+  setHovered: (id) => set({ hovered: id }),
   setCreateType: (type: string) => set({ createType: type }),
   setMouseDown: (mouseDown) => set({ mouseDown }),
   setMutationBounds: setter(set, "mutationBounds"),

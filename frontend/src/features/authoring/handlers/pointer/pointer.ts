@@ -40,7 +40,10 @@ export function handleMouseDownGlobal(e: React.MouseEvent, position: Vec2) {
 export function handleMouseMoveGlobal(e: React.MouseEvent, position: Vec2) {
   const { mode, mouseDown } = useEditorStore.getState();
 
-  if (!mouseDown) return;
+  if (!mouseDown) {
+    handleComponentHover(e);
+    return;
+  }
 
   if (mode.includes("resize")) {
     handleResizeDrag(e, position);
@@ -74,6 +77,15 @@ function handleCanvasClick() {
 }
 
 // component handlers
+
+function handleComponentHover(e: React.MouseEvent) {
+  const { setHovered } = useEditorStore.getState();
+
+  const target = e.target as HTMLElement;
+  const id = target.dataset.id as string;
+
+  setHovered(id ?? null);
+}
 
 function handleComponentClick(e: React.MouseEvent, position: Vec2) {
   const { setSelected, setOffset, setMode, setMutationBounds } =

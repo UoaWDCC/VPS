@@ -6,6 +6,7 @@ import useEditorStore from "../stores/editor";
 import shallow from "zustand/shallow";
 import useVisualScene from "../stores/visual";
 import { getStyleForSelection } from "../scene/operations/text";
+import { memo } from "react";
 
 function Cursor({ bounds }: { bounds: RelativeBounds }) {
   const visualSelection = useEditorStore((state) => state.visualSelection);
@@ -42,4 +43,4 @@ function Cursor({ bounds }: { bounds: RelativeBounds }) {
   return <path d={path} fill={color ?? "#000000"} />;
 }
 
-export default Cursor;
+export default memo(Cursor);

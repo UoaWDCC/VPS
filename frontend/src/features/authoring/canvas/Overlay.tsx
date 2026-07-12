@@ -25,12 +25,14 @@ function resolve(type: Component["type"], bounds: Bounds) {
 
 function Overlay() {
   const selected = useEditorStore((state) => state.selected)!;
+  const hovered = useEditorStore((state) => state.hovered)!;
   const bounds = useEditorStore((state) => state.mutationBounds);
   const scene = useVisualScene((scene) => scene.components);
   const mode = useEditorStore((scene) => scene.mode);
   const createType = useEditorStore((scene) => scene.createType);
 
   const component = scene[selected];
+  const hoveredComponent = scene[hovered];
 
   function ResolveHandles() {
     switch (component.type) {
@@ -60,6 +62,15 @@ function Overlay() {
           />
           <ResolveHandles />
         </>
+      )}
+      {hoveredComponent && (
+        <Rectangle
+          bounds={hoveredComponent.bounds}
+          rotationOrigin={getBoxCenter(hoveredComponent.bounds.verts)}
+          fill="none"
+          stroke="#747775"
+          strokeWidth={1}
+        />
       )}
       {mode.includes("mutation") &&
         resolve(component?.type ?? createType, bounds)}

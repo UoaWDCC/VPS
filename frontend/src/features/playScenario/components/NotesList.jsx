@@ -17,7 +17,7 @@ export default function NotesList({
         return (
           <li key={note._id}>
             <button
-              className={`cursor-pointer w-full text-left p-4 border border-primary 
+              className={`cursor-pointer w-full text-left p-4 border border-primary
                 transition-colors hover:bg-base-200 ${
                   isSelected ? "bg-base-200" : ""
                 }`}
