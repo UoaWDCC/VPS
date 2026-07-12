@@ -39,7 +39,6 @@ export const defaults = {
     type: "line",
     stroke: "#b7b7b7ff",
     strokeWidth: 5,
-    clickable: true,
     bounds: {
       verts: [
         { x: 0, y: 0 },
@@ -53,7 +52,6 @@ export const defaults = {
     fill: "#b7b7b7ff",
     stroke: "#00000000",
     strokewidth: 3,
-    clickable: true,
     bounds: {
       verts: [
         { x: 0, y: 0 },
