@@ -15,7 +15,7 @@ export function buildVisualComponents(components: Component[]) {
 }
 
 export function buildVisualScene(modelScene: Scene) {
-  const visualComponents = {};
+  const visualComponents: Record<string, Component> = {};
   for (const component of Object.values(modelScene.components)) {
     visualComponents[component.id] = buildVisualComponent(component);
   }

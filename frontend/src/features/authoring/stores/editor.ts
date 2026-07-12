@@ -9,12 +9,14 @@ type Mode = "normal" | "resize" | "create" | "text" | "mutation";
 interface EditorState {
   loading: boolean;
   selected: string | null;
+  hovered: string | null;
   createType: string | null;
   mouseDown: boolean;
   mutationBounds: Bounds;
   offset: Vec2;
 
   setSelected: (id: string | null) => void;
+  setHovered: (id: string | null) => void;
   setCreateType: (type: string) => void;
   setMouseDown: (mouseDown: boolean) => void;
   setMutationBounds: Dynamic<Bounds>;
@@ -43,7 +45,11 @@ interface EditorState {
 
 type Dynamic<T> = (arg: T | ((prev: T) => T)) => void;
 
-function setter<K extends keyof EditorState>(set: Function, prop: K) {
+type ZustandSet = (
+  updater: (state: EditorState) => Partial<EditorState>
+) => void;
+
+function setter<K extends keyof EditorState>(set: ZustandSet, prop: K) {
   return (arg: EditorState[K] | ((prev: EditorState[K]) => EditorState[K])) =>
     set((state: EditorState) => ({
       [prop]:
@@ -56,6 +62,7 @@ function setter<K extends keyof EditorState>(set: Function, prop: K) {
 const useEditorStore = create<EditorState>((set) => ({
   loading: false,
   selected: null,
+  hovered: null,
   createType: null,
   mouseDown: false,
   mutationBounds: { verts: [], rotation: 0 },
@@ -63,6 +70,7 @@ const useEditorStore = create<EditorState>((set) => ({
 
   setLoading: (value: boolean) => set({ loading: value }),
   setSelected: (id) => set({ selected: id }),
+  setHovered: (id) => set({ hovered: id }),
   setCreateType: (type: string) => set({ createType: type }),
   setMouseDown: (mouseDown) => set({ mouseDown }),
   setMutationBounds: setter(set, "mutationBounds"),
@@ -75,7 +83,7 @@ const useEditorStore = create<EditorState>((set) => ({
 
   setSelection: (selection) =>
     set(({ selected }) => {
-      if (selected && getComponent(selected).type === "textbox") {
+      if (selected && getComponent(selected)?.type === "textbox") {
         const activeStyle = getStyleForSelection(selected, selection);
         return { selection, activeStyle };
       }

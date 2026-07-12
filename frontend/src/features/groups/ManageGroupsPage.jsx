@@ -1,4 +1,3 @@
-import axios from "axios";
 import Papa from "papaparse";
 import { useContext, useRef } from "react";
 import { useParams } from "react-router-dom";
@@ -103,7 +102,7 @@ export default function ManageGroupsPage() {
 
         // Send the parsed JSON data to the backend
         try {
-          await axios.post(`/api/group/${scenarioId}`, jsonData);
+          await api.post(user, `/api/group/${scenarioId}`, jsonData);
 
           refetch();
 
@@ -137,7 +136,7 @@ export default function ManageGroupsPage() {
 
   function downloadSample() {
     window.open(
-      "https://firebasestorage.googleapis.com/v0/b/virtual-patient-simulator.appspot.com/o/_manual-uploads%2Ftesting_group.xlsx?alt=media&token=a9c61c46-c317-4c8c-b8b8-ba049f8c9ff3",
+      "https://firebasestorage.googleapis.com/v0/b/virtual-patient-simulator.appspot.com/o/_manual-uploads%2Ftesting_group.csv?alt=media&token=a7afaae7-f4a6-4eb3-ba1d-634e849fcc6c",
       "_blank",
       "noopener,noreferrer"
     );

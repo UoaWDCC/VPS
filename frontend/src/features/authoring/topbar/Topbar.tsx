@@ -16,6 +16,8 @@ import StateVariableMenu from "../../../components/StateVariables/StateVariableM
 import ImageCreateMenu from "../images";
 import ShapeCreateMenu from "./ShapeCreateMenu";
 
+import "./topbar.css";
+
 function Topbar({ saving, save }: { saving: boolean; save: () => void }) {
   const selected = useEditorStore((state) => state.selected);
   const setMode = useEditorStore((state) => state.setMode);
@@ -44,12 +46,12 @@ function Topbar({ saving, save }: { saving: boolean; save: () => void }) {
 
         <div className="divider divider-horizontal" />
 
-        <li>
+        <li className="tooltip tooltip-bottom" data-tip="Undo">
           <a onClick={undo}>
             <Undo2Icon size={16} />
           </a>
         </li>
-        <li>
+        <li className="tooltip tooltip-bottom" data-tip="Redo">
           <a onClick={redo}>
             <Redo2Icon size={16} />
           </a>
@@ -59,7 +61,7 @@ function Topbar({ saving, save }: { saving: boolean; save: () => void }) {
 
         {/* element creation */}
         <ImageCreateMenu />
-        <li>
+        <li className="tooltip tooltip-bottom" data-tip="Add text">
           <a onClick={() => switchCreate("textbox")}>
             <Type size={16} />
           </a>
@@ -72,12 +74,12 @@ function Topbar({ saving, save }: { saving: boolean; save: () => void }) {
             <div className="divider divider-horizontal" />
 
             {/* reorder */}
-            <li>
+            <li className="tooltip tooltip-bottom" data-tip="Bring to front">
               <a onClick={() => bringToFront(selected)}>
                 <BringToFront size={16} />
               </a>
             </li>
-            <li>
+            <li className="tooltip tooltip-bottom" data-tip="Send to back">
               <a onClick={() => sendToBack(selected)}>
                 <SendToBack size={16} />
               </a>

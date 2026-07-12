@@ -5,17 +5,30 @@ import { v4 as uuidv4 } from "uuid";
 import User from "../models/user.js";
 
 /**
- * Creates a scenario in the database
+ * Creates a scenario in the database with an initial scene
  * @param {String} name name of scenario
  * @param {String} uid ID of authoring user
  * @returns database scenario object
  */
 const createScenario = async (name, uid) => {
-  const dbScenario = new Scenario({
-    name,
-    uid,
+  const firstScene = new Scene({
+    name: "Scene 1",
   });
-  await dbScenario.save();
+  await firstScene.save();
+
+  let dbScenario;
+
+  try {
+    dbScenario = new Scenario({
+      name,
+      uid,
+      scenes: [firstScene._id],
+    });
+    await dbScenario.save();
+  } catch (err) {
+    await Scene.deleteOne({ _id: firstScene._id });
+    throw err;
+  }
 
   return dbScenario;
 };
@@ -51,17 +64,16 @@ const addThumbs = async (scenarios) => {
 const retrieveAccessibleScenarios = async (uid) => {
   if (!uid) return [];
 
-  //Get all access list where the user is on the list but not owner
-  const access = await Access.find({
-    ownerId: { $ne: uid },
-    [`users.${uid}`]: { $exists: true },
-  })
+  const user = await User.findOne({ uid }, { email: 1 }).lean();
+  if (!user?.email) return [];
+
+  const access = await Access.find({ accessList: user.email })
     .sort({ _id: 1 })
     .select("scenarioId -_id")
     .lean();
 
-  const scenarioIds = [...access.map((s) => s.scenarioId)];
-  if (scenarioIds.length == 0) return [];
+  const scenarioIds = access.map((a) => a.scenarioId);
+  if (scenarioIds.length === 0) return [];
 
   return retrieveScenarios(scenarioIds);
 };

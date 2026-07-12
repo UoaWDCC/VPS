@@ -1,6 +1,5 @@
 import Scene from "../models/scene.js";
 import Scenario from "../models/scenario.js";
-import { tryDeleteFile, updateFileMetadata } from "../../firebase/storage.js";
 import { HttpError } from "../../util/error.js";
 import status from "../../util/status.js";
 
@@ -87,7 +86,8 @@ const updateScene = async (sceneId, updatedScene) => {
       if (c.type === "image" || c.type === "audio") {
         // checks for non-existance in new components array
         if (!updatedScene.components.some((newC) => newC.id === c.id)) {
-          tryDeleteFile(c.href ?? c.url);
+          // FIX: firebase is setup incorrectly, so this will error
+          // tryDeleteFile(c.href ?? c.url);
         }
       }
     });
@@ -124,15 +124,29 @@ const updateScene = async (sceneId, updatedScene) => {
  * Deletes a scene from the database, and removes it from its parent scenario
  * @param {String} scenarioId MongoDB ID of scenario
  * @param {String} sceneId MongoDB ID of scene
- * @returns {Promise<Boolean>} true if scene was deleted, false otherwise
+ * @returns {Promise<{deleted: Boolean, reason?: String}>} deletion result
  */
 const deleteScene = async (scenarioId, sceneId) => {
   const scenarioRes = await Scenario.findOneAndUpdate(
-    { _id: scenarioId },
+    {
+      _id: scenarioId,
+      scenes: sceneId,
+      $expr: { $gt: [{ $size: "$scenes" }, 1] },
+    },
     { $pull: { scenes: sceneId } }
   );
+
   if (!scenarioRes) {
-    return false;
+    const scenario = await Scenario.findById(scenarioId, { scenes: 1 }).lean();
+
+    if (
+      scenario?.scenes?.length === 1 &&
+      scenario.scenes[0].toString() === sceneId.toString()
+    ) {
+      return { deleted: false, reason: "last_scene" };
+    }
+
+    return { deleted: false, reason: "not_found" };
   }
 
   await Scene.updateMany(
@@ -140,7 +154,10 @@ const deleteScene = async (scenarioId, sceneId) => {
     { $set: { directLink: null } }
   );
   const res = await Scene.findOneAndDelete({ _id: sceneId });
-  return res !== null;
+  return {
+    deleted: res !== null,
+    reason: res ? undefined : "not_found",
+  };
 };
 
 /**
@@ -160,11 +177,12 @@ const duplicateScene = async (scenarioId, sceneId) => {
   const dbScene = new Scene(newScene);
   await dbScene.save();
 
-  dbScene.components.forEach((c) => {
-    if (c.type === "image" || c.type === "audio") {
-      updateFileMetadata(c.url);
-    }
-  });
+  // FIX: firebase is setup incorrectly, so this will error
+  // dbScene.components.forEach((c) => {
+  //   if (c.type === "image" || c.type === "audio") {
+  //     updateFileMetadata(c.url);
+  //   }
+  // });
 
   await Scenario.updateOne(
     { _id: scenarioId },
@@ -210,7 +228,10 @@ const getComponent = async (sceneId, componentId) => {
  */
 const updateSceneOrder = async (scenarioId, sceneIds) => {
   const updatedScenario = await Scenario.findOneAndUpdate(
-    { _id: scenarioId },
+    {
+      _id: scenarioId,
+      $expr: { $eq: [{ $size: "$scenes" }, sceneIds.length] },
+    },
     { scenes: sceneIds },
     { new: true }
   );
