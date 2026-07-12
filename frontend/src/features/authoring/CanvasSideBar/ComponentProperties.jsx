@@ -1,5 +1,5 @@
 import SceneContext from "context/SceneContext";
-
+import { ObjectPropertyEditor } from "./ObjectPropertyEditor";
 import { useContext, useEffect, useState } from "react";
 import { modifyComponentProp } from "../scene/operations/component";
 import StateOperationMenu from "../../../components/StateVariables/StateOperationMenu";
@@ -44,6 +44,7 @@ export default function ComponentProperties({ component }) {
         </div>
       </div>
       <StateOperationMenu component={component} />
+      <ObjectPropertyEditor component={component} />
     </>
   );
 }
