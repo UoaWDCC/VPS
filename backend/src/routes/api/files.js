@@ -1,14 +1,12 @@
 import { Router } from "express";
-import mongoose from "mongoose";
 import multer from "multer";
 import auth from "../../middleware/firebaseAuth.js";
-import CollectionGroup from "../../db/models/CollectionGroup.js";
 import StoredFile from "../../db/models/StoredFile.js";
-import {
-  uploadBufferToGridFS,
-  streamGridFsToResponse,
-  deleteGridFsById,
-} from "../../util/gridfs.js";
+import { streamGridFsToResponse, deleteGridFsById } from "../../util/gridfs.js";
+import { HttpStatusCode } from "axios";
+import { uploadFile } from "../../firebase/storage.js";
+import UploadedFile from "../../db/models/uploadedFile.js";
+import { handle, HttpError } from "../../util/error.js";
 
 const router = Router();
 
@@ -47,24 +45,28 @@ router.get("/download/:fileId", async (req, res) => {
   }
 });
 
-// Upload configuration
-const MAX_FILE_SIZE_MB = parseInt(process.env.MAX_FILE_SIZE_MB || "50", 10);
+// multer config (in-memory storage)
+const MAX_FILE_SIZE_MB = parseInt(process.env.MAX_FILE_SIZE_MB || "10", 10);
 const ALLOWED_MIME_SET = new Set(
   (
     process.env.ALLOWED_MIME_LIST ||
-    "image/png,image/jpeg,image/webp,application/pdf,text/plain,text/csv,application/json,text/markdown"
+    "image/png,image/jpeg,image/webp,image/gif,application/pdf,text/plain,text/markdown,audio/mpeg,audio/wav,audio/ogg,audio/webm,audio/mp4,audio/aac"
   )
     .split(",")
     .map((s) => s.trim())
 );
 
-// Multer (in-memory storage -> GridFS)
 const upload = multer({
   storage: multer.memoryStorage(),
   limits: { fileSize: MAX_FILE_SIZE_MB * 1024 * 1024 },
   fileFilter: (_req, file, cb) => {
     if (ALLOWED_MIME_SET.size > 0 && !ALLOWED_MIME_SET.has(file.mimetype)) {
-      return cb(new Error(`Unsupported file type: ${file.mimetype}`));
+      return cb(
+        new HttpError(
+          `unsupported file type: ${file.mimetype}`,
+          HttpStatusCode.UnsupportedMediaType
+        )
+      );
     }
     cb(null, true);
   },
@@ -73,77 +75,116 @@ const upload = multer({
 /**
  * Validate that group belongs to scenario
  */
-async function assertGroupInScenario({ scenarioId, groupId }) {
-  const group = await CollectionGroup.findById(groupId);
-  if (!group) throw new Error("Group not found");
-  if (String(group.scenarioId) !== String(scenarioId)) {
-    throw new Error("groupId does not belong to scenarioId");
-  }
-}
+// async function assertGroupInScenario({ scenarioId, groupId }) {
+//   const group = await CollectionGroup.findById(groupId);
+//   if (!group) throw new Error("Group not found");
+//   if (String(group.scenarioId) !== String(scenarioId)) {
+//     throw new Error("groupId does not belong to scenarioId");
+//   }
+// }
+
+router.post(
+  "/upload",
+  upload.single("file"),
+  handle(async (req, res) => {
+    try {
+      if (!req.file)
+        throw new HttpError("no file provided", HttpStatusCode.BadRequest);
+
+      const { scenarioId } = req.body;
+
+      const firebaseInfo = await uploadFile(req.file.buffer, req.file.mimetype);
+
+      const type = req.file.mimetype.startsWith("image/")
+        ? "image"
+        : req.file.mimetype.startsWith("audio/")
+          ? "audio"
+          : "document";
+
+      const uploadedFile = await UploadedFile.create({
+        name: req.file.originalname,
+        type: type,
+        path: firebaseInfo.path,
+        url: firebaseInfo.url,
+        contentType: req.file.mimetype,
+        size: req.file.size,
+        uploaderUid: req.body.uid,
+        scenarioId: scenarioId,
+        deletedAt: Date.now(), // handle orphanage from interruption between upload and reference
+      });
+
+      return res.status(201).json(uploadedFile);
+    } catch (err) {
+      if (err.code === "LIMIT_FILE_SIZE") {
+        throw new HttpError(err.message, HttpStatusCode.PayloadTooLarge);
+      } else throw err;
+    }
+  })
+);
 
 /**
  * @route POST /api/files/upload
  * @desc Upload one or more files to a group within a scenario
  */
-router.post("/upload", upload.array("files"), async (req, res) => {
-  try {
-    const { scenarioId, groupId } = req.body;
-    if (!scenarioId || !groupId) {
-      return res
-        .status(400)
-        .json({ error: "scenarioId and groupId are required" });
-    }
-    if (!req.files || req.files.length === 0) {
-      return res.status(400).json({ error: "No files uploaded" });
-    }
-
-    const scenarioObjId = new mongoose.Types.ObjectId(scenarioId);
-    const groupObjId = new mongoose.Types.ObjectId(groupId);
-
-    await assertGroupInScenario({
-      scenarioId: scenarioObjId,
-      groupId: groupObjId,
-    });
-
-    const uploaderUid = req.body.uid;
-
-    const results = [];
-    for (const f of req.files) {
-      const gridFsId = await uploadBufferToGridFS({
-        filename: f.originalname,
-        contentType: f.mimetype,
-        buffer: f.buffer,
-        metadata: { scenarioId, groupId, uploaderUid },
-      });
-
-      const doc = await StoredFile.create({
-        scenarioId: scenarioObjId,
-        groupId: groupObjId,
-        name: f.originalname,
-        size: f.size,
-        type: f.mimetype,
-        gridFsId,
-        uploaderUid,
-      });
-
-      const ret = doc.toObject();
-      delete ret.gridFsId;
-      results.push(ret);
-    }
-
-    return res.status(201).json({ files: results });
-  } catch (err) {
-    if (err.message && err.message.startsWith("Unsupported file type")) {
-      return res.status(415).json({ error: err.message });
-    }
-    if (err.message && err.message.includes("File too large")) {
-      return res
-        .status(413)
-        .json({ error: `File exceeds ${MAX_FILE_SIZE_MB} MB` });
-    }
-    return res.status(500).json({ error: err.message || "Upload failed" });
-  }
-});
+// router.post("/upload", upload.array("files"), async (req, res) => {
+//   try {
+//     const { scenarioId, groupId } = req.body;
+//     if (!scenarioId || !groupId) {
+//       return res
+//         .status(400)
+//         .json({ error: "scenarioId and groupId are required" });
+//     }
+//     if (!req.files || req.files.length === 0) {
+//       return res.status(400).json({ error: "No files uploaded" });
+//     }
+//
+//     const scenarioObjId = new mongoose.Types.ObjectId(scenarioId);
+//     const groupObjId = new mongoose.Types.ObjectId(groupId);
+//
+//     await assertGroupInScenario({
+//       scenarioId: scenarioObjId,
+//       groupId: groupObjId,
+//     });
+//
+//     const uploaderUid = req.body.uid;
+//
+//     const results = [];
+//     for (const f of req.files) {
+//       const gridFsId = await uploadBufferToGridFS({
+//         filename: f.originalname,
+//         contentType: f.mimetype,
+//         buffer: f.buffer,
+//         metadata: { scenarioId, groupId, uploaderUid },
+//       });
+//
+//       const doc = await StoredFile.create({
+//         scenarioId: scenarioObjId,
+//         groupId: groupObjId,
+//         name: f.originalname,
+//         size: f.size,
+//         type: f.mimetype,
+//         gridFsId,
+//         uploaderUid,
+//       });
+//
+//       const ret = doc.toObject();
+//       delete ret.gridFsId;
+//       results.push(ret);
+//     }
+//
+//     return res.status(201).json({ files: results });
+//   } catch (err) {
+//     if (err.message && err.message.startsWith("Unsupported file type")) {
+//       return res.status(415).json({ error: err.message });
+//     }
+//     if (err.message && err.message.includes("File too large")) {
+//       return res
+//         .status(413)
+//         .json({ error: `File exceeds ${MAX_FILE_SIZE_MB} MB` });
+//     }
+//     return res.status(500).json({ error: err.message || "Upload failed" });
+//   }
+// });
 
 /**
  * @route DELETE /api/files/:fileId
