@@ -1,4 +1,5 @@
 import Image from "../models/image.js";
+import UploadedFile from "../models/uploadedFile.js";
 
 /**
  * Creates and persists an image object with a url into the database
@@ -9,20 +10,20 @@ const createImage = async ({ id, url, fileName, uploadedAt }) => {
 };
 
 /**
- * Retrieves all the images stored in the database
+ * Retrieves all the images stored for a scenario
  * @returns list of database image objects
  */
-const retrieveImageList = async () => {
-  return Image.find().sort({ url: 1 }).lean();
+const retrieveImageList = async (scenarioId) => {
+  return UploadedFile.find({ scenarioId, type: "image" }).lean();
 };
 
 /**
- * Retrieves a single image object from the database by ID
+ * Retrieves a single image by ID
  * @param {String} imageId MongoDB ID of image
  * @returns database image object
  */
 const retrieveImage = async (imageId) => {
-  return Image.findOne({ id: imageId }).lean();
+  return UploadedFile.findById(imageId).lean();
 };
 
 export { createImage, retrieveImageList, retrieveImage };
