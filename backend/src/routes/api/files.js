@@ -91,8 +91,6 @@ router.post(
       if (!req.file)
         throw new HttpError("no file provided", HttpStatusCode.BadRequest);
 
-      const { scenarioId } = req.body;
-
       const firebaseInfo = await uploadFile(req.file.buffer, req.file.mimetype);
 
       const type = req.file.mimetype.startsWith("image/")
@@ -108,8 +106,8 @@ router.post(
         url: firebaseInfo.url,
         contentType: req.file.mimetype,
         size: req.file.size,
-        uploaderUid: req.body.uid,
-        scenarioId: scenarioId,
+        uploaderUid: req.uid,
+        scenarioId: req.body.scenarioId,
         deletedAt: Date.now(), // handle orphanage from interruption between upload and reference
       });
 
