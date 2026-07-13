@@ -17,6 +17,7 @@ export default async function auth(req, res, next) {
     .then((decoded) => {
       const { uid } = decoded;
       req.body.uid = uid;
+      req.uid = uid; // to ensure other middleware (multer) doesn't overwrite
       next();
     })
     .catch(() => res.sendStatus(HttpStatusCode.Unauthorized));
