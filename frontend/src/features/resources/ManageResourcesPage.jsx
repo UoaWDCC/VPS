@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect } from "react";
+import React, { useRef, useState, useEffect, useContext } from "react";
 import { getAuth } from "firebase/auth";
 import axios from "axios";
 import toast from "react-hot-toast";
@@ -15,18 +15,11 @@ import AddGroup from "./components/AddGroup";
 import StateConditionalMenu from "../../components/StateVariables/StateConditionalMenu";
 import MDTextViewer from "../playScenario/components/MDTextViewer";
 import { getDownloadUrl } from "../playScenario/hooks/useDownloadUrl";
+import { api } from "../../util/api";
+import AuthenticationContext from "../../context/AuthenticationContext";
 
 function normaliseFile(f) {
-  return {
-    id: f._id || f.id,
-    groupId: f.groupId,
-    groupName: f.groupName,
-    name: f.name,
-    size: f.size,
-    type: f.type,
-    createdAt: f.createdAt,
-    stateConditionals: f.stateConditionals || [],
-  };
+  return f;
 }
 
 function normaliseGroup(g) {
@@ -43,6 +36,47 @@ function normaliseGroup(g) {
       })
     ),
   };
+}
+
+async function uploadResource(user, scenarioId, groupId, file) {
+  try {
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("scenarioId", scenarioId);
+
+    const fileResponse = await api.post(user, "api/files/upload", formData);
+
+    const resource = {
+      groupId,
+      name: fileResponse.data.name,
+      fileId: fileResponse.data._id,
+      url: fileResponse.data.url,
+      type: fileResponse.data.type,
+      contentType: fileResponse.data.contentType,
+    };
+
+    const resourceResponse = await api.post(
+      user,
+      `api/resources/${scenarioId}`,
+      resource
+    );
+    toast.success(`Resource created`);
+    return resourceResponse.data;
+  } catch (err) {
+    console.error(err);
+    toast.error("Upload failed");
+  }
+}
+
+async function removeResource(user, scenarioId, resourceId) {
+  try {
+    await api.delete(user, `/api/resources/${scenarioId}/${resourceId}`);
+    toast.success("Resource deleted");
+    return resourceId;
+  } catch (err) {
+    console.error(err);
+    toast.error("Delete failed");
+  }
 }
 
 // Page for managing resources (collections and files) for a scenario
@@ -65,6 +99,8 @@ export default function ManageResourcesPage() {
   const [groups, setGroups] = useState([]);
   const [selectedGroup, setSelectedGroup] = useState(null);
   const [selectedFile, setSelectedFile] = useState(null);
+
+  const { user } = useContext(AuthenticationContext);
 
   // Load groups and files
   useEffect(() => {
@@ -97,81 +133,29 @@ export default function ManageResourcesPage() {
     };
   }, [scenarioId]);
 
-  // Upload directly to group
-  async function addFilesTo(groupId, files) {
-    try {
-      const user = getAuth().currentUser;
-      if (!user) {
-        toast.error("You must be logged in to upload.");
-        return;
-      }
-      const idToken = await user.getIdToken();
+  async function addResourceToGroup(groupId, file) {
+    const resource = await uploadResource(user, scenarioId, groupId, file);
+    if (!resource) return;
 
-      const fd = new FormData();
-      fd.set("scenarioId", scenarioId);
-      fd.set("groupId", groupId);
-      for (const file of files) fd.append("files", file);
-
-      const { data } = await axios.post("/api/files/upload", fd, {
-        headers: {
-          Authorization: `Bearer ${idToken}`,
-          "Content-Type": "multipart/form-data",
-        },
-      });
-
-      const uploaded = data?.files || [];
-      if (!uploaded.length) return;
-
-      const normalizedUploaded = uploaded.map((f) => ({
-        id: f._id,
-        groupId,
-        name: f.name,
-        size: f.size,
-        type: f.type,
-        createdAt: f.createdAt,
-        stateConditionals: f.stateConditionals || [],
-      }));
-
-      setGroups((prev) =>
-        prev.map((g) =>
-          g.id === groupId
-            ? { ...g, files: [...normalizedUploaded, ...(g.files || [])] }
-            : g
-        )
-      );
-
-      toast.success(`Uploaded ${normalizedUploaded.length} file(s)`);
-    } catch (err) {
-      console.error(err);
-      toast.error(err?.response?.data?.error || "Upload failed");
-    }
+    setGroups((prev) =>
+      prev.map((g) =>
+        g.id === groupId ? { ...g, files: [resource, ...(g.files || [])] } : g
+      )
+    );
   }
 
-  async function removeFile(fileId) {
-    try {
-      const user = getAuth().currentUser;
-      if (!user) {
-        toast.error("You must be logged in to delete.");
-        return;
-      }
-      const idToken = await user.getIdToken();
-      await axios.delete(`/api/files/${fileId}`, {
-        headers: { Authorization: `Bearer ${idToken}` },
-      });
+  async function deleteResource(resourceId) {
+    const success = await removeResource(user, scenarioId, resourceId);
+    if (!success) return;
 
-      setGroups((prev) =>
-        prev.map((g) => ({
-          ...g,
-          files: (g.files || []).filter((f) => f.id !== fileId),
-        }))
-      );
+    setGroups((prev) =>
+      prev.map((g) => ({
+        ...g,
+        files: (g.files || []).filter((f) => f.id !== resourceId),
+      }))
+    );
 
-      if (selectedFile?.id === fileId) setSelectedFile(null);
-      toast.success("Deleted");
-    } catch (err) {
-      console.error(err);
-      toast.error(err?.response?.data?.error || "Delete failed");
-    }
+    if (selectedFile?.id === resourceId) setSelectedFile(null);
   }
 
   async function deleteGroup(groupId) {
@@ -331,7 +315,10 @@ export default function ManageResourcesPage() {
                           <span className="text--1 truncate">{group.name}</span>
                           <div className="flex items-center ml-auto">
                             <UploadButton
-                              onFiles={(files) => addFilesTo(group.id, files)}
+                              multiple={false}
+                              onFiles={(files) =>
+                                addResourceToGroup(group.id, files[0])
+                              }
                             />
                             <button
                               className="btn btn-phantom btn-xs"
@@ -369,7 +356,7 @@ export default function ManageResourcesPage() {
                                 </a>
                                 <button
                                   className="btn btn-phantom btn-xs px-0"
-                                  onClick={() => removeFile(f.id)}
+                                  onClick={() => deleteResource(f._id)}
                                   title="Delete file"
                                 >
                                   <XIcon size={16} />
@@ -515,34 +502,30 @@ function Preview({ file }) {
     );
 
   // logic is consistent with resource panel
-  const isImage = file.type?.startsWith("image/");
-  const isPDF = file.type === "application/pdf";
+  const isImage = file.type === "image";
   const isText =
-    file.type?.startsWith("text/") ||
-    /\.md$|\.html?$/i.test(file.name || "") ||
-    /json|xml|csv/.test(file.type || "");
+    file.type === "document" && !file.contentType === "application/pdf";
+  const isPDF = file.contentType === "application/pdf";
 
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between">
         <h3 className="text-m">{file.name}</h3>
-        {downloadUrl && (
-          <a className="btn btn-phantom btn-xs" href={downloadUrl} download>
-            Download
-          </a>
-        )}
+        <a className="btn btn-phantom btn-xs" href={file.url} download>
+          Download
+        </a>
       </div>
 
-      {isImage && downloadUrl ? (
+      {isImage ? (
         <img
-          src={downloadUrl}
+          src={file.url}
           alt={file.name}
           className="rounded-xl max-h-80 object-contain"
         />
-      ) : isPDF && downloadUrl ? (
+      ) : isPDF ? (
         <div className="w-full h-full">
           <iframe
-            src={downloadUrl}
+            src={file.url}
             title={file.name}
             className="w-full h-full min-h-[60vh] rounded-xl border"
           />

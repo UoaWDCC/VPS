@@ -1,8 +1,6 @@
 import { Router } from "express";
 import multer from "multer";
 import auth from "../../middleware/firebaseAuth.js";
-import StoredFile from "../../db/models/StoredFile.js";
-import { streamGridFsToResponse, deleteGridFsById } from "../../util/gridfs.js";
 import { HttpStatusCode } from "axios";
 import { uploadFile } from "../../firebase/storage.js";
 import UploadedFile from "../../db/models/uploadedFile.js";
@@ -10,40 +8,7 @@ import { handle, HttpError } from "../../util/error.js";
 
 const router = Router();
 
-// Allow ?token=ID_TOKEN for <img src> / links (copy to Authorization header)
-router.use((req, _res, next) => {
-  if (req.query && req.query.token && !req.headers.authorization) {
-    req.headers.authorization = `Bearer ${req.query.token}`;
-  }
-  next();
-});
-
-// All routes below require Firebase auth
 router.use(auth);
-
-/**
- * @route GET /api/files/download/:fileId
- * @desc Stream a file directly from GridFS by ID
- */
-router.get("/download/:fileId", async (req, res) => {
-  try {
-    const { fileId } = req.params;
-    const meta = await StoredFile.findById(fileId).lean();
-    if (!meta) return res.status(404).json({ error: "File not found" });
-
-    res.setHeader("Cache-Control", "no-store"); // avoid caching auth-protected content
-
-    return streamGridFsToResponse({
-      fileId: meta.gridFsId,
-      res,
-      contentType: meta.type,
-      filename: meta.name,
-      disposition: "inline",
-    });
-  } catch (err) {
-    return res.status(500).json({ error: err.message });
-  }
-});
 
 // multer config (in-memory storage)
 const MAX_FILE_SIZE_MB = parseInt(process.env.MAX_FILE_SIZE_MB || "10", 10);
@@ -71,17 +36,6 @@ const upload = multer({
     cb(null, true);
   },
 });
-
-/**
- * Validate that group belongs to scenario
- */
-// async function assertGroupInScenario({ scenarioId, groupId }) {
-//   const group = await CollectionGroup.findById(groupId);
-//   if (!group) throw new Error("Group not found");
-//   if (String(group.scenarioId) !== String(scenarioId)) {
-//     throw new Error("groupId does not belong to scenarioId");
-//   }
-// }
 
 router.post(
   "/upload",
@@ -118,164 +72,6 @@ router.post(
       } else throw err;
     }
   })
-);
-
-/**
- * @route POST /api/files/upload
- * @desc Upload one or more files to a group within a scenario
- */
-// router.post("/upload", upload.array("files"), async (req, res) => {
-//   try {
-//     const { scenarioId, groupId } = req.body;
-//     if (!scenarioId || !groupId) {
-//       return res
-//         .status(400)
-//         .json({ error: "scenarioId and groupId are required" });
-//     }
-//     if (!req.files || req.files.length === 0) {
-//       return res.status(400).json({ error: "No files uploaded" });
-//     }
-//
-//     const scenarioObjId = new mongoose.Types.ObjectId(scenarioId);
-//     const groupObjId = new mongoose.Types.ObjectId(groupId);
-//
-//     await assertGroupInScenario({
-//       scenarioId: scenarioObjId,
-//       groupId: groupObjId,
-//     });
-//
-//     const uploaderUid = req.body.uid;
-//
-//     const results = [];
-//     for (const f of req.files) {
-//       const gridFsId = await uploadBufferToGridFS({
-//         filename: f.originalname,
-//         contentType: f.mimetype,
-//         buffer: f.buffer,
-//         metadata: { scenarioId, groupId, uploaderUid },
-//       });
-//
-//       const doc = await StoredFile.create({
-//         scenarioId: scenarioObjId,
-//         groupId: groupObjId,
-//         name: f.originalname,
-//         size: f.size,
-//         type: f.mimetype,
-//         gridFsId,
-//         uploaderUid,
-//       });
-//
-//       const ret = doc.toObject();
-//       delete ret.gridFsId;
-//       results.push(ret);
-//     }
-//
-//     return res.status(201).json({ files: results });
-//   } catch (err) {
-//     if (err.message && err.message.startsWith("Unsupported file type")) {
-//       return res.status(415).json({ error: err.message });
-//     }
-//     if (err.message && err.message.includes("File too large")) {
-//       return res
-//         .status(413)
-//         .json({ error: `File exceeds ${MAX_FILE_SIZE_MB} MB` });
-//     }
-//     return res.status(500).json({ error: err.message || "Upload failed" });
-//   }
-// });
-
-/**
- * @route DELETE /api/files/:fileId
- * @desc Delete a stored file and its GridFS data
- */
-router.delete("/:fileId", async (req, res) => {
-  try {
-    const { fileId } = req.params;
-    const meta = await StoredFile.findById(fileId);
-    if (!meta) return res.status(404).json({ error: "File not found" });
-
-    await deleteGridFsById(meta.gridFsId);
-    await meta.deleteOne();
-
-    return res.json({ deleted: 1 });
-  } catch (err) {
-    return res.status(500).json({ error: err.message });
-  }
-});
-
-/**
- * @route POST /api/files/state-conditionals/:fileId
- * @desc Add a state conditional to a stored file
- */
-router.post("/state-conditionals/:fileId", async (req, res) => {
-  try {
-    const { fileId } = req.params;
-    const { stateConditional } = req.body;
-    const meta = await StoredFile.findById(fileId);
-    if (!meta) return res.status(404).json({ error: "File not found" });
-    meta.stateConditionals.push(stateConditional);
-    await meta.save();
-    const file = meta.toObject();
-    delete file.gridFsId;
-    return res.json(file);
-  } catch (err) {
-    return res.status(500).json({ error: err.message });
-  }
-});
-
-/**
- * @route PUT /api/files/state-conditionals/:fileId
- * @desc Update a state conditional on a stored file
- */
-router.put("/state-conditionals/:fileId", async (req, res) => {
-  try {
-    const { fileId } = req.params;
-    const { stateConditional } = req.body;
-    const meta = await StoredFile.findById(fileId);
-    if (!meta) return res.status(404).json({ error: "File not found" });
-
-    meta.stateConditionals = meta.stateConditionals.map((sc) =>
-      sc._id.toString() === stateConditional._id ? stateConditional : sc
-    );
-
-    await meta.save();
-    const file = meta.toObject();
-    delete file.gridFsId;
-    return res.json(file);
-  } catch (err) {
-    return res.status(500).json({ error: err.message });
-  }
-});
-
-/**
- * @route DELETE /api/files/state-conditionals/:fileId
- * @desc Delete a state conditional from a stored file
- */
-router.delete(
-  "/state-conditionals/:fileId/:stateConditionalId",
-  async (req, res) => {
-    try {
-      const { fileId, stateConditionalId } = req.params;
-      const meta = await StoredFile.findById(fileId);
-      if (!meta) return res.status(404).json({ error: "File not found" });
-
-      const originalLength = meta.stateConditionals.length;
-      meta.stateConditionals = meta.stateConditionals.filter(
-        (sc) => sc._id.toString() !== stateConditionalId
-      );
-
-      if (meta.stateConditionals.length === originalLength) {
-        return res.status(404).json({ error: "State conditional not found" });
-      }
-
-      await meta.save();
-      const file = meta.toObject();
-      delete file.gridFsId;
-      return res.json(file);
-    } catch (err) {
-      return res.status(500).json({ error: err.message });
-    }
-  }
 );
 
 export default router;
