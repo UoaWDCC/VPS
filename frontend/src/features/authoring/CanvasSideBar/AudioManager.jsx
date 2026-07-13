@@ -1,25 +1,40 @@
 import { PlusIcon } from "lucide-react";
-import { useRef } from "react";
+import { useContext, useRef } from "react";
 import useVisualScene from "../stores/visual";
-import { v4 as uuidv4 } from "uuid";
 import { add } from "../scene/operations/modifiers";
 import EditAudioComponent from "../audio/EditAudioComponent";
+import { api } from "../../../util/api";
+import toast from "react-hot-toast";
+import { useParams } from "react-router-dom";
+import AuthenticationContext from "../../../context/AuthenticationContext";
 
-async function addAudio(fileObject) {
-  const url = await URL.createObjectURL(fileObject);
-  const newAudio = {
-    type: "audio",
-    name: fileObject.name,
-    fileObject,
-    url,
-    loop: false,
-    id: uuidv4(),
-  };
+async function addAudio(file, scenarioId, user) {
+  try {
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("scenarioId", scenarioId);
 
-  add(newAudio);
+    const response = await api.post(user, "api/files/upload", formData);
+
+    const newAudio = {
+      id: response.data._id,
+      type: "audio",
+      name: response.data.name,
+      url: response.data.url,
+      loop: false,
+    };
+
+    add(newAudio);
+  } catch (e) {
+    console.error(e);
+    toast.error("Audio upload failed");
+  }
 }
 
 function AudioManager() {
+  const { scenarioId } = useParams();
+  const { user } = useContext(AuthenticationContext);
+
   const components = useVisualScene((state) => state.components);
 
   const inputRef = useRef(null);
@@ -28,7 +43,7 @@ function AudioManager() {
   const hasAudios = audios.length > 0;
 
   async function handleFileInput(e) {
-    addAudio(e.target.files[0]);
+    addAudio(e.target.files[0], scenarioId, user);
     inputRef.current.value = null;
   }
 
@@ -64,7 +79,7 @@ function AudioManager() {
       </div>
       <input
         type="file"
-        accept=".mp3"
+        accept="audio/*,.mp3,.wav,.ogg,.m4a,.aac,.flac,.webm"
         ref={inputRef}
         className="hidden"
         onChange={handleFileInput}
