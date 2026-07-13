@@ -1,17 +1,15 @@
-import { initializeApp } from "firebase/app";
-import { getStorage } from "firebase/storage";
+import admin from "firebase-admin";
 
-// set up firebase for backend
-const app = initializeApp({
-  apiKey: process.env.REACT_APP_API_KEY,
-  authDomain: process.env.REACT_APP_AUTH_DOMAIN,
-  projectId: process.env.FIREBASE_PROJECT_ID,
-  storageBucket: process.env.REACT_APP_STORAGE_BUCKET,
-  messagingSenderId: process.env.REACT_APP_MESSAGING_SENDER_ID,
-  appId: process.env.REACT_APP_APP_ID,
-  measurementId: process.env.REACT_APP_MEASUREMENT_ID,
+// set up firebase admin sdk
+admin.initializeApp({
+  credential: admin.credential.cert({
+    projectId: process.env.FIREBASE_PROJECT_ID,
+    clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
+    privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, "\n"),
+  }),
+  storageBucket: process.env.FIREBASE_STORAGE_BUCKET,
 });
 
-const storage = getStorage(app);
+export const bucket = admin.storage().bucket();
 
-export { storage };
+export const auth = admin.auth();
