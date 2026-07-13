@@ -94,6 +94,7 @@ export function ObjectPropertyEditor({ component }) {
           <div className="flex gap-13">
             <input
               className="input max-w-21"
+              type="number"
               value={inputWidth}
               onChange={(e) => {
                 saveProp(e.target.value, "width", setInputWidth);
@@ -101,6 +102,7 @@ export function ObjectPropertyEditor({ component }) {
             />
             <input
               className="input max-w-21"
+              type="number"
               value={inputHeight}
               onChange={(e) => {
                 saveProp(e.target.value, "height", setInputHeight);
@@ -116,6 +118,7 @@ export function ObjectPropertyEditor({ component }) {
           <div className="flex gap-13">
             <input
               className="input max-w-21"
+              type="number"
               value={inputX}
               onChange={(e) => {
                 saveProp(e.target.value, "x", setInputX);
@@ -123,6 +126,7 @@ export function ObjectPropertyEditor({ component }) {
             />
             <input
               className="input max-w-21"
+              type="number"
               value={inputY}
               onChange={(e) => {
                 saveProp(e.target.value, "y", setInputY);
