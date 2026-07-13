@@ -2,6 +2,7 @@ import Scene from "../models/scene.js";
 import Scenario from "../models/scenario.js";
 import { HttpError } from "../../util/error.js";
 import status from "../../util/status.js";
+import { applyReferenceDeltas } from "./fileDao.js";
 
 // enforce direct links between scenes to be in the same scenario
 const assertDirectLinkInScenario = async (scenarioId, directLinkId) => {
@@ -239,6 +240,43 @@ const updateSceneOrder = async (scenarioId, sceneIds) => {
   return updatedScenario;
 };
 
+function hasFileRef(component) {
+  if (!component) return false;
+  return ["audio", "image"].includes(component.type) && component.fileId;
+}
+
+function computeFileRefDeltas(
+  existingComponents,
+  modifiedComponents,
+  deletedComponentIds
+) {
+  const existingComponentsById = new Map(
+    (existingComponents ?? []).map((c) => [c.id, c])
+  );
+
+  const fileRefDeltas = new Map();
+  const addDelta = (fileId, delta) => {
+    if (!fileId) return;
+    fileRefDeltas.set(fileId, (fileRefDeltas.get(fileId) ?? 0) + delta);
+  };
+
+  deletedComponentIds.forEach((id) => {
+    const existing = existingComponentsById.get(id);
+    if (hasFileRef(existing)) {
+      addDelta(existing.fileId, -1);
+    }
+  });
+
+  modifiedComponents.forEach((component) => {
+    const isNew = !existingComponentsById.has(component.id);
+    if (isNew && hasFileRef(component)) {
+      addDelta(component.fileId, 1);
+    }
+  });
+
+  return fileRefDeltas;
+}
+
 const patchScene = async (sceneId, patch, scenarioId) => {
   const { fields = {}, components = [], deletedComponentIds = [] } = patch;
 
@@ -254,6 +292,13 @@ const patchScene = async (sceneId, patch, scenarioId) => {
   if ("directLink" in allowedFields) {
     await assertDirectLinkInScenario(scenarioId, allowedFields.directLink);
   }
+
+  const existingScene = await Scene.findById(sceneId, { components: 1 });
+  const fileRefDeltas = computeFileRefDeltas(
+    existingScene.components,
+    components,
+    deletedComponentIds
+  );
 
   const operations = [];
 
@@ -314,6 +359,8 @@ const patchScene = async (sceneId, patch, scenarioId) => {
   if (operations.length > 0) {
     await Scene.bulkWrite(operations, { ordered: true });
   }
+
+  await applyReferenceDeltas(fileRefDeltas);
 
   return Scene.findById(sceneId);
 };

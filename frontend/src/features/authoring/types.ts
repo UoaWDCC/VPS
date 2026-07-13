@@ -48,6 +48,7 @@ interface ShapeComponent extends GenericComponent {
 
 export interface ImageComponent extends GenericComponent {
   type: "image";
+  fileId: string;
   href: string;
   preserveAspectRatio: string;
 }
