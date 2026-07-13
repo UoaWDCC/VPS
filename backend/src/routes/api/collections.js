@@ -2,7 +2,7 @@ import { Router } from "express";
 import mongoose from "mongoose";
 import auth from "../../middleware/firebaseAuth.js";
 import CollectionGroup from "../../db/models/CollectionGroup.js";
-import StoredFile from "../../db/models/StoredFile.js";
+import StoredFile from "../../db/models/storedFile.js";
 import { deleteGridFsById } from "../../util/gridfs.js";
 
 const router = Router();
