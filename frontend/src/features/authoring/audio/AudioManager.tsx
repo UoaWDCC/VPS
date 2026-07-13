@@ -45,6 +45,7 @@ function AudioManager() {
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   const audios = Object.values(components).filter((c) => c.type === "audio");
+  const hasAudios = audios.length > 0;
 
   function handleFileChange(event: React.ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0];
@@ -75,9 +76,17 @@ function AudioManager() {
 
   return (
     <>
-      <div className="collapse overflow-visible collapse-arrow bg-base-300 rounded-sm text-s">
-        <input type="checkbox" />
-        <div className="collapse-title flex items-center justify-between">
+      <div
+        className={`collapse overflow-visible ${
+          hasAudios ? "collapse-arrow" : ""
+        } bg-base-300 rounded-sm text-s`}
+      >
+        {hasAudios && <input type="checkbox" />}
+        <div
+          className={`collapse-title flex items-center justify-between ${
+            hasAudios ? "" : "pe-4"
+          }`}
+        >
           Audio Elements
           <div className="dropdown dropdown-end z-1">
             <div tabIndex={0} role="button">
@@ -105,11 +114,13 @@ function AudioManager() {
           accept="audio/*"
         />
 
-        <div className="collapse-content text--1 bg-base-200 px-0">
-          {audios.map((audio) => (
-            <EditAudioComponent component={audio} key={audio.id} />
-          ))}
-        </div>
+        {hasAudios && (
+          <div className="collapse-content text--1 bg-base-200 px-0">
+            {audios.map((audio) => (
+              <EditAudioComponent component={audio} key={audio.id} />
+            ))}
+          </div>
+        )}
       </div>
 
       <AudioSelectModal open={modalOpen} setOpen={setModalOpen} />
