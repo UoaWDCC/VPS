@@ -17,7 +17,7 @@ async function addAudio(file, scenarioId, user) {
     const response = await api.post(user, "api/files/upload", formData);
 
     const newAudio = {
-      id: response.data._id,
+      fileId: response.data._id,
       type: "audio",
       name: response.data.name,
       url: response.data.url,

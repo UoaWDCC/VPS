@@ -30,6 +30,7 @@ interface Image {
 
 async function addExistingImage(image: Image) {
   const newImage = structuredClone(defaults.image) as Partial<ImageComponent>;
+  newImage.fileId = image._id;
   newImage.href = image.url;
   newImage.bounds!.verts = await getImageDimensions(image.url);
   add(newImage);
@@ -51,6 +52,7 @@ async function addNewImage(file: File, scenarioId: string, user: User) {
     )) as AxiosResponse<Image>;
 
     const newImage = structuredClone(defaults.image) as Partial<ImageComponent>;
+    newImage.fileId = response.data._id;
     newImage.href = response.data.url;
     newImage.bounds!.verts = await getImageDimensions(response.data.url);
     add(newImage);
