@@ -5,10 +5,13 @@ import { HttpStatusCode } from "axios";
 import { uploadFile } from "../../firebase/storage.js";
 import UploadedFile from "../../db/models/uploadedFile.js";
 import { handle, HttpError } from "../../util/error.js";
+import { retrieveFile, retrieveImageList } from "../../db/daos/fileDao.js";
+import scenarioAuth from "../../middleware/scenarioAuth.js";
 
 const router = Router();
 
 router.use(auth);
+router.use("/:scenarioId", scenarioAuth);
 
 // multer config (in-memory storage)
 const MAX_FILE_SIZE_MB = parseInt(process.env.MAX_FILE_SIZE_MB || "10", 10);
@@ -37,8 +40,9 @@ const upload = multer({
   },
 });
 
+// POST /files/:scenarioId — upload a file to a scenario
 router.post(
-  "/upload",
+  "/:scenarioId",
   upload.single("file"),
   handle(async (req, res) => {
     try {
@@ -61,7 +65,7 @@ router.post(
         contentType: req.file.mimetype,
         size: req.file.size,
         uploaderUid: req.uid,
-        scenarioId: req.body.scenarioId,
+        scenarioId: req.params.scenarioId,
         deletedAt: Date.now(), // handle orphanage from interruption between upload and reference
       });
 
@@ -71,6 +75,33 @@ router.post(
         throw new HttpError(err.message, HttpStatusCode.PayloadTooLarge);
       } else throw err;
     }
+  })
+);
+
+// GET /files/:scenarioId/images — retrieve all images in scenario
+router.get(
+  "/:scenarioId/images",
+  handle(async (req, res) => {
+    const { scenarioId } = req.params;
+    const images = await retrieveImageList(scenarioId);
+    return res.json(images);
+  })
+);
+
+// GET /files/:scenarioId/:fileId — retrieve single file
+router.get(
+  "/:scenarioId/:fileId",
+  handle(async (req, res) => {
+    const { scenarioId, fileId } = req.params;
+    if (!fileId)
+      throw new HttpError(
+        "invalid or missing file id",
+        HttpStatusCode.BadRequest
+      );
+    const uploadedFile = await retrieveFile(scenarioId, fileId);
+    if (!uploadedFile)
+      throw new HttpError("file not found", HttpStatusCode.NotFound);
+    return res.json(uploadedFile);
   })
 );
 
