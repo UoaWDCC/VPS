@@ -1,6 +1,4 @@
-import mongoose from "mongoose";
-
-const { Schema, model } = mongoose;
+import { model, Schema } from "mongoose";
 
 const uploadedFileSchema = new Schema(
   {
@@ -15,7 +13,12 @@ const uploadedFileSchema = new Schema(
     contentType: { type: String, required: true },
     size: { type: Number, required: true },
     uploaderUid: { type: String, required: true, index: true },
-    scenarioId: { type: String, required: true, index: true },
+    scenarioId: {
+      type: Schema.Types.ObjectId,
+      ref: "Scenario",
+      required: true,
+      index: true,
+    },
     refCount: { type: Number, default: 0, min: 0 },
     deletedAt: { type: Date, default: null },
   },
