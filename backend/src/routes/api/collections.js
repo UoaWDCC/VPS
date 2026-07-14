@@ -2,8 +2,8 @@ import { Router } from "express";
 import mongoose from "mongoose";
 import auth from "../../middleware/firebaseAuth.js";
 import CollectionGroup from "../../db/models/CollectionGroup.js";
-import StoredFile from "../../db/models/storedFile.js";
 import { deleteGridFsById } from "../../util/gridfs.js";
+import Resource from "../../db/models/resource.js";
 
 const router = Router();
 
@@ -50,14 +50,12 @@ router.post("/groups", async (req, res) => {
 router.get("/tree/:scenarioId", async (req, res) => {
   try {
     const { scenarioId } = req.params;
-    const scenarioObjId = new mongoose.Types.ObjectId(scenarioId);
 
     const [groups, files] = await Promise.all([
-      CollectionGroup.find({ scenarioId: scenarioObjId })
-        .sort({ order: 1, name: 1 })
-        .lean(),
-      StoredFile.find({ scenarioId: scenarioObjId })
-        .sort({ createdAt: -1 })
+      CollectionGroup.find({ scenarioId }).sort({ order: 1, name: 1 }).lean(),
+      Resource.find({ scenarioId })
+        .populate("fileId", "url type contentType size")
+        .sort({ groupId: 1, createdAt: -1 })
         .lean(),
     ]);
 
@@ -66,9 +64,7 @@ router.get("/tree/:scenarioId", async (req, res) => {
     for (const f of files) {
       const key = String(f.groupId);
       if (!filesByGroup.has(key)) filesByGroup.set(key, []);
-      const safe = { ...f };
-      delete safe.gridFsId; // never send internal GridFS IDs to client
-      filesByGroup.get(key).push(safe);
+      filesByGroup.get(key).push(f);
     }
 
     // attach files directly to each group
@@ -94,11 +90,11 @@ router.delete("/groups/:groupId", async (req, res) => {
     const group = await CollectionGroup.findById(groupId);
     if (!group) return res.status(404).json({ error: "Group not found" });
 
-    const files = await StoredFile.find({ groupId: group._id }, "_id gridFsId");
+    const files = await Resource.find({ groupId: group._id });
 
     // Delete GridFS blobs and metadata
     await Promise.all(files.map((f) => deleteGridFsById(f.gridFsId)));
-    await StoredFile.deleteMany({ groupId: group._id });
+    await Resource.deleteMany({ groupId: group._id });
 
     // Delete group
     await group.deleteOne();

@@ -2,10 +2,10 @@ import { Router } from "express";
 import auth from "../../middleware/firebaseAuth.js";
 import { handle, HttpError } from "../../util/error.js";
 import scenarioAuth from "../../middleware/scenarioAuth.js";
-import StoredFile from "../../db/models/storedFile.js";
 import CollectionGroup from "../../db/models/CollectionGroup.js";
 import { HttpStatusCode } from "axios";
 import { applyReferenceDelta } from "../../db/daos/fileDao.js";
+import Resource from "../../db/models/resource.js";
 
 const router = Router();
 
@@ -20,10 +20,9 @@ router.post(
   "/:scenarioId",
   handle(async (req, res) => {
     const { scenarioId } = req.params;
+    const { groupId, name, fileId } = req.body;
 
-    const { groupId, name, fileId, url, type, contentType } = req.body;
-
-    if (!groupId || !name || !fileId || !url || !type || !contentType)
+    if (!groupId || !name || !fileId)
       throw new HttpError(
         "missing required properties",
         HttpStatusCode.BadRequest
@@ -32,19 +31,17 @@ router.post(
     const group = await CollectionGroup.findOne({ _id: groupId, scenarioId });
     if (!group) throw new HttpError("group not found", HttpStatusCode.NotFound);
 
-    const storedFile = await StoredFile.create({
+    const resource = await Resource.create({
       scenarioId,
       groupId,
       name,
-      type,
       fileId,
-      url,
-      contentType,
     });
+    await resource.populate("fileId", "url type contentType size");
 
-    await applyReferenceDelta(storedFile.fileId, 1);
+    await applyReferenceDelta(resource.fileId._id, 1);
 
-    return res.status(201).json(storedFile);
+    return res.status(HttpStatusCode.Created).json(resource);
   })
 );
 
@@ -57,14 +54,14 @@ router.delete(
   handle(async (req, res) => {
     const { scenarioId, resourceId } = req.params;
 
-    const storedFile = await StoredFile.findOneAndDelete({
+    const resource = await Resource.findOneAndDelete({
       _id: resourceId,
       scenarioId,
     });
-    if (!storedFile)
+    if (!resource)
       throw new HttpError("resource not found", HttpStatusCode.NotFound);
 
-    await applyReferenceDelta(storedFile.fileId, -1);
+    await applyReferenceDelta(resource.fileId, -1);
 
     return res.status(HttpStatusCode.NoContent).send();
   })
@@ -80,15 +77,18 @@ router.post(
     const { scenarioId, resourceId } = req.params;
     const { stateConditional } = req.body;
 
-    const storedFile = await StoredFile.findOneAndUpdate(
+    const resource = await Resource.findOneAndUpdate(
       { _id: resourceId, scenarioId },
       { $push: { stateConditionals: stateConditional } },
       { new: true }
-    );
+    )
+      .populate("fileId", "url type contentType size")
+      .lean();
 
-    if (!storedFile)
+    if (!resource)
       throw new HttpError("resource not found", HttpStatusCode.NotFound);
-    return res.json(storedFile);
+
+    return res.json(resource);
   })
 );
 
@@ -102,7 +102,7 @@ router.put(
     const { scenarioId, resourceId } = req.params;
     const { stateConditional } = req.body;
 
-    const storedFile = await StoredFile.findOneAndUpdate(
+    const resource = await Resource.findOneAndUpdate(
       {
         _id: resourceId,
         scenarioId,
@@ -110,11 +110,14 @@ router.put(
       },
       { $set: { "stateConditionals.$": stateConditional } },
       { new: true }
-    );
+    )
+      .populate("fileId", "url type contentType size")
+      .lean();
 
-    if (!storedFile)
+    if (!resource)
       throw new HttpError("resource not found", HttpStatusCode.NotFound);
-    return res.json(storedFile);
+
+    return res.json(resource);
   })
 );
 
@@ -127,15 +130,17 @@ router.delete(
   handle(async (req, res) => {
     const { scenarioId, resourceId, conditionalId } = req.params;
 
-    const storedFile = await StoredFile.findOneAndUpdate(
+    const resource = await Resource.findOneAndUpdate(
       { _id: resourceId, scenarioId },
       { $pull: { stateConditionals: { _id: conditionalId } } },
       { new: true }
-    );
+    )
+      .populate("fileId", "url type contentType size")
+      .lean();
 
-    if (!storedFile)
+    if (!resource)
       throw new HttpError("resource not found", HttpStatusCode.NotFound);
-    return res.json(storedFile);
+    return res.json(resource);
   })
 );
 
