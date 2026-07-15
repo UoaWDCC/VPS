@@ -10,6 +10,5 @@ admin.initializeApp({
   storageBucket: process.env.FIREBASE_STORAGE_BUCKET,
 });
 
-export const bucket = admin.storage().bucket();
-
-export const auth = admin.auth();
+export const getBucket = () => admin.storage().bucket();
+export const getAuth = () => admin.auth();

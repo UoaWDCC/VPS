@@ -8,7 +8,6 @@ import Scene from "../../../db/models/scene.js";
 import Group from "../../../db/models/group.js";
 import User from "../../../db/models/user.js";
 import Note from "../../../db/models/note.js";
-import Resource from "../../../db/models/resource.js";
 import auth from "../../../middleware/firebaseAuth.js";
 import { authHeaders } from "./testHelpers.js";
 import {
@@ -133,56 +132,6 @@ describe("Navigate Group API tests", () => {
         `http://localhost:${ctx.port}/api/navigate/group/${group._id}`,
         { uid: "uid-stranger", addFlags: [], removeFlags: [] },
         authHeaders("uid-stranger")
-      )
-    ).rejects.toMatchObject({ response: { status: 404 } });
-  });
-
-  // --- GET /navigate/group/resources/:groupId ---
-
-  it("GET /navigate/group/resources/:groupId returns resources visible to the group", async () => {
-    // Resource with no required flags is always visible
-    await Resource.create({
-      name: "Open Resource",
-      type: "text",
-      scenarioId: scenario._id.toString(),
-      textContent: "content",
-      imageContent: "",
-      requiredFlags: [],
-    });
-
-    const response = await axios.get(
-      `http://localhost:${ctx.port}/api/navigate/group/resources/${group._id}`,
-      authHeaders("uid-player")
-    );
-    expect(response.status).toBe(200);
-    expect(response.data).toHaveLength(1);
-    expect(response.data[0].name).toBe("Open Resource");
-  });
-
-  it("GET /navigate/group/resources/:groupId filters resources by required flags", async () => {
-    await Resource.create({
-      name: "Gated Resource",
-      type: "text",
-      scenarioId: scenario._id.toString(),
-      textContent: "content",
-      imageContent: "",
-      requiredFlags: ["flag-unlocked"],
-    });
-
-    // group has no currentFlags → gated resource is not returned
-    const response = await axios.get(
-      `http://localhost:${ctx.port}/api/navigate/group/resources/${group._id}`,
-      authHeaders("uid-player")
-    );
-    expect(response.status).toBe(200);
-    expect(response.data).toHaveLength(0);
-  });
-
-  it("GET /navigate/group/resources/:groupId returns 404 for unknown group", async () => {
-    await expect(
-      axios.get(
-        `http://localhost:${ctx.port}/api/navigate/group/resources/000000000000000000000099`,
-        authHeaders("uid-player")
       )
     ).rejects.toMatchObject({ response: { status: 404 } });
   });

@@ -14,7 +14,8 @@ router.use(auth);
 router.use("/:scenarioId", scenarioAuth);
 
 // multer config (in-memory storage)
-const MAX_FILE_SIZE_MB = parseInt(process.env.MAX_FILE_SIZE_MB || "10", 10);
+const MAX_FILE_SIZE_MB = parseFloat(process.env.MAX_FILE_SIZE_MB || "10");
+const MAX_FILE_SIZE_BYTES = Math.floor(MAX_FILE_SIZE_MB * 1024 * 1024);
 const ALLOWED_MIME_SET = new Set(
   (
     process.env.ALLOWED_MIME_LIST ||
@@ -26,7 +27,7 @@ const ALLOWED_MIME_SET = new Set(
 
 const upload = multer({
   storage: multer.memoryStorage(),
-  limits: { fileSize: MAX_FILE_SIZE_MB * 1024 * 1024 },
+  limits: { fileSize: MAX_FILE_SIZE_BYTES },
   fileFilter: (_req, file, cb) => {
     if (ALLOWED_MIME_SET.size > 0 && !ALLOWED_MIME_SET.has(file.mimetype)) {
       return cb(
@@ -40,41 +41,53 @@ const upload = multer({
   },
 });
 
+function uploadWrapper(req, res, next) {
+  upload.single("file")(req, res, (err) => {
+    if (err) {
+      if (err.code === "LIMIT_FILE_SIZE")
+        return next(new HttpError(err.message, HttpStatusCode.PayloadTooLarge));
+      if (
+        err instanceof multer.MulterError ||
+        err.message === "Unexpected end of form"
+      )
+        return next(
+          new HttpError("malformed upload", HttpStatusCode.BadRequest)
+        );
+      return next(err);
+    }
+    next();
+  });
+}
+
 // POST /files/:scenarioId — upload a file to a scenario
 router.post(
   "/:scenarioId",
-  upload.single("file"),
+  uploadWrapper,
   handle(async (req, res) => {
-    try {
-      if (!req.file)
-        throw new HttpError("no file provided", HttpStatusCode.BadRequest);
+    if (!req.file)
+      throw new HttpError("no file provided", HttpStatusCode.BadRequest);
 
-      const firebaseInfo = await uploadFile(req.file.buffer, req.file.mimetype);
+    const firebaseInfo = await uploadFile(req.file.buffer, req.file.mimetype);
 
-      const type = req.file.mimetype.startsWith("image/")
-        ? "image"
-        : req.file.mimetype.startsWith("audio/")
-          ? "audio"
-          : "document";
+    const type = req.file.mimetype.startsWith("image/")
+      ? "image"
+      : req.file.mimetype.startsWith("audio/")
+        ? "audio"
+        : "document";
 
-      const uploadedFile = await UploadedFile.create({
-        name: req.file.originalname,
-        type: type,
-        path: firebaseInfo.path,
-        url: firebaseInfo.url,
-        contentType: req.file.mimetype,
-        size: req.file.size,
-        uploaderUid: req.uid,
-        scenarioId: req.params.scenarioId,
-        deletedAt: Date.now(), // handle orphanage from interruption between upload and reference
-      });
+    const uploadedFile = await UploadedFile.create({
+      name: req.file.originalname,
+      type: type,
+      path: firebaseInfo.path,
+      url: firebaseInfo.url,
+      contentType: req.file.mimetype,
+      size: req.file.size,
+      uploaderUid: req.uid,
+      scenarioId: req.params.scenarioId,
+      deletedAt: Date.now(), // handle orphanage from interruption between upload and reference
+    });
 
-      return res.status(201).json(uploadedFile);
-    } catch (err) {
-      if (err.code === "LIMIT_FILE_SIZE") {
-        throw new HttpError(err.message, HttpStatusCode.PayloadTooLarge);
-      } else throw err;
-    }
+    return res.status(201).json(uploadedFile);
   })
 );
 
