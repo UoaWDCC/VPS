@@ -18,7 +18,6 @@ import UploadedFile from "../../../db/models/uploadedFile.js";
 import auth from "../../../middleware/firebaseAuth.js";
 import errorHandler from "../../../middleware/errorHandler.js";
 
-jest.mock("../../../util/gridfs.js");
 jest.mock("../../../middleware/firebaseAuth");
 jest.mock("firebase-admin");
 

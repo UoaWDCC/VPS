@@ -25,7 +25,6 @@ import {
   useExpressServer,
 } from "../../../test/testSetup.js";
 
-jest.mock("../../../util/gridfs.js");
 jest.mock("../../../middleware/firebaseAuth");
 jest.mock("../../../middleware/scenarioAuth");
 jest.mock("firebase-admin");

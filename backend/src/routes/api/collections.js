@@ -2,7 +2,6 @@ import { Router } from "express";
 import mongoose from "mongoose";
 import auth from "../../middleware/firebaseAuth.js";
 import CollectionGroup from "../../db/models/CollectionGroup.js";
-import { deleteGridFsById } from "../../util/gridfs.js";
 import Resource from "../../db/models/resource.js";
 
 const router = Router();
@@ -92,8 +91,6 @@ router.delete("/groups/:groupId", async (req, res) => {
 
     const files = await Resource.find({ groupId: group._id });
 
-    // Delete GridFS blobs and metadata
-    await Promise.all(files.map((f) => deleteGridFsById(f.gridFsId)));
     await Resource.deleteMany({ groupId: group._id });
 
     // Delete group
