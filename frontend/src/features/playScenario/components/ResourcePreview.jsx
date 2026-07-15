@@ -1,54 +1,17 @@
-import React, { useEffect, useState } from "react";
-import toast from "react-hot-toast";
+import React from "react";
 import MDTextViewer from "./MDTextViewer";
+import { useQuery } from "@tanstack/react-query";
 
-export default function ResourcePreview({ file, getDownloadUrl }) {
-  const [url, setUrl] = useState(null);
-  const [text, setText] = useState(null);
-  const [loading, setLoading] = useState(false);
-  const [fetchErr, setFetchErr] = useState(null);
+async function loadText(url) {
+  return fetch(url).then((res) => res.text());
+}
 
-  useEffect(() => {
-    let cancelled = false;
-    async function prepare() {
-      setUrl(null);
-      setText(null);
-      setFetchErr(null);
-      if (!file) return;
-
-      try {
-        setLoading(true);
-        const u = await getDownloadUrl(file.id);
-        if (cancelled) return;
-        setUrl(u);
-
-        // Fetch text content only for text-like types
-        const isText =
-          file.type?.startsWith("text/") ||
-          /json|xml|csv/.test(file.type || "") ||
-          /\.md$|\.html?$/i.test(file.name || "");
-        if (isText) {
-          const resp = await fetch(u);
-          if (!resp.ok) throw new Error(`Failed to fetch (${resp.status})`);
-          const t = await resp.text();
-          if (!cancelled) setText(t);
-        }
-      } catch (err) {
-        console.error(err);
-        if (!cancelled) {
-          const msg = err?.message || "Failed to load preview";
-          setFetchErr(msg);
-          toast.error(msg);
-        }
-      } finally {
-        if (!cancelled) setLoading(false);
-      }
-    }
-    prepare();
-    return () => {
-      cancelled = true;
-    };
-  }, [file, getDownloadUrl]);
+export default function ResourcePreview({ file }) {
+  const text = useQuery({
+    queryKey: ["file-text", file?.url],
+    queryFn: () => loadText(file.url),
+    enabled: !!(file?.contentType.startsWith("text") && file?.url),
+  });
 
   if (!file) {
     return (
@@ -64,12 +27,10 @@ export default function ResourcePreview({ file, getDownloadUrl }) {
     );
   }
 
-  const isImage = file.type?.startsWith("image/");
-  const isPDF = file.type === "application/pdf";
+  const isImage = file.type === "image";
   const isText =
-    file.type?.startsWith("text/") ||
-    /\.md$|\.html?$/i.test(file.name || "") ||
-    /json|xml|csv/.test(file.type || "");
+    file.type === "document" && file.contentType !== "application/pdf";
+  const isPDF = file.contentType === "application/pdf";
 
   return (
     <div className="p-3 h-full flex flex-col gap-3 font-ibm">
@@ -85,50 +46,43 @@ export default function ResourcePreview({ file, getDownloadUrl }) {
             {file.groupName} / {file.childName}
           </div>
         </div>
-        {url && (
-          <a className="btn btn-phantom btn-xs" href={url} download>
+        {file.url && (
+          <a className="btn btn-phantom btn-xs" href={file.url} download>
             Download
           </a>
         )}
       </div>
       <div className="flex-1 min-h-0">
-        {loading ? (
-          <div className="space-y-2">
-            <div className="skeleton h-6 w-1/3" />
-            <div className="skeleton h-48 w-full" />
-            <div className="skeleton h-4 w-1/4" />
-          </div>
-        ) : fetchErr ? (
-          <div className="alert alert-warning">
-            <span>{fetchErr}</span>
-          </div>
-        ) : isImage && url ? (
-          <div className="w-full h-full overflow-auto">
-            <img
-              src={url}
-              alt={file.name}
-              className="rounded-xl max-h-[60vh] object-contain mx-auto"
-            />
-          </div>
-        ) : isPDF && url ? (
+        {isImage ? (
+          <img
+            src={file.url}
+            alt={file.name}
+            className="rounded-xl max-h-80 object-contain"
+          />
+        ) : isPDF ? (
           <div className="w-full h-full">
             <iframe
-              src={url}
+              src={file.url}
               title={file.name}
               className="w-full h-full min-h-[60vh] rounded-xl border"
             />
           </div>
-        ) : isText && url ? (
-          <MDTextViewer file={file} content={text} />
-        ) : url ? (
-          <div className="h-full flex items-center justify-center">
-            <div className="text-sm opacity-70">
-              Preview not supported. Use the download button.
-            </div>
+        ) : isText && text.isLoading ? (
+          <div className="space-y-2">
+            <div className="skeleton h-6 w-1/2" />
+            <div className="skeleton h-48 w-full" />
           </div>
+        ) : isText && text.isError ? (
+          <div className="alert alert-warning">
+            <span>{text.error}</span>
+          </div>
+        ) : isText ? (
+          <MDTextViewer file={file} content={text.data} />
         ) : (
-          <div className="h-full flex items-center justify-center">
-            <div className="text-sm opacity-70">No preview available.</div>
+          <div className="alert">
+            <span>
+              Preview not supported. You can download the file instead.
+            </span>
           </div>
         )}
       </div>

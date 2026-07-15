@@ -14,13 +14,10 @@ import {
 import AddGroup from "./components/AddGroup";
 import StateConditionalMenu from "../../components/StateVariables/StateConditionalMenu";
 import MDTextViewer from "../playScenario/components/MDTextViewer";
-import { getDownloadUrl } from "../playScenario/hooks/useDownloadUrl";
 import { api } from "../../util/api";
 import AuthenticationContext from "../../context/AuthenticationContext";
-
-function normaliseFile(f) {
-  return f;
-}
+import { useQuery } from "@tanstack/react-query";
+import { normaliseFile } from "./util";
 
 function normaliseGroup(g) {
   return {
@@ -28,13 +25,7 @@ function normaliseGroup(g) {
     name: g.name,
     order: g.order ?? 0,
     stateConditionals: g.stateConditionals || [],
-    files: (g.files || []).map((f) =>
-      normaliseFile({
-        ...f,
-        groupId: g._id || g.id,
-        groupName: g.name,
-      })
-    ),
+    files: (g.files || []).map((f) => normaliseFile(f)),
   };
 }
 
@@ -42,23 +33,21 @@ async function uploadResource(user, scenarioId, groupId, file) {
   try {
     const formData = new FormData();
     formData.append("file", file);
-    formData.append("scenarioId", scenarioId);
 
-    const fileResponse = await api.post(user, "api/files/upload", formData);
-
-    const resource = {
-      groupId,
-      name: fileResponse.data.name,
-      fileId: fileResponse.data._id,
-      url: fileResponse.data.url,
-      type: fileResponse.data.type,
-      contentType: fileResponse.data.contentType,
-    };
+    const fileResponse = await api.post(
+      user,
+      `api/files/${scenarioId}`,
+      formData
+    );
 
     const resourceResponse = await api.post(
       user,
       `api/resources/${scenarioId}`,
-      resource
+      {
+        groupId,
+        name: fileResponse.data.name,
+        fileId: fileResponse.data._id,
+      }
     );
     toast.success(`Resource created`);
     return resourceResponse.data;
@@ -107,19 +96,10 @@ export default function ManageResourcesPage() {
     let cancelled = false;
     (async () => {
       try {
-        const user = getAuth().currentUser;
-        if (!user) {
-          toast.error("You must be logged in to view collections.");
-          return;
-        }
-        const idToken = await user.getIdToken();
-        const { data } = await axios.get(
-          `/api/collections/tree/${scenarioId}`,
-          {
-            headers: { Authorization: `Bearer ${idToken}` },
-          }
+        const { data } = await api.get(
+          user,
+          `/api/collections/tree/${scenarioId}`
         );
-
         const normalized = (data || []).map((g) => normaliseGroup(g)) || [];
         if (!cancelled) setGroups(normalized);
       } catch (err) {
@@ -139,7 +119,9 @@ export default function ManageResourcesPage() {
 
     setGroups((prev) =>
       prev.map((g) =>
-        g.id === groupId ? { ...g, files: [resource, ...(g.files || [])] } : g
+        g.id === groupId
+          ? { ...g, files: [normaliseFile(resource), ...(g.files || [])] }
+          : g
       )
     );
   }
@@ -188,10 +170,7 @@ export default function ManageResourcesPage() {
   }
 
   function updateFile(updatedFile) {
-    const normalisedFile = normaliseFile({
-      ...updatedFile,
-      groupName: selectedFile?.groupName,
-    });
+    const normalisedFile = normaliseFile(updatedFile);
     setSelectedFile(normalisedFile);
     setGroups((prev) =>
       prev.map((g) =>
@@ -233,7 +212,7 @@ export default function ManageResourcesPage() {
       ? "Collection"
       : null;
   const selectedTargetEndpoint = selectedFile
-    ? `/api/files/state-conditionals/${selectedFile.id}`
+    ? `/api/resources/${scenarioId}/${selectedFile.id}/conditionals`
     : selectedGroup
       ? `/api/collections/groups/${selectedGroup.id}/state-conditionals`
       : "";
@@ -356,7 +335,7 @@ export default function ManageResourcesPage() {
                                 </a>
                                 <button
                                   className="btn btn-phantom btn-xs px-0"
-                                  onClick={() => deleteResource(f._id)}
+                                  onClick={() => deleteResource(f.id)}
                                   title="Delete file"
                                 >
                                   <XIcon size={16} />
@@ -426,69 +405,16 @@ function UploadButton({ onFiles, multiple = true, className = "" }) {
   );
 }
 
+async function loadText(url) {
+  return fetch(url).then((res) => res.text());
+}
+
 function Preview({ file }) {
-  const [downloadUrl, setDownloadUrl] = useState(null);
-  const [text, setText] = useState(null);
-  const [textLoading, setTextLoading] = useState(false);
-  const [fetchErr, setFetchErr] = useState(null);
-
-  useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      if (!file) {
-        setDownloadUrl(null);
-        setText(null);
-        return;
-      }
-      const url = await getDownloadUrl(file.id);
-      if (!cancelled) setDownloadUrl(url);
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, [file]);
-
-  useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      if (!file || !downloadUrl) {
-        setText(null);
-        setFetchErr(null);
-        setTextLoading(false);
-        return;
-      }
-      const isText =
-        file.type?.startsWith("text/") ||
-        /\.md$|\.html?$/i.test(file.name || "") ||
-        /json|xml|csv/.test(file.type || "");
-
-      if (!isText) {
-        setText(null);
-        setFetchErr(null);
-        return;
-      }
-
-      setTextLoading(true);
-      setFetchErr(null);
-      try {
-        const resp = await fetch(downloadUrl);
-        if (!resp.ok)
-          throw new Error(`Failed to load preview (${resp.status})`);
-        const t = await resp.text();
-        if (!cancelled) setText(t);
-      } catch (err) {
-        if (!cancelled) {
-          setFetchErr(err?.message || "Failed to load preview");
-          setText(null);
-        }
-      } finally {
-        if (!cancelled) setTextLoading(false);
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, [file, downloadUrl]);
+  const text = useQuery({
+    queryKey: ["file-text", file?.url],
+    queryFn: () => loadText(file.url),
+    enabled: !!(file?.contentType.startsWith("text") && file?.url),
+  });
 
   if (!file)
     return (
@@ -501,10 +427,9 @@ function Preview({ file }) {
       </div>
     );
 
-  // logic is consistent with resource panel
   const isImage = file.type === "image";
   const isText =
-    file.type === "document" && !file.contentType === "application/pdf";
+    file.type === "document" && file.contentType !== "application/pdf";
   const isPDF = file.contentType === "application/pdf";
 
   return (
@@ -530,19 +455,17 @@ function Preview({ file }) {
             className="w-full h-full min-h-[60vh] rounded-xl border"
           />
         </div>
-      ) : isText &&
-        (textLoading ||
-          (text == null && downloadUrl == null && fetchErr == null)) ? (
+      ) : isText && text.isLoading ? (
         <div className="space-y-2">
           <div className="skeleton h-6 w-1/2" />
           <div className="skeleton h-48 w-full" />
         </div>
-      ) : isText && fetchErr ? (
+      ) : isText && text.isError ? (
         <div className="alert alert-warning">
-          <span>{fetchErr}</span>
+          <span>{text.error}</span>
         </div>
       ) : isText ? (
-        <MDTextViewer file={file} content={text} />
+        <MDTextViewer file={file} content={text.data} />
       ) : (
         <div className="alert">
           <span>Preview not supported. You can download the file instead.</span>
