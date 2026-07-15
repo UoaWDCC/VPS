@@ -14,7 +14,7 @@ import toast from "react-hot-toast";
 import AuthenticationContext from "../../context/AuthenticationContext.jsx";
 import type { AxiosResponse } from "axios";
 
-interface Image {
+interface UploadedFile {
   _id: string;
   name: string;
   type: "image";
@@ -28,7 +28,7 @@ interface Image {
   deletedAt: Date | null;
 }
 
-async function addExistingImage(image: Image) {
+async function addExistingImage(image: UploadedFile) {
   const newImage = structuredClone(defaults.image) as Partial<ImageComponent>;
   newImage.fileId = image._id;
   newImage.href = image.url;
@@ -43,13 +43,12 @@ async function addNewImage(file: File, scenarioId: string, user: User) {
   try {
     const formData = new FormData();
     formData.append("file", file);
-    formData.append("scenarioId", scenarioId);
 
     const response = (await api.post(
       user,
-      "api/files/upload",
+      `api/files/${scenarioId}`,
       formData
-    )) as AxiosResponse<Image>;
+    )) as AxiosResponse<UploadedFile>;
 
     const newImage = structuredClone(defaults.image) as Partial<ImageComponent>;
     newImage.fileId = response.data._id;
@@ -76,15 +75,16 @@ async function getImageDimensions(url: string, defaultHeight = 300) {
 }
 
 async function getImages(user: User, scenarioId: string) {
-  const res = (await api.get(user, `api/image/${scenarioId}`)) as AxiosResponse<
-    Image[]
-  >;
+  const res = (await api.get(
+    user,
+    `api/files/${scenarioId}/images`
+  )) as AxiosResponse<UploadedFile[]>;
   return res.data;
 }
 
 function ImageCreateMenu() {
   const { scenarioId } = useParams<{ scenarioId: string }>();
-  const [selectedImage, setSelectedImage] = useState<Image | null>(null);
+  const [selectedImage, setSelectedImage] = useState<UploadedFile | null>(null);
 
   const { user } = useContext(AuthenticationContext as Context<{ user: User }>);
   const [modalOpen, setModalOpen] = useState(false);
@@ -161,7 +161,7 @@ function ImageCreateMenu() {
         <ImageListContainer
           data={imagesQuery.data}
           selectedId={selectedImage?._id}
-          onItemSelected={(img: Image) => setSelectedImage(img)}
+          onItemSelected={(img: UploadedFile) => setSelectedImage(img)}
         />
         <div className="modal-action">
           <form method="dialog">
