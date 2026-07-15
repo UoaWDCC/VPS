@@ -1,5 +1,5 @@
 import { HttpStatusCode } from "axios";
-import { auth as firebaseAuth } from "../firebase/firebase.js";
+import { getAuth } from "../firebase/firebase.js";
 
 /**
  * Verify user firebase token
@@ -12,7 +12,7 @@ export default async function auth(req, res, next) {
   }
 
   const token = req.headers.authorization.split(" ")[1];
-  firebaseAuth
+  getAuth()
     .verifyIdToken(token)
     .then((decoded) => {
       const { uid } = decoded;
