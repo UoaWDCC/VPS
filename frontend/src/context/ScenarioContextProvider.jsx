@@ -16,12 +16,8 @@ async function getAllScenarios(user) {
   return res.data;
 }
 
-// TODO: this should be unionised into a single endpoint for efficiency
 async function createScenario(user, name) {
   const { data: scenario } = await api.post(user, `/api/scenario`, { name });
-  await api.post(user, `/api/scenario/${scenario._id}/scene`, {
-    name: "Scene 1",
-  });
   return scenario._id;
 }
 

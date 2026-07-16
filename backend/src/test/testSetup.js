@@ -25,7 +25,9 @@ export function useExpressServer(configureApp) {
   const ctx = { port: 0 };
 
   beforeAll(async () => {
-    server = configureApp().listen(0);
+    await new Promise((resolve) => {
+      server = configureApp().listen(0, resolve);
+    });
     ctx.port = server.address().port;
   });
 
