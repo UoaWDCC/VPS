@@ -6,6 +6,8 @@ import CollectionGroup from "../../db/models/CollectionGroup.js";
 import { HttpStatusCode } from "axios";
 import { applyReferenceDelta } from "../../db/daos/fileDao.js";
 import Resource from "../../db/models/resource.js";
+import { isValidObjectId } from "../../util/validation.js";
+import UploadedFile from "../../db/models/uploadedFile.js";
 
 const router = Router();
 
@@ -28,8 +30,16 @@ router.post(
         HttpStatusCode.BadRequest
       );
 
-    const group = await CollectionGroup.findOne({ _id: groupId, scenarioId });
+    if (!isValidObjectId(groupId))
+      throw new HttpError("invalid group id", HttpStatusCode.BadRequest);
+    if (!isValidObjectId(fileId))
+      throw new HttpError("invalid file id", HttpStatusCode.BadRequest);
+
+    const group = await CollectionGroup.exists({ _id: groupId, scenarioId });
     if (!group) throw new HttpError("group not found", HttpStatusCode.NotFound);
+
+    const file = await UploadedFile.exists({ _id: fileId, scenarioId });
+    if (!file) throw new HttpError("file not found", HttpStatusCode.NotFound);
 
     const resource = await Resource.create({
       scenarioId,
@@ -39,7 +49,7 @@ router.post(
     });
     await resource.populate("fileId", "url type contentType size");
 
-    await applyReferenceDelta(resource.fileId._id, 1);
+    await applyReferenceDelta(fileId, 1);
 
     return res.status(HttpStatusCode.Created).json(resource);
   })
@@ -80,7 +90,7 @@ router.post(
     const resource = await Resource.findOneAndUpdate(
       { _id: resourceId, scenarioId },
       { $push: { stateConditionals: stateConditional } },
-      { new: true }
+      { new: true, runValidators: true }
     )
       .populate("fileId", "url type contentType size")
       .lean();
@@ -109,7 +119,7 @@ router.put(
         "stateConditionals._id": stateConditional._id,
       },
       { $set: { "stateConditionals.$": stateConditional } },
-      { new: true }
+      { new: true, runValidators: true }
     )
       .populate("fileId", "url type contentType size")
       .lean();
@@ -131,7 +141,7 @@ router.delete(
     const { scenarioId, resourceId, conditionalId } = req.params;
 
     const resource = await Resource.findOneAndUpdate(
-      { _id: resourceId, scenarioId },
+      { _id: resourceId, scenarioId, "stateConditionals._id": conditionalId },
       { $pull: { stateConditionals: { _id: conditionalId } } },
       { new: true }
     )

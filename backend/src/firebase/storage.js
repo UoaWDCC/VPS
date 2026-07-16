@@ -26,3 +26,13 @@ export async function uploadFile(buffer, contentType) {
 
   return { path: file.name, url: publicUrl };
 }
+
+// delete
+export async function deleteFile(path) {
+  if (!path) throw new Error("path is required");
+  try {
+    await getBucket().file(path).delete();
+  } catch (err) {
+    throw new Error(`delete failed: ${err.message}`);
+  }
+}

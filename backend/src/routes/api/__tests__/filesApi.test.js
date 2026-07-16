@@ -16,7 +16,7 @@ import UploadedFile from "../../../db/models/uploadedFile.js";
 import auth from "../../../middleware/firebaseAuth.js";
 import scenarioAuth from "../../../middleware/scenarioAuth.js";
 import errorHandler from "../../../middleware/errorHandler.js";
-import { uploadFile } from "../../../firebase/storage.js";
+import { uploadFile, deleteFile } from "../../../firebase/storage.js";
 
 import { authHeaders } from "./testHelpers.js";
 import {
@@ -206,6 +206,31 @@ describe("Files API tests", () => {
     ).rejects.toMatchObject({ response: { status: 413 } });
 
     expect(uploadFile).not.toHaveBeenCalled();
+  });
+
+  it("POST /files/:scenarioId deletes the uploaded blob when UploadedFile.create fails", async () => {
+    const dbError = new Error("simulated db failure");
+    const createSpy = jest
+      .spyOn(UploadedFile, "create")
+      .mockRejectedValueOnce(dbError);
+
+    const form = new FormData();
+    form.append("file", Buffer.from("fake-image-data"), {
+      filename: "upload.png",
+      contentType: "image/png",
+    });
+
+    await expect(
+      axios.post(`http://localhost:${ctx.port}/api/files/${scenarioId}`, form, {
+        headers: { ...form.getHeaders(), Authorization: "Bearer user1" },
+      })
+    ).rejects.toMatchObject({ response: { status: 500 } });
+
+    expect(uploadFile).toHaveBeenCalledTimes(1);
+    expect(deleteFile).toHaveBeenCalledTimes(1);
+    expect(deleteFile).toHaveBeenCalledWith("files/fake-path-image-png");
+
+    createSpy.mockRestore();
   });
 
   // --- Retrieve image list ---

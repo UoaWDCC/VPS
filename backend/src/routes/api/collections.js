@@ -3,6 +3,7 @@ import mongoose from "mongoose";
 import auth from "../../middleware/firebaseAuth.js";
 import CollectionGroup from "../../db/models/CollectionGroup.js";
 import Resource from "../../db/models/resource.js";
+import { applyReferenceDeltas } from "../../db/daos/fileDao.js";
 
 const router = Router();
 
@@ -89,17 +90,22 @@ router.delete("/groups/:groupId", async (req, res) => {
     const group = await CollectionGroup.findById(groupId);
     if (!group) return res.status(404).json({ error: "Group not found" });
 
-    const files = await Resource.find({ groupId: group._id });
+    const resources = await Resource.find({ groupId: group._id });
+
+    const fileRefDeltas = new Map();
+    for (const resource of resources) {
+      const fileId = resource.fileId.toString();
+      fileRefDeltas.set(fileId, (fileRefDeltas.get(fileId) ?? 0) - 1);
+    }
 
     await Resource.deleteMany({ groupId: group._id });
-
-    // Delete group
+    await applyReferenceDeltas(fileRefDeltas);
     await group.deleteOne();
 
     return res.json({
       deleted: {
         groups: 1,
-        files: files.length,
+        files: resources.length,
       },
     });
   } catch (err) {
