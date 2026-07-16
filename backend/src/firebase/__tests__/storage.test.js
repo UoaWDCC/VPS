@@ -2,7 +2,7 @@ import { jest, describe, beforeEach, it, expect } from "@jest/globals";
 
 import { v4 as uuidv4 } from "uuid";
 import { getBucket } from "../firebase.js";
-import { uploadFile } from "../storage.js";
+import { uploadFile, deleteFile } from "../storage.js";
 
 jest.mock("uuid");
 jest.mock("firebase-admin");
@@ -81,6 +81,42 @@ describe("uploadFile", () => {
 
     await expect(uploadFile(Buffer.from("data"), "image/png")).rejects.toThrow(
       "upload failed: network timeout"
+    );
+  });
+});
+
+describe("deleteFile", () => {
+  let mockFile;
+  let mockBucket;
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockFile = {
+      delete: jest.fn().mockResolvedValue(undefined),
+    };
+    mockBucket = {
+      file: jest.fn().mockReturnValue(mockFile),
+    };
+    getBucket.mockReturnValue(mockBucket);
+  });
+
+  it("throws when path is missing, without touching the bucket", async () => {
+    await expect(deleteFile(undefined)).rejects.toThrow("path is required");
+    expect(getBucket).not.toHaveBeenCalled();
+  });
+
+  it("deletes the file at the given path", async () => {
+    await deleteFile("files/some-uuid");
+
+    expect(mockBucket.file).toHaveBeenCalledWith("files/some-uuid");
+    expect(mockFile.delete).toHaveBeenCalledTimes(1);
+  });
+
+  it("wraps a storage failure in a generic 'delete failed' error", async () => {
+    mockFile.delete.mockRejectedValue(new Error("network timeout"));
+
+    await expect(deleteFile("files/some-uuid")).rejects.toThrow(
+      "delete failed: network timeout"
     );
   });
 });

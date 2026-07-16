@@ -2,11 +2,12 @@ import { Router } from "express";
 import multer from "multer";
 import auth from "../../middleware/firebaseAuth.js";
 import { HttpStatusCode } from "axios";
-import { uploadFile } from "../../firebase/storage.js";
+import { deleteFile, uploadFile } from "../../firebase/storage.js";
 import UploadedFile from "../../db/models/uploadedFile.js";
 import { handle, HttpError } from "../../util/error.js";
 import { retrieveFile, retrieveImageList } from "../../db/daos/fileDao.js";
 import scenarioAuth from "../../middleware/scenarioAuth.js";
+import { isValidObjectId } from "../../util/validation.js";
 
 const router = Router();
 
@@ -14,8 +15,12 @@ router.use(auth);
 router.use("/:scenarioId", scenarioAuth);
 
 // multer config (in-memory storage)
-const MAX_FILE_SIZE_MB = parseFloat(process.env.MAX_FILE_SIZE_MB || "10");
+const parsedMaxFileSizeMb = parseFloat(process.env.MAX_FILE_SIZE_MB);
+const MAX_FILE_SIZE_MB = Number.isFinite(parsedMaxFileSizeMb)
+  ? parsedMaxFileSizeMb
+  : 10;
 const MAX_FILE_SIZE_BYTES = Math.floor(MAX_FILE_SIZE_MB * 1024 * 1024);
+
 const ALLOWED_MIME_SET = new Set(
   (
     process.env.ALLOWED_MIME_LIST ||
@@ -69,25 +74,34 @@ router.post(
 
     const firebaseInfo = await uploadFile(req.file.buffer, req.file.mimetype);
 
-    const type = req.file.mimetype.startsWith("image/")
-      ? "image"
-      : req.file.mimetype.startsWith("audio/")
-        ? "audio"
-        : "document";
+    try {
+      const type = req.file.mimetype.startsWith("image/")
+        ? "image"
+        : req.file.mimetype.startsWith("audio/")
+          ? "audio"
+          : "document";
 
-    const uploadedFile = await UploadedFile.create({
-      name: req.file.originalname,
-      type: type,
-      path: firebaseInfo.path,
-      url: firebaseInfo.url,
-      contentType: req.file.mimetype,
-      size: req.file.size,
-      uploaderUid: req.uid,
-      scenarioId: req.params.scenarioId,
-      deletedAt: Date.now(), // handle orphanage from interruption between upload and reference
-    });
+      const uploadedFile = await UploadedFile.create({
+        name: req.file.originalname,
+        type: type,
+        path: firebaseInfo.path,
+        url: firebaseInfo.url,
+        contentType: req.file.mimetype,
+        size: req.file.size,
+        uploaderUid: req.uid,
+        scenarioId: req.params.scenarioId,
+        deletedAt: Date.now(), // handle orphanage from interruption between upload and reference
+      });
 
-    return res.status(201).json(uploadedFile);
+      return res.status(201).json(uploadedFile);
+    } catch (err) {
+      try {
+        await deleteFile(firebaseInfo.path);
+      } catch (cleanupErr) {
+        err.cleanupErr = cleanupErr;
+      }
+      throw err;
+    }
   })
 );
 
@@ -106,7 +120,7 @@ router.get(
   "/:scenarioId/:fileId",
   handle(async (req, res) => {
     const { scenarioId, fileId } = req.params;
-    if (!fileId)
+    if (!fileId || !isValidObjectId(fileId))
       throw new HttpError(
         "invalid or missing file id",
         HttpStatusCode.BadRequest

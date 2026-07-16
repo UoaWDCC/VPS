@@ -3,14 +3,17 @@ import MDTextViewer from "./MDTextViewer";
 import { useQuery } from "@tanstack/react-query";
 
 async function loadText(url) {
-  return fetch(url).then((res) => res.text());
+  return fetch(url).then((res) => {
+    if (!res.ok) throw new Error(`failed to load file (${res.status})`);
+    return res.text();
+  });
 }
 
 export default function ResourcePreview({ file }) {
   const text = useQuery({
     queryKey: ["file-text", file?.url],
     queryFn: () => loadText(file.url),
-    enabled: !!(file?.contentType.startsWith("text") && file?.url),
+    enabled: !!(file?.contentType?.startsWith("text") && file?.url),
   });
 
   if (!file) {
@@ -20,7 +23,7 @@ export default function ResourcePreview({ file }) {
           <div className="text-sm">Select a file to preview.</div>
           <div className="text-xs">
             Select a file to preview. Images and PDFs files show inline;
-            text/CSV/JSON/Markdown render below; other files provide a download.
+            Text/Markdown render below; other files provide a download.
           </div>
         </div>
       </div>
@@ -74,7 +77,7 @@ export default function ResourcePreview({ file }) {
           </div>
         ) : isText && text.isError ? (
           <div className="alert alert-warning">
-            <span>{text.error}</span>
+            <span>{text.error?.message || "Failed to load preview."}</span>
           </div>
         ) : isText ? (
           <MDTextViewer file={file} content={text.data} />

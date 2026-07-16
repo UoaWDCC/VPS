@@ -113,7 +113,7 @@ function ImageCreateMenu() {
   function handleSubmit() {
     if (!selectedImage) return;
     setModalOpen(false);
-    void addExistingImage(selectedImage);
+    addExistingImage(selectedImage).catch(handleGeneric);
   }
 
   return (
