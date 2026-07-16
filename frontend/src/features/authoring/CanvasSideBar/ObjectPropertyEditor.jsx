@@ -2,6 +2,7 @@ import { translate } from "../../authoring/util";
 import { useEffect, useState } from "react";
 import { modifyVerts } from "../handlers/pointer/resize";
 import { modifyComponentProp } from "../scene/operations/component";
+import { SquareCenterlineDashedHorizontal } from "lucide-react";
 
 export function ObjectPropertyEditor({ component }) {
   // x and y vals used for setting and current
@@ -46,9 +47,9 @@ export function ObjectPropertyEditor({ component }) {
   // uses the same function as the drag box feat w modifyComponentProp
   function saveProp(v, type, set) {
     let value;
-    if (v === "") {
-      set("");
-      return;
+    if (v === "" || v == "0") {
+      set(1);
+      value = 1;
     } else {
       value = parseFloat(String(v).trim());
       if (isNaN(value)) return;
@@ -82,7 +83,7 @@ export function ObjectPropertyEditor({ component }) {
 
   return (
     <div className="collapse overflow-visible collapse-arrow bg-base-300 rounded-sm text-s">
-      <input type="checkbox" />
+      <input type="checkbox"/>
       <div className="collapse-title">Object Properties</div>
       <div className="collapse-content text--1 bg-base-200">
         <fieldset className="fieldset pt-2">
@@ -132,6 +133,12 @@ export function ObjectPropertyEditor({ component }) {
                 saveProp(e.target.value, "y", setInputY);
               }}
             />
+          </div>
+          <div className="flex gap-22">
+            <button className="w-5 hover">
+              hell
+            </button>
+            <SquareCenterlineDashedHorizontal />
           </div>
         </fieldset>
       </div>
