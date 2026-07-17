@@ -77,7 +77,7 @@ async function getImageDimensions(url: string, defaultHeight = 300) {
 async function getImages(user: User, scenarioId: string) {
   const res = (await api.get(
     user,
-    `api/files/${scenarioId}/images`
+    `api/files/${scenarioId}/image`
   )) as AxiosResponse<UploadedFile[]>;
   return res.data;
 }

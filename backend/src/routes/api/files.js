@@ -5,7 +5,7 @@ import { HttpStatusCode } from "axios";
 import { deleteFile, uploadFile } from "../../firebase/storage.js";
 import UploadedFile from "../../db/models/uploadedFile.js";
 import { handle, HttpError } from "../../util/error.js";
-import { retrieveFile, retrieveImageList } from "../../db/daos/fileDao.js";
+import { retrieveFile, retrieveFiles } from "../../db/daos/fileDao.js";
 import scenarioAuth from "../../middleware/scenarioAuth.js";
 import { isValidObjectId } from "../../util/validation.js";
 
@@ -105,13 +105,17 @@ router.post(
   })
 );
 
+const VALID_TYPES = ["image", "audio", "document"];
+
 // GET /files/:scenarioId/images — retrieve all images in scenario
 router.get(
-  "/:scenarioId/images",
+  "/:scenarioId/:type",
   handle(async (req, res) => {
-    const { scenarioId } = req.params;
-    const images = await retrieveImageList(scenarioId);
-    return res.json(images);
+    const { scenarioId, type } = req.params;
+    if (!VALID_TYPES.includes(type))
+      throw new HttpError("invalid file type", HttpStatusCode.BadRequest);
+    const files = await retrieveFiles(scenarioId, type);
+    return res.json(files);
   })
 );
 

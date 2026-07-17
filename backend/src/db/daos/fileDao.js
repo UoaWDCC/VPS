@@ -56,8 +56,8 @@ export async function applyReferenceDelta(fileId, delta) {
  * @param {string} scenarioId MongoDB ID of scenario
  * @returns {Promise<Object[]>} Array of image file documents
  */
-export function retrieveImageList(scenarioId) {
-  return UploadedFile.find({ scenarioId, type: "image" }).lean();
+export function retrieveFiles(scenarioId, type) {
+  return UploadedFile.find({ scenarioId, type }).lean();
 }
 
 /**
