@@ -11,7 +11,7 @@ import toast from "react-hot-toast";
 import AuthenticationContext from "../../../context/AuthenticationContext";
 import { useParams } from "react-router-dom";
 import { PlusIcon } from "lucide-react";
-import AudioSelectModal from "./AudioCreateMenu";
+import AudioSelectModal from "./AudioSelectModal";
 
 async function addNewAudio(file: File, scenarioId: string, user: User) {
   const formData = new FormData();
