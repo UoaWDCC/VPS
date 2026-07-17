@@ -88,10 +88,10 @@ function AudioManager() {
               className="dropdown-content menu bg-base-300 rounded-box z-1 w-52 p-2 shadow-sm top-[38px]"
             >
               <li>
-                <a onClick={showFilePicker}>Upload New Audio</a>
+                <button onClick={showFilePicker}>Upload New Audio</button>
               </li>
               <li>
-                <a onClick={showModal}>Select Existing Audio</a>
+                <button onClick={showModal}>Select Existing Audio</button>
               </li>
             </ul>
           </div>
