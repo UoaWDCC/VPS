@@ -13,6 +13,7 @@ import { useParams } from "react-router-dom";
 import { PlusIcon } from "lucide-react";
 import AudioSelectModal from "./AudioSelectModal";
 
+// before calling validation of file should already be done
 async function addNewAudio(file: File, scenarioId: string, user: User) {
   const formData = new FormData();
   formData.append("file", file);
@@ -47,7 +48,11 @@ function AudioManager() {
 
   function handleFileChange(event: React.ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0];
-    if (!file) return;
+    if (!file?.type.startsWith("audio/")) {
+      toast.error("Invalid audio file");
+      return;
+    }
+
     addNewAudio(file, scenarioId, user)
       .then(() => {
         void queryClient.invalidateQueries({
@@ -74,10 +79,7 @@ function AudioManager() {
         <input type="checkbox" />
         <div className="collapse-title flex items-center justify-between">
           Audio Elements
-          <div
-            className="dropdown dropdown-end z-1"
-            onClick={(e) => e.stopPropagation()}
-          >
+          <div className="dropdown dropdown-end z-1">
             <div tabIndex={0} role="button">
               <PlusIcon size={18} />
             </div>
@@ -100,11 +102,12 @@ function AudioManager() {
           type="file"
           className="hidden"
           onChange={handleFileChange}
+          accept="audio/*"
         />
 
         <div className="collapse-content text--1 bg-base-200 px-0">
-          {audios.map((audio, i) => (
-            <EditAudioComponent component={audio} key={i} />
+          {audios.map((audio) => (
+            <EditAudioComponent component={audio} key={audio.id} />
           ))}
         </div>
       </div>

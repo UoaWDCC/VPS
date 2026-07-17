@@ -109,7 +109,7 @@ const VALID_TYPES = ["image", "audio", "document"];
 
 // GET /files/:scenarioId/images — retrieve all images in scenario
 router.get(
-  "/:scenarioId/:type",
+  "/:scenarioId/type/:type",
   handle(async (req, res) => {
     const { scenarioId, type } = req.params;
     if (!VALID_TYPES.includes(type))

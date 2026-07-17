@@ -47,24 +47,28 @@ function AudioListContainer({
   return (
     <div className="grid grid-cols-2 gap-2">
       {data?.map((item) => (
-        <button
-          type="button"
+        <div
           key={item._id}
-          onClick={() => onItemSelected(item)}
           className={
-            "flex items-center justify-between px-2 py-1 bg-base-300 " +
+            "flex items-center bg-base-300 " +
             (item._id === selectedId ? "outline-accent outline-2" : "")
           }
         >
-          <span className="truncate text-xs">{item.name}</span>
           <button
             type="button"
-            className="btn btn-xs btn-phantom"
+            onClick={() => onItemSelected(item)}
+            className="truncate w-full text-left text-xs px-2 py-2"
+          >
+            {item.name}
+          </button>
+          <button
+            type="button"
+            className="btn btn-xs btn-phantom px-2 py-2"
             onClick={(e) => togglePlayback(e, item)}
           >
             {playingId === item._id ? "Pause" : "Play"}
           </button>
-        </button>
+        </div>
       ))}
     </div>
   );

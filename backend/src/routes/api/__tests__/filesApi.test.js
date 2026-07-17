@@ -235,7 +235,7 @@ describe("Files API tests", () => {
 
   // --- Retrieve image list ---
 
-  it("GET /files/:scenarioId/image returns only image-type files for the scenario", async () => {
+  it("GET /files/:scenarioId/type/image returns only image-type files for the scenario", async () => {
     const response = await axios.get(
       `http://localhost:${ctx.port}/api/files/${scenarioId}/image`,
       authHeaders("user1")

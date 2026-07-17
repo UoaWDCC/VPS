@@ -30,7 +30,7 @@ function addExistingAudio(audio: UploadedFile) {
 async function getAudios(user: User, scenarioId: string) {
   const res = (await api.get(
     user,
-    `api/files/${scenarioId}/audio`
+    `api/files/${scenarioId}/type/audio`
   )) as AxiosResponse<UploadedFile[]>;
   return res.data;
 }
@@ -57,6 +57,7 @@ function AudioSelectModal({
     if (!selectedAudio) return;
     setOpen(false);
     addExistingAudio(selectedAudio);
+    setSelectedAudio(null);
   }
 
   return (
@@ -76,11 +77,9 @@ function AudioSelectModal({
         />
       }
       <div className="modal-action">
-        <form method="dialog">
-          <button className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">
-            ✕
-          </button>
-        </form>
+        <button className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">
+          ✕
+        </button>
         <button
           className="btn"
           disabled={!selectedAudio}
