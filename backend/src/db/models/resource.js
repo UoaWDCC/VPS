@@ -8,17 +8,22 @@ const resourceSchema = new Schema(
       required: true,
       index: true,
     },
-    groupId: {
+    parentId: {
       type: Schema.Types.ObjectId,
-      ref: "CollectionGroup",
-      required: true,
+      ref: "Resource",
+      required: false,
       index: true,
+    },
+    type: {
+      type: String,
+      enum: ["file", "collection"],
+      required: true,
     },
     name: { type: String, required: true },
     fileId: {
       type: Schema.Types.ObjectId,
       ref: "UploadedFile",
-      required: true,
+      required: false,
     },
     stateConditionals: {
       type: [
@@ -40,7 +45,7 @@ const resourceSchema = new Schema(
 
 resourceSchema.index({
   scenarioId: 1,
-  groupId: 1,
+  parentId: 1,
   createdAt: -1,
 });
 
