@@ -13,6 +13,9 @@ function DetailEditModal({
     scenario?.estimatedTime ?? ""
   );
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showNameError, setShowNameError] = useState(false);
+
+  const isNameBlank = !name.trim();
 
   function handleEstimatedTimeChange(e) {
     const value = e.target.value.replace(/\D/g, "");
@@ -20,9 +23,14 @@ function DetailEditModal({
   }
 
   async function handleSave() {
+    if (isNameBlank) {
+      setShowNameError(true);
+      return;
+    }
+
     setIsSubmitting(true);
     try {
-      await onSave({ name, description, estimatedTime });
+      await onSave({ name: name.trim(), description, estimatedTime });
       onClose?.();
     } catch {
       // the mutation itself surfaces an error toast; keep the modal open to retry
@@ -45,12 +53,20 @@ function DetailEditModal({
           value={name}
           onChange={(e) => setName(e.target.value)}
           placeholder="Enter scenario name..."
-          className="input input-bordered border-primary/30 bg-base-100 text-base-content font-dm text-base w-full focus:border-primary focus:outline-none placeholder:text-base-content/40"
+          className={`input input-bordered bg-base-100 text-base-content font-dm text-base w-full focus:outline-none placeholder:text-base-content/40 ${
+            showNameError && isNameBlank
+              ? "border-error focus:border-error"
+              : "border-primary/30 focus:border-primary"
+          }`}
           maxLength={100}
         />
         <label className="label">
-          <span className="label-text-alt text-base-content/50 font-ibm">
-            {name.length}/100 characters
+          <span
+            className={`label-text-alt font-ibm ${showNameError && isNameBlank ? "text-error" : "text-base-content/50"}`}
+          >
+            {showNameError && isNameBlank
+              ? "Scenario name is required"
+              : `${name.length}/100 characters`}
           </span>
         </label>
       </div>
