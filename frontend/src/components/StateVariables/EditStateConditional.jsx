@@ -5,6 +5,23 @@ import { stateTypes, validComparators } from "./stateTypes";
 import AuthenticationContext from "../../context/AuthenticationContext";
 import { api } from "../../util/api";
 import toast from "react-hot-toast";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useParams } from "react-router-dom";
+
+function deleteStateConditional(user, scenarioId, resourceId, conditionalId) {
+  return api.delete(
+    user,
+    `api/resources/${scenarioId}/${resourceId}/conditionals/${conditionalId}`
+  );
+}
+
+function editStateConditional(user, scenarioId, resourceId, conditional) {
+  return api.put(
+    user,
+    `api/resources/${scenarioId}/${resourceId}/conditionals`,
+    { stateConditional: conditional }
+  );
+}
 
 /**
  * Component used for editing state operations
@@ -12,20 +29,15 @@ import toast from "react-hot-toast";
  *
  * @component
  */
-const EditStateConditional = ({
-  endpoint,
-  conditional,
-  conditionalId,
-  updateTarget,
-}) => {
+const EditStateConditional = ({ resource, conditional }) => {
+  const { scenarioId } = useParams();
   const { user } = useContext(AuthenticationContext);
   const { stateVariables } = useContext(ScenarioContext);
 
   const [comparator, setComparator] = useState(conditional.comparator);
   const [value, setValue] = useState(conditional.value);
 
-  const isEditing =
-    comparator !== conditional.comparator || value !== conditional.value;
+  const queryClient = useQueryClient();
 
   useEffect(() => {
     if (conditional.comparator !== comparator)
@@ -37,48 +49,78 @@ const EditStateConditional = ({
     return null;
   }
 
+  const deleteConditionalMutation = useMutation({
+    mutationFn: (conditionalId) =>
+      deleteStateConditional(user, scenarioId, resource._id, conditionalId),
+    onMutate: (conditionalId) => {
+      queryClient.cancelQueries(["resources", scenarioId]);
+      queryClient.setQueryData(["resources", scenarioId], (prev) => {
+        return prev.map((r) =>
+          r._id !== resource._id
+            ? r
+            : {
+                ...r,
+                stateConditionals: r.stateConditionals.filter(
+                  (c) => c._id !== conditionalId
+                ),
+              }
+        );
+      });
+    },
+    onSettled: () => queryClient.invalidateQueries(["resources", scenarioId]),
+    onError: (e) => {
+      console.error(e);
+      toast.error("Error deleting state conditional");
+    },
+  });
+
+  const updateConditionalMutation = useMutation({
+    mutationFn: (conditional) =>
+      editStateConditional(user, scenarioId, resource._id, conditional),
+    onMutate: (conditional) => {
+      queryClient.cancelQueries(["resources", scenarioId]);
+      queryClient.setQueryData(["resources", scenarioId], (prev) => {
+        return prev.map((r) =>
+          r._id !== resource._id
+            ? r
+            : {
+                ...r,
+                stateConditionals: r.stateConditionals.map((c) =>
+                  c._id !== conditional._id ? c : conditional
+                ),
+              }
+        );
+      });
+    },
+    onSettled: () => queryClient.invalidateQueries(["resources", scenarioId]),
+    onError: (e) => {
+      console.error(e);
+      toast.error("Error deleting state conditional");
+    },
+  });
+
   const stateVariable = stateVariables.find(
     (v) => v.id === conditional.stateVariableId
   );
   if (!stateVariable) return null;
 
-  const deleteStateConditional = () => {
-    api
-      .delete(user, `${endpoint}/${conditionalId}`)
-      .then((res) => {
-        updateTarget(res.data);
-      })
-      .catch((err) => {
-        console.error(err);
-        toast.error("Error deleting state conditional");
-      });
-  };
-
-  const editStateConditional = () => {
-    const stateConditional = {
-      ...conditional,
+  function constructConditional() {
+    return {
+      _id: conditional._id,
+      stateVariableId: conditional.stateVariableId,
       comparator,
       value: stateVariable.type === stateTypes.NUMBER ? Number(value) : value,
     };
+  }
 
-    api
-      .put(user, endpoint, {
-        stateConditional,
-      })
-      .then((res) => {
-        updateTarget(res.data);
-      })
-      .catch((err) => {
-        console.error(err);
-        toast.error("Error editing state conditional");
-      });
-  };
-
-  const resetFields = (e) => {
+  function resetFields(e) {
     e.preventDefault();
     setComparator(conditional.comparator);
     setValue(conditional.value);
-  };
+  }
+
+  const isEditing =
+    comparator !== conditional.comparator || value !== conditional.value;
 
   return (
     <div
@@ -119,7 +161,7 @@ const EditStateConditional = ({
         <div className="ml-auto">
           <button
             className="btn btn-xs btn-phantom"
-            onClick={deleteStateConditional}
+            onClick={() => deleteConditionalMutation.mutate(conditional._id)}
           >
             Delete
           </button>
@@ -128,7 +170,9 @@ const EditStateConditional = ({
           </button>
           <button
             className="btn btn-xs btn-phantom"
-            onClick={editStateConditional}
+            onClick={() =>
+              updateConditionalMutation.mutate(constructConditional())
+            }
           >
             Save
           </button>
