@@ -68,7 +68,7 @@ router.post(
   handle(async (req, res) => {
     const { name, uid, description, estimatedTime } = req.body;
 
-    if (!name?.trim())
+    if (typeof name !== "string" || !name.trim())
       throw new HttpError("scenario name is required", HTTP_BAD_REQUEST);
 
     const scenario = await createScenario(name.trim(), uid, {
@@ -111,7 +111,7 @@ router.patch(
   handle(async (req, res) => {
     const { name, description, estimatedTime } = req.body;
 
-    if (name !== undefined && !name.trim())
+    if (name !== undefined && (typeof name !== "string" || !name.trim()))
       throw new HttpError("scenario name cannot be empty", HTTP_BAD_REQUEST);
 
     const updates = {
