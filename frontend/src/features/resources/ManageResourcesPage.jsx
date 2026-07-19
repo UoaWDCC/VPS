@@ -202,7 +202,6 @@ export default function ManageResourcesPage() {
                               <button
                                 className="btn btn-phantom btn-xs"
                                 onClick={(e) => {
-                                  e.preventDefault();
                                   e.stopPropagation();
                                   deleteResourceMutation.mutate(resource._id);
                                 }}
@@ -221,16 +220,20 @@ export default function ManageResourcesPage() {
                               <li key={child._id}>
                                 <div className="flex items-center justify-between">
                                   <a
-                                    className="min-w-0 flex-1 text--1 truncate"
-                                    onClick={() => setSelectedResource(child)}
+                                    className={`min-w-0 flex-1 text--1 truncate ${child._id.startsWith("temp.") ? "text-primary" : ""}`}
+                                    onClick={() => {
+                                      if (!child._id.startsWith("temp."))
+                                        setSelectedResource(child);
+                                    }}
                                   >
                                     {child.name}
                                   </a>
                                   <button
                                     className="btn btn-phantom btn-xs px-0"
-                                    onClick={() =>
-                                      deleteResourceMutation.mutate(child._id)
-                                    }
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      deleteResourceMutation.mutate(child._id);
+                                    }}
                                     title="Delete file"
                                   >
                                     <XIcon size={16} />
@@ -243,16 +246,20 @@ export default function ManageResourcesPage() {
                       ) : (
                         <div className="flex items-center justify-between">
                           <a
-                            className="min-w-0 flex-1 text--1 truncate"
-                            onClick={() => setSelectedResource(resource)}
+                            className={`min-w-0 flex-1 text--1 truncate ${resource._id.startsWith("temp.") ? "text-primary" : ""}`}
+                            onClick={() => {
+                              if (!resource._id.startsWith("temp."))
+                                setSelectedResource(resource);
+                            }}
                           >
                             {resource.name}
                           </a>
                           <button
                             className="btn btn-phantom btn-xs px-0"
-                            onClick={() =>
-                              deleteResourceMutation.mutate(resource._id)
-                            }
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              deleteResourceMutation.mutate(resource._id);
+                            }}
                             title="Delete file"
                           >
                             <XIcon size={16} />
@@ -267,9 +274,15 @@ export default function ManageResourcesPage() {
 
             <div className="card col-span-2">
               <div className="card-body gap-4">
-                <StateConditionalMenu resource={selectedResource} />
-                {selectedResource.type === "file" && (
-                  <ResourcePreview file={selectedResource} />
+                {selectedResource ? (
+                  <>
+                    <StateConditionalMenu resource={selectedResource} />
+                    {selectedResource.type === "file" && (
+                      <ResourcePreview file={selectedResource} />
+                    )}
+                  </>
+                ) : (
+                  <span>Select a resource to show the preview</span>
                 )}
               </div>
             </div>

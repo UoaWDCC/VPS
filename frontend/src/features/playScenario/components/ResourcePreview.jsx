@@ -30,9 +30,9 @@ export default function ResourcePreview({ file }) {
     );
   }
 
-  const isImage = file.type === "image";
+  const isImage = file.fileType === "image";
   const isText =
-    file.type === "document" && file.contentType !== "application/pdf";
+    file.fileType === "document" && file.contentType !== "application/pdf";
   const isPDF = file.contentType === "application/pdf";
 
   return (
@@ -45,9 +45,6 @@ export default function ResourcePreview({ file }) {
           >
             {file.name}
           </h3>
-          <div className="text-xs opacity-70 text-primary">
-            {file.groupName} / {file.childName}
-          </div>
         </div>
         {file.url && (
           <a className="btn btn-phantom btn-xs" href={file.url} download>
