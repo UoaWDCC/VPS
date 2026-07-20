@@ -15,6 +15,7 @@ import FormData from "form-data";
 import filesRouter from "../files.js";
 import StoredFile from "../../../db/models/StoredFile.js";
 import CollectionGroup from "../../../db/models/CollectionGroup.js";
+import Scenario from "../../../db/models/scenario.js";
 import auth from "../../../middleware/firebaseAuth.js";
 import errorHandler from "../../../middleware/errorHandler.js";
 
@@ -58,11 +59,17 @@ describe("Files API tests", () => {
     return app;
   });
 
-  const scenarioId = new mongoose.mongo.ObjectId("ccc000000000000000000001");
+  let scenarioId;
   let collectionGroup;
   let storedFile;
 
   beforeEach(async () => {
+    const scenario = await Scenario.create({
+      name: "Test Scenario",
+      uid: "user1",
+    });
+    scenarioId = scenario._id;
+
     collectionGroup = await CollectionGroup.create({
       scenarioId,
       name: "Test Group",
@@ -200,6 +207,47 @@ describe("Files API tests", () => {
     ).rejects.toMatchObject({ response: { status: 404 } });
   });
 
+  it("DELETE /files/:fileId returns 403 when caller does not own the scenario", async () => {
+    await expect(
+      axios.delete(
+        `http://localhost:${ctx.port}/api/files/${storedFile._id}`,
+        authHeaders("stranger")
+      )
+    ).rejects.toMatchObject({ response: { status: 403 } });
+  });
+
+  // --- Rename file ---
+
+  it("PATCH /files/:fileId renames the file", async () => {
+    const response = await axios.patch(
+      `http://localhost:${ctx.port}/api/files/${storedFile._id}`,
+      { name: "renamed.png" },
+      authHeaders("user1")
+    );
+    expect(response.status).toBe(200);
+    expect(response.data.name).toBe("renamed.png");
+  });
+
+  it("PATCH /files/:fileId returns 400 when name is empty", async () => {
+    await expect(
+      axios.patch(
+        `http://localhost:${ctx.port}/api/files/${storedFile._id}`,
+        { name: "  " },
+        authHeaders("user1")
+      )
+    ).rejects.toMatchObject({ response: { status: 400 } });
+  });
+
+  it("PATCH /files/:fileId returns 403 when caller does not own the scenario", async () => {
+    await expect(
+      axios.patch(
+        `http://localhost:${ctx.port}/api/files/${storedFile._id}`,
+        { name: "renamed.png" },
+        authHeaders("stranger")
+      )
+    ).rejects.toMatchObject({ response: { status: 403 } });
+  });
+
   // --- State conditionals ---
 
   it("POST /files/state-conditionals/:fileId adds a state conditional", async () => {
@@ -217,6 +265,22 @@ describe("Files API tests", () => {
     expect(response.status).toBe(200);
     expect(response.data.stateConditionals).toHaveLength(1);
     expect(response.data.stateConditionals[0].stateVariableId).toBe("var-1");
+  });
+
+  it("POST /files/state-conditionals/:fileId returns 403 when caller does not own the scenario", async () => {
+    await expect(
+      axios.post(
+        `http://localhost:${ctx.port}/api/files/state-conditionals/${storedFile._id}`,
+        {
+          stateConditional: {
+            stateVariableId: "var-1",
+            comparator: "=",
+            value: "open",
+          },
+        },
+        authHeaders("stranger")
+      )
+    ).rejects.toMatchObject({ response: { status: 403 } });
   });
 
   it("POST /files/state-conditionals/:fileId returns 404 for unknown file", async () => {

@@ -105,10 +105,6 @@ export default function ManageResourcesPage() {
   async function addFilesTo(groupId, files) {
     try {
       const user = getAuth().currentUser;
-      if (!user) {
-        toast.error("You must be logged in to upload.");
-        return;
-      }
       const idToken = await user.getIdToken();
 
       const fd = new FormData();
@@ -154,10 +150,6 @@ export default function ManageResourcesPage() {
   async function renameFile(fileId, newName) {
     try {
       const user = getAuth().currentUser;
-      if (!user) {
-        toast.error("You must be logged in.");
-        return;
-      }
       const idToken = await user.getIdToken();
       const { data } = await axios.patch(
         `/api/files/${fileId}`,
@@ -174,28 +166,31 @@ export default function ManageResourcesPage() {
         }))
       );
 
-      if (selectedFile?.id === fileId) {
-        setSelectedFile((prev) => ({ ...prev, name: data.name }));
-      }
+      setSelectedFile((prev) =>
+        prev?.id === fileId ? { ...prev, name: data.name } : prev
+      );
 
       toast.success("Renamed");
+      return true;
     } catch (err) {
       console.error(err);
       toast.error(err?.response?.data?.error || "Rename failed");
+      return false;
     }
   }
 
   async function handleRenameSubmit() {
     const trimmed = renameInput.trim();
     if (!trimmed) {
-      setRenamingFileId(null);
+      toast.error("Name cannot be empty");
       return;
     }
     const current = groups
       .flatMap((g) => g.files)
       .find((f) => f.id === renamingFileId);
     if (current && trimmed !== current.name) {
-      await renameFile(renamingFileId, trimmed);
+      const ok = await renameFile(renamingFileId, trimmed);
+      if (!ok) return;
     }
     setRenamingFileId(null);
   }
@@ -203,10 +198,6 @@ export default function ManageResourcesPage() {
   async function removeFile(fileId) {
     try {
       const user = getAuth().currentUser;
-      if (!user) {
-        toast.error("You must be logged in to delete.");
-        return;
-      }
       const idToken = await user.getIdToken();
       await axios.delete(`/api/files/${fileId}`, {
         headers: { Authorization: `Bearer ${idToken}` },
@@ -234,10 +225,6 @@ export default function ManageResourcesPage() {
     if (!ok) return;
     try {
       const user = getAuth().currentUser;
-      if (!user) {
-        toast.error("You must be logged in to delete.");
-        return;
-      }
       const idToken = await user.getIdToken();
       await axios.delete(`/api/collections/groups/${groupId}`, {
         headers: { Authorization: `Bearer ${idToken}` },
@@ -340,7 +327,6 @@ export default function ManageResourcesPage() {
                     onAdd={async (name) => {
                       try {
                         const user = getAuth().currentUser;
-                        if (!user) return toast.error("You must be logged in.");
                         const idToken = await user.getIdToken();
                         const { data } = await axios.post(
                           "/api/collections/groups",
@@ -451,13 +437,10 @@ export default function ManageResourcesPage() {
                                   }}
                                 >
                                   <a
-                                    className="text--1"
+                                    className="truncate text--1"
                                     title={f.name}
-                                    style={{
-                                      overflow: "hidden",
-                                      textOverflow: "ellipsis",
-                                      whiteSpace: "nowrap",
-                                    }}
+                                    role="button"
+                                    tabIndex={0}
                                     onClick={() =>
                                       setSelectedFile({
                                         ...f,
@@ -465,6 +448,16 @@ export default function ManageResourcesPage() {
                                         groupName: group.name,
                                       })
                                     }
+                                    onKeyDown={(e) => {
+                                      if (e.key === "Enter" || e.key === " ") {
+                                        e.preventDefault();
+                                        setSelectedFile({
+                                          ...f,
+                                          groupId: group.id,
+                                          groupName: group.name,
+                                        });
+                                      }
+                                    }}
                                   >
                                     {f.name}
                                   </a>
@@ -640,7 +633,7 @@ function Preview({ file }) {
         <h3 className="text-m break-all">{file.name}</h3>
         {downloadUrl && (
           <a
-            className="btn btn-phantom btn-xs flex-shrink-0"
+            className="btn btn-phantom btn-xs shrink-0"
             href={downloadUrl}
             download
           >

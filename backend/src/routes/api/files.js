@@ -2,6 +2,7 @@ import { Router } from "express";
 import mongoose from "mongoose";
 import multer from "multer";
 import auth from "../../middleware/firebaseAuth.js";
+import { isAuthor } from "../../middleware/scenarioAuth.js";
 import CollectionGroup from "../../db/models/CollectionGroup.js";
 import StoredFile from "../../db/models/StoredFile.js";
 import {
@@ -82,6 +83,21 @@ async function assertGroupInScenario({ scenarioId, groupId }) {
 }
 
 /**
+ * Load a stored file and verify the caller has access to its scenario.
+ * Throws an Error tagged with .status (404/403) for the route's catch block.
+ */
+async function loadAuthorizedFile(fileId, uid) {
+  const meta = await StoredFile.findById(fileId);
+  if (!meta) {
+    throw Object.assign(new Error("File not found"), { status: 404 });
+  }
+  if (!(await isAuthor(meta.scenarioId, uid))) {
+    throw Object.assign(new Error("Forbidden"), { status: 403 });
+  }
+  return meta;
+}
+
+/**
  * @route POST /api/files/upload
  * @desc Upload one or more files to a group within a scenario
  */
@@ -152,8 +168,8 @@ router.post("/upload", upload.array("files"), async (req, res) => {
 router.patch("/:fileId", async (req, res) => {
   try {
     const { fileId } = req.params;
-    const { name } = req.body;
-    if (!name || !name.trim()) {
+    const { name, uid } = req.body;
+    if (typeof name !== "string" || !name.trim()) {
       return res.status(400).json({ error: "Name is required" });
     }
     if (name.trim().length > 255) {
@@ -161,15 +177,14 @@ router.patch("/:fileId", async (req, res) => {
         .status(400)
         .json({ error: "Name must be 255 characters or fewer" });
     }
-    const meta = await StoredFile.findById(fileId);
-    if (!meta) return res.status(404).json({ error: "File not found" });
+    const meta = await loadAuthorizedFile(fileId, uid);
     meta.name = name.trim();
     await meta.save();
     const file = meta.toObject();
     delete file.gridFsId;
     return res.json(file);
   } catch (err) {
-    return res.status(500).json({ error: err.message });
+    return res.status(err.status || 500).json({ error: err.message });
   }
 });
 
@@ -180,15 +195,15 @@ router.patch("/:fileId", async (req, res) => {
 router.delete("/:fileId", async (req, res) => {
   try {
     const { fileId } = req.params;
-    const meta = await StoredFile.findById(fileId);
-    if (!meta) return res.status(404).json({ error: "File not found" });
+    const { uid } = req.body;
+    const meta = await loadAuthorizedFile(fileId, uid);
 
     await deleteGridFsById(meta.gridFsId);
     await meta.deleteOne();
 
     return res.json({ deleted: 1 });
   } catch (err) {
-    return res.status(500).json({ error: err.message });
+    return res.status(err.status || 500).json({ error: err.message });
   }
 });
 
@@ -199,16 +214,15 @@ router.delete("/:fileId", async (req, res) => {
 router.post("/state-conditionals/:fileId", async (req, res) => {
   try {
     const { fileId } = req.params;
-    const { stateConditional } = req.body;
-    const meta = await StoredFile.findById(fileId);
-    if (!meta) return res.status(404).json({ error: "File not found" });
+    const { stateConditional, uid } = req.body;
+    const meta = await loadAuthorizedFile(fileId, uid);
     meta.stateConditionals.push(stateConditional);
     await meta.save();
     const file = meta.toObject();
     delete file.gridFsId;
     return res.json(file);
   } catch (err) {
-    return res.status(500).json({ error: err.message });
+    return res.status(err.status || 500).json({ error: err.message });
   }
 });
 
@@ -219,9 +233,8 @@ router.post("/state-conditionals/:fileId", async (req, res) => {
 router.put("/state-conditionals/:fileId", async (req, res) => {
   try {
     const { fileId } = req.params;
-    const { stateConditional } = req.body;
-    const meta = await StoredFile.findById(fileId);
-    if (!meta) return res.status(404).json({ error: "File not found" });
+    const { stateConditional, uid } = req.body;
+    const meta = await loadAuthorizedFile(fileId, uid);
 
     meta.stateConditionals = meta.stateConditionals.map((sc) =>
       sc._id.toString() === stateConditional._id ? stateConditional : sc
@@ -232,7 +245,7 @@ router.put("/state-conditionals/:fileId", async (req, res) => {
     delete file.gridFsId;
     return res.json(file);
   } catch (err) {
-    return res.status(500).json({ error: err.message });
+    return res.status(err.status || 500).json({ error: err.message });
   }
 });
 
@@ -245,8 +258,8 @@ router.delete(
   async (req, res) => {
     try {
       const { fileId, stateConditionalId } = req.params;
-      const meta = await StoredFile.findById(fileId);
-      if (!meta) return res.status(404).json({ error: "File not found" });
+      const { uid } = req.body;
+      const meta = await loadAuthorizedFile(fileId, uid);
 
       const originalLength = meta.stateConditionals.length;
       meta.stateConditionals = meta.stateConditionals.filter(
@@ -262,7 +275,7 @@ router.delete(
       delete file.gridFsId;
       return res.json(file);
     } catch (err) {
-      return res.status(500).json({ error: err.message });
+      return res.status(err.status || 500).json({ error: err.message });
     }
   }
 );
