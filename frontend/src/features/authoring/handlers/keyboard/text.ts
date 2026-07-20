@@ -17,7 +17,11 @@ import {
   syncModelSelection,
   syncVisualCursor,
 } from "../../text/cursor";
-import type { VisualBlock, VisualSelection } from "../../text/types";
+import type {
+  VisualBlock,
+  VisualDocument,
+  VisualSelection,
+} from "../../text/types";
 
 export function handleTextMode(e: KeyboardEvent) {
   const { selected } = useEditorStore.getState();
@@ -38,7 +42,8 @@ export function handleSelectAll(selected: string) {
   const scene = useVisualScene.getState().components;
   const component = scene[selected];
 
-  const blocks = component.document.blocks;
+  const blocks = (component as unknown as { document: VisualDocument }).document
+    .blocks;
 
   if (!blocks || blocks.length === 0) return;
 
@@ -76,16 +81,19 @@ function handleEditing(e: KeyboardEvent, selected: string) {
     const newCursor = end
       ? insertSelection(selected, selection, e.key)
       : insertChar(selected, start, e.key);
+    if (!newCursor) return;
     setSelection({ start: newCursor, end: null });
   } else if (e.key === "Backspace") {
     // delete character before cursor
     const newCursor = !end
       ? deleteChar(selected, start)
       : deleteSelection(selected, selection);
+    if (!newCursor) return;
     setSelection({ start: newCursor, end: null });
   } else if (e.key === "Enter") {
     // create a new block at cursor
     const newCursor = createBlock(selected, start);
+    if (!newCursor) return;
     setSelection({ start: newCursor, end });
   } else if (e.key === "Escape") {
     // clear current selection
@@ -101,7 +109,11 @@ function handleNavigation(e: KeyboardEvent, selected: string) {
     useEditorStore.getState();
   if (!visualSelection.start) return;
 
-  const { blocks } = useVisualScene.getState().components[selected].document;
+  const { blocks } = (
+    useVisualScene.getState().components[selected] as unknown as {
+      document: VisualDocument;
+    }
+  ).document;
 
   const handler = navigationHandlers[e.key];
   if (handler) {

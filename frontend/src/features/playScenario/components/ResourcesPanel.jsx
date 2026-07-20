@@ -61,6 +61,7 @@ export default function ResourcesPanel({
           id: g._id,
           name: g.name,
           order: g.order ?? 0,
+          stateConditionals: g.stateConditionals || [],
           files: (g.files || []).map((f) => ({
             id: f._id,
             name: f.name,

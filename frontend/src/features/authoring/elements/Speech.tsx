@@ -12,7 +12,7 @@ import {
   scale,
   subtract,
 } from "../util";
-import type { Component, SpeechComponent, Vec2 } from "../types";
+import type { SpeechComponent, Vec2 } from "../types";
 
 interface Segment {
   grid: Vec2;
@@ -115,7 +115,7 @@ function Speech(component: SpeechComponent) {
   }
 
   return (
-    <g>
+    <g className="speech">
       <path d={constructPath()} {...filterComponent(component)} />
     </g>
   );

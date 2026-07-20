@@ -1,6 +1,5 @@
 import Scene from "../models/scene.js";
 import Scenario from "../models/scenario.js";
-import { tryDeleteFile, updateFileMetadata } from "../../firebase/storage.js";
 import { HttpError } from "../../util/error.js";
 import status from "../../util/status.js";
 
@@ -87,7 +86,8 @@ const updateScene = async (sceneId, updatedScene) => {
       if (c.type === "image" || c.type === "audio") {
         // checks for non-existance in new components array
         if (!updatedScene.components.some((newC) => newC.id === c.id)) {
-          tryDeleteFile(c.href ?? c.url);
+          // FIX: firebase is setup incorrectly, so this will error
+          // tryDeleteFile(c.href ?? c.url);
         }
       }
     });
@@ -177,11 +177,12 @@ const duplicateScene = async (scenarioId, sceneId) => {
   const dbScene = new Scene(newScene);
   await dbScene.save();
 
-  dbScene.components.forEach((c) => {
-    if (c.type === "image" || c.type === "audio") {
-      updateFileMetadata(c.url);
-    }
-  });
+  // FIX: firebase is setup incorrectly, so this will error
+  // dbScene.components.forEach((c) => {
+  //   if (c.type === "image" || c.type === "audio") {
+  //     updateFileMetadata(c.url);
+  //   }
+  // });
 
   await Scenario.updateOne(
     { _id: scenarioId },

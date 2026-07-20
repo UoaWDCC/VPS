@@ -4,10 +4,12 @@ import { api, handleGeneric } from "../../../util/api";
 import Thumbnail from "../components/Thumbnail";
 import AuthenticationContext from "../../../context/AuthenticationContext";
 import SceneContext from "../../../context/SceneContext";
-import { useParams, useHistory } from "react-router-dom";
-import { applySceneSwitch, saveCurrentScene } from "../scene/scene";
+import { useParams } from "react-router-dom";
+import { getScene } from "../scene/scene";
 import { handle } from "../../../components/ContextMenu/portal";
 import { CopyPlusIcon, Trash2Icon } from "lucide-react";
+import type { User } from "firebase/auth";
+import type { Scene } from "../types";
 
 const SceneMenu = ({
   id,
@@ -46,34 +48,29 @@ function ContextableThumb({
   index,
   active,
 }: {
-  scene: Record<string, any>;
+  scene: Scene;
   index: number;
   active: boolean;
 }) {
-  const { user } = useContext(AuthenticationContext);
+  const { user } = useContext(AuthenticationContext) as { user: User };
 
   const { scenarioId } = useParams<{ scenarioId: string }>();
-  const history = useHistory();
 
-  const { scenes, reFetch, saveScenePatch, deleteScene } =
-    useContext(SceneContext);
+  const { scenes, reFetch, switchScene, deleteScene } = useContext(
+    SceneContext
+  ) as {
+    scenes: Scene[];
+    reFetch: () => Promise<void>;
+    switchScene: (scene: Scene, id: string) => void;
+    deleteScene: (id: string) => void;
+  };
 
-  const duplicateScene = async (id: string) => {
-    api
+  const duplicateScene = (id: string): void => {
+    void api
       .post(user, `/api/scenario/${scenarioId}/scene/duplicate/${id}`, {})
       .then(reFetch)
       .catch(handleGeneric);
   };
-
-  async function switchScene(scene: Record<string, any>) {
-    if (active) return;
-
-    await saveCurrentScene(saveScenePatch);
-    await reFetch();
-
-    applySceneSwitch(scene, scenarioId);
-    history.push({ pathname: `/scenario/${scenarioId}/scene/${scene._id}` });
-  }
 
   return (
     <RightContextMenu
@@ -89,7 +86,7 @@ function ContextableThumb({
         <p className="w-5.5 text--1 text-right mr-1.5">{index + 1}</p>
         <button
           type="button"
-          onMouseDown={() => switchScene(scene)}
+          onMouseDown={() => switchScene(getScene(), scene._id)}
           className="w-[160px] relative rounded-sm overflow-hidden border-3 hover:border-primary"
           style={active ? { border: "3px solid #035084" } : {}}
           key={scene._id}

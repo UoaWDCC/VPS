@@ -1,21 +1,21 @@
-interface SelectInputProps {
-  values: any[];
-  value: any;
-  display?: (v: any) => string;
-  onChange: (v: any) => void;
+interface SelectInputProps<T> {
+  values: T[];
+  value: T | null;
+  display?: (v: T) => string;
+  onChange: (v: T | null) => void;
   nullable?: boolean;
 }
 
-function SelectInput({
+function SelectInput<T>({
   values,
   value,
   display,
   nullable = false,
   onChange,
-}: SelectInputProps) {
-  const render = display ?? ((v: any) => String(v));
+}: SelectInputProps<T>) {
+  const render = display ?? ((v: T) => String(v));
 
-  function handleClick(v: any) {
+  function handleClick(v: T) {
     (document.activeElement as HTMLDivElement).blur();
     onChange(v);
   }
@@ -33,7 +33,7 @@ function SelectInput({
         tabIndex={0}
         className="dropdown-content menu bg-base-300 rounded-box z-1 w-70 p-2 shadow-sm"
       >
-        {values.map((v: any, i: number) => (
+        {values.map((v, i) => (
           <li key={i}>
             <a
               onClick={() => handleClick(v)}

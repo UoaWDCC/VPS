@@ -1,16 +1,15 @@
 import { render } from "../../../../components/ContextMenu/portal";
-import type { Vec2 } from "../../types";
 import ComponentMenu from "./ComponentContext";
 
-export function handleContextGlobal(e: React.MouseEvent, position: Vec2) {
+export function handleContextGlobal(e: React.MouseEvent) {
   const target = e.target as HTMLElement;
 
   if (target.dataset.id) {
-    handleComponentContext(e, position);
+    handleComponentContext(e);
   }
 }
 
-function handleComponentContext(e: React.MouseEvent, _: Vec2) {
+function handleComponentContext(e: React.MouseEvent) {
   const target = e.target as HTMLElement;
   const id = target.dataset.id as string;
 

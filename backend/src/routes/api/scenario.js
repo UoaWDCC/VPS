@@ -20,7 +20,7 @@ import {
 import { retrieveAssignedScenarioList } from "../../db/daos/userDao.js";
 
 import scene from "./scene.js";
-import { createAccessList, deleteAccessList } from "../../db/daos/accessDao.js";
+import { deleteAccessList } from "../../db/daos/accessDao.js";
 
 const router = Router();
 
@@ -65,7 +65,6 @@ router.post("/", async (req, res) => {
   const { name, uid } = req.body;
 
   const scenario = await createScenario(name, uid);
-  await createAccessList(scenario._id, name, uid);
 
   res.status(HTTP_OK).json(scenario);
 });
@@ -108,11 +107,8 @@ router.patch("/:scenarioId", async (req, res) => {
 // Delete a scenario of a user
 router.delete("/:scenarioId", async (req, res) => {
   const deleted = await deleteScenario(req.params.scenarioId);
-  const accessDeleted = await deleteAccessList(
-    req.params.scenarioId,
-    req.body.uid
-  );
-  if (deleted && accessDeleted) {
+  await deleteAccessList(req.params.scenarioId);
+  if (deleted) {
     res.sendStatus(HTTP_OK);
   } else {
     res.sendStatus(HTTP_NOT_FOUND);

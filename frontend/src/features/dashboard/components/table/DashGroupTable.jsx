@@ -1,9 +1,9 @@
-import { Visibility } from "@material-ui/icons";
 import { useMemo, useState } from "react";
 import TablePaginationActions from "./TablePaginationAction";
 import getComparator from "../../utils/TableHelper";
 import CustomSortHeader from "./CustomSortHeader";
 import CustomPagination from "./CustomPagination";
+import { EyeIcon } from "lucide-react";
 // Need to update this to be able to take either multiple groups or individual group (to display members per row)
 // Acutally need to update this component to make it reuseable and take in params to dynamically display thead, tdata stuff with num col etc
 
@@ -124,12 +124,9 @@ const DashGroupTable = ({ groupInfo, rowClick }) => {
                     {ginfo.path.length != 0 ? "Started" : "Not yet started"}
                   </td>
                   <td>
-                    <Visibility
-                      className="hover:cursor-pointer"
-                      onClick={() => {
-                        rowClick(ginfo._id);
-                      }}
-                    />
+                    <button onClick={() => rowClick(ginfo._id)}>
+                      <EyeIcon size={20} />
+                    </button>
                   </td>
                 </tr>
               ))

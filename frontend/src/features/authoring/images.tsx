@@ -134,7 +134,7 @@ const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
 };
 
 function ImageCreateMenu() {
-  const { scenarioId } = useParams();
+  const { scenarioId } = useParams<{ scenarioId?: string }>();
   const [selectedImage, setSelectedImage] = useState<Image | null>(null);
 
   const [modalOpen, setModalOpen] = useState(false);
@@ -164,7 +164,7 @@ function ImageCreateMenu() {
   return (
     <>
       <div className="dropdown">
-        <li>
+        <li className="tooltip tooltip-bottom" data-tip="Add image">
           <a tabIndex={0}>
             <ImageIcon size={16} />
           </a>
