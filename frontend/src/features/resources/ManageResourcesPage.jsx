@@ -505,7 +505,7 @@ export default function ManageResourcesPage() {
                     <div className="text-xs text-primary">
                       {selectedTargetType}
                     </div>
-                    <h2 className="text-m">{selectedTarget.name}</h2>
+                    <h2 className="text-m break-all">{selectedTarget.name}</h2>
                   </div>
                 ) : null}
                 <StateConditionalMenu
