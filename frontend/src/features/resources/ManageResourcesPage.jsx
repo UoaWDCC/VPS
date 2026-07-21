@@ -11,6 +11,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { normaliseFile } from "./util";
 import { v4 as uuid } from "uuid";
 import ResourcePreview from "./ResourcePreview";
+import SkeletonBody from "./ResourcesSkeleton";
 
 async function uploadFileResource(user, scenarioId, parentId, file) {
   const formData = new FormData();
@@ -150,12 +151,7 @@ export default function ManageResourcesPage() {
     history.push(`/scenario/${scenarioId}`);
   }
 
-  // TODO: loading and error handling
-  if (resourcesQuery.isLoading || resourcesQuery.isError) {
-    return null;
-  }
-
-  const resourceTree = buildResourceTree(resourcesQuery.data);
+  const resourceTree = buildResourceTree(resourcesQuery.data ?? []);
 
   const filteredTree = (() => {
     if (!search.trim()) return resourceTree;
@@ -184,147 +180,158 @@ export default function ManageResourcesPage() {
 
       <div className="u-container min-h-0 w-full flex-1 pb-[max(1rem,env(safe-area-inset-bottom))]">
         <div className="container mx-auto h-full min-h-0">
-          <div className="grid grid-cols-1 gap-4 lg:h-full lg:min-h-0 lg:grid-cols-3">
-            {/* LEFT: Groups and files */}
-            <div className="card min-h-[35dvh] bg-base-100 shadow-md lg:h-full lg:min-h-0">
-              <div className="card-body flex min-h-0 flex-col gap-4 px-0">
-                <h1 className="flex-none text-xl">Uploaded Resources</h1>
+          {resourcesQuery.isLoading ? (
+            <SkeletonBody />
+          ) : resourcesQuery.isError ? (
+            <div className="h-full flex flex-col items-center justify-center gap-3">
+              <div className="alert alert-error max-w-md">
+                <span>{resourcesQuery.error.text}</span>
+              </div>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 gap-4 lg:h-full lg:min-h-0 lg:grid-cols-3">
+              {/* LEFT: Groups and files */}
+              <div className="card min-h-[35dvh] bg-base-100 shadow-md lg:h-full lg:min-h-0">
+                <div className="card-body flex min-h-0 flex-col gap-4 px-0">
+                  <h1 className="flex-none text-xl">Uploaded Resources</h1>
 
-                <label htmlFor="authoring-resource-search" className="sr-only">
-                  Search files or collection name
-                </label>
-                <input
-                  id="authoring-resource-search"
-                  type="search"
-                  className="w-full flex-none border-0 border-b-1 border-primary pb-3 outline-none"
-                  placeholder="Search files or collection name"
-                  value={search}
-                  onChange={(event) => setSearch(event.target.value)}
-                />
+                  <label htmlFor="authoring-resource-search" className="sr-only">
+                    Search files or collection name
+                  </label>
+                  <input
+                    id="authoring-resource-search"
+                    type="search"
+                    className="w-full flex-none border-0 border-b-1 border-primary pb-3 outline-none"
+                    placeholder="Search files or collection name"
+                    value={search}
+                    onChange={(event) => setSearch(event.target.value)}
+                  />
+                  <div className="flex items-center justify-between gap-2">
+                    <h2 className="text-m">Uploaded Resources</h2>
+                    <AddGroup onAdd={addResourceCollectionMutation.mutate} />
+                  </div>
 
-                <div className="flex items-center justify-between gap-2">
-                  <h2 className="text-m">Uploaded Resources</h2>
-                  <AddGroup onAdd={addResourceCollectionMutation.mutate} />
-                </div>
+                  <ul className="menu min-h-0 w-full flex-1 overflow-auto rounded-box bg-base-100 p-0">
 
-                <ul className="menu min-h-0 w-full flex-1 overflow-auto rounded-box bg-base-100 p-0">
-                  {search.trim() && filteredTree.length === 0 && (
-                    <li className="p-2 opacity-60">
-                      No matching resources found.
-                    </li>
-                  )}
-                  {filteredTree.map((resource) => (
-                    <li key={resource._id}>
-                      {resource.type === "collection" ? (
-                        <details open={search.trim() ? true : undefined}>
-                          <summary
-                            className={`flex items-center px-0 ${selectedResource?.id === resource._id ? "bg-base-200" : ""}`}
-                            onClick={() => setSelectedResource(resource)}
-                          >
-                            <span className="text--1 truncate">
+                    {search.trim() && filteredTree.length === 0 && (
+                      <li className="p-2 opacity-60">
+                        No matching resources found.
+                      </li>
+                    )}
+                    {filteredTree.map((resource) => (
+                      <li key={resource._id}>
+                        {resource.type === "collection" ? (
+                          <details>
+                            <summary
+                              className={`flex items-center ${selectedResource?._id === resource._id ? "bg-base-200" : ""}`}
+                              onClick={() => setSelectedResource(resource)}
+                            >
+                              <span className="text--1 truncate">
+                                {resource.name}
+                              </span>
+                              <div className="flex items-center ml-auto">
+                                <UploadButton
+                                  multiple={false}
+                                  onFiles={(file) => {
+                                    addFileResourceMutation.mutate({
+                                      parentId: resource._id,
+                                      file,
+                                    });
+                                  }}
+                                />
+                                <button
+                                  className="btn btn-phantom btn-xs"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    deleteResourceMutation.mutate(resource._id);
+                                  }}
+                                  title="Delete group"
+                                >
+                                  <XIcon size={16} />
+                                </button>
+                              </div>
+                            </summary>
+
+                            <ul>
+                              {resource.children.length === 0 && (
+                                <li className="opacity-60 p-2">No files yet</li>
+                              )}
+                              {resource.children.map((child) => (
+                                <li key={child._id}>
+                                  <div className="flex items-center justify-between">
+                                    <a
+                                      className={`min-w-0 flex-1 text--1 truncate ${child._id.startsWith("temp.") ? "text-primary" : ""}`}
+                                      onClick={() => {
+                                        if (!child._id.startsWith("temp."))
+                                          setSelectedResource(child);
+                                      }}
+                                    >
+                                      {child.name}
+                                    </a>
+                                    <button
+                                      className="btn btn-phantom btn-xs px-0"
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        deleteResourceMutation.mutate(
+                                          child._id
+                                        );
+                                      }}
+                                      title="Delete file"
+                                    >
+                                      <XIcon size={16} />
+                                    </button>
+                                  </div>
+                                </li>
+                              ))}
+                            </ul>
+                          </details>
+                        ) : (
+                          <div className="flex items-center justify-between">
+                            <a
+                              className={`min-w-0 flex-1 text--1 truncate ${resource._id.startsWith("temp.") ? "text-primary" : ""}`}
+                              onClick={() => {
+                                if (!resource._id.startsWith("temp."))
+                                  setSelectedResource(resource);
+                              }}
+                            >
                               {resource.name}
-                            </span>
-                            <div className="flex items-center ml-auto">
-                              <UploadButton
-                                multiple={false}
-                                onFiles={(file) =>
-                                  addFileResourceMutation.mutate({
-                                    parentId: resource._id,
-                                    file,
-                                  })
-                                }
-                              />
-                              <button
-                                className="btn btn-phantom btn-xs"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  deleteResourceMutation.mutate(resource._id);
-                                }}
-                                title="Delete group"
-                              >
-                                <XIcon size={16} />
-                              </button>
-                            </div>
-                          </summary>
+                            </a>
+                            <button
+                              className="btn btn-phantom btn-xs px-0"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                deleteResourceMutation.mutate(resource._id);
+                              }}
+                              title="Delete file"
+                            >
+                              <XIcon size={16} />
+                            </button>
+                          </div>
+                        )}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
 
-                          <ul>
-                            {resource.children.length === 0 && (
-                              <li className="opacity-60 p-2">No files yet</li>
-                            )}
-                            {resource.children.map((child) => (
-                              <li key={child._id}>
-                                <div className="flex items-center justify-between">
-                                  <a
-                                    className={`min-w-0 flex-1 text--1 truncate ${child._id.startsWith("temp.") ? "text-primary" : ""}`}
-                                    onClick={() => {
-                                      if (!child._id.startsWith("temp."))
-                                        setSelectedResource(child);
-                                    }}
-                                  >
-                                    {child.name}
-                                  </a>
-                                  <button
-                                    className="btn btn-phantom btn-xs px-0"
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      deleteResourceMutation.mutate(child._id);
-                                    }}
-                                    title="Delete file"
-                                  >
-                                    <XIcon size={16} />
-                                  </button>
-                                </div>
-                              </li>
-                            ))}
-                          </ul>
-                        </details>
-                      ) : (
-                        <div className="flex items-center justify-between">
-                          <a
-                            className={`min-w-0 flex-1 text--1 truncate ${resource._id.startsWith("temp.") ? "text-primary" : ""}`}
-                            onClick={() => {
-                              if (!resource._id.startsWith("temp."))
-                                setSelectedResource(resource);
-                            }}
-                          >
-                            {resource.name}
-                          </a>
-                          <button
-                            className="btn btn-phantom btn-xs px-0"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              deleteResourceMutation.mutate(resource._id);
-                            }}
-                            title="Delete file"
-                          >
-                            <XIcon size={16} />
-                          </button>
+              {/* RIGHT: File list and preview */}
+              <div className="card min-h-[60dvh] overflow-auto pb-[max(1rem,env(safe-area-inset-bottom))] lg:col-span-2 lg:h-full lg:min-h-0">
+                <div className="card-body flex min-h-full flex-col gap-4">
+                  {selectedResource ? (
+                    <>
+                      <StateConditionalMenu resource={selectedResource} />
+                      {selectedResource?.type === "file" && (
+                        <div className="min-h-[50dvh] flex-1 lg:min-h-0">
+                          <ResourcePreview file={selectedResource} />
                         </div>
                       )}
-                    </li>
-                  ))}
-                </ul>
+                    </>
+                  ) : (
+                    <span>Select a resource to show the preview</span>
+                  )}
+                </div>
               </div>
-            </div>
-
-            {/* RIGHT: File list and preview */}
-            <div className="card min-h-[60dvh] overflow-auto pb-[max(1rem,env(safe-area-inset-bottom))] lg:col-span-2 lg:h-full lg:min-h-0">
-              <div className="card-body flex min-h-full flex-col gap-4">
-                {selectedResource ? (
-                  <>
-                    <StateConditionalMenu resource={selectedResource} />
-                    {selectedResource?.type === "file" && (
-                      <div className="min-h-[50dvh] flex-1 lg:min-h-0">
-                        <ResourcePreview file={selectedResource} />
-                      </div>
-                    )}
-                  </>
-                ) : (
-                  <span>Select a resource to show the preview</span>
-                )}
-              </div>
-            </div>
-          </div>
+            </div>)}
         </div>
       </div>
     </div>
