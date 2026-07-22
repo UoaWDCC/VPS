@@ -25,6 +25,7 @@ export default function Dashboard() {
   const [scenes, setScenes] = useState([]);
   const [groupInfo, setGroupInfo] = useState({});
   const [heading, setHeading] = useState("");
+  const [activeTab, setActiveTab] = useState("groups");
 
   function goBack() {
     history.push("/dashboard");
@@ -81,34 +82,40 @@ export default function Dashboard() {
     return CreateGraphData(scenes, groupInfo ? groupInfo : []);
   }, [scenes, groupInfo]);
 
+  // Flattens every group's members into a single list for the Members tab
+  const allMembers = useMemo(
+    () => ({ users: scenarioGroupInfo.flatMap((group) => group.users) }),
+    [scenarioGroupInfo]
+  );
+
   const DashGroupInfo = ({ groupData, className }) => {
     const totalGroups = groupData.length;
-    const groupsNotStarted = groupData.filter(
-      (group) => group.path.length == 0
-    ).length;
     const groupsStarted = groupData.filter(
       (group) => group.path.length != 0
     ).length;
+    const groupsNotStarted = groupData.filter(
+      (group) => group.path.length == 0
+    ).length;
+
+    const stats = [
+      { label: "Total Groups", value: totalGroups },
+      { label: "Has Started", value: groupsStarted },
+      { label: "Not Started", value: groupsNotStarted },
+    ];
 
     return (
       <div
-        className={`${className} inline-grid lg:stats-vertical xl:stats-horizontal shadow-(--color-base-content-box-shadow) w-full`}
+        className={`${className} flex divide-x divide-base-content/15 rounded-box border border-base-content/15 bg-base-200 w-full`}
       >
-        <div className="stat ">
-          <div className="stat-title">Total Groups</div>
-          <div className="stat-value">{totalGroups}</div>
-          <div className="stat-desc">No. of groups assigned</div>
-        </div>
-        <div className="stat">
-          <div className="stat-title">Not Started</div>
-          <div className="stat-value">{groupsNotStarted}</div>
-          <div className="stat-desc">No. of groups not started</div>
-        </div>
-        <div className="stat">
-          <div className="stat-title">Started</div>
-          <div className="stat-value">{groupsStarted}</div>
-          <div className="stat-desc">No. of groups started</div>
-        </div>
+        {stats.map((stat) => (
+          <div
+            key={stat.label}
+            className="flex-1 flex items-center justify-between gap-4 px-6 py-5"
+          >
+            <span className="font-semibold">{stat.label}</span>
+            <span className="text-3xl font-bold">{stat.value}</span>
+          </div>
+        ))}
       </div>
     );
   };
@@ -122,7 +129,7 @@ export default function Dashboard() {
         </button>
       </div>
       <div className="h-full px-10 py-7 overflow-y-scroll ">
-        <h1 className="text-xl font-bold">
+        <h1 className="text-3xl font-mona font-bold">
           {heading ? heading : <span className="invisible">placeholder</span>}
         </h1>
         <div className="flex gap-10">
@@ -131,16 +138,38 @@ export default function Dashboard() {
             <Switch>
               <ProtectedRoute exact path={path}>
                 <DashGroupInfo
-                  className={"lg:stats-horizontal mb-10"}
+                  className={"mb-10"}
                   groupData={scenarioGroupInfo}
                 />
-                <h1 className="text-xl">Groups Table</h1>
-                {!isLoading && (
-                  <DashGroupTable
-                    groupInfo={scenarioGroupInfo}
-                    rowClick={viewGroup}
-                  />
-                )}
+                <div className="flex items-center justify-between mb-4">
+                  <h2 className="text-2xl font-bold">
+                    {activeTab === "groups" ? "Groups" : "Members"}
+                  </h2>
+                  <div className="join">
+                    <button
+                      className={`btn join-item ${activeTab === "groups" ? "btn-primary" : "btn-ghost"}`}
+                      onClick={() => setActiveTab("groups")}
+                    >
+                      Groups
+                    </button>
+                    <button
+                      className={`btn join-item ${activeTab === "members" ? "btn-primary" : "btn-ghost"}`}
+                      onClick={() => setActiveTab("members")}
+                    >
+                      Members
+                    </button>
+                  </div>
+                </div>
+                {!isLoading &&
+                  (activeTab === "groups" ? (
+                    <DashGroupTable
+                      key="groups"
+                      groupInfo={scenarioGroupInfo}
+                      rowClick={viewGroup}
+                    />
+                  ) : (
+                    <DashGroupTable key="members" groupInfo={allMembers} />
+                  ))}
               </ProtectedRoute>
               <ProtectedRoute path={`${path}/view-group/:groupId`}>
                 <ViewGroup groupInfo={groupInfo} />

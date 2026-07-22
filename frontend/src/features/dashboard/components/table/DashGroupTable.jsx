@@ -53,8 +53,8 @@ const DashGroupTable = ({ groupInfo, rowClick }) => {
 
   return (
     <div className="overflow-x-auto rounded-box border border-base-content/15 w-full">
-      <table className="table table-zebra ">
-        <thead>
+      <table className="table table-zebra table-lg">
+        <thead className="text-base font-semibold">
           {mode == "groups" ? (
             <tr>
               <CustomSortHeader
