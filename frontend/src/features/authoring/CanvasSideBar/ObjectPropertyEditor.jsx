@@ -33,13 +33,11 @@ export function ObjectPropertyEditor({ component }) {
   useEffect(() => {
     const width =
       Math.round(
-        (component.bounds.verts[1].x - component.bounds.verts[0].x) *
-          100
+        (component.bounds.verts[1].x - component.bounds.verts[0].x) * 100
       ) / 100;
     const height =
       Math.round(
-        (component.bounds.verts[1].y - component.bounds.verts[0].y) *
-          100
+        (component.bounds.verts[1].y - component.bounds.verts[0].y) * 100
       ) / 100;
     const x = Math.round(component.bounds.verts[0].x * 100) / 100;
     const y = Math.round(component.bounds.verts[0].y * 100) / 100;
@@ -62,7 +60,7 @@ export function ObjectPropertyEditor({ component }) {
     });
   }
 
-  // sets the value then flips it 
+  // sets the value then flips it
   function negativeFlip(type, value) {
     const absValue = Math.abs(value);
     const axis = type === "width" ? "x" : "y";
