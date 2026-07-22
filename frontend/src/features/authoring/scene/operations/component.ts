@@ -1,8 +1,11 @@
 import type { Bounds, Component } from "../../types";
-import { getComponent, getComponentProp, getScene } from "../scene";
+import { getComponent, getScene } from "../scene";
 import { mutate, subtract, translate } from "../../util";
 import { getObject, merge } from "../util";
 import { add, modify } from "./modifiers";
+
+type LayerDirection = "forward" | "backward";
+type LayerMode = "step" | "extreme";
 
 export const defaults = {
   textbox: {
@@ -168,99 +171,86 @@ export function modifyComponentBounds(
   modifyComponentProp(ids, "bounds", bounds);
 }
 
-export function bringForward(ids: string[]) {
+
+function shiftComponentLayers(
+  ids: string[],
+  direction: LayerDirection,
+  mode: LayerMode
+) {
   if (!ids.length) return;
 
   const components = Object.values(getScene().components) as Component[];
   const selectedIds = new Set(ids);
 
-  const sortedComponents = components.sort((a, b) => a.zIndex - b.zIndex);
-
+  // Sort components by zIndex (ascending) and capture the original zIndex scale
+  const sortedComponents = [...components].sort((a, b) => a.zIndex - b.zIndex);
   const zIndexScale = sortedComponents.map((c) => c.zIndex);
 
-  for (let i = sortedComponents.length - 1; i >= 0; i--) {
-    if (selectedIds.has(sortedComponents[i].id)) {
-      if (
-        i < sortedComponents.length - 1 &&
-        !selectedIds.has(sortedComponents[i + 1].id)
-      ) {
-        const temp = sortedComponents[i];
-        sortedComponents[i] = sortedComponents[i + 1];
-        sortedComponents[i + 1] = temp;
+  let newSortedComponents: Component[] = [];
+
+  if (mode === "extreme") {
+    // Bring to Front / Send to Back
+    const selected = sortedComponents.filter((c) => selectedIds.has(c.id));
+    const unselected = sortedComponents.filter((c) => !selectedIds.has(c.id));
+
+    newSortedComponents =
+      direction === "forward"
+        ? [...unselected, ...selected] // Front: unselected first, then selected on top
+        : [...selected, ...unselected]; // Back: selected on bottom, then unselected
+  } else {
+    // Bring Forward / Send Backward (Single step)
+    newSortedComponents = [...sortedComponents];
+
+    if (direction === "forward") {
+      // Loop backward to move items up without overwriting consecutive selections
+      for (let i = newSortedComponents.length - 1; i >= 0; i--) {
+        if (
+          selectedIds.has(newSortedComponents[i].id) &&
+          i < newSortedComponents.length - 1 &&
+          !selectedIds.has(newSortedComponents[i + 1].id)
+        ) {
+          const temp = newSortedComponents[i];
+          newSortedComponents[i] = newSortedComponents[i + 1];
+          newSortedComponents[i + 1] = temp;
+        }
+      }
+    } else {
+      // Loop forward to move items down
+      for (let i = 0; i < newSortedComponents.length; i++) {
+        if (
+          selectedIds.has(newSortedComponents[i].id) &&
+          i > 0 &&
+          !selectedIds.has(newSortedComponents[i - 1].id)
+        ) {
+          const temp = newSortedComponents[i];
+          newSortedComponents[i] = newSortedComponents[i - 1];
+          newSortedComponents[i - 1] = temp;
+        }
       }
     }
   }
 
-  sortedComponents.forEach((comp, index) => {
+  // Apply target zIndices back to modified components
+  newSortedComponents.forEach((comp, index) => {
     const targetZIndex = zIndexScale[index];
-
     if (comp.zIndex !== targetZIndex) {
       modifyComponentProp([comp.id], "zIndex", targetZIndex);
     }
   });
+}
+
+export function bringForward(ids: string[]) {
+  shiftComponentLayers(ids, "forward", "step");
 }
 
 export function sendBackward(ids: string[]) {
-  if (!ids.length) return;
-
-  const components = Object.values(getScene().components) as Component[];
-  const selectedIds = new Set(ids);
-
-  const sortedComponents = components.sort((a, b) => a.zIndex - b.zIndex);
-
-  const zIndexScale = sortedComponents.map((c) => c.zIndex);
-
-  for (let i = 0; i < sortedComponents.length; i++) {
-    if (selectedIds.has(sortedComponents[i].id)) {
-      if (i > 0 && !selectedIds.has(sortedComponents[i - 1].id)) {
-        const temp = sortedComponents[i];
-        sortedComponents[i] = sortedComponents[i - 1];
-        sortedComponents[i - 1] = temp;
-      }
-    }
-  }
-
-  sortedComponents.forEach((comp, index) => {
-    const targetZIndex = zIndexScale[index];
-
-    if (comp.zIndex !== targetZIndex) {
-      modifyComponentProp([comp.id], "zIndex", targetZIndex);
-    }
-  });
-}
-function moveComponentFrontAndBack(ids: string[], state: "front" | "back") {
-  if (!ids.length) return;
-
-  const components = Object.values(getScene().components) as Component[];
-  const selectedIds = new Set(ids);
-
-  const sortedComponents = components.sort((a, b) => a.zIndex - b.zIndex);
-  const zIndexScale = sortedComponents.map((c) => c.zIndex);
-  const selectedComponents = sortedComponents.filter((comp) =>
-    selectedIds.has(comp.id)
-  );
-  const unselectedComponents = sortedComponents.filter(
-    (comp) => !selectedIds.has(comp.id)
-  );
-
-  const newSortedComponents =
-    state == "front"
-      ? [...unselectedComponents, ...selectedComponents]
-      : [...selectedComponents, ...unselectedComponents];
-
-  newSortedComponents.forEach((comp, index) => {
-    const targetZIndex = zIndexScale[index];
-
-    if (comp.zIndex !== targetZIndex) {
-      modifyComponentProp([comp.id], "zIndex", targetZIndex);
-    }
-  });
+  shiftComponentLayers(ids, "backward", "step");
 }
 
 export function bringToFront(ids: string[]) {
-  moveComponentFrontAndBack(ids, "front");
+  shiftComponentLayers(ids, "forward", "extreme");
 }
 
 export function sendToBack(ids: string[]) {
-  moveComponentFrontAndBack(ids, "back");
+  shiftComponentLayers(ids, "backward", "extreme");
 }
