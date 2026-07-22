@@ -80,7 +80,7 @@ export function ObjectPropertyEditor({ component }) {
   }
 
   function inputValidation(type, v, set) {
-    if (v === "" || v === "-") {
+    if (v === "" || v === "-" || v.at(-1) === ".") {
       set(v);
       return null;
     }
