@@ -70,12 +70,15 @@ export function updateHistory(incomingChanges: ChangeRecord[]) {
 }
 
 export function handleHistoryChange(action: ActionHistory) {
-  const batch = action === 'undo' ? undoStack.pop() : redoStack.pop();
+  const isUndo = action === 'undo';
+  const sourceStack = isUndo ? undoStack : redoStack;
+  const targetStack = isUndo ? redoStack : undoStack;
+
+  const batch = sourceStack.pop();
   if (!batch || batch.length === 0) return;
 
   const sceneID = batch[0].sceneId;
   const ids = batch.map((obj) => obj.id);
-  const isDelete = batch[0].state === null;
 
   if (!switchToScene(sceneID)) return;
 
@@ -88,23 +91,11 @@ export function handleHistoryChange(action: ActionHistory) {
     };
   });
 
-  if (isDelete) {
-    useEditorStore.getState().setSelected([]);
-    ids.forEach((id) => {
-      delete getScene().components[id];
-      useVisualScene.getState().deleteComponent(id);
-    });
-  } else {
-    batch.forEach((obj) => {
-      restoreComponent(obj.id, obj.state);
-    });
-  }
+  batch.forEach((obj) => {
+    restoreComponent(obj.id, obj.state);
+  });
 
-  if (action === 'undo') {
-    redoStack.push(validChanges);
-  } else {
-    undoStack.push(validChanges);
-  }
+  targetStack.push(validChanges)
 }
 
 function switchToScene(targetSceneId: string): boolean {
@@ -117,7 +108,13 @@ function switchToScene(targetSceneId: string): boolean {
 }
 
 function restoreComponent(id: string, state: Component | null) {
-  if (state === null) return;
-  getScene().components[id] = structuredClone(state);
-  useVisualScene.getState().updateComponent(buildVisualComponent(state));
+  const { setSelected } = useEditorStore.getState();
+  if (state === null) {
+    setSelected([]);
+    delete getScene().components[id];
+    useVisualScene.getState().deleteComponent(id);
+  } else {
+    getScene().components[id] = structuredClone(state);
+    useVisualScene.getState().updateComponent(buildVisualComponent(state));
+  }
 }
