@@ -7,14 +7,6 @@ import {
   SquareCenterlineDashedVertical,
 } from "lucide-react";
 
-class componentData {
-  constructor(value, type, setter) {
-    this.type = type;
-    this.value = value;
-    this.setter = setter;
-  }
-}
-
 export function ObjectPropertyEditor({ component }) {
   // x and y vals used for setting and current
   const [inputX, setInputX] = useState(
@@ -41,11 +33,13 @@ export function ObjectPropertyEditor({ component }) {
   useEffect(() => {
     const width =
       Math.round(
-        (component.bounds.verts[1].x - component.bounds.verts[0].x) * 100
+        (component.bounds.verts[1].x - component.bounds.verts[0].x) *
+          100
       ) / 100;
     const height =
       Math.round(
-        (component.bounds.verts[1].y - component.bounds.verts[0].y) * 100
+        (component.bounds.verts[1].y - component.bounds.verts[0].y) *
+          100
       ) / 100;
     const x = Math.round(component.bounds.verts[0].x * 100) / 100;
     const y = Math.round(component.bounds.verts[0].y * 100) / 100;
@@ -70,69 +64,81 @@ export function ObjectPropertyEditor({ component }) {
 
   //saveProp was getting a bit long i decided to break it down
   // takes a neg val, sets it then flips (only for width/height)
-  // function negativeFlip(type, v, set) {
+  function negativeFlip(type, value) {
+    const verts = component.bounds.verts;
 
-  // }
-
-  //instead of checking val type in prop saver, i moved it here
-  function inputVerification(componentData) {
-    if (
-      (componentData.type == "width" || componentData.type == "height") &&
-      componentData.value == "0"
-    ) {
-      componentData.setter(1);
-      componentData.value = 1;
-    } else if (componentData.value === "" || componentData.value === "-") {
-      componentData.setter(componentData.value);
-      console.log(componentData.value === "");
-      return;
-    } else {
-      componentData.value = parseFloat(String(componentData.value).trim());
-      console.log(componentData.value);
-
-      if (isNaN(componentData.value)) return;
-
-      if (
-        (componentData.type == "width" || componentData.type == "height") &&
-        componentData.value < "0"
-      ) {
-        console.log("negative value", componentData.value);
-        // negativeFlip(type, v, set);
-        return;
-      }
-      componentData.setter(componentData.value);
+    if (type === "width") {
+      const x = verts[0].x + value;
+      modifyComponentProp(component.id, "bounds.verts", (prev) =>
+        modifyVerts(prev, [1, 0.5], { x, y: 0 })
+      );
+      flipComponent("x");
+    } else if (type === "height") {
+      const y = verts[0].y + value;
+      modifyComponentProp(component.id, "bounds.verts", (prev) =>
+        modifyVerts(prev, [0.5, 1], { x: 0, y })
+      );
+      flipComponent("y");
     }
   }
 
+  //instead of checking val type in prop saver, i moved it here
+  function inputVerification(type, v, set) {
+    let value;
+
+    if ((type == "width" || type == "height") && v == "0") {
+      set(1);
+      value = 1;
+    } else if (v === "" || v === "-") {
+      set(v);
+      console.log(v === "");
+      return;
+    } else {
+      value = parseFloat(String(v).trim());
+      console.log(value);
+
+      if (isNaN(value)) return;
+
+      set(value);
+      if ((type == "width" || type == "height") && v < "0") {
+        console.log("negative value", value)
+        negativeFlip(type, value, set);
+        return;
+      }
+    }
+
+    return value
+  }
+
   // uses the same function as the drag box feat w modifyComponentProp
-  function saveProp(componentData) {
-    console.log(componentData);
-    inputVerification(componentData);
+  function saveProp(v, type, set) {
+    let value = inputVerification(type, v, set);
+    if (value === undefined) return;
     const verts = component.bounds.verts;
 
-    if (componentData.type === "x") {
-      const diff = componentData.value - verts[0].x;
+    if (type === "x") {
+      const diff = value - verts[0].x;
       modifyComponentProp(component.id, "bounds.verts", (prev) =>
         translate(prev, { x: diff, y: 0 })
       );
-    } else if (componentData.type === "y") {
-      const diff = componentData.value - verts[0].y;
+    } else if (type === "y") {
+      const diff = value - verts[0].y;
       modifyComponentProp(component.id, "bounds.verts", (prev) =>
         translate(prev, { x: 0, y: diff })
       );
       // increase bottom y to expand height and same idea with x
-    } else if (componentData.type === "width") {
-      const x = verts[0].x + componentData.value;
+    } else if (type === "width") {
+      const x = verts[0].x + value;
       modifyComponentProp(component.id, "bounds.verts", (prev) =>
         modifyVerts(prev, [1, 0.5], { x, y: 0 })
       );
-    } else if (componentData.type === "height") {
-      const y = verts[0].y + componentData.value;
+    } else if (type === "height") {
+      const y = verts[0].y + value;
       modifyComponentProp(component.id, "bounds.verts", (prev) =>
         modifyVerts(prev, [0.5, 1], { x: 0, y })
       );
-    } else if (componentData.type === "rotation") {
-      modifyComponentProp(component.id, "bounds.rotation", componentData.value);
+    } else if (type === "rotation") {
+      modifyComponentProp(component.id, "bounds.rotation", value);
     }
   }
 
@@ -152,18 +158,14 @@ export function ObjectPropertyEditor({ component }) {
               className="input max-w-21"
               value={inputWidth}
               onChange={(e) => {
-                saveProp(
-                  new componentData(e.target.value, "width", setInputWidth)
-                );
+                saveProp(e.target.value, "width", setInputWidth);
               }}
             />
             <input
               className="input max-w-21"
               value={inputHeight}
               onChange={(e) => {
-                saveProp(
-                  new componentData(e.target.value, "height", setInputHeight)
-                );
+                saveProp(e.target.value, "height", setInputHeight);
               }}
             />
           </div>
@@ -178,14 +180,14 @@ export function ObjectPropertyEditor({ component }) {
               className="input max-w-21"
               value={inputX}
               onChange={(e) => {
-                saveProp(new componentData(e.target.value, "x", setInputX));
+                saveProp(e.target.value, "x", setInputX);
               }}
             />
             <input
               className="input max-w-21"
               value={inputY}
               onChange={(e) => {
-                saveProp(new componentData(e.target.value, "y", setInputY));
+                saveProp(e.target.value, "y", setInputY);
               }}
             />
           </div>
@@ -195,9 +197,7 @@ export function ObjectPropertyEditor({ component }) {
               className="input max-w-21"
               value={inputAngle}
               onChange={(e) =>
-                saveProp(
-                  new componentData(e.target.value, "rotation", setInputAngle)
-                )
+                saveProp(e.target.value, "rotation", setInputAngle)
               }
             />
             <div className="flex gap-3">
