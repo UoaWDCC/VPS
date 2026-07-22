@@ -62,58 +62,69 @@ export function ObjectPropertyEditor({ component }) {
     });
   }
 
-  //saveProp was getting a bit long i decided to break it down
-  // takes a neg val, sets it then flips (only for width/height)
+  // sets the value then flips it 
   function negativeFlip(type, value) {
-    const verts = component.bounds.verts;
+    const absValue = Math.abs(value);
+    const axis = type === "width" ? "x" : "y";
 
-    if (type === "width") {
-      const x = verts[0].x + value;
-      modifyComponentProp(component.id, "bounds.verts", (prev) =>
-        modifyVerts(prev, [1, 0.5], { x, y: 0 })
-      );
-      flipComponent("x");
-    } else if (type === "height") {
-      const y = verts[0].y + value;
-      modifyComponentProp(component.id, "bounds.verts", (prev) =>
-        modifyVerts(prev, [0.5, 1], { x: 0, y })
-      );
-      flipComponent("y");
-    }
+    modifyComponentProp(component.id, "bounds.verts", (prev) => {
+      let verts =
+        type === "width"
+          ? modifyVerts(prev, [1, 0.5], { x: prev[0].x + absValue, y: 0 })
+          : modifyVerts(prev, [0.5, 1], { x: 0, y: prev[0].y + absValue });
+
+      const center = getBoxCenter(verts);
+      return verts.map((v) => ({
+        x: axis === "x" ? 2 * center.x - v.x : v.x,
+        y: axis === "y" ? 2 * center.y - v.y : v.y,
+      }));
+    });
   }
 
-  //instead of checking val type in prop saver, i moved it here
-  function inputVerification(type, v, set) {
-    let value;
-
-    if ((type == "width" || type == "height") && v == "0") {
-      set(1);
-      value = 1;
-    } else if (v === "" || v === "-") {
+  function inputValidation(type, v, set) {
+    if (v === "" || v === "-") {
       set(v);
-      console.log(v === "");
-      return;
-    } else {
-      value = parseFloat(String(v).trim());
-      console.log(value);
-
-      if (isNaN(value)) return;
-
-      set(value);
-      if ((type == "width" || type == "height") && v < "0") {
-        console.log("negative value", value)
-        negativeFlip(type, value, set);
-        return;
-      }
+      return null;
     }
 
-    return value
+    const value = parseFloat(String(v).trim());
+    if (isNaN(value)) return null;
+
+    if (value === 0) {
+      set(1);
+      return 1;
+    }
+
+    set(value);
+
+    if (value < 0) {
+      negativeFlip(type, value);
+      return null;
+    }
+
+    return value;
+  }
+
+  function parseInput(v, set) {
+    if (v === "" || v === "-") {
+      set(v);
+      return null;
+    }
+
+    const value = parseFloat(String(v).trim());
+    if (isNaN(value)) return null;
+
+    set(value);
+    return value;
   }
 
   // uses the same function as the drag box feat w modifyComponentProp
   function saveProp(v, type, set) {
-    let value = inputVerification(type, v, set);
-    if (value === undefined) return;
+    const value =
+      type === "width" || type === "height"
+        ? inputValidation(type, v, set)
+        : parseInput(v, set);
+    if (value === null) return;
     const verts = component.bounds.verts;
 
     if (type === "x") {
