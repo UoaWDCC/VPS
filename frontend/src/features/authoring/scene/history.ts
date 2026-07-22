@@ -27,6 +27,8 @@ export interface ChangeRecord {
   prevState: Component | null;
 }
 
+type ActionHistory = 'redo' | 'undo'
+
 let undoStack: HistoryObject[][] = [];
 let redoStack: HistoryObject[][] = [];
 let scenes: SceneRef[] = [];
@@ -67,8 +69,8 @@ export function updateHistory(incomingChanges: ChangeRecord[]) {
   redoStack = [];
 }
 
-export function handleUndoRedo(isUndo: boolean) {
-  const batch = isUndo ? undoStack.pop() : redoStack.pop();
+export function handleHistoryChange(action: ActionHistory) {
+  const batch = action === 'undo' ? undoStack.pop() : redoStack.pop();
   if (!batch || batch.length === 0) return;
 
   const sceneID = batch[0].sceneId;
@@ -98,7 +100,7 @@ export function handleUndoRedo(isUndo: boolean) {
     });
   }
 
-  if (isUndo) {
+  if (action === 'undo') {
     redoStack.push(validChanges);
   } else {
     undoStack.push(validChanges);

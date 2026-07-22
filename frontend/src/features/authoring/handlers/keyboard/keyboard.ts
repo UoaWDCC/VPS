@@ -1,4 +1,4 @@
-import { handleUndoRedo } from "../../scene/history";
+import { handleHistoryChange} from "../../scene/history";
 import {
   bringForward,
   bringToFront,
@@ -31,8 +31,8 @@ function handleCtrlOperations(e: KeyboardEvent) {
   const { selected, setSelected } = useEditorStore.getState();
 
   // TODO ADD e.key === "a" for all components or create new function for cmd
-  if (e.key === "z") handleUndoRedo(true);
-  else if (e.key === "y") handleUndoRedo(false);
+  if (e.key === "z") handleHistoryChange("undo");
+  else if (e.key === "y") handleHistoryChange("redo");
   else if (e.key === "d" && selected) {
     e.preventDefault();
     const ids = duplicateComponent(selected);
