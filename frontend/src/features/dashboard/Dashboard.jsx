@@ -7,7 +7,7 @@ import CreateGraphData from "./utils/GraphHelper";
 import ScenarioGraph from "./components/ScenarioGraph";
 import ProtectedRoute from "../../firebase/ProtectedRoute";
 import ViewGroup from "./components/ViewGroup";
-import { ArrowLeftIcon } from "lucide-react";
+import { ArrowLeftIcon, SearchIcon } from "lucide-react";
 
 /**
  * Could maybe add some info about the scenario? Who created what time, last edited, thumbnail of the scenario and an overlay edit button * which directs you to the edit page?
@@ -26,6 +26,7 @@ export default function Dashboard() {
   const [groupInfo, setGroupInfo] = useState({});
   const [heading, setHeading] = useState("");
   const [activeTab, setActiveTab] = useState("groups");
+  const [memberSearch, setMemberSearch] = useState("");
 
   function goBack() {
     history.push("/dashboard");
@@ -87,6 +88,19 @@ export default function Dashboard() {
     () => ({ users: scenarioGroupInfo.flatMap((group) => group.users) }),
     [scenarioGroupInfo]
   );
+
+  // Filters the Members tab list by name or email
+  const filteredMembers = useMemo(() => {
+    const query = memberSearch.trim().toLowerCase();
+    if (!query) return allMembers;
+    return {
+      users: allMembers.users.filter(
+        (user) =>
+          user.name?.toLowerCase().includes(query) ||
+          user.email?.toLowerCase().includes(query)
+      ),
+    };
+  }, [allMembers, memberSearch]);
 
   const DashGroupInfo = ({ groupData, className }) => {
     const totalGroups = groupData.length;
@@ -160,6 +174,17 @@ export default function Dashboard() {
                     </button>
                   </div>
                 </div>
+                {activeTab === "members" && (
+                  <label className="input search w-full mb-4">
+                    <input
+                      type="search"
+                      placeholder="Search members"
+                      value={memberSearch}
+                      onChange={(e) => setMemberSearch(e.target.value)}
+                    />
+                    <SearchIcon size={18} />
+                  </label>
+                )}
                 {!isLoading &&
                   (activeTab === "groups" ? (
                     <DashGroupTable
@@ -168,7 +193,10 @@ export default function Dashboard() {
                       rowClick={viewGroup}
                     />
                   ) : (
-                    <DashGroupTable key="members" groupInfo={allMembers} />
+                    <DashGroupTable
+                      key="members"
+                      groupInfo={filteredMembers}
+                    />
                   ))}
               </ProtectedRoute>
               <ProtectedRoute path={`${path}/view-group/:groupId`}>
