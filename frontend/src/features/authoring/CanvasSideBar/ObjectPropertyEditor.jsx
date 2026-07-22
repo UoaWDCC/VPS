@@ -1,8 +1,11 @@
-import { translate } from "../../authoring/util";
+import { getBoxCenter, translate } from "../../authoring/util";
 import { useEffect, useState } from "react";
 import { modifyVerts } from "../handlers/pointer/resize";
 import { modifyComponentProp } from "../scene/operations/component";
-import { SquareCenterlineDashedHorizontal } from "lucide-react";
+import {
+  SquareCenterlineDashedHorizontal,
+  SquareCenterlineDashedVertical,
+} from "lucide-react";
 
 export function ObjectPropertyEditor({ component }) {
   // x and y vals used for setting and current
@@ -12,6 +15,7 @@ export function ObjectPropertyEditor({ component }) {
   const [inputY, setInputY] = useState(
     Math.round(component.bounds.verts[0].y * 100) / 100
   );
+  // Width and height vals
   const [inputWidth, setInputWidth] = useState(
     Math.round(
       Math.abs(component.bounds.verts[1].x - component.bounds.verts[0].x) * 100
@@ -21,6 +25,9 @@ export function ObjectPropertyEditor({ component }) {
     Math.round(
       Math.abs(component.bounds.verts[1].y - component.bounds.verts[0].y) * 100
     ) / 100
+  );
+  const [inputAngle, setInputAngle] = useState(
+    Math.round((component.bounds.rotation ?? 0) * 100) / 100
   );
 
   useEffect(() => {
@@ -36,20 +43,37 @@ export function ObjectPropertyEditor({ component }) {
       ) / 100;
     const x = Math.round(component.bounds.verts[0].x * 100) / 100;
     const y = Math.round(component.bounds.verts[0].y * 100) / 100;
+    const rotation = Math.round((component.bounds.rotation ?? 0) * 100) / 100;
 
     setInputWidth(width);
     setInputHeight(height);
     setInputX(x);
     setInputY(y);
-  }, [component.bounds.verts]);
+    setInputAngle(rotation);
+  }, [component.bounds.verts, component.bounds.rotation]);
+
+  function flipComponent(axis) {
+    modifyComponentProp(component.id, "bounds.verts", (prev) => {
+      const center = getBoxCenter(prev);
+      return prev.map((v) => ({
+        x: axis === "x" ? 2 * center.x - v.x : v.x,
+        y: axis === "y" ? 2 * center.y - v.y : v.y,
+      }));
+    });
+  }
 
   //this could prolly be improved
   // uses the same function as the drag box feat w modifyComponentProp
   function saveProp(v, type, set) {
     let value;
-    if (v === "" || v == "0") {
+
+    if ((type == "width" || type == "height") && v == "0") {
       set(1);
       value = 1;
+    } else if (v === "") {
+      set(v);
+      console.log(v === "");
+      return;
     } else {
       value = parseFloat(String(v).trim());
       if (isNaN(value)) return;
@@ -78,12 +102,14 @@ export function ObjectPropertyEditor({ component }) {
       modifyComponentProp(component.id, "bounds.verts", (prev) =>
         modifyVerts(prev, [0.5, 1], { x: 0, y })
       );
+    } else if (type === "rotation") {
+      modifyComponentProp(component.id, "bounds.rotation", value);
     }
   }
 
   return (
     <div className="collapse overflow-visible collapse-arrow bg-base-300 rounded-sm text-s">
-      <input type="checkbox"/>
+      <input type="checkbox" />
       <div className="collapse-title">Object Properties</div>
       <div className="collapse-content text--1 bg-base-200">
         <fieldset className="fieldset pt-2">
@@ -95,7 +121,6 @@ export function ObjectPropertyEditor({ component }) {
           <div className="flex gap-13">
             <input
               className="input max-w-21"
-              type="number"
               value={inputWidth}
               onChange={(e) => {
                 saveProp(e.target.value, "width", setInputWidth);
@@ -103,7 +128,6 @@ export function ObjectPropertyEditor({ component }) {
             />
             <input
               className="input max-w-21"
-              type="number"
               value={inputHeight}
               onChange={(e) => {
                 saveProp(e.target.value, "height", setInputHeight);
@@ -119,7 +143,6 @@ export function ObjectPropertyEditor({ component }) {
           <div className="flex gap-13">
             <input
               className="input max-w-21"
-              type="number"
               value={inputX}
               onChange={(e) => {
                 saveProp(e.target.value, "x", setInputX);
@@ -127,18 +150,37 @@ export function ObjectPropertyEditor({ component }) {
             />
             <input
               className="input max-w-21"
-              type="number"
               value={inputY}
               onChange={(e) => {
                 saveProp(e.target.value, "y", setInputY);
               }}
             />
           </div>
-          <div className="flex gap-22">
-            <button className="w-5 hover">
-              hell
-            </button>
-            <SquareCenterlineDashedHorizontal />
+          <label className="label">Angle</label>
+          <div className="flex gap-13">
+            <input
+              className="input max-w-21"
+              value={inputAngle}
+              onChange={(e) =>
+                saveProp(e.target.value, "rotation", setInputAngle)
+              }
+            />
+            <div className="flex gap-3">
+              <button
+                type="button"
+                className="hover:bg-stone-800 cursor-pointer rounded-sm"
+                onClick={() => flipComponent("x")}
+              >
+                <SquareCenterlineDashedHorizontal className="m-2" />
+              </button>
+              <button
+                type="button"
+                className="hover:bg-stone-800 cursor-pointer rounded-sm"
+                onClick={() => flipComponent("y")}
+              >
+                <SquareCenterlineDashedVertical className="m-2" />
+              </button>
+            </div>
           </div>
         </fieldset>
       </div>
