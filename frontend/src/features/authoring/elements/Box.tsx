@@ -16,7 +16,7 @@ function Box(component: BoxComponent) {
     bounds.rotation
   );
   const path = constructPath(verts);
-  return <path d={path} {...filterComponent(component)} />;
+  return <path className="box" d={path} {...filterComponent(component)} />;
 }
 
 export default Box;

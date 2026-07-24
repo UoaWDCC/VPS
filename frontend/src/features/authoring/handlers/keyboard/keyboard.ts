@@ -21,11 +21,8 @@ export function handleGlobal(e: KeyboardEvent) {
 }
 
 function handleComponentOperations(e: KeyboardEvent, selected: string) {
-  const { setSelected } = useEditorStore.getState();
-
   if (e.key === "Backspace") {
     remove(selected);
-    setSelected(null);
   } else if (e.key === "ArrowUp") {
     modifyComponentProp(selected, "bounds.verts", (prev: Vec2[]) =>
       translate(prev, { x: 0, y: -5 })

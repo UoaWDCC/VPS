@@ -1,4 +1,5 @@
 import type { RelativeBounds } from "../types";
+import type { VisualDocument } from "./types";
 import { expandToPath } from "../util";
 import { normalizeSelectionVisual } from "./cursor";
 import type {
@@ -85,8 +86,13 @@ function genSegs(
         const isStart = isStartBlock && isStartLine && k === start.spanI;
         const isEnd = i === end.blockI && j === end.lineI && k === end.spanI;
 
-        let { x, width } = genSeg(selection, line.spans[k], isStart, isEnd);
-        x += bounds.x + line.x;
+        const { x: segX, width } = genSeg(
+          selection,
+          line.spans[k],
+          isStart,
+          isEnd
+        );
+        const x = segX + bounds.x + line.x;
         const y = bounds.y + +line.y + block.y;
         const rel = { x, y, width, height: line.height };
 
@@ -111,7 +117,9 @@ function Highlight({ color }: HighlightProps) {
 
   const { selected } = useEditorStore.getState();
   const { components } = useVisualScene.getState();
-  const { blocks, bounds } = components[selected!].document;
+  const { blocks, bounds } = (
+    components[selected!] as unknown as { document: VisualDocument }
+  ).document;
 
   if (!isValidSelection(selection, blocks)) return null;
 

@@ -6,12 +6,13 @@ import ScenarioContext from "../../context/ScenarioContext";
 import SceneContext from "../../context/SceneContext";
 import SelectInput from "../../features/authoring/components/Select";
 import { stateTypes } from "./stateTypes";
+import { arrayToObject } from "../../features/authoring/scene/util";
 
 const EditStateVariable = ({ stateVariable, scenarioId }) => {
   const { user } = useContext(AuthenticationContext);
   const { setStateVariables } = useContext(ScenarioContext);
   const sceneContext = useContext(SceneContext);
-  const { scenes, saveScenePatch, reFetch } = sceneContext || {
+  const { scenes, modifyScene, reFetch } = sceneContext || {
     scenes: [],
     saveScenePatch: async () => {},
     reFetch: async () => {},
@@ -71,40 +72,35 @@ const EditStateVariable = ({ stateVariable, scenarioId }) => {
 
       // Clean up all state operations that reference this deleted state variable
       // Only do this if we have access to scenes (SceneContext is available)
-      if (scenes && scenes.length > 0 && saveScenePatch) {
+      if (scenes && scenes.length > 0 && modifyScene) {
         const updatedScenes = scenes.map((scene) => ({
           ...scene,
-          components: scene.components.map((component) => {
-            if (!component.stateOperations) return component;
+          components: arrayToObject(
+            scene.components.map((component) => {
+              if (!component.stateOperations) return component;
 
-            // Filter out state operations that reference the deleted state variable
-            const filteredOperations = component.stateOperations.filter(
-              (operation) => {
-                // Check both UUID and name references
-                const referencesDeletedVariable =
-                  (operation.stateVariableId &&
-                    operation.stateVariableId === stateVariable.id) ||
-                  (!operation.stateVariableId && operation.name === name);
+              // Filter out state operations that reference the deleted state variable
+              const filteredOperations = component.stateOperations.filter(
+                (operation) => {
+                  // Check both UUID and name references
+                  const referencesDeletedVariable =
+                    (operation.stateVariableId &&
+                      operation.stateVariableId === stateVariable.id) ||
+                    (!operation.stateVariableId && operation.name === name);
 
-                return !referencesDeletedVariable;
-              }
-            );
+                  return !referencesDeletedVariable;
+                }
+              );
 
-            return {
-              ...component,
-              stateOperations: filteredOperations,
-            };
-          }),
+              return {
+                ...component,
+                stateOperations: filteredOperations,
+              };
+            })
+          ),
         }));
 
-        const updatePromises = updatedScenes.map((scene) =>
-          saveScenePatch({
-            _id: scene._id,
-            fields: {},
-            components: scene.components,
-            deletedComponentIds: [],
-          })
-        );
+        const updatePromises = updatedScenes.map(modifyScene);
 
         await Promise.all(updatePromises);
         await reFetch();

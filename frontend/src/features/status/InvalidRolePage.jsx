@@ -1,7 +1,7 @@
 import { useContext, useState } from "react";
 import { useLocation } from "react-router-dom";
 import AuthenticationContext from "../../context/AuthenticationContext";
-import NotesDisplayCard from "../playScenario/modals/NotesModal/NotesModal";
+import NotesPanel from "../playScenario/components/NotesPanel";
 
 function InvalidRolePage({ group }) {
   const { user } = useContext(AuthenticationContext);
@@ -85,9 +85,7 @@ function InvalidRolePage({ group }) {
         <br />
         Allowed roles: {rolesWithAccess.join(", ")}
       </p>
-      {noteOpen && (
-        <NotesDisplayCard group={group} user={user} handleClose={handleClose} />
-      )}
+      <NotesPanel group={group} open={noteOpen} onClose={handleClose} />
     </div>
   );
 }

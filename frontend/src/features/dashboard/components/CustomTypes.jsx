@@ -2,7 +2,6 @@ import { memo } from "react";
 import Thumbnail from "../../authoring/components/Thumbnail";
 import { Handle } from "@xyflow/react";
 import SimpleFloatingEdge from "./SimpleFloatingEdge";
-import { Badge } from "@material-ui/core";
 
 const NodeBase = ({ data }) => (
   <div
@@ -74,13 +73,12 @@ const NodeBase = ({ data }) => (
 const ThumbnailNode = memo(({ data }) => (
   <>
     {data.visitCounter !== undefined ? (
-      <Badge
-        badgeContent={data.visitCounter}
-        color="primary"
-        overlap="rectangular"
-      >
+      <div className="indicator">
+        <span className="indicator-item badge badge-sm badge-accent">
+          {data.visitCounter}
+        </span>
         <NodeBase data={data} />
-      </Badge>
+      </div>
     ) : (
       <NodeBase data={data} />
     )}

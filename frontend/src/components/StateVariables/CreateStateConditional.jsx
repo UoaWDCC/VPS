@@ -13,7 +13,7 @@ import toast from "react-hot-toast";
  *
  * @component
  */
-const CreateStateConditional = ({ fileId, open, setOpen, updateFile }) => {
+const CreateStateConditional = ({ endpoint, open, setOpen, updateTarget }) => {
   const { user } = useContext(AuthenticationContext);
   const { stateVariables } = useContext(ScenarioContext);
 
@@ -23,17 +23,20 @@ const CreateStateConditional = ({ fileId, open, setOpen, updateFile }) => {
 
   if (!stateVariables?.length) {
     return (
-      <div className="modal-box">
-        <h3 className="font-bold text-m">Create State Operation</h3>
+      <ModalDialog
+        title="Create State Conditional"
+        open={open}
+        onClose={() => setOpen(false)}
+      >
         <div className="text-xs">
           No state variables found, create some in the state variable menu
         </div>
         <div className="modal-action">
-          <form method="dialog">
-            <button className="btn">Close</button>
-          </form>
+          <button className="btn" onClick={() => setOpen(false)}>
+            Close
+          </button>
         </div>
-      </div>
+      </ModalDialog>
     );
   }
 
@@ -44,15 +47,15 @@ const CreateStateConditional = ({ fileId, open, setOpen, updateFile }) => {
     const stateConditional = {
       stateVariableId: selectedState.id,
       comparator,
-      value,
+      value: selectedState.type === stateTypes.NUMBER ? Number(value) : value,
     };
 
     api
-      .post(user, `/api/files/state-conditionals/${fileId}`, {
+      .post(user, endpoint, {
         stateConditional,
       })
       .then((res) => {
-        updateFile(res.data);
+        updateTarget(res.data);
         setSelectedState(null);
         setComparator(null);
         setValue(null);
@@ -100,6 +103,7 @@ const CreateStateConditional = ({ fileId, open, setOpen, updateFile }) => {
                 <SelectInput
                   values={[true, false]}
                   value={value}
+                  display={(v) => String(v)}
                   onChange={setValue}
                 />
               ) : (
