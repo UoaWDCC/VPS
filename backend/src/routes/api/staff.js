@@ -1,8 +1,11 @@
 import { Router } from "express";
 import retrieveAuthorisedStaffList from "../../db/daos/staffDao.js";
+import auth from "../../middleware/firebaseAuth.js";
 
 const router = Router();
 const HTTP_OK = 200;
+
+router.use(auth);
 
 const AccessLevel = {
   STAFF: "staff",

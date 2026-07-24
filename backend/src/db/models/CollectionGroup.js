@@ -7,6 +7,20 @@ const CollectionGroupSchema = new Schema(
     scenarioId: { type: Types.ObjectId, required: true, index: true },
     name: { type: String, required: true, trim: true },
     order: { type: Number, default: 0 },
+    stateConditionals: {
+      type: [
+        {
+          stateVariableId: { type: String, required: true },
+          comparator: {
+            type: String,
+            enum: ["=", "!=", "<", ">"],
+            required: true,
+          },
+          value: { type: String, required: true },
+        },
+      ],
+      default: [],
+    },
     createdAt: { type: Date, default: Date.now },
   },
   { versionKey: false }

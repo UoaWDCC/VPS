@@ -1,6 +1,4 @@
-import "./AuthoringToolPage.css";
-
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
 import SceneContext from "context/SceneContext";
 import CanvasSideBar from "./CanvasSideBar/CanvasSideBar";
@@ -9,13 +7,26 @@ import SceneNavigator from "./SceneNavigator/SceneNavigator";
 import Canvas from "./canvas/Canvas";
 import Topbar from "./topbar/Topbar";
 import useVisualScene from "./stores/visual";
-import { getScenePatch, commitSavedScene } from "./scene/scene";
 import { copy, cut, paste } from "./handlers/keyboard/clipboard";
 import useEditorStore from "./stores/editor";
 import { useHistory } from "react-router-dom";
-import { replace } from "./scene/operations/modifiers";
-import { ArrowLeftIcon, FilesIcon, PlayIcon, UsersIcon } from "lucide-react";
+import { replace, replaceComponent } from "./scene/operations/modifiers";
+import {
+  ArrowLeftIcon,
+  FilesIcon,
+  PencilIcon,
+  PlayIcon,
+  UserPlusIcon,
+  UsersIcon,
+} from "lucide-react";
 import { handleGlobal } from "./handlers/keyboard/keyboard";
+import { clearHistory, historyEvents } from "./scene/history";
+import { debounce } from "../../util/debounce";
+import { getScene } from "./scene/scene";
+import ShareModal from "./components/ShareModal";
+import ScenarioContext from "../../context/ScenarioContext";
+import ModalDialog from "../../components/ModalDialogue";
+import DetailEditModal from "../scenarioInfo/components/DetailEditModal";
 
 const listeners = [
   ["copy", copy],
@@ -24,35 +35,80 @@ const listeners = [
   ["keydown", handleGlobal],
 ];
 
-const AUTOSAVE_INTERVAL = 30000; // 30 secs
+// const AUTOSAVE_INTERVAL = 30000; // 30 secs
 
 /**
  * This page allows the user to edit a scene.
  * @container
  */
 export default function AuthoringToolPage() {
-  const { scenes, saveScenePatch } = useContext(SceneContext);
+  const { scenes, modifyScene, switchScene } = useContext(SceneContext);
+  const { allScenarios, updateScenarioDetails } = useContext(ScenarioContext);
   const { scenarioId } = useParams();
 
   const sceneId = useVisualScene((scene) => scene.id);
+  const setSelected = useEditorStore((state) => state.setSelected);
 
   const history = useHistory();
 
   const [saving, setSaving] = useState(false);
+  const [shareModalOpen, setShareModalOpen] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
 
-  // autosave setup
+  const pendingSavesRef = useRef(0);
+
+  // NOTE: this is both the autosaver and the history actioner, which are distinct
+  // operations, but are both here due to the limitations of the scene context
   useEffect(() => {
-    if (!sceneId) return;
-    const autosave = setInterval(save, AUTOSAVE_INTERVAL);
-    return () => clearInterval(autosave);
-  }, [sceneId]);
+    const debounced = debounce(async () => {
+      try {
+        pendingSavesRef.current++;
+        await modifyScene(getScene());
+      } finally {
+        pendingSavesRef.current--;
+        if (pendingSavesRef.current === 0) setSaving(false);
+      }
+    }, 2500);
+
+    const listener = async ({ operation, record }) => {
+      if (operation === "undo" || operation === "redo") {
+        if (record.sceneId !== sceneId) switchScene(getScene(), record.sceneId);
+        const state = operation === "undo" ? record.before : record.after;
+        replaceComponent(record.id, state);
+        if (state !== null) setSelected(record.id);
+      }
+
+      setSaving(true);
+      debounced();
+    };
+
+    historyEvents.addEventListener("update", listener);
+    return () => historyEvents.removeEventListener("update", listener);
+  }, [sceneId, switchScene, setSelected, modifyScene]);
+
+  // if the active scene was deleted, switch to the first available scene
+  useEffect(() => {
+    if (!sceneId || !scenes) return;
+    if (!scenes.find((s) => s._id === sceneId)) {
+      const next = scenes[0];
+      if (next) {
+        useEditorStore.getState().clear();
+        replace(next);
+      }
+    }
+  }, [scenes]);
 
   useEffect(() => {
     const activeScene = localStorage.getItem(`${scenarioId}:activeScene`);
-    if (activeScene) replace(scenes.find((s) => s._id === activeScene));
-    else replace(scenes[0]);
+    const found = activeScene
+      ? scenes.find((s) => s._id === activeScene)
+      : null;
+    const target = found ?? scenes[0];
+    if (target) replace(target);
 
     useEditorStore.getState().clear();
+
+    clearHistory();
 
     listeners.forEach(([event, fn]) => document.addEventListener(event, fn));
 
@@ -77,30 +133,19 @@ export default function AuthoringToolPage() {
   }
 
   function goBack() {
-    history.push("/");
+    history.push("/create");
   }
 
   async function save() {
-    if (saving) return; // we dont want to interrupt in progress saves (usually uploading media)
     setSaving(true);
-
-    const patch = getScenePatch();
-
-    const hasChanges =
-      Object.keys(patch.fields).length > 0 ||
-      patch.components.length > 0 ||
-      patch.deletedComponentIds.length > 0;
-
-    if (!hasChanges) {
+    try {
+      await modifyScene(getScene());
+    } finally {
       setSaving(false);
-      return;
     }
-
-    await saveScenePatch(patch);
-    commitSavedScene();
-
-    setTimeout(() => setSaving(false), 5000);
   }
+
+  const isScenarioOwner = allScenarios?.owned.find((s) => s._id === scenarioId);
 
   return (
     <>
@@ -110,6 +155,15 @@ export default function AuthoringToolPage() {
             <ArrowLeftIcon size={20} />
             Back
           </button>
+          {isScenarioOwner && (
+            <button
+              onClick={() => setShowEditModal(true)}
+              className="btn btn-phantom text-m"
+            >
+              <PencilIcon size={20} />
+              Details
+            </button>
+          )}
           <button
             onClick={goToResources}
             className="btn btn-phantom text-m ml-auto"
@@ -121,6 +175,15 @@ export default function AuthoringToolPage() {
             <UsersIcon size={20} />
             Groups
           </button>
+          {isScenarioOwner && (
+            <button
+              onClick={() => setShareModalOpen(true)}
+              className="btn btn-phantom text-m"
+            >
+              <UserPlusIcon size={20} />
+              Share
+            </button>
+          )}
           <button onClick={playScenario} className="btn btn-phantom text-m">
             <PlayIcon size={20} />
             Play
@@ -135,6 +198,24 @@ export default function AuthoringToolPage() {
           </div>
         </div>
       </div>
+      {isScenarioOwner && (
+        <ShareModal open={shareModalOpen} setOpen={setShareModalOpen} />
+      )}
+      {isScenarioOwner && (
+        <ModalDialog
+          title="Edit Scenario Details"
+          open={showEditModal}
+          onClose={() => setShowEditModal(false)}
+        >
+          <DetailEditModal
+            scenario={isScenarioOwner}
+            onSave={(details) =>
+              updateScenarioDetails({ id: scenarioId, details })
+            }
+            onClose={() => setShowEditModal(false)}
+          />
+        </ModalDialog>
+      )}
     </>
   );
 }

@@ -9,6 +9,7 @@ Welcome to the documentation home for the Virtual Patient Simulator (VPS) projec
 
 - [Github Repository](https://github.com/UoaWDCC/VPS)
 - [Live Deployment](https://vps.wdcc.co.nz/)
+- [New User Guide](https://uoawdcc.github.io/VPS/)
 
 ## Wiki Structure
 

@@ -1,17 +1,23 @@
 import { useEffect, useState } from "react";
-import type { Component } from "../types";
 import { remove } from "../scene/operations/modifiers";
 import { modifyComponentProp } from "../scene/operations/component";
 
-function EditAudioComponent({ component }: { component: Component }) {
+interface AudioComponentData {
+  id: string;
+  loop: boolean;
+  name: string;
+  url: string;
+}
+
+function EditAudioComponent({ component }: { component: AudioComponentData }) {
   const [loop, setLoop] = useState<boolean>(component.loop);
   const [name, setName] = useState<string>(component.name);
 
-  const [audio, setAudio] = useState(new Audio(component.url));
+  const [audio] = useState(new Audio(component.url));
   const [playing, setPlaying] = useState(false);
 
   useEffect(() => {
-    if (playing) audio.play();
+    if (playing) void audio.play();
     else audio.pause();
     return () => audio.pause();
   }, [playing]);

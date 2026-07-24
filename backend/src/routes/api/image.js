@@ -5,8 +5,11 @@ import {
   retrieveImage,
   retrieveImageList,
 } from "../../db/daos/imageDao.js";
+import auth from "../../middleware/firebaseAuth.js";
 
 const router = Router();
+
+router.use(auth);
 
 const HTTP_OK = 200;
 const HTTP_BAD_REQUEST = 400;

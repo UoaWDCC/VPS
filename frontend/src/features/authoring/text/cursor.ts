@@ -1,6 +1,7 @@
 import useEditorStore from "../stores/editor";
 import useVisualScene from "../stores/visual";
 import type { RelativeBounds, Vec2 } from "../types";
+import type { VisualDocument } from "./types";
 import { rotate, subtract } from "../util";
 import type {
   ModelCursor,
@@ -113,8 +114,11 @@ export function toVisualSelection(
 export function syncModelSelection() {
   const editorState = useEditorStore.getState();
   if (!editorState.selected || !editorState.visualSelection.start) return;
-  const blocks =
-    useVisualScene.getState().components[editorState.selected].document.blocks;
+  const blocks = (
+    useVisualScene.getState().components[editorState.selected] as unknown as {
+      document: VisualDocument;
+    }
+  ).document.blocks;
   editorState.setSelection(
     toModelSelection(editorState.visualSelection, blocks)
   );
@@ -123,8 +127,11 @@ export function syncModelSelection() {
 export function syncVisualCursor() {
   const editorState = useEditorStore.getState();
   if (!editorState.selected || !editorState.selection.start) return;
-  const blocks =
-    useVisualScene.getState().components[editorState.selected].document.blocks;
+  const blocks = (
+    useVisualScene.getState().components[editorState.selected] as unknown as {
+      document: VisualDocument;
+    }
+  ).document.blocks;
   editorState.setVisualSelection(
     toVisualSelection(editorState.selection, blocks)
   );

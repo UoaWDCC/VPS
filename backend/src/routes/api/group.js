@@ -9,6 +9,8 @@ import {
 import { retrieveRoleList, updateRoleList } from "../../db/daos/scenarioDao.js";
 import Group from "../../db/models/group.js";
 
+import auth from "../../middleware/firebaseAuth.js";
+import scenarioAuth from "../../middleware/scenarioAuth.js";
 import validScenarioId from "../../middleware/validScenarioId.js";
 
 const router = Router();
@@ -16,6 +18,8 @@ const router = Router();
 const HTTP_OK = 200;
 const HTTP_BAD_REQUEST = 400;
 const HTTP_NOT_FOUND = 404;
+
+router.use(auth);
 
 // get the groups assigned to a scenario
 router.get("/scenario/:scenarioId", async (req, res) => {
@@ -49,11 +53,9 @@ router.get("/retrieve/:groupId", async (req, res) => {
   return res.status(HTTP_OK).json(group);
 });
 
-export default router;
-
 router.use("/:scenarioId", validScenarioId);
-// create a new group
-router.post("/:scenarioId", async (req, res) => {
+// create a new group — restricted to scenario owner
+router.post("/:scenarioId", scenarioAuth, async (req, res) => {
   const { groupList, roleList } = req.body;
   const { scenarioId } = req.params;
 
@@ -108,3 +110,5 @@ router.get("/:scenarioId/roleList", async (req, res) => {
 
   res.status(HTTP_OK).json(roleList);
 });
+
+export default router;

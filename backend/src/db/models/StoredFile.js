@@ -29,7 +29,7 @@ const StoredFileSchema = new Schema(
             enum: ["=", "!=", "<", ">"],
             required: true,
           },
-          value: { type: String, required: true },
+          value: { type: Schema.Types.Mixed, required: true },
         },
       ],
       default: [],
