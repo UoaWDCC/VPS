@@ -63,7 +63,10 @@ const shortcuts: Shortcut[] = [
   },
   {
     combos: ["mod+arrowup"],
-    when: () => Boolean(useEditorStore.getState().selected),
+    when: () => {
+      const { mode, selected } = useEditorStore.getState();
+      return !mode.includes("text") && Boolean(selected);
+    },
     run: () => {
       const { selected } = useEditorStore.getState();
       if (!selected) return;
@@ -72,7 +75,10 @@ const shortcuts: Shortcut[] = [
   },
   {
     combos: ["mod+shift+arrowup"],
-    when: () => Boolean(useEditorStore.getState().selected),
+    when: () => {
+      const { mode, selected } = useEditorStore.getState();
+      return !mode.includes("text") && Boolean(selected);
+    },
     run: () => {
       const { selected } = useEditorStore.getState();
       if (!selected) return;
@@ -81,7 +87,10 @@ const shortcuts: Shortcut[] = [
   },
   {
     combos: ["mod+arrowdown"],
-    when: () => Boolean(useEditorStore.getState().selected),
+    when: () => {
+      const { mode, selected } = useEditorStore.getState();
+      return !mode.includes("text") && Boolean(selected);
+    },
     run: () => {
       const { selected } = useEditorStore.getState();
       if (!selected) return;
@@ -90,7 +99,10 @@ const shortcuts: Shortcut[] = [
   },
   {
     combos: ["mod+shift+arrowdown"],
-    when: () => Boolean(useEditorStore.getState().selected),
+    when: () => {
+      const { mode, selected } = useEditorStore.getState();
+      return !mode.includes("text") && Boolean(selected);
+    },
     run: () => {
       const { selected } = useEditorStore.getState();
       if (!selected) return;
