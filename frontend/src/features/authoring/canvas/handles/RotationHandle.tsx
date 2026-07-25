@@ -5,24 +5,13 @@ import { getSelectedComponentBounds } from "../../handlers/pointer/pointer";
 const RotationHandle = () => {
   const mode = useEditorStore((s) => s.mode);
 
-  const componentBounds = getSelectedComponentBounds();
-  const componentVerts = componentBounds.verts;
-  const componentRotation = componentBounds.rotation;
+  const bounds = getSelectedComponentBounds();
+  const center = getBoxCenter(bounds.verts);
 
-  const componentCenter = getBoxCenter(componentBounds.verts);
+  const y = Math.min(bounds.verts[0].y, bounds.verts[1].y);
 
-  const y = Math.min(componentVerts[0].y, componentVerts[1].y);
-
-  const initial = rotate(
-    { x: componentCenter.x, y },
-    componentCenter,
-    componentRotation
-  );
-  const point = rotate(
-    { x: componentCenter.x, y: y - 40 },
-    componentCenter,
-    componentRotation
-  );
+  const initial = rotate({ x: center.x, y }, center, bounds.rotation);
+  const point = rotate({ x: center.x, y: y - 40 }, center, bounds.rotation);
 
   return (
     <g

@@ -1,3 +1,4 @@
+import { getComponent } from "../../scene/scene";
 import useEditorStore from "../../stores/editor";
 import type { Bounds, Vec2 } from "../../types";
 import {
@@ -120,11 +121,12 @@ function updateResize(
   anchorCenter: boolean,
   fixed: boolean
 ) {
-  const bounds = getSelectedComponentBounds();
+  const { selected } = useEditorStore.getState();
+  const type = selected.length === 1 ? getComponent(selected[0]).type : "box";
 
+  const bounds = getSelectedComponentBounds();
   const center = getBoxCenter(bounds.verts);
 
-  let type = "box";
   let verts = modifyVerts(bounds.verts, coords, position);
 
   if (!coords.includes(2)) {

@@ -47,12 +47,12 @@ function Topbar({ saving, save }: { saving: boolean; save: () => void }) {
         <div className="divider divider-horizontal" />
 
         <li>
-          <a onClick={() => handleHistoryChange('undo')}>
+          <a onClick={() => handleHistoryChange("undo")}>
             <Undo2Icon size={16} />
           </a>
         </li>
         <li>
-          <a onClick={() => handleHistoryChange('redo')}>
+          <a onClick={() => handleHistoryChange("redo")}>
             <Redo2Icon size={16} />
           </a>
         </li>

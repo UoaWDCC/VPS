@@ -13,19 +13,12 @@ interface ShapeProps {
   strokeWidth: number;
 }
 
-const defaultProps: ShapeProps = {
-  fill: "#000000",
-  stroke: "#000000",
-  strokeWidth: 1,
-};
-
 function extractProps(selected: string[]): ShapeProps {
-  if (!selected || selected.length === 0) return defaultProps;
   const component = getComponent(selected[0]);
   return {
-    fill: component?.fill ?? defaultProps.fill,
-    stroke: component?.stroke ?? defaultProps.stroke,
-    strokeWidth: component?.strokeWidth ?? defaultProps.strokeWidth,
+    fill: component.fill,
+    stroke: component.stroke,
+    strokeWidth: component.strokeWidth,
   };
 }
 
@@ -37,7 +30,7 @@ function ShapeSection() {
   const [props, setProps] = useState(extractProps(selected));
 
   useEffect(() => {
-    setProps(extractProps(selected));
+    setProps(extractProps(selected)!);
   }, [selected]);
 
   function modifyProps(prop: string, value: string | number) {

@@ -24,14 +24,7 @@ function resolve(type: Component["type"], bounds: Bounds) {
   return <Fc bounds={bounds} fill="none" stroke="green" strokeWidth={3} />;
 }
 
-function ResolveHandles({
-  type,
-  isMultiSelect,
-}: {
-  type: string;
-  isMultiSelect: boolean;
-}) {
-  if (isMultiSelect) return <DragHandles />;
+function ResolveHandles({ type }: { type: string }) {
   switch (type) {
     case "speech":
       return <SpeechHandles />;
@@ -44,16 +37,20 @@ function ResolveHandles({
 
 function Overlay() {
   const selected = useEditorStore((s) => s.selected);
+  const mutationBounds = useEditorStore((s) => s.mutationBounds);
   const mode = useEditorStore((s) => s.mode);
   const createType = useEditorStore((s) => s.createType);
-  const mutationBounds = useEditorStore((s) => s.mutationBounds);
   const components = useVisualScene((s) => s.components);
 
-  const primaryComponent =
-    selected.length === 0 ? null : components[selected[0]];
+  const hasSelection = selected.length > 0;
+  const type = hasSelection
+    ? selected.length > 1
+      ? "box"
+      : components[selected[0]].type
+    : null;
 
   const bounds = getSelectedComponentBounds();
-  const verts = bounds.verts;
+  const verts = bounds?.verts;
 
   return (
     <svg
@@ -61,7 +58,7 @@ function Overlay() {
       className="w-full h-full absolute pointer-events-none"
       viewBox={`-50 -50 ${1920 + 50 * 2} ${1080 + 50 * 2}`}
     >
-      {primaryComponent && (
+      {hasSelection && (
         <>
           <Rectangle
             bounds={bounds}
@@ -70,14 +67,10 @@ function Overlay() {
             stroke="blue"
             strokeWidth={3}
           />
-          <ResolveHandles
-            type={primaryComponent?.type}
-            isMultiSelect={selected.length > 1}
-          />
+          <ResolveHandles type={type} />
         </>
       )}
-      {mode.includes("mutation") &&
-        resolve(primaryComponent?.type ?? createType, mutationBounds as Bounds)}
+      {mode.includes("mutation") && resolve(type ?? createType, mutationBounds)}
     </svg>
   );
 }

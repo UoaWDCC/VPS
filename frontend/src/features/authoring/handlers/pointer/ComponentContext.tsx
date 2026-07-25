@@ -15,7 +15,7 @@ import {
 } from "../../scene/operations/component";
 import useEditorStore from "../../stores/editor";
 
-const ComponentMenu = (ids: string[]) => {
+const ComponentMenu = ({ ids }: { ids: string[] }) => {
   function removeAndDeselect(selectedIds: string[]) {
     remove(selectedIds);
     useEditorStore.getState().setSelected([]);

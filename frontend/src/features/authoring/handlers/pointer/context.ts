@@ -16,7 +16,7 @@ function handleComponentContext(e: React.MouseEvent, _: Vec2) {
 
   e.preventDefault();
   render({
-    menu: ComponentMenu(selected),
+    menu: ComponentMenu({ ids: selected }),
     position: { x: e.clientX, y: e.clientY },
   });
 }

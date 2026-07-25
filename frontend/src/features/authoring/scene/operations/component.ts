@@ -171,7 +171,6 @@ export function modifyComponentBounds(
   modifyComponentProp(ids, "bounds", bounds);
 }
 
-
 function shiftComponentLayers(
   ids: string[],
   direction: LayerDirection,

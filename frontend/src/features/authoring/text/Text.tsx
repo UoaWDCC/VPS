@@ -4,6 +4,7 @@ import Highlight from "./Highlight";
 import Rectangle from "../canvas/Rectangle";
 import { buildStyle } from "./build";
 import useEditorStore from "../stores/editor";
+import TextHighlight from "./TextHighlight.tsx";
 
 function buildGroups(doc: VisualDocument) {
   return doc.blocks.map((block, i) => (
@@ -57,6 +58,7 @@ function Text({ doc, editable }: { doc: VisualDocument; editable?: boolean }) {
 
   return (
     <g className="select-none">
+      <TextHighlight doc={doc} />
       {isSelected && <Highlight color="#4997ff80" bounds={bounds} />}
       <g className="select-none" transform={transformation}>
         {buildGroups(doc)}

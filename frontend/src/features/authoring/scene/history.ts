@@ -27,7 +27,7 @@ export interface ChangeRecord {
   prevState: Component | null;
 }
 
-type ActionHistory = 'redo' | 'undo'
+type ActionHistory = "redo" | "undo";
 
 let undoStack: HistoryObject[][] = [];
 let redoStack: HistoryObject[][] = [];
@@ -70,7 +70,7 @@ export function updateHistory(incomingChanges: ChangeRecord[]) {
 }
 
 export function handleHistoryChange(action: ActionHistory) {
-  const isUndo = action === 'undo';
+  const isUndo = action === "undo";
   const sourceStack = isUndo ? undoStack : redoStack;
   const targetStack = isUndo ? redoStack : undoStack;
 
@@ -95,7 +95,7 @@ export function handleHistoryChange(action: ActionHistory) {
     restoreComponent(obj.id, obj.state);
   });
 
-  targetStack.push(validChanges)
+  targetStack.push(validChanges);
 }
 
 function switchToScene(targetSceneId: string): boolean {
