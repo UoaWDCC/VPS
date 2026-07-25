@@ -5,6 +5,7 @@ import Ellipse from "../authoring/elements/Ellipse";
 import Box from "../authoring/elements/Box";
 import Image from "../authoring/elements/Image";
 import Line from "../authoring/elements/Line";
+import { resolveSceneBindings } from "../../components/StateVariables/componentBindings";
 
 const componentMap = {
   textbox: TextBox,
@@ -174,7 +175,8 @@ export default function PlayScenarioCanvas({
   buttonPressed,
   stateVariables,
 }) {
-  const sceneToRender = injectStateVariables(scene, stateVariables);
+  const boundScene = resolveSceneBindings(scene, stateVariables);
+  const sceneToRender = injectStateVariables(boundScene, stateVariables);
 
   const components = Object.values(buildVisualScene(sceneToRender).components)
     .sort((a, b) => a.zIndex - b.zIndex)
