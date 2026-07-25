@@ -126,3 +126,63 @@ test("resolves every component in a scene", () => {
   assert.equal(resolved.components.second, scene.components.second);
   assert.equal(scene.components.first.opacity, undefined);
 });
+
+test("applies safe colour values and rejects unsafe or invalid colours", () => {
+  const component = box({
+    stateBindings: [
+      { target: "fill", stateVariableId: "fill" },
+      { target: "stroke", stateVariableId: "stroke" },
+    ],
+  });
+
+  const safe = resolveComponentBindings(component, [
+    { id: "fill", type: "string", value: " #12ab34cc " },
+    { id: "stroke", type: "string", value: "rgb(10, 20, 30)" },
+  ]);
+  const unsafe = resolveComponentBindings(component, [
+    { id: "fill", type: "string", value: "url(javascript:alert(1))" },
+    { id: "stroke", type: "string", value: "not a colour" },
+  ]);
+
+  assert.equal(safe.fill, "#12ab34cc");
+  assert.equal(safe.stroke, "rgb(10, 20, 30)");
+  assert.equal(unsafe.fill, component.fill);
+  assert.equal(unsafe.stroke, component.stroke);
+});
+
+test("only applies approved image source schemes", () => {
+  const component = {
+    ...box({ type: "image", href: "https://example.com/original.png" }),
+    stateBindings: [{ target: "href", stateVariableId: "image" }],
+  };
+
+  const httpsImage = resolveComponentBindings(component, [
+    {
+      id: "image",
+      type: "string",
+      value: " https://example.com/replacement.png ",
+    },
+  ]);
+  const dataImage = resolveComponentBindings(component, [
+    {
+      id: "image",
+      type: "string",
+      value: "data:image/png;base64,iVBORw0KGgo=",
+    },
+  ]);
+  const unsafeImage = resolveComponentBindings(component, [
+    { id: "image", type: "string", value: "javascript:alert(1)" },
+  ]);
+  const unsafeSvg = resolveComponentBindings(component, [
+    {
+      id: "image",
+      type: "string",
+      value: "data:image/svg+xml,<svg onload=alert(1)>",
+    },
+  ]);
+
+  assert.equal(httpsImage.href, "https://example.com/replacement.png");
+  assert.equal(dataImage.href, "data:image/png;base64,iVBORw0KGgo=");
+  assert.equal(unsafeImage.href, component.href);
+  assert.equal(unsafeSvg.href, component.href);
+});

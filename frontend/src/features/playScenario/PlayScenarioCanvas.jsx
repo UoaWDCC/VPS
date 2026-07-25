@@ -6,6 +6,7 @@ import Box from "../authoring/elements/Box";
 import Image from "../authoring/elements/Image";
 import Line from "../authoring/elements/Line";
 import { resolveSceneBindings } from "../../components/StateVariables/componentBindings";
+import { useMemo } from "react";
 
 const componentMap = {
   textbox: TextBox,
@@ -175,8 +176,10 @@ export default function PlayScenarioCanvas({
   buttonPressed,
   stateVariables,
 }) {
-  const boundScene = resolveSceneBindings(scene, stateVariables);
-  const sceneToRender = injectStateVariables(boundScene, stateVariables);
+  const sceneToRender = useMemo(() => {
+    const boundScene = resolveSceneBindings(scene, stateVariables);
+    return injectStateVariables(boundScene, stateVariables);
+  }, [scene, stateVariables]);
 
   const components = Object.values(buildVisualScene(sceneToRender).components)
     .sort((a, b) => a.zIndex - b.zIndex)
