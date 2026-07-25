@@ -54,6 +54,31 @@ You can place this text in the top left of all your scenes so the player can alw
 
 A more complex example would be tracking user input for prescribing medicine. You would have buttons with increment and decrement actions on a tracked value for the dosage of each medication, and a text box labelled $$medicine-x-dosage$$ above each pair of buttons. This way, you can create a numerical input within the scenario.
 
+## Binding Tracked Values to Scene Elements
+
+Tracked values can also control the properties of scene elements while a
+scenario is being played. For example, binding a box's **X position** to a
+number tracked value named `playerX` makes the box move whenever an action
+changes `playerX`.
+
+To create a binding:
+
+1. Select the scene element on the canvas.
+2. Open **State Bindings** in the right sidebar and press the plus button.
+3. Select the component property to control.
+4. Select a tracked value of the required type and press **Create**.
+
+Bindings support position, size, rotation, layer order, opacity, clickability,
+fills, strokes, textbox padding, and image properties where applicable. The
+tracked value type must match the property type shown in the binding dialog.
+Bindings are applied during play mode; the element's saved authoring value is
+used as a fallback if its tracked value is missing or has an incompatible type.
+
+You can combine bindings with actions to build interactive elements. A
+`playerX` number could begin at `100`; one button could add `-20` to it and
+another could add `20`. Binding a box's **X position** to `playerX` then creates
+a simple left/right-controlled sprite.
+
 ## Next Steps
 
 Tracked values can also control which [Resources](/resources/) are visible to the player at any given point in the scenario.
