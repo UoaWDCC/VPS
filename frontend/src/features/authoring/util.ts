@@ -158,6 +158,7 @@ export function filterComponent(component: Record<string, unknown>) {
     fill: component.fill,
     preserveAspectRatio: component.preserveAspectRatio,
     href: component.href,
+    opacity: component.opacity,
   };
   return filtered;
 }
