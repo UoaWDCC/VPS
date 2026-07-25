@@ -59,6 +59,47 @@ function setProp(prop) {
   };
 }
 
+function setValidatedProp(prop, isValid) {
+  return (component, value) => {
+    if (isValid(value)) component[prop] = value.trim();
+  };
+}
+
+function isSafeColor(value) {
+  if (typeof value !== "string") return false;
+
+  const color = value.trim();
+  if (/^#(?:[\da-f]{3}|[\da-f]{4}|[\da-f]{6}|[\da-f]{8})$/i.test(color)) {
+    return true;
+  }
+
+  if (/^(?:transparent|currentcolor)$/i.test(color)) return true;
+
+  return /^(?:rgb|rgba|hsl|hsla)\(\s*-?(?:\d*\.)?\d+%?(?:\s*[,/ ]\s*-?(?:\d*\.)?\d+%?){2,4}\s*\)$/i.test(
+    color
+  );
+}
+
+function isSafeImageSource(value) {
+  if (typeof value !== "string") return false;
+
+  const source = value.trim();
+  if (
+    /^data:image\/(?:avif|bmp|gif|jpeg|png|webp);base64,[a-z\d+/=\s]+$/i.test(
+      source
+    )
+  ) {
+    return true;
+  }
+
+  try {
+    const url = new URL(source);
+    return url.protocol === "http:" || url.protocol === "https:";
+  } catch {
+    return false;
+  }
+}
+
 export const componentBindingTargets = [
   {
     key: "x",
@@ -125,14 +166,14 @@ export const componentBindingTargets = [
     label: "Fill colour",
     stateType: "string",
     supports: supports(shapeComponentTypes),
-    apply: setProp("fill"),
+    apply: setValidatedProp("fill", isSafeColor),
   },
   {
     key: "stroke",
     label: "Stroke colour",
     stateType: "string",
     supports: supports(strokedComponentTypes),
-    apply: setProp("stroke"),
+    apply: setValidatedProp("stroke", isSafeColor),
   },
   {
     key: "strokeWidth",
@@ -157,7 +198,7 @@ export const componentBindingTargets = [
     label: "Image source",
     stateType: "string",
     supports: supports(["image"]),
-    apply: setProp("href"),
+    apply: setValidatedProp("href", isSafeImageSource),
   },
   {
     key: "preserveAspectRatio",
