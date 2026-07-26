@@ -111,7 +111,7 @@ function getAspect(verts: Vec2[]) {
   return width / height;
 }
 
-function inverse(coords: number[]) {
+export function inverse(coords: number[]) {
   return [1 - coords[0], 1 - coords[1]];
 }
 
@@ -164,4 +164,11 @@ function modifyVerts(verts: Vec2[], coords: number[], v: Vec2) {
   if (coords[1] !== BOX_CENTER_VALUE) newVerts[coords[1]].y = v.y;
   if (coords[0] !== BOX_CENTER_VALUE) newVerts[coords[0]].x = v.x;
   return newVerts;
+}
+
+export function getCoordsVec(verts: Vec2[], coords: number[]) {
+  const center = getBoxCenter(verts);
+  const x = coords[0] !== BOX_CENTER_VALUE ? verts[coords[0]].x : center.x;
+  const y = coords[1] !== BOX_CENTER_VALUE ? verts[coords[1]].y : center.y;
+  return { x, y };
 }

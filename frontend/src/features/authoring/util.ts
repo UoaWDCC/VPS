@@ -1,4 +1,4 @@
-import type { Component, RelativeBounds, Vec2 } from "./types";
+import type { RelativeBounds, Vec2 } from "./types";
 
 type Degree = number;
 type Radian = number;
@@ -23,15 +23,26 @@ export function subtract(v1: Vec2, v2: Vec2) {
   return { x: v1.x - v2.x, y: v1.y - v2.y };
 }
 
-export function scale(v: Vec2, scale: number) {
-  return { x: v.x * scale, y: v.y * scale };
+export function scale<T extends Vec2 | Vec2[]>(
+  v: T,
+  scale: number | Vec2,
+  origin: Vec2 = { x: 0, y: 0 }
+) {
+  const scaleVec = typeof scale === "object" ? scale : { x: scale, y: scale };
+  if (Array.isArray(v)) {
+    return v.map((vec) =>
+      add(multiply(subtract(vec, origin), scaleVec), origin)
+    ) as T;
+  } else {
+    return add(multiply(subtract(v, origin), scaleVec), origin) as T;
+  }
 }
 
 export function multiply(v1: Vec2, v2: Vec2) {
   return { x: v1.x * v2.x, y: v1.y * v2.y };
 }
 
-export function divide(v1: Vec2, v2: Vec2) {
+export function divide(v1: Vec2, v2: Vec2): Vec2 {
   return { x: v1.x / v2.x, y: v1.y / v2.y };
 }
 

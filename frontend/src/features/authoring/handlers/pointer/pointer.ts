@@ -6,17 +6,23 @@ import {
   parseHit,
   syncModelSelection,
 } from "../../text/cursor";
-import type { Vec2 } from "../../types";
+import type { Component, Vec2 } from "../../types";
 import {
+  divide,
   expandBoxVerts,
   getBoxCenter,
-  rotate,
   rotateMany,
+  scale,
   subtract,
   translate,
 } from "../../util";
 import { handleCreateDrag, handleCreateEnd, handleCreateStart } from "./create";
-import { handleResizeDrag, handleResizeStart } from "./resize";
+import {
+  getCoordsVec,
+  handleResizeDrag,
+  handleResizeStart,
+  inverse,
+} from "./resize";
 
 export function handleMouseDownGlobal(e: React.MouseEvent, position: Vec2) {
   const target = e.target as HTMLElement;
@@ -124,19 +130,31 @@ function handleMutationEnd() {
   if (selected.length == 1) {
     modifyComponentBounds(selected, mutationBounds);
   } else {
-    const verts = mutationBounds.verts;
-    const [minX, minY] = getSelectedMinMaxXY();
+    const { verts: prevVerts } = getSelectedComponentBounds();
+    const { verts } = mutationBounds;
 
-    const origin = { x: minX, y: minY };
-    const delta = { x: verts[0].x - minX, y: verts[0].y - minY };
-
-    const scaleVec = getResizeScaleVec(verts);
-    modifyComponentBounds(selected, (prev) => ({
-      ...prev,
-      verts: mode.includes("resize")
-        ? getNewResizePosition(prev.verts, verts, origin, scaleVec)
-        : translate(prev.verts, delta),
-    }));
+    if (mode.includes("resize")) {
+      const coords = detectChangedAxes(prevVerts, verts);
+      const origin = getCoordsVec(prevVerts, inverse(coords));
+      const scaleVec = divide(
+        subtract(verts[0], verts[1]),
+        subtract(prevVerts[0], prevVerts[1])
+      );
+      modifyComponentBounds(selected, ({ verts, rotation }) => {
+        const rotated = rotateMany(verts, getBoxCenter(verts), rotation);
+        const scaled = scale(rotated, scaleVec, origin);
+        return {
+          rotation,
+          verts: rotateMany(scaled, getBoxCenter(scaled), -rotation),
+        };
+      });
+    } else {
+      const delta = subtract(verts[0], prevVerts[0]);
+      modifyComponentBounds(selected, (prev) => ({
+        ...prev,
+        verts: translate(prev.verts, delta),
+      }));
+    }
   }
 
   setMode(["normal"]);
@@ -144,51 +162,25 @@ function handleMutationEnd() {
 
 // Component Helper Functions
 
-function getResizeScaleVec(newVerts: Vec2[]) {
-  const [minX, minY, maxX, maxY] = getSelectedMinMaxXY();
-
-  const oldGroupWidth = maxX - minX;
-  const oldGroupHeight = maxY - minY;
-
-  const newGroupWidth = newVerts[1].x - newVerts[0].x;
-  const newGroupHeight = newVerts[1].y - newVerts[0].y;
-
-  const scaleX = oldGroupWidth === 0 ? 1 : newGroupWidth / oldGroupWidth;
-  const scaleY = oldGroupHeight === 0 ? 1 : newGroupHeight / oldGroupHeight;
-
-  return { x: scaleX, y: scaleY };
+function resolveAxis(changed0: boolean, changed1: boolean) {
+  if (changed0 && changed1) return 0.5;
+  if (changed0) return 0;
+  if (changed1) return 1;
+  return 0.5;
 }
 
-function getNewResizePosition(
-  verts: Vec2[],
-  newVerts: Vec2[],
-  origin: Vec2,
-  scaleVec: Vec2
-) {
-  const result: Vec2[] = [];
-  for (let i = 0; i < 2; i++) {
-    const vert = verts[i];
-    result.push({
-      x: newVerts[0].x + (vert.x - origin.x) * scaleVec.x,
-      y: newVerts[0].y + (vert.y - origin.y) * scaleVec.y,
-    });
-  }
-  if (verts[2]) result.push(verts[2]);
-  return result;
+function detectChangedAxes(a: Vec2[], b: Vec2[]) {
+  const delta0 = { x: a[0].x !== b[0].x, y: a[0].y !== b[0].y };
+  const delta1 = { x: a[1].x !== b[1].x, y: a[1].y !== b[1].y };
+  return [resolveAxis(delta0.x, delta1.x), resolveAxis(delta0.y, delta1.y)];
 }
 
-function getSelectedMinMaxXY() {
-  const { selected } = useEditorStore.getState();
-  let minX = Infinity;
-  let minY = Infinity;
-  let maxX = -Infinity;
-  let maxY = -Infinity;
+function computeBounds(components: Component[]) {
+  const min = { x: Infinity, y: Infinity };
+  const max = { x: -Infinity, y: -Infinity };
 
-  const components = useVisualScene.getState().components;
-
-  selected.forEach((id: string) => {
-    const { bounds } = components[id];
-    const { verts, rotation } = bounds;
+  components.forEach((component) => {
+    const { verts, rotation } = component.bounds;
 
     const rotated = rotateMany(
       expandBoxVerts(verts),
@@ -197,33 +189,26 @@ function getSelectedMinMaxXY() {
     );
 
     rotated.forEach((pos: Vec2) => {
-      minX = Math.min(minX, pos.x);
-      minY = Math.min(minY, pos.y);
-      maxX = Math.max(maxX, pos.x);
-      maxY = Math.max(maxY, pos.y);
+      min.x = Math.min(min.x, pos.x);
+      min.y = Math.min(min.y, pos.y);
+      max.x = Math.max(max.x, pos.x);
+      max.y = Math.max(max.y, pos.y);
     });
   });
 
-  return [minX, minY, maxX, maxY];
+  return [min, max];
 }
 
 export function getSelectedComponentBounds() {
   const { selected } = useEditorStore.getState();
   if (!selected?.length) return null;
 
-  if (selected.length === 1) {
-    const scene = useVisualScene.getState();
-    return scene.components[selected[0]].bounds;
-  }
+  const scene = useVisualScene.getState();
 
-  const [minX, minY, maxX, maxY] = getSelectedMinMaxXY();
-  const verts = [
-    { x: minX, y: minY },
-    { x: maxX, y: maxY },
-  ];
+  if (selected.length === 1) return scene.components[selected[0]].bounds;
 
-  const bounds = { verts, rotation: 0 };
-  return bounds;
+  const components = selected.map((id) => scene.components[id]);
+  return { verts: computeBounds(components), rotation: 0 };
 }
 
 // document handlers
