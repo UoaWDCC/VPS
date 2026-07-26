@@ -28,10 +28,10 @@ const attachClickAwayListener = () => {
     const menu = document.getElementById("context-menu-wrapper");
     if (menu?.contains(event.target)) return;
     unrender();
-    document.removeEventListener("mouseup", clickAwayListener);
+    document.removeEventListener("mousedown", clickAwayListener);
   };
 
-  document.addEventListener("mouseup", clickAwayListener, { passive: true });
+  document.addEventListener("mousedown", clickAwayListener, { passive: true });
 };
 
 export const ContextMenuPortal = () => {
