@@ -3,11 +3,11 @@ import TablePaginationActions from "./TablePaginationAction";
 import getComparator from "../../utils/TableHelper";
 import CustomSortHeader from "./CustomSortHeader";
 import CustomPagination from "./CustomPagination";
-import { EyeIcon } from "lucide-react";
+import { Ban, EyeIcon } from "lucide-react";
 // Need to update this to be able to take either multiple groups or individual group (to display members per row)
 // Acutally need to update this component to make it reuseable and take in params to dynamically display thead, tdata stuff with num col etc
 
-const DashGroupTable = ({ groupInfo, rowClick }) => {
+const DashGroupTable = ({ groupInfo, rowClick, onRevoke }) => {
   // Check if group info is in array (Scenario Dashboard) or object (Vewiing Group)
   // Maybe just make mode default to groups?
   let mode;
@@ -104,6 +104,7 @@ const DashGroupTable = ({ groupInfo, rowClick }) => {
               >
                 Role
               </CustomSortHeader>
+              {onRevoke && <th>Revoke</th>}
             </tr>
           )}
         </thead>
@@ -135,12 +136,23 @@ const DashGroupTable = ({ groupInfo, rowClick }) => {
                   <td>{user.name}</td>
                   <td>{user.email}</td>
                   <td>{user.role}</td>
+                  {onRevoke && (
+                    <td>
+                      <button
+                        onClick={() => onRevoke(user)}
+                        aria-label={`Revoke ${user.name}`}
+                        className="hover:text-error"
+                      >
+                        <Ban size={20} />
+                      </button>
+                    </td>
+                  )}
                 </tr>
               ))}
         </tbody>
         <tfoot>
           <CustomPagination
-            colSpan={mode == "groups" ? 5 : 3}
+            colSpan={mode == "groups" ? 5 : onRevoke ? 4 : 3}
             value={rowsPerPage}
             onChange={handleChangeRowsPerPage}
             count={group.length}

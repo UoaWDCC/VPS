@@ -1,12 +1,14 @@
 import { useGet } from "hooks/crudHooks";
 import { useParams, useHistory, useRouteMatch, Switch } from "react-router-dom";
-import { useEffect, useState, useMemo } from "react";
+import { useContext, useEffect, useState, useMemo } from "react";
+import axios from "axios";
 import DashGroupTable from "./components/table/DashGroupTable";
 import { ReactFlowProvider } from "@xyflow/react";
 import CreateGraphData from "./utils/GraphHelper";
 import ScenarioGraph from "./components/ScenarioGraph";
 import ProtectedRoute from "../../firebase/ProtectedRoute";
 import ViewGroup from "./components/ViewGroup";
+import AuthenticationContext from "../../context/AuthenticationContext";
 import { ArrowLeftIcon, SearchIcon } from "lucide-react";
 
 /**
@@ -27,6 +29,8 @@ export default function Dashboard() {
   const [heading, setHeading] = useState("");
   const [activeTab, setActiveTab] = useState("groups");
   const [memberSearch, setMemberSearch] = useState("");
+  const { user, getUserIdToken } = useContext(AuthenticationContext);
+  const isOwner = Boolean(user && scenario.uid && user.uid === scenario.uid);
 
   function goBack() {
     history.push("/dashboard");
@@ -41,7 +45,7 @@ export default function Dashboard() {
 
   useGet(`api/dashboard/scenarios/${scenarioId}/scenes`, setScenes);
 
-  const { isLoading } = useGet(
+  const { isLoading, reFetch: reFetchGroups } = useGet(
     `/api/dashboard/scenarios/${scenarioId}/groups`,
     setScenarioGroupInfo
   );
@@ -60,6 +64,21 @@ export default function Dashboard() {
 
   const viewGroup = async (groupId) => {
     history.push(`${url}/view-group/${groupId}`);
+  };
+
+  const handleRevoke = async (member) => {
+    if (!window.confirm(`Remove ${member.name} from their group?`)) return;
+    try {
+      const token = await getUserIdToken();
+      await axios.patch(
+        `/api/dashboard/scenarios/${scenarioId}/groups/${member.groupId}/revoke`,
+        { uid: user.uid, email: member.email },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      reFetchGroups();
+    } catch (err) {
+      console.error("Failed to revoke member:", err);
+    }
   };
 
   // Resets the current groupInfo when the mode is not the view group mode
@@ -85,7 +104,11 @@ export default function Dashboard() {
 
   // Flattens every group's members into a single list for the Members tab
   const allMembers = useMemo(
-    () => ({ users: scenarioGroupInfo.flatMap((group) => group.users) }),
+    () => ({
+      users: scenarioGroupInfo.flatMap((group) =>
+        group.users.map((member) => ({ ...member, groupId: group._id }))
+      ),
+    }),
     [scenarioGroupInfo]
   );
 
@@ -196,6 +219,7 @@ export default function Dashboard() {
                     <DashGroupTable
                       key="members"
                       groupInfo={filteredMembers}
+                      onRevoke={isOwner ? handleRevoke : undefined}
                     />
                   ))}
               </ProtectedRoute>

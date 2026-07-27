@@ -7,7 +7,10 @@ import Scenario from "../../../db/models/scenario.js";
 import Scene from "../../../db/models/scene.js";
 import Group from "../../../db/models/group.js";
 import auth from "../../../middleware/firebaseAuth.js";
-import scenarioAuth from "../../../middleware/scenarioAuth.js";
+import scenarioAuth, {
+  scenarioOwnerAuth,
+} from "../../../middleware/scenarioAuth.js";
+import errorHandler from "../../../middleware/errorHandler.js";
 import { authHeaders } from "./testHelpers.js";
 import {
   useMongoMemoryServer,
@@ -27,12 +30,17 @@ scenarioAuth.mockImplementation(async (req, res, next) => {
   next();
 });
 
+scenarioOwnerAuth.mockImplementation(async (req, res, next) => {
+  next();
+});
+
 describe("Dashboard API tests", () => {
   useMongoMemoryServer();
   const ctx = useExpressServer(() => {
     const app = express();
     app.use(express.json());
     app.use("/", routes);
+    app.use(errorHandler);
     return app;
   });
 
@@ -126,6 +134,39 @@ describe("Dashboard API tests", () => {
     await expect(
       axios.get(
         `http://localhost:${ctx.port}/api/dashboard/groups/000000000000000000000099`,
+        authHeaders("user1")
+      )
+    ).rejects.toMatchObject({ response: { status: 404 } });
+  });
+
+  it("PATCH /dashboard/scenarios/:scenarioId/groups/:groupId/revoke removes the member", async () => {
+    const response = await axios.patch(
+      `http://localhost:${ctx.port}/api/dashboard/scenarios/${scenario._id}/groups/${group._id}/revoke`,
+      { email: "P@Example.com" },
+      authHeaders("user1")
+    );
+    expect(response.status).toBe(200);
+    expect(response.data.users).toHaveLength(0);
+
+    const updated = await Group.findById(group._id);
+    expect(updated.users).toHaveLength(0);
+  });
+
+  it("PATCH /dashboard/scenarios/:scenarioId/groups/:groupId/revoke returns 400 for an invalid email", async () => {
+    await expect(
+      axios.patch(
+        `http://localhost:${ctx.port}/api/dashboard/scenarios/${scenario._id}/groups/${group._id}/revoke`,
+        { email: "not-an-email" },
+        authHeaders("user1")
+      )
+    ).rejects.toMatchObject({ response: { status: 400 } });
+  });
+
+  it("PATCH /dashboard/scenarios/:scenarioId/groups/:groupId/revoke returns 404 for an unknown group", async () => {
+    await expect(
+      axios.patch(
+        `http://localhost:${ctx.port}/api/dashboard/scenarios/${scenario._id}/groups/000000000000000000000099/revoke`,
+        { email: "p@example.com" },
         authHeaders("user1")
       )
     ).rejects.toMatchObject({ response: { status: 404 } });

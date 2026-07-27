@@ -1,9 +1,19 @@
 import { Router } from "express";
+import { HttpStatusCode } from "axios";
 import { retrieveScenario } from "../../db/daos/scenarioDao.js";
 import { retrieveSceneList, retrieveScene } from "../../db/daos/sceneDao.js";
-import { getGroup, getGroupByScenarioId } from "../../db/daos/groupDao.js";
+import {
+  getGroup,
+  getGroupByScenarioId,
+  removeUserFromGroup,
+} from "../../db/daos/groupDao.js";
 import auth from "../../middleware/firebaseAuth.js";
-import scenarioAuth from "../../middleware/scenarioAuth.js";
+import scenarioAuth, {
+  scenarioOwnerAuth,
+} from "../../middleware/scenarioAuth.js";
+import { handle, HttpError } from "../../util/error.js";
+import { normaliseString } from "../../util/normalise.js";
+import { isValidEmail } from "../../util/email.js";
 
 const router = Router();
 
@@ -70,5 +80,28 @@ router.get("/groups/:groupId", async (req, res) => {
   }
   return res.status(200).json(group);
 });
+
+/**
+ * Revoke (remove) a single member from a group.
+ * Restricted to the scenario owner.
+ */
+router.patch(
+  "/scenarios/:scenarioId/groups/:groupId/revoke",
+  scenarioOwnerAuth,
+  handle(async (req, res) => {
+    const { groupId } = req.params;
+    const email = normaliseString(req.body.email);
+    if (!email || !isValidEmail(email))
+      throw new HttpError(
+        "email format is not valid",
+        HttpStatusCode.BadRequest
+      );
+
+    const group = await removeUserFromGroup(groupId, email);
+    if (!group)
+      throw new HttpError("group not found", HttpStatusCode.NotFound);
+    return res.json(group);
+  })
+);
 
 export default router;
