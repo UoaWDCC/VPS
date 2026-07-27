@@ -15,12 +15,18 @@ import toast from "react-hot-toast";
  */
 const CreateRole = ({ scenarioId }) => {
   const { user } = useContext(AuthenticationContext);
-  const { setRoleList } = useContext(ScenarioContext);
+  const { roleList, setRoleList } = useContext(ScenarioContext);
 
   const [role, setRole] = useState("");
 
   function handleSubmit(e) {
     e.preventDefault();
+
+    const normalized = role.trim().toLowerCase();
+    if (roleList?.includes(normalized)) {
+      toast.error(`Role "${normalized}" already exists`);
+      return;
+    }
 
     api
       .post(user, `/api/scenario/${scenarioId}/roles`, { role })
