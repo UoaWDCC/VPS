@@ -126,30 +126,32 @@ export function ObjectPropertyEditor({ component }) {
     if (value === null) return;
     const verts = component.bounds.verts;
 
-    if (type === "x") {
-      const diff = value - verts[0].x;
-      modifyComponentProp(component.id, "bounds.verts", (prev) =>
-        translate(prev, { x: diff, y: 0 })
-      );
-    } else if (type === "y") {
-      const diff = value - verts[0].y;
-      modifyComponentProp(component.id, "bounds.verts", (prev) =>
-        translate(prev, { x: 0, y: diff })
-      );
-      // increase bottom y to expand height and same idea with x
-    } else if (type === "width") {
-      const x = verts[0].x + value;
-      modifyComponentProp(component.id, "bounds.verts", (prev) =>
-        modifyVerts(prev, [1, 0.5], { x, y: 0 })
-      );
-    } else if (type === "height") {
-      const y = verts[0].y + value;
-      modifyComponentProp(component.id, "bounds.verts", (prev) =>
-        modifyVerts(prev, [0.5, 1], { x: 0, y })
-      );
-    } else if (type === "rotation") {
-      modifyComponentProp(component.id, "bounds.rotation", value);
-    }
+    setTimeout(() => {
+      if (type === "x") {
+        const diff = value - verts[0].x;
+        modifyComponentProp(component.id, "bounds.verts", (prev) =>
+          translate(prev, { x: diff, y: 0 })
+        );
+      } else if (type === "y") {
+        const diff = value - verts[0].y;
+        modifyComponentProp(component.id, "bounds.verts", (prev) =>
+          translate(prev, { x: 0, y: diff })
+        );
+        // increase bottom y to expand height and same idea with x
+      } else if (type === "width") {
+        const x = verts[0].x + value;
+        modifyComponentProp(component.id, "bounds.verts", (prev) =>
+          modifyVerts(prev, [1, 0.5], { x, y: 0 })
+        );
+      } else if (type === "height") {
+        const y = verts[0].y + value;
+        modifyComponentProp(component.id, "bounds.verts", (prev) =>
+          modifyVerts(prev, [0.5, 1], { x: 0, y })
+        );
+      } else if (type === "rotation") {
+        modifyComponentProp(component.id, "bounds.rotation", value);
+      }
+    })
   }
 
   return (
