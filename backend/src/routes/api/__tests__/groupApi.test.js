@@ -237,6 +237,40 @@ describe("Group API tests", () => {
     expect(dbScenario.roleList).toHaveLength(3);
   });
 
+  it("POST /group/:scenarioId does not create a case-insensitive duplicate role on merge", async () => {
+    const groupList = [
+      [
+        {
+          email: "j@example.com",
+          name: "Jan",
+          role: "Doctor",
+          group: "F",
+        },
+        {
+          email: "k@example.com",
+          name: "Kim",
+          role: "medic",
+          group: "F",
+        },
+      ],
+    ];
+
+    const response = await axios.post(
+      `http://localhost:${ctx.port}/api/group/${scenario._id}`,
+      { groupList, roleList: ["Doctor", "medic"] },
+      authHeaders("user1")
+    );
+    expect(response.status).toBe(200);
+
+    // scenario already had "doctor" (lowercase) from beforeEach, so the
+    // capitalised "Doctor" from this upload should not create a duplicate
+    const dbScenario = await Scenario.findById(scenario._id).lean();
+    expect(dbScenario.roleList).toEqual(
+      expect.arrayContaining(["doctor", "nurse", "medic"])
+    );
+    expect(dbScenario.roleList).toHaveLength(3);
+  });
+
   it("POST /group/:scenarioId returns 400 when duplicate roles exist within a group", async () => {
     const groupList = [
       [

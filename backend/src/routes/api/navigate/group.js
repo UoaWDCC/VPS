@@ -16,6 +16,11 @@ const createInvalidError = (roles) =>
     roles_with_access: roles,
   });
 
+// role names are stored with whatever casing they were authored/uploaded with,
+// so access checks must be case-insensitive
+const roleMatches = (roles, role) =>
+  roles.some((r) => r.toLowerCase() === role?.toLowerCase());
+
 export const getSimpleScene = async (sceneId) => {
   const scene = await Scene.findOne(
     { _id: sceneId },
@@ -53,7 +58,7 @@ export const getScenarioFirstScene = async (scenarioId) => {
 
 const getSceneConsideringRole = async (sceneId, role) => {
   const scene = await getSimpleScene(sceneId);
-  if (scene.roles.length && !scene.roles.includes(role))
+  if (scene.roles.length && !roleMatches(scene.roles, role))
     throw createInvalidError(scene.roles);
   return scene;
 };
@@ -83,7 +88,7 @@ const getConnectedScenes = async (sceneID, role, active = true) => {
     { roles: 1, components: 1, directLink: 1 }
   ).lean();
   const filtered = connectedScenes.map((s) => {
-    if (s.roles.includes(role) || !s.roles.length) return s;
+    if (!s.roles.length || roleMatches(s.roles, role)) return s;
     const error = createInvalidError(s.roles);
     return { _id: s._id, ...error.toJSON() };
   });
