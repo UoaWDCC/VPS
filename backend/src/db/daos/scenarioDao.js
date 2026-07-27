@@ -192,20 +192,62 @@ const updateDurations = async (scenarioId, updatedDurations) => {
 };
 
 /**
- * Updates scenario durations for users
- * @param {String} sceneId MongoDB ID of scene
- * @param {updatedRoleList: Array} updatedRoleList updated role list for the scenario
+ * Merges new roles into a scenario's role list, keeping any existing roles
+ * @param {String} scenarioId MongoDB ID of scenario
+ * @param {Array} updatedRoleList role names to merge into the scenario's role list
  * @returns updated database scenario object
  */
 const updateRoleList = async (scenarioId, updatedRoleList) => {
-  // if we are updating name only, components will be null
   const scenario = await Scenario.findById(scenarioId);
   try {
-    scenario.roleList = updatedRoleList;
+    scenario.roleList = [
+      ...new Set([...scenario.roleList, ...updatedRoleList]),
+    ];
     await scenario.save();
     return scenario;
   } catch {
     return scenario;
+  }
+};
+
+/**
+ * Creates a new role for a scenario
+ * @param {String} scenarioId MongoDB ID of scenario
+ * @param {String} role name of the role to add
+ * @returns updated role list for the scenario
+ */
+const createRole = async (scenarioId, role) => {
+  const scenario = await Scenario.findById(scenarioId);
+  try {
+    const normalized = role.trim().toLowerCase();
+    if (!scenario.roleList.includes(normalized)) {
+      scenario.roleList.push(normalized);
+      await scenario.save();
+    }
+    return scenario.roleList;
+  } catch {
+    return scenario.roleList;
+  }
+};
+
+/**
+ * Deletes a role from a scenario and removes it from any scenes that reference it
+ * @param {String} scenarioId MongoDB ID of scenario
+ * @param {String} role name of the role to remove
+ * @returns updated role list for the scenario
+ */
+const deleteRole = async (scenarioId, role) => {
+  const scenario = await Scenario.findById(scenarioId);
+  try {
+    scenario.roleList = scenario.roleList.filter((r) => r !== role);
+    await scenario.save();
+    await Scene.updateMany(
+      { _id: { $in: scenario.scenes } },
+      { $pull: { roles: role } }
+    );
+    return scenario.roleList;
+  } catch {
+    return scenario.roleList;
   }
 };
 
@@ -340,6 +382,8 @@ export {
   retrieveScenarios,
   updateDurations,
   updateRoleList,
+  createRole,
+  deleteRole,
   updateScenario,
   getStateVariables,
   createStateVariable,
