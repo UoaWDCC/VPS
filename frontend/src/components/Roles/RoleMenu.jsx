@@ -1,5 +1,6 @@
 import { useContext } from "react";
 import { useParams } from "react-router-dom";
+import { Trash2Icon } from "lucide-react";
 import CreateRole from "./CreateRole";
 import ScenarioContext from "context/ScenarioContext";
 import AuthenticationContext from "../../context/AuthenticationContext";
@@ -46,22 +47,35 @@ const RoleMenu = ({ show, setShow }) => {
     <ModalDialog title="Roles" open={show} onClose={() => setShow(false)}>
       <CreateRole scenarioId={scenarioId} />
       <div className="divider" />
-      <div className="flex flex-col gap-xs">
-        {roleList.map((role, i) => (
-          <fieldset
-            key={i}
-            className="fieldset bg-base-200 border-base-300 rounded-box border p-4 flex-row items-center"
-          >
-            <span className="flex-1">{role}</span>
-            <button
-              className="btn btn-xs btn-phantom"
-              onClick={() => deleteRole(role)}
-            >
-              Delete
-            </button>
-          </fieldset>
-        ))}
-      </div>
+      {roleList.length > 0 && (
+        <div className="overflow-x-auto rounded-box border border-base-content/5 w-full">
+          <table className="table table-zebra">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th className="w-0" />
+              </tr>
+            </thead>
+            <tbody>
+              {roleList.map((role, i) => (
+                <tr key={i}>
+                  <td>{role}</td>
+                  <td className="text-right">
+                    <button
+                      type="button"
+                      className="btn btn-xs btn-square btn-ghost"
+                      aria-label={`Delete role ${role}`}
+                      onClick={() => deleteRole(role)}
+                    >
+                      <Trash2Icon size={14} />
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
     </ModalDialog>
   );
 };

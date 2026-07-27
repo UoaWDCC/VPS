@@ -37,6 +37,12 @@ const CreateRole = ({ scenarioId }) => {
 
   const isSubmittable = role.trim().length > 0;
 
+  function handleKeyDown(e) {
+    if (e.key !== "Enter") return;
+    e.preventDefault();
+    if (isSubmittable) handleSubmit(e);
+  }
+
   return (
     <fieldset className="fieldset bg-base-200 border-base-300 rounded-box border p-4">
       <legend className="fieldset-legend">New Role</legend>
@@ -47,12 +53,14 @@ const CreateRole = ({ scenarioId }) => {
             type="text"
             value={role}
             onChange={(e) => setRole(e.target.value)}
+            onKeyDown={handleKeyDown}
             placeholder="Name"
             className="input"
           />
         </div>
       </div>
       <button
+        type="button"
         className={`ml-auto btn btn-xs btn-phantom float-right ${!isSubmittable && "btn-disabled"}`}
         onClick={handleSubmit}
       >
