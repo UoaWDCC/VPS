@@ -181,10 +181,13 @@ router.delete(
 );
 
 // Get the role list of a scenario
-router.get("/:scenarioId/roles", async (req, res) => {
-  const roleList = await retrieveRoleList(req.params.scenarioId);
-  res.status(HTTP_OK).json(roleList);
-});
+router.get(
+  "/:scenarioId/roles",
+  handle(async (req, res) => {
+    const roleList = await retrieveRoleList(req.params.scenarioId);
+    res.status(HTTP_OK).json(roleList);
+  })
+);
 
 // Create a new role for a scenario
 router.post(
@@ -201,9 +204,12 @@ router.post(
 );
 
 // Delete a role from a scenario
-router.delete("/:scenarioId/roles/:role", async (req, res) => {
-  const roleList = await deleteRole(req.params.scenarioId, req.params.role);
-  res.status(HTTP_OK).json(roleList);
-});
+router.delete(
+  "/:scenarioId/roles/:role",
+  handle(async (req, res) => {
+    const roleList = await deleteRole(req.params.scenarioId, req.params.role);
+    res.status(HTTP_OK).json(roleList);
+  })
+);
 
 export default router;

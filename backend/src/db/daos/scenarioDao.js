@@ -234,16 +234,12 @@ const updateRoleList = async (scenarioId, updatedRoleList) => {
  */
 const createRole = async (scenarioId, role) => {
   const scenario = await Scenario.findById(scenarioId);
-  try {
-    const merged = mergeRoles(scenario.roleList, [role.trim()]);
-    if (merged.length !== scenario.roleList.length) {
-      scenario.roleList = merged;
-      await scenario.save();
-    }
-    return scenario.roleList;
-  } catch {
-    return scenario.roleList;
+  const merged = mergeRoles(scenario.roleList, [role.trim()]);
+  if (merged.length !== scenario.roleList.length) {
+    scenario.roleList = merged;
+    await scenario.save();
   }
+  return scenario.roleList;
 };
 
 /**
@@ -254,17 +250,13 @@ const createRole = async (scenarioId, role) => {
  */
 const deleteRole = async (scenarioId, role) => {
   const scenario = await Scenario.findById(scenarioId);
-  try {
-    scenario.roleList = scenario.roleList.filter((r) => r !== role);
-    await scenario.save();
-    await Scene.updateMany(
-      { _id: { $in: scenario.scenes } },
-      { $pull: { roles: role } }
-    );
-    return scenario.roleList;
-  } catch {
-    return scenario.roleList;
-  }
+  scenario.roleList = scenario.roleList.filter((r) => r !== role);
+  await scenario.save();
+  await Scene.updateMany(
+    { _id: { $in: scenario.scenes } },
+    { $pull: { roles: role } }
+  );
+  return scenario.roleList;
 };
 
 /**
