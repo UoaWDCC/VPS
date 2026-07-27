@@ -117,7 +117,7 @@ describe("Files API tests", () => {
     expect(dbFile).not.toBeNull();
     expect(dbFile.path).toBe("files/fake-path-image-png");
     // marked as orphaned until a resource references it
-    expect(dbFile.deletedAt).toBeInstanceOf(Date);
+    expect(dbFile.orphanedAt).toBeInstanceOf(Date);
   });
 
   it("POST /files/:scenarioId infers type from mimetype (audio)", async () => {

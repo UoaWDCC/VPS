@@ -51,9 +51,18 @@ function computePatchFileRefDeltas(
   });
 
   modifiedComponents.forEach((component) => {
-    const isNew = !existingComponentsById.has(component.id);
-    if (isNew && hasFileRef(component))
-      addDelta(fileRefDeltas, component.fileId, 1);
+    const existing = existingComponentsById.get(component.id);
+
+    // decrement the previously referenced file (if any) and increment the
+    // newly referenced one (if any). this handles brand new components, a
+    // component whose file reference was cleared, and a component whose
+    // fileId was swapped in place
+    const existingFileId = hasFileRef(existing) ? existing.fileId : null;
+    const newFileId = hasFileRef(component) ? component.fileId : null;
+
+    if (existingFileId === newFileId) return;
+    if (existingFileId) addDelta(fileRefDeltas, existingFileId, -1);
+    if (newFileId) addDelta(fileRefDeltas, newFileId, 1);
   });
 
   return fileRefDeltas;

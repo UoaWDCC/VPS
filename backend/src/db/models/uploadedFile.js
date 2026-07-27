@@ -20,7 +20,7 @@ const uploadedFileSchema = new Schema(
       index: true,
     },
     refCount: { type: Number, default: 0, min: 0 },
-    deletedAt: { type: Date, default: null },
+    orphanedAt: { type: Date, default: null },
   },
   { timestamps: true }
 );
