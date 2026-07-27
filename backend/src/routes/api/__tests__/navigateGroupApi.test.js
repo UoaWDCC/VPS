@@ -136,6 +136,23 @@ describe("Navigate Group API tests", () => {
     expect(response.data.active).toBe(scene1._id.toString());
   });
 
+  it("POST /navigate/group/:groupId allows access when role has stray whitespace (trim-insensitive match)", async () => {
+    // scene1 is gated to "doctor", but the group member's role has stray
+    // whitespace from an untrimmed CSV cell - access should still be granted
+    await Scene.findByIdAndUpdate(scene1._id, { roles: ["doctor"] });
+    await Group.findByIdAndUpdate(group._id, {
+      users: [{ email: user.email, name: user.name, role: " doctor " }],
+    });
+
+    const response = await axios.post(
+      `http://localhost:${ctx.port}/api/navigate/group/${group._id}`,
+      { uid: "uid-player", addFlags: [], removeFlags: [] },
+      authHeaders("uid-player")
+    );
+    expect(response.status).toBe(200);
+    expect(response.data.active).toBe(scene1._id.toString());
+  });
+
   it("POST /navigate/group/:groupId returns 403 when the group member's role has no access", async () => {
     await Scene.findByIdAndUpdate(scene1._id, { roles: ["nurse"] });
     await Group.findByIdAndUpdate(group._id, {

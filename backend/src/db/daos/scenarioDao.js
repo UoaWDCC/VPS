@@ -199,9 +199,9 @@ const updateDurations = async (scenarioId, updatedDurations) => {
  */
 const mergeRoles = (existingRoles, newRoles) => {
   const merged = [...existingRoles];
-  const seen = new Set(merged.map((r) => r.toLowerCase()));
+  const seen = new Set(merged.map((r) => r.trim().toLowerCase()));
   for (const role of newRoles) {
-    const key = role.toLowerCase();
+    const key = role.trim().toLowerCase();
     if (seen.has(key)) continue;
     seen.add(key);
     merged.push(role);
