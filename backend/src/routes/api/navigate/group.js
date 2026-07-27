@@ -15,10 +15,13 @@ const createInvalidError = (roles) =>
     roles_with_access: roles,
   });
 
-// role names are stored with whatever casing they were authored/uploaded with,
-// so access checks must be case-insensitive
-const roleMatches = (roles, role) =>
-  roles.some((r) => r.toLowerCase() === role?.toLowerCase());
+// role names are stored with whatever casing/whitespace they were
+// authored/uploaded with, so access checks must normalize both
+const normalizeRole = (role) => role?.trim().toLowerCase();
+const roleMatches = (roles, role) => {
+  const target = normalizeRole(role);
+  return roles.some((r) => normalizeRole(r) === target);
+};
 
 export const getSimpleScene = async (sceneId) => {
   const scene = await Scene.findOne(
