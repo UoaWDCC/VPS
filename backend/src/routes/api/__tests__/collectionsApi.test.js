@@ -65,7 +65,7 @@ describe("Collections API tests", () => {
       contentType: "application/pdf",
       size: 2048,
       uploaderUid: "user1",
-      deletedAt: new Date(),
+      orphanedAt: new Date(),
     });
 
     resource = await Resource.create({

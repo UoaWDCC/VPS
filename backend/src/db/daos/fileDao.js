@@ -17,7 +17,7 @@ export async function applyReferenceDeltas(fileRefDeltas) {
           { $set: { refCount: { $add: ["$refCount", delta] } } },
           {
             $set: {
-              deletedAt: {
+              orphanedAt: {
                 $cond: [{ $lte: ["$refCount", 0] }, "$$NOW", "$$REMOVE"],
               },
             },
@@ -43,7 +43,9 @@ export async function applyReferenceDelta(fileId, delta) {
     { $set: { refCount: { $add: ["$refCount", delta] } } },
     {
       $set: {
-        deletedAt: { $cond: [{ $lte: ["$refCount", 0] }, "$$NOW", "$$REMOVE"] },
+        orphanedAt: {
+          $cond: [{ $lte: ["$refCount", 0] }, "$$NOW", "$$REMOVE"],
+        },
       },
     },
   ]);

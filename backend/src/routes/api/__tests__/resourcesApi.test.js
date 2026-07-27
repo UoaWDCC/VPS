@@ -69,7 +69,7 @@ describe("Resources API tests", () => {
       contentType: "image/png",
       size: 1024,
       uploaderUid: "user1",
-      deletedAt: new Date(),
+      orphanedAt: new Date(),
     });
 
     resource = await Resource.create({
@@ -154,7 +154,7 @@ describe("Resources API tests", () => {
 
     const dbFile = await UploadedFile.findById(uploadedFile._id);
     expect(dbFile.refCount).toBe(0);
-    expect(dbFile.deletedAt).toBeInstanceOf(Date);
+    expect(dbFile.orphanedAt).toBeInstanceOf(Date);
   });
 
   it("DELETE /resources/:scenarioId/:resourceId returns 404 when resource not found", async () => {

@@ -90,7 +90,7 @@ router.post(
         size: req.file.size,
         uploaderUid: req.uid,
         scenarioId: req.params.scenarioId,
-        deletedAt: Date.now(), // handle orphanage from interruption between upload and reference
+        orphanedAt: Date.now(), // handle orphanage from interruption between upload and reference
       });
 
       return res.status(201).json(uploadedFile);
