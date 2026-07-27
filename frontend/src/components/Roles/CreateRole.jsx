@@ -28,12 +28,19 @@ const CreateRole = ({ scenarioId }) => {
       return;
     }
 
+    const previousCount = roleList?.length ?? 0;
+
     api
-      .post(user, `/api/scenario/${scenarioId}/roles`, { role })
+      .post(user, `/api/scenario/${scenarioId}/roles`, { role: trimmed })
       .then((response) => {
         setRoleList(response.data);
-        toast.success("Role created successfully");
-        setRole("");
+        if (response.data.length > previousCount) {
+          toast.success("Role created successfully");
+          setRole("");
+        } else {
+          // another client created the same role (case-insensitively) first
+          toast.error(`Role "${trimmed}" already exists`);
+        }
       })
       .catch((error) => {
         console.error("Error creating role:", error);
