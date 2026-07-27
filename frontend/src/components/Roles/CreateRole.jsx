@@ -22,9 +22,9 @@ const CreateRole = ({ scenarioId }) => {
   function handleSubmit(e) {
     e.preventDefault();
 
-    const normalized = role.trim().toLowerCase();
-    if (roleList?.includes(normalized)) {
-      toast.error(`Role "${normalized}" already exists`);
+    const trimmed = role.trim();
+    if (roleList?.some((r) => r.toLowerCase() === trimmed.toLowerCase())) {
+      toast.error(`Role "${trimmed}" already exists`);
       return;
     }
 

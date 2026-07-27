@@ -96,10 +96,18 @@ export default function ManageGroupsPage() {
 
         const groupList = Object.values(groupMap);
 
-        // Extract role list
-        const roleList = [
-          ...new Set(data.map((user) => user.role.toLowerCase())),
-        ].filter((str) => str.trim() !== "");
+        // Extract role list, preserving casing but deduping case-insensitively
+        // (roles are matched case-insensitively when gating scene access)
+        const seenRoles = new Set();
+        const roleList = [];
+        data.forEach((user) => {
+          const role = user.role?.trim();
+          if (!role) return;
+          const key = role.toLowerCase();
+          if (seenRoles.has(key)) return;
+          seenRoles.add(key);
+          roleList.push(role);
+        });
 
         const jsonData = { groupList, roleList };
 

@@ -351,17 +351,36 @@ describe("Scenario API tests", () => {
     expect(Array.isArray(response.data)).toBe(true);
   });
 
-  it("POST /scenario/:scenarioId/roles creates a role", async () => {
+  it("POST /scenario/:scenarioId/roles creates a role, preserving casing", async () => {
     const response = await axios.post(
       `http://localhost:${ctx.port}/api/scenario/${scenario1._id}/roles`,
       { role: "Doctor" },
       authHeaders("user1")
     );
     expect(response.status).toBe(HTTP_OK);
-    expect(response.data).toEqual(["doctor"]);
+    expect(response.data).toEqual(["Doctor"]);
 
     const dbScenario = await Scenario.findById(scenario1._id).lean();
-    expect(dbScenario.roleList).toEqual(["doctor"]);
+    expect(dbScenario.roleList).toEqual(["Doctor"]);
+  });
+
+  it("POST /scenario/:scenarioId/roles does not create a case-insensitive duplicate", async () => {
+    await axios.post(
+      `http://localhost:${ctx.port}/api/scenario/${scenario1._id}/roles`,
+      { role: "Doctor" },
+      authHeaders("user1")
+    );
+
+    const response = await axios.post(
+      `http://localhost:${ctx.port}/api/scenario/${scenario1._id}/roles`,
+      { role: "doctor" },
+      authHeaders("user1")
+    );
+    expect(response.status).toBe(HTTP_OK);
+    expect(response.data).toEqual(["Doctor"]);
+
+    const dbScenario = await Scenario.findById(scenario1._id).lean();
+    expect(dbScenario.roleList).toEqual(["Doctor"]);
   });
 
   it("POST /scenario/:scenarioId/roles returns 400 for an empty role name", async () => {

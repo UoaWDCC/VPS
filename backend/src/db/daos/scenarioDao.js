@@ -192,6 +192,26 @@ const updateDurations = async (scenarioId, updatedDurations) => {
 };
 
 /**
+ * Merges new role names into an existing role list without creating
+ * case-insensitive duplicates. Roles already present keep their existing
+ * casing; new roles keep the casing they were given in.
+ * @param {String[]} existingRoles role names already on the scenario
+ * @param {String[]} newRoles role names to merge in
+ * @returns {String[]} merged role list
+ */
+const mergeRoles = (existingRoles, newRoles) => {
+  const merged = [...existingRoles];
+  const seen = new Set(merged.map((r) => r.toLowerCase()));
+  for (const role of newRoles) {
+    const key = role.toLowerCase();
+    if (seen.has(key)) continue;
+    seen.add(key);
+    merged.push(role);
+  }
+  return merged;
+};
+
+/**
  * Merges new roles into a scenario's role list, keeping any existing roles
  * @param {String} scenarioId MongoDB ID of scenario
  * @param {Array} updatedRoleList role names to merge into the scenario's role list
@@ -200,9 +220,7 @@ const updateDurations = async (scenarioId, updatedDurations) => {
 const updateRoleList = async (scenarioId, updatedRoleList) => {
   const scenario = await Scenario.findById(scenarioId);
   try {
-    scenario.roleList = [
-      ...new Set([...scenario.roleList, ...updatedRoleList]),
-    ];
+    scenario.roleList = mergeRoles(scenario.roleList, updatedRoleList);
     await scenario.save();
     return scenario;
   } catch {
@@ -219,9 +237,9 @@ const updateRoleList = async (scenarioId, updatedRoleList) => {
 const createRole = async (scenarioId, role) => {
   const scenario = await Scenario.findById(scenarioId);
   try {
-    const normalized = role.trim().toLowerCase();
-    if (!scenario.roleList.includes(normalized)) {
-      scenario.roleList.push(normalized);
+    const merged = mergeRoles(scenario.roleList, [role.trim()]);
+    if (merged.length !== scenario.roleList.length) {
+      scenario.roleList = merged;
       await scenario.save();
     }
     return scenario.roleList;
