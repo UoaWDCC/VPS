@@ -1,11 +1,12 @@
 import Papa from "papaparse";
-import { useContext, useRef } from "react";
+import { useContext, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
 import GroupsTable from "./GroupTable";
 import {
   ArrowLeftIcon,
   DownloadIcon,
   FileSpreadsheetIcon,
+  TagIcon,
   UploadIcon,
 } from "lucide-react";
 import toast from "react-hot-toast";
@@ -15,6 +16,7 @@ import { api } from "../../util/api";
 import AuthenticationContext from "../../context/AuthenticationContext";
 import GenericErrorPage from "../status/GenericErrorPage";
 import LoadingPage from "../status/LoadingPage";
+import RoleMenu from "../../components/Roles/RoleMenu";
 
 function convertToCSV(data, scenarioId) {
   const headers = ["email", "name", "role", "group number", "playable link"];
@@ -48,6 +50,7 @@ export default function ManageGroupsPage() {
   const history = useHistory();
 
   const fileInputRef = useRef(null);
+  const [showRoleMenu, setShowRoleMenu] = useState(false);
 
   // fetch groups assigned to this scenario
   const { data, isLoading, isError, error, refetch } = useQuery({
@@ -148,12 +151,20 @@ export default function ManageGroupsPage() {
 
   return (
     <div className="font-ibm flex flex-col h-screen w-screen overflow-hidden gap-2xl">
+      <RoleMenu show={showRoleMenu} setShow={setShowRoleMenu} />
       <div className="flex pt-l px-l">
         <button onClick={goBack} className="btn btn-phantom text-m">
           <ArrowLeftIcon size={20} />
           Back
         </button>
-        <button onClick={upload} className="btn btn-phantom text-m ml-auto">
+        <button
+          onClick={() => setShowRoleMenu(true)}
+          className="btn btn-phantom text-m ml-auto"
+        >
+          <TagIcon size={20} />
+          Roles
+        </button>
+        <button onClick={upload} className="btn btn-phantom text-m">
           <UploadIcon size={20} />
           Upload
         </button>
