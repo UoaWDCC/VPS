@@ -58,7 +58,7 @@ export function ObjectPropertyEditor({ component }) {
         y: axis === "y" ? 2 * center.y - v.y : v.y,
       }));
     });
-    modifyComponentProp(component.id, "bounds.rotation", (prev) => 2 * Math.PI - prev);
+    modifyComponentProp(component.id, "bounds.rotation", (prev) => 360 - prev);
   }
 
   // sets the value then flips it
@@ -126,32 +126,30 @@ export function ObjectPropertyEditor({ component }) {
     if (value === null) return;
     const verts = component.bounds.verts;
 
-    setTimeout(() => {
-      if (type === "x") {
-        const diff = value - verts[0].x;
-        modifyComponentProp(component.id, "bounds.verts", (prev) =>
-          translate(prev, { x: diff, y: 0 })
-        );
-      } else if (type === "y") {
-        const diff = value - verts[0].y;
-        modifyComponentProp(component.id, "bounds.verts", (prev) =>
-          translate(prev, { x: 0, y: diff })
-        );
-        // increase bottom y to expand height and same idea with x
-      } else if (type === "width") {
-        const x = verts[0].x + value;
-        modifyComponentProp(component.id, "bounds.verts", (prev) =>
-          modifyVerts(prev, [1, 0.5], { x, y: 0 })
-        );
-      } else if (type === "height") {
-        const y = verts[0].y + value;
-        modifyComponentProp(component.id, "bounds.verts", (prev) =>
-          modifyVerts(prev, [0.5, 1], { x: 0, y })
-        );
-      } else if (type === "rotation") {
-        modifyComponentProp(component.id, "bounds.rotation", value);
-      }
-    })
+    if (type === "x") {
+      const diff = value - verts[0].x;
+      modifyComponentProp(component.id, "bounds.verts", (prev) =>
+        translate(prev, { x: diff, y: 0 })
+      );
+    } else if (type === "y") {
+      const diff = value - verts[0].y;
+      modifyComponentProp(component.id, "bounds.verts", (prev) =>
+        translate(prev, { x: 0, y: diff })
+      );
+      // increase bottom y to expand height and same idea with x
+    } else if (type === "width") {
+      const x = verts[0].x + value;
+      modifyComponentProp(component.id, "bounds.verts", (prev) =>
+        modifyVerts(prev, [1, 0.5], { x, y: 0 })
+      );
+    } else if (type === "height") {
+      const y = verts[0].y + value;
+      modifyComponentProp(component.id, "bounds.verts", (prev) =>
+        modifyVerts(prev, [0.5, 1], { x: 0, y })
+      );
+    } else if (type === "rotation") {
+      modifyComponentProp(component.id, "bounds.rotation", value);
+    }
   }
 
   return (
@@ -162,20 +160,20 @@ export function ObjectPropertyEditor({ component }) {
       <div className="collapse-content text--1 bg-base-200">
         <fieldset className="fieldset pt-2">
           {/* Width and Height num inputs*/}
-          <span className="flex justify-between">
-            <label className="label">Object Width</label>
-            <label className="label">Object Height</label>
+          <span className="flex gap-2 justify-between">
+            <label className="label flex-1">Object Width</label>
+            <label className="label flex-1">Object Height</label>
           </span>
-          <div className="flex justify-between">
+          <div className="flex gap-2 justify-between">
             <input
-              className="input max-w-21"
+              className="input flex-1 min-w-0"
               value={inputWidth}
               onChange={(e) => {
                 saveProp(e.target.value, "width", setInputWidth);
               }}
             />
             <input
-              className="input max-w-21"
+              className="input flex-1 min-w-0"
               value={inputHeight}
               onChange={(e) => {
                 saveProp(e.target.value, "height", setInputHeight);
@@ -184,20 +182,20 @@ export function ObjectPropertyEditor({ component }) {
           </div>
 
           {/* positoin x and y num inputs*/}
-          <span className=" flex justify-between">
-            <label className="label">Position X</label>
-            <label className="label">Position Y</label>
+          <span className=" flex gap-2 justify-between">
+            <label className="label flex-1">Position X</label>
+            <label className="label flex-1">Position Y</label>
           </span>
-          <div className="flex justify-between">
+          <div className="flex justify-between gap-2 w-full">
             <input
-              className="input max-w-21"
+              className="input flex-1 min-w-0"
               value={inputX}
               onChange={(e) => {
                 saveProp(e.target.value, "x", setInputX);
               }}
             />
             <input
-              className="input max-w-21"
+              className="input flex-1 min-w-0"
               value={inputY}
               onChange={(e) => {
                 saveProp(e.target.value, "y", setInputY);
@@ -207,13 +205,13 @@ export function ObjectPropertyEditor({ component }) {
           <label className="label">Angle</label>
           <div className="flex justify-between">
             <input
-              className="input max-w-21"
+              className="input flex-1 min-w-0"
               value={inputAngle}
               onChange={(e) =>
                 saveProp(e.target.value, "rotation", setInputAngle)
               }
             />
-            <div className="flex justify-between">
+            <div className="ml-6 flex-1">
               <button
                 type="button"
                 className="hover:bg-stone-800 cursor-pointer rounded-sm"
