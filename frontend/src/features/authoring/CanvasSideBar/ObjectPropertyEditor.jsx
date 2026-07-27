@@ -58,6 +58,7 @@ export function ObjectPropertyEditor({ component }) {
         y: axis === "y" ? 2 * center.y - v.y : v.y,
       }));
     });
+    modifyComponentProp(component.id, "bounds.rotation", (prev) => 2 * Math.PI - prev);
   }
 
   // sets the value then flips it
@@ -104,7 +105,7 @@ export function ObjectPropertyEditor({ component }) {
   }
 
   function parseInput(v, set) {
-    if (v === "" || v === "-") {
+    if (v === "" || v === "-" || v.at(-1) === ".") {
       set(v);
       return null;
     }
@@ -152,17 +153,18 @@ export function ObjectPropertyEditor({ component }) {
   }
 
   return (
+    <>
     <div className="collapse overflow-visible collapse-arrow bg-base-300 rounded-sm text-s">
       <input type="checkbox" />
-      <div className="collapse-title">Object Properties</div>
+      <div className="collapse-title min-w-0">Object Properties</div>
       <div className="collapse-content text--1 bg-base-200">
         <fieldset className="fieldset pt-2">
           {/* Width and Height num inputs*/}
-          <span className=" flex gap-17">
+          <span className="flex justify-between">
             <label className="label">Object Width</label>
             <label className="label">Object Height</label>
           </span>
-          <div className="flex gap-13">
+          <div className="flex justify-between">
             <input
               className="input max-w-21"
               value={inputWidth}
@@ -180,11 +182,11 @@ export function ObjectPropertyEditor({ component }) {
           </div>
 
           {/* positoin x and y num inputs*/}
-          <span className=" flex gap-22">
+          <span className=" flex justify-between">
             <label className="label">Position X</label>
             <label className="label">Position Y</label>
           </span>
-          <div className="flex gap-13">
+          <div className="flex justify-between">
             <input
               className="input max-w-21"
               value={inputX}
@@ -201,7 +203,7 @@ export function ObjectPropertyEditor({ component }) {
             />
           </div>
           <label className="label">Angle</label>
-          <div className="flex gap-13">
+          <div className="flex justify-between">
             <input
               className="input max-w-21"
               value={inputAngle}
@@ -209,7 +211,7 @@ export function ObjectPropertyEditor({ component }) {
                 saveProp(e.target.value, "rotation", setInputAngle)
               }
             />
-            <div className="flex gap-3">
+            <div className="flex justify-between">
               <button
                 type="button"
                 className="hover:bg-stone-800 cursor-pointer rounded-sm"
@@ -228,6 +230,7 @@ export function ObjectPropertyEditor({ component }) {
           </div>
         </fieldset>
       </div>
-    </div>
+      </div>
+    </>
   );
 }
