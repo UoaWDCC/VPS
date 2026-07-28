@@ -63,25 +63,23 @@ export function ObjectPropertyEditor({ component }) {
 
   // sets the value then flips it
   function negativeFlip(type, value) {
-    const absValue = Math.abs(value);
-    const axis = type === "width" ? "x" : "y";
-
-    modifyComponentProp(component.id, "bounds.verts", (prev) => {
-      let verts =
-        type === "width"
-          ? modifyVerts(prev, [1, 0.5], { x: prev[0].x + absValue, y: 0 })
-          : modifyVerts(prev, [0.5, 1], { x: 0, y: prev[0].y + absValue });
-
-      const center = getBoxCenter(verts);
-      return verts.map((v) => ({
-        x: axis === "x" ? 2 * center.x - v.x : v.x,
-        y: axis === "y" ? 2 * center.y - v.y : v.y,
-      }));
-    });
+    const verts = component.bounds.verts;
+    if (type === "width") {
+      const x = verts[0].x + Math.abs(value);
+      modifyComponentProp(component.id, "bounds.verts", (prev) =>
+        modifyVerts(prev, [1, 0.5], { x, y: 0 })
+      );
+    } else if (type === "height") {
+      const y = verts[0].y + Math.abs(value);
+      modifyComponentProp(component.id, "bounds.verts", (prev) =>
+        modifyVerts(prev, [0.5, 1], { x: 0, y })
+      );
+    }
+    flipComponent(type)
   }
 
   function inputValidation(type, v, set) {
-    if (v === "" || v === "-" || v.at(-1) === ".") {
+    if (v === "" || v === "-" || v.at(-1) === "." || v.slice(-2) === ".0") {
       set(v);
       return null;
     }
