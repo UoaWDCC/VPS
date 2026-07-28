@@ -58,7 +58,7 @@ export function ObjectPropertyEditor({ component }) {
         y: axis === "y" ? 2 * center.y - v.y : v.y,
       }));
     });
-    modifyComponentProp(component.id, "bounds.rotation", (prev) => 360 - prev);
+    modifyComponentProp(component.id, "bounds.rotation", (prev) => 360 - (prev ?? 0));
   }
 
   function inputValidation(type, v, set, prevValue) {
