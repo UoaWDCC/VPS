@@ -51,7 +51,6 @@ export function ObjectPropertyEditor({ component }) {
   }, [component.bounds.verts, component.bounds.rotation]);
 
   function flipComponent(axis) {
-    console.log(component.bounds.verts, getBoxCenter(component.bounds.verts));
     modifyComponentProp(component.id, "bounds.verts", (prev) => {
       const center = getBoxCenter(prev);
       return prev.map((v) => ({
@@ -62,10 +61,6 @@ export function ObjectPropertyEditor({ component }) {
     modifyComponentProp(component.id, "bounds.rotation", (prev) => 360 - prev);
   }
 
-  // sets the value then flips it
-  // function negativeFlip(type, value) {
-  // }
-
   function inputValidation(type, v, set, prevValue) {
     if (v === "" || v === "-" || v.at(-1) === "." || v.slice(-2) === ".0") {
       set(v);
@@ -75,40 +70,22 @@ export function ObjectPropertyEditor({ component }) {
     const value = parseFloat(String(v).trim());
     if (isNaN(value)) return null;
 
-    if (value === 0) {
+    if (value === 0 && prevValue !== null) {
       set(1);
       return 1;
     }
-
     set(value);
 
-    if (Math.sign(value) !== Math.sign(prevValue)) {
+    if ((Math.sign(value) !== Math.sign(prevValue)) && prevValue !== null) {
       flipComponent(type === "width" ? "x" : "y");
-      return null;
     }
 
-    return value;
-  }
-
-  function parseInput(v, set) {
-    if (v === "" || v === "-" || v.at(-1) === "." || v.slice(-2) === ".0") {
-      set(v);
-      return null;
-    }
-
-    const value = parseFloat(String(v).trim());
-    if (isNaN(value)) return null;
-
-    set(value);
     return value;
   }
 
   // uses the same function as the drag box feat w modifyComponentProp
   function saveProp(v, type, set) {
-    const value =
-      type === "width" || type === "height"
-        ? inputValidation(type, v, set, type === "width" ? inputWidth : inputHeight)
-        : parseInput(v, set);
+    const value = inputValidation(type, v, set, (type === "width" || type === "height") ? (type === "width" ? inputWidth : inputHeight) : null); 
     if (value === null) return;
     const verts = component.bounds.verts;
 
