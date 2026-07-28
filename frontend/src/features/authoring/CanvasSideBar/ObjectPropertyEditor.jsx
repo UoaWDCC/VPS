@@ -51,6 +51,7 @@ export function ObjectPropertyEditor({ component }) {
   }, [component.bounds.verts, component.bounds.rotation]);
 
   function flipComponent(axis) {
+    console.log(component.bounds.verts, getBoxCenter(component.bounds.verts));
     modifyComponentProp(component.id, "bounds.verts", (prev) => {
       const center = getBoxCenter(prev);
       return prev.map((v) => ({
@@ -62,23 +63,10 @@ export function ObjectPropertyEditor({ component }) {
   }
 
   // sets the value then flips it
-  function negativeFlip(type, value) {
-    const verts = component.bounds.verts;
-    if (type === "width") {
-      const x = verts[0].x + Math.abs(value);
-      modifyComponentProp(component.id, "bounds.verts", (prev) =>
-        modifyVerts(prev, [1, 0.5], { x, y: 0 })
-      );
-    } else if (type === "height") {
-      const y = verts[0].y + Math.abs(value);
-      modifyComponentProp(component.id, "bounds.verts", (prev) =>
-        modifyVerts(prev, [0.5, 1], { x: 0, y })
-      );
-    }
-    flipComponent(type)
-  }
+  // function negativeFlip(type, value) {
+  // }
 
-  function inputValidation(type, v, set) {
+  function inputValidation(type, v, set, prevValue) {
     if (v === "" || v === "-" || v.at(-1) === "." || v.slice(-2) === ".0") {
       set(v);
       return null;
@@ -94,8 +82,8 @@ export function ObjectPropertyEditor({ component }) {
 
     set(value);
 
-    if (value < 0) {
-      negativeFlip(type, value);
+    if (Math.sign(value) !== Math.sign(prevValue)) {
+      flipComponent(type === "width" ? "x" : "y");
       return null;
     }
 
@@ -103,7 +91,7 @@ export function ObjectPropertyEditor({ component }) {
   }
 
   function parseInput(v, set) {
-    if (v === "" || v === "-" || v.at(-1) === ".") {
+    if (v === "" || v === "-" || v.at(-1) === "." || v.slice(-2) === ".0") {
       set(v);
       return null;
     }
@@ -119,7 +107,7 @@ export function ObjectPropertyEditor({ component }) {
   function saveProp(v, type, set) {
     const value =
       type === "width" || type === "height"
-        ? inputValidation(type, v, set)
+        ? inputValidation(type, v, set, type === "width" ? inputWidth : inputHeight)
         : parseInput(v, set);
     if (value === null) return;
     const verts = component.bounds.verts;
