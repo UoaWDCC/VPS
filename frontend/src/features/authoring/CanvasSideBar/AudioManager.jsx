@@ -25,6 +25,7 @@ function AudioManager() {
   const inputRef = useRef(null);
 
   const audios = Object.values(components).filter((c) => c.type === "audio");
+  const hasAudios = audios.length > 0;
 
   async function handleFileInput(e) {
     addAudio(e.target.files[0]);
@@ -37,18 +38,26 @@ function AudioManager() {
 
   return (
     <>
-      <div className="collapse overflow-visible collapse-arrow bg-base-300 rounded-sm text-s">
-        <input type="checkbox" />
-        <div className="collapse-title flex items-center justify-between">
-          Audio Elements
-          <PlusIcon size={18} onClick={createNew} className="z-1" />
-        </div>
+    <div
+      className={`collapse overflow-visible ${
+        hasAudios ? "collapse-arrow" : ""
+      } bg-base-300 rounded-sm text-s`}
+    >
+      {hasAudios && <input type="checkbox" />}
+
+      <div className="collapse-title flex items-center justify-between">
+        Audio Elements
+        <PlusIcon size={18} onClick={createNew} className="z-1" />
+      </div>
+
+      {hasAudios && (
         <div className="collapse-content text--1 bg-base-200 px-0">
-          {audios.map((audio, i) => (
-            <EditAudioComponent component={audio} key={i} />
+          {audios.map((audio) => (
+            <EditAudioComponent component={audio} key={audio.id} />
           ))}
         </div>
-      </div>
+      )}
+    </div>
       <input
         type="file"
         accept=".mp3"
