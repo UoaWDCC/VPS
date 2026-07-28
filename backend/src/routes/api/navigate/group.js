@@ -88,7 +88,7 @@ const getConnectedScenes = async (sceneID, role, active = true) => {
     .filter(Boolean);
   const connectedScenes = await Scene.find(
     { _id: { $in: connectedIds } },
-    { roles: 1, components: 1, directLink: 1 }
+    { roles: 1, components: 1, directLink: 1, time: 1, timerStateOperations: 1 }
   ).lean();
   const filtered = connectedScenes.map((s) => {
     if (s.roles.includes(role) || !s.roles.length) return s;

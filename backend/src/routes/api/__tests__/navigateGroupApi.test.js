@@ -348,6 +348,75 @@ describe("Navigate Group API tests", () => {
       );
     });
 
+    it("includes `time` on connected (not-yet-entered) scenes, not just the active one", async () => {
+      const componentId = "btn-go";
+      const timedTarget = await Scene.create({
+        name: "Timed Target",
+        components: [],
+        roles: [],
+        time: 75,
+      });
+      const linkingScene = await Scene.create({
+        name: "Linking",
+        components: [
+          {
+            id: componentId,
+            clickable: true,
+            nextScene: timedTarget._id,
+            type: "BUTTON",
+          },
+        ],
+        roles: [],
+      });
+      await Group.findByIdAndUpdate(group._id, {
+        path: [linkingScene._id.toString()],
+      });
+
+      const response = await axios.post(
+        `http://localhost:${ctx.port}/api/navigate/group/${group._id}`,
+        { uid: "uid-player", addFlags: [], removeFlags: [] }, // no currentScene → refresh
+        authHeaders("uid-player")
+      );
+      expect(response.status).toBe(200);
+      // linkingScene has no timer, so this is a refresh-style response whose
+      // `scenes` still includes the connected (not-yet-active) timed target.
+      const connected = response.data.scenes.find(
+        (s) => s._id === timedTarget._id.toString()
+      );
+      expect(connected.time).toBe(75);
+    });
+
+    it("returns the configured remainingTime for a scene that links back to itself", async () => {
+      const componentId = "btn-retry";
+      const selfLoopScene = await Scene.create({
+        name: "Self Loop",
+        components: [],
+        roles: [],
+        time: 45,
+      });
+      await Scene.findByIdAndUpdate(selfLoopScene._id, {
+        components: [
+          {
+            id: componentId,
+            clickable: true,
+            nextScene: selfLoopScene._id,
+            type: "BUTTON",
+          },
+        ],
+      });
+      await Group.findByIdAndUpdate(group._id, {
+        path: [selfLoopScene._id.toString()],
+      });
+
+      const response = await axios.post(
+        `http://localhost:${ctx.port}/api/navigate/group/${group._id}`,
+        { uid: "uid-player", addFlags: [], removeFlags: [] }, // no currentScene → refresh
+        authHeaders("uid-player")
+      );
+      expect(response.status).toBe(200);
+      expect(response.data.remainingTime).toBe(45);
+    });
+
     it("clears the entry stamp on reset", async () => {
       const resetScene = await Scene.create({
         name: "Reset Timed",
