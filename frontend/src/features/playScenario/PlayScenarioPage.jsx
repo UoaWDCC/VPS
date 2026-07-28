@@ -47,6 +47,12 @@ const navigateSingleplayer = async (
   if (res.data.scenes) {
     res.data.scenes.forEach((scene) => sceneCache.set(scene._id, scene));
   }
+  // Server-authoritative remaining time for the active scene, so a refresh
+  // resumes the countdown instead of restarting it.
+  if (res.data.active && res.data.remainingTime != null) {
+    const active = sceneCache.get(res.data.active);
+    if (active) active.remainingTime = res.data.remainingTime;
+  }
   return {
     newSceneId: res.data.active,
     stateVariables: res.data.stateVariables,
@@ -76,6 +82,12 @@ const navigateMultiplayer = async (
   const res = await axios.request(config);
   if (res.data.scenes) {
     res.data.scenes.forEach((scene) => sceneCache.set(scene._id, scene));
+  }
+  // Server-authoritative remaining time for the active scene, so a refresh
+  // resumes the countdown instead of restarting it.
+  if (res.data.active && res.data.remainingTime != null) {
+    const active = sceneCache.get(res.data.active);
+    if (active) active.remainingTime = res.data.remainingTime;
   }
   return {
     newSceneId: res.data.active,
@@ -330,6 +342,7 @@ export default function PlayScenarioPage({ group }) {
           <SceneTimer
             key={sceneId}
             duration={currScene.time}
+            initialSeconds={currScene.remainingTime ?? currScene.time}
             onTimeout={handleTimerTimeout}
           />
         </div>

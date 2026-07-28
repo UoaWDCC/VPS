@@ -10,6 +10,7 @@ import { applyStateOperations } from "../../../util/statevariables/stateOperatio
 import STATUS from "../../../util/status.js";
 
 import { getScenarioFirstScene, getSimpleScene } from "./group.js";
+import { remainingFor, getActiveSceneTime } from "./timer.js";
 
 const getConnectedScenes = async (sceneID, active = true) => {
   const scene = await getSimpleScene(sceneID);
@@ -36,7 +37,9 @@ const addSceneToPath = async (userId, scenarioId, currentSceneId, sceneId) => {
       throw new HttpError("Scene mismatch has occured", STATUS.CONFLICT);
     user.paths.get(scenarioId).unshift(sceneId);
   }
+  user.sceneEnteredAt.set(scenarioId, new Date());
   user.markModified("paths");
+  user.markModified("sceneEnteredAt");
   await user.save();
   return STATUS.OK;
 };
@@ -95,7 +98,13 @@ export const userNavigate = async (req) => {
   const [user, authorised] = await Promise.all([
     User.findOne(
       { uid },
-      { paths: 1, _id: 1, stateVariables: 1, stateVersions: 1 }
+      {
+        paths: 1,
+        _id: 1,
+        stateVariables: 1,
+        stateVersions: 1,
+        sceneEnteredAt: 1,
+      }
     ).lean(),
     // Only hit the access list when startScene is present — avoids an extra DB query on every normal player request.
     startSceneParam ? await isAuthor(scenarioId, uid) : false,
@@ -116,22 +125,32 @@ export const userNavigate = async (req) => {
     ]);
     return {
       status: STATUS.OK,
-      json: { ...scenes, stateVariables, stateVersion },
+      json: {
+        ...scenes,
+        stateVariables,
+        stateVersion,
+        remainingTime: getActiveSceneTime(scenes),
+      },
     };
   }
 
   // the first time the user is navigating in their session
   if (!currentScene) {
     const activeSceneId = startScene || path[0];
+    const isJump = startScene && startScene !== path[0];
 
     // Replace the entire path rather than appending: the prior history is invalid after jumping to an arbitrary scene.
-    const updatePromise =
-      startScene && startScene !== path[0]
-        ? User.updateOne(
-            { uid },
-            { $set: { [`paths.${scenarioId}`]: [startScene] } }
-          )
-        : Promise.resolve();
+    const updatePromise = isJump
+      ? User.updateOne(
+          { uid },
+          {
+            $set: {
+              [`paths.${scenarioId}`]: [startScene],
+              [`sceneEnteredAt.${scenarioId}`]: new Date(),
+            },
+          }
+        )
+      : Promise.resolve();
 
     const [, scenes] = await Promise.all([
       updatePromise,
@@ -143,9 +162,18 @@ export const userNavigate = async (req) => {
       scenarioId
     );
 
+    // A jump enters a fresh scene (full time); a plain re-fetch/refresh must
+    // resume from the untouched entry stamp so refreshing can't reset the timer.
+    const remainingTime = isJump
+      ? getActiveSceneTime(scenes)
+      : remainingFor(
+          getActiveSceneTime(scenes),
+          user.sceneEnteredAt?.[scenarioId]
+        );
+
     return {
       status: STATUS.OK,
-      json: { ...scenes, stateVariables, stateVersion },
+      json: { ...scenes, stateVariables, stateVersion, remainingTime },
     };
   }
 
@@ -183,7 +211,14 @@ export const userNavigate = async (req) => {
 
   return {
     status: STATUS.OK,
-    json: { ...scenes, stateVariables, stateVersion },
+    json: {
+      ...scenes,
+      stateVariables,
+      stateVersion,
+      // Only when a move actually happened; a no-move interaction leaves the
+      // client's running countdown alone.
+      ...(scenes ? { remainingTime: getActiveSceneTime(scenes) } : {}),
+    },
   };
 };
 
@@ -203,7 +238,12 @@ export const userReset = async (req) => {
 
   await User.findOneAndUpdate(
     { _id: user._id },
-    { $unset: { [`paths.${scenarioId}`]: "" } }
+    {
+      $unset: {
+        [`paths.${scenarioId}`]: "",
+        [`sceneEnteredAt.${scenarioId}`]: "",
+      },
+    }
   );
 
   return { status: STATUS.OK };

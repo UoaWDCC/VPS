@@ -259,4 +259,115 @@ describe("Navigate Group API tests", () => {
     const dbNote = await Note.findById(note._id);
     expect(dbNote).toBeNull();
   });
+
+  // --- Server-authoritative scene timer ---
+
+  describe("scene timer", () => {
+    it("returns the full remainingTime and stamps entry on first navigation", async () => {
+      await Scene.findByIdAndUpdate(scene1._id, { time: 120 });
+
+      const response = await axios.post(
+        `http://localhost:${ctx.port}/api/navigate/group/${group._id}`,
+        { uid: "uid-player", addFlags: [], removeFlags: [] },
+        authHeaders("uid-player")
+      );
+      expect(response.status).toBe(200);
+      expect(response.data.remainingTime).toBe(120);
+
+      const dbGroup = await Group.findById(group._id);
+      expect(dbGroup.currentSceneEnteredAt).toBeInstanceOf(Date);
+    });
+
+    it("resumes with a decreased remainingTime on re-entry (refresh cannot reset it)", async () => {
+      const timedScene = await Scene.create({
+        name: "Timed",
+        components: [],
+        roles: [],
+        time: 120,
+      });
+      const enteredAt = new Date(Date.now() - 30_000);
+      await Group.findByIdAndUpdate(group._id, {
+        path: [timedScene._id.toString()],
+        currentSceneEnteredAt: enteredAt,
+      });
+
+      const response = await axios.post(
+        `http://localhost:${ctx.port}/api/navigate/group/${group._id}`,
+        { uid: "uid-player", addFlags: [], removeFlags: [] }, // no currentScene → refresh
+        authHeaders("uid-player")
+      );
+      expect(response.status).toBe(200);
+      expect(response.data.remainingTime).toBeGreaterThan(85);
+      expect(response.data.remainingTime).toBeLessThanOrEqual(91);
+
+      const dbGroup = await Group.findById(group._id);
+      expect(dbGroup.currentSceneEnteredAt.getTime()).toBe(enteredAt.getTime());
+    });
+
+    it("resets remainingTime to full and restamps on a real scene move", async () => {
+      const componentId = "btn-go";
+      const clickScene = await Scene.create({
+        name: "Click",
+        components: [
+          {
+            id: componentId,
+            clickable: true,
+            nextScene: scene2._id,
+            type: "BUTTON",
+          },
+        ],
+        roles: [],
+        time: 60,
+      });
+      await Scene.findByIdAndUpdate(scene2._id, { time: 90 });
+
+      const enteredAt = new Date(Date.now() - 45_000);
+      await Group.findByIdAndUpdate(group._id, {
+        path: [clickScene._id.toString()],
+        currentSceneEnteredAt: enteredAt,
+      });
+
+      const response = await axios.post(
+        `http://localhost:${ctx.port}/api/navigate/group/${group._id}`,
+        {
+          uid: "uid-player",
+          currentScene: clickScene._id.toString(),
+          componentId,
+          addFlags: [],
+          removeFlags: [],
+        },
+        authHeaders("uid-player")
+      );
+      expect(response.status).toBe(200);
+      expect(response.data.active).toBe(scene2._id.toString());
+      expect(response.data.remainingTime).toBe(90);
+
+      const dbGroup = await Group.findById(group._id);
+      expect(dbGroup.currentSceneEnteredAt.getTime()).toBeGreaterThan(
+        enteredAt.getTime()
+      );
+    });
+
+    it("clears the entry stamp on reset", async () => {
+      const resetScene = await Scene.create({
+        name: "Reset Timed",
+        components: [{ type: "RESET_BUTTON" }],
+        roles: [],
+        time: 60,
+      });
+      await Group.findByIdAndUpdate(group._id, {
+        path: [resetScene._id.toString()],
+        currentSceneEnteredAt: new Date(),
+      });
+
+      await axios.post(
+        `http://localhost:${ctx.port}/api/navigate/group/reset/${group._id}`,
+        { uid: "uid-player", currentScene: resetScene._id.toString() },
+        authHeaders("uid-player")
+      );
+
+      const dbGroup = await Group.findById(group._id);
+      expect(dbGroup.currentSceneEnteredAt).toBeNull();
+    });
+  });
 });

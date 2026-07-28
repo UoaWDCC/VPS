@@ -10,6 +10,7 @@ import { getStateVariables } from "../../../db/daos/scenarioDao.js";
 import { setGroupStateVariables } from "../../../db/daos/groupDao.js";
 import { applyStateOperations } from "../../../util/statevariables/stateOperations.js";
 import { getComponent } from "../../../db/daos/sceneDao.js";
+import { remainingFor, getActiveSceneTime } from "./timer.js";
 
 const createInvalidError = (roles) =>
   new HttpError("Invalid role to access this scene", STATUS.FORBIDDEN, {
@@ -62,7 +63,14 @@ const getGroupByIdAndUser = async (groupId, uid) => {
   const { email } = await User.findOne({ uid }, { email: 1 }).lean();
   const group = await Group.findOne(
     { _id: groupId, users: { $elemMatch: { email } } },
-    { "users.$": 1, scenarioId: 1, path: 1, stateVariables: 1, stateVersion: 1 }
+    {
+      "users.$": 1,
+      scenarioId: 1,
+      path: 1,
+      stateVariables: 1,
+      stateVersion: 1,
+      currentSceneEnteredAt: 1,
+    }
   ).lean();
   if (!group)
     throw new HttpError(
@@ -100,7 +108,10 @@ const addSceneToPath = async (groupId, currentSceneId, sceneId) => {
       _id: groupId,
       $or: [{ "path.0": currentSceneId }, { path: { $size: 0 } }],
     },
-    { $push: { path: { $each: [sceneId], $position: 0 } } }
+    {
+      $push: { path: { $each: [sceneId], $position: 0 } },
+      $set: { currentSceneEnteredAt: new Date() },
+    }
   );
   if (!res) throw new HttpError("Scene mismatch has occured", STATUS.CONFLICT);
   return STATUS.OK;
@@ -210,7 +221,12 @@ export const groupNavigate = async (req) => {
     ]);
     return {
       status: STATUS.OK,
-      json: { ...scenes, stateVariables, stateVersion },
+      json: {
+        ...scenes,
+        stateVariables,
+        stateVersion,
+        remainingTime: getActiveSceneTime(scenes),
+      },
     };
   }
 
@@ -220,9 +236,19 @@ export const groupNavigate = async (req) => {
 
     const [stateVariables, stateVersion] = await syncStateVariables(group);
 
+    // Plain re-fetch/refresh: resume from the untouched entry stamp so
+    // refreshing can't reset the timer.
     return {
       status: STATUS.OK,
-      json: { ...scenes, stateVariables, stateVersion },
+      json: {
+        ...scenes,
+        stateVariables,
+        stateVersion,
+        remainingTime: remainingFor(
+          getActiveSceneTime(scenes),
+          group.currentSceneEnteredAt
+        ),
+      },
     };
   }
   // the user is navigating from one scene to another
@@ -262,7 +288,14 @@ export const groupNavigate = async (req) => {
 
   return {
     status: STATUS.OK,
-    json: { ...scenes, stateVariables, stateVersion },
+    json: {
+      ...scenes,
+      stateVariables,
+      stateVersion,
+      // Only when a move actually happened; a no-move interaction leaves the
+      // client's running countdown alone.
+      ...(scenes ? { remainingTime: getActiveSceneTime(scenes) } : {}),
+    },
   };
 };
 
@@ -291,7 +324,7 @@ export const groupReset = async (req) => {
 
   await Group.updateOne(
     { _id: req.params.groupId },
-    { $set: { path: [], currentFlags: [] } }
+    { $set: { path: [], currentFlags: [], currentSceneEnteredAt: null } }
   ).exec();
 
   return { status: STATUS.OK };
