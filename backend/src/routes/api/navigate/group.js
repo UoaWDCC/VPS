@@ -10,7 +10,11 @@ import { getStateVariables } from "../../../db/daos/scenarioDao.js";
 import { setGroupStateVariables } from "../../../db/daos/groupDao.js";
 import { applyStateOperations } from "../../../util/statevariables/stateOperations.js";
 import { getComponent } from "../../../db/daos/sceneDao.js";
-import { remainingFor, getActiveSceneTime } from "./timer.js";
+import {
+  freshRemainingTime,
+  resumedRemainingTime,
+  movedRemainingTimeField,
+} from "./timer.js";
 
 const createInvalidError = (roles) =>
   new HttpError("Invalid role to access this scene", STATUS.FORBIDDEN, {
@@ -225,7 +229,7 @@ export const groupNavigate = async (req) => {
         ...scenes,
         stateVariables,
         stateVersion,
-        remainingTime: getActiveSceneTime(scenes),
+        remainingTime: freshRemainingTime(scenes),
       },
     };
   }
@@ -236,16 +240,14 @@ export const groupNavigate = async (req) => {
 
     const [stateVariables, stateVersion] = await syncStateVariables(group);
 
-    // Plain re-fetch/refresh: resume from the untouched entry stamp so
-    // refreshing can't reset the timer.
     return {
       status: STATUS.OK,
       json: {
         ...scenes,
         stateVariables,
         stateVersion,
-        remainingTime: remainingFor(
-          getActiveSceneTime(scenes),
+        remainingTime: resumedRemainingTime(
+          scenes,
           group.currentSceneEnteredAt
         ),
       },
@@ -292,9 +294,7 @@ export const groupNavigate = async (req) => {
       ...scenes,
       stateVariables,
       stateVersion,
-      // Only when a move actually happened; a no-move interaction leaves the
-      // client's running countdown alone.
-      ...(scenes ? { remainingTime: getActiveSceneTime(scenes) } : {}),
+      ...movedRemainingTimeField(scenes),
     },
   };
 };

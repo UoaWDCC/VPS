@@ -10,7 +10,11 @@ import { applyStateOperations } from "../../../util/statevariables/stateOperatio
 import STATUS from "../../../util/status.js";
 
 import { getScenarioFirstScene, getSimpleScene } from "./group.js";
-import { remainingFor, getActiveSceneTime } from "./timer.js";
+import {
+  freshRemainingTime,
+  resumedRemainingTime,
+  movedRemainingTimeField,
+} from "./timer.js";
 
 const getConnectedScenes = async (sceneID, active = true) => {
   const scene = await getSimpleScene(sceneID);
@@ -28,9 +32,18 @@ const getConnectedScenes = async (sceneID, active = true) => {
   };
 };
 
-const addSceneToPath = async (userId, scenarioId, currentSceneId, sceneId) => {
+// `replace: true` discards any existing path (used for an author jump to an
+// arbitrary scene, where the prior history is no longer valid) instead of
+// requiring it to continue from `currentSceneId`.
+const addSceneToPath = async (
+  userId,
+  scenarioId,
+  currentSceneId,
+  sceneId,
+  { replace = false } = {}
+) => {
   const user = await User.findById(userId);
-  if (!user.paths.get(scenarioId)) {
+  if (replace || !user.paths.get(scenarioId)) {
     user.paths.set(scenarioId, [sceneId]);
   } else {
     if (user.paths.get(scenarioId)[0] !== currentSceneId)
@@ -129,7 +142,7 @@ export const userNavigate = async (req) => {
         ...scenes,
         stateVariables,
         stateVersion,
-        remainingTime: getActiveSceneTime(scenes),
+        remainingTime: freshRemainingTime(scenes),
       },
     };
   }
@@ -139,17 +152,13 @@ export const userNavigate = async (req) => {
     const activeSceneId = startScene || path[0];
     const isJump = startScene && startScene !== path[0];
 
-    // Replace the entire path rather than appending: the prior history is invalid after jumping to an arbitrary scene.
+    // A jump replaces the entire path (the prior history is invalid after
+    // jumping to an arbitrary scene) and restamps the timer, since it's a
+    // fresh entry; a plain re-fetch/refresh does neither.
     const updatePromise = isJump
-      ? User.updateOne(
-          { uid },
-          {
-            $set: {
-              [`paths.${scenarioId}`]: [startScene],
-              [`sceneEnteredAt.${scenarioId}`]: new Date(),
-            },
-          }
-        )
+      ? addSceneToPath(user._id, scenarioId, null, startScene, {
+          replace: true,
+        })
       : Promise.resolve();
 
     const [, scenes] = await Promise.all([
@@ -165,11 +174,8 @@ export const userNavigate = async (req) => {
     // A jump enters a fresh scene (full time); a plain re-fetch/refresh must
     // resume from the untouched entry stamp so refreshing can't reset the timer.
     const remainingTime = isJump
-      ? getActiveSceneTime(scenes)
-      : remainingFor(
-          getActiveSceneTime(scenes),
-          user.sceneEnteredAt?.[scenarioId]
-        );
+      ? freshRemainingTime(scenes)
+      : resumedRemainingTime(scenes, user.sceneEnteredAt?.[scenarioId]);
 
     return {
       status: STATUS.OK,
@@ -215,9 +221,7 @@ export const userNavigate = async (req) => {
       ...scenes,
       stateVariables,
       stateVersion,
-      // Only when a move actually happened; a no-move interaction leaves the
-      // client's running countdown alone.
-      ...(scenes ? { remainingTime: getActiveSceneTime(scenes) } : {}),
+      ...movedRemainingTimeField(scenes),
     },
   };
 };
