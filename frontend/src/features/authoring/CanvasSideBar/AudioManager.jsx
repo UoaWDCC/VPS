@@ -45,7 +45,11 @@ function AudioManager() {
       >
         {hasAudios && <input type="checkbox" />}
 
-        <div className="collapse-title flex items-center justify-between">
+        <div
+          className={`collapse-title flex items-center justify-between ${
+            hasAudios ? "" : "pe-4"
+          }`}
+        >
           Audio Elements
           <PlusIcon size={18} onClick={createNew} className="z-1" />
         </div>

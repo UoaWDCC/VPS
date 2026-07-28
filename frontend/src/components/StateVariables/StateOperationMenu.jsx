@@ -27,7 +27,11 @@ const StateOperationMenu = ({ component }) => {
       >
         {hasStateOperations && <input type="checkbox" />}
 
-        <div className="collapse-title flex items-center justify-between">
+        <div
+          className={`collapse-title flex items-center justify-between ${
+            hasStateOperations ? "" : "pe-4"
+          }`}
+        >
           State Operations
           <PlusIcon size={18} onClick={createNew} className="z-1" />
         </div>
