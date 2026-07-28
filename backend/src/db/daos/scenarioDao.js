@@ -3,6 +3,8 @@ import Scenario from "../models/scenario.js";
 import Scene from "../models/scene.js";
 import { v4 as uuidv4 } from "uuid";
 import User from "../models/user.js";
+import { addDelta, hasFileRef } from "./sceneDao.js";
+import { applyReferenceDeltas } from "./fileDao.js";
 
 /**
  * Creates a scenario in the database with an initial scene
@@ -215,11 +217,23 @@ const updateRoleList = async (scenarioId, updatedRoleList) => {
 const deleteScenario = async (scenarioId) => {
   try {
     const res = await Scenario.findOneAndDelete({ _id: scenarioId });
-    if (res !== null) {
-      await Scene.deleteMany({ _id: { $in: res.scenes } });
-      return true;
-    }
-    return false;
+    if (res === null) return false;
+
+    const scenes = await Scene.find({ _id: { $in: res.scenes } });
+
+    const fileRefDeltas = new Map();
+    scenes.forEach((scene) => {
+      (scene.components ?? []).forEach((component) => {
+        if (hasFileRef(component)) {
+          addDelta(fileRefDeltas, component.fileId, -1);
+        }
+      });
+    });
+
+    await Scene.deleteMany({ _id: { $in: res.scenes } });
+    await applyReferenceDeltas(fileRefDeltas);
+
+    return true;
   } catch {
     return false;
   }
