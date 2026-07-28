@@ -38,26 +38,26 @@ function AudioManager() {
 
   return (
     <>
-    <div
-      className={`collapse overflow-visible ${
-        hasAudios ? "collapse-arrow" : ""
-      } bg-base-300 rounded-sm text-s`}
-    >
-      {hasAudios && <input type="checkbox" />}
+      <div
+        className={`collapse overflow-visible ${
+          hasAudios ? "collapse-arrow" : ""
+        } bg-base-300 rounded-sm text-s`}
+      >
+        {hasAudios && <input type="checkbox" />}
 
-      <div className="collapse-title flex items-center justify-between">
-        Audio Elements
-        <PlusIcon size={18} onClick={createNew} className="z-1" />
-      </div>
-
-      {hasAudios && (
-        <div className="collapse-content text--1 bg-base-200 px-0">
-          {audios.map((audio) => (
-            <EditAudioComponent component={audio} key={audio.id} />
-          ))}
+        <div className="collapse-title flex items-center justify-between">
+          Audio Elements
+          <PlusIcon size={18} onClick={createNew} className="z-1" />
         </div>
-      )}
-    </div>
+
+        {hasAudios && (
+          <div className="collapse-content text--1 bg-base-200 px-0">
+            {audios.map((audio) => (
+              <EditAudioComponent component={audio} key={audio.id} />
+            ))}
+          </div>
+        )}
+      </div>
       <input
         type="file"
         accept=".mp3"

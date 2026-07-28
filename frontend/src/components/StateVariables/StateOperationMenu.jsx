@@ -20,31 +20,31 @@ const StateOperationMenu = ({ component }) => {
 
   return (
     <>
-    <div
-      className={`collapse overflow-visible ${
-        hasStateOperations ? "collapse-arrow" : ""
-      } bg-base-300 rounded-sm text-s`}
-    >
-      {hasStateOperations && <input type="checkbox" />}
+      <div
+        className={`collapse overflow-visible ${
+          hasStateOperations ? "collapse-arrow" : ""
+        } bg-base-300 rounded-sm text-s`}
+      >
+        {hasStateOperations && <input type="checkbox" />}
 
-      <div className="collapse-title flex items-center justify-between">
-        State Operations
-        <PlusIcon size={18} onClick={createNew} className="z-1" />
-      </div>
-
-      {hasStateOperations && (
-        <div className="collapse-content text--1 bg-base-200 px-0">
-          {stateOperations.map((operation, i) => (
-            <EditStateOperation
-              component={component}
-              operationIndex={i}
-              stateOperation={operation}
-              key={i}
-            />
-          ))}
+        <div className="collapse-title flex items-center justify-between">
+          State Operations
+          <PlusIcon size={18} onClick={createNew} className="z-1" />
         </div>
-      )}
-    </div>
+
+        {hasStateOperations && (
+          <div className="collapse-content text--1 bg-base-200 px-0">
+            {stateOperations.map((operation, i) => (
+              <EditStateOperation
+                component={component}
+                operationIndex={i}
+                stateOperation={operation}
+                key={i}
+              />
+            ))}
+          </div>
+        )}
+      </div>
       <CreateStateOperation
         component={component}
         open={createOpen}
