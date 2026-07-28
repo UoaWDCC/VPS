@@ -186,6 +186,7 @@ export function ObjectPropertyEditor({ component }) {
               <div className="ml-6 flex-1">
                 <button
                   type="button"
+                  aria-label="Flip horizontally"
                   className="hover:bg-stone-800 cursor-pointer rounded-sm"
                   onClick={() => flipComponent("x")}
                 >
@@ -193,6 +194,7 @@ export function ObjectPropertyEditor({ component }) {
                 </button>
                 <button
                   type="button"
+                  aria-label="Flip vertically"
                   className="hover:bg-stone-800 cursor-pointer rounded-sm"
                   onClick={() => flipComponent("y")}
                 >
