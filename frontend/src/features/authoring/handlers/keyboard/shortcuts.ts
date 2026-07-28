@@ -55,10 +55,9 @@ const shortcuts: Shortcut[] = [
       return !mode.includes("text") && Boolean(selected);
     },
     run: () => {
-      const { selected, setSelected } = useEditorStore.getState();
+      const { selected } = useEditorStore.getState();
       if (!selected) return;
       remove(selected);
-      setSelected(null);
     },
   },
   {

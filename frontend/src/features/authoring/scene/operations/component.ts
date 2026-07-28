@@ -123,7 +123,7 @@ export function parseComponent(component: Component) {
 
 export function duplicateComponent(id: string) {
   const component = getComponent(id);
-  if (!component) return;
+  if (!component) return null;
   return parseComponent(structuredClone(component));
 }
 
