@@ -76,7 +76,7 @@ export function ObjectPropertyEditor({ component }) {
     }
     set(value);
 
-    if ((Math.sign(value) !== Math.sign(prevValue)) && prevValue !== null) {
+    if (Math.sign(value) !== Math.sign(prevValue) && prevValue !== null) {
       flipComponent(type === "width" ? "x" : "y");
     }
 
@@ -85,7 +85,16 @@ export function ObjectPropertyEditor({ component }) {
 
   // uses the same function as the drag box feat w modifyComponentProp
   function saveProp(v, type, set) {
-    const value = inputValidation(type, v, set, (type === "width" || type === "height") ? (type === "width" ? inputWidth : inputHeight) : null); 
+    const value = inputValidation(
+      type,
+      v,
+      set,
+      type === "width" || type === "height"
+        ? type === "width"
+          ? inputWidth
+          : inputHeight
+        : null
+    );
     if (value === null) return;
     const verts = component.bounds.verts;
 
