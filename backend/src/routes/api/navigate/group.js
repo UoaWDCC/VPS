@@ -9,6 +9,7 @@ import { getStateVariables } from "../../../db/daos/scenarioDao.js";
 import { setGroupStateVariables } from "../../../db/daos/groupDao.js";
 import { applyStateOperations } from "../../../util/statevariables/stateOperations.js";
 import { getComponent } from "../../../db/daos/sceneDao.js";
+import { normaliseString } from "../../../util/normalise.js";
 
 const createInvalidError = (roles) =>
   new HttpError("Invalid role to access this scene", STATUS.FORBIDDEN, {
@@ -17,10 +18,10 @@ const createInvalidError = (roles) =>
 
 // role names are stored with whatever casing/whitespace they were
 // authored/uploaded with, so access checks must normalize both
-const normalizeRole = (role) => role?.trim().toLowerCase();
 const roleMatches = (roles, role) => {
-  const target = normalizeRole(role);
-  return roles.some((r) => normalizeRole(r) === target);
+  const target = normaliseString(role);
+  if (!target) return false;
+  return roles.some((r) => normaliseString(r) === target);
 };
 
 export const getSimpleScene = async (sceneId) => {

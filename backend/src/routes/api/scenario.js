@@ -25,6 +25,7 @@ import { retrieveAssignedScenarioList } from "../../db/daos/userDao.js";
 import scene from "./scene.js";
 import { deleteAccessList } from "../../db/daos/accessDao.js";
 import { handle, HttpError } from "../../util/error.js";
+import { normaliseString } from "../../util/normalise.js";
 
 const router = Router();
 
@@ -194,10 +195,8 @@ router.post(
   "/:scenarioId/roles",
   handle(async (req, res) => {
     const { role } = req.body;
-
-    if (typeof role !== "string" || !role.trim())
+    if (!normaliseString(role))
       throw new HttpError("role name is required", HTTP_BAD_REQUEST);
-
     const roleList = await createRole(req.params.scenarioId, role);
     res.status(HTTP_OK).json(roleList);
   })
@@ -207,7 +206,8 @@ router.post(
 router.delete(
   "/:scenarioId/roles/:role",
   handle(async (req, res) => {
-    const roleList = await deleteRole(req.params.scenarioId, req.params.role);
+    const { scenarioId, role } = req.params;
+    const roleList = await deleteRole(scenarioId, role);
     res.status(HTTP_OK).json(roleList);
   })
 );
