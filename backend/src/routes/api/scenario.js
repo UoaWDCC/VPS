@@ -104,7 +104,7 @@ router.patch("/:scenarioId", async (req, res) => {
   res.status(HTTP_OK).json(scenario);
 });
 
-// Delete a scenario of a user
+// Delete a scenario
 router.delete("/:scenarioId", async (req, res) => {
   const deleted = await deleteScenario(req.params.scenarioId);
   await deleteAccessList(req.params.scenarioId);

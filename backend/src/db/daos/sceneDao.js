@@ -5,11 +5,11 @@ import status from "../../util/status.js";
 import { applyReferenceDeltas } from "./fileDao.js";
 import { HttpStatusCode } from "axios";
 
-function addDelta(fileRefDeltas, fileId, delta) {
+export function addDelta(fileRefDeltas, fileId, delta) {
   fileRefDeltas.set(fileId, (fileRefDeltas.get(fileId) ?? 0) + delta);
 }
 
-function hasFileRef(component) {
+export function hasFileRef(component) {
   if (!component) return false;
   return ["audio", "image"].includes(component.type) && component.fileId;
 }
