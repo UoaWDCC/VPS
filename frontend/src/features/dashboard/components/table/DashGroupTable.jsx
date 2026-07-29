@@ -7,7 +7,7 @@ import { Ban, EyeIcon } from "lucide-react";
 // Need to update this to be able to take either multiple groups or individual group (to display members per row)
 // Acutally need to update this component to make it reuseable and take in params to dynamically display thead, tdata stuff with num col etc
 
-const DashGroupTable = ({ groupInfo, rowClick, onRevoke }) => {
+const DashGroupTable = ({ groupInfo, rowClick, onRevoke, onMemberClick }) => {
   // Check if group info is in array (Scenario Dashboard) or object (Vewiing Group)
   // Maybe just make mode default to groups?
   let mode;
@@ -48,7 +48,7 @@ const DashGroupTable = ({ groupInfo, rowClick, onRevoke }) => {
       [...sort]
         .sort(getComparator(order, orderBy))
         .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage),
-    [order, orderBy, page, rowsPerPage]
+    [sort, order, orderBy, page, rowsPerPage]
   );
 
   return (
@@ -115,11 +115,20 @@ const DashGroupTable = ({ groupInfo, rowClick, onRevoke }) => {
                   <td>{ginfo.users[0].group}</td>
                   <td>{ginfo.users.length}</td>
                   <td>
-                    {ginfo.users.map((user) => (
-                      <span key={user.email}>
-                        {user.name} - [{user.role}]
-                      </span>
-                    ))}
+                    <div className="flex flex-col gap-1.5 py-1">
+                      {ginfo.users.map((user) => (
+                        <button
+                          key={user.email}
+                          onClick={() => onMemberClick?.(user)}
+                          className="flex items-center gap-2 text-left hover:underline w-fit"
+                        >
+                          <span>{user.name}</span>
+                          <span className="badge badge-ghost badge-md text-sm">
+                            {user.role}
+                          </span>
+                        </button>
+                      ))}
+                    </div>
                   </td>
                   <td>
                     {ginfo.path.length != 0 ? "Started" : "Not yet started"}
@@ -155,7 +164,7 @@ const DashGroupTable = ({ groupInfo, rowClick, onRevoke }) => {
             colSpan={mode == "groups" ? 5 : onRevoke ? 4 : 3}
             value={rowsPerPage}
             onChange={handleChangeRowsPerPage}
-            count={group.length}
+            count={sort.length}
             page={page}
             rowsPerPage={rowsPerPage}
             onPageChange={handleChangePage}

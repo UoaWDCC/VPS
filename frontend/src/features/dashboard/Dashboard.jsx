@@ -66,6 +66,12 @@ export default function Dashboard() {
     history.push(`${url}/view-group/${groupId}`);
   };
 
+  // Jumps to the Members tab, filtered down to just this member's group
+  const handleMemberClick = (member) => {
+    setActiveTab("members");
+    setMemberSearch(member.group != null ? String(member.group) : "");
+  };
+
   const handleRevoke = async (member) => {
     if (!window.confirm(`Remove ${member.name} from their group?`)) return;
     try {
@@ -112,13 +118,17 @@ export default function Dashboard() {
     [scenarioGroupInfo]
   );
 
-  // Filters the Members tab list by name or email
+  // Filters the Members tab list by name, email, or an exact group match
+  // (an exact group match lets clicking a member in the Groups tab jump
+  // here pre-filtered to just their group, without name/email substrings
+  // that happen to equal the group value causing unrelated false matches)
   const filteredMembers = useMemo(() => {
     const query = memberSearch.trim().toLowerCase();
     if (!query) return allMembers;
     return {
       users: allMembers.users.filter(
         (user) =>
+          String(user.group).toLowerCase() === query ||
           user.name?.toLowerCase().includes(query) ||
           user.email?.toLowerCase().includes(query)
       ),
@@ -135,9 +145,21 @@ export default function Dashboard() {
     ).length;
 
     const stats = [
-      { label: "Total Groups", value: totalGroups },
-      { label: "Has Started", value: groupsStarted },
-      { label: "Not Started", value: groupsNotStarted },
+      {
+        label: "Total Groups",
+        value: totalGroups,
+        desc: "No. of groups assigned",
+      },
+      {
+        label: "Has Started",
+        value: groupsStarted,
+        desc: "No. of groups that have started",
+      },
+      {
+        label: "Not Started",
+        value: groupsNotStarted,
+        desc: "No. of groups not yet started",
+      },
     ];
 
     return (
@@ -145,12 +167,10 @@ export default function Dashboard() {
         className={`${className} flex divide-x divide-base-content/15 rounded-box border border-base-content/15 bg-base-200 w-full`}
       >
         {stats.map((stat) => (
-          <div
-            key={stat.label}
-            className="flex-1 flex items-center justify-between gap-4 px-6 py-5"
-          >
+          <div key={stat.label} className="flex-1 flex flex-col gap-1 px-6 py-5">
             <span className="font-semibold">{stat.label}</span>
             <span className="text-3xl font-bold">{stat.value}</span>
+            <span className="text-sm text-base-content/60">{stat.desc}</span>
           </div>
         ))}
       </div>
@@ -184,13 +204,13 @@ export default function Dashboard() {
                   </h2>
                   <div className="join">
                     <button
-                      className={`btn join-item ${activeTab === "groups" ? "btn-primary" : "btn-ghost"}`}
+                      className={`btn btn-ghost join-item ${activeTab === "groups" ? "text-white" : "text-base-content/60 hover:bg-primary/10 hover:text-primary"}`}
                       onClick={() => setActiveTab("groups")}
                     >
                       Groups
                     </button>
                     <button
-                      className={`btn join-item ${activeTab === "members" ? "btn-primary" : "btn-ghost"}`}
+                      className={`btn btn-ghost join-item ${activeTab === "members" ? "text-white" : "text-base-content/60 hover:bg-primary/10 hover:text-primary"}`}
                       onClick={() => setActiveTab("members")}
                     >
                       Members
@@ -201,7 +221,7 @@ export default function Dashboard() {
                   <label className="input search w-full mb-4">
                     <input
                       type="search"
-                      placeholder="Search members"
+                      placeholder="Search members by name, email, or group"
                       value={memberSearch}
                       onChange={(e) => setMemberSearch(e.target.value)}
                     />
@@ -214,6 +234,7 @@ export default function Dashboard() {
                       key="groups"
                       groupInfo={scenarioGroupInfo}
                       rowClick={viewGroup}
+                      onMemberClick={handleMemberClick}
                     />
                   ) : (
                     <DashGroupTable
