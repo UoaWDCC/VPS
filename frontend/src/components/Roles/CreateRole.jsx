@@ -68,7 +68,7 @@ const CreateRole = ({ scenarioId }) => {
             onChange={(e) => setRole(e.target.value)}
             onKeyDown={handleKeyDown}
             placeholder="Name"
-            className="input"
+            className="input w-full"
           />
         </div>
       </div>
