@@ -3,7 +3,6 @@ import User from "../../../db/models/user.js";
 import Group from "../../../db/models/group.js";
 import Scenario from "../../../db/models/scenario.js";
 import Note from "../../../db/models/note.js";
-import Resource from "../../../db/models/resource.js";
 import { HttpError } from "../../../util/error.js";
 import STATUS from "../../../util/status.js";
 import { getStateVariables } from "../../../db/daos/scenarioDao.js";
@@ -304,29 +303,4 @@ export const groupReset = async (req) => {
   ).exec();
 
   return { status: STATUS.OK };
-};
-
-// Fetches groups flags and returns resources
-export const groupGetResources = async (req) => {
-  const group = await Group.findById(req.params.groupId);
-
-  if (!group) {
-    throw new HttpError("Group not found", STATUS.NOT_FOUND);
-  }
-
-  const flags = group.currentFlags || [];
-  const resources = [];
-
-  // Fetch all resources from the database
-  const allResources = await Resource.find({});
-
-  // Filter resources where all requiredFlags are present in the group's current flags
-  const matchingResources = allResources.filter((resource) =>
-    resource.requiredFlags.every((flag) => flags.includes(flag))
-  );
-
-  // Push the filtered resources to the resources array
-  resources.push(...matchingResources);
-
-  return { status: STATUS.OK, json: resources };
 };

@@ -11,9 +11,9 @@ export default function ImageListContainer({
       {data?.map((item) => (
         <button
           type="button"
-          key={item.id}
+          key={item._id}
           onClick={() => onItemSelected(item)}
-          className={item.id === selectedId ? "border-accent border-2" : ""}
+          className={item._id === selectedId ? "border-accent border-2" : ""}
         >
           <div
             className="aspect-square bg-cover bg-center hover:opacity-50 hover:cursor-pointer"

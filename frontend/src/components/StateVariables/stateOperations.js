@@ -25,6 +25,9 @@ export const applyStateOperations = (stateVariables, stateOperations) => {
         case operations.ADD:
           stateVariable.value += stateOperation.value;
           break;
+        case operations.SUBTRACT:
+          stateVariable.value -= stateOperation.value;
+          break;
         default:
           console.error(`Unknown operation ${stateOperation.operation}`);
       }
