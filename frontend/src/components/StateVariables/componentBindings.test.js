@@ -99,11 +99,21 @@ test("provides component-specific binding targets", () => {
     ...box(),
     type: "line",
   }).map((target) => target.key);
+  const textboxTargets = getComponentBindingTargets({
+    ...box(),
+    type: "textbox",
+  }).map((target) => target.key);
+  const boxTargets = getComponentBindingTargets(box()).map(
+    (target) => target.key
+  );
 
-  assert.ok(imageTargets.includes("href"));
+  assert.ok(!imageTargets.includes("href"));
+  assert.ok(!imageTargets.includes("preserveAspectRatio"));
   assert.ok(!imageTargets.includes("fill"));
   assert.ok(lineTargets.includes("stroke"));
   assert.ok(!lineTargets.includes("rotation"));
+  assert.ok(!textboxTargets.includes("padding"));
+  assert.ok(!boxTargets.includes("opacity"));
 });
 
 test("resolves every component in a scene", () => {
@@ -112,19 +122,19 @@ test("resolves every component in a scene", () => {
     components: {
       first: box({
         id: "first",
-        stateBindings: [{ target: "opacity", stateVariableId: "opacity" }],
+        stateBindings: [{ target: "x", stateVariableId: "x" }],
       }),
       second: box({ id: "second" }),
     },
   };
 
   const resolved = resolveSceneBindings(scene, [
-    { id: "opacity", type: "number", value: 2 },
+    { id: "x", type: "number", value: 25 },
   ]);
 
-  assert.equal(resolved.components.first.opacity, 1);
+  assert.equal(resolved.components.first.bounds.verts[0].x, 25);
   assert.equal(resolved.components.second, scene.components.second);
-  assert.equal(scene.components.first.opacity, undefined);
+  assert.equal(scene.components.first.bounds.verts[0].x, 10);
 });
 
 test("applies safe colour values and rejects unsafe or invalid colours", () => {
@@ -148,41 +158,4 @@ test("applies safe colour values and rejects unsafe or invalid colours", () => {
   assert.equal(safe.stroke, "rgb(10, 20, 30)");
   assert.equal(unsafe.fill, component.fill);
   assert.equal(unsafe.stroke, component.stroke);
-});
-
-test("only applies approved image source schemes", () => {
-  const component = {
-    ...box({ type: "image", href: "https://example.com/original.png" }),
-    stateBindings: [{ target: "href", stateVariableId: "image" }],
-  };
-
-  const httpsImage = resolveComponentBindings(component, [
-    {
-      id: "image",
-      type: "string",
-      value: " https://example.com/replacement.png ",
-    },
-  ]);
-  const dataImage = resolveComponentBindings(component, [
-    {
-      id: "image",
-      type: "string",
-      value: "data:image/png;base64,iVBORw0KGgo=",
-    },
-  ]);
-  const unsafeImage = resolveComponentBindings(component, [
-    { id: "image", type: "string", value: "javascript:alert(1)" },
-  ]);
-  const unsafeSvg = resolveComponentBindings(component, [
-    {
-      id: "image",
-      type: "string",
-      value: "data:image/svg+xml,<svg onload=alert(1)>",
-    },
-  ]);
-
-  assert.equal(httpsImage.href, "https://example.com/replacement.png");
-  assert.equal(dataImage.href, "data:image/png;base64,iVBORw0KGgo=");
-  assert.equal(unsafeImage.href, component.href);
-  assert.equal(unsafeSvg.href, component.href);
 });

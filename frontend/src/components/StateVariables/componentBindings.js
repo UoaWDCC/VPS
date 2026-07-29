@@ -1,3 +1,11 @@
+import {
+  clamp1,
+  getRelativeBounds,
+  multiply,
+  scale,
+  translate,
+} from "../../features/authoring/util.ts";
+
 const allComponentTypes = [
   "box",
   "ellipse",
@@ -17,40 +25,41 @@ function supports(types) {
   return (component) => types.includes(component.type);
 }
 
-function updateBounds(component, updater) {
+function translateAxis(component, axis, value) {
+  const bounds = getRelativeBounds(component.bounds.verts);
+  const delta = { x: 0, y: 0, [axis]: value - bounds[axis] };
   component.bounds = {
     ...component.bounds,
-    verts: component.bounds.verts.map((vert) => ({ ...vert })),
+    verts: translate(component.bounds.verts, delta),
   };
-  updater(component.bounds);
-}
-
-function translateAxis(component, axis, value) {
-  updateBounds(component, (bounds) => {
-    const current = Math.min(bounds.verts[0][axis], bounds.verts[1][axis]);
-    const delta = value - current;
-    bounds.verts.forEach((vert) => {
-      vert[axis] += delta;
-    });
-  });
 }
 
 function resizeAxis(component, axis, value) {
-  updateBounds(component, (bounds) => {
-    const size = Math.max(0, value);
-    const currentMin = Math.min(bounds.verts[0][axis], bounds.verts[1][axis]);
-    const currentSize = Math.abs(bounds.verts[1][axis] - bounds.verts[0][axis]);
+  const bounds = getRelativeBounds(component.bounds.verts);
+  const dimension = axis === "x" ? "width" : "height";
+  const size = clamp1(value, 0, Infinity);
+  const origin = { x: bounds.x, y: bounds.y };
 
-    if (currentSize === 0) {
-      bounds.verts[1][axis] = bounds.verts[0][axis] + size;
-      return;
-    }
+  if (bounds[dimension] === 0) {
+    component.bounds = {
+      ...component.bounds,
+      verts: component.bounds.verts.map((vert, index) => ({
+        ...vert,
+        ...(index === 1 && { [axis]: origin[axis] + size }),
+      })),
+    };
+    return;
+  }
 
-    const scale = size / currentSize;
-    bounds.verts.forEach((vert) => {
-      vert[axis] = currentMin + (vert[axis] - currentMin) * scale;
-    });
-  });
+  const factor = { x: 1, y: 1, [axis]: size / bounds[dimension] };
+  const relativeVerts = translate(component.bounds.verts, scale(origin, -1));
+  component.bounds = {
+    ...component.bounds,
+    verts: translate(
+      relativeVerts.map((vert) => multiply(vert, factor)),
+      origin
+    ),
+  };
 }
 
 function setProp(prop) {
@@ -78,26 +87,6 @@ function isSafeColor(value) {
   return /^(?:rgb|rgba|hsl|hsla)\(\s*-?(?:\d*\.)?\d+%?(?:\s*[,/ ]\s*-?(?:\d*\.)?\d+%?){2,4}\s*\)$/i.test(
     color
   );
-}
-
-function isSafeImageSource(value) {
-  if (typeof value !== "string") return false;
-
-  const source = value.trim();
-  if (
-    /^data:image\/(?:avif|bmp|gif|jpeg|png|webp);base64,[a-z\d+/=\s]+$/i.test(
-      source
-    )
-  ) {
-    return true;
-  }
-
-  try {
-    const url = new URL(source);
-    return url.protocol === "http:" || url.protocol === "https:";
-  } catch {
-    return false;
-  }
 }
 
 export const componentBindingTargets = [
@@ -146,15 +135,6 @@ export const componentBindingTargets = [
     apply: setProp("zIndex"),
   },
   {
-    key: "opacity",
-    label: "Opacity",
-    stateType: "number",
-    supports: supports(allComponentTypes),
-    apply: (component, value) => {
-      component.opacity = Math.max(0, Math.min(1, value));
-    },
-  },
-  {
     key: "clickable",
     label: "Clickable",
     stateType: "boolean",
@@ -181,31 +161,8 @@ export const componentBindingTargets = [
     stateType: "number",
     supports: supports(strokedComponentTypes),
     apply: (component, value) => {
-      component.strokeWidth = Math.max(0, value);
+      component.strokeWidth = clamp1(value, 0, Infinity);
     },
-  },
-  {
-    key: "padding",
-    label: "Text padding",
-    stateType: "number",
-    supports: supports(["textbox"]),
-    apply: (component, value) => {
-      component.padding = Math.max(0, value);
-    },
-  },
-  {
-    key: "href",
-    label: "Image source",
-    stateType: "string",
-    supports: supports(["image"]),
-    apply: setValidatedProp("href", isSafeImageSource),
-  },
-  {
-    key: "preserveAspectRatio",
-    label: "Image aspect ratio",
-    stateType: "string",
-    supports: supports(["image"]),
-    apply: setProp("preserveAspectRatio"),
   },
 ];
 

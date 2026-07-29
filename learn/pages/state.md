@@ -68,9 +68,9 @@ To create a binding:
 3. Select the component property to control.
 4. Select a tracked value of the required type and press **Create**.
 
-Bindings support position, size, rotation, layer order, opacity, clickability,
-fills, strokes, textbox padding, and image properties where applicable. The
-tracked value type must match the property type shown in the binding dialog.
+Bindings support position, size, rotation, layer order, clickability, fills, and
+strokes where applicable. The tracked value type must match the property type
+shown in the binding dialog.
 Bindings are applied during play mode; the element's saved authoring value is
 used as a fallback if its tracked value is missing or has an incompatible type.
 
