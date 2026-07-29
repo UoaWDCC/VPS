@@ -167,7 +167,10 @@ export default function Dashboard() {
         className={`${className} flex divide-x divide-base-content/15 rounded-box border border-base-content/15 bg-base-200 w-full`}
       >
         {stats.map((stat) => (
-          <div key={stat.label} className="flex-1 flex flex-col gap-1 px-6 py-5">
+          <div
+            key={stat.label}
+            className="flex-1 flex flex-col gap-1 px-6 py-5"
+          >
             <span className="font-semibold">{stat.label}</span>
             <span className="text-3xl font-bold">{stat.value}</span>
             <span className="text-sm text-base-content/60">{stat.desc}</span>

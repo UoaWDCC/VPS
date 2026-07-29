@@ -98,8 +98,7 @@ router.patch(
       );
 
     const group = await removeUserFromGroup(groupId, email);
-    if (!group)
-      throw new HttpError("group not found", HttpStatusCode.NotFound);
+    if (!group) throw new HttpError("group not found", HttpStatusCode.NotFound);
     return res.json(group);
   })
 );
