@@ -171,4 +171,22 @@ describe("Dashboard API tests", () => {
       )
     ).rejects.toMatchObject({ response: { status: 404 } });
   });
+
+  it("PATCH /dashboard/scenarios/:scenarioId/groups/:groupId/revoke returns 404 and does not modify a group that belongs to a different scenario", async () => {
+    const otherScenario = await Scenario.create({
+      name: "Other Scenario",
+      uid: "user2",
+    });
+
+    await expect(
+      axios.patch(
+        `http://localhost:${ctx.port}/api/dashboard/scenarios/${otherScenario._id}/groups/${group._id}/revoke`,
+        { email: "p@example.com" },
+        authHeaders("user2")
+      )
+    ).rejects.toMatchObject({ response: { status: 404 } });
+
+    const untouched = await Group.findById(group._id);
+    expect(untouched.users).toHaveLength(1);
+  });
 });

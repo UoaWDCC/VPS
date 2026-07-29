@@ -89,7 +89,7 @@ router.patch(
   "/scenarios/:scenarioId/groups/:groupId/revoke",
   scenarioOwnerAuth,
   handle(async (req, res) => {
-    const { groupId } = req.params;
+    const { scenarioId, groupId } = req.params;
     const email = normaliseString(req.body.email);
     if (!email || !isValidEmail(email))
       throw new HttpError(
@@ -97,7 +97,7 @@ router.patch(
         HttpStatusCode.BadRequest
       );
 
-    const group = await removeUserFromGroup(groupId, email);
+    const group = await removeUserFromGroup(groupId, scenarioId, email);
     if (!group) throw new HttpError("group not found", HttpStatusCode.NotFound);
     return res.json(group);
   })

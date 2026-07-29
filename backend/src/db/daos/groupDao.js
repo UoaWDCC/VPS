@@ -38,13 +38,14 @@ const createGroup = async (scenarioId, userList) => {
 /**
  * Removes a single user from a group's member list by email
  * @param {String} groupId MongoDB ID of group
+ * @param {String} scenarioId ID of the scenario the group must belong to
  * @param {String} email email of the user to remove
- * @returns the updated group object, or null if the group does not exist
+ * @returns the updated group object, or null if no matching group exists
  */
-const removeUserFromGroup = async (groupId, email) => {
+const removeUserFromGroup = async (groupId, scenarioId, email) => {
   const escapedEmail = email.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
   const group = await Group.findOneAndUpdate(
-    { _id: groupId },
+    { _id: groupId, scenarioId },
     {
       $pull: {
         users: { email: { $regex: `^${escapedEmail}$`, $options: "i" } },
