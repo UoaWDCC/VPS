@@ -16,8 +16,8 @@ async function getAllScenarios(user) {
   return res.data;
 }
 
-async function createScenario(user, name) {
-  const { data: scenario } = await api.post(user, `/api/scenario`, { name });
+async function createScenario(user, details) {
+  const { data: scenario } = await api.post(user, `/api/scenario`, details);
   return scenario._id;
 }
 
@@ -48,7 +48,7 @@ export default function ScenarioContextProvider({ children }) {
   });
 
   const createMutation = useMutation({
-    mutationFn: (name) => createScenario(user, name),
+    mutationFn: (details) => createScenario(user, details),
     onSuccess: () => {
       return queryClient.invalidateQueries(["scenarios"]);
     },
@@ -125,7 +125,7 @@ export default function ScenarioContextProvider({ children }) {
         allScenarios: scenarioQuery.data,
 
         deleteScenario: deleteMutation.mutate,
-        updateScenarioDetails: updateDetailsMutation.mutate,
+        updateScenarioDetails: updateDetailsMutation.mutateAsync,
         createScenario: createMutation.mutateAsync,
 
         roleList,

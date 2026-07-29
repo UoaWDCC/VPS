@@ -207,6 +207,7 @@ function ScenarioInfo() {
           onSave={(details) =>
             updateScenarioDetails({ id: selectedScenarioId, details })
           }
+          onClose={() => setShowEditModal(false)}
         />
       </ModalDialog>
 

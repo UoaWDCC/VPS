@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import { BrowserRouter, Redirect, Route, Switch } from "react-router-dom";
+import ErrorBoundary from "./components/ErrorBoundary";
 
 import AuthenticationContextProvider from "./context/AuthenticationContextProvider";
 import ScenarioContextProvider from "./context/ScenarioContextProvider";
@@ -40,7 +41,7 @@ export default function App() {
   }, []);
 
   return (
-    <>
+    <ErrorBoundary>
       {/* Toaster container */}
       <Toaster
         position="bottom-right"
@@ -134,6 +135,6 @@ export default function App() {
           </BrowserRouter>
         </QueryClientProvider>
       </AuthenticationContextProvider>
-    </>
+    </ErrorBoundary>
   );
 }

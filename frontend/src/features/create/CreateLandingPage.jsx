@@ -2,7 +2,8 @@ import { useState, useContext } from "react";
 import { useHistory } from "react-router-dom";
 import ScenarioContext from "../../context/ScenarioContext";
 import Thumbnail from "../authoring/components/Thumbnail";
-import CreateScenarioCard from "../../components/CreateScenarioCard/CreateScenarioCard";
+import ModalDialog from "../../components/ModalDialogue";
+import DetailEditModal from "../scenarioInfo/components/DetailEditModal";
 import TopNavBar from "../../features/TopNavBar/TopNavBar";
 import FabMenu from "../../components/FabMenu";
 import { PlusIcon, SearchIcon, Trash2Icon } from "lucide-react";
@@ -45,9 +46,8 @@ export default function CreateLandingPage() {
     scenario.name.toLowerCase().includes(search.toLowerCase())
   );
 
-  async function handleCreate(name) {
-    setShowCreateModal(false);
-    const scenarioId = await createScenario(name);
+  async function handleCreate(details) {
+    const scenarioId = await createScenario(details);
     history.push(`/scenario/${scenarioId}`);
   }
 
@@ -124,12 +124,18 @@ export default function CreateLandingPage() {
       />
 
       {/* Create Scenario Modal */}
-      {showCreateModal && (
-        <CreateScenarioCard
-          onCreate={handleCreate}
-          onClose={() => setShowCreateModal(false)}
+      <ModalDialog
+        title="Create Scenario"
+        open={showCreateModal}
+        onClose={() => setShowCreateModal(false)}
+      >
+        <DetailEditModal
+          scenario={null}
+          submitLabel="Create"
+          pendingLabel="Creating..."
+          onSave={handleCreate}
         />
-      )}
+      </ModalDialog>
 
       <FabMenu />
     </div>
