@@ -38,7 +38,6 @@ interface GenericComponent {
   id: string;
   bounds: Bounds;
   zIndex: number;
-  opacity?: number;
   clickable?: boolean;
   stateBindings?: StateBinding[];
 }

@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "test": "node --test",
+    "test": "node --import ./scripts/register-typescript-loader.mjs --test",
     "lint": "eslint src",
     "lint:fix": "eslint --fix src",
     "prettier": "prettier --check src",
