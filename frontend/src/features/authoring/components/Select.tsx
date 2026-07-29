@@ -5,6 +5,7 @@ import {
   type FocusEvent,
   type KeyboardEvent,
 } from "react";
+import { ChevronDown } from "lucide-react";
 
 interface SelectInputProps<T> {
   values: T[];
@@ -55,6 +56,13 @@ function SelectInput<T>({
   }
 
   function handleTriggerKeyDown(event: KeyboardEvent<HTMLButtonElement>) {
+    if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault();
+      if (open) setOpen(false);
+      else openMenu();
+      return;
+    }
+
     if (event.key === "ArrowDown" || event.key === "ArrowUp") {
       event.preventDefault();
       openMenu(
@@ -72,6 +80,11 @@ function SelectInput<T>({
     let nextIndex = index;
 
     switch (event.key) {
+      case "Enter":
+      case " ":
+        event.preventDefault();
+        selectOption(index);
+        return;
       case "ArrowDown":
         nextIndex = (index + 1) % optionCount;
         break;
@@ -112,9 +125,16 @@ function SelectInput<T>({
         aria-expanded={open}
         onClick={() => (open ? setOpen(false) : openMenu())}
         onKeyDown={handleTriggerKeyDown}
-        className="justify-start input mb-1 font-normal join-item w-full"
+        className="justify-between input mb-1 font-normal join-item w-full"
       >
-        {value != null ? render(value) : "None"}
+        <span className="truncate">
+          {value != null ? render(value) : "None"}
+        </span>
+        <ChevronDown
+          aria-hidden="true"
+          className={`shrink-0 transition-transform ${open ? "rotate-180" : ""}`}
+          size={16}
+        />
       </button>
       {!disabled && open && (
         <ul
