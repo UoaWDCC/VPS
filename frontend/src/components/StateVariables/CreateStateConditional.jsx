@@ -34,6 +34,23 @@ const CreateStateConditional = ({ resource, open, setOpen }) => {
 
   const queryClient = useQueryClient();
 
+  const createConditionalMutation = useMutation({
+    mutationFn: (conditional) =>
+      createStateConditional(user, scenarioId, resource._id, conditional),
+    onSettled: () => queryClient.invalidateQueries(["resources", scenarioId]),
+    onError: (e) => {
+      console.error(e);
+      toast.error("Error creating state conditional");
+    },
+    onSuccess: () => {
+      setSelectedState(null);
+      setComparator(null);
+      setValue(null);
+      setOpen(false);
+      toast.success("State conditional created!");
+    },
+  });
+
   if (!stateVariables?.length) {
     return (
       <ModalDialog
@@ -52,23 +69,6 @@ const CreateStateConditional = ({ resource, open, setOpen }) => {
       </ModalDialog>
     );
   }
-
-  const createConditionalMutation = useMutation({
-    mutationFn: (conditional) =>
-      createStateConditional(user, scenarioId, resource._id, conditional),
-    onSettled: () => queryClient.invalidateQueries(["resources", scenarioId]),
-    onError: (e) => {
-      console.error(e);
-      toast.error("Error creating state conditional");
-    },
-    onSuccess: () => {
-      setSelectedState(null);
-      setComparator(null);
-      setValue(null);
-      setOpen(false);
-      toast.success("State conditional created!");
-    },
-  });
 
   const handleSubmit = () => {
     if (!selectedState?.id || !comparator) return;

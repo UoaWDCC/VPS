@@ -68,8 +68,10 @@ export default function ResourcesPanel({
 
   // Filtered tree for search
   const filteredTree = (() => {
-    if (!search.trim()) return resourceTree;
-    const q = search.trim().toLowerCase();
+    const filtered = filterTreeByConditions(resourceTree, stateVariables);
+
+    const q = search.trim()?.toLowerCase();
+    if (!q) return filtered;
 
     // NOTE: the filtering by state variables should ideally be done on the server to prevent cheating, but here we filter before rendering
 

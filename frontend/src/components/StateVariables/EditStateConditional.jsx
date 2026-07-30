@@ -45,10 +45,6 @@ const EditStateConditional = ({ resource, conditional }) => {
     if (conditional.value !== value) setValue(conditional.value);
   }, [conditional]);
 
-  if (!stateVariables) {
-    return null;
-  }
-
   const deleteConditionalMutation = useMutation({
     mutationFn: (conditionalId) =>
       deleteStateConditional(user, scenarioId, resource._id, conditionalId),
@@ -95,11 +91,11 @@ const EditStateConditional = ({ resource, conditional }) => {
     onSettled: () => queryClient.invalidateQueries(["resources", scenarioId]),
     onError: (e) => {
       console.error(e);
-      toast.error("Error deleting state conditional");
+      toast.error("Error updating state conditional");
     },
   });
 
-  const stateVariable = stateVariables.find(
+  const stateVariable = stateVariables?.find(
     (v) => v.id === conditional.stateVariableId
   );
   if (!stateVariable) return null;
