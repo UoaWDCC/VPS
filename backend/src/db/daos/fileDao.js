@@ -52,9 +52,10 @@ export async function applyReferenceDelta(fileId, delta) {
 }
 
 /**
- * Retrieves all image files for a scenario
+ * Retrieves all files of a given type for a scenario
  * @param {string} scenarioId MongoDB ID of scenario
- * @returns {Promise<Object[]>} Array of image file documents
+ * @param {string} type File type to filter by (e.g. "image", "audio", "document")
+ * @returns {Promise<Object[]>} Array of matching file documents
  */
 export function retrieveFiles(scenarioId, type) {
   return UploadedFile.find({ scenarioId, type }).lean();
@@ -62,8 +63,8 @@ export function retrieveFiles(scenarioId, type) {
 
 /**
  * Retrieves a file object by ID
- * @param {string} fileId MongoDB ID of file
  * @param {string} scenarioId MongoDB ID of scenario
+ * @param {string} fileId MongoDB ID of file
  * @returns {Promise<Object|null>} The file document, or null if not found
  */
 export function retrieveFile(scenarioId, fileId) {
