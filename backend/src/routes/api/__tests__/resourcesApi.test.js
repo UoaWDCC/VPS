@@ -225,7 +225,7 @@ describe("Resources API tests", () => {
 
     const dbFile = await UploadedFile.findById(uploadedFile._id);
     expect(dbFile.refCount).toBe(0);
-    expect(dbFile.deletedAt).toBeInstanceOf(Date);
+    expect(dbFile.orphanedAt).toBeInstanceOf(Date);
   });
 
   // --- State conditionals ---
