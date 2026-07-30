@@ -24,6 +24,10 @@ export default function CreateStateBinding({ component, open, setOpen }) {
         (variable) => variable.type === target.stateType
       )
     : [];
+  const targetAlreadyBound =
+    component?.stateBindings?.some(
+      (binding) => binding.target === target?.key
+    ) ?? false;
 
   function selectTarget(nextTarget) {
     setTarget(nextTarget);
@@ -39,13 +43,19 @@ export default function CreateStateBinding({ component, open, setOpen }) {
   function create() {
     if (!target || !stateVariable) return;
 
-    modifyComponentProp(component.id, "stateBindings", (bindings) => [
-      ...(bindings ?? []),
-      {
-        target: target.key,
-        stateVariableId: stateVariable.id,
-      },
-    ]);
+    modifyComponentProp(component.id, "stateBindings", (bindings) => {
+      if (bindings?.some((binding) => binding.target === target.key)) {
+        return bindings;
+      }
+
+      return [
+        ...(bindings ?? []),
+        {
+          target: target.key,
+          stateVariableId: stateVariable.id,
+        },
+      ];
+    });
     close();
   }
 
@@ -95,8 +105,11 @@ export default function CreateStateBinding({ component, open, setOpen }) {
 
       <div className="modal-action">
         <button
-          className={`btn ${(!target || !stateVariable) && "btn-disabled"}`}
+          className={`btn ${
+            (!target || !stateVariable || targetAlreadyBound) && "btn-disabled"
+          }`}
           onClick={create}
+          disabled={!target || !stateVariable || targetAlreadyBound}
         >
           Create
         </button>
