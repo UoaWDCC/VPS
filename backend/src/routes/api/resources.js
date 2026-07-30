@@ -56,9 +56,16 @@ router.post(
       throw new HttpError("invalid file id", HttpStatusCode.BadRequest);
 
     if (parentId) {
-      const parent = await Resource.exists({ _id: parentId, scenarioId });
+      const parent = await Resource.exists({
+        _id: parentId,
+        scenarioId,
+        type: "collection",
+      });
       if (!parent)
-        throw new HttpError("group not found", HttpStatusCode.NotFound);
+        throw new HttpError(
+          "parent collection not found",
+          HttpStatusCode.NotFound
+        );
     }
 
     const file = await UploadedFile.exists({ _id: fileId, scenarioId });
@@ -129,12 +136,16 @@ router.delete(
     if (resource.type === "collection") {
       const children = await Resource.find({ parentId: resource._id });
       for (const child of children) {
-        const fileId = child.fileId.toString();
-        fileRefDeltas.set(fileId, (fileRefDeltas.get(fileId) ?? 0) - 1);
+        if (child.fileId) {
+          const fileId = child.fileId.toString();
+          fileRefDeltas.set(fileId, (fileRefDeltas.get(fileId) ?? 0) - 1);
+        }
       }
       await Resource.deleteMany({ parentId: resource._id });
     } else {
-      fileRefDeltas.set(resource.fileId, -1);
+      if (resource.fileId) {
+        fileRefDeltas.set(resource.fileId.toString(), -1);
+      }
     }
 
     await applyReferenceDeltas(fileRefDeltas);

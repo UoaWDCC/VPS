@@ -13,6 +13,10 @@ import { v4 as uuid } from "uuid";
 import ResourcePreview from "./ResourcePreview";
 import SkeletonBody from "./ResourcesSkeleton";
 
+function isTemp(resource) {
+  return resource._id.startsWith("temp.");
+}
+
 async function uploadFileResource(user, scenarioId, parentId, file) {
   const formData = new FormData();
   formData.append("file", file);
@@ -89,8 +93,8 @@ export default function ManageResourcesPage() {
       const tempId = `temp.${uuid()}`;
       const temp = { parentId, name: file.name, _id: tempId, type: "file" };
       queryClient.setQueryData(["resources", scenarioId], (prev) => [
-        ...prev,
         temp,
+        ...prev,
       ]);
       return { tempId };
     },
@@ -112,10 +116,10 @@ export default function ManageResourcesPage() {
     onMutate: async (name) => {
       await queryClient.cancelQueries(["resources", scenarioId]);
       const tempId = `temp.${uuid()}`;
-      const temp = { name, _id: tempId };
+      const temp = { name, _id: tempId, type: "collection", children: [] };
       queryClient.setQueryData(["resources", scenarioId], (prev) => [
-        ...prev,
         temp,
+        ...prev,
       ]);
       return { tempId };
     },
@@ -223,7 +227,7 @@ export default function ManageResourcesPage() {
                         {resource.type === "collection" ? (
                           <details>
                             <summary
-                              className={`flex items-center ${selectedResource?._id === resource._id ? "bg-base-200" : ""}`}
+                              className={`flex items-center ${isTemp(resource) ? "text-primary" : ""} ${selectedResource?._id === resource._id ? "bg-base-200" : ""}`}
                               onClick={() => setSelectedResource(resource)}
                             >
                               <span className="text--1 truncate">
@@ -232,6 +236,7 @@ export default function ManageResourcesPage() {
                               <div className="flex items-center ml-auto">
                                 <UploadButton
                                   multiple={false}
+                                  disabled={isTemp(resource)}
                                   onFiles={(file) => {
                                     addFileResourceMutation.mutate({
                                       parentId: resource._id,
@@ -246,6 +251,7 @@ export default function ManageResourcesPage() {
                                     deleteResourceMutation.mutate(resource._id);
                                   }}
                                   title="Delete group"
+                                  disabled={isTemp(resource)}
                                 >
                                   <XIcon size={16} />
                                 </button>
@@ -260,7 +266,7 @@ export default function ManageResourcesPage() {
                                 <li key={child._id}>
                                   <div className="flex items-center justify-between">
                                     <a
-                                      className={`min-w-0 flex-1 text--1 truncate ${child._id.startsWith("temp.") ? "text-primary" : ""}`}
+                                      className={`min-w-0 flex-1 text--1 truncate ${isTemp(child) ? "text-primary" : ""}`}
                                       onClick={() => {
                                         if (!child._id.startsWith("temp."))
                                           setSelectedResource(child);
@@ -277,6 +283,7 @@ export default function ManageResourcesPage() {
                                         );
                                       }}
                                       title="Delete file"
+                                      disabled={isTemp(child)}
                                     >
                                       <XIcon size={16} />
                                     </button>
@@ -288,7 +295,7 @@ export default function ManageResourcesPage() {
                         ) : (
                           <div className="flex items-center justify-between">
                             <a
-                              className={`min-w-0 flex-1 text--1 truncate ${resource._id.startsWith("temp.") ? "text-primary" : ""}`}
+                              className={`min-w-0 flex-1 text--1 truncate ${isTemp(resource) ? "text-primary" : ""}`}
                               onClick={() => {
                                 if (!resource._id.startsWith("temp."))
                                   setSelectedResource(resource);
@@ -303,6 +310,7 @@ export default function ManageResourcesPage() {
                                 deleteResourceMutation.mutate(resource._id);
                               }}
                               title="Delete file"
+                              disabled={isTemp(resource)}
                             >
                               <XIcon size={16} />
                             </button>
@@ -339,7 +347,12 @@ export default function ManageResourcesPage() {
 }
 
 // Helper components
-function UploadButton({ onFiles, multiple = true, className = "" }) {
+function UploadButton({
+  onFiles,
+  multiple = true,
+  disabled = false,
+  className = "",
+}) {
   const inputRef = useRef(null);
   return (
     <>
@@ -357,6 +370,7 @@ function UploadButton({ onFiles, multiple = true, className = "" }) {
         className={`btn btn-phantom btn-xs ${className}`}
         onClick={() => inputRef.current?.click()}
         title="Add files"
+        disabled={disabled}
       >
         <PlusIcon size={16} />
       </button>
