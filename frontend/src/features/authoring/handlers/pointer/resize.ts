@@ -1,5 +1,6 @@
 import { getComponent, getComponentProp } from "../../scene/scene";
 import useEditorStore from "../../stores/editor";
+import useVisualScene from "../../stores/visual";
 import type { Bounds, Vec2 } from "../../types";
 import {
   add,
@@ -13,6 +14,7 @@ import {
   scale,
   subtract,
 } from "../../util";
+import { snapResizePoint } from "./snap";
 
 type HandleType = "size" | "rotation";
 
@@ -30,7 +32,8 @@ export function handleResizeStart(e: React.MouseEvent) {
 }
 
 export function handleResizeDrag(e: React.MouseEvent, position: Vec2) {
-  const { addMode, setMutationBounds, selected } = useEditorStore.getState();
+  const { addMode, setMutationBounds, setActiveGuides, selected } =
+    useEditorStore.getState();
   addMode("mutation");
 
   const bounds = getComponentProp(selected!, "bounds") as Bounds;
@@ -38,11 +41,22 @@ export function handleResizeDrag(e: React.MouseEvent, position: Vec2) {
   const newBounds: Partial<Bounds> = {};
 
   if (type === "size") {
-    const relative = rotate(
+    let relative = rotate(
       position,
       getBoxCenter(bounds.verts),
       -bounds.rotation
     );
+
+    // alignment guides only make sense in global space, so only snap unrotated components
+    if (!bounds.rotation) {
+      const components = Object.values(useVisualScene.getState().components);
+      const snapped = snapResizePoint(relative, coords, components, selected!);
+      relative = snapped.position;
+      setActiveGuides(snapped.guides);
+    } else {
+      setActiveGuides([]);
+    }
+
     newBounds.verts = updateResize(relative, coords, e.ctrlKey, e.shiftKey);
   } else if (type === "rotation") {
     newBounds.rotation = getRotation(
@@ -50,6 +64,7 @@ export function handleResizeDrag(e: React.MouseEvent, position: Vec2) {
       getBoxCenter(bounds.verts),
       e.shiftKey
     );
+    setActiveGuides([]);
   }
 
   setMutationBounds((prev) => ({ ...prev, ...newBounds }));

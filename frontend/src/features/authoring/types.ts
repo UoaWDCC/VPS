@@ -34,6 +34,12 @@ export interface RelativeBounds {
   rotation: number;
 }
 
+export interface Guide {
+  orientation: "vertical" | "horizontal";
+  position: number;
+  isCanvasCenter?: boolean;
+}
+
 interface GenericComponent {
   id: string;
   bounds: Bounds;
