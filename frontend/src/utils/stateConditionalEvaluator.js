@@ -80,9 +80,13 @@ export function filterTreeByConditions(tree, stateVariables) {
     .filter(({ stateConditionals }) =>
       evaluateResourceConditions(stateConditionals, stateVariables)
     )
-    .map((c) => ({
-      ...c,
-      children: filterResourcesByConditions(c.children, stateVariables),
-    }))
-    .filter((c) => c.children?.length > 0);
+    .map((r) =>
+      r.type === "collection"
+        ? {
+            ...r,
+            children: filterResourcesByConditions(r.children, stateVariables),
+          }
+        : r
+    )
+    .filter((r) => r.type !== "collection" || r.children?.length > 0);
 }
