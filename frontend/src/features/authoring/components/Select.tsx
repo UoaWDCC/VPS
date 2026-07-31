@@ -41,7 +41,10 @@ function SelectInput<T>({
         <ChevronDown className="shrink-0" size={16} />
       </div>
       {!disabled && (
-        <ul className="dropdown-content menu bg-base-300 rounded-box z-1 w-70 p-2 shadow-sm">
+        <ul
+          tabIndex={0}
+          className="dropdown-content menu bg-base-300 rounded-box z-1 w-70 p-2 shadow-sm"
+        >
           {values.map((v, i) => (
             <li key={i}>
               <a

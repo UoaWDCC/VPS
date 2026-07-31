@@ -1,5 +1,5 @@
 import { useContext, useState, useEffect } from "react";
-import { Check } from "lucide-react";
+import { Check, ChevronDown } from "lucide-react";
 import ScenarioContext from "context/ScenarioContext";
 import SceneContext from "context/SceneContext";
 import { generateUniqueSceneName } from "../../../utils/sceneUtils";
@@ -129,9 +129,12 @@ export default function SceneSettings() {
               <div
                 tabIndex={0}
                 role="button"
-                className="justify-start input mb-1 font-normal"
+                className="justify-between input mb-1 font-normal w-full"
               >
-                {selectedRoles?.join(", ") || "All"}
+                <span className="truncate">
+                  {selectedRoles?.join(", ") || "All"}
+                </span>
+                <ChevronDown className="shrink-0" size={16} />
               </div>
               <ul
                 tabIndex={0}
