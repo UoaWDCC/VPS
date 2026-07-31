@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Check } from "lucide-react";
 
 function FontFinder(currentSearch: string = "") {
   const fonts = [
@@ -44,20 +45,22 @@ function FontInput({
           onChange(e.target.value);
         }}
       />
-      <div
+      <ul
         tabIndex={0}
-        className="dropdown-content z-1 top-[38px] w-32 max-h-35 bg-base-300 rounded-box shadow-sm overflow-y-auto"
+        className="dropdown-content menu menu-sm flex-nowrap bg-base-300 rounded-box shadow-sm w-max max-h-60 overflow-y-auto"
       >
         {fonts.map((font, index) => (
-          <div
-            className="text-[0.8rem] pl-1 hover:bg-base-200 cursor-pointer w-32 mt-[2px] mb-[2px]"
-            key={index}
-            onClick={() => onChange(font)}
-          >
-            {font}
-          </div>
+          <li key={index}>
+            <a
+              className={`justify-between ${font === value ? "menu-active" : ""}`}
+              onClick={() => onChange(font)}
+            >
+              {font}
+              {font === value && <Check size={14} />}
+            </a>
+          </li>
         ))}
-      </div>
+      </ul>
     </div>
   );
 }
