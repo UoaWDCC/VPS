@@ -50,7 +50,7 @@ export default function ResourceTree({
                   >
                     <span className="truncate">{f.name}</span>
                     <span className="text-[10px] opacity-60 ml-2 whitespace-nowrap">
-                      {formatBytes(f.size)} · {shortType(f.fileType)}
+                      {formatBytes(f.size)} · {shortType(f.contentType)}
                     </span>
                   </button>
                 </li>
