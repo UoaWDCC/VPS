@@ -1,12 +1,12 @@
-import axios from "axios";
 import Papa from "papaparse";
-import { useContext, useRef } from "react";
+import { useContext, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
 import GroupsTable from "./GroupTable";
 import {
   ArrowLeftIcon,
   DownloadIcon,
   FileSpreadsheetIcon,
+  TagIcon,
   UploadIcon,
 } from "lucide-react";
 import toast from "react-hot-toast";
@@ -16,6 +16,7 @@ import { api } from "../../util/api";
 import AuthenticationContext from "../../context/AuthenticationContext";
 import GenericErrorPage from "../status/GenericErrorPage";
 import LoadingPage from "../status/LoadingPage";
+import RoleMenu from "../../components/Roles/RoleMenu";
 
 function convertToCSV(data, scenarioId) {
   const headers = ["email", "name", "role", "group number", "playable link"];
@@ -49,6 +50,7 @@ export default function ManageGroupsPage() {
   const history = useHistory();
 
   const fileInputRef = useRef(null);
+  const [showRoleMenu, setShowRoleMenu] = useState(false);
 
   // fetch groups assigned to this scenario
   const { data, isLoading, isError, error, refetch } = useQuery({
@@ -94,16 +96,24 @@ export default function ManageGroupsPage() {
 
         const groupList = Object.values(groupMap);
 
-        // Extract role list
-        const roleList = [
-          ...new Set(data.map((user) => user.role.toLowerCase())),
-        ].filter((str) => str.trim() !== "");
+        // Extract role list, preserving casing but deduping case-insensitively
+        // (roles are matched case-insensitively when gating scene access)
+        const seenRoles = new Set();
+        const roleList = [];
+        data.forEach((user) => {
+          const role = user.role?.trim();
+          if (!role) return;
+          const key = role.toLowerCase();
+          if (seenRoles.has(key)) return;
+          seenRoles.add(key);
+          roleList.push(role);
+        });
 
         const jsonData = { groupList, roleList };
 
         // Send the parsed JSON data to the backend
         try {
-          await axios.post(`/api/group/${scenarioId}`, jsonData);
+          await api.post(user, `/api/group/${scenarioId}`, jsonData);
 
           refetch();
 
@@ -137,7 +147,7 @@ export default function ManageGroupsPage() {
 
   function downloadSample() {
     window.open(
-      "https://firebasestorage.googleapis.com/v0/b/virtual-patient-simulator.appspot.com/o/_manual-uploads%2Ftesting_group.xlsx?alt=media&token=a9c61c46-c317-4c8c-b8b8-ba049f8c9ff3",
+      "https://firebasestorage.googleapis.com/v0/b/virtual-patient-simulator.appspot.com/o/_manual-uploads%2Ftesting_group.csv?alt=media&token=a7afaae7-f4a6-4eb3-ba1d-634e849fcc6c",
       "_blank",
       "noopener,noreferrer"
     );
@@ -149,12 +159,20 @@ export default function ManageGroupsPage() {
 
   return (
     <div className="font-ibm flex flex-col h-screen w-screen overflow-hidden gap-2xl">
+      <RoleMenu show={showRoleMenu} setShow={setShowRoleMenu} />
       <div className="flex pt-l px-l">
         <button onClick={goBack} className="btn btn-phantom text-m">
           <ArrowLeftIcon size={20} />
           Back
         </button>
-        <button onClick={upload} className="btn btn-phantom text-m ml-auto">
+        <button
+          onClick={() => setShowRoleMenu(true)}
+          className="btn btn-phantom text-m ml-auto"
+        >
+          <TagIcon size={20} />
+          Roles
+        </button>
+        <button onClick={upload} className="btn btn-phantom text-m">
           <UploadIcon size={20} />
           Upload
         </button>

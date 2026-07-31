@@ -405,28 +405,7 @@
                 {% alert noscriptAlert %}
             </noscript>
             {{ content | cleanup | autoids }}
-            <footer class="minh-100vh">
-                <div class="pt-11 | blwidth-1 blstyle-dashed bcolor-neutral-500"></div>
-                <nav class="d-flex ai-center rgap-7 | blwidth-1 blstyle-dashed bcolor-neutral-500"
-                    fw-wrap="xs">
-                    <div class="pl-5 | bbwidth-1 bbstyle-dashed bcolor-neutral-500"></div>
-                    {% if editThisPageRootUrl.size > 0 %}
-                        <a  href="{{ editThisPageUrl }}"
-                            target="_blank"
-                            class="btn btn-primary-light">
-                            <span class="icon-pencil-simple"></span>
-                            {{ libdocMessages.editThisPage[libdocConfig.lang] }}
-                        </a>
-                    {% endif %}
-                    <div class="w-100" d-none="sm,md"></div>
-                    <div class="pl-5 | bbwidth-1 bbstyle-dashed bcolor-neutral-500" w-100="sm,md"></div>
-                    <a  href="https://github.com/ita-design-system/eleventy-libdoc"
-                        target="_blank"
-                        class="d-flex ai-center gap-2 | pl-2 pr-2 | fvs-wght-400 fs-2 lsp-3 lh-3 td-none ws-nowrap">
-                        11ty LibDoc {{ libdocUtils.version }}
-                    </a>
-                </nav>
-            </footer>
+            <footer class="pt-11"></footer>
         </main>
     </div>
     

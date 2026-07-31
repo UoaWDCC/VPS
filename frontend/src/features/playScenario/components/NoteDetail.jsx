@@ -1,8 +1,7 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { getAuth } from "firebase/auth";
 import axios from "axios";
 import toast from "react-hot-toast";
-import AuthenticationContext from "context/AuthenticationContext";
 import MDTextViewer from "./MDTextViewer";
 
 export default function NoteDetail({
@@ -12,7 +11,6 @@ export default function NoteDetail({
   onSaved,
   onDeleted,
 }) {
-  const { user } = useContext(AuthenticationContext);
   const [editing, setEditing] = useState(false);
   const [title, setTitle] = useState("");
   const [text, setText] = useState("");
@@ -49,7 +47,6 @@ export default function NoteDetail({
           title,
           text,
           groupId: group._id,
-          email: user.email,
         },
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -66,7 +63,7 @@ export default function NoteDetail({
     try {
       const token = await getAuth().currentUser.getIdToken();
       await axios.delete("/api/note/delete", {
-        data: { noteId: note._id, groupId: group._id, email: user.email },
+        data: { noteId: note._id, groupId: group._id },
         headers: { Authorization: `Bearer ${token}` },
       });
       onDeleted?.(note._id);

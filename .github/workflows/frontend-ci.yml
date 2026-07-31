@@ -31,3 +31,20 @@ jobs:
       - run: yarn install --frozen-lockfile
       - run: yarn prettier
       - run: yarn lint
+
+  build:
+    name: build
+    needs: lint-format
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: 'yarn'
+          cache-dependency-path: frontend/yarn.lock
+      - run: yarn install --frozen-lockfile
+      - run: yarn build

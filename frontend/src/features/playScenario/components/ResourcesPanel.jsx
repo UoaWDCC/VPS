@@ -9,8 +9,8 @@ import {
   ListChevronsUpDownIcon,
   XIcon,
 } from "lucide-react";
-import { getDownloadUrl } from "../hooks/useDownloadUrl";
 import { filterTreeByConditions } from "../../../utils/stateConditionalEvaluator";
+import { normaliseFile } from "../../resources/util";
 
 export default function ResourcesPanel({
   scenarioId,
@@ -61,14 +61,8 @@ export default function ResourcesPanel({
           id: g._id,
           name: g.name,
           order: g.order ?? 0,
-          files: (g.files || []).map((f) => ({
-            id: f._id,
-            name: f.name,
-            size: f.size,
-            type: f.type,
-            createdAt: f.createdAt,
-            stateConditionals: f.stateConditionals || [],
-          })),
+          stateConditionals: g.stateConditionals || [],
+          files: (g.files || []).map(normaliseFile),
         })) || [];
 
       const filteredTree = filterTreeByConditions(normalized, stateVariables);
@@ -241,10 +235,7 @@ export default function ResourcesPanel({
                     />
                   </div>
                   <div className="col-span-2 overflow-auto rounded-lg">
-                    <ResourcePreview
-                      file={selectedFile}
-                      getDownloadUrl={getDownloadUrl}
-                    />
+                    <ResourcePreview file={selectedFile} />
                   </div>
                 </div>
               )}

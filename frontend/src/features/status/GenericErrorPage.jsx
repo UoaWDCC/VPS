@@ -1,27 +1,12 @@
-import { Grid, Typography } from "@material-ui/core";
-
 const GenericErrorPage = () => {
   return (
-    <Grid
-      container
-      spacing={5}
-      direction="column"
-      alignItems="center"
-      justifyContent="center"
-      style={{ minHeight: "100vh" }}
-    >
-      <Grid item container direction="column" alignItems="center" spacing={4}>
-        <Grid item>
-          <Typography variant="h4">{"Something went wrong :\\"}</Typography>
-        </Grid>
-        <Grid>
-          <Typography>
-            Some unexpected error occurred while trying to play the scenario.
-            Please try again later.
-          </Typography>
-        </Grid>
-      </Grid>
-    </Grid>
+    <div className="flex flex-col gap-4 items-center h-screen justify-center">
+      <h1 className="text-xl">{"Something went wrong :\\"}</h1>
+      <p className="text-s">
+        Some unexpected error occurred while trying to play the scenario. Please
+        try again later.
+      </p>
+    </div>
   );
 };
 

@@ -1,4 +1,4 @@
-import ArrowUpwardIcon from "@mui/icons-material/ArrowUpward";
+import { ArrowUpIcon } from "lucide-react";
 
 const CustomSortHeader = ({ active, direction, onClick, children }) => {
   return (
@@ -11,10 +11,7 @@ const CustomSortHeader = ({ active, direction, onClick, children }) => {
         <span
           className={`inline-block origin-center duration-150 transform transition-transform ${active && direction == "desc" ? "rotate-180" : "rotate-0"} ${active ? "opacity-100" : "opacity-0 group-hover:opacity-30"}`}
         >
-          <ArrowUpwardIcon
-            fontSize="small"
-            style={{ transformOrigin: "center", display: "block" }}
-          />
+          <ArrowUpIcon size={16} />
         </span>
       </span>
     </th>

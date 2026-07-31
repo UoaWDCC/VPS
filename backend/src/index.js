@@ -5,8 +5,6 @@ import { fileURLToPath } from "url";
 import connectToDatabase from "./db/db-connect.js";
 
 import routes from "./routes/index.js";
-import collectionsRouter from "./routes/api/collections.js";
-import filesRouter from "./routes/api/files.js";
 
 import errorHandler from "./middleware/errorHandler.js";
 
@@ -16,13 +14,8 @@ const port = process.env.PORT || 3000;
 // CORS + JSON body parsing
 app.options("*", cors());
 app.use(cors());
-app.use(express.json({ limit: "2mb" })); // JSON for non-multipart routes
+app.use(express.json({ limit: "2mb" }));
 
-// Mount new API routes (GridFS-backed)
-app.use("/api/collections", collectionsRouter);
-app.use("/api/files", filesRouter);
-
-// Keep your existing routes as-is (e.g., /api/resources CSV upload, etc.)
 app.use("/", routes);
 
 // Central error handler (should come after routes)
@@ -38,7 +31,6 @@ if (process.env.NODE_ENV === "production") {
 }
 
 // Connect DB first, then start server.
-// NOTE: GridFS helpers use the active Mongoose connection from db-connect.js.
 connectToDatabase().then(() => {
   app.listen(port, () => console.log(`App server listening on port ${port}!`));
 });

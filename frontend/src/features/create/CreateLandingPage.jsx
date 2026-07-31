@@ -2,44 +2,58 @@ import { useState, useContext } from "react";
 import { useHistory } from "react-router-dom";
 import ScenarioContext from "../../context/ScenarioContext";
 import Thumbnail from "../authoring/components/Thumbnail";
-import CreateScenarioCard from "../../components/CreateScenarioCard/CreateScenarioCard";
+import ModalDialog from "../../components/ModalDialogue";
+import DetailEditModal from "../scenarioInfo/components/DetailEditModal";
 import TopNavBar from "../../features/TopNavBar/TopNavBar";
 import FabMenu from "../../components/FabMenu";
 import { PlusIcon, SearchIcon, Trash2Icon } from "lucide-react";
 import { handle } from "../../components/ContextMenu/portal";
 import RightContextMenu from "../../components/ContextMenu/RightContextMenu";
+import DeleteScenarioModal from "./DeleteScenarioModal";
 
-// TODO: delete should be in a better place than this
-const ScenarioMenu = ({ id, deleteScenario }) => {
+const ScenarioMenu = ({ scenario, requestDelete }) => {
   return (
     <ul className="menu bg-base-200 rounded-box w-fit">
       <li>
-        <a onClick={handle(deleteScenario, id)}>
+        <button type="button" onClick={handle(requestDelete, scenario)}>
           <Trash2Icon size={16} />
           Delete
-        </a>
+        </button>
       </li>
     </ul>
   );
 };
 
 export default function CreateLandingPage() {
-  const { allScenarios, deleteScenario, createScenario } =
-    useContext(ScenarioContext);
+  const { allScenarios, createScenario } = useContext(ScenarioContext);
 
   const history = useHistory();
 
   const [search, setSearch] = useState("");
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const [scenarioToDelete, setScenarioToDelete] = useState(null);
 
-  const filteredScenarios = allScenarios.owned.filter((scenario) =>
+  const scenarios = Array.from(
+    new Map(
+      [...allScenarios.owned, ...allScenarios.accessible].map((scenario) => [
+        scenario._id,
+        scenario,
+      ])
+    ).values()
+  );
+
+  const filteredScenarios = scenarios.filter((scenario) =>
     scenario.name.toLowerCase().includes(search.toLowerCase())
   );
 
-  async function handleCreate(name) {
-    setShowCreateModal(false);
-    const scenarioId = await createScenario(name);
+  async function handleCreate(details) {
+    const scenarioId = await createScenario(details);
     history.push(`/scenario/${scenarioId}`);
+  }
+
+  function requestDelete(scenario, event) {
+    event?.stopPropagation();
+    setScenarioToDelete(scenario);
   }
 
   return (
@@ -71,31 +85,57 @@ export default function CreateLandingPage() {
         {filteredScenarios.map((scenario) => (
           <RightContextMenu
             menu={
-              <ScenarioMenu id={scenario._id} deleteScenario={deleteScenario} />
+              <ScenarioMenu scenario={scenario} requestDelete={requestDelete} />
             }
             key={scenario._id}
           >
             <div
-              className="cursor-pointer hover:-translate-y-1 duration-100 ease"
+              className="relative cursor-pointer"
               onClick={() => history.push(`/scenario/${scenario._id}`)}
             >
-              <div className="aspect-16/9 rounded overflow-hidden mb-s border-primary/10 border-1">
-                <Thumbnail components={scenario.thumbnail?.components || []} />
+              <button
+                type="button"
+                className="btn btn-circle btn-sm absolute right-xs top-xs z-10 bg-base-100/80 text-error shadow-none border-none transition hover:bg-error hover:text-error-content"
+                onClick={(event) => requestDelete(scenario, event)}
+                aria-label={`Delete ${scenario.name}`}
+                title="Delete scenario"
+              >
+                <Trash2Icon size={16} />
+              </button>
+              <div className="hover:-translate-y-1 duration-100 ease">
+                <div className="aspect-16/9 rounded overflow-hidden mb-s border-primary/10 border-1">
+                  <Thumbnail
+                    components={scenario.thumbnail?.components || []}
+                  />
+                </div>
+                <p className="font-ibm text-l text-nowrap truncate">
+                  {scenario.name}
+                </p>
               </div>
-              <p className="font-ibm text-l text-nowrap truncate">
-                {scenario.name}
-              </p>
             </div>
           </RightContextMenu>
         ))}
       </div>
+
+      <DeleteScenarioModal
+        scenario={scenarioToDelete}
+        open={!!scenarioToDelete}
+        setOpen={() => setScenarioToDelete(null)}
+      />
+
       {/* Create Scenario Modal */}
-      {showCreateModal && (
-        <CreateScenarioCard
-          onCreate={handleCreate}
-          onClose={() => setShowCreateModal(false)}
+      <ModalDialog
+        title="Create Scenario"
+        open={showCreateModal}
+        onClose={() => setShowCreateModal(false)}
+      >
+        <DetailEditModal
+          scenario={null}
+          submitLabel="Create"
+          pendingLabel="Creating..."
+          onSave={handleCreate}
         />
-      )}
+      </ModalDialog>
 
       <FabMenu />
     </div>

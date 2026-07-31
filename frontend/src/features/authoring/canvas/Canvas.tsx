@@ -18,7 +18,7 @@ import { handleContextGlobal } from "../handlers/pointer/context";
 import LoadingOverlay from "./LoadingOverlay.tsx";
 import useEditorStore from "../stores/editor.ts";
 
-const componentMap: Record<string, React.FC<any>> = {
+const componentMap: Record<string, React.FC<Record<string, unknown>>> = {
   textbox: (props) => <TextBox {...props} editable={true} />,
   speech: Speech,
   ellipse: Ellipse,
@@ -67,7 +67,7 @@ function Canvas() {
   }
 
   function handleContextMenu(e: React.MouseEvent) {
-    handleContextGlobal(e, toSVGSpace(e.clientX, e.clientY));
+    handleContextGlobal(e);
   }
 
   const components = Object.values(scene)

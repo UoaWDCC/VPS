@@ -13,17 +13,13 @@ import toast from "react-hot-toast";
  * @component
  */
 const EditStateConditional = ({
-  fileId,
+  endpoint,
   conditional,
   conditionalId,
-  updateFile,
+  updateTarget,
 }) => {
   const { user } = useContext(AuthenticationContext);
   const { stateVariables } = useContext(ScenarioContext);
-
-  if (!stateVariables) {
-    return null;
-  }
 
   const [comparator, setComparator] = useState(conditional.comparator);
   const [value, setValue] = useState(conditional.value);
@@ -33,9 +29,13 @@ const EditStateConditional = ({
 
   useEffect(() => {
     if (conditional.comparator !== comparator)
-      setComparator(conditional.operation);
+      setComparator(conditional.comparator);
     if (conditional.value !== value) setValue(conditional.value);
   }, [conditional]);
+
+  if (!stateVariables) {
+    return null;
+  }
 
   const stateVariable = stateVariables.find(
     (v) => v.id === conditional.stateVariableId
@@ -44,9 +44,9 @@ const EditStateConditional = ({
 
   const deleteStateConditional = () => {
     api
-      .delete(user, `/api/files/state-conditionals/${fileId}/${conditionalId}`)
+      .delete(user, `${endpoint}/${conditionalId}`)
       .then((res) => {
-        updateFile(res.data);
+        updateTarget(res.data);
       })
       .catch((err) => {
         console.error(err);
@@ -62,11 +62,11 @@ const EditStateConditional = ({
     };
 
     api
-      .put(user, `/api/files/state-conditionals/${fileId}`, {
+      .put(user, endpoint, {
         stateConditional,
       })
       .then((res) => {
-        updateFile(res.data);
+        updateTarget(res.data);
       })
       .catch((err) => {
         console.error(err);
@@ -101,7 +101,8 @@ const EditStateConditional = ({
             <SelectInput
               values={[true, false]}
               value={value}
-              onChange={(e) => setValue(e.target.value)}
+              display={(v) => String(v)}
+              onChange={setValue}
             />
           ) : (
             <input

@@ -2,48 +2,68 @@ import CreateStateConditional from "./CreateStateConditional";
 import { PlusIcon } from "lucide-react";
 import { useState } from "react";
 import EditStateConditional from "./EditStateConditional";
+import { useParams } from "react-router-dom";
 
 /**
  * Component that houses state conditional interface (methods for creating and editing)
  *
  * @component
  */
-const StateConditionalMenu = ({ file, updateFile }) => {
-  if (!file) {
+const StateConditionalMenu = ({
+  target,
+  title = "State Conditionals",
+  endpoint,
+  updateTarget,
+}) => {
+  const [createOpen, setCreateOpen] = useState(false);
+  const { scenarioId } = useParams();
+
+  const subject = target;
+  const conditionEndpoint =
+    endpoint ||
+    (subject ? `/api/resources/${scenarioId}/${subject.id}/conditionals` : "");
+  const handleUpdate = updateTarget;
+
+  if (!subject) {
     return null;
   }
-
-  const [createOpen, setCreateOpen] = useState(false);
 
   return (
     <>
       <div className="collapse overflow-visible collapse-arrow bg-base-300 rounded-sm text-s">
         <input type="checkbox" />
         <div className="collapse-title flex items-center justify-between">
-          State Conditionals
-          <PlusIcon
-            size={18}
-            onClick={() => setCreateOpen(true)}
-            className="z-1"
-          />
+          {title}
+          <button
+            type="button"
+            className="btn btn-phantom btn-xs relative z-10"
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              setCreateOpen(true);
+            }}
+            title="Create state conditional"
+          >
+            <PlusIcon size={18} />
+          </button>
         </div>
         <div className="collapse-content text--1 bg-base-200 px-0">
-          {file.stateConditionals?.map((stateConditional) => (
+          {subject.stateConditionals?.map((stateConditional) => (
             <EditStateConditional
-              fileId={file.id}
+              endpoint={conditionEndpoint}
               conditional={stateConditional}
               conditionalId={stateConditional._id}
               key={stateConditional._id}
-              updateFile={updateFile}
+              updateTarget={handleUpdate}
             />
           ))}
         </div>
       </div>
       <CreateStateConditional
-        fileId={file.id}
+        endpoint={conditionEndpoint}
         open={createOpen}
         setOpen={setCreateOpen}
-        updateFile={updateFile}
+        updateTarget={handleUpdate}
       />
     </>
   );

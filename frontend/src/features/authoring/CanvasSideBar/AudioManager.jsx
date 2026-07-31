@@ -1,33 +1,48 @@
 import { PlusIcon } from "lucide-react";
-import { useRef } from "react";
+import { useContext, useRef } from "react";
 import useVisualScene from "../stores/visual";
-import { v4 as uuidv4 } from "uuid";
 import { add } from "../scene/operations/modifiers";
 import EditAudioComponent from "../audio/EditAudioComponent";
+import { api } from "../../../util/api";
+import toast from "react-hot-toast";
+import { useParams } from "react-router-dom";
+import AuthenticationContext from "../../../context/AuthenticationContext";
 
-async function addAudio(fileObject) {
-  const url = await URL.createObjectURL(fileObject);
-  const newAudio = {
-    type: "audio",
-    name: fileObject.name,
-    fileObject,
-    url,
-    loop: false,
-    id: uuidv4(),
-  };
+async function addAudio(file, scenarioId, user) {
+  try {
+    const formData = new FormData();
+    formData.append("file", file);
 
-  add(newAudio);
+    const response = await api.post(user, `api/files/${scenarioId}`, formData);
+
+    const newAudio = {
+      fileId: response.data._id,
+      type: "audio",
+      name: response.data.name,
+      url: response.data.url,
+      loop: false,
+    };
+
+    add(newAudio);
+  } catch (e) {
+    console.error(e);
+    toast.error("Audio upload failed");
+  }
 }
 
 function AudioManager() {
+  const { scenarioId } = useParams();
+  const { user } = useContext(AuthenticationContext);
+
   const components = useVisualScene((state) => state.components);
 
   const inputRef = useRef(null);
 
   const audios = Object.values(components).filter((c) => c.type === "audio");
+  const hasAudios = audios.length > 0;
 
   async function handleFileInput(e) {
-    addAudio(e.target.files[0]);
+    addAudio(e.target.files[0], scenarioId, user);
     inputRef.current.value = null;
   }
 
@@ -37,21 +52,33 @@ function AudioManager() {
 
   return (
     <>
-      <div className="collapse overflow-visible collapse-arrow bg-base-300 rounded-sm text-s">
-        <input type="checkbox" />
-        <div className="collapse-title flex items-center justify-between">
+      <div
+        className={`collapse overflow-visible ${
+          hasAudios ? "collapse-arrow" : ""
+        } bg-base-300 rounded-sm text-s`}
+      >
+        {hasAudios && <input type="checkbox" />}
+
+        <div
+          className={`collapse-title flex items-center justify-between ${
+            hasAudios ? "" : "pe-4"
+          }`}
+        >
           Audio Elements
           <PlusIcon size={18} onClick={createNew} className="z-1" />
         </div>
-        <div className="collapse-content text--1 bg-base-200 px-0">
-          {audios.map((audio, i) => (
-            <EditAudioComponent component={audio} key={i} />
-          ))}
-        </div>
+
+        {hasAudios && (
+          <div className="collapse-content text--1 bg-base-200 px-0">
+            {audios.map((audio) => (
+              <EditAudioComponent component={audio} key={audio.id} />
+            ))}
+          </div>
+        )}
       </div>
       <input
         type="file"
-        accept=".mp3"
+        accept="audio/*,.mp3,.wav,.ogg,.m4a,.aac,.flac,.webm"
         ref={inputRef}
         className="hidden"
         onChange={handleFileInput}

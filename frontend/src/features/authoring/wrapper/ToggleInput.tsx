@@ -3,6 +3,7 @@ type ToggleInputProps = React.PropsWithChildren<{
   onToggle: (value: string) => void;
   enabled: string;
   disabled: string;
+  tooltip?: string;
 }>;
 
 function ToggleInput({
@@ -11,6 +12,7 @@ function ToggleInput({
   onToggle,
   enabled,
   disabled,
+  tooltip,
 }: ToggleInputProps) {
   const active = value === enabled;
 
@@ -20,7 +22,10 @@ function ToggleInput({
   }
 
   return (
-    <li>
+    <li
+      className={tooltip ? "tooltip tooltip-bottom" : undefined}
+      data-tip={tooltip}
+    >
       <a className={`${active && "bg-base-100"}`} onClick={handleClick}>
         {children}
       </a>
