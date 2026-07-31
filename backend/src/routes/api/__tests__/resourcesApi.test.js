@@ -168,7 +168,7 @@ describe("Resources API tests", () => {
 
   // --- Create resource collection ---
 
-  it("POST /resources/:scenarioId creates a Resource document", async () => {
+  it("POST /resources/:scenarioId creates a Resource collection", async () => {
     const response = await axios.post(
       `http://localhost:${ctx.port}/api/resources/${scenarioId}/collection`,
       { name: "New Collection" },
