@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Check } from "lucide-react";
 
 function FontFinder(currentSearch: string = "") {
@@ -31,7 +31,13 @@ function FontInput({
   value: string;
   onChange: (value: string) => void;
 }) {
-  const [fonts, setFonts] = useState(FontFinder());
+  const [searchQuery, setSearchQuery] = useState("");
+  const fonts = FontFinder(searchQuery);
+
+  // Reset search query when the selected value changes externally
+  useEffect(() => {
+    setSearchQuery("");
+  }, [value]);
 
   return (
     <div className="dropdown">
@@ -39,10 +45,9 @@ function FontInput({
         type="text"
         className="input input-sm h-[28px] w-30"
         placeholder="Search fonts..."
-        value={value}
+        value={searchQuery || value}
         onChange={(e) => {
-          setFonts(FontFinder(e.target.value));
-          onChange(e.target.value);
+          setSearchQuery(e.target.value);
         }}
       />
       <ul
@@ -51,13 +56,17 @@ function FontInput({
       >
         {fonts.map((font, index) => (
           <li key={index}>
-            <a
+            <button
+              type="button"
               className={`justify-between ${font === value ? "menu-active" : ""}`}
-              onClick={() => onChange(font)}
+              onClick={() => {
+                onChange(font);
+                setSearchQuery("");
+              }}
             >
               {font}
               {font === value && <Check size={14} />}
-            </a>
+            </button>
           </li>
         ))}
       </ul>
