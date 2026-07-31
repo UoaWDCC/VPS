@@ -10,6 +10,7 @@ import SpeechHandles from "./handles/SpeechHandles";
 import Rectangle from "./Rectangle";
 import useEditorStore from "../stores/editor";
 import useVisualScene from "../stores/visual";
+import { CANVAS_HEIGHT, CANVAS_WIDTH } from "../../../util/canvas";
 
 const componentMap: Record<string, React.FC<Record<string, unknown>>> = {
   speech: Speech,
@@ -50,7 +51,7 @@ function Overlay() {
     <svg
       id="overlay"
       className="w-full h-full absolute pointer-events-none"
-      viewBox={`-50 -50 ${1920 + 50 * 2} ${1080 + 50 * 2}`}
+      viewBox={`-50 -50 ${CANVAS_WIDTH + 50 * 2} ${CANVAS_HEIGHT + 50 * 2}`}
     >
       {component && (
         <>
@@ -90,7 +91,7 @@ function Overlay() {
               x1={guide.position}
               y1={-50}
               x2={guide.position}
-              y2={1130}
+              y2={CANVAS_HEIGHT + 50}
               {...style}
             />
           ) : (
@@ -98,7 +99,7 @@ function Overlay() {
               key={index}
               x1={-50}
               y1={guide.position}
-              x2={1970}
+              x2={CANVAS_WIDTH + 50}
               y2={guide.position}
               {...style}
             />
