@@ -1,5 +1,4 @@
-import { useLayoutEffect, useRef, useState } from "react";
-import { createPortal } from "react-dom";
+import { useState } from "react";
 
 function FontFinder(currentSearch: string = "") {
   const fonts = [
@@ -31,56 +30,35 @@ function FontInput({
   value: string;
   onChange: (value: string) => void;
 }) {
-  const [open, setOpen] = useState(false);
   const [fonts, setFonts] = useState(FontFinder());
-  const inputRef = useRef<HTMLInputElement>(null);
-  const [position, setPosition] = useState({ top: 0, left: 0 });
-
-  useLayoutEffect(() => {
-    if (!open || !inputRef.current) return;
-    const rect = inputRef.current.getBoundingClientRect();
-    setPosition({ top: rect.bottom, left: rect.left });
-  }, [open]);
-
-  const portal = document.getElementById("modal-portal");
 
   return (
-    <>
+    <div className="dropdown">
       <input
-        ref={inputRef}
         type="text"
-        className="input input-sm h-[28px] w-30 relative"
+        className="input input-sm h-[28px] w-30"
         placeholder="Font Name"
         value={value}
         onChange={(e) => {
           setFonts(FontFinder(e.target.value));
           onChange(e.target.value);
         }}
-        onFocus={() => setOpen(true)}
       />
-      {open &&
-        portal &&
-        createPortal(
+      <div
+        tabIndex={0}
+        className="dropdown-content z-1 top-[38px] w-32 max-h-35 bg-base-300 rounded-box shadow-sm overflow-y-auto"
+      >
+        {fonts.map((font, index) => (
           <div
-            className="absolute w-32 max-h-35 bg-base-300 rounded-box shadow-sm overflow-y-auto pointer-events-auto"
-            style={{ top: position.top + 10, left: position.left - 4 }}
+            className="text-[0.8rem] pl-1 hover:bg-base-200 cursor-pointer w-32 mt-[2px] mb-[2px]"
+            key={index}
+            onClick={() => onChange(font)}
           >
-            {fonts.map((font, index) => (
-              <div
-                className="text-[0.8rem] pl-1 hover:bg-base-200 cursor-pointer w-32 mt-[2px] mb-[2px]"
-                key={index}
-                onMouseDown={() => {
-                  onChange(font);
-                  setOpen(false);
-                }}
-              >
-                {font}
-              </div>
-            ))}
-          </div>,
-          portal
-        )}
-    </>
+            {font}
+          </div>
+        ))}
+      </div>
+    </div>
   );
 }
 
