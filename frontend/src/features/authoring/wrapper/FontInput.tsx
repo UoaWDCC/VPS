@@ -38,7 +38,7 @@ function FontInput({
       <input
         type="text"
         className="input input-sm h-[28px] w-30"
-        placeholder="Font Name"
+        placeholder="Search fonts..."
         value={value}
         onChange={(e) => {
           setFonts(FontFinder(e.target.value));
