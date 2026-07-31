@@ -77,7 +77,7 @@ export default function ManageResourcesPage() {
   const { user } = useContext(AuthenticationContext);
   const queryClient = useQueryClient();
 
-  const [selectedResource, setSelectedResource] = useState(null);
+  const [selectedResourceId, setSelectedResourceId] = useState(null);
 
   const resourcesQuery = useQuery({
     queryKey: ["resources", scenarioId],
@@ -93,7 +93,7 @@ export default function ManageResourcesPage() {
       const temp = { parentId, name: file.name, _id: tempId, type: "file" };
       queryClient.setQueryData(["resources", scenarioId], (prev) => [
         temp,
-        ...prev,
+        ...(prev ?? []),
       ]);
       return { tempId };
     },
@@ -118,7 +118,7 @@ export default function ManageResourcesPage() {
       const temp = { name, _id: tempId, type: "collection", children: [] };
       queryClient.setQueryData(["resources", scenarioId], (prev) => [
         temp,
-        ...prev,
+        ...(prev ?? []),
       ]);
       return { tempId };
     },
@@ -140,7 +140,9 @@ export default function ManageResourcesPage() {
     onMutate: async (resourceId) => {
       await queryClient.cancelQueries(["resources", scenarioId]);
       queryClient.setQueryData(["resources", scenarioId], (prev) =>
-        prev.filter((r) => r._id !== resourceId && r.parentId !== resourceId)
+        (prev ?? []).filter(
+          (r) => r._id !== resourceId && r.parentId !== resourceId
+        )
       );
     },
     onError: (e) => {
@@ -155,6 +157,9 @@ export default function ManageResourcesPage() {
   }
 
   const resourceTree = buildResourceTree(resourcesQuery.data ?? []);
+
+  const selectedResource =
+    resourcesQuery.data?.find((r) => r._id === selectedResourceId) ?? null;
 
   return (
     <div className="font-ibm flex flex-col h-screen w-screen overflow-hidden gap-2xl">
@@ -174,7 +179,7 @@ export default function ManageResourcesPage() {
           ) : resourcesQuery.isError ? (
             <div className="h-full flex flex-col items-center justify-center gap-3">
               <div className="alert alert-error max-w-md">
-                <span>{resourcesQuery.error.text}</span>
+                <span>{resourcesQuery.error.message}</span>
               </div>
             </div>
           ) : (
@@ -193,7 +198,9 @@ export default function ManageResourcesPage() {
                           <details>
                             <summary
                               className={`flex items-center ${isTemp(resource) ? "text-primary" : ""} ${selectedResource?._id === resource._id ? "bg-base-200" : ""}`}
-                              onClick={() => setSelectedResource(resource)}
+                              onClick={() =>
+                                setSelectedResourceId(resource._id)
+                              }
                             >
                               <span className="text--1 truncate">
                                 {resource.name}
@@ -234,7 +241,7 @@ export default function ManageResourcesPage() {
                                       className={`min-w-0 flex-1 text--1 truncate ${isTemp(child) ? "text-primary" : ""}`}
                                       onClick={() => {
                                         if (!child._id.startsWith("temp."))
-                                          setSelectedResource(child);
+                                          setSelectedResourceId(child._id);
                                       }}
                                     >
                                       {child.name}
@@ -263,7 +270,7 @@ export default function ManageResourcesPage() {
                               className={`min-w-0 flex-1 text--1 truncate ${isTemp(resource) ? "text-primary" : ""}`}
                               onClick={() => {
                                 if (!resource._id.startsWith("temp."))
-                                  setSelectedResource(resource);
+                                  setSelectedResourceId(resource._id);
                               }}
                             >
                               {resource.name}

@@ -75,7 +75,7 @@ export default function ResourcesPanel({
 
     // NOTE: the filtering by state variables should ideally be done on the server to prevent cheating, but here we filter before rendering
 
-    return filterTreeByConditions(resourceTree, stateVariables)
+    return filtered
       .map((g) => {
         const matchingFiles = (g.children || []).filter((f) => {
           const inName = f.name.toLowerCase().includes(q);
@@ -184,7 +184,7 @@ export default function ResourcesPanel({
               ) : isError ? (
                 <div className="h-full flex flex-col items-center justify-center gap-3">
                   <div className="alert alert-error max-w-md">
-                    <span>{error.text}</span>
+                    <span>{error.message}</span>
                   </div>
                 </div>
               ) : (filteredTree?.length ?? 0) === 0 ? (
