@@ -47,7 +47,7 @@ function FontInput({
       />
       <ul
         tabIndex={0}
-        className="dropdown-content menu menu-sm flex-nowrap bg-base-300 rounded-box shadow-sm w-max max-h-60 overflow-y-auto"
+        className="dropdown-content menu menu-sm flex-nowrap bg-base-300 rounded-box shadow-sm min-w-30 w-max max-w-60 max-h-60 overflow-y-auto"
       >
         {fonts.map((font, index) => (
           <li key={index}>
