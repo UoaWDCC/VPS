@@ -1,9 +1,8 @@
 import type { Bounds, Component, Guide, Vec2 } from "../../types";
 import { expandBoxVerts, getBoxCenter, rotateMany } from "../../util";
+import { CANVAS_HEIGHT, CANVAS_WIDTH } from "../../../../util/canvas";
 
 export const SNAP_THRESHOLD = 10;
-export const CANVAS_WIDTH = 1920;
-export const CANVAS_HEIGHT = 1080;
 
 interface AABB {
   minX: number;
