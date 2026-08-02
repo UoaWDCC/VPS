@@ -122,17 +122,25 @@ export function ObjectPropertyEditor({ component }) {
       );
       // increase bottom y to expand height and same idea with x
     } else if (type === "width") {
-      const x = verts[0].x + value;
-      modifyComponentProp(component.id, "bounds.verts", (prev) =>
-        modifyVerts(prev, [1, 0.5], { x, y: 0 })
-      );
+      modifyComponentProp(component.id, "bounds.verts", (prev) => {
+        const center = getBoxCenter(prev);
+        const halfWidth = value / 2;
+        return [
+          { x: center.x - halfWidth, y: prev[0].y },
+          { x: center.x + halfWidth, y: prev[1].y },
+        ];
+      });
     } else if (type === "height") {
-      const y = verts[0].y + value;
-      modifyComponentProp(component.id, "bounds.verts", (prev) =>
-        modifyVerts(prev, [0.5, 1], { x: 0, y })
-      );
+      modifyComponentProp(component.id, "bounds.verts", (prev) => {
+        const center = getBoxCenter(prev);
+        const halfHeight = value / 2;
+        return [
+          { x: prev[0].x, y: center.y - halfHeight },
+          { x: prev[1].x, y: center.y + halfHeight },
+        ];
+      });
     } else if (type === "rotation") {
-      modifyComponentProp(component.id, "bounds.rotation", value % 361);  
+      modifyComponentProp(component.id, "bounds.rotation", value % 361);
     }
   }
 
