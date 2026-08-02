@@ -2,7 +2,6 @@
 
 import { getBoxCenter, translate } from "../../authoring/util";
 import { useEffect, useState } from "react";
-import { modifyVerts } from "../handlers/pointer/resize";
 import { modifyComponentProp } from "../scene/operations/component";
 import {
   SquareCenterlineDashedHorizontal,
