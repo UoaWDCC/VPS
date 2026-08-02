@@ -1,7 +1,7 @@
 // Self Note: onblur function for when no value is inside the input fields, and then use box center to calc width and height instead
 
 import { getBoxCenter, translate } from "../../authoring/util";
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState } from "react";
 import { modifyVerts } from "../handlers/pointer/resize";
 import { modifyComponentProp } from "../scene/operations/component";
 import {
@@ -11,7 +11,6 @@ import {
 
 export function ObjectPropertyEditor({ component }) {
   // x and y vals used for setting and current
-  const fieldsetRef = useRef(null);
   const [inputX, setInputX] = useState(
     Math.round(component.bounds.verts[0].x * 100) / 100
   );
@@ -143,7 +142,7 @@ export function ObjectPropertyEditor({ component }) {
         <input type="checkbox" />
         <div className="collapse-title min-w-0">Object Properties</div>
         <div className="collapse-content text--1 bg-base-200">
-          <fieldset ref={fieldsetRef} className="fieldset pt-2">
+          <fieldset className="fieldset pt-2">
             {/* Width and Height num inputs*/}
             <span className="flex gap-2 justify-between">
               <label className="label flex-1">Object Width</label>
