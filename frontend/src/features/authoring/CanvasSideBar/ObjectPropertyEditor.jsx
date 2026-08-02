@@ -1,5 +1,7 @@
+// Self Note: onblur function for when no value is inside the input fields, and then use box center to calc width and height instead
+
 import { getBoxCenter, translate } from "../../authoring/util";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { modifyVerts } from "../handlers/pointer/resize";
 import { modifyComponentProp } from "../scene/operations/component";
 import {
@@ -9,6 +11,7 @@ import {
 
 export function ObjectPropertyEditor({ component }) {
   // x and y vals used for setting and current
+  const fieldsetRef = useRef(null);
   const [inputX, setInputX] = useState(
     Math.round(component.bounds.verts[0].x * 100) / 100
   );
@@ -27,7 +30,7 @@ export function ObjectPropertyEditor({ component }) {
     ) / 100
   );
   const [inputAngle, setInputAngle] = useState(
-    Math.round((component.bounds.rotation ?? 0) * 100) / 100
+    (Math.round((component.bounds.rotation ?? 0) * 100) / 100) % 361
   );
 
   useEffect(() => {
@@ -63,6 +66,12 @@ export function ObjectPropertyEditor({ component }) {
       "bounds.rotation",
       (prev) => 360 - (prev ?? 0)
     );
+  }
+
+  function noFields(v, type, set) {
+    if (v === "") {
+      saveProp("0", type, set);
+    }
   }
 
   function inputValidation(type, v, set, prevValue) {
@@ -124,7 +133,7 @@ export function ObjectPropertyEditor({ component }) {
         modifyVerts(prev, [0.5, 1], { x: 0, y })
       );
     } else if (type === "rotation") {
-      modifyComponentProp(component.id, "bounds.rotation", value);
+      modifyComponentProp(component.id, "bounds.rotation", value % 361);  
     }
   }
 
@@ -134,7 +143,7 @@ export function ObjectPropertyEditor({ component }) {
         <input type="checkbox" />
         <div className="collapse-title min-w-0">Object Properties</div>
         <div className="collapse-content text--1 bg-base-200">
-          <fieldset className="fieldset pt-2">
+          <fieldset ref={fieldsetRef} className="fieldset pt-2">
             {/* Width and Height num inputs*/}
             <span className="flex gap-2 justify-between">
               <label className="label flex-1">Object Width</label>
@@ -147,12 +156,18 @@ export function ObjectPropertyEditor({ component }) {
                 onChange={(e) => {
                   saveProp(e.target.value, "width", setInputWidth);
                 }}
+                onBlur={(e) => {
+                  noFields(e.target.value, "width", setInputWidth);
+                }}
               />
               <input
                 className="input flex-1 min-w-0"
                 value={inputHeight}
                 onChange={(e) => {
                   saveProp(e.target.value, "height", setInputHeight);
+                }}
+                onBlur={(e) => {
+                  noFields(e.target.value, "height", setInputHeight);
                 }}
               />
             </div>
@@ -169,6 +184,9 @@ export function ObjectPropertyEditor({ component }) {
                 onChange={(e) => {
                   saveProp(e.target.value, "x", setInputX);
                 }}
+                onBlur={(e) => {
+                  noFields(e.target.value, "x", setInputX);
+                }}
               />
               <input
                 className="input flex-1 min-w-0"
@@ -176,9 +194,12 @@ export function ObjectPropertyEditor({ component }) {
                 onChange={(e) => {
                   saveProp(e.target.value, "y", setInputY);
                 }}
+                onBlur={(e) => {
+                  noFields(e.target.value, "y", setInputY);
+                }}
               />
             </div>
-            <label className="label">Angle</label>
+            <label className="label">Angle (Degrees)</label>
             <div className="flex justify-between">
               <input
                 className="input flex-1 min-w-0"
@@ -186,10 +207,14 @@ export function ObjectPropertyEditor({ component }) {
                 onChange={(e) =>
                   saveProp(e.target.value, "rotation", setInputAngle)
                 }
+                onBlur={(e) => {
+                  noFields(e.target.value, "rotation", setInputAngle);
+                }}
               />
               <div className="ml-6 flex-1">
                 <button
                   type="button"
+                  title="Flip Horizontally"
                   aria-label="Flip horizontally"
                   className="hover:bg-stone-800 cursor-pointer rounded-sm"
                   onClick={() => flipComponent("x")}
@@ -198,6 +223,7 @@ export function ObjectPropertyEditor({ component }) {
                 </button>
                 <button
                   type="button"
+                  title="Flip Vertically"
                   aria-label="Flip vertically"
                   className="hover:bg-stone-800 cursor-pointer rounded-sm"
                   onClick={() => flipComponent("y")}
