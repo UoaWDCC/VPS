@@ -40,11 +40,7 @@ function AddGroup({ onAdd }) {
   };
 
   return (
-    <div
-      className={`dropdown dropdown-end ${
-        open ? "dropdown-open" : ""
-      }`}
-    >
+    <div className={`dropdown dropdown-end ${open ? "dropdown-open" : ""}`}>
       <button
         type="button"
         className="btn btn-phantom btn-sm"
