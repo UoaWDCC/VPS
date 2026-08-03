@@ -24,6 +24,8 @@ const gridSize = 5;
 function Speech(component: SpeechComponent) {
   const { bounds } = component;
 
+    // if (!bounds?.verts || bounds.verts.length < 3) return null;
+
   const center = getBoxCenter(bounds.verts);
 
   function getSegment() {

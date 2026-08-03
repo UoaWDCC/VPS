@@ -127,7 +127,8 @@ export function ObjectPropertyEditor({ component }) {
         return [
           { x: center.x - halfWidth, y: prev[0].y },
           { x: center.x + halfWidth, y: prev[1].y },
-        ];
+          prev[2],
+        ].filter(Boolean);
       });
     } else if (type === "height") {
       modifyComponentProp(component.id, "bounds.verts", (prev) => {
@@ -136,7 +137,8 @@ export function ObjectPropertyEditor({ component }) {
         return [
           { x: prev[0].x, y: center.y - halfHeight },
           { x: prev[1].x, y: center.y + halfHeight },
-        ];
+          prev[2],
+        ].filter(Boolean);
       });
     } else if (type === "rotation") {
       modifyComponentProp(component.id, "bounds.rotation", value % 361);
