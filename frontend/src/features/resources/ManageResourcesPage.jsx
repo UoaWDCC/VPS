@@ -306,6 +306,11 @@ export default function ManageResourcesPage() {
                 </div>
 
                 <ul className="menu min-h-0 w-full flex-1 overflow-auto rounded-box bg-base-100">
+                  {search.trim() && filteredGroups.length === 0 && (
+                    <li className="p-2 opacity-60">
+                      No matching resources found.
+                    </li>
+                  )}
                   {filteredGroups.map((group) => (
                     <li key={group.id}>
                       <details open={search.trim() ? true : undefined}>

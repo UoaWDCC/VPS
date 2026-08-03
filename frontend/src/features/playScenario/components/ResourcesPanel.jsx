@@ -220,10 +220,17 @@ export default function ResourcesPanel({
                   ) : (filteredTree?.length ?? 0) === 0 ? (
                     <div className="flex h-full items-center justify-center">
                       <div className="text-center opacity-70">
-                        <p>No resources available for this scenario.</p>
-                        <p className="text-sm">
-                          Ask the author to upload files in the authoring UI.
-                        </p>
+                        {search.trim() ? (
+                          <p>No matching resources found.</p>
+                        ) : (
+                          <>
+                            <p>No resources available for this scenario.</p>
+                            <p className="text-sm">
+                              Ask the author to upload files in the authoring
+                              UI.
+                            </p>
+                          </>
+                        )}
                       </div>
                     </div>
                   ) : (
