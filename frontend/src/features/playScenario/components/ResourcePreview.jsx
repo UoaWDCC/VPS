@@ -37,7 +37,7 @@ export default function ResourcePreview({ file }) {
 
   return (
     <div className="flex h-full min-h-0 flex-col gap-3 p-3 font-ibm">
-      <div className="flex items-start justify-between gap-2">
+      <div className="flex items-start justify-between gap-2 pr-3xl">
         <div>
           <h3
             className="font-dm text-l text-base-content truncate"

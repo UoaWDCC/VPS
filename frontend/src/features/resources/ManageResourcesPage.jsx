@@ -305,7 +305,7 @@ export default function ManageResourcesPage() {
                   />
                 </div>
 
-                <ul className="menu min-h-0 w-full flex-1 overflow-auto rounded-box bg-base-100">
+                <ul className="menu min-h-0 w-full flex-1 overflow-auto rounded-box bg-base-100 p-0">
                   {search.trim() && filteredGroups.length === 0 && (
                     <li className="p-2 opacity-60">
                       No matching resources found.
@@ -315,7 +315,7 @@ export default function ManageResourcesPage() {
                     <li key={group.id}>
                       <details open={search.trim() ? true : undefined}>
                         <summary
-                          className={`flex items-center ${
+                          className={`flex items-center px-0 ${
                             selectedGroup?.id === group.id && !selectedFile
                               ? "bg-base-200"
                               : ""
