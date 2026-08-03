@@ -162,20 +162,12 @@ export default function ResourcesPanel({
           className="relative h-dvh w-full overflow-hidden font-ibm shadow-2xl"
           onClick={stopPropagation}
         >
-          <button
-            className="btn btn-phantom btn-sm absolute right-l top-l z-10 lg:top-4xl"
-            onClick={onClose}
-            aria-label="Close"
-          >
-            <XIcon size={32} />
-          </button>
-
           <div className="u-container h-full w-full overflow-y-auto py-l lg:overflow-hidden lg:py-4xl">
             <div className="grid min-h-full grid-cols-1 gap-3 lg:h-full lg:min-h-0 lg:grid-cols-3">
               <div className="flex min-h-[35dvh] flex-col lg:min-h-0">
                 <h1 className="mb-l pr-3xl text-xl">Resources</h1>
 
-                <div className="mb-2 flex flex-none gap-2 p-3">
+                <div className="mb-2 flex flex-none gap-2 py-3">
                   <label htmlFor="resource-search" className="sr-only">
                     Search files or collection name
                   </label>
@@ -205,7 +197,7 @@ export default function ResourcesPanel({
                   </button>
                 </div>
 
-                <div className="min-h-0 flex-1 overflow-auto rounded-lg p-3">
+                <div className="min-h-0 flex-1 overflow-auto rounded-lg py-3">
                   {loading ? (
                     <TreeSkeleton />
                   ) : error ? (
@@ -246,8 +238,17 @@ export default function ResourcesPanel({
                 </div>
               </div>
 
-              <div className="min-h-[60dvh] overflow-auto rounded-lg pb-[max(1rem,env(safe-area-inset-bottom))] lg:col-span-2 lg:min-h-0">
-                <ResourcePreview file={selectedFile} />
+              <div className="relative min-h-[60dvh] rounded-lg lg:col-span-2 lg:min-h-0">
+                <button
+                  className="btn btn-phantom btn-sm absolute right-3 top-2 z-10"
+                  onClick={onClose}
+                  aria-label="Close"
+                >
+                  <XIcon size={32} />
+                </button>
+                <div className="h-full overflow-auto pb-[max(1rem,env(safe-area-inset-bottom))]">
+                  <ResourcePreview file={selectedFile} />
+                </div>
               </div>
             </div>
           </div>
