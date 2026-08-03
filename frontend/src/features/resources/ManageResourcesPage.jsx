@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect, useContext } from "react";
+import React, { useRef, useState, useEffect, useContext, useMemo } from "react";
 import { getAuth } from "firebase/auth";
 import axios from "axios";
 import toast from "react-hot-toast";
@@ -86,6 +86,7 @@ export default function ManageResourcesPage() {
 
   // Groups (each with files)
   const [groups, setGroups] = useState([]);
+  const [search, setSearch] = useState("");
   const [selectedGroup, setSelectedGroup] = useState(null);
   const [selectedFile, setSelectedFile] = useState(null);
 
@@ -217,9 +218,25 @@ export default function ManageResourcesPage() {
       ? `/api/collections/groups/${selectedGroup.id}/state-conditionals`
       : "";
 
+  const filteredGroups = useMemo(() => {
+    const query = search.trim().toLowerCase();
+    if (!query) return groups;
+
+    return groups
+      .map((group) => {
+        if (group.name.toLowerCase().includes(query)) return group;
+
+        const matchingFiles = (group.files || []).filter((file) =>
+          file.name.toLowerCase().includes(query)
+        );
+        return matchingFiles.length ? { ...group, files: matchingFiles } : null;
+      })
+      .filter(Boolean);
+  }, [groups, search]);
+
   return (
-    <div className="font-ibm flex flex-col h-screen w-screen overflow-hidden gap-2xl">
-      <div className="flex pt-l px-l">
+    <div className="font-ibm flex min-h-dvh w-screen flex-col gap-l overflow-y-auto lg:h-dvh lg:overflow-hidden">
+      <div className="flex flex-none px-l pt-l">
         <button onClick={goBack} className="btn btn-phantom text-m">
           <ArrowLeftIcon size={20} />
           Back
@@ -236,14 +253,26 @@ export default function ManageResourcesPage() {
         </button>
       </div>
 
-      <div className="u-container w-full">
-        <div className="container mx-auto">
-          <h1 className="text-xl mb-l">Uploaded Resources</h1>
-
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+      <div className="u-container min-h-0 w-full flex-1 pb-[max(1rem,env(safe-area-inset-bottom))]">
+        <div className="container mx-auto h-full min-h-0">
+          <div className="grid grid-cols-1 gap-4 lg:h-full lg:min-h-0 lg:grid-cols-3">
             {/* LEFT: Groups and files */}
-            <div className="card bg-base-100 shadow-md">
-              <div className="card-body gap-4 px-0">
+            <div className="card min-h-[35dvh] bg-base-100 shadow-md lg:h-full lg:min-h-0">
+              <div className="card-body flex min-h-0 flex-col gap-4 px-0">
+                <h1 className="flex-none text-xl">Uploaded Resources</h1>
+
+                <label htmlFor="authoring-resource-search" className="sr-only">
+                  Search files or collection name
+                </label>
+                <input
+                  id="authoring-resource-search"
+                  type="search"
+                  className="w-full flex-none border-0 border-b-1 border-primary pb-3 outline-none"
+                  placeholder="Search files or collection name"
+                  value={search}
+                  onChange={(event) => setSearch(event.target.value)}
+                />
+
                 <div className="flex items-center justify-between gap-2">
                   <h2 className="text-m">Collections</h2>
                   <AddGroup
@@ -276,10 +305,10 @@ export default function ManageResourcesPage() {
                   />
                 </div>
 
-                <ul className="menu bg-base-100 rounded-box w-full">
-                  {groups.map((group) => (
+                <ul className="menu min-h-0 w-full flex-1 overflow-auto rounded-box bg-base-100">
+                  {filteredGroups.map((group) => (
                     <li key={group.id}>
-                      <details>
+                      <details open={search.trim() ? true : undefined}>
                         <summary
                           className={`flex items-center ${
                             selectedGroup?.id === group.id && !selectedFile
@@ -352,8 +381,8 @@ export default function ManageResourcesPage() {
             </div>
 
             {/* RIGHT: File list and preview */}
-            <div className="card col-span-2">
-              <div className="card-body gap-4">
+            <div className="card min-h-[60dvh] overflow-auto pb-[max(1rem,env(safe-area-inset-bottom))] lg:col-span-2 lg:h-full lg:min-h-0">
+              <div className="card-body flex min-h-full flex-col gap-4">
                 {selectedTarget ? (
                   <div>
                     <div className="text-xs text-primary">
@@ -368,7 +397,9 @@ export default function ManageResourcesPage() {
                   endpoint={selectedTargetEndpoint}
                   updateTarget={selectedFile ? updateFile : updateGroup}
                 />
-                <Preview file={selectedFile} />
+                <div className="min-h-[50dvh] flex-1 lg:min-h-0">
+                  <Preview file={selectedFile} />
+                </div>
               </div>
             </div>
           </div>
@@ -436,7 +467,7 @@ function Preview({ file }) {
   const isPDF = file.contentType === "application/pdf";
 
   return (
-    <div className="space-y-3">
+    <div className="flex h-full min-h-0 flex-col gap-3">
       <div className="flex items-center justify-between">
         <h3 className="text-m">{file.name}</h3>
         <a className="btn btn-phantom btn-xs" href={file.url} download>
@@ -444,36 +475,40 @@ function Preview({ file }) {
         </a>
       </div>
 
-      {isImage ? (
-        <img
-          src={file.url}
-          alt={file.name}
-          className="rounded-xl max-h-80 object-contain"
-        />
-      ) : isPDF ? (
-        <div className="w-full h-full">
-          <iframe
+      <div className="min-h-0 flex-1">
+        {isImage ? (
+          <img
             src={file.url}
-            title={file.name}
-            className="w-full h-full min-h-[60vh] rounded-xl border"
+            alt={file.name}
+            className="rounded-xl max-h-80 object-contain"
           />
-        </div>
-      ) : isText && text.isLoading ? (
-        <div className="space-y-2">
-          <div className="skeleton h-6 w-1/2" />
-          <div className="skeleton h-48 w-full" />
-        </div>
-      ) : isText && text.isError ? (
-        <div className="alert alert-warning">
-          <span>{text.error?.message || "Failed to load preview."}</span>
-        </div>
-      ) : isText ? (
-        <MDTextViewer file={file} content={text.data} />
-      ) : (
-        <div className="alert">
-          <span>Preview not supported. You can download the file instead.</span>
-        </div>
-      )}
+        ) : isPDF ? (
+          <div className="h-full min-h-0 w-full">
+            <iframe
+              src={file.url}
+              title={file.name}
+              className="block h-full min-h-[50dvh] w-full rounded-xl border lg:min-h-0"
+            />
+          </div>
+        ) : isText && text.isLoading ? (
+          <div className="space-y-2">
+            <div className="skeleton h-6 w-1/2" />
+            <div className="skeleton h-48 w-full" />
+          </div>
+        ) : isText && text.isError ? (
+          <div className="alert alert-warning">
+            <span>{text.error?.message || "Failed to load preview."}</span>
+          </div>
+        ) : isText ? (
+          <MDTextViewer file={file} content={text.data} />
+        ) : (
+          <div className="alert">
+            <span>
+              Preview not supported. You can download the file instead.
+            </span>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

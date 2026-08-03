@@ -159,72 +159,74 @@ export default function ResourcesPanel({
       >
         <div
           ref={dialogRef}
-          className="shadow-2xl w-full h-full overflow-hidden font-ibm"
+          className="relative h-dvh w-full overflow-hidden font-ibm shadow-2xl"
           onClick={stopPropagation}
         >
-          <div className="u-container w-full pt-4xl">
-            <div className="flex justify-between items-center mb-l">
-              <h1 className="text-xl">Resources </h1>
-              <button
-                className="btn btn-phantom btn-sm"
-                onClick={onClose}
-                aria-label="Close"
-              >
-                <XIcon size={32} />
-              </button>
-            </div>
-            {/* Search */}
-            <div className="p-3">
-              <div className="flex gap-2 mb-2">
-                <input
-                  type="text"
-                  className="flex-1 outline-none pb-3 border-0 border-b-1 border-primary"
-                  placeholder="Search files or group name"
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                />
-                <button
-                  className="btn btn-phantom btn-sm"
-                  onClick={expandAll}
-                  title="Expand all"
-                  disabled={loading || !tree.length}
-                >
-                  <ListChevronsDownUpIcon size={20} />
-                </button>
-                <button
-                  className="btn btn-phantom btn-sm"
-                  onClick={collapseAll}
-                  title="Collapse all"
-                  disabled={loading || !tree.length}
-                >
-                  <ListChevronsUpDownIcon size={20} />
-                </button>
-              </div>
-            </div>
-            <div className="p-3 h-[calc(100%-112px)] overflow-hidden">
-              {loading ? (
-                <SkeletonBody />
-              ) : error ? (
-                <div className="h-full flex flex-col items-center justify-center gap-3">
-                  <div className="alert alert-error max-w-md">
-                    <span>{error}</span>
-                  </div>
-                  <button className="btn btn-sm" onClick={handleRetry}>
-                    Retry
+          <button
+            className="btn btn-phantom btn-sm absolute right-l top-l z-10 lg:top-4xl"
+            onClick={onClose}
+            aria-label="Close"
+          >
+            <XIcon size={32} />
+          </button>
+
+          <div className="u-container h-full w-full overflow-y-auto py-l lg:overflow-hidden lg:py-4xl">
+            <div className="grid min-h-full grid-cols-1 gap-3 lg:h-full lg:min-h-0 lg:grid-cols-3">
+              <div className="flex min-h-[35dvh] flex-col lg:min-h-0">
+                <h1 className="mb-l pr-3xl text-xl">Resources</h1>
+
+                <div className="mb-2 flex flex-none gap-2 p-3">
+                  <label htmlFor="resource-search" className="sr-only">
+                    Search files or collection name
+                  </label>
+                  <input
+                    id="resource-search"
+                    type="search"
+                    className="flex-1 border-0 border-b-1 border-primary pb-3 outline-none"
+                    placeholder="Search files or collection name"
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                  />
+                  <button
+                    className="btn btn-phantom btn-sm"
+                    onClick={expandAll}
+                    title="Expand all"
+                    disabled={loading || !tree.length}
+                  >
+                    <ListChevronsDownUpIcon size={20} />
+                  </button>
+                  <button
+                    className="btn btn-phantom btn-sm"
+                    onClick={collapseAll}
+                    title="Collapse all"
+                    disabled={loading || !tree.length}
+                  >
+                    <ListChevronsUpDownIcon size={20} />
                   </button>
                 </div>
-              ) : (filteredTree?.length ?? 0) === 0 ? (
-                <div className="h-full flex items-center justify-center">
-                  <div className="text-center opacity-70">
-                    <p>No resources available for this scenario.</p>
-                    <p className="text-sm">
-                      Ask the author to upload files in the authoring UI.
-                    </p>
-                  </div>
-                </div>
-              ) : (
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 h-full">
-                  <div className="overflow-auto rounded-lg">
+
+                <div className="min-h-0 flex-1 overflow-auto rounded-lg p-3">
+                  {loading ? (
+                    <TreeSkeleton />
+                  ) : error ? (
+                    <div className="flex h-full flex-col items-center justify-center gap-3">
+                      <div className="alert alert-error max-w-md">
+                        <span>{error}</span>
+                      </div>
+                      <button className="btn btn-sm" onClick={handleRetry}>
+                        Retry
+                      </button>
+                    </div>
+                  ) : (filteredTree?.length ?? 0) === 0 ? (
+                    <div className="flex h-full items-center justify-center">
+                      <div className="text-center opacity-70">
+                        <p>No resources available for this scenario.</p>
+                        <p className="text-sm">
+                          Ask the author to upload files in the authoring UI.
+                        </p>
+                      </div>
+                    </div>
+                  ) : (
                     <ResourceTree
                       tree={filteredTree}
                       search={search}
@@ -233,12 +235,13 @@ export default function ResourcesPanel({
                       openGroups={openGroups}
                       toggleGroup={toggleGroup}
                     />
-                  </div>
-                  <div className="col-span-2 overflow-auto rounded-lg">
-                    <ResourcePreview file={selectedFile} />
-                  </div>
+                  )}
                 </div>
-              )}
+              </div>
+
+              <div className="min-h-[60dvh] overflow-auto rounded-lg pb-[max(1rem,env(safe-area-inset-bottom))] lg:col-span-2 lg:min-h-0">
+                <ResourcePreview file={selectedFile} />
+              </div>
             </div>
           </div>
         </div>
@@ -247,21 +250,14 @@ export default function ResourcesPanel({
   );
 }
 
-function SkeletonBody() {
+function TreeSkeleton() {
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 h-full">
-      <div className="space-y-2">
-        <div className="skeleton h-5 w-1/2" />
-        <div className="skeleton h-4 w-2/3" />
-        <div className="skeleton h-4 w-3/5" />
-        <div className="skeleton h-4 w-1/2" />
-        <div className="skeleton h-4 w-2/3" />
-      </div>
-      <div className="space-y-2 col-span-2">
-        <div className="skeleton h-6 w-3/4" />
-        <div className="skeleton h-48 w-full" />
-        <div className="skeleton h-4 w-1/3" />
-      </div>
+    <div className="space-y-2">
+      <div className="skeleton h-5 w-1/2" />
+      <div className="skeleton h-4 w-2/3" />
+      <div className="skeleton h-4 w-3/5" />
+      <div className="skeleton h-4 w-1/2" />
+      <div className="skeleton h-4 w-2/3" />
     </div>
   );
 }

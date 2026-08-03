@@ -36,7 +36,7 @@ export default function ResourcePreview({ file }) {
   const isPDF = file.contentType === "application/pdf";
 
   return (
-    <div className="p-3 h-full flex flex-col gap-3 font-ibm">
+    <div className="flex h-full min-h-0 flex-col gap-3 p-3 font-ibm">
       <div className="flex items-start justify-between gap-2">
         <div>
           <h3
@@ -63,11 +63,11 @@ export default function ResourcePreview({ file }) {
             className="rounded-xl max-h-80 object-contain"
           />
         ) : isPDF ? (
-          <div className="w-full h-full">
+          <div className="h-full min-h-0 w-full">
             <iframe
               src={file.url}
               title={file.name}
-              className="w-full h-full min-h-[60vh] rounded-xl border"
+              className="block h-full min-h-[50dvh] w-full rounded-xl border lg:min-h-0"
             />
           </div>
         ) : isText && text.isLoading ? (
