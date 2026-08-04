@@ -3,6 +3,7 @@
 export const EmailTemplate = Object.freeze({
   ACCESS_GRANTED: "ACCESS_GRANTED",
   WELCOME: "WELCOME",
+  YOUR_TURN: "YOUR_TURN",
 });
 
 // Each builder takes template data and returns { subject, html }.
@@ -16,6 +17,15 @@ const builders = {
   [EmailTemplate.WELCOME]: ({ name }) => ({
     subject: "Welcome to VPS",
     html: `<p>Hi ${name || "there"}, welcome to the Virtual Patient Simulator!</p>`,
+  }),
+
+  [EmailTemplate.YOUR_TURN]: ({ name, scenarioName }) => ({
+    subject: scenarioName
+      ? `${scenarioName}: it's your turn`
+      : "It's your turn",
+    html: `<p>Hi ${name || "there"}, your group member has finished their part${
+      scenarioName ? ` of <strong>${scenarioName}</strong>` : ""
+    }. It's your turn to continue the scenario.</p>`,
   }),
 };
 

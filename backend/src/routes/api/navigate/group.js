@@ -10,6 +10,8 @@ import { getStateVariables } from "../../../db/daos/scenarioDao.js";
 import { setGroupStateVariables } from "../../../db/daos/groupDao.js";
 import { applyStateOperations } from "../../../util/statevariables/stateOperations.js";
 import { getComponent } from "../../../db/daos/sceneDao.js";
+import { sendEmail } from "../../../util/resend.js";
+import { EmailTemplate } from "../../../util/emailTemplates.js";
 
 const createInvalidError = (roles) =>
   new HttpError("Invalid role to access this scene", STATUS.FORBIDDEN, {
@@ -171,6 +173,37 @@ const syncStateVariables = async (group) => {
   return [stateVariables, group.stateVersions];
 };
 
+// Emails the group member(s) whose role the new scene is for, letting them
+// know it's their turn. Never throws — a failed notification shouldn't block
+// navigation.
+const notifyNextRole = async (group, nextSceneId, currentRole) => {
+  try {
+    const nextScene = await Scene.findById(nextSceneId, { roles: 1 }).lean();
+    if (!nextScene?.roles?.length) return;
+
+    const [fullGroup, scenario] = await Promise.all([
+      Group.findById(group._id, { users: 1 }).lean(),
+      Scenario.findById(group.scenarioId, { name: 1 }).lean(),
+    ]);
+
+    const recipients = fullGroup.users.filter(
+      (user) => nextScene.roles.includes(user.role) && user.role !== currentRole
+    );
+
+    await Promise.all(
+      recipients.map((user) =>
+        sendEmail({
+          to: user.email,
+          template: EmailTemplate.YOUR_TURN,
+          data: { name: user.name, scenarioName: scenario?.name },
+        })
+      )
+    );
+  } catch (err) {
+    console.error("Failed to send turn notification email:", err.message);
+  }
+};
+
 // Updates state variables for a group
 const updateStateVariables = async (group, component) => {
   if (!component || !component.stateOperations) {
@@ -247,12 +280,18 @@ export const groupNavigate = async (req) => {
   const nextScene = component?.nextScene ?? bodyNextScene;
 
   if (nextScene && nextScene !== currentScene) {
-    [, , , scenes] = await Promise.all([
+    await Promise.all([
       addSceneToPath(group._id, currentScene, nextScene),
       addFlagsToGroup(group._id, addFlags),
       removeFlagsFromGroup(group._id, removeFlags),
-      getConnectedScenes(nextScene, role, true),
     ]);
+
+    // Runs before getConnectedScenes below, which throws FORBIDDEN when nextScene
+    // isn't for this user's role — the expected signal that they just handed off
+    // to a teammate. The notification must fire regardless of that throw.
+    await notifyNextRole(group, nextScene, role);
+
+    scenes = await getConnectedScenes(nextScene, role, true);
   }
 
   const [stateVariables, stateVersion] = await updateStateVariables(
