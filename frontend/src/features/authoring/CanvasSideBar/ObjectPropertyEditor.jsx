@@ -51,6 +51,18 @@ export function ObjectPropertyEditor({ component }) {
     setInputAngle(rotation);
   }, [component.bounds.verts, component.bounds.rotation]);
 
+  useEffect(() => {
+    return () => {
+      noFields([
+        [inputX, "x", setInputX],
+        [inputY, "y", setInputY],
+        [inputHeight, "height", setInputHeight],
+        [inputWidth, "width", setInputWidth],
+        [inputAngle, "rotation", setInputAngle],
+      ]);
+    };
+  }, [inputX, inputHeight, inputWidth, inputY, inputAngle]);
+
   function flipComponent(axis) {
     modifyComponentProp(component.id, "bounds.verts", (prev) => {
       const center = getBoxCenter(prev);
@@ -66,10 +78,15 @@ export function ObjectPropertyEditor({ component }) {
     );
   }
 
-  function noFields(v, type, set) {
-    if (v === "") {
-      saveProp("0", type, set);
-    }
+  function noFields(values) {
+    values.forEach((value) => {
+      const v = value[0];
+      const type = value[1];
+      const set = value[2];
+      if (v === "") {
+        saveProp("0", type, set);
+      }
+    });
   }
 
   function inputValidation(type, v, set, prevValue) {
@@ -122,21 +139,17 @@ export function ObjectPropertyEditor({ component }) {
       // increase bottom y to expand height and same idea with x
     } else if (type === "width") {
       modifyComponentProp(component.id, "bounds.verts", (prev) => {
-        const center = getBoxCenter(prev);
-        const halfWidth = value / 2;
         return [
-          { x: center.x - halfWidth, y: prev[0].y },
-          { x: center.x + halfWidth, y: prev[1].y },
+          prev[0],
+          { x: prev[0].x + value, y: prev[1].y },
           prev[2],
         ].filter(Boolean);
       });
     } else if (type === "height") {
       modifyComponentProp(component.id, "bounds.verts", (prev) => {
-        const center = getBoxCenter(prev);
-        const halfHeight = value / 2;
         return [
-          { x: prev[0].x, y: center.y - halfHeight },
-          { x: prev[1].x, y: center.y + halfHeight },
+          prev[0],
+          { x: prev[1].x, y: prev[0].y + value },
           prev[2],
         ].filter(Boolean);
       });
