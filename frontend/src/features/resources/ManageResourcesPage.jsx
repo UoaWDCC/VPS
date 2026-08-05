@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect } from "react";
+import React, { useRef, useState, useEffect, useContext, useMemo } from "react";
 import { getAuth } from "firebase/auth";
 import axios from "axios";
 import toast from "react-hot-toast";
@@ -14,20 +14,10 @@ import {
 import AddGroup from "./components/AddGroup";
 import StateConditionalMenu from "../../components/StateVariables/StateConditionalMenu";
 import MDTextViewer from "../playScenario/components/MDTextViewer";
-import { getDownloadUrl } from "../playScenario/hooks/useDownloadUrl";
-
-function normaliseFile(f) {
-  return {
-    id: f._id || f.id,
-    groupId: f.groupId,
-    groupName: f.groupName,
-    name: f.name,
-    size: f.size,
-    type: f.type,
-    createdAt: f.createdAt,
-    stateConditionals: f.stateConditionals || [],
-  };
-}
+import { api } from "../../util/api";
+import AuthenticationContext from "../../context/AuthenticationContext";
+import { useQuery } from "@tanstack/react-query";
+import { normaliseFile } from "./util";
 
 function normaliseGroup(g) {
   return {
@@ -35,14 +25,47 @@ function normaliseGroup(g) {
     name: g.name,
     order: g.order ?? 0,
     stateConditionals: g.stateConditionals || [],
-    files: (g.files || []).map((f) =>
-      normaliseFile({
-        ...f,
-        groupId: g._id || g.id,
-        groupName: g.name,
-      })
-    ),
+    files: (g.files || []).map((f) => normaliseFile(f)),
   };
+}
+
+async function uploadResource(user, scenarioId, groupId, file) {
+  try {
+    const formData = new FormData();
+    formData.append("file", file);
+
+    const fileResponse = await api.post(
+      user,
+      `api/files/${scenarioId}`,
+      formData
+    );
+
+    const resourceResponse = await api.post(
+      user,
+      `api/resources/${scenarioId}`,
+      {
+        groupId,
+        name: fileResponse.data.name,
+        fileId: fileResponse.data._id,
+      }
+    );
+    toast.success(`Resource created`);
+    return resourceResponse.data;
+  } catch (err) {
+    console.error(err);
+    toast.error("Upload failed");
+  }
+}
+
+async function removeResource(user, scenarioId, resourceId) {
+  try {
+    await api.delete(user, `/api/resources/${scenarioId}/${resourceId}`);
+    toast.success("Resource deleted");
+    return resourceId;
+  } catch (err) {
+    console.error(err);
+    toast.error("Delete failed");
+  }
 }
 
 // Page for managing resources (collections and files) for a scenario
@@ -63,27 +86,21 @@ export default function ManageResourcesPage() {
 
   // Groups (each with files)
   const [groups, setGroups] = useState([]);
+  const [search, setSearch] = useState("");
   const [selectedGroup, setSelectedGroup] = useState(null);
   const [selectedFile, setSelectedFile] = useState(null);
+
+  const { user } = useContext(AuthenticationContext);
 
   // Load groups and files
   useEffect(() => {
     let cancelled = false;
     (async () => {
       try {
-        const user = getAuth().currentUser;
-        if (!user) {
-          toast.error("You must be logged in to view collections.");
-          return;
-        }
-        const idToken = await user.getIdToken();
-        const { data } = await axios.get(
-          `/api/collections/tree/${scenarioId}`,
-          {
-            headers: { Authorization: `Bearer ${idToken}` },
-          }
+        const { data } = await api.get(
+          user,
+          `/api/collections/tree/${scenarioId}`
         );
-
         const normalized = (data || []).map((g) => normaliseGroup(g)) || [];
         if (!cancelled) setGroups(normalized);
       } catch (err) {
@@ -97,81 +114,31 @@ export default function ManageResourcesPage() {
     };
   }, [scenarioId]);
 
-  // Upload directly to group
-  async function addFilesTo(groupId, files) {
-    try {
-      const user = getAuth().currentUser;
-      if (!user) {
-        toast.error("You must be logged in to upload.");
-        return;
-      }
-      const idToken = await user.getIdToken();
+  async function addResourceToGroup(groupId, file) {
+    const resource = await uploadResource(user, scenarioId, groupId, file);
+    if (!resource) return;
 
-      const fd = new FormData();
-      fd.set("scenarioId", scenarioId);
-      fd.set("groupId", groupId);
-      for (const file of files) fd.append("files", file);
-
-      const { data } = await axios.post("/api/files/upload", fd, {
-        headers: {
-          Authorization: `Bearer ${idToken}`,
-          "Content-Type": "multipart/form-data",
-        },
-      });
-
-      const uploaded = data?.files || [];
-      if (!uploaded.length) return;
-
-      const normalizedUploaded = uploaded.map((f) => ({
-        id: f._id,
-        groupId,
-        name: f.name,
-        size: f.size,
-        type: f.type,
-        createdAt: f.createdAt,
-        stateConditionals: f.stateConditionals || [],
-      }));
-
-      setGroups((prev) =>
-        prev.map((g) =>
-          g.id === groupId
-            ? { ...g, files: [...normalizedUploaded, ...(g.files || [])] }
-            : g
-        )
-      );
-
-      toast.success(`Uploaded ${normalizedUploaded.length} file(s)`);
-    } catch (err) {
-      console.error(err);
-      toast.error(err?.response?.data?.error || "Upload failed");
-    }
+    setGroups((prev) =>
+      prev.map((g) =>
+        g.id === groupId
+          ? { ...g, files: [normaliseFile(resource), ...(g.files || [])] }
+          : g
+      )
+    );
   }
 
-  async function removeFile(fileId) {
-    try {
-      const user = getAuth().currentUser;
-      if (!user) {
-        toast.error("You must be logged in to delete.");
-        return;
-      }
-      const idToken = await user.getIdToken();
-      await axios.delete(`/api/files/${fileId}`, {
-        headers: { Authorization: `Bearer ${idToken}` },
-      });
+  async function deleteResource(resourceId) {
+    const success = await removeResource(user, scenarioId, resourceId);
+    if (!success) return;
 
-      setGroups((prev) =>
-        prev.map((g) => ({
-          ...g,
-          files: (g.files || []).filter((f) => f.id !== fileId),
-        }))
-      );
+    setGroups((prev) =>
+      prev.map((g) => ({
+        ...g,
+        files: (g.files || []).filter((f) => f.id !== resourceId),
+      }))
+    );
 
-      if (selectedFile?.id === fileId) setSelectedFile(null);
-      toast.success("Deleted");
-    } catch (err) {
-      console.error(err);
-      toast.error(err?.response?.data?.error || "Delete failed");
-    }
+    if (selectedFile?.id === resourceId) setSelectedFile(null);
   }
 
   async function deleteGroup(groupId) {
@@ -204,10 +171,7 @@ export default function ManageResourcesPage() {
   }
 
   function updateFile(updatedFile) {
-    const normalisedFile = normaliseFile({
-      ...updatedFile,
-      groupName: selectedFile?.groupName,
-    });
+    const normalisedFile = normaliseFile(updatedFile);
     setSelectedFile(normalisedFile);
     setGroups((prev) =>
       prev.map((g) =>
@@ -249,14 +213,30 @@ export default function ManageResourcesPage() {
       ? "Collection"
       : null;
   const selectedTargetEndpoint = selectedFile
-    ? `/api/files/state-conditionals/${selectedFile.id}`
+    ? `/api/resources/${scenarioId}/${selectedFile.id}/conditionals`
     : selectedGroup
       ? `/api/collections/groups/${selectedGroup.id}/state-conditionals`
       : "";
 
+  const filteredGroups = useMemo(() => {
+    const query = search.trim().toLowerCase();
+    if (!query) return groups;
+
+    return groups
+      .map((group) => {
+        if (group.name.toLowerCase().includes(query)) return group;
+
+        const matchingFiles = (group.files || []).filter((file) =>
+          file.name.toLowerCase().includes(query)
+        );
+        return matchingFiles.length ? { ...group, files: matchingFiles } : null;
+      })
+      .filter(Boolean);
+  }, [groups, search]);
+
   return (
-    <div className="font-ibm flex flex-col h-screen w-screen overflow-hidden gap-2xl">
-      <div className="flex pt-l px-l">
+    <div className="font-ibm flex min-h-dvh w-screen flex-col gap-l overflow-y-auto lg:h-dvh lg:overflow-hidden">
+      <div className="flex flex-none px-l pt-l">
         <button onClick={goBack} className="btn btn-phantom text-m">
           <ArrowLeftIcon size={20} />
           Back
@@ -273,14 +253,26 @@ export default function ManageResourcesPage() {
         </button>
       </div>
 
-      <div className="u-container w-full">
-        <div className="container mx-auto">
-          <h1 className="text-xl mb-l">Uploaded Resources</h1>
-
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+      <div className="u-container min-h-0 w-full flex-1 pb-[max(1rem,env(safe-area-inset-bottom))]">
+        <div className="container mx-auto h-full min-h-0">
+          <div className="grid grid-cols-1 gap-4 lg:h-full lg:min-h-0 lg:grid-cols-3">
             {/* LEFT: Groups and files */}
-            <div className="card bg-base-100 shadow-md">
-              <div className="card-body gap-4 px-0">
+            <div className="card min-h-[35dvh] bg-base-100 shadow-md lg:h-full lg:min-h-0">
+              <div className="card-body flex min-h-0 flex-col gap-4 px-0">
+                <h1 className="flex-none text-xl">Uploaded Resources</h1>
+
+                <label htmlFor="authoring-resource-search" className="sr-only">
+                  Search files or collection name
+                </label>
+                <input
+                  id="authoring-resource-search"
+                  type="search"
+                  className="w-full flex-none border-0 border-b-1 border-primary pb-3 outline-none"
+                  placeholder="Search files or collection name"
+                  value={search}
+                  onChange={(event) => setSearch(event.target.value)}
+                />
+
                 <div className="flex items-center justify-between gap-2">
                   <h2 className="text-m">Collections</h2>
                   <AddGroup
@@ -313,12 +305,17 @@ export default function ManageResourcesPage() {
                   />
                 </div>
 
-                <ul className="menu bg-base-100 rounded-box w-full">
-                  {groups.map((group) => (
+                <ul className="menu min-h-0 w-full flex-1 overflow-auto rounded-box bg-base-100 p-0">
+                  {search.trim() && filteredGroups.length === 0 && (
+                    <li className="p-2 opacity-60">
+                      No matching resources found.
+                    </li>
+                  )}
+                  {filteredGroups.map((group) => (
                     <li key={group.id}>
-                      <details>
+                      <details open={search.trim() ? true : undefined}>
                         <summary
-                          className={`flex items-center ${
+                          className={`flex items-center px-0 ${
                             selectedGroup?.id === group.id && !selectedFile
                               ? "bg-base-200"
                               : ""
@@ -331,7 +328,10 @@ export default function ManageResourcesPage() {
                           <span className="text--1 truncate">{group.name}</span>
                           <div className="flex items-center ml-auto">
                             <UploadButton
-                              onFiles={(files) => addFilesTo(group.id, files)}
+                              multiple={false}
+                              onFiles={(files) =>
+                                addResourceToGroup(group.id, files[0])
+                              }
                             />
                             <button
                               className="btn btn-phantom btn-xs"
@@ -369,7 +369,7 @@ export default function ManageResourcesPage() {
                                 </a>
                                 <button
                                   className="btn btn-phantom btn-xs px-0"
-                                  onClick={() => removeFile(f.id)}
+                                  onClick={() => deleteResource(f.id)}
                                   title="Delete file"
                                 >
                                   <XIcon size={16} />
@@ -386,8 +386,8 @@ export default function ManageResourcesPage() {
             </div>
 
             {/* RIGHT: File list and preview */}
-            <div className="card col-span-2">
-              <div className="card-body gap-4">
+            <div className="card min-h-[60dvh] overflow-auto pb-[max(1rem,env(safe-area-inset-bottom))] lg:col-span-2 lg:h-full lg:min-h-0">
+              <div className="card-body flex min-h-full flex-col gap-4">
                 {selectedTarget ? (
                   <div>
                     <div className="text-xs text-primary">
@@ -402,7 +402,9 @@ export default function ManageResourcesPage() {
                   endpoint={selectedTargetEndpoint}
                   updateTarget={selectedFile ? updateFile : updateGroup}
                 />
-                <Preview file={selectedFile} />
+                <div className="min-h-[50dvh] flex-1 lg:min-h-0">
+                  <Preview file={selectedFile} />
+                </div>
               </div>
             </div>
           </div>
@@ -439,69 +441,19 @@ function UploadButton({ onFiles, multiple = true, className = "" }) {
   );
 }
 
+async function loadText(url) {
+  return fetch(url).then((res) => {
+    if (!res.ok) throw new Error(`failed to load file (${res.status})`);
+    return res.text();
+  });
+}
+
 function Preview({ file }) {
-  const [downloadUrl, setDownloadUrl] = useState(null);
-  const [text, setText] = useState(null);
-  const [textLoading, setTextLoading] = useState(false);
-  const [fetchErr, setFetchErr] = useState(null);
-
-  useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      if (!file) {
-        setDownloadUrl(null);
-        setText(null);
-        return;
-      }
-      const url = await getDownloadUrl(file.id);
-      if (!cancelled) setDownloadUrl(url);
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, [file]);
-
-  useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      if (!file || !downloadUrl) {
-        setText(null);
-        setFetchErr(null);
-        setTextLoading(false);
-        return;
-      }
-      const isText =
-        file.type?.startsWith("text/") ||
-        /\.md$|\.html?$/i.test(file.name || "") ||
-        /json|xml|csv/.test(file.type || "");
-
-      if (!isText) {
-        setText(null);
-        setFetchErr(null);
-        return;
-      }
-
-      setTextLoading(true);
-      setFetchErr(null);
-      try {
-        const resp = await fetch(downloadUrl);
-        if (!resp.ok)
-          throw new Error(`Failed to load preview (${resp.status})`);
-        const t = await resp.text();
-        if (!cancelled) setText(t);
-      } catch (err) {
-        if (!cancelled) {
-          setFetchErr(err?.message || "Failed to load preview");
-          setText(null);
-        }
-      } finally {
-        if (!cancelled) setTextLoading(false);
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, [file, downloadUrl]);
+  const text = useQuery({
+    queryKey: ["file-text", file?.url],
+    queryFn: () => loadText(file.url),
+    enabled: !!(file?.contentType?.startsWith("text") && file?.url),
+  });
 
   if (!file)
     return (
@@ -509,62 +461,59 @@ function Preview({ file }) {
         <h3>Preview</h3>
         <p>
           Select a file to preview. Images and PDFs files show inline;
-          text/CSV/JSON/Markdown render below; other files provide a download.
+          Text/Markdown render below; other files provide a download.
         </p>
       </div>
     );
 
-  // logic is consistent with resource panel
-  const isImage = file.type?.startsWith("image/");
-  const isPDF = file.type === "application/pdf";
+  const isImage = file.type === "image";
   const isText =
-    file.type?.startsWith("text/") ||
-    /\.md$|\.html?$/i.test(file.name || "") ||
-    /json|xml|csv/.test(file.type || "");
+    file.type === "document" && file.contentType !== "application/pdf";
+  const isPDF = file.contentType === "application/pdf";
 
   return (
-    <div className="space-y-3">
+    <div className="flex h-full min-h-0 flex-col gap-3">
       <div className="flex items-center justify-between">
         <h3 className="text-m">{file.name}</h3>
-        {downloadUrl && (
-          <a className="btn btn-phantom btn-xs" href={downloadUrl} download>
-            Download
-          </a>
-        )}
+        <a className="btn btn-phantom btn-xs" href={file.url} download>
+          Download
+        </a>
       </div>
 
-      {isImage && downloadUrl ? (
-        <img
-          src={downloadUrl}
-          alt={file.name}
-          className="rounded-xl max-h-80 object-contain"
-        />
-      ) : isPDF && downloadUrl ? (
-        <div className="w-full h-full">
-          <iframe
-            src={downloadUrl}
-            title={file.name}
-            className="w-full h-full min-h-[60vh] rounded-xl border"
+      <div className="min-h-0 flex-1">
+        {isImage ? (
+          <img
+            src={file.url}
+            alt={file.name}
+            className="rounded-xl max-h-80 object-contain"
           />
-        </div>
-      ) : isText &&
-        (textLoading ||
-          (text == null && downloadUrl == null && fetchErr == null)) ? (
-        <div className="space-y-2">
-          <div className="skeleton h-6 w-1/2" />
-          <div className="skeleton h-48 w-full" />
-        </div>
-      ) : isText && fetchErr ? (
-        <div className="alert alert-warning">
-          <span>{fetchErr}</span>
-        </div>
-      ) : isText ? (
-        <MDTextViewer file={file} content={text} />
-      ) : (
-        <div className="alert">
-          <span>Preview not supported. You can download the file instead.</span>
-        </div>
-      )}
+        ) : isPDF ? (
+          <div className="h-full min-h-0 w-full">
+            <iframe
+              src={file.url}
+              title={file.name}
+              className="block h-full min-h-[50dvh] w-full rounded-xl border lg:min-h-0"
+            />
+          </div>
+        ) : isText && text.isLoading ? (
+          <div className="space-y-2">
+            <div className="skeleton h-6 w-1/2" />
+            <div className="skeleton h-48 w-full" />
+          </div>
+        ) : isText && text.isError ? (
+          <div className="alert alert-warning">
+            <span>{text.error?.message || "Failed to load preview."}</span>
+          </div>
+        ) : isText ? (
+          <MDTextViewer file={file} content={text.data} />
+        ) : (
+          <div className="alert">
+            <span>
+              Preview not supported. You can download the file instead.
+            </span>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

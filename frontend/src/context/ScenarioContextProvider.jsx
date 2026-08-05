@@ -89,9 +89,8 @@ export default function ScenarioContextProvider({ children }) {
     },
   });
 
-  // TODO: this should be divorced from the "uploaded" groups and exist as prop of the scenario instead
   useGet(
-    `api/group/${scenarioId}/roleList`,
+    `api/scenario/${scenarioId}/roles`,
     setRoleList,
     true,
     !scenarioId // Skip request if there is no current scenario.
@@ -129,6 +128,7 @@ export default function ScenarioContextProvider({ children }) {
         createScenario: createMutation.mutateAsync,
 
         roleList,
+        setRoleList,
         stateVariables,
         setStateVariables,
       }}

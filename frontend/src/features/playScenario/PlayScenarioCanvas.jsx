@@ -201,7 +201,7 @@ export default function PlayScenarioCanvas({
 
   return (
     <div className="bg-black" style={{ width: "100vw", height: "100vh" }}>
-      <svg id="main" className="w-full h-full" viewBox="0 0 1920 1080">
+      <svg id="play-main" className="w-full h-full" viewBox="0 0 1920 1080">
         <rect x="0" y="0" width="1920" height="1080" fill="white" />
         {components}
       </svg>

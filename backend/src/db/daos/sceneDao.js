@@ -2,6 +2,71 @@ import Scene from "../models/scene.js";
 import Scenario from "../models/scenario.js";
 import { HttpError } from "../../util/error.js";
 import status from "../../util/status.js";
+import { applyReferenceDeltas } from "./fileDao.js";
+import { HttpStatusCode } from "axios";
+
+export function addDelta(fileRefDeltas, fileId, delta) {
+  fileRefDeltas.set(fileId, (fileRefDeltas.get(fileId) ?? 0) + delta);
+}
+
+export function hasFileRef(component) {
+  if (!component) return false;
+  return ["audio", "image"].includes(component.type) && component.fileId;
+}
+
+function computeCreateFileRefDeltas(components) {
+  const fileRefDeltas = new Map();
+  (components ?? []).forEach((component) => {
+    if (hasFileRef(component)) {
+      addDelta(fileRefDeltas, component.fileId, 1);
+    }
+  });
+  return fileRefDeltas;
+}
+
+function computeDeleteFileRefDeltas(components) {
+  const fileRefDeltas = new Map();
+  (components ?? []).forEach((component) => {
+    if (hasFileRef(component)) {
+      addDelta(fileRefDeltas, component.fileId, -1);
+    }
+  });
+  return fileRefDeltas;
+}
+
+function computePatchFileRefDeltas(
+  existingComponents,
+  modifiedComponents,
+  deletedComponentIds
+) {
+  const existingComponentsById = new Map(
+    (existingComponents ?? []).map((c) => [c.id, c])
+  );
+
+  const fileRefDeltas = new Map();
+
+  deletedComponentIds.forEach((id) => {
+    const existing = existingComponentsById.get(id);
+    if (hasFileRef(existing)) addDelta(fileRefDeltas, existing.fileId, -1);
+  });
+
+  modifiedComponents.forEach((component) => {
+    const existing = existingComponentsById.get(component.id);
+
+    // decrement the previously referenced file (if any) and increment the
+    // newly referenced one (if any). this handles brand new components, a
+    // component whose file reference was cleared, and a component whose
+    // fileId was swapped in place
+    const existingFileId = hasFileRef(existing) ? existing.fileId : null;
+    const newFileId = hasFileRef(component) ? component.fileId : null;
+
+    if (existingFileId === newFileId) return;
+    if (existingFileId) addDelta(fileRefDeltas, existingFileId, -1);
+    if (newFileId) addDelta(fileRefDeltas, newFileId, 1);
+  });
+
+  return fileRefDeltas;
+}
 
 // enforce direct links between scenes to be in the same scenario
 const assertDirectLinkInScenario = async (scenarioId, directLinkId) => {
@@ -76,21 +141,13 @@ const retrieveScene = async (sceneId) => {
  * @returns updated database scene object
  */
 const updateScene = async (sceneId, updatedScene) => {
+  // WARNING: this function does not handle resource ref counting, the
+  // patch function is what should be used instead
+
   // makes sure when we update components is not null
   if (updatedScene.components) {
     const prevDbScene = await Scene.findById(sceneId);
     if (!prevDbScene) return null;
-
-    // if previous firebase media component no longer exists, try to delete file from firebase storage
-    prevDbScene.components.forEach((c) => {
-      if (c.type === "image" || c.type === "audio") {
-        // checks for non-existance in new components array
-        if (!updatedScene.components.some((newC) => newC.id === c.id)) {
-          // FIX: firebase is setup incorrectly, so this will error
-          // tryDeleteFile(c.href ?? c.url);
-        }
-      }
-    });
 
     const dbScene = await Scene.findOneAndUpdate(
       { _id: sceneId },
@@ -154,6 +211,12 @@ const deleteScene = async (scenarioId, sceneId) => {
     { $set: { directLink: null } }
   );
   const res = await Scene.findOneAndDelete({ _id: sceneId });
+
+  if (res) {
+    const fileRefDeltas = computeDeleteFileRefDeltas(res.components);
+    await applyReferenceDeltas(fileRefDeltas);
+  }
+
   return {
     deleted: res !== null,
     reason: res ? undefined : "not_found",
@@ -177,17 +240,13 @@ const duplicateScene = async (scenarioId, sceneId) => {
   const dbScene = new Scene(newScene);
   await dbScene.save();
 
-  // FIX: firebase is setup incorrectly, so this will error
-  // dbScene.components.forEach((c) => {
-  //   if (c.type === "image" || c.type === "audio") {
-  //     updateFileMetadata(c.url);
-  //   }
-  // });
-
   await Scenario.updateOne(
     { _id: scenarioId },
     { $push: { scenes: dbScene._id } }
   );
+
+  const fileRefDeltas = computeCreateFileRefDeltas(dbScene.components);
+  await applyReferenceDeltas(fileRefDeltas);
 
   return dbScene;
 };
@@ -255,6 +314,16 @@ const patchScene = async (sceneId, patch, scenarioId) => {
     await assertDirectLinkInScenario(scenarioId, allowedFields.directLink);
   }
 
+  const existingScene = await Scene.findById(sceneId, { components: 1 });
+  if (!existingScene)
+    throw new HttpError("scene not found", HttpStatusCode.NotFound);
+
+  const fileRefDeltas = computePatchFileRefDeltas(
+    existingScene.components,
+    components,
+    deletedComponentIds
+  );
+
   const operations = [];
 
   if (Object.keys(allowedFields).length > 0) {
@@ -314,6 +383,8 @@ const patchScene = async (sceneId, patch, scenarioId) => {
   if (operations.length > 0) {
     await Scene.bulkWrite(operations, { ordered: true });
   }
+
+  await applyReferenceDeltas(fileRefDeltas);
 
   return Scene.findById(sceneId);
 };

@@ -1,5 +1,5 @@
 import { useContext, useState, useEffect } from "react";
-import { Check } from "lucide-react";
+import { Check, ChevronDown } from "lucide-react";
 import ScenarioContext from "context/ScenarioContext";
 import SceneContext from "context/SceneContext";
 import { generateUniqueSceneName } from "../../../utils/sceneUtils";
@@ -11,6 +11,7 @@ import useDirectLink from "./useDirectLink";
 import shallow from "zustand/shallow";
 import toast from "react-hot-toast";
 import TimerStateOperationMenu from "../../../components/StateVariables/TimerStateOperationMenu";
+import SelectInput from "../components/Select";
 
 /**
  * This component displays the settings of a scene, such as the scene name
@@ -128,9 +129,12 @@ export default function SceneSettings() {
               <div
                 tabIndex={0}
                 role="button"
-                className="justify-start input mb-1 font-normal"
+                className="justify-between input mb-1 font-normal w-full"
               >
-                {selectedRoles?.join(", ") || "All"}
+                <span className="truncate">
+                  {selectedRoles?.join(", ") || "All"}
+                </span>
+                <ChevronDown className="shrink-0" size={16} />
               </div>
               <ul
                 tabIndex={0}
@@ -185,23 +189,23 @@ export default function SceneSettings() {
                 </span>
               )}
             </label>
-            <select
-              className="select select-bordered"
+            <SelectInput
+              nullable
               disabled={!directLink || directLinkDisabled}
-              value={directLink ?? ""}
-              onChange={(e) =>
-                modifySceneProp("directLink", e.target.value || null)
+              value={directLink}
+              values={
+                scenes
+                  ?.filter((scene) => scene._id !== sceneId)
+                  .map((scene) => scene._id) ?? []
               }
-            >
-              <option value="">No direct link target</option>
-              {scenes
-                ?.filter((scene) => scene._id !== sceneId)
-                .map((scene) => (
-                  <option key={scene._id} value={scene._id}>
-                    {scene.name}
-                  </option>
-                ))}
-            </select>
+              display={(targetId) =>
+                scenes?.find((scene) => scene._id === targetId)?.name ??
+                "Unknown scene"
+              }
+              onChange={(targetId) =>
+                modifySceneProp("directLink", targetId || null)
+              }
+            />
           </fieldset>
         </div>
       </div>

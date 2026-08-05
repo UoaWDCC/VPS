@@ -27,11 +27,6 @@ function EditAudioComponent({ component }: { component: AudioComponentData }) {
     return () => audio.removeEventListener("ended", () => setPlaying(false));
   }, [audio]);
 
-  // useEffect(() => {
-  //   if (stateOperation.operation !== operation) setOperation(stateOperation.operation);
-  //   if (stateOperation.value !== value) setValue(stateOperation.value);
-  // }, [stateOperation]);
-
   function togglePlayback() {
     setPlaying((prev) => !prev);
   }
