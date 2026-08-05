@@ -240,9 +240,17 @@ const duplicateScene = async (scenarioId, sceneId) => {
   const dbScene = new Scene(newScene);
   await dbScene.save();
 
+ 
+  //find where scene originally sits in scenes array
+  const { scenes: sceneIds = [] } =
+    (await Scenario.findById(scenarioId, { scenes: 1 }).lean()) ?? {};
+  //positions duplicate either right after original or at end of array
+  const position =
+    sceneIds.findIndex((id) => id.equals(sceneId)) + 1 || sceneIds.length;
+
   await Scenario.updateOne(
     { _id: scenarioId },
-    { $push: { scenes: dbScene._id } }
+    { $push: { scenes: { $each: [dbScene._id], $position: position } } }
   );
 
   const fileRefDeltas = computeCreateFileRefDeltas(dbScene.components);
