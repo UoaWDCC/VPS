@@ -116,7 +116,6 @@ export default function PlayScenarioPage({ group }) {
   const startSceneRef = useRef(
     new URLSearchParams(location.search).get("startScene")
   );
-  const handlingConflictRef = useRef(false);
 
   const [sceneId, setSceneId] = useState(null);
   const [stateVariables, setStateVariables] = useState([]);
@@ -133,16 +132,12 @@ export default function PlayScenarioPage({ group }) {
   const handleError = (error) => {
     if (!error) return;
     if (error.status === 409) {
-      if (!handlingConflictRef.current) {
-        handlingConflictRef.current = true;
-        onSceneChange();
-        toast.success(
-          isMultiplayer
-            ? "Someone else made a move first, but you're back on track!"
-            : "A move from somewhere else was made, but you're back on track!"
-        );
-        setTimeout(() => { handlingConflictRef.current = false; }, 1000);
-      }
+      onSceneChange();
+      toast.success(
+        isMultiplayer
+          ? "Someone else made a move first, but you're back on track!"
+          : "A move from somewhere else was made, but you're back on track!"
+      );
     } else if (isMultiplayer && error.status === 403) {
       const roles = JSON.stringify(error.meta.roles_with_access);
       history.push(`/play/${scenarioId}/invalid-role?roles=${roles}`);
