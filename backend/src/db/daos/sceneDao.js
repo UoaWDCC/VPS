@@ -240,7 +240,6 @@ const duplicateScene = async (scenarioId, sceneId) => {
   const dbScene = new Scene(newScene);
   await dbScene.save();
 
- 
   //find where scene originally sits in scenes array
   const { scenes: sceneIds = [] } =
     (await Scenario.findById(scenarioId, { scenes: 1 }).lean()) ?? {};
