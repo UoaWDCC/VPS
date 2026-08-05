@@ -1,7 +1,8 @@
 import { useGet } from "hooks/crudHooks";
 import { useParams, useHistory, useRouteMatch, Switch } from "react-router-dom";
 import { useContext, useEffect, useState, useMemo } from "react";
-import axios from "axios";
+import toast from "react-hot-toast";
+import { api } from "../../util/api";
 import DashGroupTable from "./components/table/DashGroupTable";
 import { ReactFlowProvider } from "@xyflow/react";
 import CreateGraphData from "./utils/GraphHelper";
@@ -29,17 +30,18 @@ export default function Dashboard() {
   const [heading, setHeading] = useState("");
   const [activeTab, setActiveTab] = useState("groups");
   const [memberSearch, setMemberSearch] = useState("");
-  const { user, getUserIdToken } = useContext(AuthenticationContext);
+  const { user } = useContext(AuthenticationContext);
   const isOwner = Boolean(user && scenario.uid && user.uid === scenario.uid);
-
-  function goBack() {
-    history.push("/dashboard");
-  }
 
   // Check what page we are on
   const matchViewGroup = useRouteMatch(`${path}/view-group/:groupId`);
   const isViewGroupMode = Boolean(matchViewGroup);
   const viewGroupId = matchViewGroup?.params.groupId || 0;
+
+  // From the group list, back goes home; from a group's page, back goes to the group list
+  function goBack() {
+    history.push(isViewGroupMode ? url : "/dashboard");
+  }
 
   useGet(`api/dashboard/scenarios/${scenarioId}`, setCurrentScenario);
 
@@ -75,15 +77,15 @@ export default function Dashboard() {
   const handleRevoke = async (member) => {
     if (!window.confirm(`Remove ${member.name} from their group?`)) return;
     try {
-      const token = await getUserIdToken();
-      await axios.patch(
+      await api.patch(
+        user,
         `/api/dashboard/scenarios/${scenarioId}/groups/${member.groupId}/revoke`,
-        { uid: user.uid, email: member.email },
-        { headers: { Authorization: `Bearer ${token}` } }
+        { uid: user.uid, email: member.email }
       );
       reFetchGroups();
     } catch (err) {
       console.error("Failed to revoke member:", err);
+      toast.error("Failed to revoke member from their group");
     }
   };
 
@@ -189,7 +191,7 @@ export default function Dashboard() {
         </button>
       </div>
       <div className="h-full px-10 py-7 overflow-y-scroll ">
-        <h1 className="text-3xl font-mona font-bold">
+        <h1 className="text-3xl font-ibm font-bold">
           {heading ? heading : <span className="invisible">placeholder</span>}
         </h1>
         <div className="flex gap-10">
@@ -254,7 +256,7 @@ export default function Dashboard() {
           </div>
           {/* Right side coloum - used for graph */}
           <div className="w-1/2 min-w-0">
-            <h3 className="text-3xl font-mona font-bold">Scenario Overview</h3>
+            <h3 className="text-3xl font-ibm font-bold">Scenario Overview</h3>
             <ReactFlowProvider>
               <ScenarioGraph
                 inNodes={nodes}
