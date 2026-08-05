@@ -140,7 +140,9 @@ export default function PlayScenarioPage({ group }) {
             ? "Someone else made a move first, but you're back on track!"
             : "A move from somewhere else was made, but you're back on track!"
         );
-        setTimeout(() => { handlingConflictRef.current = false; }, 1000);
+        setTimeout(() => {
+          handlingConflictRef.current = false;
+        }, 1000);
       }
     } else if (isMultiplayer && error.status === 403) {
       const roles = JSON.stringify(error.meta.roles_with_access);
