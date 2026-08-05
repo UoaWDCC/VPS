@@ -13,27 +13,25 @@ import axios from "axios";
 
 import collectionsRouter from "../collections.js";
 import CollectionGroup from "../../../db/models/CollectionGroup.js";
-import StoredFile from "../../../db/models/StoredFile.js";
+import Resource from "../../../db/models/resource.js";
+import UploadedFile from "../../../db/models/uploadedFile.js";
 import auth from "../../../middleware/firebaseAuth.js";
 import errorHandler from "../../../middleware/errorHandler.js";
 
-jest.mock("../../../util/gridfs.js");
 jest.mock("../../../middleware/firebaseAuth");
 jest.mock("firebase-admin");
 
-import { deleteGridFsById } from "../../../util/gridfs.js";
 import { authHeaders } from "./testHelpers.js";
 import {
   useMongoMemoryServer,
   useExpressServer,
 } from "../../../test/testSetup.js";
+import { applyReferenceDelta } from "../../../db/daos/fileDao.js";
 
 auth.mockImplementation(async (req, res, next) => {
   req.body.uid = req.headers.authorization?.split(" ")[1];
   next();
 });
-
-deleteGridFsById.mockResolvedValue(undefined);
 
 describe("Collections API tests", () => {
   useMongoMemoryServer();
@@ -48,8 +46,8 @@ describe("Collections API tests", () => {
 
   const scenarioId = new mongoose.mongo.ObjectId("eee000000000000000000001");
   let group;
-  let storedFile;
-  const fakeGridFsId = new mongoose.mongo.ObjectId("fff000000000000000000001");
+  let uploadedFile;
+  let resource;
 
   beforeEach(async () => {
     group = await CollectionGroup.create({
@@ -58,15 +56,26 @@ describe("Collections API tests", () => {
       order: 1,
     });
 
-    storedFile = await StoredFile.create({
+    uploadedFile = await UploadedFile.create({
+      scenarioId,
+      name: "doc.pdf",
+      type: "document",
+      path: "files/fake-path.pdf",
+      url: "https://firebasestorage.googleapis.com/fake-url",
+      contentType: "application/pdf",
+      size: 2048,
+      uploaderUid: "user1",
+      orphanedAt: new Date(),
+    });
+
+    resource = await Resource.create({
       scenarioId,
       groupId: group._id,
       name: "doc.pdf",
-      size: 2048,
-      type: "application/pdf",
-      gridFsId: fakeGridFsId,
-      uploaderUid: "user1",
+      fileId: uploadedFile._id,
     });
+
+    await applyReferenceDelta(uploadedFile._id, 1);
   });
 
   afterEach(() => {
@@ -124,8 +133,6 @@ describe("Collections API tests", () => {
     expect(returnedGroup.name).toBe("Group A");
     expect(returnedGroup.files).toHaveLength(1);
     expect(returnedGroup.files[0].name).toBe("doc.pdf");
-    // gridFsId must never be sent to client
-    expect(returnedGroup.files[0].gridFsId).toBeUndefined();
   });
 
   it("GET /collections/tree/:scenarioId returns empty array for unknown scenario", async () => {
@@ -165,12 +172,11 @@ describe("Collections API tests", () => {
     expect(response.status).toBe(200);
     expect(response.data.deleted.groups).toBe(1);
     expect(response.data.deleted.files).toBe(1);
-    expect(deleteGridFsById).toHaveBeenCalledTimes(1);
 
     const dbGroup = await CollectionGroup.findById(group._id);
     expect(dbGroup).toBeNull();
 
-    const dbFile = await StoredFile.findById(storedFile._id);
+    const dbFile = await Resource.findById(resource._id);
     expect(dbFile).toBeNull();
   });
 
@@ -197,6 +203,5 @@ describe("Collections API tests", () => {
     expect(response.status).toBe(200);
     expect(response.data.deleted.groups).toBe(1);
     expect(response.data.deleted.files).toBe(0);
-    expect(deleteGridFsById).not.toHaveBeenCalled();
   });
 });

@@ -1,5 +1,5 @@
-import { getComponent } from "../scene/scene";
 import useEditorStore from "../stores/editor";
+import useVisualScene from "../stores/visual";
 import AudioManager from "./AudioManager";
 import ComponentProperties from "./ComponentProperties";
 import SceneSettings from "./SceneSettings";
@@ -11,7 +11,9 @@ import SceneSettings from "./SceneSettings";
 export default function CanvasSideBar() {
   const selected = useEditorStore((state) => state.selected);
 
-  const component = selected ? getComponent(selected) : null;
+  const component = useVisualScene((state) =>
+    selected ? state.components[selected] : null
+  );
 
   return (
     <div className="flex pb-m flex-col w-[18vw] gap-s overflow-y-auto no-scrollbar">

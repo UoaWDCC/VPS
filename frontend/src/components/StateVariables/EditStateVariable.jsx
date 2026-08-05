@@ -70,17 +70,14 @@ const EditStateVariable = ({ stateVariable, scenarioId }) => {
       );
       setStateVariables(res.data);
 
-      // Clean up all state operations that reference this deleted state variable
+      // Clean up state operations and bindings that reference the deleted variable
       // Only do this if we have access to scenes (SceneContext is available)
       if (scenes && scenes.length > 0 && modifyScene) {
         const updatedScenes = scenes.map((scene) => ({
           ...scene,
           components: arrayToObject(
             scene.components.map((component) => {
-              if (!component.stateOperations) return component;
-
-              // Filter out state operations that reference the deleted state variable
-              const filteredOperations = component.stateOperations.filter(
+              const filteredOperations = component.stateOperations?.filter(
                 (operation) => {
                   // Check both UUID and name references
                   const referencesDeletedVariable =
@@ -91,10 +88,20 @@ const EditStateVariable = ({ stateVariable, scenarioId }) => {
                   return !referencesDeletedVariable;
                 }
               );
+              const filteredBindings = component.stateBindings?.filter(
+                (binding) => binding.stateVariableId !== stateVariable.id
+              );
+
+              if (!filteredOperations && !filteredBindings) return component;
 
               return {
                 ...component,
-                stateOperations: filteredOperations,
+                ...(filteredOperations && {
+                  stateOperations: filteredOperations,
+                }),
+                ...(filteredBindings && {
+                  stateBindings: filteredBindings,
+                }),
               };
             })
           ),

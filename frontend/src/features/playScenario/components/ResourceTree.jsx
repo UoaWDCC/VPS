@@ -17,11 +17,11 @@ export default function ResourceTree({
   }, [search, tree, openGroups, toggleGroup]);
 
   return (
-    <ul className="menu w-full">
+    <ul className="menu w-full p-0">
       {tree.map((group) => (
         <li key={group.id} className="mb-1">
           <button
-            className="flex items-center justify-between px-2 py-1 rounded hover:bg-base-200 focus:outline-none"
+            className="flex items-center justify-between rounded px-0 py-1 hover:bg-base-200 focus:outline-none"
             onClick={() => toggleGroup(group.id)}
             aria-expanded={openGroups.has(group.id)}
           >
