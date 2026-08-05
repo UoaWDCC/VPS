@@ -155,7 +155,7 @@ function mirror(verts: Vec2[], center: Vec2, coords: number[]) {
   return modifyVerts(verts, inverse(coords), inversePosition);
 }
 
-function modifyVerts(verts: Vec2[], coords: number[], v: Vec2) {
+export function modifyVerts(verts: Vec2[], coords: number[], v: Vec2) {
   const newVerts = verts.map((v) => ({ ...v }));
   if (coords[1] !== 0.5) newVerts[coords[1]].y = v.y;
   if (coords[0] !== 0.5) newVerts[coords[0]].x = v.x;
