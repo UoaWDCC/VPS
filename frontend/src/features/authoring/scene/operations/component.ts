@@ -132,12 +132,19 @@ export function createComponentFromBounds(
   bounds: Bounds
 ) {
   const component = structuredClone(defaults[type]);
+
   const dims = mutate(subtract(bounds.verts[1], bounds.verts[0]), Math.abs);
-  if (dims.x > 50 && dims.y > 50) component.bounds = bounds;
+
+  if (dims.x > 50 && dims.y > 50) {
+    component.bounds = bounds;
+  } else {
+    component.bounds.verts = translate(component.bounds.verts, bounds.verts[0]);
+  }
 
   // Set zIndex to the current number of components on the canvas
   const componentsCount = Object.keys(getScene().components).length;
   component.zIndex = componentsCount;
+
   return add(component);
 }
 
