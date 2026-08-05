@@ -6,6 +6,16 @@ import ModalDialog from "../ModalDialogue";
 import { api } from "../../util/api";
 import AuthenticationContext from "../../context/AuthenticationContext";
 import toast from "react-hot-toast";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useParams } from "react-router-dom";
+
+function createStateConditional(user, scenarioId, resourceId, conditional) {
+  return api.post(
+    user,
+    `api/resources/${scenarioId}/${resourceId}/conditionals`,
+    { stateConditional: conditional }
+  );
+}
 
 /**
  * Component used for creating state conditionals
@@ -13,13 +23,33 @@ import toast from "react-hot-toast";
  *
  * @component
  */
-const CreateStateConditional = ({ endpoint, open, setOpen, updateTarget }) => {
+const CreateStateConditional = ({ resource, open, setOpen }) => {
+  const { scenarioId } = useParams();
   const { user } = useContext(AuthenticationContext);
   const { stateVariables } = useContext(ScenarioContext);
 
   const [selectedState, setSelectedState] = useState(null);
   const [comparator, setComparator] = useState(null);
   const [value, setValue] = useState(null);
+
+  const queryClient = useQueryClient();
+
+  const createConditionalMutation = useMutation({
+    mutationFn: (conditional) =>
+      createStateConditional(user, scenarioId, resource._id, conditional),
+    onSettled: () => queryClient.invalidateQueries(["resources", scenarioId]),
+    onError: (e) => {
+      console.error(e);
+      toast.error("Error creating state conditional");
+    },
+    onSuccess: () => {
+      setSelectedState(null);
+      setComparator(null);
+      setValue(null);
+      setOpen(false);
+      toast.success("State conditional created!");
+    },
+  });
 
   if (!stateVariables?.length) {
     return (
@@ -41,31 +71,13 @@ const CreateStateConditional = ({ endpoint, open, setOpen, updateTarget }) => {
   }
 
   const handleSubmit = () => {
-    // Validate that all required fields are filled
     if (!selectedState?.id || !comparator) return;
 
-    const stateConditional = {
+    createConditionalMutation.mutate({
       stateVariableId: selectedState.id,
       comparator,
       value: selectedState.type === stateTypes.NUMBER ? Number(value) : value,
-    };
-
-    api
-      .post(user, endpoint, {
-        stateConditional,
-      })
-      .then((res) => {
-        updateTarget(res.data);
-        setSelectedState(null);
-        setComparator(null);
-        setValue(null);
-        setOpen(false);
-        toast.success("State conditional created!");
-      })
-      .catch((err) => {
-        console.error(err);
-        toast.error("Error creating state conditional");
-      });
+    });
   };
 
   function onVariableChange(variable) {
@@ -80,7 +92,12 @@ const CreateStateConditional = ({ endpoint, open, setOpen, updateTarget }) => {
     <ModalDialog
       title="Create State Conditional"
       open={open}
-      onClose={() => setOpen(false)}
+      onClose={() => {
+        setSelectedState(null);
+        setComparator(null);
+        setValue(null);
+        setOpen(false);
+      }}
     >
       <fieldset className="fieldset">
         <label className="label">State Variable</label>
