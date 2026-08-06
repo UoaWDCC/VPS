@@ -16,6 +16,24 @@ import { PlayIcon } from "lucide-react";
 
 const sceneCache = new Map();
 
+// Caches the scenes from a navigate response and patches in the
+// server-authoritative remaining time for the active scene, so a refresh
+// resumes the countdown instead of restarting it.
+function cacheNavigateResponse(data) {
+  if (data.scenes) {
+    data.scenes.forEach((scene) => sceneCache.set(scene._id, scene));
+  }
+  if (data.active && data.remainingTime != null) {
+    const active = sceneCache.get(data.active);
+    if (active) active.remainingTime = data.remainingTime;
+  }
+  return {
+    newSceneId: data.active,
+    stateVariables: data.stateVariables,
+    newStateVersion: data.stateVersion,
+  };
+}
+
 const navigateSingleplayer = async (
   user,
   scenarioId,
@@ -44,14 +62,7 @@ const navigateSingleplayer = async (
     },
   };
   const res = await axios.request(config);
-  if (res.data.scenes) {
-    res.data.scenes.forEach((scene) => sceneCache.set(scene._id, scene));
-  }
-  return {
-    newSceneId: res.data.active,
-    stateVariables: res.data.stateVariables,
-    newStateVersion: res.data.stateVersion,
-  };
+  return cacheNavigateResponse(res.data);
 };
 
 const navigateMultiplayer = async (
@@ -74,14 +85,7 @@ const navigateMultiplayer = async (
     data: { currentScene, addFlags, removeFlags, componentId, nextScene },
   };
   const res = await axios.request(config);
-  if (res.data.scenes) {
-    res.data.scenes.forEach((scene) => sceneCache.set(scene._id, scene));
-  }
-  return {
-    newSceneId: res.data.active,
-    stateVariables: res.data.stateVariables,
-    newStateVersion: res.data.stateVersion,
-  };
+  return cacheNavigateResponse(res.data);
 };
 
 function playAudios(scene) {
@@ -330,6 +334,7 @@ export default function PlayScenarioPage({ group }) {
           <SceneTimer
             key={sceneId}
             duration={currScene.time}
+            initialSeconds={currScene.remainingTime ?? currScene.time}
             onTimeout={handleTimerTimeout}
           />
         </div>

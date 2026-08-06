@@ -30,6 +30,12 @@ const userSchema = new Schema({
     of: [String],
     default: {},
   },
+  // Map of scenarioId to the time the current (head) scene was entered
+  sceneEnteredAt: {
+    type: Map,
+    of: Date,
+    default: {},
+  },
   // Map of scenarioId to state variables
   stateVariables: {
     type: Map,

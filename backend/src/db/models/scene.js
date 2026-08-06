@@ -12,8 +12,12 @@ const sceneSchema = new Schema({
       type: Object,
     },
   ],
+  // Seconds for the scene timer; absent/null means no timer. The authoring
+  // tool never stores 0 (it normalises non-positive input to null), so this
+  // enforces the same invariant the rest of the app already assumes.
   time: {
     type: Number,
+    min: 1,
   },
   timerStateOperations: [
     {

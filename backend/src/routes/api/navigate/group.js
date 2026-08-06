@@ -9,6 +9,11 @@ import { getStateVariables } from "../../../db/daos/scenarioDao.js";
 import { setGroupStateVariables } from "../../../db/daos/groupDao.js";
 import { applyStateOperations } from "../../../util/statevariables/stateOperations.js";
 import { getComponent } from "../../../db/daos/sceneDao.js";
+import {
+  freshRemainingTime,
+  resumedRemainingTime,
+  movedRemainingTimeField,
+} from "./timer.js";
 import { normaliseString } from "../../../util/normalise.js";
 
 const createInvalidError = (roles) =>
@@ -70,7 +75,14 @@ const getGroupByIdAndUser = async (groupId, uid) => {
   const { email } = await User.findOne({ uid }, { email: 1 }).lean();
   const group = await Group.findOne(
     { _id: groupId, users: { $elemMatch: { email } } },
-    { "users.$": 1, scenarioId: 1, path: 1, stateVariables: 1, stateVersion: 1 }
+    {
+      "users.$": 1,
+      scenarioId: 1,
+      path: 1,
+      stateVariables: 1,
+      stateVersion: 1,
+      currentSceneEnteredAt: 1,
+    }
   ).lean();
   if (!group)
     throw new HttpError(
@@ -88,7 +100,7 @@ const getConnectedScenes = async (sceneID, role, active = true) => {
     .filter(Boolean);
   const connectedScenes = await Scene.find(
     { _id: { $in: connectedIds } },
-    { roles: 1, components: 1, directLink: 1 }
+    { roles: 1, components: 1, directLink: 1, time: 1, timerStateOperations: 1 }
   ).lean();
   const filtered = connectedScenes.map((s) => {
     if (!s.roles.length || roleMatches(s.roles, role)) return s;
@@ -108,7 +120,10 @@ const addSceneToPath = async (groupId, currentSceneId, sceneId) => {
       _id: groupId,
       $or: [{ "path.0": currentSceneId }, { path: { $size: 0 } }],
     },
-    { $push: { path: { $each: [sceneId], $position: 0 } } }
+    {
+      $push: { path: { $each: [sceneId], $position: 0 } },
+      $set: { currentSceneEnteredAt: new Date() },
+    }
   );
   if (!res) throw new HttpError("Scene mismatch has occured", STATUS.CONFLICT);
   return STATUS.OK;
@@ -218,7 +233,12 @@ export const groupNavigate = async (req) => {
     ]);
     return {
       status: STATUS.OK,
-      json: { ...scenes, stateVariables, stateVersion },
+      json: {
+        ...scenes,
+        stateVariables,
+        stateVersion,
+        remainingTime: freshRemainingTime(scenes),
+      },
     };
   }
 
@@ -230,7 +250,15 @@ export const groupNavigate = async (req) => {
 
     return {
       status: STATUS.OK,
-      json: { ...scenes, stateVariables, stateVersion },
+      json: {
+        ...scenes,
+        stateVariables,
+        stateVersion,
+        remainingTime: resumedRemainingTime(
+          scenes,
+          group.currentSceneEnteredAt
+        ),
+      },
     };
   }
   // the user is navigating from one scene to another
@@ -270,7 +298,12 @@ export const groupNavigate = async (req) => {
 
   return {
     status: STATUS.OK,
-    json: { ...scenes, stateVariables, stateVersion },
+    json: {
+      ...scenes,
+      stateVariables,
+      stateVersion,
+      ...movedRemainingTimeField(scenes),
+    },
   };
 };
 
@@ -299,7 +332,7 @@ export const groupReset = async (req) => {
 
   await Group.updateOne(
     { _id: req.params.groupId },
-    { $set: { path: [], currentFlags: [] } }
+    { $set: { path: [], currentFlags: [], currentSceneEnteredAt: null } }
   ).exec();
 
   return { status: STATUS.OK };

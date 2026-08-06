@@ -13,6 +13,10 @@ const groupSchema = new Schema({
     of: [String],
   },
   path: [String],
+  // Time the current (head) scene was entered — used for the server-authoritative timer
+  currentSceneEnteredAt: {
+    type: Date,
+  },
   scenarioId: {
     type: String,
   },

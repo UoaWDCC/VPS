@@ -257,4 +257,184 @@ describe("Navigate Group API tests", () => {
     const dbNote = await Note.findById(note._id);
     expect(dbNote).toBeNull();
   });
+
+  // --- Server-authoritative scene timer ---
+
+  describe("scene timer", () => {
+    it("returns the full remainingTime and stamps entry on first navigation", async () => {
+      await Scene.findByIdAndUpdate(scene1._id, { time: 120 });
+
+      const response = await axios.post(
+        `http://localhost:${ctx.port}/api/navigate/group/${group._id}`,
+        { uid: "uid-player", addFlags: [], removeFlags: [] },
+        authHeaders("uid-player")
+      );
+      expect(response.status).toBe(200);
+      expect(response.data.remainingTime).toBe(120);
+
+      const dbGroup = await Group.findById(group._id);
+      expect(dbGroup.currentSceneEnteredAt).toBeInstanceOf(Date);
+    });
+
+    it("resumes with a decreased remainingTime on re-entry (refresh cannot reset it)", async () => {
+      const timedScene = await Scene.create({
+        name: "Timed",
+        components: [],
+        roles: [],
+        time: 120,
+      });
+      const enteredAt = new Date(Date.now() - 30_000);
+      await Group.findByIdAndUpdate(group._id, {
+        path: [timedScene._id.toString()],
+        currentSceneEnteredAt: enteredAt,
+      });
+
+      const response = await axios.post(
+        `http://localhost:${ctx.port}/api/navigate/group/${group._id}`,
+        { uid: "uid-player", addFlags: [], removeFlags: [] }, // no currentScene → refresh
+        authHeaders("uid-player")
+      );
+      expect(response.status).toBe(200);
+      expect(response.data.remainingTime).toBeGreaterThan(85);
+      expect(response.data.remainingTime).toBeLessThanOrEqual(91);
+
+      const dbGroup = await Group.findById(group._id);
+      expect(dbGroup.currentSceneEnteredAt.getTime()).toBe(enteredAt.getTime());
+    });
+
+    it("resets remainingTime to full and restamps on a real scene move", async () => {
+      const componentId = "btn-go";
+      const clickScene = await Scene.create({
+        name: "Click",
+        components: [
+          {
+            id: componentId,
+            clickable: true,
+            nextScene: scene2._id,
+            type: "BUTTON",
+          },
+        ],
+        roles: [],
+        time: 60,
+      });
+      await Scene.findByIdAndUpdate(scene2._id, { time: 90 });
+
+      const enteredAt = new Date(Date.now() - 45_000);
+      await Group.findByIdAndUpdate(group._id, {
+        path: [clickScene._id.toString()],
+        currentSceneEnteredAt: enteredAt,
+      });
+
+      const response = await axios.post(
+        `http://localhost:${ctx.port}/api/navigate/group/${group._id}`,
+        {
+          uid: "uid-player",
+          currentScene: clickScene._id.toString(),
+          componentId,
+          addFlags: [],
+          removeFlags: [],
+        },
+        authHeaders("uid-player")
+      );
+      expect(response.status).toBe(200);
+      expect(response.data.active).toBe(scene2._id.toString());
+      expect(response.data.remainingTime).toBe(90);
+
+      const dbGroup = await Group.findById(group._id);
+      expect(dbGroup.currentSceneEnteredAt.getTime()).toBeGreaterThan(
+        enteredAt.getTime()
+      );
+    });
+
+    it("includes `time` on connected (not-yet-entered) scenes, not just the active one", async () => {
+      const componentId = "btn-go";
+      const timedTarget = await Scene.create({
+        name: "Timed Target",
+        components: [],
+        roles: [],
+        time: 75,
+      });
+      const linkingScene = await Scene.create({
+        name: "Linking",
+        components: [
+          {
+            id: componentId,
+            clickable: true,
+            nextScene: timedTarget._id,
+            type: "BUTTON",
+          },
+        ],
+        roles: [],
+      });
+      await Group.findByIdAndUpdate(group._id, {
+        path: [linkingScene._id.toString()],
+      });
+
+      const response = await axios.post(
+        `http://localhost:${ctx.port}/api/navigate/group/${group._id}`,
+        { uid: "uid-player", addFlags: [], removeFlags: [] }, // no currentScene → refresh
+        authHeaders("uid-player")
+      );
+      expect(response.status).toBe(200);
+      // linkingScene has no timer, so this is a refresh-style response whose
+      // `scenes` still includes the connected (not-yet-active) timed target.
+      const connected = response.data.scenes.find(
+        (s) => s._id === timedTarget._id.toString()
+      );
+      expect(connected.time).toBe(75);
+    });
+
+    it("returns the configured remainingTime for a scene that links back to itself", async () => {
+      const componentId = "btn-retry";
+      const selfLoopScene = await Scene.create({
+        name: "Self Loop",
+        components: [],
+        roles: [],
+        time: 45,
+      });
+      await Scene.findByIdAndUpdate(selfLoopScene._id, {
+        components: [
+          {
+            id: componentId,
+            clickable: true,
+            nextScene: selfLoopScene._id,
+            type: "BUTTON",
+          },
+        ],
+      });
+      await Group.findByIdAndUpdate(group._id, {
+        path: [selfLoopScene._id.toString()],
+      });
+
+      const response = await axios.post(
+        `http://localhost:${ctx.port}/api/navigate/group/${group._id}`,
+        { uid: "uid-player", addFlags: [], removeFlags: [] }, // no currentScene → refresh
+        authHeaders("uid-player")
+      );
+      expect(response.status).toBe(200);
+      expect(response.data.remainingTime).toBe(45);
+    });
+
+    it("clears the entry stamp on reset", async () => {
+      const resetScene = await Scene.create({
+        name: "Reset Timed",
+        components: [{ type: "RESET_BUTTON" }],
+        roles: [],
+        time: 60,
+      });
+      await Group.findByIdAndUpdate(group._id, {
+        path: [resetScene._id.toString()],
+        currentSceneEnteredAt: new Date(),
+      });
+
+      await axios.post(
+        `http://localhost:${ctx.port}/api/navigate/group/reset/${group._id}`,
+        { uid: "uid-player", currentScene: resetScene._id.toString() },
+        authHeaders("uid-player")
+      );
+
+      const dbGroup = await Group.findById(group._id);
+      expect(dbGroup.currentSceneEnteredAt).toBeNull();
+    });
+  });
 });
