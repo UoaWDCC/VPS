@@ -21,7 +21,7 @@ export const resumedRemainingTime = (scenes, enteredAt) => {
   if (sceneTime == null) return null;
   if (!enteredAt) return sceneTime;
   const elapsed = (Date.now() - new Date(enteredAt).getTime()) / 1000;
-  return Math.max(0, sceneTime - elapsed);
+  return Math.min(sceneTime, Math.max(0, sceneTime - elapsed));
 };
 
 // `scenes` is only set when a move actually happened; a no-move interaction

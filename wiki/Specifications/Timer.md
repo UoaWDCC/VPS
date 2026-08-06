@@ -136,10 +136,10 @@ Server-side entry timestamps are also tracked to support resuming a timer instea
 
 #### Server-Side Enforcement
 
-The backend now stamps a scene-entry timestamp and returns the server-computed remaining time on every navigate response, so the timer can't be reset by refreshing or rejoining:
+The backend now stamps a scene-entry timestamp and returns the server-computed remaining time when entering, resuming, or moving to a scene, so the timer can't be reset by refreshing or rejoining:
 
 - `Group.currentSceneEnteredAt` (multiplayer) and `User.sceneEnteredAt` (singleplayer, keyed per scenario) record when the current scene was entered.
-- `backend/src/routes/api/navigate/timer.js` computes `remainingTime` from that timestamp and the scene's `time`; it's included in every navigate response and stamped on scene entry, cleared on reset.
+- `backend/src/routes/api/navigate/timer.js` computes `remainingTime` from that timestamp and the scene's `time`; it's included when entering, resuming, or moving to a scene, and stamped on scene entry, cleared on reset.
 - The frontend seeds `SceneTimer` from this value (`initialSeconds={currScene.remainingTime ?? currScene.time}`) instead of always starting from the full duration, so a page reload or a player rejoining resumes the existing countdown rather than restarting it.
 
 This does not yet provide live sync between concurrent multiplayer clients — each client still runs its own local countdown once seeded, and clients aren't pushed updates when others act. It also doesn't implement role-locking of timed scenes.
