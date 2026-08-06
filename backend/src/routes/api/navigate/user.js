@@ -32,9 +32,10 @@ const getConnectedScenes = async (sceneID, active = true) => {
   };
 };
 
-// `replace: true` discards any existing path (used for an author jump to an
-// arbitrary scene, where the prior history is no longer valid) instead of
-// requiring it to continue from `currentSceneId`.
+// Atomic so concurrent requests are handled safely. `replace: true` discards
+// any existing path (used for an author jump to an arbitrary scene, where the
+// prior history is no longer valid) instead of requiring it to continue from
+// `currentSceneId`.
 const addSceneToPath = async (
   userId,
   scenarioId,
@@ -42,18 +43,28 @@ const addSceneToPath = async (
   sceneId,
   { replace = false } = {}
 ) => {
-  const user = await User.findById(userId);
-  if (replace || !user.paths.get(scenarioId)) {
-    user.paths.set(scenarioId, [sceneId]);
-  } else {
-    if (user.paths.get(scenarioId)[0] !== currentSceneId)
-      throw new HttpError("Scene mismatch has occured", STATUS.CONFLICT);
-    user.paths.get(scenarioId).unshift(sceneId);
-  }
-  user.sceneEnteredAt.set(scenarioId, new Date());
-  user.markModified("paths");
-  user.markModified("sceneEnteredAt");
-  await user.save();
+  const pathField = `paths.${scenarioId}`;
+  const enteredField = `sceneEnteredAt.${scenarioId}`;
+
+  const filter = replace
+    ? { _id: userId }
+    : {
+        _id: userId,
+        $or: [
+          { [`${pathField}.0`]: currentSceneId },
+          { [pathField]: { $exists: false } },
+        ],
+      };
+
+  const update = replace
+    ? { $set: { [pathField]: [sceneId], [enteredField]: new Date() } }
+    : {
+        $push: { [pathField]: { $each: [sceneId], $position: 0 } },
+        $set: { [enteredField]: new Date() },
+      };
+
+  const res = await User.findOneAndUpdate(filter, update);
+  if (!res) throw new HttpError("Scene mismatch has occured", STATUS.CONFLICT);
   return STATUS.OK;
 };
 
