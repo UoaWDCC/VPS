@@ -3,6 +3,8 @@ import Scenario from "../models/scenario.js";
 import Scene from "../models/scene.js";
 import { v4 as uuidv4 } from "uuid";
 import User from "../models/user.js";
+import { addDelta, hasFileRef } from "./sceneDao.js";
+import { applyReferenceDeltas } from "./fileDao.js";
 
 /**
  * Creates a scenario in the database with an initial scene
@@ -190,21 +192,73 @@ const updateDurations = async (scenarioId, updatedDurations) => {
 };
 
 /**
- * Updates scenario durations for users
- * @param {String} sceneId MongoDB ID of scene
- * @param {updatedRoleList: Array} updatedRoleList updated role list for the scenario
+ * Merges new role names into an existing role list without creating
+ * case-insensitive duplicates. Roles already present keep their existing
+ * casing; new roles keep the casing they were given in.
+ * @param {String[]} existingRoles role names already on the scenario
+ * @param {String[]} newRoles role names to merge in
+ * @returns {String[]} merged role list
+ */
+const mergeRoles = (existingRoles, newRoles) => {
+  const merged = [...existingRoles];
+  const seen = new Set(merged.map((r) => r.trim().toLowerCase()));
+  for (const role of newRoles) {
+    const key = role.trim().toLowerCase();
+    if (seen.has(key)) continue;
+    seen.add(key);
+    merged.push(role);
+  }
+  return merged;
+};
+
+/**
+ * Merges new roles into a scenario's role list, keeping any existing roles
+ * @param {String} scenarioId MongoDB ID of scenario
+ * @param {Array} updatedRoleList role names to merge into the scenario's role list
  * @returns updated database scenario object
  */
 const updateRoleList = async (scenarioId, updatedRoleList) => {
-  // if we are updating name only, components will be null
   const scenario = await Scenario.findById(scenarioId);
   try {
-    scenario.roleList = updatedRoleList;
+    scenario.roleList = mergeRoles(scenario.roleList, updatedRoleList);
     await scenario.save();
     return scenario;
   } catch {
     return scenario;
   }
+};
+
+/**
+ * Creates a new role for a scenario
+ * @param {String} scenarioId MongoDB ID of scenario
+ * @param {String} role name of the role to add
+ * @returns updated role list for the scenario
+ */
+const createRole = async (scenarioId, role) => {
+  const scenario = await Scenario.findById(scenarioId);
+  const merged = mergeRoles(scenario.roleList, [role.trim()]);
+  if (merged.length !== scenario.roleList.length) {
+    scenario.roleList = merged;
+    await scenario.save();
+  }
+  return scenario.roleList;
+};
+
+/**
+ * Deletes a role from a scenario and removes it from any scenes that reference it
+ * @param {String} scenarioId MongoDB ID of scenario
+ * @param {String} role name of the role to remove
+ * @returns updated role list for the scenario
+ */
+const deleteRole = async (scenarioId, role) => {
+  const scenario = await Scenario.findById(scenarioId);
+  scenario.roleList = scenario.roleList.filter((r) => r !== role);
+  await scenario.save();
+  await Scene.updateMany(
+    { _id: { $in: scenario.scenes } },
+    { $pull: { roles: role } }
+  );
+  return scenario.roleList;
 };
 
 /**
@@ -215,11 +269,23 @@ const updateRoleList = async (scenarioId, updatedRoleList) => {
 const deleteScenario = async (scenarioId) => {
   try {
     const res = await Scenario.findOneAndDelete({ _id: scenarioId });
-    if (res !== null) {
-      await Scene.deleteMany({ _id: { $in: res.scenes } });
-      return true;
-    }
-    return false;
+    if (res === null) return false;
+
+    const scenes = await Scene.find({ _id: { $in: res.scenes } });
+
+    const fileRefDeltas = new Map();
+    scenes.forEach((scene) => {
+      (scene.components ?? []).forEach((component) => {
+        if (hasFileRef(component)) {
+          addDelta(fileRefDeltas, component.fileId, -1);
+        }
+      });
+    });
+
+    await Scene.deleteMany({ _id: { $in: res.scenes } });
+    await applyReferenceDeltas(fileRefDeltas);
+
+    return true;
   } catch {
     return false;
   }
@@ -326,6 +392,8 @@ export {
   retrieveScenarios,
   updateDurations,
   updateRoleList,
+  createRole,
+  deleteRole,
   updateScenario,
   getStateVariables,
   createStateVariable,

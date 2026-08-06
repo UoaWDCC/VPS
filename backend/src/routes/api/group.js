@@ -104,6 +104,7 @@ router.post("/:scenarioId", scenarioAuth, async (req, res) => {
   return res.status(HTTP_OK).json(output);
 });
 
+// Kept for backward compatibility; superseded by GET /api/scenario/:scenarioId/roles
 router.get("/:scenarioId/roleList", async (req, res) => {
   const { scenarioId } = req.params;
   const roleList = await retrieveRoleList(scenarioId);

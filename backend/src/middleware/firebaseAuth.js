@@ -1,16 +1,5 @@
-import admin from "firebase-admin";
-
-admin.initializeApp({
-  credential: admin.credential.cert({
-    projectId: process.env.FIREBASE_PROJECT_ID,
-    clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-    privateKey: process.env.FIREBASE_PRIVATE_KEY
-      ? process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, "\n")
-      : "",
-  }),
-});
-
-const HTTP_UNAUTHORISED = 401;
+import { HttpStatusCode } from "axios";
+import { getAuth } from "../firebase/firebase.js";
 
 /**
  * Verify user firebase token
@@ -18,19 +7,18 @@ const HTTP_UNAUTHORISED = 401;
  */
 export default async function auth(req, res, next) {
   if (!req.headers.authorization) {
-    res.sendStatus(HTTP_UNAUTHORISED);
-  } else {
-    const idToken = req.headers.authorization.split(" ")[1];
-    admin
-      .auth()
-      .verifyIdToken(idToken)
-      .then((token) => {
-        const { uid } = token;
-        req.body.uid = uid;
-        next();
-      })
-      .catch(() => {
-        res.sendStatus(HTTP_UNAUTHORISED);
-      });
+    res.sendStatus(HttpStatusCode.Unauthorized);
+    return;
   }
+
+  const token = req.headers.authorization.split(" ")[1];
+  getAuth()
+    .verifyIdToken(token)
+    .then((decoded) => {
+      const { uid } = decoded;
+      req.body.uid = uid;
+      req.uid = uid; // to ensure other middleware (multer) doesn't overwrite
+      next();
+    })
+    .catch(() => res.sendStatus(HttpStatusCode.Unauthorized));
 }

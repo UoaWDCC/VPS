@@ -341,4 +341,78 @@ describe("Scenario API tests", () => {
       expect.arrayContaining([expect.objectContaining({ name: "score" })])
     );
   });
+
+  it("GET /scenario/:scenarioId/roles returns role list array", async () => {
+    const response = await axios.get(
+      `http://localhost:${ctx.port}/api/scenario/${scenario1._id}/roles`,
+      authHeaders("user1")
+    );
+    expect(response.status).toBe(HTTP_OK);
+    expect(Array.isArray(response.data)).toBe(true);
+  });
+
+  it("POST /scenario/:scenarioId/roles creates a role, preserving casing", async () => {
+    const response = await axios.post(
+      `http://localhost:${ctx.port}/api/scenario/${scenario1._id}/roles`,
+      { role: "Doctor" },
+      authHeaders("user1")
+    );
+    expect(response.status).toBe(HTTP_OK);
+    expect(response.data).toEqual(["Doctor"]);
+
+    const dbScenario = await Scenario.findById(scenario1._id).lean();
+    expect(dbScenario.roleList).toEqual(["Doctor"]);
+  });
+
+  it("POST /scenario/:scenarioId/roles does not create a case-insensitive duplicate", async () => {
+    await axios.post(
+      `http://localhost:${ctx.port}/api/scenario/${scenario1._id}/roles`,
+      { role: "Doctor" },
+      authHeaders("user1")
+    );
+
+    const response = await axios.post(
+      `http://localhost:${ctx.port}/api/scenario/${scenario1._id}/roles`,
+      { role: "doctor" },
+      authHeaders("user1")
+    );
+    expect(response.status).toBe(HTTP_OK);
+    expect(response.data).toEqual(["Doctor"]);
+
+    const dbScenario = await Scenario.findById(scenario1._id).lean();
+    expect(dbScenario.roleList).toEqual(["Doctor"]);
+  });
+
+  it("POST /scenario/:scenarioId/roles returns 400 for an empty role name", async () => {
+    await expect(
+      axios.post(
+        `http://localhost:${ctx.port}/api/scenario/${scenario1._id}/roles`,
+        { role: "   " },
+        authHeaders("user1")
+      )
+    ).rejects.toMatchObject({ response: { status: HTTP_BAD_REQUEST } });
+  });
+
+  it("DELETE /scenario/:scenarioId/roles/:role removes a role and cascades to scenes", async () => {
+    await axios.post(
+      `http://localhost:${ctx.port}/api/scenario/${scenario2._id}/roles`,
+      { role: "doctor" },
+      authHeaders("user1")
+    );
+
+    await Scene.findByIdAndUpdate(scene1._id, { roles: ["doctor"] });
+
+    const response = await axios.delete(
+      `http://localhost:${ctx.port}/api/scenario/${scenario2._id}/roles/doctor`,
+      authHeaders("user1")
+    );
+    expect(response.status).toBe(HTTP_OK);
+    expect(response.data).toEqual([]);
+
+    const dbScenario = await Scenario.findById(scenario2._id).lean();
+    expect(dbScenario.roleList).toEqual([]);
+
+    const dbScene1 = await Scene.findById(scene1._id).lean();
+    expect(dbScene1.roles).toEqual([]);
+  });
 });

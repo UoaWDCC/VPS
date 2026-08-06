@@ -12,7 +12,7 @@ There are also a few recommended tools to download, for ease of use, version con
 
 Node is an open-source, cross-platform JavaScript runtime environment that allows developers to execute JavaScript code server-side.
 
-If using nvm (see below), it can be installed by running `nvm install 20` or it can be downloaded from the node website (note that clicking ‘download’ on this website installs the latest version of Node (currently 20 but will not be for long), so go to previous releases). To verify it installed successfully, run `node --version` in the terminal.
+If using nvm (see below), it can be installed by running `nvm install 24` or it can be downloaded from the node website (note that clicking ‘download’ on this website may default to the latest version of Node, so go to previous releases). To verify it installed successfully, run `node --version` in the terminal.
 
 #### Versions of Node/NVM
 
@@ -37,7 +37,7 @@ It is recommended to use an NPM version similar to 10.8.2 (which is the version 
 
 Yarn is a package manager for JavaScript that serves as an alternative to npm (basically it is was a “better” version of NPM which we use to manage our repo).
 
-This project works with Yarn 1.22.21, which can be installed by running the following terminal command: `npm install -g yarn@1.22.21`.
+This project works with Yarn 1.22.22, which can be installed by running the following terminal command: `npm install -g yarn@1.22.22`.
 
 If you already have yarn installed, uninstall it via `npm uninstall -g yarn` (note this prevents you from using the current version of Yarn in any other projects simultaneously).
 

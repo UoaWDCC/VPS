@@ -2,6 +2,7 @@ import CreateStateConditional from "./CreateStateConditional";
 import { PlusIcon } from "lucide-react";
 import { useState } from "react";
 import EditStateConditional from "./EditStateConditional";
+import { useParams } from "react-router-dom";
 
 /**
  * Component that houses state conditional interface (methods for creating and editing)
@@ -15,10 +16,12 @@ const StateConditionalMenu = ({
   updateTarget,
 }) => {
   const [createOpen, setCreateOpen] = useState(false);
+  const { scenarioId } = useParams();
 
   const subject = target;
   const conditionEndpoint =
-    endpoint || (subject ? `/api/files/state-conditionals/${subject.id}` : "");
+    endpoint ||
+    (subject ? `/api/resources/${scenarioId}/${subject.id}/conditionals` : "");
   const handleUpdate = updateTarget;
 
   if (!subject) {

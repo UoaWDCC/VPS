@@ -10,11 +10,14 @@ import {
   getStateVariables,
   retrieveScenario,
   retrieveScenarioList,
+  retrieveRoleList,
   retrieveAccessibleScenarios,
   updateDurations,
   updateScenario,
   editStateVariable,
   deleteStateVariable,
+  createRole,
+  deleteRole,
 } from "../../db/daos/scenarioDao.js";
 
 import { retrieveAssignedScenarioList } from "../../db/daos/userDao.js";
@@ -22,6 +25,7 @@ import { retrieveAssignedScenarioList } from "../../db/daos/userDao.js";
 import scene from "./scene.js";
 import { deleteAccessList } from "../../db/daos/accessDao.js";
 import { handle, HttpError } from "../../util/error.js";
+import { normaliseString } from "../../util/normalise.js";
 
 const router = Router();
 
@@ -125,7 +129,7 @@ router.patch(
   })
 );
 
-// Delete a scenario of a user
+// Delete a scenario
 router.delete("/:scenarioId", async (req, res) => {
   const deleted = await deleteScenario(req.params.scenarioId);
   await deleteAccessList(req.params.scenarioId);
@@ -175,6 +179,37 @@ router.delete(
     );
     res.status(HTTP_OK).json(updatedStateVariables);
   }
+);
+
+// Get the role list of a scenario
+router.get(
+  "/:scenarioId/roles",
+  handle(async (req, res) => {
+    const roleList = await retrieveRoleList(req.params.scenarioId);
+    res.status(HTTP_OK).json(roleList);
+  })
+);
+
+// Create a new role for a scenario
+router.post(
+  "/:scenarioId/roles",
+  handle(async (req, res) => {
+    const { role } = req.body;
+    if (!normaliseString(role))
+      throw new HttpError("role name is required", HTTP_BAD_REQUEST);
+    const roleList = await createRole(req.params.scenarioId, role);
+    res.status(HTTP_OK).json(roleList);
+  })
+);
+
+// Delete a role from a scenario
+router.delete(
+  "/:scenarioId/roles/:role",
+  handle(async (req, res) => {
+    const { scenarioId, role } = req.params;
+    const roleList = await deleteRole(scenarioId, role);
+    res.status(HTTP_OK).json(roleList);
+  })
 );
 
 export default router;
