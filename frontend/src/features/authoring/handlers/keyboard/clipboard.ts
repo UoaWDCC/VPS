@@ -5,6 +5,7 @@ import {
 } from "../../scene/operations/component";
 import { add, remove } from "../../scene/operations/modifiers";
 import {
+  deleteSelection,
   getDocumentText,
   getSelectionContent,
   mergeDocs,
@@ -59,25 +60,32 @@ export function paste(e: ClipboardEvent) {
   const text = e.clipboardData?.getData("text/plain");
 
   if (selected && mode.includes("text")) {
+    let doc: ModelDocument | null = null;
     if (app) {
       const obj = JSON.parse(app) as {
         type?: string;
         document?: ModelDocument;
       };
-      const doc =
-        obj.type === "textbox"
+      doc =
+        (obj.type === "textbox"
           ? obj.document
-          : (obj as unknown as ModelDocument);
-      if (!doc) return;
-      const cursor = mergeDocs(selected, selection.start!, doc);
-      if (!cursor) return;
-      setSelection({ start: cursor, end: null });
+          : (obj as unknown as ModelDocument)) ?? null;
     } else if (text) {
-      const doc = plainToDoc(text) as ModelDocument;
-      const cursor = mergeDocs(selected, selection.start!, doc);
-      if (!cursor) return;
-      setSelection({ start: cursor, end: null });
+      doc = plainToDoc(text) as ModelDocument;
     }
+    if (!doc) return;
+
+    // an active range selection should be replaced by the pasted content,
+    // same as typing over a selection does -- resolved above so a paste
+    // with no usable clipboard content bails out before anything is deleted
+    const insertAt = selection.end
+      ? deleteSelection(selected, selection)
+      : selection.start!;
+    if (!insertAt) return;
+
+    const cursor = mergeDocs(selected, insertAt, doc);
+    if (!cursor) return;
+    setSelection({ start: cursor, end: null });
     syncVisualCursor();
   } else {
     if (app) {

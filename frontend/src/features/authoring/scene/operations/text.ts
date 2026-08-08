@@ -205,8 +205,45 @@ function blockText(block: ModelBlock) {
 // flattens a document to plain text with block breaks as "\n", matching
 // getDocumentText, so a whole-document diff naturally covers block
 // splits/merges (Enter/Backspace) as well as in-line edits
-function flattenBlocks(blocks: ModelBlock[]) {
+export function flattenBlocks(blocks: ModelBlock[]) {
   return blocks.map(blockText).join("\n");
+}
+
+// inverse of offsetToCursor: converts a cursor into a flat character offset
+export function cursorToOffset(blocks: ModelBlock[], cursor: ModelCursor) {
+  let offset = 0;
+  for (let blockI = 0; blockI < cursor.blockI; blockI++) {
+    offset += blockText(blocks[blockI]).length + 1; // +1 for the "\n" block break
+  }
+
+  const spans = blocks[cursor.blockI].spans;
+  for (let spanI = 0; spanI < cursor.spanI; spanI++) {
+    offset += spans[spanI].text.length;
+  }
+
+  return offset + cursor.charI;
+}
+
+// \p{L}/\p{N} (rather than \w) so double-click word selection works for
+// accented and non-Latin scripts, not just ASCII letters/digits
+const WORD_CHAR = /[\p{L}\p{N}_']/u;
+
+// finds the start/end flat offsets of the word touching a click position,
+// for double-click-to-select-word -- clicking on a non-word character (e.g.
+// whitespace/punctuation) just selects that single character instead
+export function findWordRange(text: string, offset: number) {
+  if (!text.length) return { start: 0, end: 0 };
+
+  const i = Math.min(offset, text.length - 1);
+  if (!WORD_CHAR.test(text[i])) return { start: i, end: i + 1 };
+
+  let start = i;
+  while (start > 0 && WORD_CHAR.test(text[start - 1])) start--;
+
+  let end = i + 1;
+  while (end < text.length && WORD_CHAR.test(text[end])) end++;
+
+  return { start, end };
 }
 
 // converts a flat (block-break-inclusive) character offset into a cursor
