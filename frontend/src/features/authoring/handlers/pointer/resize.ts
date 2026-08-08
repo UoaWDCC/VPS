@@ -109,7 +109,12 @@ function lockAspect(verts: Vec2[], newVerts: Vec2[], coords: number[]) {
 
   const { x: dx, y: dy } = subtract(newPoint, inversePoint);
   const aspect = getAspect(verts);
-  if (Math.abs(dx) >= Math.abs(dy)) {
+  const width = Math.abs(verts[1].x - verts[0].x);
+  const height = Math.abs(verts[1].y - verts[0].y);
+
+  // compare movement relative to each axis's own size, not raw magnitude,
+  // otherwise the axis with the larger original dimension always "wins"
+  if (Math.abs(dx) * height >= Math.abs(dy) * width) {
     newVerts[coords[1]].y =
       inversePoint.y + Math.sign(dy) * (Math.abs(dx) / aspect);
   } else {
