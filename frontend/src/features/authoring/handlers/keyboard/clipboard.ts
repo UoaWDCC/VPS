@@ -5,6 +5,7 @@ import {
 } from "../../scene/operations/component";
 import { add, remove } from "../../scene/operations/modifiers";
 import {
+  deleteSelection,
   getDocumentText,
   getSelectionContent,
   mergeDocs,
@@ -26,6 +27,16 @@ function plainToDoc(text: string) {
 function isInputTarget(e: ClipboardEvent) {
   const tag = (e.target as HTMLElement)?.tagName;
   return tag === "INPUT" || tag === "TEXTAREA";
+}
+
+// guards against treating a copied non-textbox component (e.g. a box or
+// image, which has no blocks) as a pasteable text document
+function isModelDocument(value: unknown): value is ModelDocument {
+  return (
+    !!value &&
+    typeof value === "object" &&
+    Array.isArray((value as ModelDocument).blocks)
+  );
 }
 
 export function copy(e: ClipboardEvent) {
@@ -59,25 +70,34 @@ export function paste(e: ClipboardEvent) {
   const text = e.clipboardData?.getData("text/plain");
 
   if (selected && mode.includes("text")) {
+    let doc: ModelDocument | null = null;
     if (app) {
-      const obj = JSON.parse(app) as {
-        type?: string;
-        document?: ModelDocument;
-      };
-      const doc =
-        obj.type === "textbox"
-          ? obj.document
-          : (obj as unknown as ModelDocument);
-      if (!doc) return;
-      const cursor = mergeDocs(selected, selection.start!, doc);
-      if (!cursor) return;
-      setSelection({ start: cursor, end: null });
-    } else if (text) {
-      const doc = plainToDoc(text) as ModelDocument;
-      const cursor = mergeDocs(selected, selection.start!, doc);
-      if (!cursor) return;
-      setSelection({ start: cursor, end: null });
+      try {
+        const obj = JSON.parse(app) as {
+          type?: string;
+          document?: ModelDocument;
+        };
+        const candidate = obj.type === "textbox" ? obj.document : obj;
+        if (isModelDocument(candidate)) doc = candidate;
+      } catch {
+        // malformed clipboard payload -- fall through to the text/plain
+        // fallback below rather than throwing out of the paste handler
+      }
     }
+    if (!doc && text) doc = plainToDoc(text) as ModelDocument;
+    if (!doc) return;
+
+    // an active range selection should be replaced by the pasted content,
+    // same as typing over a selection does -- resolved above so a paste
+    // with no usable clipboard content bails out before anything is deleted
+    const insertAt = selection.end
+      ? deleteSelection(selected, selection)
+      : selection.start!;
+    if (!insertAt) return;
+
+    const cursor = mergeDocs(selected, insertAt, doc);
+    if (!cursor) return;
+    setSelection({ start: cursor, end: null });
     syncVisualCursor();
   } else {
     if (app) {

@@ -198,6 +198,176 @@ function normaliseSelection(sel: ModelSelection) {
   return { start, end };
 }
 
+function blockText(block: ModelBlock) {
+  return block.spans.map((s) => s.text).join("");
+}
+
+// flattens a document to plain text with block breaks as "\n", matching
+// getDocumentText, so a whole-document diff naturally covers block
+// splits/merges (Enter/Backspace) as well as in-line edits
+export function flattenBlocks(blocks: ModelBlock[]) {
+  return blocks.map(blockText).join("\n");
+}
+
+// inverse of offsetToCursor: converts a cursor into a flat character offset
+export function cursorToOffset(blocks: ModelBlock[], cursor: ModelCursor) {
+  let offset = 0;
+  for (let blockI = 0; blockI < cursor.blockI; blockI++) {
+    offset += blockText(blocks[blockI]).length + 1; // +1 for the "\n" block break
+  }
+
+  const spans = blocks[cursor.blockI].spans;
+  for (let spanI = 0; spanI < cursor.spanI; spanI++) {
+    offset += spans[spanI].text.length;
+  }
+
+  return offset + cursor.charI;
+}
+
+// \p{L}/\p{N} (rather than \w) so double-click word selection works for
+// accented and non-Latin scripts, not just ASCII letters/digits
+const WORD_CHAR = /[\p{L}\p{N}_']/u;
+
+function isHighSurrogate(code: number) {
+  return code >= 0xd800 && code <= 0xdbff;
+}
+function isLowSurrogate(code: number) {
+  return code >= 0xdc00 && code <= 0xdfff;
+}
+
+// UTF-16 length (1 or 2) of the code point starting at a code-point-aligned index
+function codePointLength(text: string, i: number) {
+  if (
+    isHighSurrogate(text.charCodeAt(i)) &&
+    isLowSurrogate(text.charCodeAt(i + 1))
+  ) {
+    return 2;
+  }
+  return 1;
+}
+
+// index of the start of the code point that contains index i -- steps back
+// one unit if i lands on the low half of a surrogate pair
+function codePointStart(text: string, i: number) {
+  if (
+    i > 0 &&
+    isLowSurrogate(text.charCodeAt(i)) &&
+    isHighSurrogate(text.charCodeAt(i - 1))
+  ) {
+    return i - 1;
+  }
+  return i;
+}
+
+// finds the start/end flat offsets of the word touching a click position,
+// for double-click-to-select-word -- clicking on a non-word character (e.g.
+// whitespace/punctuation) just selects that single character instead.
+// offsets are always clamped to code point boundaries so a surrogate pair
+// (e.g. an emoji) is never split in half
+export function findWordRange(text: string, offset: number) {
+  if (!text.length) return { start: 0, end: 0 };
+
+  const i = codePointStart(text, Math.min(offset, text.length - 1));
+  const iLen = codePointLength(text, i);
+  if (!WORD_CHAR.test(text.slice(i, i + iLen)))
+    return { start: i, end: i + iLen };
+
+  let start = i;
+  while (start > 0) {
+    const prevStart = codePointStart(text, start - 1);
+    if (!WORD_CHAR.test(text.slice(prevStart, start))) break;
+    start = prevStart;
+  }
+
+  let end = i + iLen;
+  while (end < text.length) {
+    const len = codePointLength(text, end);
+    if (!WORD_CHAR.test(text.slice(end, end + len))) break;
+    end += len;
+  }
+
+  return { start, end };
+}
+
+// converts a flat (block-break-inclusive) character offset into a cursor
+export function offsetToCursor(
+  blocks: ModelBlock[],
+  offset: number
+): ModelCursor {
+  let remaining = offset;
+
+  for (let blockI = 0; blockI < blocks.length; blockI++) {
+    const spans = blocks[blockI].spans;
+    const text = blockText(blocks[blockI]);
+    const isLastBlock = blockI === blocks.length - 1;
+
+    if (remaining <= text.length || isLastBlock) {
+      let inBlock = Math.min(remaining, text.length);
+      for (let spanI = 0; spanI < spans.length; spanI++) {
+        const len = spans[spanI].text.length;
+        const isLastSpan = spanI === spans.length - 1;
+        if (inBlock <= len || isLastSpan) {
+          return { blockI, spanI, charI: Math.min(inBlock, len) };
+        }
+        inBlock -= len;
+      }
+      return { blockI, spanI: 0, charI: 0 };
+    }
+
+    remaining -= text.length + 1; // +1 for the "\n" block break
+  }
+
+  return { blockI: 0, spanI: 0, charI: 0 };
+}
+
+// locates exactly which characters changed between two versions of a
+// document, so undo/redo can jump the cursor/selection straight to the
+// edit rather than an approximate/stale position. returns null when the
+// text content is identical (e.g. a style-only change like bold/alignment,
+// which still produces a history entry) since there's no text position to
+// jump to -- without this, start/end both collapse to the end of the
+// document and the cursor would jump there on every style toggle
+export function findEditDiff(
+  beforeBlocks: ModelBlock[],
+  afterBlocks: ModelBlock[]
+) {
+  const bText = flattenBlocks(beforeBlocks);
+  const aText = flattenBlocks(afterBlocks);
+
+  if (bText === aText) return null;
+
+  const maxPrefix = Math.min(bText.length, aText.length);
+  let start = 0;
+  while (start < maxPrefix && bText[start] === aText[start]) start++;
+
+  const remaining = maxPrefix - start;
+  let suffix = 0;
+  while (
+    suffix < remaining &&
+    bText[bText.length - 1 - suffix] === aText[aText.length - 1 - suffix]
+  ) {
+    suffix++;
+  }
+
+  return { start, suffix };
+}
+
+// turns an edit diff into a selection within the given (post-undo/redo)
+// document -- selects the text that reappeared, or collapses to a cursor
+// where text disappeared
+export function diffToSelection(
+  targetBlocks: ModelBlock[],
+  diff: { start: number; suffix: number }
+): ModelSelection {
+  const targetText = flattenBlocks(targetBlocks);
+  const end = Math.max(diff.start, targetText.length - diff.suffix);
+
+  return {
+    start: offsetToCursor(targetBlocks, diff.start),
+    end: end > diff.start ? offsetToCursor(targetBlocks, end) : null,
+  };
+}
+
 export function normaliseCursor(blocks: ModelBlock[], cursor: ModelCursor) {
   // if at start of span but not the first span then move to prev span end
   if (cursor.charI === 0 && cursor.spanI > 0) {
@@ -431,10 +601,15 @@ export function getSelectionContent(id: string, sel: ModelSelection) {
   return { text, doc: newDoc };
 }
 
-function squashSpanStyles(doc: ModelDocument) {
+function squashSpanStyles(
+  doc: ModelDocument,
+  baseStyle: Partial<BaseTextStyle>
+) {
+  // pasted spans fully adopt the destination style — any formatting the
+  // text had at copy time (font, color, etc.) is intentionally discarded
   doc.blocks.forEach((b) => {
     b.spans.forEach((s) => {
-      s.style = { ...doc.style, ...s.style };
+      s.style = { ...baseStyle };
     });
   });
 }
@@ -452,7 +627,12 @@ function getExtremeCursor(doc: ModelDocument) {
 export const mergeDocs = modify(
   (id: string, cursor: ModelCursor, doc: ModelDocument) => {
     const original = getComponentProp(id, "document") as ModelDocument;
-    squashSpanStyles(doc);
+
+    // pasted content should adopt the style of the text surrounding the
+    // insertion point rather than the style it had when it was copied
+    const baseStyle = getStyleForSelection(id, { start: cursor, end: null });
+    const diff = objectDiff(baseStyle, squash(original.style));
+    squashSpanStyles(doc, diff);
 
     const extreme = getExtremeCursor(doc);
 
