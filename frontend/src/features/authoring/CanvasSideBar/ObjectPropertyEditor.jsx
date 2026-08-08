@@ -1,7 +1,5 @@
-// Self Note: onblur function for when no value is inside the input fields, and then use box center to calc width and height instead
-
 import { getBoxCenter, translate } from "../../authoring/util";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { modifyComponentProp } from "../scene/operations/component";
 import {
   SquareCenterlineDashedHorizontal,
@@ -28,7 +26,7 @@ export function ObjectPropertyEditor({ component }) {
     ) / 100
   );
   const [inputAngle, setInputAngle] = useState(
-    (Math.round((component.bounds.rotation ?? 0) * 100) / 100) % 361
+    (Math.round((component.bounds.rotation ?? 0) * 100) / 100) % 360
   );
 
   useEffect(() => {
@@ -51,8 +49,12 @@ export function ObjectPropertyEditor({ component }) {
     setInputAngle(rotation);
   }, [component.bounds.verts, component.bounds.rotation]);
 
+  const latestValues = useRef({});
+  latestValues.current = { inputX, inputY, inputWidth, inputHeight, inputAngle };
+  
   useEffect(() => {
     return () => {
+      const { inputX, inputY, inputWidth, inputHeight, inputAngle } = latestValues.current;
       noFields([
         [inputX, "x", setInputX],
         [inputY, "y", setInputY],
@@ -61,7 +63,7 @@ export function ObjectPropertyEditor({ component }) {
         [inputAngle, "rotation", setInputAngle],
       ]);
     };
-  }, [inputX, inputHeight, inputWidth, inputY, inputAngle]);
+  }, [component.id]);
 
   function flipComponent(axis) {
     modifyComponentProp(component.id, "bounds.verts", (prev) => {
@@ -154,7 +156,7 @@ export function ObjectPropertyEditor({ component }) {
         ].filter(Boolean);
       });
     } else if (type === "rotation") {
-      modifyComponentProp(component.id, "bounds.rotation", value % 361);
+      modifyComponentProp(component.id, "bounds.rotation", value % 360);
     }
   }
 
@@ -177,9 +179,9 @@ export function ObjectPropertyEditor({ component }) {
                 onChange={(e) => {
                   saveProp(e.target.value, "width", setInputWidth);
                 }}
-                onBlur={(e) => {
-                  noFields(e.target.value, "width", setInputWidth);
-                }}
+                // onBlur={(e) => {
+                //   noFields(e.target.value, "width", setInputWidth);
+                // }}
               />
               <input
                 className="input flex-1 min-w-0"
@@ -187,9 +189,9 @@ export function ObjectPropertyEditor({ component }) {
                 onChange={(e) => {
                   saveProp(e.target.value, "height", setInputHeight);
                 }}
-                onBlur={(e) => {
-                  noFields(e.target.value, "height", setInputHeight);
-                }}
+                // onBlur={(e) => {
+                //   noFields(e.target.value, "height", setInputHeight);
+                // }}
               />
             </div>
 
@@ -205,9 +207,9 @@ export function ObjectPropertyEditor({ component }) {
                 onChange={(e) => {
                   saveProp(e.target.value, "x", setInputX);
                 }}
-                onBlur={(e) => {
-                  noFields(e.target.value, "x", setInputX);
-                }}
+                // onBlur={(e) => {
+                //   noFields(e.target.value, "x", setInputX);
+                // }}
               />
               <input
                 className="input flex-1 min-w-0"
@@ -215,9 +217,9 @@ export function ObjectPropertyEditor({ component }) {
                 onChange={(e) => {
                   saveProp(e.target.value, "y", setInputY);
                 }}
-                onBlur={(e) => {
-                  noFields(e.target.value, "y", setInputY);
-                }}
+                // onBlur={(e) => {
+                //   noFields(e.target.value, "y", setInputY);
+                // }}
               />
             </div>
             <label className="label">Angle (Degrees)</label>
@@ -228,9 +230,9 @@ export function ObjectPropertyEditor({ component }) {
                 onChange={(e) =>
                   saveProp(e.target.value, "rotation", setInputAngle)
                 }
-                onBlur={(e) => {
-                  noFields(e.target.value, "rotation", setInputAngle);
-                }}
+                // onBlur={(e) => {
+                //   noFields(e.target.value, "rotation", setInputAngle);
+                // }}
               />
               <div className="ml-6 flex-1">
                 <button
