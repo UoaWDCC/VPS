@@ -126,7 +126,8 @@ const EditStateVariable = ({ stateVariable, scenarioId }) => {
 
   function parseValue(e) {
     const val = e.target.value;
-    if (type === stateTypes.NUMBER) setNewValue(Number(val));
+    if (newType === stateTypes.NUMBER)
+      setNewValue(val === "" ? "" : Number(val));
     else setNewValue(val);
   }
   `bg-base-300 mt-xs px-[1rem] py-[0.5rem] `;
