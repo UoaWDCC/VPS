@@ -5,11 +5,11 @@ import SimpleFloatingEdge from "./SimpleFloatingEdge";
 
 const NodeBase = ({ data }) => (
   <div
-    className={`bg-black w-40 text-center ${data.visited ? "" : "brightness-60"} ${data.isHighlighted ? "border-red-500 border-4" : ""}`}
+    className={`bg-base-300 text-base-content w-40 text-center ${data.visited ? "" : "brightness-60"} ${data.isHighlighted ? "border-error border-4" : ""}`}
   >
     <div>
       <Thumbnail components={data.components} />
-      <span className=" w-[100%] text-white">{data.label}</span>
+      <span className="block w-full">{data.label}</span>
     </div>
     <Handle
       type="target"

@@ -55,7 +55,7 @@ const CreateGraphData = (scenes, groupInfo) => {
             },
             style: {
               strokeWidth: 3,
-              stroke: "#b1b1b7",
+              stroke: "var(--color-primary)",
             },
             animated: true,
           });
@@ -78,11 +78,11 @@ const CreateGraphData = (scenes, groupInfo) => {
         type: "simpleFloating",
         markerEnd: {
           ...markerEnd,
-          color: "#89d149",
+          color: "var(--color-success)",
         },
         style: {
           strokeWidth: 3,
-          stroke: "#89d149",
+          stroke: "var(--color-success)",
           zIndex: 10000,
         },
         animated: true,

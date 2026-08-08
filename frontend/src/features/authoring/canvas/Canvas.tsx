@@ -93,8 +93,8 @@ function Canvas() {
               top-[120px]
               left-1/2
               -translate-x-1/2
-              bg-gray-600/45
-              text-white
+              bg-primary/70
+              text-secondary
               text-sm
               font-medium
               px-4 py-2
@@ -124,7 +124,7 @@ function Canvas() {
             width="1920"
             height="1080"
             fill="none"
-            stroke="white"
+            stroke="var(--color-backdrop-content)"
             strokeWidth="1"
           />
         </svg>
@@ -135,7 +135,13 @@ function Canvas() {
           viewBox={`-50 -50 ${1920 + 50 * 2} ${1080 + 50 * 2}`}
           ref={canvasRef}
         >
-          <rect x="0" y="0" width="1920" height="1080" fill="white" />
+          <rect
+            x="0"
+            y="0"
+            width="1920"
+            height="1080"
+            fill="var(--color-canvas)"
+          />
           {components}
         </svg>
       </div>

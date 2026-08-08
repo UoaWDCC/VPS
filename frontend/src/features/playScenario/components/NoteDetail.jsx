@@ -164,7 +164,7 @@ export default function NoteDetail({
 
       {showConfirm && (
         <div
-          className="fixed inset-0 z-[60] bg-black/60 flex items-center justify-center"
+          className="fixed inset-0 z-[60] bg-backdrop/60 flex items-center justify-center"
           onClick={() => setShowConfirm(false)}
         >
           <div

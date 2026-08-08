@@ -29,7 +29,7 @@ const Thumbnail = ({ components }) => {
 
   return (
     <svg viewBox="0 0 1920 1080">
-      <rect x="0" y="0" width="1920" height="1080" fill="white" />
+      <rect x="0" y="0" width="1920" height="1080" fill="var(--color-canvas)" />
       {visualComponents}
     </svg>
   );
