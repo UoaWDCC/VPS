@@ -1,6 +1,6 @@
 import useEditorStore from "../stores/editor";
 import useVisualScene from "../stores/visual";
-import AudioManager from "./AudioManager";
+import AudioManager from "../audio/AudioManager";
 import ComponentProperties from "./ComponentProperties";
 import SceneSettings from "./SceneSettings";
 
