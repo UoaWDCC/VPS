@@ -107,7 +107,7 @@ router.post(
 
 const VALID_TYPES = ["image", "audio", "document"];
 
-// GET /files/:scenarioId/images — retrieve all images in scenario
+// GET /files/:scenarioId/type/:type — retrieve all files of a given type in scenario
 router.get(
   "/:scenarioId/type/:type",
   handle(async (req, res) => {
