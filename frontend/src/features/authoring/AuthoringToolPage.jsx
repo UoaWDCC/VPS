@@ -11,6 +11,8 @@ import { copy, cut, paste } from "./handlers/keyboard/clipboard";
 import useEditorStore from "./stores/editor";
 import { useHistory } from "react-router-dom";
 import { replace, replaceComponent } from "./scene/operations/modifiers";
+import { diffToSelection, findEditDiff } from "./scene/operations/text";
+import { syncVisualCursor } from "./text/cursor";
 import {
   ArrowLeftIcon,
   FilesIcon,
@@ -72,10 +74,37 @@ export default function AuthoringToolPage() {
 
     const listener = async ({ operation, record }) => {
       if (operation === "undo" || operation === "redo") {
+        const editorState = useEditorStore.getState();
+
+        // React 17 doesn't batch these updates outside of an event handler,
+        // so the text cursor/selection must be cleared before the document
+        // is replaced -- otherwise a render can happen in between with the
+        // restored (possibly shorter) document and the stale selection,
+        // reading past the end of the document
+        editorState.setSelection({ start: null, end: null });
+        editorState.setVisualSelection({ start: null, end: null });
+
         if (record.sceneId !== sceneId) switchScene(getScene(), record.sceneId);
         const state = operation === "undo" ? record.before : record.after;
         replaceComponent(record.id, state);
         if (state !== null) setSelected(record.id);
+
+        // jump straight to the exact text that was undone/redone, the way
+        // undo/redo works in any text editor, by diffing the before/after
+        // documents rather than relying on wherever the cursor used to be
+        const beforeBlocks = record.before?.document?.blocks;
+        const afterBlocks = record.after?.document?.blocks;
+        const targetBlocks = state?.document?.blocks;
+        const diff =
+          beforeBlocks?.length && afterBlocks?.length
+            ? findEditDiff(beforeBlocks, afterBlocks)
+            : null;
+        if (diff && targetBlocks?.length) {
+          const selection = diffToSelection(targetBlocks, diff);
+          editorState.setMode(["text"]);
+          editorState.setSelection(selection);
+          syncVisualCursor();
+        }
       }
 
       setSaving(true);
