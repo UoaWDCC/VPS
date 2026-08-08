@@ -228,20 +228,63 @@ export function cursorToOffset(blocks: ModelBlock[], cursor: ModelCursor) {
 // accented and non-Latin scripts, not just ASCII letters/digits
 const WORD_CHAR = /[\p{L}\p{N}_']/u;
 
+function isHighSurrogate(code: number) {
+  return code >= 0xd800 && code <= 0xdbff;
+}
+function isLowSurrogate(code: number) {
+  return code >= 0xdc00 && code <= 0xdfff;
+}
+
+// UTF-16 length (1 or 2) of the code point starting at a code-point-aligned index
+function codePointLength(text: string, i: number) {
+  if (
+    isHighSurrogate(text.charCodeAt(i)) &&
+    isLowSurrogate(text.charCodeAt(i + 1))
+  ) {
+    return 2;
+  }
+  return 1;
+}
+
+// index of the start of the code point that contains index i -- steps back
+// one unit if i lands on the low half of a surrogate pair
+function codePointStart(text: string, i: number) {
+  if (
+    i > 0 &&
+    isLowSurrogate(text.charCodeAt(i)) &&
+    isHighSurrogate(text.charCodeAt(i - 1))
+  ) {
+    return i - 1;
+  }
+  return i;
+}
+
 // finds the start/end flat offsets of the word touching a click position,
 // for double-click-to-select-word -- clicking on a non-word character (e.g.
-// whitespace/punctuation) just selects that single character instead
+// whitespace/punctuation) just selects that single character instead.
+// offsets are always clamped to code point boundaries so a surrogate pair
+// (e.g. an emoji) is never split in half
 export function findWordRange(text: string, offset: number) {
   if (!text.length) return { start: 0, end: 0 };
 
-  const i = Math.min(offset, text.length - 1);
-  if (!WORD_CHAR.test(text[i])) return { start: i, end: i + 1 };
+  const i = codePointStart(text, Math.min(offset, text.length - 1));
+  const iLen = codePointLength(text, i);
+  if (!WORD_CHAR.test(text.slice(i, i + iLen)))
+    return { start: i, end: i + iLen };
 
   let start = i;
-  while (start > 0 && WORD_CHAR.test(text[start - 1])) start--;
+  while (start > 0) {
+    const prevStart = codePointStart(text, start - 1);
+    if (!WORD_CHAR.test(text.slice(prevStart, start))) break;
+    start = prevStart;
+  }
 
-  let end = i + 1;
-  while (end < text.length && WORD_CHAR.test(text[end])) end++;
+  let end = i + iLen;
+  while (end < text.length) {
+    const len = codePointLength(text, end);
+    if (!WORD_CHAR.test(text.slice(end, end + len))) break;
+    end += len;
+  }
 
   return { start, end };
 }

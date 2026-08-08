@@ -29,6 +29,16 @@ function isInputTarget(e: ClipboardEvent) {
   return tag === "INPUT" || tag === "TEXTAREA";
 }
 
+// guards against treating a copied non-textbox component (e.g. a box or
+// image, which has no blocks) as a pasteable text document
+function isModelDocument(value: unknown): value is ModelDocument {
+  return (
+    !!value &&
+    typeof value === "object" &&
+    Array.isArray((value as ModelDocument).blocks)
+  );
+}
+
 export function copy(e: ClipboardEvent) {
   if (isInputTarget(e)) return;
   const { selected } = useEditorStore.getState();
@@ -62,17 +72,19 @@ export function paste(e: ClipboardEvent) {
   if (selected && mode.includes("text")) {
     let doc: ModelDocument | null = null;
     if (app) {
-      const obj = JSON.parse(app) as {
-        type?: string;
-        document?: ModelDocument;
-      };
-      doc =
-        (obj.type === "textbox"
-          ? obj.document
-          : (obj as unknown as ModelDocument)) ?? null;
-    } else if (text) {
-      doc = plainToDoc(text) as ModelDocument;
+      try {
+        const obj = JSON.parse(app) as {
+          type?: string;
+          document?: ModelDocument;
+        };
+        const candidate = obj.type === "textbox" ? obj.document : obj;
+        if (isModelDocument(candidate)) doc = candidate;
+      } catch {
+        // malformed clipboard payload -- fall through to the text/plain
+        // fallback below rather than throwing out of the paste handler
+      }
     }
+    if (!doc && text) doc = plainToDoc(text) as ModelDocument;
     if (!doc) return;
 
     // an active range selection should be replaced by the pasted content,
