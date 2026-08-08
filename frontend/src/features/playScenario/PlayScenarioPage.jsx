@@ -120,6 +120,7 @@ export default function PlayScenarioPage({ group }) {
   const startSceneRef = useRef(
     new URLSearchParams(location.search).get("startScene")
   );
+  const handlingConflictRef = useRef(false);
 
   const [sceneId, setSceneId] = useState(null);
   const [stateVariables, setStateVariables] = useState([]);
@@ -136,12 +137,17 @@ export default function PlayScenarioPage({ group }) {
   const handleError = (error) => {
     if (!error) return;
     if (error.status === 409) {
-      onSceneChange();
-      toast.success(
-        isMultiplayer
-          ? "Someone else made a move first, but you're back on track!"
-          : "A move from somewhere else was made, but you're back on track!"
-      );
+      if (!handlingConflictRef.current) {
+        handlingConflictRef.current = true;
+        toast.success(
+          isMultiplayer
+            ? "Someone else made a move first, but you're back on track!"
+            : "A move from somewhere else was made, but you're back on track!"
+        );
+        setTimeout(() => {
+          handlingConflictRef.current = false;
+        }, 1000);
+      }
     } else if (isMultiplayer && error.status === 403) {
       const roles = JSON.stringify(error.meta.roles_with_access);
       history.push(`/play/${scenarioId}/invalid-role?roles=${roles}`);
@@ -150,7 +156,7 @@ export default function PlayScenarioPage({ group }) {
     }
   };
 
-  const onSceneChange = async (componentId) => {
+  const onSceneChange = async (componentId, currentSceneOverride = sceneId) => {
     if (componentId) {
       const component = currScene?.components?.find(
         (comp) => comp.id === componentId
@@ -165,14 +171,14 @@ export default function PlayScenarioPage({ group }) {
     }
 
     const startScene = startSceneRef.current;
-    startSceneRef.current = null; // Clear before the await so a concurrent retry (409 handler) never replays it.
+    startSceneRef.current = null; // Clear after first use so the startScene override is only consumed once.
 
     try {
       const { newSceneId, stateVariables, newStateVersion } = isMultiplayer
         ? await navigateMultiplayer(
             user,
             group._id,
-            sceneId,
+            currentSceneOverride,
             addFlags,
             removeFlags,
             componentId
@@ -180,7 +186,7 @@ export default function PlayScenarioPage({ group }) {
         : await navigateSingleplayer(
             user,
             scenarioId,
-            sceneId,
+            currentSceneOverride,
             addFlags,
             removeFlags,
             componentId,
