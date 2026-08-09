@@ -27,6 +27,7 @@ function Overlay() {
   const selected = useEditorStore((state) => state.selected)!;
   const hovered = useEditorStore((state) => state.hovered)!;
   const bounds = useEditorStore((state) => state.mutationBounds);
+  const activeGuides = useEditorStore((state) => state.activeGuides);
   const scene = useVisualScene((scene) => scene.components);
   const mode = useEditorStore((scene) => scene.mode);
   const createType = useEditorStore((scene) => scene.createType);
@@ -74,6 +75,35 @@ function Overlay() {
       )}
       {mode.includes("mutation") &&
         resolve(component?.type ?? createType, bounds)}
+      {mode.includes("mutation") &&
+        activeGuides.map((guide, index) => {
+          const style = guide.isCanvasCenter
+            ? {
+                stroke: "var(--color-warning)",
+                strokeWidth: 3,
+                strokeDasharray: "6 4",
+              }
+            : { stroke: "var(--color-error)", strokeWidth: 2 };
+          return guide.orientation === "vertical" ? (
+            <line
+              key={index}
+              x1={guide.position}
+              y1={-50}
+              x2={guide.position}
+              y2={1130}
+              {...style}
+            />
+          ) : (
+            <line
+              key={index}
+              x1={-50}
+              y1={guide.position}
+              x2={1970}
+              y2={guide.position}
+              {...style}
+            />
+          );
+        })}
     </svg>
   );
 }
