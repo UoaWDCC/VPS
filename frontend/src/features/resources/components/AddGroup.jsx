@@ -18,24 +18,21 @@ function AddGroup({ onAdd }) {
     setName("");
   };
   useEffect(() => {
-  if (!open) return;
+    if (!open) return;
 
-  const handleClickOutside = (event) => {
-    if (
-      dropdownRef.current &&
-      !dropdownRef.current.contains(event.target)
-    ) {
-      setOpen(false);
-      setName("");
-    }
-  };
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setOpen(false);
+        setName("");
+      }
+    };
 
-  document.addEventListener("pointerdown", handleClickOutside);
+    document.addEventListener("pointerdown", handleClickOutside);
 
-  return () => {
-    document.removeEventListener("pointerdown", handleClickOutside);
-  };
-}, [open]);
+    return () => {
+      document.removeEventListener("pointerdown", handleClickOutside);
+    };
+  }, [open]);
 
   const addCollection = () => {
     const trimmedName = name.trim();
@@ -60,7 +57,10 @@ function AddGroup({ onAdd }) {
   };
 
   return (
-    <div ref={dropdownRef} className={`dropdown dropdown-end ${open ? "dropdown-open" : ""}`} >
+    <div
+      ref={dropdownRef}
+      className={`dropdown dropdown-end ${open ? "dropdown-open" : ""}`}
+    >
       <button
         type="button"
         className="btn btn-phantom btn-sm"
