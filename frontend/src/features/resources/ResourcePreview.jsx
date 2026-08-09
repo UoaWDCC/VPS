@@ -9,10 +9,16 @@ async function loadText(url) {
 }
 
 function ResourcePreview({ file }) {
+  const canPreviewText = !!(
+    file?.fileType === "document" &&
+    file?.contentType?.startsWith("text") &&
+    file?.url
+  );
+
   const text = useQuery({
     queryKey: ["file-text", file?.url],
     queryFn: () => loadText(file.url),
-    enabled: !!(file?.contentType?.startsWith("text") && file?.url),
+    enabled: canPreviewText,
   });
 
   if (!file)
@@ -20,15 +26,14 @@ function ResourcePreview({ file }) {
       <div className="prose max-w-none opacity-70">
         <h3>Preview</h3>
         <p>
-          Select a file to preview. Images and PDFs files show inline;
-          Text/Markdown render below; other files provide a download.
+          Select a file to preview. If a preview is not available, the file can
+          be downloaded.
         </p>
       </div>
     );
 
   const isImage = file.fileType === "image";
-  const isText =
-    file.fileType === "document" && file.contentType !== "application/pdf";
+  const isText = canPreviewText;
   const isPDF = file.contentType === "application/pdf";
 
   return (

@@ -6,7 +6,7 @@ import {
   XIcon,
 } from "lucide-react";
 import { filterTreeByConditions } from "../../../utils/stateConditionalEvaluator";
-import { normaliseFile } from "../../resources/util";
+import { filterTreeBySearch, normaliseFile } from "../../resources/util";
 import { api } from "../../../util/api";
 import { useQuery } from "@tanstack/react-query";
 import AuthenticationContext from "../../../context/AuthenticationContext";
@@ -60,32 +60,15 @@ export default function ResourcesPanel({
   }, [open, onClose]);
 
   const { data, isLoading, isError, error } = useQuery({
-    queryKey: ["resources", scenarioId, stateVariables],
+    queryKey: ["resources", scenarioId],
     queryFn: () => getResources(user, scenarioId),
   });
 
   const resourceTree = buildResourceTree(data ?? []);
-
-  // Filtered tree for search
+  // NOTE: the filtering by state variables should ideally be done on the server to prevent cheating, but here we filter before rendering
   const filteredTree = (() => {
     const filtered = filterTreeByConditions(resourceTree, stateVariables);
-
-    const q = search.trim()?.toLowerCase();
-    if (!q) return filtered;
-
-    // NOTE: the filtering by state variables should ideally be done on the server to prevent cheating, but here we filter before rendering
-
-    return filtered
-      .map((g) => {
-        const matchingFiles = (g.children || []).filter((f) => {
-          const inName = f.name.toLowerCase().includes(q);
-          const inPath = g.name.toLowerCase().includes(q);
-          return inName || inPath;
-        });
-        if (matchingFiles.length === 0) return null;
-        return { ...g, children: matchingFiles };
-      })
-      .filter(Boolean);
+    return filterTreeBySearch(filtered, search);
   })();
 
   function handleSelectFile(file) {
@@ -146,13 +129,13 @@ export default function ResourcesPanel({
 
                 <div className="mb-2 flex flex-none gap-2 py-3">
                   <label htmlFor="resource-search" className="sr-only">
-                    Search files or collection name
+                    Search files and collections
                   </label>
                   <input
                     id="resource-search"
                     type="search"
                     className="flex-1 border-0 border-b-1 border-primary pb-3 outline-none"
-                    placeholder="Search files or collection name"
+                    placeholder="Search files and collections"
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
                   />

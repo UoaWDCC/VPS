@@ -8,7 +8,7 @@ import StateConditionalMenu from "../../components/StateVariables/StateCondition
 import { api } from "../../util/api";
 import AuthenticationContext from "../../context/AuthenticationContext";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { normaliseFile } from "./util";
+import { filterTreeBySearch, normaliseFile } from "./util";
 import { v4 as uuid } from "uuid";
 import ResourcePreview from "./ResourcePreview";
 import SkeletonBody from "./ResourcesSkeleton";
@@ -103,7 +103,7 @@ export default function ManageResourcesPage() {
       const tempId = context?.tempId;
       if (tempId) {
         queryClient.setQueryData(["resources", scenarioId], (prev) =>
-          prev.filter((r) => r._id !== tempId)
+          (prev ?? []).filter((r) => r._id !== tempId)
         );
       }
       console.error(e);
@@ -128,7 +128,7 @@ export default function ManageResourcesPage() {
       const tempId = context?.tempId;
       if (tempId) {
         queryClient.setQueryData(["resources", scenarioId], (prev) =>
-          prev.filter((r) => r._id !== tempId)
+          (prev ?? []).filter((r) => r._id !== tempId)
         );
       }
       console.error(e);
@@ -158,22 +158,7 @@ export default function ManageResourcesPage() {
   }
 
   const resourceTree = buildResourceTree(resourcesQuery.data ?? []);
-
-  const filteredTree = (() => {
-    if (!search.trim()) return resourceTree;
-    const q = search.trim().toLowerCase();
-    return resourceTree
-      .map((g) => {
-        const matchingFiles = (g.files || []).filter((f) => {
-          const inName = f.name.toLowerCase().includes(q);
-          const inPath = g.name.toLowerCase().includes(q);
-          return inName || inPath;
-        });
-        if (matchingFiles.length === 0) return null;
-        return { ...g, files: matchingFiles };
-      })
-      .filter(Boolean);
-  })();
+  const filteredTree = filterTreeBySearch(resourceTree, search);
 
   const foundResource = resourcesQuery.data?.find(
     (r) => r._id === selectedResourceId
@@ -210,13 +195,13 @@ export default function ManageResourcesPage() {
                     htmlFor="authoring-resource-search"
                     className="sr-only"
                   >
-                    Search files or collection name
+                    Search files and collections
                   </label>
                   <input
                     id="authoring-resource-search"
                     type="search"
                     className="w-full flex-none border-0 border-b-1 border-primary pb-3 outline-none"
-                    placeholder="Search files or collection name"
+                    placeholder="Search files and collections"
                     value={search}
                     onChange={(event) => setSearch(event.target.value)}
                   />
@@ -238,6 +223,7 @@ export default function ManageResourcesPage() {
                             <summary
                               className={`flex items-center ${isTemp(resource) ? "text-primary" : ""} ${selectedResource?._id === resource._id ? "bg-base-200" : ""}`}
                               onClick={() =>
+                                !isTemp(resource) &&
                                 setSelectedResourceId(resource._id)
                               }
                             >
@@ -375,6 +361,8 @@ function UploadButton({
         className="hidden"
         onChange={(e) => {
           const file = e.target.files[0];
+          e.target.value = "";
+          if (!file) return;
           onFiles(file);
         }}
       />
