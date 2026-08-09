@@ -155,7 +155,7 @@ export default function SceneSettings() {
             <label className="label cursor-pointer justify-start gap-3 mt-2 mb-2">
               <input
                 type="checkbox"
-                className="toggle" 
+                className="toggle"
                 checked={!!directLink && !directLinkDisabled}
                 disabled={directLinkDisabled}
                 onChange={(e) => {
@@ -173,7 +173,7 @@ export default function SceneSettings() {
                   modifySceneProp("directLink", target);
                 }}
               />
-              
+
               <span className="label-text">Direct Link</span>
               {directLinkDisabled && (
                 <span
@@ -187,12 +187,12 @@ export default function SceneSettings() {
               )}
               <span
                 className="label-text tooltip tooltip-top cursor-help before:!whitespace-normal before:!max-w-[130px] before:!text-[0.75rem]"
-                data-tip="Directs the user to another scene automatically instead of waiting for a button click."
+                data-tip="The player will be sent to this scene when they press either the 'space' or 'right arrow' keyboard button, instead of having to click an on screen element."
               >
                 ⓘ
               </span>
             </label>
-            
+
             <select
               className="select select-bordered w-full"
               disabled={!directLink || directLinkDisabled}
