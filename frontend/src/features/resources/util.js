@@ -20,7 +20,7 @@ export function filterTreeBySearch(tree, string) {
   return tree
     .map((r) => {
       const isMatch = r.name.toLowerCase().includes(q);
-      if (r.type !== "collection") return isMatch;
+      if (r.type !== "collection") return isMatch ? r : null;
       const matchingChildren = (r.children || []).filter((c) => {
         return isMatch || c.name.toLowerCase().includes(q);
       });

@@ -46,7 +46,7 @@ export default function ResourcesPanel({
   const { user } = useContext(AuthenticationContext);
 
   const [search, setSearch] = useState("");
-  const [selectedFile, setSelectedFile] = useState(null);
+  const [selectedResourceId, setSelectedResourceId] = useState(null);
   const [openGroups, setOpenGroups] = useState(() => new Set());
 
   // Close on Escape
@@ -60,20 +60,22 @@ export default function ResourcesPanel({
   }, [open, onClose]);
 
   const { data, isLoading, isError, error } = useQuery({
-    queryKey: ["resources", scenarioId],
+    queryKey: ["resources", scenarioId, user],
     queryFn: () => getResources(user, scenarioId),
   });
 
+  // NOTE: state variable filters can't change while the resources panel is
+  // open, so deselecting on resource hiding isn't a concern
+  const foundResource = data?.find((r) => r._id === selectedResourceId);
+  const selectedResource = foundResource ? normaliseFile(foundResource) : null;
+
   const resourceTree = buildResourceTree(data ?? []);
-  // NOTE: the filtering by state variables should ideally be done on the server to prevent cheating, but here we filter before rendering
+  // NOTE: the filtering by state variables should ideally be done on the
+  // server to prevent cheating, but here we filter before rendering
   const filteredTree = (() => {
     const filtered = filterTreeByConditions(resourceTree, stateVariables);
     return filterTreeBySearch(filtered, search);
   })();
-
-  function handleSelectFile(file) {
-    setSelectedFile(file);
-  }
 
   const toggleGroup = (gid) => {
     setOpenGroups((prev) => {
@@ -186,8 +188,8 @@ export default function ResourcesPanel({
                     <ResourceTree
                       tree={filteredTree}
                       search={search}
-                      onSelectFile={handleSelectFile}
-                      selectedFileId={selectedFile?._id}
+                      onSelectFile={(r) => setSelectedResourceId(r._id)}
+                      selectedFileId={selectedResource?._id}
                       openGroups={openGroups}
                       toggleGroup={toggleGroup}
                     />
@@ -204,7 +206,7 @@ export default function ResourcesPanel({
                   <XIcon size={32} />
                 </button>
                 <div className="h-full overflow-auto pb-[max(1rem,env(safe-area-inset-bottom))]">
-                  <ResourcePreview file={selectedFile} />
+                  <ResourcePreview file={selectedResource} />
                 </div>
               </div>
             </div>
