@@ -359,8 +359,8 @@ describe("Scene API tests", () => {
     });
     expect(scenarioScenes).toEqual([
       scene1._id.toString(),
-      scene2._id.toString(),
       responseScene._id,
+      scene2._id.toString(),
     ]);
 
     // check scene is not added to unrelated scenario
