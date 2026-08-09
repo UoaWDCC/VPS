@@ -11,7 +11,7 @@ export default function ResourceTree({
   // Automatically expand all groups when searching
   useEffect(() => {
     if (search.trim()) {
-      const allG = new Set(tree.map((g) => g.id));
+      const allG = new Set(tree.map((g) => g._id));
       allG.forEach((gid) => !openGroups.has(gid) && toggleGroup(gid));
     }
   }, [search, tree, openGroups, toggleGroup]);
@@ -19,31 +19,31 @@ export default function ResourceTree({
   return (
     <ul className="menu w-full p-0">
       {tree.map((group) => (
-        <li key={group.id} className="mb-1">
+        <li key={group._id} className="mb-1">
           <button
-            className="flex items-center justify-between rounded px-0 py-1 hover:bg-base-200 focus:outline-none"
-            onClick={() => toggleGroup(group.id)}
-            aria-expanded={openGroups.has(group.id)}
+            className="flex items-center justify-between px-2 py-1 rounded hover:bg-base-200 focus:outline-none"
+            onClick={() => toggleGroup(group._id)}
+            aria-expanded={openGroups.has(group._id)}
           >
             <span className="font-medium truncate">{group.name}</span>
             <span className="text-xs opacity-70">
-              {(group.files || []).length}{" "}
-              {openGroups.has(group.id) ? "▾" : "▸"}
+              {(group.children || []).length}{" "}
+              {openGroups.has(group._id) ? "▾" : "▸"}
             </span>
           </button>
 
-          {openGroups.has(group.id) && (
+          {openGroups.has(group._id) && (
             <ul className="ml-3">
-              {(group.files || []).map((f) => (
-                <li key={f.id}>
+              {(group.children || []).map((f) => (
+                <li key={f._id}>
                   <button
                     className={`flex w-full items-center justify-between px-2 py-1 rounded hover:bg-base-200 text-left ${
-                      selectedFileId === f.id ? "bg-base-200" : ""
+                      selectedFileId === f._id ? "bg-base-200" : ""
                     }`}
                     onClick={() =>
                       onSelectFile({
                         ...f,
-                        groupId: group.id,
+                        groupId: group._id,
                         groupName: group.name,
                       })
                     }
@@ -51,7 +51,7 @@ export default function ResourceTree({
                   >
                     <span className="truncate">{f.name}</span>
                     <span className="text-[10px] opacity-60 ml-2 whitespace-nowrap">
-                      {formatBytes(f.size)} · {shortType(f.type)}
+                      {formatBytes(f.size)} · {shortType(f.contentType)}
                     </span>
                   </button>
                 </li>
