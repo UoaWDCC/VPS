@@ -5,6 +5,7 @@ function AddGroup({ onAdd }) {
   const [open, setOpen] = useState(false);
   const [name, setName] = useState("");
   const inputRef = useRef(null);
+  const dropdownRef = useRef(null);
 
   useEffect(() => {
     if (open) {
@@ -16,6 +17,25 @@ function AddGroup({ onAdd }) {
     setOpen(false);
     setName("");
   };
+  useEffect(() => {
+  if (!open) return;
+
+  const handleClickOutside = (event) => {
+    if (
+      dropdownRef.current &&
+      !dropdownRef.current.contains(event.target)
+    ) {
+      setOpen(false);
+      setName("");
+    }
+  };
+
+  document.addEventListener("pointerdown", handleClickOutside);
+
+  return () => {
+    document.removeEventListener("pointerdown", handleClickOutside);
+  };
+}, [open]);
 
   const addCollection = () => {
     const trimmedName = name.trim();
@@ -40,7 +60,7 @@ function AddGroup({ onAdd }) {
   };
 
   return (
-    <div className={`dropdown dropdown-end ${open ? "dropdown-open" : ""}`}>
+    <div ref={dropdownRef} className={`dropdown dropdown-end ${open ? "dropdown-open" : ""}`} >
       <button
         type="button"
         className="btn btn-phantom btn-sm"
