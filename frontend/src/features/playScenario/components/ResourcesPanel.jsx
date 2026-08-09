@@ -115,19 +115,21 @@ export default function ResourcesPanel({
   return (
     <>
       <div
-        className={`fixed inset-0 z-50 bg-black/90 transition-opacity ${open
-          ? "opacity-100 pointer-events-auto"
-          : "opacity-0 pointer-events-none"
-          }`}
+        className={`fixed inset-0 z-50 bg-black/90 transition-opacity ${
+          open
+            ? "opacity-100 pointer-events-auto"
+            : "opacity-0 pointer-events-none"
+        }`}
         onClick={onClose}
         aria-hidden="true"
       />
 
       <div
-        className={`fixed inset-0 z-50 flex items-center justify-center transition-all ${open
-          ? "opacity-100 scale-100 pointer-events-auto"
-          : "opacity-0 scale-95 pointer-events-none"
-          }`}
+        className={`fixed inset-0 z-50 flex items-center justify-center transition-all ${
+          open
+            ? "opacity-100 scale-100 pointer-events-auto"
+            : "opacity-0 scale-95 pointer-events-none"
+        }`}
         role="dialog"
         aria-modal="true"
         aria-label="Resources"

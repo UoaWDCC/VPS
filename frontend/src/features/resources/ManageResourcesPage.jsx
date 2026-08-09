@@ -175,8 +175,10 @@ export default function ManageResourcesPage() {
       .filter(Boolean);
   })();
 
-  const selectedResource =
-    resourcesQuery.data?.find((r) => r._id === selectedResourceId) ?? null;
+  const foundResource = resourcesQuery.data?.find(
+    (r) => r._id === selectedResourceId
+  );
+  const selectedResource = foundResource ? normaliseFile(foundResource) : null;
 
   return (
     <div className="font-ibm flex min-h-dvh w-screen flex-col gap-l overflow-y-auto lg:h-dvh lg:overflow-hidden">
@@ -204,7 +206,10 @@ export default function ManageResourcesPage() {
                 <div className="card-body flex min-h-0 flex-col gap-4 px-0">
                   <h1 className="flex-none text-xl">Uploaded Resources</h1>
 
-                  <label htmlFor="authoring-resource-search" className="sr-only">
+                  <label
+                    htmlFor="authoring-resource-search"
+                    className="sr-only"
+                  >
                     Search files or collection name
                   </label>
                   <input
@@ -221,7 +226,6 @@ export default function ManageResourcesPage() {
                   </div>
 
                   <ul className="menu min-h-0 w-full flex-1 overflow-auto rounded-box bg-base-100 p-0">
-
                     {search.trim() && filteredTree.length === 0 && (
                       <li className="p-2 opacity-60">
                         No matching resources found.
@@ -346,7 +350,8 @@ export default function ManageResourcesPage() {
                   )}
                 </div>
               </div>
-            </div>)}
+            </div>
+          )}
         </div>
       </div>
     </div>
