@@ -191,7 +191,7 @@ export default function SceneSettings() {
               )}
               <span
                 className="label-text tooltip tooltip-top cursor-help before:!whitespace-normal before:!max-w-[130px] before:!text-[0.75rem]"
-                data-tip="Directs the user to another scene automatically instead of waiting for a button click."
+                data-tip="The player will be sent to this scene when they press either the 'space' or 'right arrow' keyboard button, instead of having to click an on screen element."
               >
                 ⓘ
               </span>
