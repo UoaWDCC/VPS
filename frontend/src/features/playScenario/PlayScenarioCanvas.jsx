@@ -201,7 +201,10 @@ export default function PlayScenarioCanvas({
     });
 
   return (
-    <div className="bg-black" style={{ width: "100vw", height: "100vh" }}>
+    <div
+      className="bg-canvas-surround"
+      style={{ width: "100vw", height: "100vh" }}
+    >
       <svg
         id="play-main"
         className="w-full h-full"
@@ -212,7 +215,7 @@ export default function PlayScenarioCanvas({
           y="0"
           width={CANVAS_WIDTH}
           height={CANVAS_HEIGHT}
-          fill="white"
+          fill="var(--color-canvas)"
         />
         {components}
       </svg>

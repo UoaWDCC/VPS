@@ -156,7 +156,7 @@ function ScenarioInfo() {
 
               {/* Scenario Thumbnail */}
               <div className="w-full max-w-[750px] flex-shrink-0">
-                <div className="w-full aspect-video bg-white border border-gray-600 rounded-lg overflow-hidden flex items-center justify-center">
+                <div className="w-full aspect-video bg-canvas border border-primary rounded-lg overflow-hidden flex items-center justify-center">
                   <Thumbnail
                     components={selectedScenario.thumbnail.components}
                   />

@@ -35,7 +35,7 @@ const Thumbnail = ({ components }) => {
         y="0"
         width={CANVAS_WIDTH}
         height={CANVAS_HEIGHT}
-        fill="white"
+        fill="var(--color-canvas)"
       />
       {visualComponents}
     </svg>

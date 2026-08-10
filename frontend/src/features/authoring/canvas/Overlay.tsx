@@ -21,7 +21,14 @@ const componentMap: Record<string, React.FC<Record<string, unknown>>> = {
 
 function resolve(type: Component["type"], bounds: Bounds) {
   const Fc = componentMap[type] ?? Box;
-  return <Fc bounds={bounds} fill="none" stroke="green" strokeWidth={3} />;
+  return (
+    <Fc
+      bounds={bounds}
+      fill="none"
+      stroke="var(--color-success)"
+      strokeWidth={3}
+    />
+  );
 }
 
 function Overlay() {
@@ -59,7 +66,7 @@ function Overlay() {
             bounds={component.bounds}
             rotationOrigin={getBoxCenter(component.bounds.verts)}
             fill="none"
-            stroke="blue"
+            stroke="var(--color-accent)"
             strokeWidth={3}
           />
           <ResolveHandles />
@@ -70,7 +77,7 @@ function Overlay() {
           bounds={hoveredComponent.bounds}
           rotationOrigin={getBoxCenter(hoveredComponent.bounds.verts)}
           fill="none"
-          stroke="#747775"
+          stroke="var(--color-primary)"
           strokeWidth={1}
         />
       )}
