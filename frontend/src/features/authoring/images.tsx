@@ -6,27 +6,13 @@ import { useParams } from "react-router-dom";
 import { ImageIcon } from "lucide-react";
 import { add } from "./scene/operations/modifiers";
 import { defaults } from "./scene/operations/component";
-import type { ImageComponent } from "./types";
+import type { ImageComponent, UploadedFile } from "./types";
 import { api, handleGeneric } from "../../util/api";
 import ModalDialog from "../../components/ModalDialogue";
 import useEditorStore from "./stores/editor.ts";
 import toast from "react-hot-toast";
 import AuthenticationContext from "../../context/AuthenticationContext.jsx";
 import type { AxiosResponse } from "axios";
-
-interface UploadedFile {
-  _id: string;
-  name: string;
-  type: "image";
-  path: string;
-  url: string;
-  contentType: string;
-  size: number;
-  uploaderUid: string;
-  scenarioId: string;
-  refCount: number;
-  deletedAt: Date | null;
-}
 
 async function addExistingImage(image: UploadedFile) {
   const newImage = structuredClone(defaults.image) as Partial<ImageComponent>;
@@ -77,7 +63,7 @@ async function getImageDimensions(url: string, defaultHeight = 300) {
 async function getImages(user: User, scenarioId: string) {
   const res = (await api.get(
     user,
-    `api/files/${scenarioId}/images`
+    `api/files/${scenarioId}/type/image`
   )) as AxiosResponse<UploadedFile[]>;
   return res.data;
 }

@@ -2,9 +2,11 @@ import { Router } from "express";
 import auth from "../../middleware/firebaseAuth.js";
 import { handle, HttpError } from "../../util/error.js";
 import scenarioAuth from "../../middleware/scenarioAuth.js";
-import CollectionGroup from "../../db/models/CollectionGroup.js";
 import { HttpStatusCode } from "axios";
-import { applyReferenceDelta } from "../../db/daos/fileDao.js";
+import {
+  applyReferenceDelta,
+  applyReferenceDeltas,
+} from "../../db/daos/fileDao.js";
 import Resource from "../../db/models/resource.js";
 import { isValidObjectId } from "../../util/validation.js";
 import UploadedFile from "../../db/models/uploadedFile.js";
@@ -15,41 +17,96 @@ router.use(auth);
 router.use("/:scenarioId", scenarioAuth);
 
 /**
+ * @route GET /api/resources/:scenarioId
+ * @desc Get all resources for a scenario
+ */
+router.get(
+  "/:scenarioId",
+  handle(async (req, res) => {
+    const { scenarioId } = req.params;
+
+    const resources = await Resource.find({ scenarioId })
+      .populate("fileId", "url type contentType size")
+      .sort({ parentId: 1, createdAt: -1 })
+      .lean();
+
+    return res.json(resources);
+  })
+);
+
+/**
  * @route POST /api/resources/:scenarioId
- * @desc Upload a file to a resource group
+ * @desc Upload a file resource, optionally to a collection
  */
 router.post(
   "/:scenarioId",
   handle(async (req, res) => {
     const { scenarioId } = req.params;
-    const { groupId, name, fileId } = req.body;
+    const { parentId, name, fileId } = req.body;
 
-    if (!groupId || !name || !fileId)
+    if (!name || !fileId)
       throw new HttpError(
         "missing required properties",
         HttpStatusCode.BadRequest
       );
 
-    if (!isValidObjectId(groupId))
-      throw new HttpError("invalid group id", HttpStatusCode.BadRequest);
+    if (parentId && !isValidObjectId(parentId))
+      throw new HttpError("invalid parent id", HttpStatusCode.BadRequest);
     if (!isValidObjectId(fileId))
       throw new HttpError("invalid file id", HttpStatusCode.BadRequest);
 
-    const group = await CollectionGroup.exists({ _id: groupId, scenarioId });
-    if (!group) throw new HttpError("group not found", HttpStatusCode.NotFound);
+    if (parentId) {
+      const parent = await Resource.exists({
+        _id: parentId,
+        scenarioId,
+        type: "collection",
+      });
+      if (!parent)
+        throw new HttpError(
+          "parent collection not found",
+          HttpStatusCode.NotFound
+        );
+    }
 
     const file = await UploadedFile.exists({ _id: fileId, scenarioId });
     if (!file) throw new HttpError("file not found", HttpStatusCode.NotFound);
 
     const resource = await Resource.create({
+      type: "file",
       scenarioId,
-      groupId,
+      parentId,
       name,
       fileId,
     });
     await resource.populate("fileId", "url type contentType size");
 
     await applyReferenceDelta(fileId, 1);
+
+    return res.status(HttpStatusCode.Created).json(resource);
+  })
+);
+
+/**
+ * @route POST /api/resources/:scenarioId/collection
+ * @desc Create a resource collection
+ */
+router.post(
+  "/:scenarioId/collection",
+  handle(async (req, res) => {
+    const { scenarioId } = req.params;
+    const { name } = req.body;
+
+    if (!name)
+      throw new HttpError(
+        "missing required properties",
+        HttpStatusCode.BadRequest
+      );
+
+    const resource = await Resource.create({
+      type: "collection",
+      scenarioId,
+      name,
+    });
 
     return res.status(HttpStatusCode.Created).json(resource);
   })
@@ -64,6 +121,9 @@ router.delete(
   handle(async (req, res) => {
     const { scenarioId, resourceId } = req.params;
 
+    if (!isValidObjectId(resourceId))
+      throw new HttpError("invalid resource id", HttpStatusCode.BadRequest);
+
     const resource = await Resource.findOneAndDelete({
       _id: resourceId,
       scenarioId,
@@ -71,7 +131,24 @@ router.delete(
     if (!resource)
       throw new HttpError("resource not found", HttpStatusCode.NotFound);
 
-    await applyReferenceDelta(resource.fileId, -1);
+    const fileRefDeltas = new Map();
+
+    if (resource.type === "collection") {
+      const children = await Resource.find({ parentId: resource._id });
+      for (const child of children) {
+        if (child.fileId) {
+          const fileId = child.fileId.toString();
+          fileRefDeltas.set(fileId, (fileRefDeltas.get(fileId) ?? 0) - 1);
+        }
+      }
+      await Resource.deleteMany({ parentId: resource._id });
+    } else {
+      if (resource.fileId) {
+        fileRefDeltas.set(resource.fileId.toString(), -1);
+      }
+    }
+
+    await applyReferenceDeltas(fileRefDeltas);
 
     return res.status(HttpStatusCode.NoContent).send();
   })

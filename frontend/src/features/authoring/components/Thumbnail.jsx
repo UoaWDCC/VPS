@@ -5,6 +5,7 @@ import Line from "../elements/Line";
 import Speech from "../elements/Speech";
 import TextBox from "../elements/TextBox";
 import { buildVisualComponents } from "../pipeline";
+import { CANVAS_HEIGHT, CANVAS_WIDTH } from "../../../util/canvas";
 
 const componentMap = {
   textbox: TextBox,
@@ -28,8 +29,14 @@ const Thumbnail = ({ components }) => {
     .map(resolve);
 
   return (
-    <svg viewBox="0 0 1920 1080">
-      <rect x="0" y="0" width="1920" height="1080" fill="white" />
+    <svg viewBox={`0 0 ${CANVAS_WIDTH} ${CANVAS_HEIGHT}`}>
+      <rect
+        x="0"
+        y="0"
+        width={CANVAS_WIDTH}
+        height={CANVAS_HEIGHT}
+        fill="var(--color-canvas)"
+      />
       {visualComponents}
     </svg>
   );

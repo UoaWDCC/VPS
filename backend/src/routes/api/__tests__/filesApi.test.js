@@ -235,9 +235,9 @@ describe("Files API tests", () => {
 
   // --- Retrieve image list ---
 
-  it("GET /files/:scenarioId/images returns only image-type files for the scenario", async () => {
+  it("GET /files/:scenarioId/type/image returns only image-type files for the scenario", async () => {
     const response = await axios.get(
-      `http://localhost:${ctx.port}/api/files/${scenarioId}/images`,
+      `http://localhost:${ctx.port}/api/files/${scenarioId}/type/image`,
       authHeaders("user1")
     );
 
@@ -247,13 +247,13 @@ describe("Files API tests", () => {
     expect(response.data[0].type).toBe("image");
   });
 
-  it("GET /files/:scenarioId/images returns an empty array when scenario has no images", async () => {
+  it("GET /files/:scenarioId/type/image returns an empty array when scenario has no images", async () => {
     const otherScenarioId = new mongoose.mongo.ObjectId(
       "ddd000000000000000000001"
     );
 
     const response = await axios.get(
-      `http://localhost:${ctx.port}/api/files/${otherScenarioId}/images`,
+      `http://localhost:${ctx.port}/api/files/${otherScenarioId}/type/image`,
       authHeaders("user1")
     );
 

@@ -36,6 +36,27 @@ const createGroup = async (scenarioId, userList) => {
 };
 
 /**
+ * Removes a single user from a group's member list by email
+ * @param {String} groupId MongoDB ID of group
+ * @param {String} scenarioId ID of the scenario the group must belong to
+ * @param {String} email email of the user to remove
+ * @returns the updated group object, or null if no matching group exists
+ */
+const removeUserFromGroup = async (groupId, scenarioId, email) => {
+  const escapedEmail = email.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const group = await Group.findOneAndUpdate(
+    { _id: groupId, scenarioId },
+    {
+      $pull: {
+        users: { email: { $regex: `^${escapedEmail}$`, $options: "i" } },
+      },
+    },
+    { new: true }
+  );
+  return group;
+};
+
+/**
  * Sets the state variables for a group
  * @param {String} groupId MongoDB ID of group
  * @param {Object} stateVariables Object containing state variables
@@ -65,5 +86,6 @@ export {
   getCurrentScene,
   createGroup,
   getGroupByScenarioId,
+  removeUserFromGroup,
   setGroupStateVariables,
 };

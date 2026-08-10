@@ -2,38 +2,18 @@ import CreateStateConditional from "./CreateStateConditional";
 import { PlusIcon } from "lucide-react";
 import { useState } from "react";
 import EditStateConditional from "./EditStateConditional";
-import { useParams } from "react-router-dom";
 
-/**
- * Component that houses state conditional interface (methods for creating and editing)
- *
- * @component
- */
-const StateConditionalMenu = ({
-  target,
-  title = "State Conditionals",
-  endpoint,
-  updateTarget,
-}) => {
+const StateConditionalMenu = ({ resource }) => {
   const [createOpen, setCreateOpen] = useState(false);
-  const { scenarioId } = useParams();
 
-  const subject = target;
-  const conditionEndpoint =
-    endpoint ||
-    (subject ? `/api/resources/${scenarioId}/${subject.id}/conditionals` : "");
-  const handleUpdate = updateTarget;
-
-  if (!subject) {
-    return null;
-  }
+  if (!resource) return null;
 
   return (
     <>
       <div className="collapse overflow-visible collapse-arrow bg-base-300 rounded-sm text-s">
         <input type="checkbox" />
         <div className="collapse-title flex items-center justify-between">
-          {title}
+          Visibility Conditionals
           <button
             type="button"
             className="btn btn-phantom btn-xs relative z-10"
@@ -48,22 +28,19 @@ const StateConditionalMenu = ({
           </button>
         </div>
         <div className="collapse-content text--1 bg-base-200 px-0">
-          {subject.stateConditionals?.map((stateConditional) => (
+          {resource.stateConditionals?.map((stateConditional) => (
             <EditStateConditional
-              endpoint={conditionEndpoint}
+              resource={resource}
               conditional={stateConditional}
-              conditionalId={stateConditional._id}
               key={stateConditional._id}
-              updateTarget={handleUpdate}
             />
           ))}
         </div>
       </div>
       <CreateStateConditional
-        endpoint={conditionEndpoint}
+        resource={resource}
         open={createOpen}
         setOpen={setCreateOpen}
-        updateTarget={handleUpdate}
       />
     </>
   );
