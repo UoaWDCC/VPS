@@ -145,7 +145,8 @@ export default function AuthoringToolPage() {
     }
   }
 
-  const isScenarioOwner = allScenarios?.owned.find((s) => s._id === scenarioId);
+  const ownedScenario = allScenarios?.owned.find((s) => s._id === scenarioId);
+  const isOwner = Boolean(ownedScenario);
 
   return (
     <>
@@ -155,13 +156,13 @@ export default function AuthoringToolPage() {
             <ArrowLeftIcon size={20} />
             Back
           </button>
-          {isScenarioOwner && (
+          {isOwner && (
             <button
               onClick={() => setShowEditModal(true)}
               className="btn btn-phantom text-m"
             >
               <PencilIcon size={20} />
-              {isScenarioOwner.name}
+              {ownedScenario.name}
             </button>
           )}
           <button
@@ -175,7 +176,7 @@ export default function AuthoringToolPage() {
             <UsersIcon size={20} />
             Groups
           </button>
-          {isScenarioOwner && (
+          {isOwner && (
             <button
               onClick={() => setShareModalOpen(true)}
               className="btn btn-phantom text-m"
@@ -198,17 +199,17 @@ export default function AuthoringToolPage() {
           </div>
         </div>
       </div>
-      {isScenarioOwner && (
+      {isOwner && (
         <ShareModal open={shareModalOpen} setOpen={setShareModalOpen} />
       )}
-      {isScenarioOwner && (
+      {isOwner && (
         <ModalDialog
           title="Edit Scenario Details"
           open={showEditModal}
           onClose={() => setShowEditModal(false)}
         >
           <DetailEditModal
-            scenario={isScenarioOwner}
+            scenario={ownedScenario}
             onSave={(details) =>
               updateScenarioDetails({ id: scenarioId, details })
             }
