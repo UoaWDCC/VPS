@@ -161,7 +161,7 @@ export default function AuthoringToolPage() {
               className="btn btn-phantom text-m"
             >
               <PencilIcon size={20} />
-              Details
+              {isScenarioOwner.name}
             </button>
           )}
           <button
