@@ -4,7 +4,8 @@ export type Component =
   | ImageComponent
   | EllipseComponent
   | SpeechComponent
-  | LineComponent;
+  | LineComponent
+  | AudioComponent;
 
 export interface Scene {
   _id: string;
@@ -34,6 +35,12 @@ export interface RelativeBounds {
   rotation: number;
 }
 
+export interface Guide {
+  orientation: "vertical" | "horizontal";
+  position: number;
+  isCanvasCenter?: boolean;
+}
+
 interface GenericComponent {
   id: string;
   bounds: Bounds;
@@ -58,6 +65,14 @@ export interface ImageComponent extends GenericComponent {
   fileId: string;
   href: string;
   preserveAspectRatio: string;
+}
+
+export interface AudioComponent extends GenericComponent {
+  type: "audio";
+  fileId: string;
+  url: string;
+  name: string;
+  loop: boolean;
 }
 
 export interface SpeechComponent extends ShapeComponent {
@@ -124,3 +139,17 @@ export interface SpanTextStyle {
 }
 
 type HexString = string;
+
+export interface UploadedFile {
+  _id: string;
+  name: string;
+  type: "image" | "audio" | "document";
+  path: string;
+  url: string;
+  contentType: string;
+  size: number;
+  uploaderUid: string;
+  scenarioId: string;
+  refCount: number;
+  deletedAt: Date | null;
+}

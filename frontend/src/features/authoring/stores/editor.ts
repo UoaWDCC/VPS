@@ -1,6 +1,6 @@
 import create from "zustand";
 import type { ModelSelection, VisualSelection } from "../text/types";
-import type { BaseTextStyle, Bounds, Vec2 } from "../types";
+import type { BaseTextStyle, Bounds, Guide, Vec2 } from "../types";
 import { getComponent } from "../scene/scene";
 import { getStyleForSelection } from "../scene/operations/text";
 
@@ -14,6 +14,7 @@ interface EditorState {
   mouseDown: boolean;
   mutationBounds: Bounds;
   offset: Vec2;
+  activeGuides: Guide[];
 
   setSelected: (id: string | null) => void;
   setHovered: (id: string | null) => void;
@@ -21,6 +22,7 @@ interface EditorState {
   setMouseDown: (mouseDown: boolean) => void;
   setMutationBounds: Dynamic<Bounds>;
   setOffset: (offset: Vec2) => void;
+  setActiveGuides: (guides: Guide[]) => void;
 
   // text editing
   selection: ModelSelection;
@@ -67,6 +69,7 @@ const useEditorStore = create<EditorState>((set) => ({
   mouseDown: false,
   mutationBounds: { verts: [], rotation: 0 },
   offset: { x: 0, y: 0 },
+  activeGuides: [],
 
   setLoading: (value: boolean) => set({ loading: value }),
   setSelected: (id) => set({ selected: id }),
@@ -75,6 +78,7 @@ const useEditorStore = create<EditorState>((set) => ({
   setMouseDown: (mouseDown) => set({ mouseDown }),
   setMutationBounds: setter(set, "mutationBounds"),
   setOffset: (offset) => set({ offset }),
+  setActiveGuides: (guides) => set({ activeGuides: guides }),
 
   selection: { start: null, end: null },
   visualSelection: { start: null, end: null },
@@ -105,6 +109,7 @@ const useEditorStore = create<EditorState>((set) => ({
       selection: { start: null, end: null },
       visualSelection: { start: null, end: null },
       mode: ["normal"],
+      activeGuides: [],
     }),
 }));
 

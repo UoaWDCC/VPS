@@ -1,6 +1,5 @@
-import React from "react";
-import MDTextViewer from "./MDTextViewer";
 import { useQuery } from "@tanstack/react-query";
+import MDTextViewer from "../playScenario/components/MDTextViewer";
 
 async function loadText(url) {
   return fetch(url).then((res) => {
@@ -9,53 +8,44 @@ async function loadText(url) {
   });
 }
 
-export default function ResourcePreview({ file }) {
+function ResourcePreview({ file }) {
+  const canPreviewText = !!(
+    file?.fileType === "document" &&
+    file?.contentType?.startsWith("text") &&
+    file?.url
+  );
+
   const text = useQuery({
     queryKey: ["file-text", file?.url],
     queryFn: () => loadText(file.url),
-    enabled: !!(file?.contentType?.startsWith("text") && file?.url),
+    enabled: canPreviewText,
   });
 
-  if (!file) {
+  if (!file)
     return (
-      <div className="p-3 h-full flex items-center justify-center text-center opacity-70">
-        <div>
-          <div className="text-sm">Select a file to preview.</div>
-          <div className="text-xs">
-            Select a file to preview. Images and PDFs files show inline;
-            Text/Markdown render below; other files provide a download.
-          </div>
-        </div>
+      <div className="prose max-w-none opacity-70">
+        <h3>Preview</h3>
+        <p>
+          Select a file to preview. If a preview is not available, the file can
+          be downloaded.
+        </p>
       </div>
     );
-  }
 
-  const isImage = file.type === "image";
-  const isText =
-    file.type === "document" && file.contentType !== "application/pdf";
+  const isImage = file.fileType === "image";
+  const isText = canPreviewText;
   const isPDF = file.contentType === "application/pdf";
 
   return (
     <div className="flex h-full min-h-0 flex-col gap-3 p-3 font-ibm">
-      <div className="flex items-start justify-between gap-2 pr-3xl">
-        <div>
-          <h3
-            className="font-dm text-l text-base-content truncate"
-            title={file.name}
-          >
-            {file.name}
-          </h3>
-          <div className="text-xs opacity-70 text-primary">
-            {file.groupName} / {file.childName}
-          </div>
-        </div>
-        {file.url && (
-          <a className="btn btn-phantom btn-xs" href={file.url} download>
-            Download
-          </a>
-        )}
+      <div className="flex items-center justify-between gap-2">
+        <h3 className="text-m truncate">{file.name}</h3>
+        <a className="btn btn-phantom btn-xs" href={file.url} download>
+          Download
+        </a>
       </div>
-      <div className="flex-1 min-h-0">
+
+      <div className="min-h-0 flex-1">
         {isImage ? (
           <img
             src={file.url}
@@ -70,7 +60,7 @@ export default function ResourcePreview({ file }) {
               className="block h-full min-h-[50dvh] w-full rounded-xl border lg:min-h-0"
             />
           </div>
-        ) : isText && text.isLoading ? (
+        ) : isText && text.isInitialLoading ? (
           <div className="space-y-2">
             <div className="skeleton h-6 w-1/2" />
             <div className="skeleton h-48 w-full" />
@@ -92,3 +82,5 @@ export default function ResourcePreview({ file }) {
     </div>
   );
 }
+
+export default ResourcePreview;

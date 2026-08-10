@@ -1,13 +1,16 @@
 import { useGet } from "hooks/crudHooks";
 import { useParams, useHistory, useRouteMatch, Switch } from "react-router-dom";
-import { useEffect, useState, useMemo } from "react";
+import { useContext, useEffect, useState, useMemo } from "react";
+import toast from "react-hot-toast";
+import { api } from "../../util/api";
 import DashGroupTable from "./components/table/DashGroupTable";
 import { ReactFlowProvider } from "@xyflow/react";
 import CreateGraphData from "./utils/GraphHelper";
 import ScenarioGraph from "./components/ScenarioGraph";
 import ProtectedRoute from "../../firebase/ProtectedRoute";
 import ViewGroup from "./components/ViewGroup";
-import { ArrowLeftIcon } from "lucide-react";
+import AuthenticationContext from "../../context/AuthenticationContext";
+import { ArrowLeftIcon, SearchIcon } from "lucide-react";
 
 /**
  * Could maybe add some info about the scenario? Who created what time, last edited, thumbnail of the scenario and an overlay edit button * which directs you to the edit page?
@@ -25,21 +28,26 @@ export default function Dashboard() {
   const [scenes, setScenes] = useState([]);
   const [groupInfo, setGroupInfo] = useState({});
   const [heading, setHeading] = useState("");
-
-  function goBack() {
-    history.push("/dashboard");
-  }
+  const [activeTab, setActiveTab] = useState("groups");
+  const [memberSearch, setMemberSearch] = useState("");
+  const { user } = useContext(AuthenticationContext);
+  const isOwner = Boolean(user && scenario.uid && user.uid === scenario.uid);
 
   // Check what page we are on
   const matchViewGroup = useRouteMatch(`${path}/view-group/:groupId`);
   const isViewGroupMode = Boolean(matchViewGroup);
   const viewGroupId = matchViewGroup?.params.groupId || 0;
 
+  // From the group list, back goes home; from a group's page, back goes to the group list
+  function goBack() {
+    history.push(isViewGroupMode ? url : "/dashboard");
+  }
+
   useGet(`api/dashboard/scenarios/${scenarioId}`, setCurrentScenario);
 
   useGet(`api/dashboard/scenarios/${scenarioId}/scenes`, setScenes);
 
-  const { isLoading } = useGet(
+  const { isLoading, reFetch: reFetchGroups } = useGet(
     `/api/dashboard/scenarios/${scenarioId}/groups`,
     setScenarioGroupInfo
   );
@@ -58,6 +66,27 @@ export default function Dashboard() {
 
   const viewGroup = async (groupId) => {
     history.push(`${url}/view-group/${groupId}`);
+  };
+
+  // Jumps to the Members tab, filtered down to just this member's group
+  const handleMemberClick = (member) => {
+    setActiveTab("members");
+    setMemberSearch(member.group != null ? String(member.group) : "");
+  };
+
+  const handleRevoke = async (member) => {
+    if (!window.confirm(`Remove ${member.name} from their group?`)) return;
+    try {
+      await api.patch(
+        user,
+        `/api/dashboard/scenarios/${scenarioId}/groups/${member.groupId}/revoke`,
+        { uid: user.uid, email: member.email }
+      );
+      reFetchGroups();
+    } catch (err) {
+      console.error("Failed to revoke member:", err);
+      toast.error("Failed to revoke member from their group");
+    }
   };
 
   // Resets the current groupInfo when the mode is not the view group mode
@@ -81,34 +110,74 @@ export default function Dashboard() {
     return CreateGraphData(scenes, groupInfo ? groupInfo : []);
   }, [scenes, groupInfo]);
 
+  // Flattens every group's members into a single list for the Members tab
+  const allMembers = useMemo(
+    () => ({
+      users: scenarioGroupInfo.flatMap((group) =>
+        group.users.map((member) => ({ ...member, groupId: group._id }))
+      ),
+    }),
+    [scenarioGroupInfo]
+  );
+
+  // Filters the Members tab list by name, email, or an exact group match
+  // (an exact group match lets clicking a member in the Groups tab jump
+  // here pre-filtered to just their group, without name/email substrings
+  // that happen to equal the group value causing unrelated false matches)
+  const filteredMembers = useMemo(() => {
+    const query = memberSearch.trim().toLowerCase();
+    if (!query) return allMembers;
+    return {
+      users: allMembers.users.filter(
+        (user) =>
+          String(user.group).toLowerCase() === query ||
+          user.name?.toLowerCase().includes(query) ||
+          user.email?.toLowerCase().includes(query)
+      ),
+    };
+  }, [allMembers, memberSearch]);
+
   const DashGroupInfo = ({ groupData, className }) => {
     const totalGroups = groupData.length;
-    const groupsNotStarted = groupData.filter(
-      (group) => group.path.length == 0
-    ).length;
     const groupsStarted = groupData.filter(
       (group) => group.path.length != 0
     ).length;
+    const groupsNotStarted = groupData.filter(
+      (group) => group.path.length == 0
+    ).length;
+
+    const stats = [
+      {
+        label: "Total Groups",
+        value: totalGroups,
+        desc: "No. of groups assigned",
+      },
+      {
+        label: "Has Started",
+        value: groupsStarted,
+        desc: "No. of groups that have started",
+      },
+      {
+        label: "Not Started",
+        value: groupsNotStarted,
+        desc: "No. of groups not yet started",
+      },
+    ];
 
     return (
       <div
-        className={`${className} inline-grid lg:stats-vertical xl:stats-horizontal shadow-(--color-base-content-box-shadow) w-full`}
+        className={`${className} flex divide-x divide-base-content/15 rounded-box border border-base-content/15 bg-base-200 w-full`}
       >
-        <div className="stat ">
-          <div className="stat-title">Total Groups</div>
-          <div className="stat-value">{totalGroups}</div>
-          <div className="stat-desc">No. of groups assigned</div>
-        </div>
-        <div className="stat">
-          <div className="stat-title">Not Started</div>
-          <div className="stat-value">{groupsNotStarted}</div>
-          <div className="stat-desc">No. of groups not started</div>
-        </div>
-        <div className="stat">
-          <div className="stat-title">Started</div>
-          <div className="stat-value">{groupsStarted}</div>
-          <div className="stat-desc">No. of groups started</div>
-        </div>
+        {stats.map((stat) => (
+          <div
+            key={stat.label}
+            className="flex-1 flex flex-col gap-1 px-6 py-5"
+          >
+            <span className="font-semibold">{stat.label}</span>
+            <span className="text-3xl font-bold">{stat.value}</span>
+            <span className="text-sm text-base-content/60">{stat.desc}</span>
+          </div>
+        ))}
       </div>
     );
   };
@@ -122,7 +191,7 @@ export default function Dashboard() {
         </button>
       </div>
       <div className="h-full px-10 py-7 overflow-y-scroll ">
-        <h1 className="text-xl font-bold">
+        <h1 className="text-3xl font-ibm font-bold">
           {heading ? heading : <span className="invisible">placeholder</span>}
         </h1>
         <div className="flex gap-10">
@@ -131,16 +200,54 @@ export default function Dashboard() {
             <Switch>
               <ProtectedRoute exact path={path}>
                 <DashGroupInfo
-                  className={"lg:stats-horizontal mb-10"}
+                  className={"mb-10"}
                   groupData={scenarioGroupInfo}
                 />
-                <h1 className="text-xl">Groups Table</h1>
-                {!isLoading && (
-                  <DashGroupTable
-                    groupInfo={scenarioGroupInfo}
-                    rowClick={viewGroup}
-                  />
+                <div className="flex items-center justify-between mb-4">
+                  <h2 className="text-2xl font-bold">
+                    {activeTab === "groups" ? "Groups" : "Members"}
+                  </h2>
+                  <div className="join">
+                    <button
+                      className={`btn btn-ghost join-item ${activeTab === "groups" ? "text-white" : "text-base-content/60 hover:bg-primary/10 hover:text-primary"}`}
+                      onClick={() => setActiveTab("groups")}
+                    >
+                      Groups
+                    </button>
+                    <button
+                      className={`btn btn-ghost join-item ${activeTab === "members" ? "text-white" : "text-base-content/60 hover:bg-primary/10 hover:text-primary"}`}
+                      onClick={() => setActiveTab("members")}
+                    >
+                      Members
+                    </button>
+                  </div>
+                </div>
+                {activeTab === "members" && (
+                  <label className="input search w-full mb-4">
+                    <input
+                      type="search"
+                      placeholder="Search members by name, email, or group"
+                      value={memberSearch}
+                      onChange={(e) => setMemberSearch(e.target.value)}
+                    />
+                    <SearchIcon size={18} />
+                  </label>
                 )}
+                {!isLoading &&
+                  (activeTab === "groups" ? (
+                    <DashGroupTable
+                      key="groups"
+                      groupInfo={scenarioGroupInfo}
+                      rowClick={viewGroup}
+                      onMemberClick={handleMemberClick}
+                    />
+                  ) : (
+                    <DashGroupTable
+                      key="members"
+                      groupInfo={filteredMembers}
+                      onRevoke={isOwner ? handleRevoke : undefined}
+                    />
+                  ))}
               </ProtectedRoute>
               <ProtectedRoute path={`${path}/view-group/:groupId`}>
                 <ViewGroup groupInfo={groupInfo} />
@@ -149,7 +256,7 @@ export default function Dashboard() {
           </div>
           {/* Right side coloum - used for graph */}
           <div className="w-1/2 min-w-0">
-            <h3 className="text-3xl font-mona font-bold">Scenario Overview</h3>
+            <h3 className="text-3xl font-ibm font-bold">Scenario Overview</h3>
             <ReactFlowProvider>
               <ScenarioGraph
                 inNodes={nodes}
