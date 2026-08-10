@@ -46,7 +46,7 @@ function InvalidRolePage({ group }) {
           it is their turn
         </span>
       </p>
-      <p style={textMargin} className="text-primary">
+      <p style={textMargin} className="text-base-content">
         Wait for your group member(s) to finish playing through their part of
         the scenario. Then, when it&apos;s your turn to play through (your group
         members should let you know), click the below button:
@@ -62,7 +62,7 @@ function InvalidRolePage({ group }) {
           View Notes
         </button>
         <p
-          className="text-primary"
+          className="text-base-content"
           style={{
             marginBottom: "1em",
             marginTop: "1em",

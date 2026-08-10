@@ -52,6 +52,7 @@ const CreateGraphData = (scenes, groupInfo) => {
             type: "simpleFloating",
             markerEnd: {
               ...markerEnd,
+              color: "var(--color-primary)",
             },
             style: {
               strokeWidth: 3,
