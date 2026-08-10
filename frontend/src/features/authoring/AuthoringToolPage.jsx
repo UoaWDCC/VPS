@@ -157,13 +157,15 @@ export default function AuthoringToolPage() {
             Back
           </button>
           {isOwner && (
-            <button
-              onClick={() => setShowEditModal(true)}
-              className="btn btn-phantom text-m"
-            >
-              <PencilIcon size={20} />
-              {ownedScenario.name}
-            </button>
+            <div className="flex flex-1 min-w-0">
+              <button
+                onClick={() => setShowEditModal(true)}
+                className="btn btn-phantom text-m max-w-full min-w-0"
+              >
+                <PencilIcon size={20} className="shrink-0" />
+                <span className="min-w-0 truncate">{ownedScenario.name}</span>
+              </button>
+            </div>
           )}
           <button
             onClick={goToResources}
