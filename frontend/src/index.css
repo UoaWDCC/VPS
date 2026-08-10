@@ -109,7 +109,7 @@
 @plugin "daisyui/theme" {
   name: "vps-dark";
   default: true;
-  prefersdark: true;
+  prefersdark: false;
   color-scheme: dark;
 
   --color-base-100: var(--color-black);
@@ -261,4 +261,15 @@ body,
 
 .input.search input {
   @apply grow placeholder:text-primary text-secondary;
+}
+
+svg#main .box,
+svg#main .speech,
+svg#main .ellipse,
+svg#main .image {
+  @apply cursor-move;
+}
+
+svg#main .text {
+  @apply cursor-text;
 }

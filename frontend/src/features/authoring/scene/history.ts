@@ -19,7 +19,39 @@ interface SceneRef {
 interface HistoryObject {
   sceneId: string;
   id: string;
-  state: Component | null;
+  before: Component | null;
+  after: Component | null;
+}
+
+type HistoryOperation = "do" | "undo" | "redo";
+
+interface HistoryEventMap {
+  update: HistoryEvent<HistoryOperation>;
+}
+
+class HistoryEvent<T extends HistoryOperation> extends Event {
+  operation: T;
+  record: T extends "undo" | "redo" ? HistoryObject : HistoryObject | undefined;
+
+  constructor(
+    operation: T,
+    record: T extends "undo" | "redo"
+      ? HistoryObject
+      : HistoryObject | undefined
+  ) {
+    super("update");
+    this.operation = operation;
+    this.record = record;
+  }
+}
+
+function cloneHistoryRecord(record: HistoryObject): HistoryObject {
+  return {
+    sceneId: record.sceneId,
+    id: record.id,
+    before: structuredClone(record.before),
+    after: structuredClone(record.after),
+  };
 }
 
 export interface ChangeRecord {
@@ -67,6 +99,11 @@ export function updateHistory(incomingChanges: ChangeRecord[]) {
   if (undoStack.length > 100) undoStack.shift();
 
   redoStack = [];
+
+  historyEvents.dispatchTypedEvent(
+    "update",
+    new HistoryEvent("do", cloneHistoryRecord(record))
+  );
 }
 
 export function handleHistoryChange(action: ActionHistory) {

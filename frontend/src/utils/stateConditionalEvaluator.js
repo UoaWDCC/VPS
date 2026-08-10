@@ -77,9 +77,16 @@ export function filterTreeByConditions(tree, stateVariables) {
   if (!tree) return [];
 
   return tree
-    .map((group) => ({
-      ...group,
-      files: filterResourcesByConditions(group.files, stateVariables),
-    }))
-    .filter((group) => group.files && group.files.length > 0);
+    .filter(({ stateConditionals }) =>
+      evaluateResourceConditions(stateConditionals, stateVariables)
+    )
+    .map((r) =>
+      r.type === "collection"
+        ? {
+            ...r,
+            children: filterResourcesByConditions(r.children, stateVariables),
+          }
+        : r
+    )
+    .filter((r) => r.type !== "collection" || r.children?.length > 0);
 }

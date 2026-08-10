@@ -19,7 +19,13 @@ function plainToDoc(text: string) {
   return { style: {}, blocks };
 }
 
+function isInputTarget(e: ClipboardEvent) {
+  const tag = (e.target as HTMLElement)?.tagName;
+  return tag === "INPUT" || tag === "TEXTAREA";
+}
+
 export function copy(e: ClipboardEvent) {
+  if (isInputTarget(e)) return;
   const { selected } = useEditorStore.getState();
   if (!selected) return;
 
@@ -29,7 +35,8 @@ export function copy(e: ClipboardEvent) {
 }
 
 export function cut(e: ClipboardEvent) {
-  const { selected, setSelected } = useEditorStore.getState();
+  if (isInputTarget(e)) return;
+  const { selected } = useEditorStore.getState();
   if (!selected) return;
 
   e.preventDefault();
@@ -40,6 +47,7 @@ export function cut(e: ClipboardEvent) {
 }
 
 export function paste(e: ClipboardEvent) {
+  if (isInputTarget(e)) return;
   e.preventDefault();
   const { mode, selected, selection, setSelected, setSelection } =
     useEditorStore.getState();

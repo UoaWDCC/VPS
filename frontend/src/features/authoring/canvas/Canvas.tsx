@@ -17,8 +17,9 @@ import {
 import { handleContextGlobal } from "../handlers/pointer/context";
 import LoadingOverlay from "./LoadingOverlay.tsx";
 import useEditorStore from "../stores/editor.ts";
+import { CANVAS_HEIGHT, CANVAS_WIDTH } from "../../../util/canvas";
 
-const componentMap: Record<string, React.FC<any>> = {
+const componentMap: Record<string, React.FC<Record<string, unknown>>> = {
   textbox: (props) => <TextBox {...props} editable={true} />,
   speech: Speech,
   ellipse: Ellipse,
@@ -47,8 +48,8 @@ function Canvas() {
     const boundingRect = canvasRef.current?.children[0];
     if (!boundingRect) return { x: 0, y: 0 };
     const { top, left, width, height } = boundingRect.getBoundingClientRect();
-    const x = ((cx - left) / width) * 1920;
-    const y = ((cy - top) / height) * 1080;
+    const x = ((cx - left) / width) * CANVAS_WIDTH;
+    const y = ((cy - top) / height) * CANVAS_HEIGHT;
     return { x, y };
   }
 
@@ -67,7 +68,7 @@ function Canvas() {
   }
 
   function handleContextMenu(e: React.MouseEvent) {
-    handleContextGlobal(e, toSVGSpace(e.clientX, e.clientY));
+    handleContextGlobal(e);
   }
 
   const components = Object.values(scene)
@@ -115,14 +116,14 @@ function Canvas() {
         <svg
           id="outline"
           className="w-full h-full absolute pointer-events-none"
-          viewBox={`-50 -50 ${1920 + 50 * 2} ${1080 + 50 * 2}`}
+          viewBox={`-50 -50 ${CANVAS_WIDTH + 50 * 2} ${CANVAS_HEIGHT + 50 * 2}`}
           style={{ mixBlendMode: "difference" }}
         >
           <rect
             x="0"
             y="0"
-            width="1920"
-            height="1080"
+            width={CANVAS_WIDTH}
+            height={CANVAS_HEIGHT}
             fill="none"
             stroke="white"
             strokeWidth="1"
@@ -132,10 +133,16 @@ function Canvas() {
         <svg
           id="main"
           className="w-full h-full"
-          viewBox={`-50 -50 ${1920 + 50 * 2} ${1080 + 50 * 2}`}
+          viewBox={`-50 -50 ${CANVAS_WIDTH + 50 * 2} ${CANVAS_HEIGHT + 50 * 2}`}
           ref={canvasRef}
         >
-          <rect x="0" y="0" width="1920" height="1080" fill="white" />
+          <rect
+            x="0"
+            y="0"
+            width={CANVAS_WIDTH}
+            height={CANVAS_HEIGHT}
+            fill="white"
+          />
           {components}
         </svg>
       </div>

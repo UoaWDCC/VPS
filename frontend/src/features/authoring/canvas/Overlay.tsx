@@ -11,8 +11,9 @@ import Rectangle from "./Rectangle";
 import useEditorStore from "../stores/editor";
 import useVisualScene from "../stores/visual";
 import { getSelectedComponentBounds } from "../handlers/pointer/pointer";
+import { CANVAS_HEIGHT, CANVAS_WIDTH } from "../../../util/canvas";
 
-const componentMap: Record<string, React.FC<any>> = {
+const componentMap: Record<string, React.FC<Record<string, unknown>>> = {
   speech: Speech,
   ellipse: Ellipse,
   box: Box,
@@ -56,7 +57,7 @@ function Overlay() {
     <svg
       id="overlay"
       className="w-full h-full absolute pointer-events-none"
-      viewBox={`-50 -50 ${1920 + 50 * 2} ${1080 + 50 * 2}`}
+      viewBox={`-50 -50 ${CANVAS_WIDTH + 50 * 2} ${CANVAS_HEIGHT + 50 * 2}`}
     >
       {hasSelection && (
         <>
@@ -70,7 +71,46 @@ function Overlay() {
           <ResolveHandles type={type} />
         </>
       )}
-      {mode.includes("mutation") && resolve(type ?? createType, mutationBounds)}
+      {hoveredComponent && (
+        <Rectangle
+          bounds={hoveredComponent.bounds}
+          rotationOrigin={getBoxCenter(hoveredComponent.bounds.verts)}
+          fill="none"
+          stroke="#747775"
+          strokeWidth={1}
+        />
+      )}
+      {mode.includes("mutation") &&
+        resolve(component?.type ?? createType, bounds)}
+      {mode.includes("mutation") &&
+        activeGuides.map((guide, index) => {
+          const style = guide.isCanvasCenter
+            ? {
+                stroke: "var(--color-warning)",
+                strokeWidth: 3,
+                strokeDasharray: "6 4",
+              }
+            : { stroke: "var(--color-error)", strokeWidth: 2 };
+          return guide.orientation === "vertical" ? (
+            <line
+              key={index}
+              x1={guide.position}
+              y1={-50}
+              x2={guide.position}
+              y2={CANVAS_HEIGHT + 50}
+              {...style}
+            />
+          ) : (
+            <line
+              key={index}
+              x1={-50}
+              y1={guide.position}
+              x2={CANVAS_WIDTH + 50}
+              y2={guide.position}
+              {...style}
+            />
+          );
+        })}
     </svg>
   );
 }

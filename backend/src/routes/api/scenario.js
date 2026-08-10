@@ -10,21 +10,27 @@ import {
   getStateVariables,
   retrieveScenario,
   retrieveScenarioList,
+  retrieveRoleList,
   retrieveAccessibleScenarios,
   updateDurations,
   updateScenario,
   editStateVariable,
   deleteStateVariable,
+  createRole,
+  deleteRole,
 } from "../../db/daos/scenarioDao.js";
 
 import { retrieveAssignedScenarioList } from "../../db/daos/userDao.js";
 
 import scene from "./scene.js";
-import { createAccessList, deleteAccessList } from "../../db/daos/accessDao.js";
+import { deleteAccessList } from "../../db/daos/accessDao.js";
+import { handle, HttpError } from "../../util/error.js";
+import { normaliseString } from "../../util/normalise.js";
 
 const router = Router();
 
 const HTTP_OK = 200;
+const HTTP_BAD_REQUEST = 400;
 const HTTP_NOT_FOUND = 404;
 
 router.use("/:scenarioId/scene", scene);
@@ -61,14 +67,22 @@ router.get("/all", async (req, res) => {
 });
 
 // Create a scenario for a user
-router.post("/", async (req, res) => {
-  const { name, uid } = req.body;
+router.post(
+  "/",
+  handle(async (req, res) => {
+    const { name, uid, description, estimatedTime } = req.body;
 
-  const scenario = await createScenario(name, uid);
-  await createAccessList(scenario._id, name, uid);
+    if (typeof name !== "string" || !name.trim())
+      throw new HttpError("scenario name is required", HTTP_BAD_REQUEST);
 
-  res.status(HTTP_OK).json(scenario);
-});
+    const scenario = await createScenario(name.trim(), uid, {
+      description,
+      estimatedTime,
+    });
+
+    res.status(HTTP_OK).json(scenario);
+  })
+);
 
 // Apply scenario auth middleware
 router.use("/:scenarioId", validScenarioId);
@@ -96,23 +110,30 @@ router.put("/:scenarioId", async (req, res) => {
   res.status(HTTP_OK).json(scenario);
 });
 
-router.patch("/:scenarioId", async (req, res) => {
-  const { name, description, estimatedTime } = req.body;
+router.patch(
+  "/:scenarioId",
+  handle(async (req, res) => {
+    const { name, description, estimatedTime } = req.body;
 
-  const updates = { name, description, estimatedTime };
+    if (name !== undefined && (typeof name !== "string" || !name.trim()))
+      throw new HttpError("scenario name cannot be empty", HTTP_BAD_REQUEST);
 
-  const scenario = await updateScenario(req.params.scenarioId, updates);
-  res.status(HTTP_OK).json(scenario);
-});
+    const updates = {
+      name: name?.trim(),
+      description,
+      estimatedTime,
+    };
 
-// Delete a scenario of a user
+    const scenario = await updateScenario(req.params.scenarioId, updates);
+    res.status(HTTP_OK).json(scenario);
+  })
+);
+
+// Delete a scenario
 router.delete("/:scenarioId", async (req, res) => {
   const deleted = await deleteScenario(req.params.scenarioId);
-  const accessDeleted = await deleteAccessList(
-    req.params.scenarioId,
-    req.body.uid
-  );
-  if (deleted && accessDeleted) {
+  await deleteAccessList(req.params.scenarioId);
+  if (deleted) {
     res.sendStatus(HTTP_OK);
   } else {
     res.sendStatus(HTTP_NOT_FOUND);
@@ -158,6 +179,37 @@ router.delete(
     );
     res.status(HTTP_OK).json(updatedStateVariables);
   }
+);
+
+// Get the role list of a scenario
+router.get(
+  "/:scenarioId/roles",
+  handle(async (req, res) => {
+    const roleList = await retrieveRoleList(req.params.scenarioId);
+    res.status(HTTP_OK).json(roleList);
+  })
+);
+
+// Create a new role for a scenario
+router.post(
+  "/:scenarioId/roles",
+  handle(async (req, res) => {
+    const { role } = req.body;
+    if (!normaliseString(role))
+      throw new HttpError("role name is required", HTTP_BAD_REQUEST);
+    const roleList = await createRole(req.params.scenarioId, role);
+    res.status(HTTP_OK).json(roleList);
+  })
+);
+
+// Delete a role from a scenario
+router.delete(
+  "/:scenarioId/roles/:role",
+  handle(async (req, res) => {
+    const { scenarioId, role } = req.params;
+    const roleList = await deleteRole(scenarioId, role);
+    res.status(HTTP_OK).json(roleList);
+  })
 );
 
 export default router;

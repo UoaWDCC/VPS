@@ -1,5 +1,4 @@
 import mongoose from "mongoose";
-import { tryDeleteFile } from "../../firebase/storage.js";
 
 const { Schema } = mongoose;
 
@@ -13,8 +12,12 @@ const sceneSchema = new Schema({
       type: Object,
     },
   ],
+  // Seconds for the scene timer; absent/null means no timer. The authoring
+  // tool never stores 0 (it normalises non-positive input to null), so this
+  // enforces the same invariant the rest of the app already assumes.
   time: {
     type: Number,
+    min: 1,
   },
   timerStateOperations: [
     {
@@ -37,14 +40,16 @@ const sceneSchema = new Schema({
   },
 });
 
+// NOTE: this will be replaced by a scheduled remove of unused files
+//
 // before removal of scene from the database, first attempt to delete all user-uploaded images from firebase
-sceneSchema.pre("remove", function () {
-  this.components.forEach((c) => {
-    if (c.type === "image" || c.type === "audio") {
-      tryDeleteFile(c.href ?? c.url);
-    }
-  });
-});
+// sceneSchema.pre("remove", function () {
+//   this.components.forEach((c) => {
+//     if (c.type === "image" || c.type === "audio") {
+//       tryDeleteFile(c.href ?? c.url);
+//     }
+//   });
+// });
 
 const Scene = mongoose.model("Scene", sceneSchema);
 

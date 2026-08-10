@@ -1,5 +1,6 @@
 import { getComponent } from "../../scene/scene";
 import useEditorStore from "../../stores/editor";
+import useVisualScene from "../../stores/visual";
 import type { Bounds, Vec2 } from "../../types";
 import {
   add,
@@ -14,6 +15,7 @@ import {
   subtract,
 } from "../../util";
 import { getSelectedComponentBounds } from "./pointer";
+import { snapResizePoint } from "./snap";
 
 type HandleType = "size" | "rotation";
 const BOX_CENTER_VALUE = 0.5;
@@ -45,13 +47,51 @@ export function handleResizeDrag(e: React.MouseEvent, position: Vec2) {
       getBoxCenter(bounds.verts),
       -bounds.rotation
     );
-    newBounds.verts = updateResize(relative, coords, e.ctrlKey, e.shiftKey);
+
+    // alignment guides only make sense in global space, so only snap unrotated components
+    if (!bounds.rotation) {
+      const components = Object.values(useVisualScene.getState().components);
+
+      // resolve modifiers (shift/ctrl) against the raw point first so we snap the
+      // actual resize point, not the mouse position they'd otherwise overwrite
+      const unsnappedVerts = updateResize(
+        relative,
+        coords,
+        e.ctrlKey,
+        e.shiftKey
+      );
+      const draggedPoint = getVertPoint(unsnappedVerts, coords);
+      const originalOpposite = getVertPoint(bounds.verts, inverse(coords));
+      const pivot = getBoxCenter(bounds.verts);
+
+      const snapped = snapResizePoint(
+        draggedPoint,
+        originalOpposite,
+        pivot,
+        coords,
+        e.ctrlKey,
+        components,
+        selected!
+      );
+      setActiveGuides(snapped.guides);
+
+      newBounds.verts = updateResize(
+        snapped.position,
+        coords,
+        e.ctrlKey,
+        e.shiftKey
+      );
+    } else {
+      setActiveGuides([]);
+      newBounds.verts = updateResize(relative, coords, e.ctrlKey, e.shiftKey);
+    }
   } else if (type === "rotation") {
     newBounds.rotation = getRotation(
       position,
       getBoxCenter(bounds.verts),
       e.shiftKey
     );
+    setActiveGuides([]);
   }
 
   setMutationBounds((prev) => ({ ...prev, ...newBounds }));
@@ -96,7 +136,12 @@ function lockAspect(verts: Vec2[], newVerts: Vec2[], coords: number[]) {
 
   const { x: dx, y: dy } = subtract(newPoint, inversePoint);
   const aspect = getAspect(verts);
-  if (Math.abs(dx) >= Math.abs(dy)) {
+  const width = Math.abs(verts[1].x - verts[0].x);
+  const height = Math.abs(verts[1].y - verts[0].y);
+
+  // compare movement relative to each axis's own size, not raw magnitude,
+  // otherwise the axis with the larger original dimension always "wins"
+  if (Math.abs(dx) * height >= Math.abs(dy) * width) {
     newVerts[coords[1]].y =
       inversePoint.y + Math.sign(dy) * (Math.abs(dx) / aspect);
   } else {
@@ -157,6 +202,15 @@ function mirror(verts: Vec2[], center: Vec2, coords: number[]) {
   const point = { x: verts[coords[0]].x, y: verts[coords[1]].y };
   const inversePosition = add(scale(subtract(point, center), -1), center);
   return modifyVerts(verts, inverse(coords), inversePosition);
+}
+
+// extracts the position of the vertex being dragged, ignoring axes the
+// current handle doesn't control (coords entry of 0.5)
+function getVertPoint(verts: Vec2[], coords: number[]): Vec2 {
+  return {
+    x: coords[0] !== 0.5 ? verts[coords[0]].x : 0,
+    y: coords[1] !== 0.5 ? verts[coords[1]].y : 0,
+  };
 }
 
 function modifyVerts(verts: Vec2[], coords: number[], v: Vec2) {

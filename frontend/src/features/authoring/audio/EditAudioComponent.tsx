@@ -1,30 +1,31 @@
 import { useEffect, useState } from "react";
-import type { Component } from "../types";
 import { remove } from "../scene/operations/modifiers";
 import { modifyComponentProp } from "../scene/operations/component";
+import type { AudioComponent } from "../types";
 
-function EditAudioComponent({ component }: { component: Component }) {
+function EditAudioComponent({ component }: { component: AudioComponent }) {
   const [loop, setLoop] = useState<boolean>(component.loop);
   const [name, setName] = useState<string>(component.name);
 
-  const [audio, setAudio] = useState(new Audio(component.url));
+  const [audio] = useState(new Audio(component.url));
   const [playing, setPlaying] = useState(false);
 
   useEffect(() => {
-    if (playing) audio.play();
+    if (playing) void audio.play();
     else audio.pause();
     return () => audio.pause();
   }, [playing]);
 
   useEffect(() => {
-    audio.addEventListener("ended", () => setPlaying(false));
-    return () => audio.removeEventListener("ended", () => setPlaying(false));
+    const onEnded = () => setPlaying(false);
+    audio.addEventListener("ended", onEnded);
+    return () => {
+      audio.removeEventListener("ended", onEnded);
+      audio.pause();
+      audio.src = "";
+      audio.load();
+    };
   }, [audio]);
-
-  // useEffect(() => {
-  //   if (stateOperation.operation !== operation) setOperation(stateOperation.operation);
-  //   if (stateOperation.value !== value) setValue(stateOperation.value);
-  // }, [stateOperation]);
 
   function togglePlayback() {
     setPlaying((prev) => !prev);

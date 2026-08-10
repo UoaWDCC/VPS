@@ -148,8 +148,11 @@ export function correct(verts: Vec2[], origin: Vec2, rotation: number) {
   return translate(verts, correction);
 }
 
-export function objectDiff(a: Record<any, any>, b: Record<any, any>) {
-  const diff: Record<any, any> = {};
+export function objectDiff(
+  a: Record<string, unknown>,
+  b: Record<string, unknown>
+) {
+  const diff: Record<string, unknown> = {};
   for (const key in a) {
     if (!(key in b) || a[key] !== b[key]) {
       diff[key] = a[key];
@@ -158,7 +161,7 @@ export function objectDiff(a: Record<any, any>, b: Record<any, any>) {
   return diff;
 }
 
-export function filterComponent(component: Record<string, any>) {
+export function filterComponent(component: Record<string, unknown>) {
   const filtered = {
     "data-id": component.id,
     strokeWidth: component.strokeWidth,

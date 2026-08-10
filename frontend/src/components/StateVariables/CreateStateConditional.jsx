@@ -6,6 +6,16 @@ import ModalDialog from "../ModalDialogue";
 import { api } from "../../util/api";
 import AuthenticationContext from "../../context/AuthenticationContext";
 import toast from "react-hot-toast";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useParams } from "react-router-dom";
+
+function createStateConditional(user, scenarioId, resourceId, conditional) {
+  return api.post(
+    user,
+    `api/resources/${scenarioId}/${resourceId}/conditionals`,
+    { stateConditional: conditional }
+  );
+}
 
 /**
  * Component used for creating state conditionals
@@ -13,7 +23,8 @@ import toast from "react-hot-toast";
  *
  * @component
  */
-const CreateStateConditional = ({ fileId, open, setOpen, updateFile }) => {
+const CreateStateConditional = ({ resource, open, setOpen }) => {
+  const { scenarioId } = useParams();
   const { user } = useContext(AuthenticationContext);
   const { stateVariables } = useContext(ScenarioContext);
 
@@ -21,48 +32,52 @@ const CreateStateConditional = ({ fileId, open, setOpen, updateFile }) => {
   const [comparator, setComparator] = useState(null);
   const [value, setValue] = useState(null);
 
+  const queryClient = useQueryClient();
+
+  const createConditionalMutation = useMutation({
+    mutationFn: (conditional) =>
+      createStateConditional(user, scenarioId, resource._id, conditional),
+    onSettled: () => queryClient.invalidateQueries(["resources", scenarioId]),
+    onError: (e) => {
+      console.error(e);
+      toast.error("Error creating state conditional");
+    },
+    onSuccess: () => {
+      setSelectedState(null);
+      setComparator(null);
+      setValue(null);
+      setOpen(false);
+      toast.success("State conditional created!");
+    },
+  });
+
   if (!stateVariables?.length) {
     return (
-      <div className="modal-box">
-        <h3 className="font-bold text-m">Create State Operation</h3>
+      <ModalDialog
+        title="Create State Conditional"
+        open={open}
+        onClose={() => setOpen(false)}
+      >
         <div className="text-xs">
           No state variables found, create some in the state variable menu
         </div>
         <div className="modal-action">
-          <form method="dialog">
-            <button className="btn">Close</button>
-          </form>
+          <button className="btn" onClick={() => setOpen(false)}>
+            Close
+          </button>
         </div>
-      </div>
+      </ModalDialog>
     );
   }
 
   const handleSubmit = () => {
-    // Validate that all required fields are filled
     if (!selectedState?.id || !comparator) return;
 
-    const stateConditional = {
+    createConditionalMutation.mutate({
       stateVariableId: selectedState.id,
       comparator,
       value: selectedState.type === stateTypes.NUMBER ? Number(value) : value,
-    };
-
-    api
-      .post(user, `/api/files/state-conditionals/${fileId}`, {
-        stateConditional,
-      })
-      .then((res) => {
-        updateFile(res.data);
-        setSelectedState(null);
-        setComparator(null);
-        setValue(null);
-        setOpen(false);
-        toast.success("State conditional created!");
-      })
-      .catch((err) => {
-        console.error(err);
-        toast.error("Error creating state conditional");
-      });
+    });
   };
 
   function onVariableChange(variable) {
@@ -77,7 +92,12 @@ const CreateStateConditional = ({ fileId, open, setOpen, updateFile }) => {
     <ModalDialog
       title="Create State Conditional"
       open={open}
-      onClose={() => setOpen(false)}
+      onClose={() => {
+        setSelectedState(null);
+        setComparator(null);
+        setValue(null);
+        setOpen(false);
+      }}
     >
       <fieldset className="fieldset">
         <label className="label">State Variable</label>
@@ -100,6 +120,7 @@ const CreateStateConditional = ({ fileId, open, setOpen, updateFile }) => {
                 <SelectInput
                   values={[true, false]}
                   value={value}
+                  display={(v) => String(v)}
                   onChange={setValue}
                 />
               ) : (

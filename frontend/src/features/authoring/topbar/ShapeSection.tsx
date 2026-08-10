@@ -13,13 +13,9 @@ interface ShapeProps {
   strokeWidth: number;
 }
 
-function extractProps(selected: string[]): ShapeProps {
-  const component = getComponent(selected[0]);
-  return {
-    fill: component.fill,
-    stroke: component.stroke,
-    strokeWidth: component.strokeWidth,
-  };
+function extractProps(selected: string): ShapeProps {
+  const c = getComponent(selected[0]) as unknown as ShapeProps;
+  return { fill: c.fill, stroke: c.stroke, strokeWidth: c.strokeWidth };
 }
 
 const widths = [1, 2, 3, 4, 8, 12, 16, 24];
@@ -34,7 +30,7 @@ function ShapeSection() {
   }, [selected]);
 
   function modifyProps(prop: string, value: string | number) {
-    modifyComponentProp(selected!, `${prop}`, value);
+    modifyComponentProp(selected, `${prop}`, value);
     setProps({ ...props, [prop]: value });
   }
 
@@ -43,12 +39,14 @@ function ShapeSection() {
       <ChromePicker
         value={props.fill}
         onChange={(value) => modifyProps("fill", value)}
+        tooltip="Fill color"
       >
         <PaintBucket size={13} />
       </ChromePicker>
       <ChromePicker
         value={props.stroke}
         onChange={(value) => modifyProps("stroke", value)}
+        tooltip="Stroke color"
       >
         <Pencil size={13} />
       </ChromePicker>
@@ -56,6 +54,7 @@ function ShapeSection() {
         value={props.strokeWidth}
         values={widths}
         onChange={(v) => modifyProps("strokeWidth", v)}
+        tooltip="Stroke width"
       >
         <RulerIcon size={16} />
       </MultiInput>

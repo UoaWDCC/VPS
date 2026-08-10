@@ -25,7 +25,7 @@ function Ellipse(component: EllipseComponent) {
     `A${radius.x} ${radius.y} ${bounds.rotation} 1 1 ${anchors[0].x} ${anchors[0].y}`,
   ].join(" ");
 
-  return <path d={d} {...filterComponent(component)} />;
+  return <path className="ellipse" d={d} {...filterComponent(component)} />;
 }
 
 export default Ellipse;

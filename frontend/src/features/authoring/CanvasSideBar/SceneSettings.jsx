@@ -1,9 +1,9 @@
 import { useContext, useState, useEffect } from "react";
-import { Check } from "lucide-react";
+import { Check, ChevronDown } from "lucide-react";
 import ScenarioContext from "context/ScenarioContext";
 import SceneContext from "context/SceneContext";
 import { generateUniqueSceneName } from "../../../utils/sceneUtils";
-import { getScenePatch, commitSavedScene } from "../scene/scene";
+import { getScene } from "../scene/scene";
 
 import useVisualScene from "../stores/visual";
 import { modifySceneProp } from "../scene/operations/modifiers";
@@ -11,13 +11,14 @@ import useDirectLink from "./useDirectLink";
 import shallow from "zustand/shallow";
 import toast from "react-hot-toast";
 import TimerStateOperationMenu from "../../../components/StateVariables/TimerStateOperationMenu";
+import SelectInput from "../components/Select";
 
 /**
  * This component displays the settings of a scene, such as the scene name
  * @component
  */
 export default function SceneSettings() {
-  const { scenes, saveScenePatch, reFetch } = useContext(SceneContext);
+  const { scenes, modifyScene } = useContext(SceneContext);
   const { roleList } = useContext(ScenarioContext);
 
   const name = useVisualScene((scene) => scene.name);
@@ -81,9 +82,7 @@ export default function SceneSettings() {
     setSceneName(safeName);
 
     try {
-      await saveScenePatch(getScenePatch());
-      commitSavedScene();
-      await reFetch(); // sync ui with db
+      modifyScene(getScene());
     } catch (error) {
       console.error(error);
       toast.error("Could not save the scene name.");
@@ -130,13 +129,16 @@ export default function SceneSettings() {
               <div
                 tabIndex={0}
                 role="button"
-                className="justify-start input mb-1 font-normal"
+                className="justify-between input mb-1 font-normal w-full"
               >
-                {selectedRoles?.join(", ") || "All"}
+                <span className="truncate">
+                  {selectedRoles?.join(", ") || "All"}
+                </span>
+                <ChevronDown className="shrink-0" size={16} />
               </div>
               <ul
                 tabIndex={0}
-                className="dropdown-content menu bg-base-300 rounded-box z-1 w-52 p-2 shadow-sm"
+                className="dropdown-content menu bg-base-300 rounded-box z-1 w-full p-2 shadow-sm"
               >
                 {roleList?.map((role, i) => {
                   const active = selectedRoles.includes(role);
@@ -154,7 +156,7 @@ export default function SceneSettings() {
                 })}
               </ul>
             </div>
-            <label className="label cursor-pointer justify-start gap-3 mt-2">
+            <label className="label cursor-pointer justify-start gap-3 mt-2 mb-2">
               <input
                 type="checkbox"
                 className="toggle"
@@ -175,10 +177,11 @@ export default function SceneSettings() {
                   modifySceneProp("directLink", target);
                 }}
               />
+
               <span className="label-text">Direct Link</span>
               {directLinkDisabled && (
                 <span
-                  className="tooltip tooltip-warning tooltip-top cursor-help text-warning text-xs before:!whitespace-normal before:!max-w-[150px]"
+                  className="tooltip tooltip-warning tooltip-top cursor-help text-warning text-xs before:!whitespace-normal before:!max-w-[150px] before:!text-[0.75rem]"
                   data-tip={
                     "Disabled: scene has buttons leading to multiple different scenes"
                   }
@@ -186,24 +189,30 @@ export default function SceneSettings() {
                   ⚠
                 </span>
               )}
+              <span
+                className="label-text tooltip tooltip-top cursor-help before:!whitespace-normal before:!max-w-[130px] before:!text-[0.75rem]"
+                data-tip="The player will be sent to this scene when they press either the 'space' or 'right arrow' keyboard button, instead of having to click an on screen element."
+              >
+                ⓘ
+              </span>
             </label>
-            <select
-              className="select select-bordered"
+            <SelectInput
+              nullable
               disabled={!directLink || directLinkDisabled}
-              value={directLink ?? ""}
-              onChange={(e) =>
-                modifySceneProp("directLink", e.target.value || null)
+              value={directLink}
+              values={
+                scenes
+                  ?.filter((scene) => scene._id !== sceneId)
+                  .map((scene) => scene._id) ?? []
               }
-            >
-              <option value="">No direct link target</option>
-              {scenes
-                ?.filter((scene) => scene._id !== sceneId)
-                .map((scene) => (
-                  <option key={scene._id} value={scene._id}>
-                    {scene.name}
-                  </option>
-                ))}
-            </select>
+              display={(targetId) =>
+                scenes?.find((scene) => scene._id === targetId)?.name ??
+                "Unknown scene"
+              }
+              onChange={(targetId) =>
+                modifySceneProp("directLink", targetId || null)
+              }
+            />
           </fieldset>
         </div>
       </div>

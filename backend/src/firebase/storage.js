@@ -1,51 +1,38 @@
-import {
-  ref,
-  deleteObject,
-  getMetadata,
-  updateMetadata,
-} from "firebase/storage";
-import { storage } from "./firebase.js";
+import { v4 as uuidv4 } from "uuid";
+import { getBucket } from "./firebase.js";
 
-/**
- * Attempts to delete a file from the firebase storage.
- * A file is deleted if only one scene uses it (metadata count of 1).
- * Otherwise, the file remains and the metadata is decremented.
- * @param {String} fileUrl firebase storage link to file
- */
-const tryDeleteFile = (fileUrl) => {
-  const fileRef = ref(storage, fileUrl);
+// upload
+export async function uploadFile(buffer, contentType) {
+  if (!contentType) throw new Error("contentType is required");
 
-  getMetadata(fileRef).then((metadata) => {
-    const prevCount = parseInt(metadata.customMetadata.count, 10);
-    if (prevCount > 1) {
-      const newMetadata = {
-        customMetadata: {
-          count: prevCount - 1,
+  const downloadToken = uuidv4();
+  const uniqueFilename = uuidv4();
+  const file = getBucket().file(`files/${uniqueFilename}`);
+
+  try {
+    await file.save(buffer, {
+      metadata: {
+        contentType,
+        metadata: {
+          firebaseStorageDownloadTokens: downloadToken,
         },
-      };
-      updateMetadata(fileRef, newMetadata);
-    } else {
-      deleteObject(fileRef);
-    }
-  });
-};
-
-/**
- * Increments the metadata count of a file in firebase storage
- * @param {String} fileUrl firebase storage link to file
- */
-const updateFileMetadata = (fileUrl) => {
-  const fileRef = ref(storage, fileUrl);
-
-  getMetadata(fileRef).then((metadata) => {
-    const prevCount = parseInt(metadata.customMetadata.count, 10);
-    const newMetadata = {
-      customMetadata: {
-        count: prevCount + 1,
       },
-    };
-    updateMetadata(fileRef, newMetadata);
-  });
-};
+    });
+  } catch (err) {
+    throw new Error(`upload failed: ${err.message}`);
+  }
 
-export { tryDeleteFile, updateFileMetadata };
+  const publicUrl = `https://firebasestorage.googleapis.com/v0/b/${getBucket().name}/o/${encodeURIComponent(file.name)}?alt=media&token=${downloadToken}`;
+
+  return { path: file.name, url: publicUrl };
+}
+
+// delete
+export async function deleteFile(path) {
+  if (!path) throw new Error("path is required");
+  try {
+    await getBucket().file(path).delete();
+  } catch (err) {
+    throw new Error(`delete failed: ${err.message}`);
+  }
+}

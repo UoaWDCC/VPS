@@ -219,8 +219,10 @@ function buildBlock(
 
   const lines = buildVisualLines(block.spans, maxWidth, blockStyle);
 
-  const { y, height } = lines[lines.length - 1];
-  visualBlock.height = y + height;
+  if (lines.length > 0) {
+    const { y, height } = lines[lines.length - 1];
+    visualBlock.height = y + height;
+  }
   visualBlock.lines = lines;
 
   return visualBlock;

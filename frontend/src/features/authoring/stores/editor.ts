@@ -1,6 +1,6 @@
 import create from "zustand";
 import type { ModelSelection, VisualSelection } from "../text/types";
-import type { BaseTextStyle, Bounds, Vec2 } from "../types";
+import type { BaseTextStyle, Bounds, Guide, Vec2 } from "../types";
 import { getComponent } from "../scene/scene";
 import { getStyleForSelection } from "../scene/operations/text";
 
@@ -9,16 +9,20 @@ type Mode = "normal" | "resize" | "create" | "text" | "mutation";
 interface EditorState {
   loading: boolean;
   selected: string[];
+  hovered: string | null;
   createType: string | null;
   mouseDown: boolean;
   mutationBounds: Bounds;
   offset: Vec2;
+  activeGuides: Guide[];
 
   setSelected: (id: string[]) => void;
+  setHovered: (id: string | null) => void;
   setCreateType: (type: string) => void;
   setMouseDown: (mouseDown: boolean) => void;
   setMutationBounds: Dynamic<Bounds>;
   setOffset: (offset: Vec2) => void;
+  setActiveGuides: (guides: Guide[]) => void;
 
   // text editing
   selection: ModelSelection;
@@ -43,7 +47,11 @@ interface EditorState {
 
 type Dynamic<T> = (arg: T | ((prev: T) => T)) => void;
 
-function setter<K extends keyof EditorState>(set: Function, prop: K) {
+type ZustandSet = (
+  updater: (state: EditorState) => Partial<EditorState>
+) => void;
+
+function setter<K extends keyof EditorState>(set: ZustandSet, prop: K) {
   return (arg: EditorState[K] | ((prev: EditorState[K]) => EditorState[K])) =>
     set((state: EditorState) => ({
       [prop]:
@@ -56,17 +64,21 @@ function setter<K extends keyof EditorState>(set: Function, prop: K) {
 const useEditorStore = create<EditorState>((set) => ({
   loading: false,
   selected: [],
+  hovered: null,
   createType: null,
   mouseDown: false,
   mutationBounds: { verts: [], rotation: 0 },
   offset: { x: 0, y: 0 },
+  activeGuides: [],
 
   setLoading: (value: boolean) => set({ loading: value }),
-  setSelected: (ids) => set({ selected: ids }),
+  setSelected: (id) => set({ selected: id }),
+  setHovered: (id) => set({ hovered: id }),
   setCreateType: (type: string) => set({ createType: type }),
   setMouseDown: (mouseDown) => set({ mouseDown }),
   setMutationBounds: setter(set, "mutationBounds"),
   setOffset: (offset) => set({ offset }),
+  setActiveGuides: (guides) => set({ activeGuides: guides }),
 
   selection: { start: null, end: null },
   visualSelection: { start: null, end: null },
@@ -99,6 +111,7 @@ const useEditorStore = create<EditorState>((set) => ({
       selection: { start: null, end: null },
       visualSelection: { start: null, end: null },
       mode: ["normal"],
+      activeGuides: [],
     }),
 }));
 

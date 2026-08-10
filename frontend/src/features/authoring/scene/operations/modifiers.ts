@@ -5,21 +5,24 @@ import { updateHistory, type ChangeRecord } from "../history";
 import { commitSavedScene, getComponent, getScene, setScene } from "../scene";
 import type { Component, Scene } from "../../types";
 import { arrayToObject } from "../util";
+import useEditorStore from "../../stores/editor";
 
-export function replace(scene: Record<string, any>) {
+export function replace(scene: Scene) {
   const clone = structuredClone(scene);
-  clone.components = arrayToObject(clone.components);
-  setScene(clone as Scene);
-  commitSavedScene();
-  useVisualScene.getState().setVisualScene(buildVisualScene(clone as Scene));
+  clone.components = arrayToObject(
+    clone.components as unknown as { id: string }[]
+  ) as Record<string, Component>;
+  setScene(clone);
+  useVisualScene.getState().setVisualScene(buildVisualScene(clone));
 }
 
 export function modifySceneProp<K extends keyof VisualSceneState>(
   prop: K,
   value: VisualSceneState[K]
 ) {
-  getScene()[prop] = value;
+  (getScene() as unknown as Record<string, unknown>)[prop as string] = value;
   useVisualScene.setState({ [prop]: value } as Pick<VisualSceneState, K>);
+  dispatchModification();
 }
 
 // wrapper for state mutating functions, will capture both state and operation
@@ -74,9 +77,11 @@ export function remove(ids: string[], history = true) {
   if (history) updateHistory(previousStates);
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function add(props: Record<string, any>, history = true) {
   if (!props.id) props.id = v4();
-  getScene().components[props.id] = props;
+  const id = props.id as string;
+  getScene().components[id] = props as Component;
 
   if (history) updateHistory([{ id: props.id, prevState: null }]);
 
@@ -84,5 +89,14 @@ export function add(props: Record<string, any>, history = true) {
     .getState()
     .updateComponent(buildVisualComponent(props as Component));
 
-  return props.id;
+  return id;
+}
+
+export function replaceComponent(
+  id: string,
+  state: Component | null,
+  history = false
+) {
+  if (state === null) remove(id, history);
+  else add(state, history);
 }

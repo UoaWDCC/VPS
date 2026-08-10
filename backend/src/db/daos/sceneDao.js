@@ -1,8 +1,72 @@
 import Scene from "../models/scene.js";
 import Scenario from "../models/scenario.js";
-import { tryDeleteFile, updateFileMetadata } from "../../firebase/storage.js";
 import { HttpError } from "../../util/error.js";
 import status from "../../util/status.js";
+import { applyReferenceDeltas } from "./fileDao.js";
+import { HttpStatusCode } from "axios";
+
+export function addDelta(fileRefDeltas, fileId, delta) {
+  fileRefDeltas.set(fileId, (fileRefDeltas.get(fileId) ?? 0) + delta);
+}
+
+export function hasFileRef(component) {
+  if (!component) return false;
+  return ["audio", "image"].includes(component.type) && component.fileId;
+}
+
+function computeCreateFileRefDeltas(components) {
+  const fileRefDeltas = new Map();
+  (components ?? []).forEach((component) => {
+    if (hasFileRef(component)) {
+      addDelta(fileRefDeltas, component.fileId, 1);
+    }
+  });
+  return fileRefDeltas;
+}
+
+function computeDeleteFileRefDeltas(components) {
+  const fileRefDeltas = new Map();
+  (components ?? []).forEach((component) => {
+    if (hasFileRef(component)) {
+      addDelta(fileRefDeltas, component.fileId, -1);
+    }
+  });
+  return fileRefDeltas;
+}
+
+function computePatchFileRefDeltas(
+  existingComponents,
+  modifiedComponents,
+  deletedComponentIds
+) {
+  const existingComponentsById = new Map(
+    (existingComponents ?? []).map((c) => [c.id, c])
+  );
+
+  const fileRefDeltas = new Map();
+
+  deletedComponentIds.forEach((id) => {
+    const existing = existingComponentsById.get(id);
+    if (hasFileRef(existing)) addDelta(fileRefDeltas, existing.fileId, -1);
+  });
+
+  modifiedComponents.forEach((component) => {
+    const existing = existingComponentsById.get(component.id);
+
+    // decrement the previously referenced file (if any) and increment the
+    // newly referenced one (if any). this handles brand new components, a
+    // component whose file reference was cleared, and a component whose
+    // fileId was swapped in place
+    const existingFileId = hasFileRef(existing) ? existing.fileId : null;
+    const newFileId = hasFileRef(component) ? component.fileId : null;
+
+    if (existingFileId === newFileId) return;
+    if (existingFileId) addDelta(fileRefDeltas, existingFileId, -1);
+    if (newFileId) addDelta(fileRefDeltas, newFileId, 1);
+  });
+
+  return fileRefDeltas;
+}
 
 // enforce direct links between scenes to be in the same scenario
 const assertDirectLinkInScenario = async (scenarioId, directLinkId) => {
@@ -77,20 +141,13 @@ const retrieveScene = async (sceneId) => {
  * @returns updated database scene object
  */
 const updateScene = async (sceneId, updatedScene) => {
+  // WARNING: this function does not handle resource ref counting, the
+  // patch function is what should be used instead
+
   // makes sure when we update components is not null
   if (updatedScene.components) {
     const prevDbScene = await Scene.findById(sceneId);
     if (!prevDbScene) return null;
-
-    // if previous firebase media component no longer exists, try to delete file from firebase storage
-    prevDbScene.components.forEach((c) => {
-      if (c.type === "image" || c.type === "audio") {
-        // checks for non-existance in new components array
-        if (!updatedScene.components.some((newC) => newC.id === c.id)) {
-          tryDeleteFile(c.href ?? c.url);
-        }
-      }
-    });
 
     const dbScene = await Scene.findOneAndUpdate(
       { _id: sceneId },
@@ -124,15 +181,29 @@ const updateScene = async (sceneId, updatedScene) => {
  * Deletes a scene from the database, and removes it from its parent scenario
  * @param {String} scenarioId MongoDB ID of scenario
  * @param {String} sceneId MongoDB ID of scene
- * @returns {Promise<Boolean>} true if scene was deleted, false otherwise
+ * @returns {Promise<{deleted: Boolean, reason?: String}>} deletion result
  */
 const deleteScene = async (scenarioId, sceneId) => {
   const scenarioRes = await Scenario.findOneAndUpdate(
-    { _id: scenarioId },
+    {
+      _id: scenarioId,
+      scenes: sceneId,
+      $expr: { $gt: [{ $size: "$scenes" }, 1] },
+    },
     { $pull: { scenes: sceneId } }
   );
+
   if (!scenarioRes) {
-    return false;
+    const scenario = await Scenario.findById(scenarioId, { scenes: 1 }).lean();
+
+    if (
+      scenario?.scenes?.length === 1 &&
+      scenario.scenes[0].toString() === sceneId.toString()
+    ) {
+      return { deleted: false, reason: "last_scene" };
+    }
+
+    return { deleted: false, reason: "not_found" };
   }
 
   await Scene.updateMany(
@@ -140,7 +211,16 @@ const deleteScene = async (scenarioId, sceneId) => {
     { $set: { directLink: null } }
   );
   const res = await Scene.findOneAndDelete({ _id: sceneId });
-  return res !== null;
+
+  if (res) {
+    const fileRefDeltas = computeDeleteFileRefDeltas(res.components);
+    await applyReferenceDeltas(fileRefDeltas);
+  }
+
+  return {
+    deleted: res !== null,
+    reason: res ? undefined : "not_found",
+  };
 };
 
 /**
@@ -160,16 +240,20 @@ const duplicateScene = async (scenarioId, sceneId) => {
   const dbScene = new Scene(newScene);
   await dbScene.save();
 
-  dbScene.components.forEach((c) => {
-    if (c.type === "image" || c.type === "audio") {
-      updateFileMetadata(c.url);
-    }
-  });
+  //find where scene originally sits in scenes array
+  const { scenes: sceneIds = [] } =
+    (await Scenario.findById(scenarioId, { scenes: 1 }).lean()) ?? {};
+  //positions duplicate either right after original or at end of array
+  const position =
+    sceneIds.findIndex((id) => id.equals(sceneId)) + 1 || sceneIds.length;
 
   await Scenario.updateOne(
     { _id: scenarioId },
-    { $push: { scenes: dbScene._id } }
+    { $push: { scenes: { $each: [dbScene._id], $position: position } } }
   );
+
+  const fileRefDeltas = computeCreateFileRefDeltas(dbScene.components);
+  await applyReferenceDeltas(fileRefDeltas);
 
   return dbScene;
 };
@@ -210,7 +294,10 @@ const getComponent = async (sceneId, componentId) => {
  */
 const updateSceneOrder = async (scenarioId, sceneIds) => {
   const updatedScenario = await Scenario.findOneAndUpdate(
-    { _id: scenarioId },
+    {
+      _id: scenarioId,
+      $expr: { $eq: [{ $size: "$scenes" }, sceneIds.length] },
+    },
     { scenes: sceneIds },
     { new: true }
   );
@@ -233,6 +320,16 @@ const patchScene = async (sceneId, patch, scenarioId) => {
   if ("directLink" in allowedFields) {
     await assertDirectLinkInScenario(scenarioId, allowedFields.directLink);
   }
+
+  const existingScene = await Scene.findById(sceneId, { components: 1 });
+  if (!existingScene)
+    throw new HttpError("scene not found", HttpStatusCode.NotFound);
+
+  const fileRefDeltas = computePatchFileRefDeltas(
+    existingScene.components,
+    components,
+    deletedComponentIds
+  );
 
   const operations = [];
 
@@ -293,6 +390,8 @@ const patchScene = async (sceneId, patch, scenarioId) => {
   if (operations.length > 0) {
     await Scene.bulkWrite(operations, { ordered: true });
   }
+
+  await applyReferenceDeltas(fileRefDeltas);
 
   return Scene.findById(sceneId);
 };

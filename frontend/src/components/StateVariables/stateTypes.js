@@ -20,11 +20,12 @@ export const getDefaultValue = (type) => {
 export const operations = {
   SET: "set",
   ADD: "add",
+  SUBTRACT: "subtract",
 };
 
 export const validOperations = {
   [stateTypes.STRING]: [operations.SET],
-  [stateTypes.NUMBER]: [operations.SET, operations.ADD],
+  [stateTypes.NUMBER]: [operations.SET, operations.ADD, operations.SUBTRACT],
   [stateTypes.BOOLEAN]: [operations.SET],
 };
 

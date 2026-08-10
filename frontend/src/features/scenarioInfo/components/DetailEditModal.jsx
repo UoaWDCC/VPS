@@ -1,13 +1,42 @@
 import { useState } from "react";
 
-function DetailEditModal({ scenario, onSave }) {
-  const [description, setDescription] = useState(scenario.description);
-  const [name, setName] = useState(scenario.name);
-  const [estimatedTime, setEstimatedTime] = useState(scenario.estimatedTime);
+function DetailEditModal({
+  scenario,
+  onSave,
+  onClose,
+  submitLabel = "Save Changes",
+  pendingLabel = "Saving...",
+}) {
+  const [description, setDescription] = useState(scenario?.description ?? "");
+  const [name, setName] = useState(scenario?.name ?? "");
+  const [estimatedTime, setEstimatedTime] = useState(
+    scenario?.estimatedTime ?? ""
+  );
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showNameError, setShowNameError] = useState(false);
+
+  const isNameBlank = !name.trim();
 
   function handleEstimatedTimeChange(e) {
     const value = e.target.value.replace(/\D/g, "");
     setEstimatedTime(value);
+  }
+
+  async function handleSave() {
+    if (isNameBlank) {
+      setShowNameError(true);
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      await onSave({ name: name.trim(), description, estimatedTime });
+      onClose?.();
+    } catch {
+      // the mutation itself surfaces an error toast; keep the modal open to retry
+    } finally {
+      setIsSubmitting(false);
+    }
   }
 
   return (
@@ -24,12 +53,20 @@ function DetailEditModal({ scenario, onSave }) {
           value={name}
           onChange={(e) => setName(e.target.value)}
           placeholder="Enter scenario name..."
-          className="input input-bordered border-primary/30 bg-base-100 text-base-content font-dm text-base w-full focus:border-primary focus:outline-none placeholder:text-base-content/40"
+          className={`input input-bordered bg-base-100 text-base-content font-dm text-base w-full focus:outline-none placeholder:text-base-content/40 ${
+            showNameError && isNameBlank
+              ? "border-error focus:border-error"
+              : "border-primary/30 focus:border-primary"
+          }`}
           maxLength={100}
         />
         <label className="label">
-          <span className="label-text-alt text-base-content/50 font-ibm">
-            {name.length}/100 characters
+          <span
+            className={`label-text-alt font-ibm ${showNameError && isNameBlank ? "text-error" : "text-base-content/50"}`}
+          >
+            {showNameError && isNameBlank
+              ? "Scenario name is required"
+              : `${name.length}/100 characters`}
           </span>
         </label>
       </div>
@@ -79,15 +116,21 @@ function DetailEditModal({ scenario, onSave }) {
 
       {/* Modal Actions */}
       <div className="modal-action">
-        {/* buttons will automatically close the dialog */}
-        <button className="btn btn-ghost text-primary hover:text-base-content hover:bg-primary/10 font-dm">
+        {/* Cancel keeps the native dialog auto-close behaviour */}
+        <button
+          disabled={isSubmitting}
+          className="btn btn-ghost text-primary hover:text-base-content hover:bg-primary/10 font-dm"
+        >
           Cancel
         </button>
+        {/* type="button" so a click doesn't submit-close the dialog before the save resolves */}
         <button
-          onClick={() => onSave({ name, description, estimatedTime })}
+          type="button"
+          onClick={handleSave}
+          disabled={isSubmitting}
           className={`btn btn-ghost text-base-content border border-base-content/20 hover:bg-base-content/10 hover:border-base-content/40 font-dm`}
         >
-          Save Changes
+          {isSubmitting ? pendingLabel : submitLabel}
         </button>
       </div>
     </>

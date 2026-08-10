@@ -4,9 +4,18 @@ export type Component =
   | ImageComponent
   | EllipseComponent
   | SpeechComponent
-  | LineComponent;
+  | LineComponent
+  | AudioComponent;
 
-export type Scene = { components: Record<string, Component> };
+export interface Scene {
+  _id: string;
+  name: string;
+  components: Record<string, Component>;
+  roles: string[];
+  time: number | null;
+  directLink: string | null;
+  timerStateOperations: Record<string, unknown>[] | null;
+}
 
 export interface Vec2 {
   x: number;
@@ -26,10 +35,23 @@ export interface RelativeBounds {
   rotation: number;
 }
 
+export interface Guide {
+  orientation: "vertical" | "horizontal";
+  position: number;
+  isCanvasCenter?: boolean;
+}
+
 interface GenericComponent {
   id: string;
   bounds: Bounds;
   zIndex: number;
+  clickable?: boolean;
+  stateBindings?: StateBinding[];
+}
+
+export interface StateBinding {
+  target: string;
+  stateVariableId: string;
 }
 
 interface ShapeComponent extends GenericComponent {
@@ -40,8 +62,17 @@ interface ShapeComponent extends GenericComponent {
 
 export interface ImageComponent extends GenericComponent {
   type: "image";
+  fileId: string;
   href: string;
   preserveAspectRatio: string;
+}
+
+export interface AudioComponent extends GenericComponent {
+  type: "audio";
+  fileId: string;
+  url: string;
+  name: string;
+  loop: boolean;
 }
 
 export interface SpeechComponent extends ShapeComponent {
@@ -108,3 +139,17 @@ export interface SpanTextStyle {
 }
 
 type HexString = string;
+
+export interface UploadedFile {
+  _id: string;
+  name: string;
+  type: "image" | "audio" | "document";
+  path: string;
+  url: string;
+  contentType: string;
+  size: number;
+  uploaderUid: string;
+  scenarioId: string;
+  refCount: number;
+  deletedAt: Date | null;
+}

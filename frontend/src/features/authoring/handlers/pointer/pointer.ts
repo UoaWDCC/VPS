@@ -52,7 +52,10 @@ export function handleMouseDownGlobal(e: React.MouseEvent, position: Vec2) {
 export function handleMouseMoveGlobal(e: React.MouseEvent, position: Vec2) {
   const { mode, mouseDown } = useEditorStore.getState();
 
-  if (!mouseDown) return;
+  if (!mouseDown) {
+    handleComponentHover(e);
+    return;
+  }
 
   if (mode.includes("resize")) {
     handleResizeDrag(e, position);
@@ -87,6 +90,15 @@ function handleCanvasClick() {
 
 // component handlers
 
+function handleComponentHover(e: React.MouseEvent) {
+  const { setHovered } = useEditorStore.getState();
+
+  const target = e.target as HTMLElement;
+  const id = target.dataset.id as string;
+
+  setHovered(id ?? null);
+}
+
 function handleComponentClick(e: React.MouseEvent, position: Vec2) {
   const { selected, setSelected, setOffset, setMode, setMutationBounds } =
     useEditorStore.getState();
@@ -113,7 +125,7 @@ function handleComponentClick(e: React.MouseEvent, position: Vec2) {
 }
 
 function handleComponentDrag(_: React.MouseEvent, position: Vec2) {
-  const { selected, setMutationBounds, offset, setMode } =
+  const { selected, setMutationBounds, offset, setMode, setActiveGuides } =
     useEditorStore.getState();
   if (!selected?.length) return;
 
@@ -121,6 +133,7 @@ function handleComponentDrag(_: React.MouseEvent, position: Vec2) {
   const verts = translate(bounds.verts, subtract(position, offset));
 
   setMutationBounds((prev) => ({ ...prev, verts }));
+  setActiveGuides(guides);
   setMode(["mutation"]);
 }
 
@@ -158,6 +171,7 @@ function handleMutationEnd() {
   }
 
   setMode(["normal"]);
+  setActiveGuides([]);
 }
 
 // Component Helper Functions
@@ -224,8 +238,9 @@ function handleDocumentClick(e: React.MouseEvent, position: Vec2) {
   const scene = useVisualScene.getState().components;
 
   const target = e.target as HTMLElement;
-  const { document: doc } =
-    useVisualScene.getState().components[target.dataset.id as string];
+  const { document: doc } = useVisualScene.getState().components[
+    target.dataset.id as string
+  ] as unknown as { document: VisualDocument };
   const cursor = parseHit(
     getRelativePosition(position, doc.bounds),
     doc.blocks

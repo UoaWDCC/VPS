@@ -13,7 +13,6 @@ import {
   sendBackward,
   sendToBack,
 } from "../../scene/operations/component";
-import useEditorStore from "../../stores/editor";
 
 const ComponentMenu = ({ ids }: { ids: string[] }) => {
   function removeAndDeselect(selectedIds: string[]) {

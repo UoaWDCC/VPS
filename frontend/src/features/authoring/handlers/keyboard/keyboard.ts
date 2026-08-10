@@ -7,11 +7,14 @@ import {
   sendBackward,
   sendToBack,
 } from "../../scene/operations/component";
+import { modifyComponentProp } from "../../scene/operations/component";
 import { remove } from "../../scene/operations/modifiers";
 import useEditorStore from "../../stores/editor";
 import type { Vec2 } from "../../types";
 import { translate } from "../../util";
+import { handleShortcut } from "./shortcuts";
 import { handleTextMode } from "./text";
+import { isEditableShortcutTarget } from "./utils";
 
 export function handleGlobal(e: KeyboardEvent) {
   const mode = useEditorStore.getState().mode;
@@ -21,9 +24,11 @@ export function handleGlobal(e: KeyboardEvent) {
 
   const target = e.target as HTMLElement;
   if (target.tagName === "INPUT" || target.tagName === "TEXTAREA") return;
+  if (isEditableShortcutTarget(e.target)) return;
+
+  if (handleShortcut(e)) return;
 
   if (mode.includes("text")) handleTextMode(e);
-  else if (e.ctrlKey || e.metaKey) handleCtrlOperations(e);
   else if (selected) handleComponentOperations(e, selected);
 }
 
