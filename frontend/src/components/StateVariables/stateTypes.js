@@ -4,6 +4,8 @@ export const stateTypes = {
   BOOLEAN: "boolean",
 };
 
+export const isBooleanStateType = (type) => type === stateTypes.BOOLEAN;
+
 export const getDefaultValue = (type) => {
   switch (type) {
     case stateTypes.STRING:
