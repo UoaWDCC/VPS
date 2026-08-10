@@ -5,7 +5,7 @@ import toast from "react-hot-toast";
 import ScenarioContext from "../../context/ScenarioContext";
 import SceneContext from "../../context/SceneContext";
 import SelectInput from "../../features/authoring/components/Select";
-import { stateTypes } from "./stateTypes";
+import { isBooleanStateType, stateTypes } from "./stateTypes";
 import { arrayToObject } from "../../features/authoring/scene/util";
 
 const EditStateVariable = ({ stateVariable, scenarioId }) => {
@@ -126,7 +126,8 @@ const EditStateVariable = ({ stateVariable, scenarioId }) => {
 
   function parseValue(e) {
     const val = e.target.value;
-    if (type === stateTypes.NUMBER) setNewValue(Number(val));
+    if (newType === stateTypes.NUMBER)
+      setNewValue(val === "" ? "" : Number(val));
     else setNewValue(val);
   }
   `bg-base-300 mt-xs px-[1rem] py-[0.5rem] `;
@@ -160,7 +161,7 @@ const EditStateVariable = ({ stateVariable, scenarioId }) => {
           </div>
           <div className="flex-1 flex flex-col">
             <label className="label mb-1">Initial Value</label>
-            {type === stateTypes.BOOLEAN ? (
+            {isBooleanStateType(newType) ? (
               <SelectInput
                 value={newValue}
                 values={["true", "false"]}

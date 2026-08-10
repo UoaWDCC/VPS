@@ -54,7 +54,7 @@ const CreateStateVariable = ({ scenarioId }) => {
 
   function parseValue(e) {
     const val = e.target.value;
-    if (type === stateTypes.NUMBER) setValue(Number(val));
+    if (type === stateTypes.NUMBER) setValue(val === "" ? "" : Number(val));
     else setValue(val);
   }
 
