@@ -161,6 +161,8 @@ export default function PlayScenarioPage({ group }) {
   const startSceneRef = useRef(
     new URLSearchParams(location.search).get("startScene")
   );
+  // Track sequence of navigation & recovery requests to prevent race conditions
+  const requestIdRef = useRef(0);
   const handlingConflictRef = useRef(false);
 
   const [sceneId, setSceneId] = useState(null);
@@ -180,9 +182,17 @@ export default function PlayScenarioPage({ group }) {
     if (error.status === 409) {
       if (!handlingConflictRef.current) {
         handlingConflictRef.current = true;
+
+        // Track recovery request ID
+        const currentRequestId = ++requestIdRef.current;
+
         try {
           const { newSceneId, stateVariables, newStateVersion } =
             await refreshFromServer(user, scenarioId, group._id, isMultiplayer);
+
+          // Discard response if a newer user action was triggered during request transit
+          if (currentRequestId !== requestIdRef.current) return;
+
           setSceneId(newSceneId);
           setStateVariables(stateVariables);
           setStateVersion(newStateVersion);
@@ -207,6 +217,8 @@ export default function PlayScenarioPage({ group }) {
   };
 
   const onSceneChange = async (componentId, currentSceneOverride = sceneId) => {
+    const currentRequestId = ++requestIdRef.current; // Track navigation request ID
+
     if (componentId) {
       const component = currScene?.components?.find(
         (comp) => comp.id === componentId
@@ -221,7 +233,7 @@ export default function PlayScenarioPage({ group }) {
     }
 
     const startScene = startSceneRef.current;
-    startSceneRef.current = null; // Clear after first use so the startScene override is only consumed once.
+    startSceneRef.current = null; // Clear after first use so startScene override is consumed once.
 
     try {
       const { newSceneId, stateVariables, newStateVersion } = isMultiplayer
@@ -244,11 +256,14 @@ export default function PlayScenarioPage({ group }) {
             startScene
           );
 
+      // Discard stale response if a newer request was dispatched while this request was pending
+      if (currentRequestId !== requestIdRef.current) return;
+
       if (stateVersion < newStateVersion) {
         setStateVariables(stateVariables);
         setStateVersion(newStateVersion);
       }
-      if (!sceneId && newSceneId) {
+      if (newSceneId) {
         setSceneId(newSceneId);
       }
     } catch (e) {
@@ -278,6 +293,7 @@ export default function PlayScenarioPage({ group }) {
 
       if (e.code === "Space" || e.key === "ArrowRight") {
         e.preventDefault();
+        const currentRequestId = ++requestIdRef.current; // Track keydown navigation request ID
         try {
           const { newSceneId, stateVariables, newStateVersion } = isMultiplayer
             ? await navigateMultiplayer(
@@ -298,6 +314,10 @@ export default function PlayScenarioPage({ group }) {
                 null,
                 currScene.directLink
               );
+
+          // Discard stale response if a newer request was dispatched while pending
+          if (currentRequestId !== requestIdRef.current) return;
+
           if (stateVersion < newStateVersion) {
             setStateVariables(stateVariables);
             setStateVersion(newStateVersion);
