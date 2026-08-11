@@ -264,5 +264,8 @@ describe("Note API tests", () => {
 
     const dbNote = await Note.findById(note1._id).lean();
     expect(dbNote).not.toBeNull();
+
+    const sourceGroup = await Group.findById(group._id).lean();
+    expect(sourceGroup.notes[userRole] ?? []).toContain(note1._id.toString());
   });
 });
