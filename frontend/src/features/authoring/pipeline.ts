@@ -26,7 +26,9 @@ function pad(verts: Vec2[], amount: number) {
   const center = getBoxCenter(verts);
   return verts.map((vert) => {
     const relative = subtract(center, vert);
-    const dir = mutate(relative, (val) => val / Math.abs(val));
+    const dir = mutate(relative, (val) =>
+      val === 0 ? 0 : val / Math.abs(val)
+    );
     return add(vert, scale(dir, amount));
   });
 }
