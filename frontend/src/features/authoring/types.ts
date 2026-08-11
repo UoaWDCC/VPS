@@ -51,6 +51,7 @@ interface ShapeComponent extends GenericComponent {
   fill: HexString;
   stroke: HexString;
   strokeWidth: number;
+  document?: ModelDocument;
 }
 
 export interface ImageComponent extends GenericComponent {
@@ -72,6 +73,7 @@ export interface LineComponent extends GenericComponent {
   type: "line";
   stroke: HexString;
   strokeWidth: number;
+
 }
 
 export interface EllipseComponent extends ShapeComponent {
@@ -80,13 +82,6 @@ export interface EllipseComponent extends ShapeComponent {
 
 export interface TextBoxComponent extends ShapeComponent {
   type: "textbox";
-  document: ModelDocument;
-  color: HexString;
-  padding: number;
-}
-
-export interface TextFilledBoxComponent extends ShapeComponent {
-  type: "textfilledbox";
   document: ModelDocument;
   color: HexString;
   padding: number;

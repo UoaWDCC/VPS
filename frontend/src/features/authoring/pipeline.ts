@@ -34,8 +34,12 @@ function pad(verts: Vec2[], amount: number) {
 export function buildVisualComponent(component: Component): Component {
   switch (component.type) {
     case "textbox":
+    case "box":
+    case "ellipse":
+    case "speech":
+      if (!component.document) return { ...component };
       const relative = getRelativeBounds(
-        pad(component.bounds.verts, component.padding)
+        pad(component.bounds.verts, component.padding ?? 0)
       ) as RelativeBounds;
       relative.rotation = component.bounds.rotation;
       const doc = { ...component.document, bounds: relative, id: component.id };

@@ -29,7 +29,7 @@ function ShapeCreateMenu() {
           className="dropdown-content menu menu-horizontal bg-base-300 rounded-box z-1 p-2 shadow-sm top-[38px] w-max"
         >
           <li className="tooltip tooltip-bottom" data-tip="Box">
-            <a onClick={() => switchCreate("textFilledBox")}>
+            <a onClick={() => switchCreate("box")}>
               <VectorSquare size={16} />
             </a>
           </li>
