@@ -19,7 +19,6 @@ import LoadingOverlay from "./LoadingOverlay.tsx";
 import useEditorStore from "../stores/editor.ts";
 import { addText } from "../components/AddText.tsx";
 
-
 const TextableBox = addText(Box);
 const TextableEllipse = addText(Ellipse);
 const TextableSpeech = addText(Speech);

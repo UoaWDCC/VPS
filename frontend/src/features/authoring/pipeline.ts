@@ -39,7 +39,10 @@ export function buildVisualComponent(component: Component): Component {
     case "speech":
       if (!component.document) return { ...component };
       const relative = getRelativeBounds(
-        pad(component.bounds.verts, component.padding ?? 0)
+        pad(
+          component.bounds.verts,
+          "padding" in component ? component.padding : 0
+        )
       ) as RelativeBounds;
       relative.rotation = component.bounds.rotation;
       const doc = { ...component.document, bounds: relative, id: component.id };

@@ -47,7 +47,7 @@ export interface StateBinding {
   stateVariableId: string;
 }
 
-interface ShapeComponent extends GenericComponent {
+export interface ShapeComponent extends GenericComponent {
   fill: HexString;
   stroke: HexString;
   strokeWidth: number;
@@ -73,7 +73,6 @@ export interface LineComponent extends GenericComponent {
   type: "line";
   stroke: HexString;
   strokeWidth: number;
-
 }
 
 export interface EllipseComponent extends ShapeComponent {

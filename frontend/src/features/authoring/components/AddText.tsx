@@ -1,18 +1,27 @@
 import Text from "../text/Text";
 import { modifyComponentProp } from "../scene/operations/component";
+import type { ShapeComponent } from "../types";
 
-export function addText(WrappedComponent) {
-  return function TextableShape(props) {
+export function addText(WrappedComponent: ShapeComponent) {
+  return function TextableShape(props: ShapeComponent) {
     if (!props.document) {
       modifyComponentProp(props.id, "document", {
         style: {},
-        blocks: [{ style: {}, spans: [{ style: {}, text: "" }] }]
+        blocks: [{ style: {}, spans: [{ style: {}, text: "" }] }],
       });
     }
     function handleDoubleClick(e: React.MouseEvent) {
-      const rect = e.currentTarget.querySelector('[data-type="document"]') as HTMLElement;
+      const rect = e.currentTarget.querySelector(
+        '[data-type="document"]'
+      ) as HTMLElement;
       if (!rect) return;
-      rect.dispatchEvent(new MouseEvent('mousedown', { bubbles: true, clientX: e.clientX, clientY: e.clientY }));
+      rect.dispatchEvent(
+        new MouseEvent("mousedown", {
+          bubbles: true,
+          clientX: e.clientX,
+          clientY: e.clientY,
+        })
+      );
     }
 
     return (
@@ -21,5 +30,5 @@ export function addText(WrappedComponent) {
         {props.document && <Text doc={props.document} editable={true} />}
       </g>
     );
-  }
+  };
 }
