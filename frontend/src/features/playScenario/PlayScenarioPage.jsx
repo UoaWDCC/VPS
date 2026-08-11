@@ -94,7 +94,13 @@ const refreshFromServer = async (user, scenarioId, groupId, isMultiplayer) => {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        data: { currentScene: null, addFlags: [], removeFlags: [], componentId: null, nextScene: null },
+        data: {
+          currentScene: null,
+          addFlags: [],
+          removeFlags: [],
+          componentId: null,
+          nextScene: null,
+        },
       }
     : {
         method: "post",
@@ -103,7 +109,14 @@ const refreshFromServer = async (user, scenarioId, groupId, isMultiplayer) => {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        data: { currentScene: null, addFlags: [], removeFlags: [], componentId: null, nextScene: null, startScene: null },
+        data: {
+          currentScene: null,
+          addFlags: [],
+          removeFlags: [],
+          componentId: null,
+          nextScene: null,
+          startScene: null,
+        },
       };
   const res = await axios.request(config);
   if (res.data.scenes) {
@@ -168,12 +181,8 @@ export default function PlayScenarioPage({ group }) {
       if (!handlingConflictRef.current) {
         handlingConflictRef.current = true;
         try {
-          const { newSceneId, stateVariables, newStateVersion } = await refreshFromServer(
-            user,
-            scenarioId,
-            group._id,
-            isMultiplayer
-          );
+          const { newSceneId, stateVariables, newStateVersion } =
+            await refreshFromServer(user, scenarioId, group._id, isMultiplayer);
           setSceneId(newSceneId);
           setStateVariables(stateVariables);
           setStateVersion(newStateVersion);
