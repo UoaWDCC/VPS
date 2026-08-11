@@ -201,7 +201,7 @@ export default function PlayScenarioPage({ group }) {
               ? "Someone else made a move first, but you're back on track!"
               : "A move from somewhere else was made, but you're back on track!"
           );
-        } catch (e) {
+        } catch {
           // If refresh fails, navigate to error page
           history.push(`/play/${scenarioId}/error`);
         } finally {
