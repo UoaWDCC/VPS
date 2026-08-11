@@ -19,6 +19,7 @@ import type { VisualDocument } from "../../text/types";
 import { subtract, translate } from "../../util";
 import { handleCreateDrag, handleCreateEnd, handleCreateStart } from "./create";
 import { handleResizeDrag, handleResizeStart } from "./resize";
+import { snapTranslation } from "./snap";
 import { handleSelectAll } from "../keyboard/text";
 
 export function handleMouseDownGlobal(e: React.MouseEvent, position: Vec2) {
@@ -114,21 +115,33 @@ function handleComponentClick(e: React.MouseEvent, position: Vec2) {
 }
 
 function handleComponentDrag(_: React.MouseEvent, position: Vec2) {
-  const { selected, setMutationBounds, offset, setMode } =
+  const { selected, setMutationBounds, offset, setMode, setActiveGuides } =
     useEditorStore.getState();
   if (!selected) return;
 
-  const component = useVisualScene.getState().components[selected];
+  const { components } = useVisualScene.getState();
+  const component = components[selected];
 
-  const verts = translate(component.bounds.verts, subtract(position, offset));
+  let verts = translate(component.bounds.verts, subtract(position, offset));
+  const { delta, guides } = snapTranslation(
+    verts,
+    component.bounds.rotation,
+    Object.values(components),
+    selected
+  );
+  verts = translate(verts, delta);
+
   setMutationBounds((prev) => ({ ...prev, verts }));
+  setActiveGuides(guides);
   setMode(["mutation"]);
 }
 
 function handleMutationEnd() {
-  const { selected, mutationBounds, setMode } = useEditorStore.getState();
+  const { selected, mutationBounds, setMode, setActiveGuides } =
+    useEditorStore.getState();
   modifyComponentBounds(selected!, mutationBounds);
   setMode(["normal"]);
+  setActiveGuides([]);
 }
 
 // document handlers
