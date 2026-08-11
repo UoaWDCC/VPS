@@ -1,21 +1,18 @@
 import { modifyComponentBounds } from "../../scene/operations/component";
-import {
-  cursorToOffset,
-  findWordRange,
-  flattenBlocks,
-  offsetToCursor,
-} from "../../scene/operations/text";
-import { getComponentProp } from "../../scene/scene";
 import useEditorStore from "../../stores/editor";
 import useVisualScene from "../../stores/visual";
 import {
   getRelativePosition,
+  moveCursorVisual,
   parseHit,
   syncModelSelection,
-  syncVisualCursor,
 } from "../../text/cursor";
-import type { Vec2, ModelBlock } from "../../types";
-import type { VisualDocument } from "../../text/types";
+import type { Vec2 } from "../../types";
+import type {
+  VisualBlock,
+  VisualCursor,
+  VisualDocument,
+} from "../../text/types";
 import { subtract, translate } from "../../util";
 import { handleCreateDrag, handleCreateEnd, handleCreateStart } from "./create";
 import { handleResizeDrag, handleResizeStart } from "./resize";
@@ -180,29 +177,105 @@ function handleDocumentClick(e: React.MouseEvent, position: Vec2) {
     return;
   }
 
+  // double click selects the word under the cursor
+  if (e.detail === 2) {
+    selectWordAtCursor(cursor, doc.blocks);
+    return;
+  }
+
   setVisualSelection({ start: cursor, end: null });
   syncModelSelection();
-
-  // double click selects the word under the cursor
-  if (e.detail === 2) selectWordAtCursor(id);
 }
 
-function selectWordAtCursor(id: string) {
-  const { selection, setSelection } = useEditorStore.getState();
-  if (!selection.start) return;
+// \p{L}/\p{N} (rather than \w) so double-click word selection works for
+// accented and non-Latin scripts, not just ASCII letters/digits
+const WORD_CHAR = /[\p{L}\p{N}_']/u;
 
-  const blocks = getComponentProp(id, "document.blocks") as ModelBlock[];
-  const text = flattenBlocks(blocks);
-  const offset = cursorToOffset(blocks, selection.start);
+// the character immediately before (dir -1) or after (dir 1) a cursor,
+// peeking into the adjacent span if the cursor sits at a span boundary
+// (e.g. a word split across a style change). does not cross line/block
+// boundaries, since those already fall on natural word breaks
+function charAt(
+  blocks: VisualBlock[],
+  cursor: VisualCursor,
+  dir: 1 | -1
+): string | undefined {
+  const line = blocks[cursor.blockI]?.lines[cursor.lineI];
+  if (!line) return undefined;
 
-  const { start, end } = findWordRange(text, offset);
-  if (end <= start) return;
+  let spanI = cursor.spanI;
+  let idx = dir === 1 ? cursor.charI : cursor.charI - 1;
 
-  setSelection({
-    start: offsetToCursor(blocks, start),
-    end: offsetToCursor(blocks, end),
+  if (idx < 0) {
+    if (spanI === 0) return undefined; // start of line
+    spanI--;
+    idx = line.spans[spanI].text.length - 1;
+  } else if (idx >= line.spans[spanI].text.length) {
+    if (spanI === line.spans.length - 1) return undefined; // end of line
+    spanI++;
+    idx = 0;
+  }
+
+  return line.spans[spanI].text[idx];
+}
+
+function isWordCharAt(
+  blocks: VisualBlock[],
+  cursor: VisualCursor,
+  dir: 1 | -1
+) {
+  const char = charAt(blocks, cursor, dir);
+  return char !== undefined && WORD_CHAR.test(char);
+}
+
+function sameVisualCursor(a: VisualCursor, b: VisualCursor) {
+  return (
+    a.blockI === b.blockI &&
+    a.lineI === b.lineI &&
+    a.spanI === b.spanI &&
+    a.charI === b.charI
+  );
+}
+
+// walks in one direction while the adjacent char is a word char. the
+// sameVisualCursor check is just a safety net -- moveCursorVisual should
+// always make progress here now, but a walk that trusted that blindly is
+// exactly what caused the freeze this was built to fix in the first place
+function walkWhileWord(
+  blocks: VisualBlock[],
+  cursor: VisualCursor,
+  dir: 1 | -1
+) {
+  let pos = cursor;
+  while (isWordCharAt(blocks, pos, dir)) {
+    const next = moveCursorVisual(blocks, pos, dir);
+    if (sameVisualCursor(next, pos)) break;
+    pos = next;
+  }
+  return pos;
+}
+
+// selects the word touching the click position by walking the visual
+// cursor left/right with moveCursorVisual -- clicking on a non-word
+// character (whitespace/punctuation) selects just that one character
+function selectWordAtCursor(cursor: VisualCursor, blocks: VisualBlock[]) {
+  const { setVisualSelection } = useEditorStore.getState();
+
+  if (!isWordCharAt(blocks, cursor, 1) && !isWordCharAt(blocks, cursor, -1)) {
+    const hasRight = charAt(blocks, cursor, 1) !== undefined;
+    setVisualSelection({
+      start: hasRight ? cursor : moveCursorVisual(blocks, cursor, -1),
+      end: hasRight ? moveCursorVisual(blocks, cursor, 1) : cursor,
+    });
+    syncModelSelection();
+    return;
+  }
+
+  setVisualSelection({
+    start: walkWhileWord(blocks, cursor, -1),
+    end: walkWhileWord(blocks, cursor, 1),
   });
-  syncVisualCursor();
+  syncModelSelection();
 }
 
 function handleTextSelection(_: React.MouseEvent, position: Vec2) {
