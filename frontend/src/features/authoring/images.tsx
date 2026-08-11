@@ -6,23 +6,54 @@ import { useParams } from "react-router-dom";
 import { ImageIcon } from "lucide-react";
 import { add } from "./scene/operations/modifiers";
 import { defaults } from "./scene/operations/component";
-import type { ImageComponent, UploadedFile } from "./types";
+import type { ImageComponent, UploadedFile, Scene } from "./types";
 import { api, handleGeneric } from "../../util/api";
 import ModalDialog from "../../components/ModalDialogue";
 import useEditorStore from "./stores/editor.ts";
 import toast from "react-hot-toast";
 import AuthenticationContext from "../../context/AuthenticationContext.jsx";
 import type { AxiosResponse } from "axios";
+import SceneContext from "../../context/SceneContext.jsx";
+import { getScene, getSceneId } from "./scene/scene";
+import { v4 } from "uuid";
 
-async function addExistingImage(image: UploadedFile) {
+type ModifyScene = (scene: Scene) => Promise<unknown> | undefined;
+
+async function addImageToScene(
+  image: UploadedFile,
+  originScene: Scene,
+  modifyScene: ModifyScene
+) {
   const newImage = structuredClone(defaults.image) as Partial<ImageComponent>;
+
+  const imageId = v4();
+
+  newImage.id = imageId;
   newImage.fileId = image._id;
   newImage.href = image.url;
   newImage.bounds!.verts = await getImageDimensions(image.url);
-  add(newImage);
+
+  // Still on the slide where the operation began:
+  // add normally so visual state/history are updated.
+  if (getSceneId() === originScene._id) {
+    add(newImage);
+    return;
+  }
+
+  // User moved to another slide while the image was loading.
+  // Add it to the original slide instead of the currently active one.
+  originScene.components[imageId] = newImage as ImageComponent;
+
+  await modifyScene(originScene);
 }
 
-async function addNewImage(file: File, scenarioId: string, user: User) {
+async function addNewImage(
+  file: File,
+  scenarioId: string,
+  user: User,
+  originScene: Scene,
+  modifyScene: ModifyScene
+) {
   const { setLoading } = useEditorStore.getState();
   setLoading(true);
 
@@ -36,11 +67,7 @@ async function addNewImage(file: File, scenarioId: string, user: User) {
       formData
     )) as AxiosResponse<UploadedFile>;
 
-    const newImage = structuredClone(defaults.image) as Partial<ImageComponent>;
-    newImage.fileId = response.data._id;
-    newImage.href = response.data.url;
-    newImage.bounds!.verts = await getImageDimensions(response.data.url);
-    add(newImage);
+    await addImageToScene(response.data, originScene, modifyScene);
   } catch (e) {
     console.error(e);
     toast.error("Image upload failed");
@@ -73,6 +100,11 @@ function ImageCreateMenu() {
   const [selectedImage, setSelectedImage] = useState<UploadedFile | null>(null);
 
   const { user } = useContext(AuthenticationContext as Context<{ user: User }>);
+  const { modifyScene } = useContext(
+    SceneContext as Context<{
+      modifyScene: ModifyScene;
+    }>
+  );
   const [modalOpen, setModalOpen] = useState(false);
 
   const fileInputRef = useRef<HTMLInputElement | null>(null);
@@ -85,7 +117,14 @@ function ImageCreateMenu() {
 
   function handleFileChange(event: React.ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0];
-    if (file) addNewImage(file, scenarioId, user).catch(handleGeneric);
+
+    if (file) {
+      const originScene = getScene();
+
+      addNewImage(file, scenarioId, user, originScene, modifyScene).catch(
+        handleGeneric
+      );
+    }
   }
 
   const showFilePicker = () => {
@@ -95,11 +134,16 @@ function ImageCreateMenu() {
   function showModal() {
     setModalOpen(true);
   }
-
   function handleSubmit() {
     if (!selectedImage) return;
+
     setModalOpen(false);
-    addExistingImage(selectedImage).catch(handleGeneric);
+
+    const originScene = getScene();
+
+    addImageToScene(selectedImage, originScene, modifyScene).catch(
+      handleGeneric
+    );
   }
 
   return (
