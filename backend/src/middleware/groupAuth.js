@@ -6,7 +6,6 @@ import { isValidObjectId } from "../util/validation.js";
 
 async function getEmailByUid(uid) {
   const user = await User.findOne({ uid }, { email: 1 }).lean();
-  if (!user) throw new HttpError("user not found", HttpStatusCode.Unauthorized);
   return user.email;
 }
 

@@ -70,9 +70,9 @@ describe("Note API tests", () => {
     });
   });
 
-  it("GET /note/retrieveAll/:groupId returns all notes for a group", async () => {
+  it("GET /group/:groupId/notes returns all notes for a group", async () => {
     const response = await axios.get(
-      `http://localhost:${ctx.port}/api/note/retrieveAll/${group._id}`,
+      `http://localhost:${ctx.port}/api/group/${group._id}/notes`,
       authHeaders("user1")
     );
     expect(response.status).toBe(200);
@@ -81,9 +81,9 @@ describe("Note API tests", () => {
     expect(response.data[0].text).toBe("Some text");
   });
 
-  it("GET /note/retrieveAll/:groupId returns empty array for group with no notes", async () => {
+  it("GET /group/:groupId/notes returns empty array for group with no notes", async () => {
     const emptyGroup = await Group.create({
-      users: [],
+      users: [{ email: userEmail, name: "Doctor", role: userRole }],
       notes: {},
       path: [],
       scenarioId: "scenario-002",
@@ -91,16 +91,16 @@ describe("Note API tests", () => {
     });
 
     const response = await axios.get(
-      `http://localhost:${ctx.port}/api/note/retrieveAll/${emptyGroup._id}`,
+      `http://localhost:${ctx.port}/api/group/${emptyGroup._id}/notes`,
       authHeaders("user1")
     );
     expect(response.status).toBe(200);
     expect(response.data).toHaveLength(0);
   });
 
-  it("GET /note/retrieve/:noteId returns a specific note", async () => {
+  it("GET /group/:groupId/notes/:noteId returns a specific note", async () => {
     const response = await axios.get(
-      `http://localhost:${ctx.port}/api/note/retrieve/${note1._id}`,
+      `http://localhost:${ctx.port}/api/group/${group._id}/notes/${note1._id}`,
       authHeaders("user1")
     );
     expect(response.status).toBe(200);
@@ -108,11 +108,10 @@ describe("Note API tests", () => {
     expect(response.data.title).toBe("Note 1");
   });
 
-  it("POST /note/ creates a note for a user in the group", async () => {
+  it("POST /group/:groupId/notes creates a note for a user in the group", async () => {
     const response = await axios.post(
-      `http://localhost:${ctx.port}/api/note/`,
+      `http://localhost:${ctx.port}/api/group/${group._id}/notes`,
       {
-        groupId: group._id.toString(),
         title: "New Note",
       },
       authHeaders("user1")
@@ -126,32 +125,29 @@ describe("Note API tests", () => {
     expect(notes[0].role).toBe(userRole);
   });
 
-  it("POST /note/ does nothing silently when user is not in group", async () => {
+  it("POST /group/:groupId/notes returns forbidden when user is not in group", async () => {
     // Authenticated as "outsider", whose email is not a group member —
-    // createNote returns null but the route still responds 200.
-    const response = await axios.post(
-      `http://localhost:${ctx.port}/api/note/`,
-      {
-        groupId: group._id.toString(),
-        title: "Ghost Note",
-      },
-      authHeaders("outsider")
-    );
-    expect(response.status).toBe(200);
-    expect(response.data).toBe("note created");
+    // the middleware rejects the request before any note is created.
+    await expect(
+      axios.post(
+        `http://localhost:${ctx.port}/api/group/${group._id}/notes`,
+        {
+          title: "Ghost Note",
+        },
+        authHeaders("outsider")
+      )
+    ).rejects.toMatchObject({ response: { status: 403 } });
 
     const notes = await Note.find({ title: "Ghost Note" });
     expect(notes).toHaveLength(0);
   });
 
-  it("PUT /note/update updates a note's title and text", async () => {
+  it("PUT /group/:groupId/notes/:noteId updates a note's title and text", async () => {
     const response = await axios.put(
-      `http://localhost:${ctx.port}/api/note/update`,
+      `http://localhost:${ctx.port}/api/group/${group._id}/notes/${note1._id}`,
       {
-        noteId: note1._id.toString(),
         title: "Updated Title",
         text: "Updated text",
-        groupId: group._id.toString(),
       },
       authHeaders("user1")
     );
@@ -163,15 +159,11 @@ describe("Note API tests", () => {
     expect(dbNote.text).toBe("Updated text");
   });
 
-  it("DELETE /note/delete removes the note and its reference from the group", async () => {
+  it("DELETE /group/:groupId/notes/:noteId removes the note and its reference from the group", async () => {
     const response = await axios.delete(
-      `http://localhost:${ctx.port}/api/note/delete`,
+      `http://localhost:${ctx.port}/api/group/${group._id}/notes/${note1._id}`,
       {
         ...authHeaders("user1"),
-        data: {
-          noteId: note1._id.toString(),
-          groupId: group._id.toString(),
-        },
       }
     );
     expect(response.status).toBe(200);
