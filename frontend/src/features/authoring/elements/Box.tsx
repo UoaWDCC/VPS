@@ -1,4 +1,3 @@
-//change box creation tool to be textbox and then have it be predefined filled and then beyond that 
 import {
   constructPath,
   expandBoxVerts,
