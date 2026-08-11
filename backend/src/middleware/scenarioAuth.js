@@ -1,6 +1,8 @@
 import { HttpStatusCode } from "axios";
 import { retrieveScenario } from "../db/daos/scenarioDao.js";
 import { hasAccess } from "../db/daos/accessDao.js";
+import { isValidObjectId } from "../util/validation.js";
+import { HttpError } from "../util/error.js";
 
 /**
  * Checks if the scenario is accessable by the user
@@ -8,7 +10,11 @@ import { hasAccess } from "../db/daos/accessDao.js";
  */
 export default async function scenarioAuth(req, res, next) {
   try {
-    const scenario = await retrieveScenario(req.params.scenarioId);
+    const { scenarioId } = req.params;
+    if (!isValidObjectId(scenarioId))
+      throw new HttpError("invalid scenario id", HttpStatusCode.BadRequest);
+
+    const scenario = await retrieveScenario(scenarioId);
     if (!scenario) return res.sendStatus(HttpStatusCode.NotFound);
 
     // is direct owner or has been given access
@@ -35,7 +41,11 @@ export async function isAuthor(scenarioId, uid) {
  */
 export async function scenarioOwnerAuth(req, res, next) {
   try {
-    const scenario = await retrieveScenario(req.params.scenarioId);
+    const { scenarioId } = req.params;
+    if (!isValidObjectId(scenarioId))
+      throw new HttpError("invalid scenario id", HttpStatusCode.BadRequest);
+
+    const scenario = await retrieveScenario(scenarioId);
     if (!scenario) return res.sendStatus(HttpStatusCode.NotFound);
 
     if (req.body.uid === scenario.uid) return next();

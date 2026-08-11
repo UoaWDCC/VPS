@@ -14,7 +14,6 @@ import UploadedFile from "../../db/models/uploadedFile.js";
 const router = Router();
 
 router.use(auth);
-router.use("/:scenarioId", scenarioAuth);
 
 /**
  * @route GET /api/resources/:scenarioId
@@ -33,6 +32,8 @@ router.get(
     return res.json(resources);
   })
 );
+
+router.use("/:scenarioId", scenarioAuth);
 
 /**
  * @route POST /api/resources/:scenarioId

@@ -6,67 +6,63 @@ import {
   deleteNote,
   retrieveNote,
 } from "../../db/daos/noteDao.js";
-import auth from "../../middleware/firebaseAuth.js";
-import { handle, HttpError } from "../../util/error.js";
-import STATUS from "../../util/status.js";
-import User from "../../db/models/user.js";
+import firebaseAuth from "../../middleware/firebaseAuth.js";
+import groupAuth from "../../middleware/groupAuth.js";
+import { handle } from "../../util/error.js";
 
-const router = Router();
-const HTTP_OK = 200;
+const router = Router({ mergeParams: true });
 
-router.use(auth);
-
-async function getEmailByUid(uid) {
-  const user = await User.findOne({ uid }, { email: 1 }).lean();
-  if (!user) throw new HttpError("User not found", STATUS.UNAUTHORIZED);
-  return user.email;
-}
+router.use(firebaseAuth);
+router.use(groupAuth);
 
 // Retrieve note list
-router.get("/retrieveAll/:groupId", async (req, res) => {
+router.get("/", async (req, res) => {
   const { groupId } = req.params;
   const notes = await retrieveNoteList(groupId);
-  res.status(HTTP_OK).json(notes);
+  res.json(notes);
 });
 
 // Retrieve a note
-router.get("/retrieve/:noteId", async (req, res) => {
+router.get("/:noteId", async (req, res) => {
   const { noteId } = req.params;
   const note = await retrieveNote(noteId);
-  res.status(HTTP_OK).json(note);
+  res.json(note);
 });
 
 // Create an empty note
 router.post(
   "/",
   handle(async (req, res) => {
-    const { groupId, title } = req.body;
-    const email = await getEmailByUid(req.body.uid);
-    await createNote(groupId, title, email);
-    res.status(HTTP_OK).json("note created");
+    const { title, membership } = req.body;
+    const { groupId } = req.params;
+    await createNote(groupId, title, membership.role);
+    res.json("note created");
   })
 );
 
 // Update a note
 router.put(
-  "/update",
+  "/:noteId",
   handle(async (req, res) => {
-    const { noteId, text, title, groupId } = req.body;
-    const email = await getEmailByUid(req.body.uid);
-    const date = new Date();
-    await updateNote(noteId, { text, title, date }, groupId, email);
-    res.status(HTTP_OK).json("note updated");
+    const { noteId } = req.params;
+    const { membership, text, title } = req.body;
+    await updateNote(
+      noteId,
+      { text, title, date: new Date() },
+      membership.role
+    );
+    res.json("note updated");
   })
 );
 
 // Delete a note
 router.delete(
-  "/delete",
+  "/:noteId",
   handle(async (req, res) => {
-    const { noteId, groupId } = req.body;
-    const email = await getEmailByUid(req.body.uid);
-    await deleteNote(noteId, groupId, email);
-    res.status(STATUS.OK).json("note deleted");
+    const { noteId, groupId } = req.params;
+    const { membership } = req.body;
+    await deleteNote(noteId, groupId, membership.role);
+    res.json("note deleted");
   })
 );
 
