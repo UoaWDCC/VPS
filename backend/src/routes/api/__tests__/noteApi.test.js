@@ -7,6 +7,7 @@ import Note from "../../../db/models/note.js";
 import Group from "../../../db/models/group.js";
 import User from "../../../db/models/user.js";
 import auth from "../../../middleware/firebaseAuth.js";
+import errorHandler from "../../../middleware/errorHandler.js";
 import { authHeaders } from "./testHelpers.js";
 import {
   useMongoMemoryServer,
@@ -27,6 +28,7 @@ describe("Note API tests", () => {
     const app = express();
     app.use(express.json());
     app.use("/", routes);
+    app.use(errorHandler);
     return app;
   });
 
@@ -108,6 +110,31 @@ describe("Note API tests", () => {
     expect(response.data.title).toBe("Note 1");
   });
 
+  it("GET /group/:groupId/notes/:noteId returns not found for cross-group note access", async () => {
+    const otherGroup = await Group.create({
+      users: [{ email: userEmail, name: "Doctor", role: userRole }],
+      notes: {},
+      path: [],
+      scenarioId: "scenario-cross-group-get",
+      currentFlags: [],
+    });
+
+    await expect(
+      axios.get(
+        `http://localhost:${ctx.port}/api/group/${otherGroup._id}/notes/${note1._id}`,
+        authHeaders("user1")
+      )
+    ).rejects.toMatchObject({
+      response: {
+        status: 404,
+        data: {
+          status: 404,
+          error: "note not found",
+        },
+      },
+    });
+  });
+
   it("POST /group/:groupId/notes creates a note for a user in the group", async () => {
     const response = await axios.post(
       `http://localhost:${ctx.port}/api/group/${group._id}/notes`,
@@ -159,6 +186,39 @@ describe("Note API tests", () => {
     expect(dbNote.text).toBe("Updated text");
   });
 
+  it("PUT /group/:groupId/notes/:noteId returns not found for cross-group note access", async () => {
+    const otherGroup = await Group.create({
+      users: [{ email: userEmail, name: "Doctor", role: userRole }],
+      notes: {},
+      path: [],
+      scenarioId: "scenario-cross-group-put",
+      currentFlags: [],
+    });
+
+    await expect(
+      axios.put(
+        `http://localhost:${ctx.port}/api/group/${otherGroup._id}/notes/${note1._id}`,
+        {
+          title: "Should Not Update",
+          text: "Should Not Update",
+        },
+        authHeaders("user1")
+      )
+    ).rejects.toMatchObject({
+      response: {
+        status: 404,
+        data: {
+          status: 404,
+          error: "note not found",
+        },
+      },
+    });
+
+    const dbNote = await Note.findById(note1._id).lean();
+    expect(dbNote.title).toBe("Note 1");
+    expect(dbNote.text).toBe("Some text");
+  });
+
   it("DELETE /group/:groupId/notes/:noteId removes the note and its reference from the group", async () => {
     const response = await axios.delete(
       `http://localhost:${ctx.port}/api/group/${group._id}/notes/${note1._id}`,
@@ -174,5 +234,35 @@ describe("Note API tests", () => {
 
     const dbGroup = await Group.findById(group._id).lean();
     expect(dbGroup.notes[userRole] ?? []).not.toContain(note1._id.toString());
+  });
+
+  it("DELETE /group/:groupId/notes/:noteId returns not found for cross-group note access", async () => {
+    const otherGroup = await Group.create({
+      users: [{ email: userEmail, name: "Doctor", role: userRole }],
+      notes: {},
+      path: [],
+      scenarioId: "scenario-cross-group-delete",
+      currentFlags: [],
+    });
+
+    await expect(
+      axios.delete(
+        `http://localhost:${ctx.port}/api/group/${otherGroup._id}/notes/${note1._id}`,
+        {
+          ...authHeaders("user1"),
+        }
+      )
+    ).rejects.toMatchObject({
+      response: {
+        status: 404,
+        data: {
+          status: 404,
+          error: "note not found",
+        },
+      },
+    });
+
+    const dbNote = await Note.findById(note1._id).lean();
+    expect(dbNote).not.toBeNull();
   });
 });

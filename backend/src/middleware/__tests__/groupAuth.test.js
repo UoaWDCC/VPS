@@ -8,6 +8,7 @@ import { useMongoMemoryServer } from "../../test/testSetup.js";
 describe("Group Auth Middleware tests", () => {
   const HTTP_NOT_FOUND = 404;
   const HTTP_FORBIDDEN = 403;
+  const HTTP_UNAUTHORIZED = 401;
 
   useMongoMemoryServer();
 
@@ -90,6 +91,28 @@ describe("Group Auth Middleware tests", () => {
 
     expect(next).toHaveBeenCalledWith(
       expect.objectContaining({ status: HTTP_NOT_FOUND })
+    );
+  });
+
+  it("rejects when the authenticated user cannot be found", async () => {
+    const group = await Group.create({
+      users: [{ email: "doctor@example.com", name: "Doctor", role: "doctor" }],
+      notes: {},
+      path: [],
+      scenarioId: "scenario-003",
+      currentFlags: [],
+    });
+
+    const req = mockRequest(group._id.toString(), { uid: "missing-user" });
+    const next = jest.fn();
+
+    await groupAuth(req, {}, next);
+
+    expect(next).toHaveBeenCalledWith(
+      expect.objectContaining({
+        status: HTTP_UNAUTHORIZED,
+        message: "user not found",
+      })
     );
   });
 });

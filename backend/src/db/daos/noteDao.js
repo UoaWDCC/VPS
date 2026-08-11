@@ -2,6 +2,17 @@ import Note from "../models/note.js";
 import Group from "../models/group.js";
 import { HttpError } from "../../util/error.js";
 
+export const hasNoteInGroup = (group, noteId) => {
+  if (!group?.notes) return false;
+
+  const groupedNotes =
+    group.notes instanceof Map
+      ? Array.from(group.notes.values())
+      : Object.values(group.notes);
+
+  return groupedNotes.flat().some((id) => id === noteId);
+};
+
 /**
  * Creates a empty note in the database
  * @param {String} groupId group ID the note belongs to
@@ -76,7 +87,7 @@ const retrieveNoteList = async (groupId) => {
  * @returns database note object
  */
 const retrieveNote = async (noteId) => {
-  const note = await Note.findById(noteId);
+  const note = await Note.findOne({ _id: noteId });
   return note;
 };
 

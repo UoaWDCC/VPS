@@ -18,6 +18,7 @@ router.use(auth);
 /**
  * @route GET /api/resources/:scenarioId
  * @desc Get all resources for a scenario
+ * NOTE: this route is unprotected currently, will be addressed with assignment refactor
  */
 router.get(
   "/:scenarioId",
