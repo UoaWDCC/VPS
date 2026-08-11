@@ -100,6 +100,13 @@ export interface TextBoxComponent extends ShapeComponent {
   padding: number;
 }
 
+export interface TextFilledBoxComponent extends ShapeComponent {
+  type: "textfilledbox";
+  document: ModelDocument;
+  color: HexString;
+  padding: number;
+}
+
 interface BaseModelDocument {
   type: "text";
   blocks: ModelBlock[];

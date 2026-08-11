@@ -35,6 +35,36 @@ export const defaults = {
     },
     zIndex: 0,
   },
+  textFilledBox: {
+    type: "textbox",
+    padding: 20,
+    clickable: true,
+    fill: "#b7b7b7ff",
+    stroke: "#00000000",
+    strokeWidth: 3, // default stroke width 3
+    bounds: {
+      verts: [
+        { x: 0, y: 0 },
+        { x: 400, y: 100 },
+      ],
+      rotation: 0,
+    },
+    document: {
+      style: {},
+      blocks: [
+        {
+          style: {},
+          spans: [
+            {
+              style: {},
+              text: "",
+            },
+          ],
+        },
+      ],
+    },
+    zIndex: 0,
+  },
   line: {
     type: "line",
     stroke: "#b7b7b7ff",
