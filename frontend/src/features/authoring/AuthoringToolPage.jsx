@@ -72,10 +72,19 @@ export default function AuthoringToolPage() {
 
     const listener = async ({ operation, record }) => {
       if (operation === "undo" || operation === "redo") {
-        if (record.sceneId !== sceneId) switchScene(getScene(), record.sceneId);
-        const state = operation === "undo" ? record.before : record.after;
-        replaceComponent(record.id, state);
-        if (state !== null) setSelected(record.id);
+        const batch = record;
+        const targetSceneId = batch[0]?.sceneId;
+        if (targetSceneId && targetSceneId !== sceneId) {
+          switchScene(getScene(), targetSceneId);
+        }
+
+        const restoredIds = [];
+        batch.forEach((item) => {
+          const state = operation === "undo" ? item.before : item.after;
+          replaceComponent(item.id, state);
+          if (state !== null) restoredIds.push(item.id);
+        });
+        setSelected(restoredIds);
       }
 
       setSaving(true);

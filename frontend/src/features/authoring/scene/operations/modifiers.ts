@@ -1,11 +1,14 @@
 import { v4 } from "uuid";
 import { buildVisualComponent, buildVisualScene } from "../../pipeline";
 import useVisualScene, { type VisualSceneState } from "../../stores/visual";
-import { updateHistory, type ChangeRecord } from "../history";
-import { commitSavedScene, getComponent, getScene, setScene } from "../scene";
+import {
+  dispatchModification,
+  updateHistory,
+  type ChangeRecord,
+} from "../history";
+import { getComponent, getScene, setScene } from "../scene";
 import type { Component, Scene } from "../../types";
 import { arrayToObject } from "../util";
-import useEditorStore from "../../stores/editor";
 
 export function replace(scene: Scene) {
   const clone = structuredClone(scene);

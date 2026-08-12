@@ -1,22 +1,9 @@
 import { fastIsEqual } from "fast-is-equal";
 import type { Component } from "../types";
-import {
-  applySceneSwitch,
-  getComponent,
-  getScene,
-  getSceneId,
-  saveCurrentScene,
-} from "./scene";
-import useVisualScene from "../stores/visual";
-import { buildVisualComponent } from "../pipeline";
-import useEditorStore from "../stores/editor";
+import { getComponent, getSceneId } from "./scene";
+import { TypedEventTarget } from "typescript-event-target";
 
-interface SceneRef {
-  _id: string;
-  components: Record<string, any>[];
-}
-
-interface HistoryObject {
+interface HistoryRecord {
   sceneId: string;
   id: string;
   before: Component | null;
@@ -31,13 +18,15 @@ interface HistoryEventMap {
 
 class HistoryEvent<T extends HistoryOperation> extends Event {
   operation: T;
-  record: T extends "undo" | "redo" ? HistoryObject : HistoryObject | undefined;
+  record: T extends "undo" | "redo"
+    ? HistoryRecord[]
+    : HistoryRecord[] | undefined;
 
   constructor(
     operation: T,
     record: T extends "undo" | "redo"
-      ? HistoryObject
-      : HistoryObject | undefined
+      ? HistoryRecord[]
+      : HistoryRecord[] | undefined
   ) {
     super("update");
     this.operation = operation;
@@ -45,13 +34,13 @@ class HistoryEvent<T extends HistoryOperation> extends Event {
   }
 }
 
-function cloneHistoryRecord(record: HistoryObject): HistoryObject {
-  return {
+function cloneHistoryBatch(batch: HistoryRecord[]): HistoryRecord[] {
+  return batch.map((record) => ({
     sceneId: record.sceneId,
     id: record.id,
     before: structuredClone(record.before),
     after: structuredClone(record.after),
-  };
+  }));
 }
 
 export interface ChangeRecord {
@@ -61,48 +50,46 @@ export interface ChangeRecord {
 
 type ActionHistory = "redo" | "undo";
 
-let undoStack: HistoryObject[][] = [];
-let redoStack: HistoryObject[][] = [];
-let scenes: SceneRef[] = [];
-let scenarioId: string | null = null;
-let saveScene: ((patch: Record<string, any>) => Promise<void>) | null = null;
+let undoStack: HistoryRecord[][] = [];
+let redoStack: HistoryRecord[][] = [];
 
-export function init(
-  _scenes: SceneRef[],
-  _scenarioId: string,
-  _saveScene: (patch: Record<string, any>) => Promise<void>
-) {
-  if (_scenarioId !== scenarioId) {
-    undoStack = [];
-    redoStack = [];
-  }
-  scenes = _scenes;
-  scenarioId = _scenarioId;
-  saveScene = _saveScene;
+export const historyEvents = new TypedEventTarget<HistoryEventMap>();
+
+export function clearHistory() {
+  undoStack = [];
+  redoStack = [];
+}
+
+// NOTE: this should only be used for scene modifications that don't support undo/redo
+export function dispatchModification() {
+  historyEvents.dispatchTypedEvent("update", new HistoryEvent("do", undefined));
 }
 
 export function updateHistory(incomingChanges: ChangeRecord[]) {
   const sceneId = getSceneId();
-  let validChanges: HistoryObject[] = [];
+  const batch: HistoryRecord[] = [];
 
   incomingChanges.forEach(({ id, prevState }) => {
-    const currentState = getComponent(id);
+    const current = getComponent(id);
+    if (fastIsEqual(prevState, current)) return;
 
-    if (!fastIsEqual(prevState, currentState)) {
-      validChanges.push({ sceneId, id, state: prevState });
-    }
+    batch.push({
+      sceneId,
+      id,
+      before: structuredClone(prevState),
+      after: structuredClone(current),
+    });
   });
 
-  if (validChanges.length === 0) return;
+  if (batch.length === 0) return;
 
-  undoStack.push(validChanges);
+  undoStack.push(batch);
   if (undoStack.length > 100) undoStack.shift();
-
   redoStack = [];
 
   historyEvents.dispatchTypedEvent(
     "update",
-    new HistoryEvent("do", cloneHistoryRecord(record))
+    new HistoryEvent("do", cloneHistoryBatch(batch))
   );
 }
 
@@ -114,44 +101,10 @@ export function handleHistoryChange(action: ActionHistory) {
   const batch = sourceStack.pop();
   if (!batch || batch.length === 0) return;
 
-  const sceneID = batch[0].sceneId;
-  const ids = batch.map((obj) => obj.id);
+  targetStack.push(batch);
 
-  if (!switchToScene(sceneID)) return;
-
-  const validChanges: HistoryObject[] = ids.map((id) => {
-    const comp = getComponent(id);
-    return {
-      sceneId: sceneID,
-      id,
-      state: comp ? structuredClone(comp) : null,
-    };
-  });
-
-  batch.forEach((obj) => {
-    restoreComponent(obj.id, obj.state);
-  });
-
-  targetStack.push(validChanges);
-}
-
-function switchToScene(targetSceneId: string): boolean {
-  if (targetSceneId === getSceneId()) return true;
-  const targetScene = scenes.find((s) => s._id === targetSceneId);
-  if (!targetScene) return false;
-  if (saveScene) void saveCurrentScene(saveScene);
-  applySceneSwitch(targetScene, scenarioId!);
-  return true;
-}
-
-function restoreComponent(id: string, state: Component | null) {
-  const { setSelected } = useEditorStore.getState();
-  if (state === null) {
-    setSelected([]);
-    delete getScene().components[id];
-    useVisualScene.getState().deleteComponent(id);
-  } else {
-    getScene().components[id] = structuredClone(state);
-    useVisualScene.getState().updateComponent(buildVisualComponent(state));
-  }
+  historyEvents.dispatchTypedEvent(
+    "update",
+    new HistoryEvent(action, cloneHistoryBatch(batch))
+  );
 }

@@ -1,4 +1,4 @@
-import { redo, undo } from "../../scene/history";
+import { handleHistoryChange } from "../../scene/history";
 import {
   bringForward,
   bringToFront,
@@ -33,11 +33,11 @@ function toggleTextStyle(
 const shortcuts: Shortcut[] = [
   {
     combos: ["mod+z"],
-    run: () => undo(),
+    run: () => handleHistoryChange("undo"),
   },
   {
     combos: ["mod+shift+z", "mod+y"],
-    run: () => redo(),
+    run: () => handleHistoryChange("redo"),
   },
   {
     combos: ["mod+d"],
