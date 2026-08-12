@@ -18,14 +18,14 @@ import type { BaseTextStyle } from "../types";
 import { setTextStyle } from "../text/style";
 
 function TextSection() {
-  const selected = useEditorStore((state) => state.selected)!; // this comp only renders when a text el is selected
+  const selected = useEditorStore((state) => state.selected); // this comp only renders when a text el is selected
 
   const style = useEditorStore((state) => state.activeStyle);
 
   if (!style) return null;
 
   function modifyStyle(prop: keyof BaseTextStyle, value: string | number) {
-    setTextStyle(selected, prop, value);
+    setTextStyle(selected[0], prop, value);
   }
 
   return (

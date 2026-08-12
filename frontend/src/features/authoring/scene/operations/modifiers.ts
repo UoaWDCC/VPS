@@ -29,7 +29,7 @@ export function modifySceneProp<K extends keyof VisualSceneState>(
 }
 
 // wrapper for state mutating functions, will capture both state and operation
-export function modify<A extends [string[], ...any[]], R>(
+export function modify<A extends [string[], ...unknown[]], R>(
   fn: (...args: A) => R
 ) {
   return function (...args: A): R {
@@ -86,7 +86,7 @@ export function add(props: Record<string, any>, history = true) {
   const id = props.id as string;
   getScene().components[id] = props as Component;
 
-  if (history) updateHistory([{ id: props.id, prevState: null }]);
+  if (history) updateHistory([{ id, prevState: null }]);
 
   useVisualScene
     .getState()
@@ -100,6 +100,6 @@ export function replaceComponent(
   state: Component | null,
   history = false
 ) {
-  if (state === null) remove(id, history);
+  if (state === null) remove([id], history);
   else add(state, history);
 }

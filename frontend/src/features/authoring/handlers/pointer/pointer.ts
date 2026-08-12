@@ -6,6 +6,7 @@ import {
   parseHit,
   syncModelSelection,
 } from "../../text/cursor";
+import type { VisualDocument } from "../../text/types";
 import type { Component, Vec2 } from "../../types";
 import {
   divide,
@@ -23,6 +24,7 @@ import {
   handleResizeStart,
   inverse,
 } from "./resize";
+import { snapTranslation } from "./snap";
 
 export function handleMouseDownGlobal(e: React.MouseEvent, position: Vec2) {
   const target = e.target as HTMLElement;
@@ -129,8 +131,15 @@ function handleComponentDrag(_: React.MouseEvent, position: Vec2) {
     useEditorStore.getState();
   if (!selected?.length) return;
 
-  const bounds = getSelectedComponentBounds();
-  const verts = translate(bounds.verts, subtract(position, offset));
+  const bounds = getSelectedComponentBounds()!;
+  let verts = translate(bounds.verts, subtract(position, offset));
+
+  const { components } = useVisualScene.getState();
+  const others = Object.values(components).filter(
+    (c) => !selected.includes(c.id)
+  );
+  const { delta, guides } = snapTranslation(verts, bounds.rotation, others, "");
+  verts = translate(verts, delta);
 
   setMutationBounds((prev) => ({ ...prev, verts }));
   setActiveGuides(guides);
@@ -138,12 +147,13 @@ function handleComponentDrag(_: React.MouseEvent, position: Vec2) {
 }
 
 function handleMutationEnd() {
-  const { selected, mutationBounds, setMode, mode } = useEditorStore.getState();
+  const { selected, mutationBounds, setMode, mode, setActiveGuides } =
+    useEditorStore.getState();
 
   if (selected.length == 1) {
     modifyComponentBounds(selected, mutationBounds);
   } else {
-    const { verts: prevVerts } = getSelectedComponentBounds();
+    const { verts: prevVerts } = getSelectedComponentBounds()!;
     const { verts } = mutationBounds;
 
     if (mode.includes("resize")) {
@@ -261,7 +271,9 @@ function handleTextSelection(_: React.MouseEvent, position: Vec2) {
   const { selected, setVisualSelection } = useEditorStore.getState();
   if (!selected?.length) return;
 
-  const { document: doc } = useVisualScene.getState().components[selected[0]];
+  const { document: doc } = useVisualScene.getState().components[
+    selected[0]
+  ] as unknown as { document: VisualDocument };
   const cursor = parseHit(
     getRelativePosition(position, doc.bounds),
     doc.blocks

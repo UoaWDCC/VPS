@@ -118,7 +118,7 @@ function Highlight({ color }: HighlightProps) {
   const { selected } = useEditorStore.getState();
   const { components } = useVisualScene.getState();
   const { blocks, bounds } = (
-    components[selected[0]!] as unknown as { document: VisualDocument }
+    components[selected[0]] as unknown as { document: VisualDocument }
   ).document;
 
   if (!isValidSelection(selection, blocks)) return null;

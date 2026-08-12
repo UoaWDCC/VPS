@@ -34,10 +34,11 @@ export function handleResizeStart(e: React.MouseEvent) {
 }
 
 export function handleResizeDrag(e: React.MouseEvent, position: Vec2) {
-  const { addMode, setMutationBounds } = useEditorStore.getState();
+  const { addMode, setMutationBounds, selected, setActiveGuides } =
+    useEditorStore.getState();
   addMode("mutation");
 
-  const bounds = getSelectedComponentBounds();
+  const bounds = getSelectedComponentBounds()!;
 
   const newBounds: Partial<Bounds> = {};
 
@@ -50,7 +51,9 @@ export function handleResizeDrag(e: React.MouseEvent, position: Vec2) {
 
     // alignment guides only make sense in global space, so only snap unrotated components
     if (!bounds.rotation) {
-      const components = Object.values(useVisualScene.getState().components);
+      const components = Object.values(
+        useVisualScene.getState().components
+      ).filter((c) => !selected.includes(c.id));
 
       // resolve modifiers (shift/ctrl) against the raw point first so we snap the
       // actual resize point, not the mouse position they'd otherwise overwrite
@@ -71,7 +74,7 @@ export function handleResizeDrag(e: React.MouseEvent, position: Vec2) {
         coords,
         e.ctrlKey,
         components,
-        selected!
+        ""
       );
       setActiveGuides(snapped.guides);
 
@@ -169,7 +172,7 @@ function updateResize(
   const { selected } = useEditorStore.getState();
   const type = selected.length === 1 ? getComponent(selected[0]).type : "box";
 
-  const bounds = getSelectedComponentBounds();
+  const bounds = getSelectedComponentBounds()!;
   const center = getBoxCenter(bounds.verts);
 
   let verts = modifyVerts(bounds.verts, coords, position);

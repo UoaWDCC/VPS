@@ -27,7 +27,7 @@ function isInputTarget(e: ClipboardEvent) {
 export function copy(e: ClipboardEvent) {
   if (isInputTarget(e)) return;
   const { selected } = useEditorStore.getState();
-  if (!selected) return;
+  if (!selected.length) return;
 
   e.preventDefault();
 
@@ -36,8 +36,8 @@ export function copy(e: ClipboardEvent) {
 
 export function cut(e: ClipboardEvent) {
   if (isInputTarget(e)) return;
-  const { selected } = useEditorStore.getState();
-  if (!selected) return;
+  const { selected, setSelected } = useEditorStore.getState();
+  if (!selected.length) return;
 
   e.preventDefault();
 
@@ -55,7 +55,7 @@ export function paste(e: ClipboardEvent) {
   const appData = e.clipboardData?.getData("application/component");
   const textData = e.clipboardData?.getData("text/plain");
 
-  if (selected && mode.includes("text")) {
+  if (selected.length && mode.includes("text")) {
     let cursor = selection.start!;
 
     if (appData) {
@@ -66,10 +66,16 @@ export function paste(e: ClipboardEvent) {
         return;
       }
 
-      const items = Array.isArray(parsed) ? parsed : [parsed];
+      const items = (Array.isArray(parsed) ? parsed : [parsed]) as {
+        type?: string;
+        document?: ModelDocument;
+      }[];
 
       for (const item of items) {
-        const doc = item.type === "textbox" ? item.document : item;
+        const doc =
+          item.type === "textbox"
+            ? item.document!
+            : (item as unknown as ModelDocument);
         cursor = mergeDocs(selected, cursor, doc);
       }
 
@@ -89,15 +95,17 @@ export function paste(e: ClipboardEvent) {
         return;
       }
 
-      const items = Array.isArray(parsed) ? parsed : [parsed];
-      let newSelection: string[] = [];
+      const items = (Array.isArray(parsed) ? parsed : [parsed]) as {
+        type?: string;
+      }[];
+      const newSelection: string[] = [];
 
       items.forEach((obj) => {
         if (obj.type) {
-          newSelection.push(parseComponent(obj));
+          newSelection.push(parseComponent(obj as unknown as Component));
         } else {
           const component = structuredClone(defaults["textbox"]);
-          component.document = structuredClone(obj);
+          component.document = structuredClone(obj as unknown as ModelDocument);
           newSelection.push(add(component));
         }
       });

@@ -13,7 +13,7 @@ interface ShapeProps {
   strokeWidth: number;
 }
 
-function extractProps(selected: string): ShapeProps {
+function extractProps(selected: string[]): ShapeProps {
   const c = getComponent(selected[0]) as unknown as ShapeProps;
   return { fill: c.fill, stroke: c.stroke, strokeWidth: c.strokeWidth };
 }
@@ -21,12 +21,12 @@ function extractProps(selected: string): ShapeProps {
 const widths = [1, 2, 3, 4, 8, 12, 16, 24];
 
 function ShapeSection() {
-  const selected = useEditorStore((state) => state.selected)!;
+  const selected = useEditorStore((state) => state.selected);
 
   const [props, setProps] = useState(extractProps(selected));
 
   useEffect(() => {
-    setProps(extractProps(selected)!);
+    setProps(extractProps(selected));
   }, [selected]);
 
   function modifyProps(prop: string, value: string | number) {

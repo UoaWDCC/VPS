@@ -38,7 +38,9 @@ function ResolveHandles({ type }: { type: string }) {
 
 function Overlay() {
   const selected = useEditorStore((s) => s.selected);
+  const hovered = useEditorStore((s) => s.hovered);
   const mutationBounds = useEditorStore((s) => s.mutationBounds);
+  const activeGuides = useEditorStore((s) => s.activeGuides);
   const mode = useEditorStore((s) => s.mode);
   const createType = useEditorStore((s) => s.createType);
   const components = useVisualScene((s) => s.components);
@@ -53,22 +55,24 @@ function Overlay() {
   const bounds = getSelectedComponentBounds();
   const verts = bounds?.verts;
 
+  const hoveredComponent = hovered ? components[hovered] : null;
+
   return (
     <svg
       id="overlay"
       className="w-full h-full absolute pointer-events-none"
       viewBox={`-50 -50 ${CANVAS_WIDTH + 50 * 2} ${CANVAS_HEIGHT + 50 * 2}`}
     >
-      {hasSelection && (
+      {hasSelection && bounds && (
         <>
           <Rectangle
             bounds={bounds}
-            rotationOrigin={getBoxCenter(verts)}
+            rotationOrigin={getBoxCenter(verts!)}
             fill="none"
             stroke="blue"
             strokeWidth={3}
           />
-          <ResolveHandles type={type} />
+          <ResolveHandles type={type!} />
         </>
       )}
       {hoveredComponent && (
@@ -81,7 +85,7 @@ function Overlay() {
         />
       )}
       {mode.includes("mutation") &&
-        resolve(component?.type ?? createType, bounds)}
+        resolve(type ?? createType!, mutationBounds)}
       {mode.includes("mutation") &&
         activeGuides.map((guide, index) => {
           const style = guide.isCanvasCenter

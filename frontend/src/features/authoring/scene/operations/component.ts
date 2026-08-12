@@ -156,17 +156,27 @@ export function createComponentFromBounds(
 }
 
 export const modifyComponentProp = modify(
-  (ids: string[], prop: string, val: any) => {
+  (ids: string[], prop: string, val: unknown) => {
     ids.forEach((id) => {
       const component = getComponent(id);
       if (!component) return;
 
       const [object, key] = getObject(prop, component);
 
-      if (typeof val === "function") object[key] = val(object[key]);
-      else if (val !== null && typeof val === "object" && !Array.isArray(val))
-        object[key] = merge(object[key], val);
-      else object[key] = val;
+      if (typeof val === "function") {
+        object[key] = (val as (prev: unknown) => unknown)(object[key]);
+      } else if (
+        val !== null &&
+        typeof val === "object" &&
+        !Array.isArray(val)
+      ) {
+        object[key] = merge(
+          object[key] as Record<PropertyKey, unknown>,
+          val as Record<PropertyKey, unknown>
+        );
+      } else {
+        object[key] = val;
+      }
     });
   }
 );
@@ -185,7 +195,7 @@ function shiftComponentLayers(
 ) {
   if (!ids.length) return;
 
-  const components = Object.values(getScene().components) as Component[];
+  const components = Object.values(getScene().components);
   const selectedIds = new Set(ids);
 
   // Sort components by zIndex (ascending) and capture the original zIndex scale
