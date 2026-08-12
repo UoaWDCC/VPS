@@ -106,7 +106,7 @@ function Canvas() {
               opacity-75
             "
           >
-            Creating {createType}
+            Click or drag to create {createType}
           </div>
         )}
         <Overlay />
