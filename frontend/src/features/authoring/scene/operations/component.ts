@@ -148,9 +148,12 @@ export function createComponentFromBounds(
     component.bounds.verts = translate(component.bounds.verts, bounds.verts[0]);
   }
 
-  // Set zIndex to the current number of components on the canvas
-  const componentsCount = Object.keys(getScene().components).length;
-  component.zIndex = componentsCount;
+  // Set zIndex above the current highest zIndex on the canvas
+  const existingComponents = Object.values(getScene().components);
+  const maxZIndex = existingComponents.length
+    ? Math.max(...existingComponents.map((c) => c.zIndex))
+    : -1;
+  component.zIndex = maxZIndex + 1;
 
   return add(component);
 }
@@ -247,13 +250,29 @@ function shiftComponentLayers(
   }
 
   // Apply target zIndices back to modified components
-  newSortedComponents.forEach((comp, index) => {
-    const targetZIndex = zIndexScale[index];
-    if (comp.zIndex !== targetZIndex) {
-      modifyComponentProp([comp.id], "zIndex", targetZIndex);
-    }
-  });
+  const changed = newSortedComponents
+    .map((comp, index) => ({
+      id: comp.id,
+      targetZIndex: zIndexScale[index],
+      zIndex: comp.zIndex,
+    }))
+    .filter(({ zIndex, targetZIndex }) => zIndex !== targetZIndex);
+
+  if (changed.length) {
+    applyZIndices(
+      changed.map((c) => c.id),
+      changed.map((c) => c.targetZIndex)
+    );
+  }
 }
+
+const applyZIndices = modify((ids: string[], zIndices: number[]) => {
+  ids.forEach((id, index) => {
+    const component = getComponent(id);
+    if (!component) return;
+    component.zIndex = zIndices[index];
+  });
+});
 
 export function bringForward(ids: string[]) {
   shiftComponentLayers(ids, "forward", "step");

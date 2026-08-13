@@ -1,6 +1,6 @@
 import DragHandles from "./handles/DragHandles";
 import Ellipse from "../elements/Ellipse";
-import type { Bounds, Component } from "../types";
+import type { Bounds } from "../types";
 import Box from "../elements/Box";
 import { getBoxCenter } from "../util";
 import Speech from "../elements/Speech";
@@ -20,7 +20,7 @@ const componentMap: Record<string, React.FC<Record<string, unknown>>> = {
   line: Line,
 };
 
-function resolve(type: Component["type"], bounds: Bounds) {
+function resolve(type: string, bounds: Bounds) {
   const Fc = componentMap[type] ?? Box;
   return <Fc bounds={bounds} fill="none" stroke="green" strokeWidth={3} />;
 }

@@ -86,7 +86,7 @@ function Topbar({ saving, save }: { saving: boolean; save: () => void }) {
               </a>
             </li>
             {/* shape properties */}
-            {component?.type !== "image" && (
+            {component && component.type !== "image" && (
               <>
                 <div className="divider divider-horizontal" />
                 <ShapeSection />
