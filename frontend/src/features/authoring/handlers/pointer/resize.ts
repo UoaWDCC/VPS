@@ -173,8 +173,10 @@ function updateResize(
 
   if (!coords.includes(2)) {
     // none of these apply to the speech triangle
-    // shift modifier
-    if (fixed && !coords.includes(0.5)) {
+    // hold shift to lock aspect ratio while resizing, except for images,
+    // which lock aspect ratio by default and can be unlocked with shift
+    const shouldLockAspect = type === "image" ? !fixed : fixed;
+    if (shouldLockAspect && !coords.includes(0.5)) {
       lockAspect(bounds.verts, verts, coords);
     }
 
