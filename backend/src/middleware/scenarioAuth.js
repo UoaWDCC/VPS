@@ -15,14 +15,15 @@ export default async function scenarioAuth(req, res, next) {
       throw new HttpError("invalid scenario id", HttpStatusCode.BadRequest);
 
     const scenario = await retrieveScenario(scenarioId);
-    if (!scenario) return res.sendStatus(HttpStatusCode.NotFound);
+    if (!scenario)
+      throw new HttpError("scenario not found", HttpStatusCode.NotFound);
 
     // is direct owner or has been given access
     const { uid } = req.body;
     if (uid === scenario.uid || (await hasAccess(scenario._id, uid)))
       return next();
 
-    return res.sendStatus(HttpStatusCode.Unauthorized);
+    throw new HttpError("unauthorised", HttpStatusCode.Unauthorized);
   } catch (err) {
     return next(err);
   }
@@ -46,11 +47,12 @@ export async function scenarioOwnerAuth(req, res, next) {
       throw new HttpError("invalid scenario id", HttpStatusCode.BadRequest);
 
     const scenario = await retrieveScenario(scenarioId);
-    if (!scenario) return res.sendStatus(HttpStatusCode.NotFound);
+    if (!scenario)
+      throw new HttpError("scenario not found", HttpStatusCode.NotFound);
 
     if (req.body.uid === scenario.uid) return next();
 
-    return res.sendStatus(HttpStatusCode.Unauthorized);
+    throw new HttpError("unauthorised", HttpStatusCode.Unauthorized);
   } catch (err) {
     return next(err);
   }
