@@ -16,7 +16,7 @@ const router = Router();
 router.use("/scenario", scenario);
 router.use("/staff", staff);
 router.use("/user", user);
-router.use("/note", note);
+router.use("/group/:groupId/notes", note);
 router.use("/group", group);
 router.use("/navigate", navigate);
 router.use("/resources", resource);

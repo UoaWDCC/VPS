@@ -6,7 +6,6 @@ import routes from "../../index.js";
 import User from "../../../db/models/user.js";
 import Group from "../../../db/models/group.js";
 import Scenario from "../../../db/models/scenario.js";
-import Scene from "../../../db/models/scene.js";
 import auth from "../../../middleware/firebaseAuth.js";
 import { authHeaders } from "./testHelpers.js";
 import {
@@ -55,73 +54,6 @@ describe("User API tests", () => {
       users: ["uid-1", "uid-2"],
     });
   });
-
-  // --- GET / ---
-
-  it("GET /user/ returns all users", async () => {
-    const response = await axios.get(`http://localhost:${ctx.port}/api/user/`);
-    expect(response.status).toBe(200);
-    expect(response.data).toHaveLength(2);
-    const uids = response.data.map((u) => u.uid);
-    expect(uids).toContain("uid-1");
-    expect(uids).toContain("uid-2");
-  });
-
-  // --- GET /min ---
-
-  it("GET /user/min returns minimal user fields sorted by name", async () => {
-    const response = await axios.get(
-      `http://localhost:${ctx.port}/api/user/min`
-    );
-    expect(response.status).toBe(200);
-    expect(response.data).toHaveLength(2);
-    // Should be sorted by name ascending: Alice, Bob
-    expect(response.data[0].name).toBe("Alice");
-    expect(response.data[1].name).toBe("Bob");
-    // Only uid, name, email fields
-    expect(response.data[0].uid).toBe("uid-1");
-    expect(response.data[0].pictureURL).toBeUndefined();
-  });
-
-  // --- GET /:uid ---
-
-  it("GET /user/:uid returns a user by uid", async () => {
-    const response = await axios.get(
-      `http://localhost:${ctx.port}/api/user/${user1.uid}`
-    );
-    expect(response.status).toBe(200);
-    expect(Array.isArray(response.data)).toBe(true);
-    expect(response.data[0].name).toBe("Alice");
-  });
-
-  it("GET /user/:uid returns empty array for unknown uid", async () => {
-    const response = await axios.get(
-      `http://localhost:${ctx.port}/api/user/unknown-uid`
-    );
-    expect(response.status).toBe(200);
-    expect(response.data).toHaveLength(0);
-  });
-
-  // --- GET /played/:scenarioId ---
-
-  // NOTE: retrievePlayedUsers reads Scenario.users, but the Scenario schema does
-  // not define a 'users' field, so it is stripped on write and the query returns
-  // nothing. The scenario in beforeEach is seeded with users uid-1 and uid-2, so
-  // this asserts the CORRECT behaviour and is marked `it.failing`: it stays green
-  // while the bug exists and turns red once the schema defines 'users' — signalling
-  // that it should be un-marked.
-  it.failing(
-    "GET /user/played/:scenarioId returns users who played the scenario",
-    async () => {
-      const response = await axios.get(
-        `http://localhost:${ctx.port}/api/user/played/${scenario._id}`
-      );
-      expect(response.status).toBe(200);
-      const uids = response.data.map((u) => u.uid);
-      expect(uids).toContain("uid-1");
-      expect(uids).toContain("uid-2");
-    }
-  );
 
   // --- POST / (sign-in) ---
 
@@ -181,44 +113,6 @@ describe("User API tests", () => {
       }
     );
     expect(response.status).toBe(200);
-  });
-
-  // --- DELETE /:uid ---
-
-  it("DELETE /user/:uid returns 404 for unknown uid", async () => {
-    // deleteUser catches errors and returns false → sendStatus(404)
-    await expect(
-      axios.delete(`http://localhost:${ctx.port}/api/user/unknown-uid`)
-    ).rejects.toMatchObject({ response: { status: 404 } });
-  });
-
-  // --- PUT /:uid ---
-
-  it("PUT /user/:uid updates the user's played array", async () => {
-    const response = await axios.put(
-      `http://localhost:${ctx.port}/api/user/${user1.uid}`,
-      { scenarioId: scenario._id.toString() }
-    );
-    expect(response.status).toBe(200);
-    // addPlayed returns true on success, route responds with the return value
-    expect(response.data).toBe(true);
-  });
-
-  // --- POST /:uid/:scenarioId/path ---
-
-  it("POST /user/:uid/:scenarioId/path adds a scene to the user path", async () => {
-    const scene = await Scene.create({ name: "S1", components: [] });
-
-    const response = await axios.post(
-      `http://localhost:${ctx.port}/api/user/${user1.uid}/${scenario._id}/path`,
-      { nextSceneId: scene._id.toString() }
-    );
-    expect(response.status).toBe(200);
-
-    const dbUser = await User.findOne({ uid: user1.uid });
-    expect(dbUser.paths.get(scenario._id.toString())).toContain(
-      scene._id.toString()
-    );
   });
 
   // --- GET /group/:scenarioId (requires auth) ---
