@@ -26,6 +26,8 @@ import {
 } from "./resize";
 import { snapTranslation } from "./snap";
 
+const MIN_COMPONENT_SIZE = 1;
+
 export function handleMouseDownGlobal(e: React.MouseEvent, position: Vec2) {
   const target = e.target as HTMLElement;
 
@@ -164,11 +166,44 @@ function handleMutationEnd() {
         subtract(prevVerts[0], prevVerts[1])
       );
       modifyComponentBounds(selected, ({ verts, rotation }) => {
-        const rotated = rotateMany(verts, getBoxCenter(verts), rotation);
-        const scaled = scale(rotated, scaleVec, origin);
+        const center = getBoxCenter(verts);
+        // use all 4 corners (not just the 2 diagonal verts) so anisotropic
+        // group scaling of a rotated component is measured correctly instead
+        // of collapsing along whichever diagonal happens to align with the
+        // scale axis; any extra verts (e.g. the speech-bubble tail) ride
+        // along via the same transform.
+        const points = [...expandBoxVerts(verts), ...verts.slice(2)];
+
+        const rotatedPoints = rotateMany(points, center, rotation);
+        const scaledPoints = scale(rotatedPoints, scaleVec, origin);
+        const newCenter = getBoxCenter([scaledPoints[0], scaledPoints[2]]);
+        const localPoints = rotateMany(scaledPoints, newCenter, -rotation);
+
+        const corners = localPoints.slice(0, 4);
+        const tail = localPoints.slice(4);
+        const xs = corners.map((v) => v.x);
+        const ys = corners.map((v) => v.y);
+        const minX = Math.min(...xs);
+        const maxX = Math.max(...xs);
+        const minY = Math.min(...ys);
+        const maxY = Math.max(...ys);
+
+        // the transformed shape may no longer be an axis-aligned rectangle
+        // (Bounds can't represent a sheared parallelogram), so approximate
+        // it with its bounding box, clamped so it can never collapse to a
+        // zero-width or zero-height component.
+        const width = Math.max(maxX - minX, MIN_COMPONENT_SIZE);
+        const height = Math.max(maxY - minY, MIN_COMPONENT_SIZE);
+        const midX = (minX + maxX) / 2;
+        const midY = (minY + maxY) / 2;
+
         return {
           rotation,
-          verts: rotateMany(scaled, getBoxCenter(scaled), -rotation),
+          verts: [
+            { x: midX - width / 2, y: midY - height / 2 },
+            { x: midX + width / 2, y: midY + height / 2 },
+            ...tail,
+          ],
         };
       });
     } else {
