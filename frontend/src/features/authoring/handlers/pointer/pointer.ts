@@ -106,24 +106,28 @@ function handleComponentHover(e: React.MouseEvent) {
 function handleComponentClick(e: React.MouseEvent, position: Vec2) {
   const { selected, setSelected, setOffset, setMode, setMutationBounds } =
     useEditorStore.getState();
-  const scene = useVisualScene.getState().components;
 
   const target = e.target as HTMLElement;
   const id = target.dataset.id as string;
 
   setOffset(position);
 
-  let selectedSize = selected.length;
-
-  //TODO: this is temporary
-  if (!selected.includes(id)) {
-    setSelected([...selected, id]);
-    selectedSize += 1;
+  let newSelected: string[];
+  if (e.shiftKey) {
+    // shift-click toggles the clicked component in/out of the selection
+    newSelected = selected.includes(id)
+      ? selected.filter((selectedId) => selectedId !== id)
+      : [...selected, id];
+  } else {
+    // plain click replaces the selection, unless the target is already part
+    // of the current selection (so dragging a multi-selection still works)
+    newSelected = selected.includes(id) ? selected : [id];
   }
 
-  const { bounds } = scene[target.dataset.id as string];
-  const rotation = selectedSize > 1 ? 0 : bounds.rotation;
-  setMutationBounds({ ...bounds, rotation });
+  setSelected(newSelected);
+
+  const bounds = getSelectedComponentBounds();
+  if (bounds) setMutationBounds(bounds);
 
   setMode(["normal"]);
 }
