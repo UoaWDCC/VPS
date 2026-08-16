@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import MDTextViewer from "../playScenario/components/MDTextViewer";
+import { MDEditor } from "../playScenario/components/MDEditor";
 
 async function loadText(url) {
   return fetch(url).then((res) => {
@@ -37,7 +38,17 @@ function ResourcePreview({ file }) {
   const isPDF = file.contentType === "application/pdf";
 
   return (
-    <div className="flex h-full min-h-0 flex-col gap-3 font-ibm">
+    <div className="flex h-full min-h-0 flex-col gap-3 p-3 font-ibm">
+      <div className="flex items-center justify-between gap-2">
+        <h3 className="text-m truncate">{file.name}</h3>
+        <div>
+          <a className="btn btn-phantom btn-xs" href={MDEditor(file.url)}>Edit</a>
+          <a className="btn btn-phantom btn-xs" href={file.url} download>
+            Download
+          </a>
+        </div>
+      </div>
+
       <div className="min-h-0 flex-1">
         {isImage ? (
           <img
