@@ -33,6 +33,13 @@ export function handleResizeStart(e: React.MouseEvent) {
   setMode(["resize"]);
 }
 
+// exposes which handle is being dragged so callers (e.g. handleMutationEnd)
+// can tell a rotation drag apart from a size drag, since both share the
+// "resize" mode
+export function getHandleType() {
+  return type;
+}
+
 export function handleResizeDrag(e: React.MouseEvent, position: Vec2) {
   const { addMode, setMutationBounds, selected, setActiveGuides } =
     useEditorStore.getState();

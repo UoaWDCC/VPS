@@ -12,6 +12,7 @@ import {
   divide,
   expandBoxVerts,
   getBoxCenter,
+  rotate,
   rotateMany,
   scale,
   subtract,
@@ -20,6 +21,7 @@ import {
 import { handleCreateDrag, handleCreateEnd, handleCreateStart } from "./create";
 import {
   getCoordsVec,
+  getHandleType,
   handleResizeDrag,
   handleResizeStart,
   inverse,
@@ -162,7 +164,23 @@ function handleMutationEnd() {
     const { verts: prevVerts } = getSelectedComponentBounds()!;
     const { verts } = mutationBounds;
 
-    if (mode.includes("resize")) {
+    if (mode.includes("resize") && getHandleType() === "rotation") {
+      // group rotation: spin every selected component's own rotation by the
+      // same delta, and revolve its center around the shared group pivot so
+      // the group rotates as a rigid body instead of each piece rotating in
+      // place
+      const deltaRotation = mutationBounds.rotation;
+      const pivot = getBoxCenter(prevVerts);
+
+      modifyComponentBounds(selected, ({ verts, rotation }) => {
+        const center = getBoxCenter(verts);
+        const delta = subtract(rotate(center, pivot, deltaRotation), center);
+        return {
+          rotation: rotation + deltaRotation,
+          verts: translate(verts, delta),
+        };
+      });
+    } else if (mode.includes("resize")) {
       const coords = detectChangedAxes(prevVerts, verts);
       const origin = getCoordsVec(prevVerts, inverse(coords));
       const scaleVec = divide(
