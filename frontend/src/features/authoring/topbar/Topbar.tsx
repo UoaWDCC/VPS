@@ -36,7 +36,15 @@ function Topbar({ saving, save }: { saving: boolean; save: () => void }) {
 
   const hasSelection = selected && selected.length > 0;
 
-  const component = hasSelection ? getComponent(selected[0]) : null;
+  // check the whole selection — a mixed selection can hide a section just
+  // because a component of the "wrong" type happens to be first
+  const selectedComponents = selected.map(getComponent);
+  const hasShapeComponent = selectedComponents.some(
+    (c) => c && c.type !== "image"
+  );
+  const hasTextboxComponent = selectedComponents.some(
+    (c) => c?.type === "textbox"
+  );
 
   return (
     <>
@@ -86,7 +94,7 @@ function Topbar({ saving, save }: { saving: boolean; save: () => void }) {
               </a>
             </li>
             {/* shape properties */}
-            {component && component.type !== "image" && (
+            {hasShapeComponent && (
               <>
                 <div className="divider divider-horizontal" />
                 <ShapeSection />
@@ -94,7 +102,7 @@ function Topbar({ saving, save }: { saving: boolean; save: () => void }) {
             )}
 
             {/* text content styles */}
-            {component?.type === "textbox" && (
+            {hasTextboxComponent && (
               <>
                 <div className="divider divider-horizontal" />
                 <TextSection />
