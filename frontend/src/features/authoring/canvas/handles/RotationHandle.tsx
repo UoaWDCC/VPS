@@ -1,6 +1,7 @@
 import { getBoxCenter, rotate } from "../../util";
 import useEditorStore from "../../stores/editor";
 import useVisualScene from "../../stores/visual";
+import { HANDLE_RADIUS } from "../../../../util/canvas";
 
 const RotationHandle = () => {
   const selected = useEditorStore((state) => state.selected)!;
@@ -34,8 +35,8 @@ const RotationHandle = () => {
         data-coords={[0, 0]}
         cx={point.x}
         cy={point.y}
-        rx={7}
-        ry={7}
+        rx={HANDLE_RADIUS}
+        ry={HANDLE_RADIUS}
         fill="blue"
       />
     </g>
