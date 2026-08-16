@@ -116,20 +116,34 @@ export function stringifyComponent(id: string) {
   return JSON.stringify(component);
 }
 
-export function parseComponent(component: Component) {
+export function parseComponent(component: Component, zIndex?: number) {
   const offset = { x: 10, y: 10 };
   component.bounds.verts = translate(component.bounds.verts, offset);
-  component.zIndex += 1;
+  component.zIndex = zIndex ?? component.zIndex + 1;
   delete (component as Record<string, unknown>).id;
   return add(component);
 }
 
+export function getNextZIndex() {
+  const zIndices = Object.values(getScene().components).map((c) => c.zIndex);
+  return zIndices.length ? Math.max(...zIndices) + 1 : 0;
+}
+
 export function duplicateComponent(ids: string[]) {
-  return ids
+  // assign duplicates a zIndex above everything else, in the same relative
+  // order as their originals, instead of each `zIndex + 1` independently —
+  // that can collide with an adjacent original's zIndex and interleave the
+  // duplicated group into the existing stack instead of keeping it together
+  let nextZIndex = getNextZIndex();
+  const sortedIds = [...ids].sort(
+    (a, b) => (getComponent(a)?.zIndex ?? 0) - (getComponent(b)?.zIndex ?? 0)
+  );
+
+  return sortedIds
     .map((id: string) => {
       const newComponent = structuredClone(getComponent(id));
       if (!newComponent) return null;
-      return parseComponent(newComponent);
+      return parseComponent(newComponent, nextZIndex++);
     })
     .filter((id): id is string => id !== null);
 }

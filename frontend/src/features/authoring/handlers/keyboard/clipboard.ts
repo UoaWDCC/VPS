@@ -1,4 +1,8 @@
-import { defaults, parseComponent } from "../../scene/operations/component";
+import {
+  defaults,
+  getNextZIndex,
+  parseComponent,
+} from "../../scene/operations/component";
 import { add, remove } from "../../scene/operations/modifiers";
 import {
   getDocumentText,
@@ -100,12 +104,19 @@ export function paste(e: ClipboardEvent) {
       }[];
       const newSelection: string[] = [];
 
+      // assign pasted items increasing zIndex above everything else so a
+      // multi-item paste can't collide with an existing component's zIndex
+      let nextZIndex = getNextZIndex();
+
       items.forEach((obj) => {
         if (obj.type) {
-          newSelection.push(parseComponent(obj as unknown as Component));
+          newSelection.push(
+            parseComponent(obj as unknown as Component, nextZIndex++)
+          );
         } else {
           const component = structuredClone(defaults["textbox"]);
           component.document = structuredClone(obj as unknown as ModelDocument);
+          component.zIndex = nextZIndex++;
           newSelection.push(add(component));
         }
       });
