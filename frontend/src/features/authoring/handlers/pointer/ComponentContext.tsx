@@ -17,8 +17,8 @@ import useEditorStore from "../../stores/editor";
 
 const ComponentMenu = ({ ids }: { ids: string[] }) => {
   function removeAndDeselect(selectedIds: string[]) {
-    remove(selectedIds);
     useEditorStore.getState().setSelected([]);
+    remove(selectedIds);
   }
 
   return (

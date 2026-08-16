@@ -42,8 +42,8 @@ export function cut(e: ClipboardEvent) {
   e.preventDefault();
 
   addToClipboard(e, selected);
-  remove(selected);
   setSelected([]);
+  remove(selected);
 }
 
 export function paste(e: ClipboardEvent) {
