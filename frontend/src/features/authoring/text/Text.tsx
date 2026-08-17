@@ -59,7 +59,9 @@ function Text({ doc, editable }: { doc: VisualDocument; editable?: boolean }) {
   return (
     <g className="select-none text">
       <TextHighlight doc={doc} />
-      {isSelected && <Highlight color="#4997ff80" bounds={bounds} />}
+      {isSelected && (
+        <Highlight color="var(--color-selection)" bounds={bounds} />
+      )}
       <g className="select-none" transform={transformation}>
         {buildGroups(doc)}
       </g>

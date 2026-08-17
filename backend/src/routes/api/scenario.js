@@ -1,7 +1,6 @@
 import { Router } from "express";
 import auth from "../../middleware/firebaseAuth.js";
 import scenarioAuth from "../../middleware/scenarioAuth.js";
-import validScenarioId from "../../middleware/validScenarioId.js";
 
 import {
   createScenario,
@@ -85,7 +84,6 @@ router.post(
 );
 
 // Apply scenario auth middleware
-router.use("/:scenarioId", validScenarioId);
 router.use("/:scenarioId", scenarioAuth);
 
 // Get a scenario by id.

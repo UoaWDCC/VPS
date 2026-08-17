@@ -94,8 +94,8 @@ function Canvas() {
               top-[120px]
               left-1/2
               -translate-x-1/2
-              bg-gray-600/45
-              text-white
+              bg-primary/70
+              text-secondary
               text-sm
               font-medium
               px-4 py-2
@@ -106,7 +106,7 @@ function Canvas() {
               opacity-75
             "
           >
-            Creating {createType}
+            Click or drag to create {createType}
           </div>
         )}
         <Overlay />
@@ -125,7 +125,7 @@ function Canvas() {
             width={CANVAS_WIDTH}
             height={CANVAS_HEIGHT}
             fill="none"
-            stroke="white"
+            stroke="var(--color-backdrop-content)"
             strokeWidth="1"
           />
         </svg>
@@ -141,7 +141,7 @@ function Canvas() {
             y="0"
             width={CANVAS_WIDTH}
             height={CANVAS_HEIGHT}
-            fill="white"
+            fill="var(--color-canvas)"
           />
           {components}
         </svg>

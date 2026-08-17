@@ -1,6 +1,7 @@
 import { getBoxCenter, rotate } from "../../util";
 import useEditorStore from "../../stores/editor";
 import { getSelectedComponentBounds } from "../../handlers/pointer/pointer";
+import { HANDLE_RADIUS } from "../../../../util/canvas";
 
 interface Props {
   x: number;
@@ -31,8 +32,8 @@ const ResizeHandle = ({ x, y }: Props) => {
         data-coords={[x, y]}
         cx={point.x}
         cy={point.y}
-        rx={7}
-        ry={7}
+        rx={HANDLE_RADIUS}
+        ry={HANDLE_RADIUS}
         fill="blue"
       />
     </g>

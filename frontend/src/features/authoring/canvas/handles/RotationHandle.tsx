@@ -1,6 +1,7 @@
 import { getBoxCenter, rotate } from "../../util";
 import useEditorStore from "../../stores/editor";
 import { getSelectedComponentBounds } from "../../handlers/pointer/pointer";
+import { HANDLE_RADIUS } from "../../../../util/canvas";
 
 const RotationHandle = () => {
   const mode = useEditorStore((s) => s.mode);
@@ -32,8 +33,8 @@ const RotationHandle = () => {
         data-coords={[0, 0]}
         cx={point.x}
         cy={point.y}
-        rx={7}
-        ry={7}
+        rx={HANDLE_RADIUS}
+        ry={HANDLE_RADIUS}
         fill="blue"
       />
     </g>

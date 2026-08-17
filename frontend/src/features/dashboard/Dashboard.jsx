@@ -209,13 +209,13 @@ export default function Dashboard() {
                   </h2>
                   <div className="join">
                     <button
-                      className={`btn btn-ghost join-item ${activeTab === "groups" ? "text-white" : "text-base-content/60 hover:bg-primary/10 hover:text-primary"}`}
+                      className={`btn btn-ghost join-item ${activeTab === "groups" ? "text-base-content" : "text-base-content/60 hover:bg-primary/10 hover:text-primary"}`}
                       onClick={() => setActiveTab("groups")}
                     >
                       Groups
                     </button>
                     <button
-                      className={`btn btn-ghost join-item ${activeTab === "members" ? "text-white" : "text-base-content/60 hover:bg-primary/10 hover:text-primary"}`}
+                      className={`btn btn-ghost join-item ${activeTab === "members" ? "text-base-content" : "text-base-content/60 hover:bg-primary/10 hover:text-primary"}`}
                       onClick={() => setActiveTab("members")}
                     >
                       Members

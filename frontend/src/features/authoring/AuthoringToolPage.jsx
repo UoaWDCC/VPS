@@ -154,7 +154,8 @@ export default function AuthoringToolPage() {
     }
   }
 
-  const isScenarioOwner = allScenarios?.owned.find((s) => s._id === scenarioId);
+  const ownedScenario = allScenarios?.owned.find((s) => s._id === scenarioId);
+  const isOwner = Boolean(ownedScenario);
 
   return (
     <>
@@ -164,14 +165,16 @@ export default function AuthoringToolPage() {
             <ArrowLeftIcon size={20} />
             Back
           </button>
-          {isScenarioOwner && (
-            <button
-              onClick={() => setShowEditModal(true)}
-              className="btn btn-phantom text-m"
-            >
-              <PencilIcon size={20} />
-              Details
-            </button>
+          {isOwner && (
+            <div className="flex flex-1 min-w-0">
+              <button
+                onClick={() => setShowEditModal(true)}
+                className="btn btn-phantom text-m max-w-full min-w-0"
+              >
+                <PencilIcon size={20} className="shrink-0" />
+                <span className="min-w-0 truncate">{ownedScenario.name}</span>
+              </button>
+            </div>
           )}
           <button
             onClick={goToResources}
@@ -184,7 +187,7 @@ export default function AuthoringToolPage() {
             <UsersIcon size={20} />
             Groups
           </button>
-          {isScenarioOwner && (
+          {isOwner && (
             <button
               onClick={() => setShareModalOpen(true)}
               className="btn btn-phantom text-m"
@@ -207,17 +210,17 @@ export default function AuthoringToolPage() {
           </div>
         </div>
       </div>
-      {isScenarioOwner && (
+      {isOwner && (
         <ShareModal open={shareModalOpen} setOpen={setShareModalOpen} />
       )}
-      {isScenarioOwner && (
+      {isOwner && (
         <ModalDialog
           title="Edit Scenario Details"
           open={showEditModal}
           onClose={() => setShowEditModal(false)}
         >
           <DetailEditModal
-            scenario={isScenarioOwner}
+            scenario={ownedScenario}
             onSave={(details) =>
               updateScenarioDetails({ id: scenarioId, details })
             }
