@@ -1,11 +1,17 @@
-import React, { useRef, useState, useContext } from "react";
+import React, { useRef, useState, useContext, createRef } from "react";
 import toast from "react-hot-toast";
 import { useParams } from "react-router-dom";
 import { useHistory } from "react-router-dom";
-import { ArrowLeftIcon, PlusIcon, XIcon } from "lucide-react";
-import AddGroup from "./components/AddGroup";
 import ResourceNameField from "./components/ResourceNameField";
 import PropertyConditionalMenu from "../../components/Properties/PropertyConditionalMenu";
+import {
+  ArrowLeftIcon,
+  FilePlusIcon,
+  FolderPlusIcon,
+  PlusIcon,
+  SearchIcon,
+  XIcon,
+} from "lucide-react";
 import { api } from "../../util/api";
 import AuthenticationContext from "../../context/AuthenticationContext";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -13,6 +19,7 @@ import { filterTreeBySearch, isTemp, normaliseFile } from "./util";
 import { v4 as uuid } from "uuid";
 import ResourcePreview from "./ResourcePreview";
 import SkeletonBody from "./ResourcesSkeleton";
+import PopoverInput from "./components/PopoverInput";
 
 async function uploadFileResource(user, scenarioId, parentId, file) {
   const formData = new FormData();
@@ -85,6 +92,8 @@ export default function ManageResourcesPage() {
 
   const [selectedResourceId, setSelectedResourceId] = useState(null);
   const [search, setSearch] = useState("");
+
+  const inputRef = createRef(null);
 
   const resourcesQuery = useQuery({
     queryKey: ["resources", scenarioId],
@@ -214,27 +223,58 @@ export default function ManageResourcesPage() {
           ) : (
             <div className="grid grid-cols-1 gap-4 lg:h-full lg:min-h-0 lg:grid-cols-3">
               {/* LEFT: Groups and files */}
-              <div className="card min-h-[35dvh] min-w-0 overflow-hidden bg-base-100 shadow-md lg:h-full lg:min-h-0">
+              <div className="card min-h-[35dvh] min-w-0 overflow-hidden bg-base-100 lg:h-full lg:min-h-0">
                 <div className="card-body flex min-h-0 flex-col gap-4 px-0">
                   <h1 className="flex-none text-xl">Uploaded Resources</h1>
 
-                  <label
-                    htmlFor="authoring-resource-search"
-                    className="sr-only"
-                  >
-                    Search files and collections
-                  </label>
-                  <input
-                    id="authoring-resource-search"
-                    type="search"
-                    className="w-full flex-none border-0 border-b-1 border-primary pb-3 outline-none"
-                    placeholder="Search files and collections"
-                    value={search}
-                    onChange={(event) => setSearch(event.target.value)}
-                  />
-                  <div className="flex items-center justify-between gap-2">
-                    <h2 className="text-m">Uploaded Resources</h2>
-                    <AddGroup onAdd={addResourceCollectionMutation.mutate} />
+                  <div className="flex items-center gap-4">
+                    <label className="input search search-xs flex-grow">
+                      <input
+                        type="search"
+                        placeholder="Search files and collections"
+                        value={search}
+                        onChange={(e) => setSearch(e.target.value)}
+                      />
+                      <SearchIcon size={20} />
+                    </label>
+                    {/* hidden input for resource upload */}
+                    <input
+                      ref={inputRef}
+                      type="file"
+                      multiple={false}
+                      className="hidden"
+                      onChange={(e) => {
+                        const file = e.target.files[0];
+                        e.target.value = "";
+                        if (!file) return;
+                        addFileResourceMutation.mutate({
+                          parentId: null,
+                          file,
+                        });
+                      }}
+                    />
+                    {/* collection creation button */}
+                    <PopoverInput
+                      onSubmit={addResourceCollectionMutation.mutate}
+                      label="Collection Name"
+                      submitLabel="Create"
+                      trigger={
+                        <button
+                          className="btn btn-phantom btn-xs p-0 tooltip tooltip-bottom"
+                          data-tip="Create Collection"
+                        >
+                          <FolderPlusIcon size={16} />
+                        </button>
+                      }
+                    />
+                    {/* file upload button */}
+                    <button
+                      className="btn btn-phantom btn-xs p-0 tooltip tooltip-bottom"
+                      data-tip="Upload Resource"
+                      onClick={() => inputRef.current?.click()}
+                    >
+                      <FilePlusIcon size={16} />
+                    </button>
                   </div>
 
                   <ul className="menu min-h-0 w-full flex-1 overflow-auto rounded-box bg-base-100 p-0">

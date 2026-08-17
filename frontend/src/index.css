@@ -297,12 +297,16 @@ body,
     1;
 }
 
+.input.search input {
+  @apply grow placeholder:text-primary text-secondary;
+}
+
 .input.search {
   @apply font-dm text-s text-primary pb-2xs border-0 border-b-1 rounded-none border-primary px-0 outline-none shadow-none;
 }
 
-.input.search input {
-  @apply grow placeholder:text-primary text-secondary;
+.input.search.search-xs {
+  @apply text-xs pb-3xs h-7;
 }
 
 svg#main .box,
