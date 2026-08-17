@@ -5,7 +5,17 @@ import mongoose from "mongoose";
 import Scene from "../../models/scene.js";
 import Scenario from "../../models/scenario.js";
 import UploadedFile from "../../models/uploadedFile.js";
-import { createScene, deleteScene, patchScene } from "../sceneDao.js";
+import {
+  createScene,
+  deleteScene,
+  duplicateScene,
+  getComponent,
+  incrementVisisted,
+  patchScene,
+  retrieveScene,
+  retrieveSceneList,
+  updateSceneOrder,
+} from "../sceneDao.js";
 import { useMongoMemoryServer } from "../../../test/testSetup.js";
 
 describe("Scene DAO patchScene tests", () => {
@@ -246,5 +256,126 @@ describe("Scene DAO patchScene tests", () => {
     expect(result.deleted).toBe(true);
     const refreshedFile = await UploadedFile.findById(uploadedFile._id);
     expect(refreshedFile.refCount).toBe(0);
+  });
+
+  it("duplicates a scene, tracks visits, and enforces component lookups", async () => {
+    const scenario = await Scenario.create({
+      name: "Duplicate scenario",
+      uid: "author-4",
+      scenes: [sceneId],
+    });
+
+    const uploadedFile = await UploadedFile.create({
+      name: "dupe.png",
+      type: "image",
+      path: "images/dupe.png",
+      url: "https://example.com/dupe.png",
+      contentType: "image/png",
+      size: 64,
+      uploaderUid: "uploader-2",
+      scenarioId: scenario._id,
+      refCount: 0,
+    });
+
+    const sceneWithFile = await Scene.create({
+      name: "Linked scene",
+      components: [
+        { id: "img-dup", type: "image", fileId: uploadedFile._id.toString() },
+      ],
+    });
+
+    await Scenario.updateOne(
+      { _id: scenario._id },
+      { $push: { scenes: sceneWithFile._id } }
+    );
+
+    const duplicate = await duplicateScene(
+      scenario._id.toString(),
+      sceneWithFile._id.toString()
+    );
+    const list = await retrieveSceneList(scenario._id.toString());
+
+    expect(duplicate.name).toBe("Linked scene Copy");
+    expect(list).toHaveLength(3);
+
+    await incrementVisisted(sceneWithFile._id.toString());
+    const updatedScene = await Scene.findById(sceneWithFile._id);
+    expect(updatedScene.visited).toBe(1);
+
+    await expect(
+      getComponent(sceneWithFile._id.toString(), "missing-id")
+    ).rejects.toMatchObject({
+      status: 400,
+    });
+
+    const reordered = await updateSceneOrder(
+      scenario._id.toString(),
+      [sceneWithFile._id, sceneId, duplicate._id].map((id) => id.toString())
+    );
+    expect(reordered.scenes.map((id) => id.toString())).toEqual([
+      sceneWithFile._id.toString(),
+      sceneId.toString(),
+      duplicate._id.toString(),
+    ]);
+  });
+
+  it("covers null direct links, not-found deletes, and scene retrieval edge cases", async () => {
+    const lastScene = await Scene.create({
+      name: "Single scene",
+      components: [],
+    });
+    const singleSceneScenario = await Scenario.create({
+      name: "Edge scenario",
+      uid: "author-5",
+      scenes: [lastScene._id],
+    });
+
+    const linkScenario = await Scenario.create({
+      name: "Link scenario",
+      uid: "author-6",
+      scenes: [new mongoose.Types.ObjectId()],
+    });
+
+    const newScene = await createScene(linkScenario._id.toString(), {
+      name: "Fresh scene",
+      components: [],
+      directLink: null,
+    });
+
+    expect(await retrieveScene(newScene._id.toString())).toMatchObject({
+      name: "Fresh scene",
+    });
+
+    await expect(
+      createScene(linkScenario._id.toString(), {
+        name: "Bad link",
+        directLink: new mongoose.Types.ObjectId(),
+        components: [],
+      })
+    ).rejects.toMatchObject({ status: 400 });
+
+    const lastSceneResult = await deleteScene(
+      singleSceneScenario._id.toString(),
+      lastScene._id.toString()
+    );
+    expect(lastSceneResult).toMatchObject({
+      deleted: false,
+      reason: "last_scene",
+    });
+
+    const notFoundResult = await deleteScene(
+      linkScenario._id.toString(),
+      new mongoose.Types.ObjectId().toString()
+    );
+    expect(notFoundResult).toMatchObject({
+      deleted: false,
+      reason: "not_found",
+    });
+
+    await expect(
+      updateSceneOrder(linkScenario._id.toString(), [
+        new mongoose.Types.ObjectId().toString(),
+      ])
+    ).resolves.toBeNull();
   });
 });

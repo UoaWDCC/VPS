@@ -102,4 +102,11 @@ describe("noteDao", () => {
       deleteNote(created._id.toString(), group._id.toString(), "nurse")
     ).rejects.toBeInstanceOf(HttpError);
   });
+
+  it("handles missing and Map-backed note collections safely", () => {
+    expect(hasNoteInGroup(undefined, "missing")).toBe(false);
+    expect(
+      hasNoteInGroup({ notes: new Map([["doctor", ["a", "b"]]]) }, "b")
+    ).toBe(true);
+  });
 });

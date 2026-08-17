@@ -46,6 +46,10 @@ export const createUser = async (info) => {
  * @returns {Promise<boolean>} True when assignment succeeds, otherwise false.
  */
 export const assignScenarioToUsers = async (scenarioId, newAssignees) => {
+  if (!Array.isArray(newAssignees)) {
+    return false;
+  }
+
   try {
     await User.updateMany(
       { _id: { $in: newAssignees }, assigned: { $exists: true } },

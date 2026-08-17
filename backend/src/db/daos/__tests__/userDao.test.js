@@ -7,6 +7,7 @@ import { HttpError } from "../../../util/error.js";
 import {
   assignScenarioToUsers,
   createUser,
+  retrieveAssignedScenarioList,
   retrieveUserByEmail,
   setUserStateVariables,
 } from "../userDao.js";
@@ -92,5 +93,24 @@ describe("userDao", () => {
         [{ id: "missing", name: "score", value: 0 }]
       )
     ).rejects.toBeInstanceOf(HttpError);
+  });
+
+  it("returns an empty assignment list when the user has no assigned scenarios", async () => {
+    await User.create({
+      uid: "firebase-user-3",
+      name: "Unassigned user",
+      email: "empty@example.com",
+      pictureURL: "https://example.com/empty.png",
+    });
+
+    await expect(
+      retrieveAssignedScenarioList("firebase-user-3")
+    ).resolves.toEqual([]);
+  });
+
+  it("returns false when assignment data is malformed", async () => {
+    await expect(assignScenarioToUsers("scenario-999", null)).resolves.toBe(
+      false
+    );
   });
 });

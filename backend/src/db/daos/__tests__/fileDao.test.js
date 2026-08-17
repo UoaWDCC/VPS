@@ -90,4 +90,27 @@ describe("fileDao", () => {
     const updated = await UploadedFile.findById(file._id);
     expect(updated.refCount).toBe(2);
   });
+
+  it("returns early for empty or zero-value deltas", async () => {
+    const scenarioId = new mongoose.Types.ObjectId();
+    const file = await UploadedFile.create({
+      name: "noop.txt",
+      type: "document",
+      path: "documents/noop.txt",
+      url: "https://example.com/noop.txt",
+      contentType: "text/plain",
+      size: 14,
+      uploaderUid: "uploader-4",
+      scenarioId,
+      refCount: 3,
+    });
+
+    await expect(applyReferenceDeltas(new Map())).resolves.toBeUndefined();
+    await expect(
+      applyReferenceDelta(file._id.toString(), 0)
+    ).resolves.toBeUndefined();
+
+    const refreshed = await UploadedFile.findById(file._id);
+    expect(refreshed.refCount).toBe(3);
+  });
 });
