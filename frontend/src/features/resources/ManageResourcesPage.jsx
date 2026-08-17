@@ -94,6 +94,7 @@ export default function ManageResourcesPage() {
   const [search, setSearch] = useState("");
 
   const inputRef = createRef(null);
+  const pendingParentIdRef = useRef(null);
 
   const resourcesQuery = useQuery({
     queryKey: ["resources", scenarioId],
@@ -210,6 +211,22 @@ export default function ManageResourcesPage() {
         </button>
       </div>
 
+      {/* hidden input for resource upload */}
+      <input
+        ref={inputRef}
+        type="file"
+        className="hidden"
+        onChange={(e) => {
+          const file = e.target.files[0];
+          e.target.value = "";
+          if (!file) return;
+          addFileResourceMutation.mutate({
+            parentId: pendingParentIdRef.current,
+            file,
+          });
+        }}
+      />
+
       <div className="u-container min-h-0 w-full flex-1 pb-[max(1rem,env(safe-area-inset-bottom))]">
         <div className="container mx-auto h-full min-h-0">
           {resourcesQuery.isLoading ? (
@@ -237,22 +254,6 @@ export default function ManageResourcesPage() {
                       />
                       <SearchIcon size={20} />
                     </label>
-                    {/* hidden input for resource upload */}
-                    <input
-                      ref={inputRef}
-                      type="file"
-                      multiple={false}
-                      className="hidden"
-                      onChange={(e) => {
-                        const file = e.target.files[0];
-                        e.target.value = "";
-                        if (!file) return;
-                        addFileResourceMutation.mutate({
-                          parentId: null,
-                          file,
-                        });
-                      }}
-                    />
                     {/* collection creation button */}
                     <PopoverInput
                       onSubmit={addResourceCollectionMutation.mutate}
@@ -271,7 +272,10 @@ export default function ManageResourcesPage() {
                     <button
                       className="btn btn-phantom btn-xs p-0 tooltip tooltip-bottom"
                       data-tip="Upload Resource"
-                      onClick={() => inputRef.current?.click()}
+                      onClick={() => {
+                        pendingParentIdRef.current = null;
+                        inputRef.current?.click();
+                      }}
                     >
                       <FilePlusIcon size={16} />
                     </button>
@@ -301,16 +305,17 @@ export default function ManageResourcesPage() {
                                 {resource.name}
                               </span>
                               <div className="flex items-center ml-auto">
-                                <UploadButton
-                                  multiple={false}
+                                <button
+                                  className="btn btn-phantom btn-xs"
                                   disabled={isTemp(resource)}
-                                  onFiles={(file) => {
-                                    addFileResourceMutation.mutate({
-                                      parentId: resource._id,
-                                      file,
-                                    });
+                                  onClick={() => {
+                                    pendingParentIdRef.current = resource._id;
+                                    inputRef.current?.click();
                                   }}
-                                />
+                                  title="Add files"
+                                >
+                                  <PlusIcon size={16} />
+                                </button>
                                 <button
                                   className="btn btn-phantom btn-xs"
                                   onClick={(e) => {
@@ -417,39 +422,5 @@ export default function ManageResourcesPage() {
         </div>
       </div>
     </div>
-  );
-}
-
-// Helper components
-function UploadButton({
-  onFiles,
-  multiple = true,
-  disabled = false,
-  className = "",
-}) {
-  const inputRef = useRef(null);
-  return (
-    <>
-      <input
-        ref={inputRef}
-        type="file"
-        multiple={multiple}
-        className="hidden"
-        onChange={(e) => {
-          const file = e.target.files[0];
-          e.target.value = "";
-          if (!file) return;
-          onFiles(file);
-        }}
-      />
-      <button
-        className={`btn btn-phantom btn-xs ${className}`}
-        onClick={() => inputRef.current?.click()}
-        title="Add files"
-        disabled={disabled}
-      >
-        <PlusIcon size={16} />
-      </button>
-    </>
   );
 }
