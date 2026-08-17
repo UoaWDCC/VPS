@@ -1,18 +1,18 @@
-import CreateStateOperation from "./CreateStateOperation";
-import EditStateOperation from "./EditStateOperation";
+import CreatePropertyOperation from "./CreatePropertyOperation";
+import EditPropertyOperation from "./EditPropertyOperation";
 import { PlusIcon } from "lucide-react";
 import { useState } from "react";
 
 /*
- * Component that houses state operation interface (methods for creating and editing)
+ * Component that houses property operation interface (methods for creating and editing)
  *
  * @component
  */
-const StateOperationMenu = ({ component }) => {
+const PropertyOperationMenu = ({ component }) => {
   const [createOpen, setCreateOpen] = useState(false);
 
-  const stateOperations = component?.stateOperations ?? [];
-  const hasStateOperations = stateOperations.length > 0;
+  const propertyOperations = component?.stateOperations ?? [];
+  const hasPropertyOperations = propertyOperations.length > 0;
 
   function createNew() {
     setCreateOpen(true);
@@ -22,34 +22,34 @@ const StateOperationMenu = ({ component }) => {
     <>
       <div
         className={`collapse overflow-visible ${
-          hasStateOperations ? "collapse-arrow" : ""
+          hasPropertyOperations ? "collapse-arrow" : ""
         } bg-base-300 rounded-sm text-s`}
       >
-        {hasStateOperations && <input type="checkbox" />}
+        {hasPropertyOperations && <input type="checkbox" />}
 
         <div
           className={`collapse-title flex items-center justify-between ${
-            hasStateOperations ? "" : "pe-4"
+            hasPropertyOperations ? "" : "pe-4"
           }`}
         >
-          State Operations
+          Property Operations
           <PlusIcon size={18} onClick={createNew} className="z-1" />
         </div>
 
-        {hasStateOperations && (
+        {hasPropertyOperations && (
           <div className="collapse-content text--1 bg-base-200 px-0">
-            {stateOperations.map((operation, i) => (
-              <EditStateOperation
+            {propertyOperations.map((operation, i) => (
+              <EditPropertyOperation
                 component={component}
                 operationIndex={i}
-                stateOperation={operation}
+                propertyOperation={operation}
                 key={i}
               />
             ))}
           </div>
         )}
       </div>
-      <CreateStateOperation
+      <CreatePropertyOperation
         component={component}
         open={createOpen}
         setOpen={setCreateOpen}
@@ -58,4 +58,4 @@ const StateOperationMenu = ({ component }) => {
   );
 };
 
-export default StateOperationMenu;
+export default PropertyOperationMenu;

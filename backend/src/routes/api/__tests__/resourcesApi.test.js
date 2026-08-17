@@ -228,9 +228,9 @@ describe("Resources API tests", () => {
     expect(dbFile.orphanedAt).toBeInstanceOf(Date);
   });
 
-  // --- State conditionals ---
+  // --- Property conditionals ---
 
-  it("POST /resources/:scenarioId/:resourceId/conditionals adds a state conditional", async () => {
+  it("POST /resources/:scenarioId/:resourceId/conditionals adds a property conditional", async () => {
     const conditional = {
       stateVariableId: "var-1",
       comparator: "=",
@@ -239,7 +239,7 @@ describe("Resources API tests", () => {
 
     const response = await axios.post(
       `http://localhost:${ctx.port}/api/resources/${scenarioId}/${resource._id}/conditionals`,
-      { stateConditional: conditional },
+      { propertyConditional: conditional },
       authHeaders("user1")
     );
 
@@ -253,18 +253,22 @@ describe("Resources API tests", () => {
       axios.post(
         `http://localhost:${ctx.port}/api/resources/${scenarioId}/000000000000000000000099/conditionals`,
         {
-          stateConditional: { stateVariableId: "x", comparator: "=", value: 1 },
+          propertyConditional: {
+            stateVariableId: "x",
+            comparator: "=",
+            value: 1,
+          },
         },
         authHeaders("user1")
       )
     ).rejects.toMatchObject({ response: { status: 404 } });
   });
 
-  it("PUT /resources/:scenarioId/:resourceId/conditionals updates an existing state conditional", async () => {
+  it("PUT /resources/:scenarioId/:resourceId/conditionals updates an existing property conditional", async () => {
     const addResp = await axios.post(
       `http://localhost:${ctx.port}/api/resources/${scenarioId}/${resource._id}/conditionals`,
       {
-        stateConditional: {
+        propertyConditional: {
           stateVariableId: "var-1",
           comparator: "=",
           value: "old",
@@ -277,7 +281,7 @@ describe("Resources API tests", () => {
     const response = await axios.put(
       `http://localhost:${ctx.port}/api/resources/${scenarioId}/${resource._id}/conditionals`,
       {
-        stateConditional: {
+        propertyConditional: {
           _id: addedId,
           stateVariableId: "var-1",
           comparator: "!=",
@@ -297,7 +301,7 @@ describe("Resources API tests", () => {
       axios.put(
         `http://localhost:${ctx.port}/api/resources/${scenarioId}/000000000000000000000099/conditionals`,
         {
-          stateConditional: {
+          propertyConditional: {
             _id: new mongoose.mongo.ObjectId(),
             stateVariableId: "var-1",
             comparator: "=",
@@ -313,7 +317,7 @@ describe("Resources API tests", () => {
     const addResp = await axios.post(
       `http://localhost:${ctx.port}/api/resources/${scenarioId}/${resource._id}/conditionals`,
       {
-        stateConditional: {
+        propertyConditional: {
           stateVariableId: "var-1",
           comparator: "=",
           value: "x",

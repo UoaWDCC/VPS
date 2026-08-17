@@ -4,7 +4,7 @@ import { useParams } from "react-router-dom";
 import { useHistory } from "react-router-dom";
 import { ArrowLeftIcon, PlusIcon, XIcon } from "lucide-react";
 import AddGroup from "./components/AddGroup";
-import StateConditionalMenu from "../../components/StateVariables/StateConditionalMenu";
+import PropertyConditionalMenu from "../../components/Properties/PropertyConditionalMenu";
 import { api } from "../../util/api";
 import AuthenticationContext from "../../context/AuthenticationContext";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -324,7 +324,7 @@ export default function ManageResourcesPage() {
                 <div className="card-body flex min-h-full flex-col gap-4">
                   {selectedResource ? (
                     <>
-                      <StateConditionalMenu resource={selectedResource} />
+                      <PropertyConditionalMenu resource={selectedResource} />
                       {selectedResource?.type === "file" && (
                         <div className="min-h-[50dvh] flex-1 lg:min-h-0">
                           <ResourcePreview file={selectedResource} />
