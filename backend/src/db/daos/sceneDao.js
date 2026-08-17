@@ -133,7 +133,11 @@ const assertUniqueKeyBindings = (components, directLink, directLinkKey) => {
  */
 const createScene = async (scenarioId, scene) => {
   await assertDirectLinkInScenario(scenarioId, scene.directLink);
-  assertUniqueKeyBindings(scene.components, scene.directLink, scene.directLinkKey);
+  assertUniqueKeyBindings(
+    scene.components,
+    scene.directLink,
+    scene.directLinkKey
+  );
   const dbScene = new Scene(scene);
   await dbScene.save();
 
