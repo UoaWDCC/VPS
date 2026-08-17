@@ -100,7 +100,7 @@ export default function SceneSettings() {
 
   return (
     <>
-      <div className="collapse collapse-arrow bg-base-300 rounded-sm text-s">
+      <div className="collapse collapse-arrow bg-base-300 rounded-sm text-s has-[>input:checked]:overflow-visible">
         <input type="checkbox" />
         <div className="collapse-title">Scene Details</div>
         <div className="collapse-content text--1 bg-base-200">
