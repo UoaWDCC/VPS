@@ -1,4 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
+import toast from "react-hot-toast";
 import MDTextViewer from "../playScenario/components/MDTextViewer";
 
 async function loadText(url) {
@@ -60,9 +61,10 @@ function ResourcePreview({ file }) {
           type="button"
           className="btn btn-phantom btn-xs shrink-0"
           onClick={() =>
-            downloadFile(file.url, file.name).catch((err) =>
-              console.error("Failed to download file:", err)
-            )
+            downloadFile(file.url, file.name).catch((err) => {
+              console.error("Failed to download file:", err);
+              toast.error("Failed to download file. Please try again.");
+            })
           }
         >
           Download
