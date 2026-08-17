@@ -4,41 +4,22 @@ import Groups from "../models/group.js";
 import { retrieveScenarios } from "./scenarioDao.js";
 
 /**
- * Retrieves all users
- * @returns list of all users in databse
+ * Retrieves a user by email address.
+ *
+ * @param {string} email - Unique email of the user.
+ * @returns {Promise<object|null>} The matching user document, or null.
  */
-const retrieveAllUser = async () => {
-  return User.find();
-};
-
-/**
- * Retrieves minified all users
- * @returns uid, name, and email of all users
- */
-const retrieveAllUserMinAsc = async () => {
-  return User.find().select("uid name email -_id").sort({ name: 1 });
-};
-
-/**
- * Retrieves user based on given uid
- * @param {String} uid unique id of user
- * @returns user object
- */
-const retrieveUser = async (uid) => {
-  const user = await User.find({ uid });
-  return user;
-};
-
-/**
- * Retrieves user based on given uid
- * @param {String} email unique email of user
- * @returns user object
- */
-const retrieveUserByEmail = async (email) => {
+export const retrieveUserByEmail = async (email) => {
   return User.findOne({ email });
 };
 
-const retrievePlayedUsers = async (scenarioId) => {
+/**
+ * Retrieves all users that are assigned to a scenario.
+ *
+ * @param {string} scenarioId - MongoDB ID of the scenario.
+ * @returns {Promise<Array<object>>} The user documents assigned to that scenario.
+ */
+export const retrievePlayedUsers = async (scenarioId) => {
   const { users: userIds } = await Scenario.findById(scenarioId);
   const users = await User.find({
     uid: { $in: userIds },
@@ -47,48 +28,23 @@ const retrievePlayedUsers = async (scenarioId) => {
 };
 
 /**
- * Creates a user in the database,
- * @param {Record<String, String>} info user's info
- * @returns the created database user object
+ * Creates a user in the database.
+ *
+ * @param {Record<string, string>} info - User profile data.
+ * @returns {Promise<object>} The saved user document.
  */
-const createUser = async (info) => {
+export const createUser = async (info) => {
   return new User(info).save();
 };
 
 /**
- * @deprecated 17/09/2024
- * We currently do not support play history - a larger refactor is likely required, at which point,
- * we should support both single and multiplayer
+ * Adds scenario assignments to a list of users.
  *
- * Not removing as there are possible regressions not accounted for.
- *
- * Appendings new object "newPlayed" to user's played array and adds the users uid to scenario's user array
- * @param {String} uid user's unique id
- * @param {{scenarioId: String, path: Object[]}} newPlayed user's new played object
- * @param {String} scenarioId the scenario id of the scenario that the played just played
- * @returns {Boolean} True if successfully adding it , False if error
+ * @param {string} scenarioId - Scenario ID to assign.
+ * @param {Array<string>} newAssignees - User IDs to assign to the scenario.
+ * @returns {Promise<boolean>} True when assignment succeeds, otherwise false.
  */
-const addPlayed = async (uid, newPlayed, scenarioId) => {
-  try {
-    // Updates User's Played array, by appending new one
-
-    await User.updateOne({ uid }, { $push: { played: newPlayed } });
-    // Updates Scenario's User array, by appending new uer
-
-    await Scenario.updateOne({ _id: scenarioId }, { $push: { users: uid } });
-    return true;
-  } catch {
-    return false;
-  }
-};
-
-/**
- * Adds assignees to the scenario
- * @param {String} scenarioId
- * @param {Array} newAssignees
- * @returns all assignees
- */
-const assignScenarioToUsers = async (scenarioId, newAssignees) => {
+export const assignScenarioToUsers = async (scenarioId, newAssignees) => {
   try {
     await User.updateMany(
       { _id: { $in: newAssignees }, assigned: { $exists: true } },
@@ -114,11 +70,12 @@ const assignScenarioToUsers = async (scenarioId, newAssignees) => {
 };
 
 /**
- * Finds all assigned scenarios for a user
- * @param {String} userId
- * @returns all assigned scenarios for the user
+ * Finds all scenarios assigned to a user, including multiplayer group memberships.
+ *
+ * @param {string} userId - The Firebase user ID to look up.
+ * @returns {Promise<Array<object>>} The assigned scenario objects for the user.
  */
-const retrieveAssignedScenarioList = async (userId) => {
+export const retrieveAssignedScenarioList = async (userId) => {
   const user = await User.findOne({ uid: userId });
   if (!user?.assigned) return []; // even if list is empty, we may have groups this user is a part of.
 
@@ -132,19 +89,15 @@ const retrieveAssignedScenarioList = async (userId) => {
   );
 };
 
-const fetchScene = async (email, scenarioId) => {
-  const user = await User.findOne({ email }, { [`paths.${scenarioId}`]: 1 });
-  return (user && user.paths && user.paths.get(scenarioId)[0]) || null;
-};
-
 /**
- * Sets the state variables for a given user and scenario
- * @param {String} userId
- * @param {String} scenarioId
- * @param {Object} stateVariables
- * @returns updated user object
+ * Sets state variables for a user within a scenario.
+ *
+ * @param {string} userId - The MongoDB user ID.
+ * @param {string} scenarioId - The scenario ID associated with the state variables.
+ * @param {object} stateVariables - The state variable payload to persist.
+ * @returns {Promise<Array>} A tuple containing the updated state variables and version.
  */
-const setUserStateVariables = async (userId, scenarioId, stateVariables) => {
+export const setUserStateVariables = async (userId, scenarioId, stateVariables) => {
   try {
     const user = await User.findOneAndUpdate(
       { _id: userId },
@@ -170,18 +123,4 @@ const setUserStateVariables = async (userId, scenarioId, stateVariables) => {
   } catch (error) {
     throw new Error(`Error updating state variables: ${error.message}`);
   }
-};
-
-export {
-  retrieveAllUser,
-  retrieveAllUserMinAsc,
-  createUser,
-  retrieveUser,
-  retrieveUserByEmail,
-  addPlayed,
-  retrievePlayedUsers,
-  assignScenarioToUsers,
-  retrieveAssignedScenarioList,
-  fetchScene,
-  setUserStateVariables,
 };
