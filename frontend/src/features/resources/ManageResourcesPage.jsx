@@ -491,13 +491,15 @@ function ResourceNameField({
         </div>
       ) : (
         <>
-          <a
-            className={`text--1 truncate ${isTemp(resource) ? "text-primary" : ""}`}
+          <button
+            type="button"
+            className={`btn btn-phantom btn-xs min-w-0 justify-start truncate px-0 text--1 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary ${isTemp(resource) ? "text-primary" : ""}`}
             title={resource.name}
-            onClick={() => !disabled && onSelect()}
+            onClick={onSelect}
+            disabled={disabled}
           >
             {resource.name}
-          </a>
+          </button>
           <button
             type="button"
             className="btn btn-phantom btn-xs px-0"
