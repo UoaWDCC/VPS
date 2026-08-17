@@ -24,7 +24,14 @@ const getConnectedScenes = async (sceneID, active = true) => {
     .filter(Boolean);
   const connected = await Scene.find(
     { _id: { $in: connectedIds } },
-    { components: 1, directLink: 1, roles: 1, time: 1, timerStateOperations: 1 }
+    {
+      components: 1,
+      directLink: 1,
+      roles: 1,
+      time: 1,
+      timerStateOperations: 1,
+      background: 1,
+    }
   ).lean();
   return {
     active: scene._id,

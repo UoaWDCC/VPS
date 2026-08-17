@@ -2,6 +2,26 @@ import mongoose from "mongoose";
 
 const { Schema } = mongoose;
 
+const backgroundSchema = new Schema(
+  {
+    fileId: {
+      type: Schema.Types.ObjectId,
+      ref: "UploadedFile",
+      required: true,
+    },
+    href: {
+      type: String,
+      required: true,
+    },
+    fit: {
+      type: String,
+      enum: ["cover", "contain", "fill"],
+      default: "cover",
+    },
+  },
+  { _id: false }
+);
+
 const sceneSchema = new Schema({
   name: {
     type: String,
@@ -36,6 +56,10 @@ const sceneSchema = new Schema({
   directLink: {
     type: Schema.Types.ObjectId,
     ref: "Scene",
+    default: null,
+  },
+  background: {
+    type: backgroundSchema,
     default: null,
   },
 });

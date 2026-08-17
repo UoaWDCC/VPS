@@ -14,23 +14,31 @@ export function hasFileRef(component) {
   return ["audio", "image"].includes(component.type) && component.fileId;
 }
 
-function computeCreateFileRefDeltas(components) {
+function backgroundFileId(background) {
+  return background?.fileId ?? null;
+}
+
+function computeCreateFileRefDeltas(components, background) {
   const fileRefDeltas = new Map();
   (components ?? []).forEach((component) => {
     if (hasFileRef(component)) {
       addDelta(fileRefDeltas, component.fileId, 1);
     }
   });
+  const fileId = backgroundFileId(background);
+  if (fileId) addDelta(fileRefDeltas, fileId, 1);
   return fileRefDeltas;
 }
 
-function computeDeleteFileRefDeltas(components) {
+function computeDeleteFileRefDeltas(components, background) {
   const fileRefDeltas = new Map();
   (components ?? []).forEach((component) => {
     if (hasFileRef(component)) {
       addDelta(fileRefDeltas, component.fileId, -1);
     }
   });
+  const fileId = backgroundFileId(background);
+  if (fileId) addDelta(fileRefDeltas, fileId, -1);
   return fileRefDeltas;
 }
 
@@ -68,6 +76,19 @@ function computePatchFileRefDeltas(
   return fileRefDeltas;
 }
 
+function addBackgroundPatchFileRefDeltas(
+  fileRefDeltas,
+  existingBackground,
+  modifiedBackground
+) {
+  const existingFileId = backgroundFileId(existingBackground);
+  const newFileId = backgroundFileId(modifiedBackground);
+
+  if (String(existingFileId) === String(newFileId)) return;
+  if (existingFileId) addDelta(fileRefDeltas, existingFileId, -1);
+  if (newFileId) addDelta(fileRefDeltas, newFileId, 1);
+}
+
 // enforce direct links between scenes to be in the same scenario
 const assertDirectLinkInScenario = async (scenarioId, directLinkId) => {
   if (directLinkId == null) return;
@@ -98,6 +119,12 @@ const createScene = async (scenarioId, scene) => {
     { _id: scenarioId },
     { $push: { scenes: dbScene._id } }
   );
+
+  const fileRefDeltas = computeCreateFileRefDeltas(
+    dbScene.components,
+    dbScene.background
+  );
+  await applyReferenceDeltas(fileRefDeltas);
 
   return dbScene;
 };
@@ -213,7 +240,10 @@ const deleteScene = async (scenarioId, sceneId) => {
   const res = await Scene.findOneAndDelete({ _id: sceneId });
 
   if (res) {
-    const fileRefDeltas = computeDeleteFileRefDeltas(res.components);
+    const fileRefDeltas = computeDeleteFileRefDeltas(
+      res.components,
+      res.background
+    );
     await applyReferenceDeltas(fileRefDeltas);
   }
 
@@ -236,6 +266,7 @@ const duplicateScene = async (scenarioId, sceneId) => {
     components: sceneToCopy.components,
     time: sceneToCopy.time,
     directLink: sceneToCopy.directLink ?? null,
+    background: sceneToCopy.background ?? null,
   };
   const dbScene = new Scene(newScene);
   await dbScene.save();
@@ -252,7 +283,10 @@ const duplicateScene = async (scenarioId, sceneId) => {
     { $push: { scenes: { $each: [dbScene._id], $position: position } } }
   );
 
-  const fileRefDeltas = computeCreateFileRefDeltas(dbScene.components);
+  const fileRefDeltas = computeCreateFileRefDeltas(
+    dbScene.components,
+    dbScene.background
+  );
   await applyReferenceDeltas(fileRefDeltas);
 
   return dbScene;
@@ -309,7 +343,14 @@ const patchScene = async (sceneId, patch, scenarioId) => {
   const { fields = {}, components = [], deletedComponentIds = [] } = patch;
 
   const allowedFields = {};
-  ["name", "roles", "time", "directLink", "timerStateOperations"].forEach(
+  [
+    "name",
+    "roles",
+    "time",
+    "directLink",
+    "timerStateOperations",
+    "background",
+  ].forEach(
     (field) => {
       if (Object.prototype.hasOwnProperty.call(fields, field)) {
         allowedFields[field] = fields[field];
@@ -321,7 +362,10 @@ const patchScene = async (sceneId, patch, scenarioId) => {
     await assertDirectLinkInScenario(scenarioId, allowedFields.directLink);
   }
 
-  const existingScene = await Scene.findById(sceneId, { components: 1 });
+  const existingScene = await Scene.findById(sceneId, {
+    components: 1,
+    background: 1,
+  });
   if (!existingScene)
     throw new HttpError("scene not found", HttpStatusCode.NotFound);
 
@@ -330,6 +374,13 @@ const patchScene = async (sceneId, patch, scenarioId) => {
     components,
     deletedComponentIds
   );
+  if (Object.prototype.hasOwnProperty.call(allowedFields, "background")) {
+    addBackgroundPatchFileRefDeltas(
+      fileRefDeltas,
+      existingScene.background,
+      allowedFields.background
+    );
+  }
 
   const operations = [];
 

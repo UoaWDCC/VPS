@@ -3,6 +3,7 @@ import { describe, beforeEach, it, expect } from "@jest/globals";
 import mongoose from "mongoose";
 
 import Scene from "../../models/scene.js";
+import UploadedFile from "../../models/uploadedFile.js";
 import { patchScene } from "../sceneDao.js";
 import { useMongoMemoryServer } from "../../../test/testSetup.js";
 
@@ -164,5 +165,65 @@ describe("Scene DAO patchScene tests", () => {
     expect(updatedScene.roles).toEqual(["patient"]);
     expect(updatedScene.time).toBe(120);
     expect(updatedScene.components).toHaveLength(3);
+  });
+
+  it("updates a background and maintains its file reference count", async () => {
+    const firstFile = await UploadedFile.create({
+      name: "first.png",
+      type: "image",
+      path: "images/first.png",
+      url: "https://example.com/first.png",
+      contentType: "image/png",
+      size: 100,
+      uploaderUid: "test-user",
+      scenarioId: new mongoose.Types.ObjectId(),
+    });
+    const secondFile = await UploadedFile.create({
+      name: "second.png",
+      type: "image",
+      path: "images/second.png",
+      url: "https://example.com/second.png",
+      contentType: "image/png",
+      size: 200,
+      uploaderUid: "test-user",
+      scenarioId: new mongoose.Types.ObjectId(),
+    });
+
+    await patchScene(sceneId, {
+      fields: {
+        background: {
+          fileId: firstFile._id,
+          href: firstFile.url,
+          fit: "cover",
+        },
+      },
+    });
+
+    let updatedScene = await Scene.findById(sceneId).lean();
+    expect(updatedScene.background).toMatchObject({
+      fileId: firstFile._id,
+      href: firstFile.url,
+      fit: "cover",
+    });
+    expect((await UploadedFile.findById(firstFile._id)).refCount).toBe(1);
+
+    await patchScene(sceneId, {
+      fields: {
+        background: {
+          fileId: secondFile._id,
+          href: secondFile.url,
+          fit: "contain",
+        },
+      },
+    });
+
+    expect((await UploadedFile.findById(firstFile._id)).refCount).toBe(0);
+    expect((await UploadedFile.findById(secondFile._id)).refCount).toBe(1);
+
+    await patchScene(sceneId, { fields: { background: null } });
+
+    updatedScene = await Scene.findById(sceneId).lean();
+    expect(updatedScene.background).toBeNull();
+    expect((await UploadedFile.findById(secondFile._id)).refCount).toBe(0);
   });
 });
