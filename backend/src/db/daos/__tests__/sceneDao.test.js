@@ -3,7 +3,9 @@ import { describe, beforeEach, it, expect } from "@jest/globals";
 import mongoose from "mongoose";
 
 import Scene from "../../models/scene.js";
-import { patchScene } from "../sceneDao.js";
+import Scenario from "../../models/scenario.js";
+import UploadedFile from "../../models/uploadedFile.js";
+import { createScene, deleteScene, patchScene } from "../sceneDao.js";
 import { useMongoMemoryServer } from "../../../test/testSetup.js";
 
 describe("Scene DAO patchScene tests", () => {
@@ -164,5 +166,85 @@ describe("Scene DAO patchScene tests", () => {
     expect(updatedScene.roles).toEqual(["patient"]);
     expect(updatedScene.time).toBe(120);
     expect(updatedScene.components).toHaveLength(3);
+  });
+
+  it("rejects direct links that reference a scene outside the current scenario", async () => {
+    const otherScenario = await Scenario.create({
+      name: "Other scenario",
+      uid: "author-2",
+      scenes: [new mongoose.Types.ObjectId()],
+    });
+
+    const otherScene = await Scene.create({
+      _id: new mongoose.Types.ObjectId("000000000000000000000002"),
+      name: "Other Scene",
+      components: [],
+    });
+
+    await Scenario.updateOne(
+      { _id: otherScenario._id },
+      { $push: { scenes: otherScene._id } }
+    );
+
+    await expect(
+      createScene(
+        new mongoose.Types.ObjectId("000000000000000000000003").toString(),
+        {
+          name: "Linked scene",
+          directLink: otherScene._id,
+          components: [],
+        }
+      )
+    ).rejects.toMatchObject({ status: 400 });
+  });
+
+  it("deletes a scene and decrements the file reference count for linked media", async () => {
+    const retainingScene = await Scene.create({
+      name: "Retained scene",
+      components: [],
+    });
+
+    const scenario = await Scenario.create({
+      name: "Media scenario",
+      uid: "author-3",
+      scenes: [retainingScene._id],
+    });
+
+    const uploadedFile = await UploadedFile.create({
+      name: "media.png",
+      type: "image",
+      path: "images/media.png",
+      url: "https://example.com/media.png",
+      contentType: "image/png",
+      size: 256,
+      uploaderUid: "uploader-1",
+      scenarioId: scenario._id,
+      refCount: 1,
+    });
+
+    const scene = await Scene.create({
+      name: "Media scene",
+      components: [
+        {
+          id: "img-1",
+          type: "image",
+          fileId: uploadedFile._id.toString(),
+        },
+      ],
+    });
+
+    await Scenario.updateOne(
+      { _id: scenario._id },
+      { $push: { scenes: scene._id } }
+    );
+
+    const result = await deleteScene(
+      scenario._id.toString(),
+      scene._id.toString()
+    );
+
+    expect(result.deleted).toBe(true);
+    const refreshedFile = await UploadedFile.findById(uploadedFile._id);
+    expect(refreshedFile.refCount).toBe(0);
   });
 });

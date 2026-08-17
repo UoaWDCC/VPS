@@ -1,6 +1,7 @@
 import User from "../models/user.js";
 import Scenario from "../models/scenario.js";
 import Groups from "../models/group.js";
+import { HttpError } from "../../util/error.js";
 import { retrieveScenarios } from "./scenarioDao.js";
 
 /**
@@ -97,30 +98,30 @@ export const retrieveAssignedScenarioList = async (userId) => {
  * @param {object} stateVariables - The state variable payload to persist.
  * @returns {Promise<Array>} A tuple containing the updated state variables and version.
  */
-export const setUserStateVariables = async (userId, scenarioId, stateVariables) => {
-  try {
-    const user = await User.findOneAndUpdate(
-      { _id: userId },
-      {
-        $set: {
-          [`stateVariables.${scenarioId}`]: stateVariables,
-        },
-        $inc: {
-          [`stateVersions.${scenarioId}`]: 1,
-        },
+export const setUserStateVariables = async (
+  userId,
+  scenarioId,
+  stateVariables
+) => {
+  const user = await User.findOneAndUpdate(
+    { _id: userId },
+    {
+      $set: {
+        [`stateVariables.${scenarioId}`]: stateVariables,
       },
-      { new: true }
-    );
+      $inc: {
+        [`stateVersions.${scenarioId}`]: 1,
+      },
+    },
+    { new: true }
+  );
 
-    if (!user) {
-      throw new Error("User not found");
-    }
-
-    return [
-      user.stateVariables.get(scenarioId),
-      user.stateVersions.get(scenarioId),
-    ];
-  } catch (error) {
-    throw new Error(`Error updating state variables: ${error.message}`);
+  if (!user) {
+    throw new HttpError("user not found", 404);
   }
+
+  return [
+    user.stateVariables.get(scenarioId),
+    user.stateVersions.get(scenarioId),
+  ];
 };

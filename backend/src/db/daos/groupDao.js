@@ -1,4 +1,5 @@
 import Group from "../models/group.js";
+import { HttpError } from "../../util/error.js";
 
 /**
  * Retrieves a group by its MongoDB ID.
@@ -69,20 +70,18 @@ export const removeUserFromGroup = async (groupId, scenarioId, email) => {
  * @returns {Promise<Array>} A tuple containing the updated state variables and version.
  */
 export const setGroupStateVariables = async (groupId, stateVariables) => {
-  try {
-    const group = await Group.findOneAndUpdate(
-      { _id: groupId },
-      {
-        $set: { stateVariables },
-        $inc: { stateVersion: 1 },
-      },
-      { new: true }
-    );
-    if (!group) {
-      throw new Error("Group not found");
-    }
-    return [group.stateVariables, group.stateVersion];
-  } catch (error) {
-    throw new Error(`Error initiating state variables: ${error.message}`);
+  const group = await Group.findOneAndUpdate(
+    { _id: groupId },
+    {
+      $set: { stateVariables },
+      $inc: { stateVersion: 1 },
+    },
+    { new: true }
+  );
+
+  if (!group) {
+    throw new HttpError("group not found", 404);
   }
+
+  return [group.stateVariables, group.stateVersion];
 };

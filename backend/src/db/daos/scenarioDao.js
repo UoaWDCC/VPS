@@ -3,6 +3,7 @@ import Scenario from "../models/scenario.js";
 import Scene from "../models/scene.js";
 import { v4 as uuidv4 } from "uuid";
 import User from "../models/user.js";
+import { HttpError } from "../../util/error.js";
 import { addDelta, hasFileRef } from "./sceneDao.js";
 import { applyReferenceDeltas } from "./fileDao.js";
 
@@ -193,15 +194,24 @@ export const updateScenario = async (scenarioId, updatedScenario) => {
  * @returns updated database scene object
  */
 export const updateDurations = async (scenarioId, updatedDurations) => {
-  // if we are updating name only, components will be null
+  const scenario = await getScenarioOrThrow(scenarioId);
+  scenario.durations = [...(scenario.durations ?? []), updatedDurations];
+  await scenario.save();
+  return scenario;
+};
+
+/**
+ * Resolves a scenario or throws a consistent domain error.
+ *
+ * @param {string} scenarioId - MongoDB ID of the scenario.
+ * @returns {Promise<object>} The scenario document.
+ */
+const getScenarioOrThrow = async (scenarioId) => {
   const scenario = await Scenario.findById(scenarioId);
-  try {
-    scenario.durations = scenario.durations.push(updatedDurations);
-    await scenario.save();
-    return scenario;
-  } catch {
-    return scenario;
+  if (!scenario) {
+    throw new HttpError("scenario not found", 404);
   }
+  return scenario;
 };
 
 /**
@@ -231,14 +241,10 @@ const mergeRoles = (existingRoles, newRoles) => {
  * @returns updated database scenario object
  */
 export const updateRoleList = async (scenarioId, updatedRoleList) => {
-  const scenario = await Scenario.findById(scenarioId);
-  try {
-    scenario.roleList = mergeRoles(scenario.roleList, updatedRoleList);
-    await scenario.save();
-    return scenario;
-  } catch {
-    return scenario;
-  }
+  const scenario = await getScenarioOrThrow(scenarioId);
+  scenario.roleList = mergeRoles(scenario.roleList, updatedRoleList);
+  await scenario.save();
+  return scenario;
 };
 
 /**
@@ -248,7 +254,7 @@ export const updateRoleList = async (scenarioId, updatedRoleList) => {
  * @returns updated role list for the scenario
  */
 export const createRole = async (scenarioId, role) => {
-  const scenario = await Scenario.findById(scenarioId);
+  const scenario = await getScenarioOrThrow(scenarioId);
   const merged = mergeRoles(scenario.roleList, [role.trim()]);
   if (merged.length !== scenario.roleList.length) {
     scenario.roleList = merged;
@@ -264,7 +270,7 @@ export const createRole = async (scenarioId, role) => {
  * @returns updated role list for the scenario
  */
 export const deleteRole = async (scenarioId, role) => {
-  const scenario = await Scenario.findById(scenarioId);
+  const scenario = await getScenarioOrThrow(scenarioId);
   scenario.roleList = scenario.roleList.filter((r) => r !== role);
   await scenario.save();
   await Scene.updateMany(
@@ -322,19 +328,16 @@ export const getStateVariables = async (scenarioId) => {
  */
 export const createStateVariable = async (scenarioId, stateVariable) => {
   // TODO Add validation for state variable (e.g. name should be unique)
-  const scenario = await Scenario.findById(scenarioId);
-  try {
-    // Generate uuid on the backend
-    const stateVariableWithId = {
-      ...stateVariable,
-      id: uuidv4(),
-    };
-    scenario.stateVariables.push(stateVariableWithId);
-    await scenario.save();
-    return scenario.stateVariables;
-  } catch {
-    return scenario.stateVariables;
-  }
+  const scenario = await getScenarioOrThrow(scenarioId);
+
+  // Generate uuid on the backend
+  const stateVariableWithId = {
+    ...stateVariable,
+    id: uuidv4(),
+  };
+  scenario.stateVariables.push(stateVariableWithId);
+  await scenario.save();
+  return scenario.stateVariables;
 };
 
 /**
@@ -351,27 +354,24 @@ export const editStateVariable = async (
 ) => {
   // TODO Add validation for state variable
   // (e.g. if name has changed, it should not conflict with existing names)
-  const scenario = await Scenario.findById(scenarioId);
-  try {
-    for (let i = 0; i < scenario.stateVariables.length; i++) {
-      // Try to match by ID first (new format), then by name (legacy format)
-      const match =
-        (newStateVariable.id &&
-          scenario.stateVariables[i].id === newStateVariable.id) ||
-        (!newStateVariable.id &&
-          originalName === scenario.stateVariables[i].name);
+  const scenario = await getScenarioOrThrow(scenarioId);
 
-      if (match) {
-        scenario.stateVariables[i] = newStateVariable;
-        break;
-      }
+  for (let i = 0; i < scenario.stateVariables.length; i++) {
+    // Try to match by ID first (new format), then by name (legacy format)
+    const match =
+      (newStateVariable.id &&
+        scenario.stateVariables[i].id === newStateVariable.id) ||
+      (!newStateVariable.id &&
+        originalName === scenario.stateVariables[i].name);
+
+    if (match) {
+      scenario.stateVariables[i] = newStateVariable;
+      break;
     }
-
-    await scenario.save();
-    return scenario.stateVariables;
-  } catch {
-    return scenario.stateVariables;
   }
+
+  await scenario.save();
+  return scenario.stateVariables;
 };
 
 /**
@@ -380,17 +380,16 @@ export const editStateVariable = async (
  * @param {String} stateVariableIdentifier name or ID of the state variable to be deleted
  * @returns updated state variables for the scenario
  */
-export const deleteStateVariable = async (scenarioId, stateVariableIdentifier) => {
-  const scenario = await Scenario.findById(scenarioId);
-  try {
-    scenario.stateVariables = scenario.stateVariables.filter(
-      (state) =>
-        state.name !== stateVariableIdentifier &&
-        state.id !== stateVariableIdentifier
-    );
-    await scenario.save();
-    return scenario.stateVariables;
-  } catch {
-    return scenario.stateVariables;
-  }
+export const deleteStateVariable = async (
+  scenarioId,
+  stateVariableIdentifier
+) => {
+  const scenario = await getScenarioOrThrow(scenarioId);
+  scenario.stateVariables = scenario.stateVariables.filter(
+    (state) =>
+      state.name !== stateVariableIdentifier &&
+      state.id !== stateVariableIdentifier
+  );
+  await scenario.save();
+  return scenario.stateVariables;
 };
