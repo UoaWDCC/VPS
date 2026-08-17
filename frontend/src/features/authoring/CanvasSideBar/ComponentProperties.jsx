@@ -8,6 +8,11 @@ import SelectInput from "../components/Select";
 import KeyCapture from "../components/KeyCapture";
 import StateBindingMenu from "../../../components/StateVariables/StateBindingMenu";
 import { KEY_BINDING_OPTIONS, directLinkKeysFor } from "../keyBindings";
+import {
+  KEY_HINT_POSITIONS,
+  DEFAULT_KEY_HINT_POSITION,
+  displayKeyHintPosition,
+} from "../keyHintPosition";
 
 /**
  * This component displays the properties the selected scene component
@@ -19,6 +24,9 @@ export default function ComponentProperties({ component }) {
   const [value, setValue] = useState(component?.nextScene);
   const [keyValue, setKeyValue] = useState(component?.keyBinding ?? null);
   const [hintValue, setHintValue] = useState(!!component?.showKeyHint);
+  const [positionValue, setPositionValue] = useState(
+    component?.keyHintPosition ?? DEFAULT_KEY_HINT_POSITION
+  );
 
   useEffect(() => {
     if (component?.nextScene !== value) setValue(component?.nextScene);
@@ -26,6 +34,8 @@ export default function ComponentProperties({ component }) {
       setKeyValue(component?.keyBinding ?? null);
     if (!!component?.showKeyHint !== hintValue)
       setHintValue(!!component?.showKeyHint);
+    const nextPosition = component?.keyHintPosition ?? DEFAULT_KEY_HINT_POSITION;
+    if (nextPosition !== positionValue) setPositionValue(nextPosition);
   }, [component]);
 
   function saveLink(v) {
@@ -45,6 +55,11 @@ export default function ComponentProperties({ component }) {
   function saveHint(checked) {
     setHintValue(checked);
     modifyComponentProp(component.id, "showKeyHint", checked);
+  }
+
+  function savePosition(v) {
+    setPositionValue(v);
+    modifyComponentProp(component.id, "keyHintPosition", v);
   }
 
   if (!component) return null;
@@ -99,6 +114,17 @@ export default function ComponentProperties({ component }) {
                 />
                 Show key hint
               </label>
+              {hintValue && (
+                <fieldset className="fieldset pt-2">
+                  <label className="label">Key Hint Position</label>
+                  <SelectInput
+                    values={KEY_HINT_POSITIONS}
+                    value={positionValue}
+                    onChange={savePosition}
+                    display={displayKeyHintPosition}
+                  />
+                </fieldset>
+              )}
             </div>
           </div>
           <StateOperationMenu component={component} />

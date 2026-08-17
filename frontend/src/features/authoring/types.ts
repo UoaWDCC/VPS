@@ -1,3 +1,5 @@
+import type { KeyHintPosition } from "./keyHintPosition";
+
 export type Component =
   | BoxComponent
   | TextBoxComponent
@@ -50,6 +52,7 @@ interface GenericComponent {
   stateBindings?: StateBinding[];
   keyBinding?: string | null;
   showKeyHint?: boolean;
+  keyHintPosition?: KeyHintPosition;
 }
 
 export interface StateBinding {
