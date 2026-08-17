@@ -93,6 +93,16 @@ describe("userDao", () => {
         [{ id: "missing", name: "score", value: 0 }]
       )
     ).rejects.toBeInstanceOf(HttpError);
+    await expect(
+      setUserStateVariables(
+        new mongoose.Types.ObjectId().toString(),
+        "scenario-789",
+        [{ id: "missing", name: "score", value: 0 }]
+      )
+    ).rejects.toMatchObject({
+      status: 404,
+      message: "user not found",
+    });
   });
 
   it("returns an empty assignment list when the user has no assigned scenarios", async () => {

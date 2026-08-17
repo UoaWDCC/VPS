@@ -50,9 +50,23 @@ describe("accessDao", () => {
       accessList: ["bob@example.com"],
     });
 
-    const granted = await grantAccess("scenario-access-2", "alice@example.com");
-    expect(granted.accessList).toEqual(
+    const firstGrant = await grantAccess(
+      "scenario-access-2",
+      "alice@example.com"
+    );
+    const secondGrant = await grantAccess(
+      "scenario-access-2",
+      "alice@example.com"
+    );
+
+    expect(secondGrant.accessList).toEqual(
       expect.arrayContaining(["bob@example.com", "alice@example.com"])
+    );
+    expect(
+      secondGrant.accessList.filter((email) => email === "alice@example.com")
+    ).toHaveLength(1);
+    expect(firstGrant.accessList).toEqual(
+      expect.arrayContaining(["bob@example.com"])
     );
 
     const revoked = await revokeAccess("scenario-access-2", [

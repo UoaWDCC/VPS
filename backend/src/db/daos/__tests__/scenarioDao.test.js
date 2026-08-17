@@ -81,6 +81,22 @@ describe("scenarioDao", () => {
     ).rejects.toBeInstanceOf(HttpError);
   });
 
+  it("throws HttpError when updateScenario targets an absent scenario", async () => {
+    await expect(
+      updateScenario(new mongoose.Types.ObjectId().toString(), {
+        name: "Missing scenario",
+      })
+    ).rejects.toBeInstanceOf(HttpError);
+    await expect(
+      updateScenario(new mongoose.Types.ObjectId().toString(), {
+        name: "Missing scenario",
+      })
+    ).rejects.toMatchObject({
+      status: 404,
+      message: "scenario not found",
+    });
+  });
+
   it("returns empty values when access and state data are absent", async () => {
     await expect(retrieveAccessibleScenarios(null)).resolves.toEqual([]);
 

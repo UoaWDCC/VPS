@@ -35,6 +35,7 @@ describe("noteDao", () => {
       "doctor",
       "Text"
     );
+    const refreshedGroup = await Group.findById(group._id).lean();
     const noteList = await retrieveNoteList(group._id.toString());
     const found = await retrieveNote(created._id.toString());
 
@@ -45,9 +46,7 @@ describe("noteDao", () => {
     });
     expect(noteList).toHaveLength(1);
     expect(found).toMatchObject({ title: "Title", role: "doctor" });
-    expect(hasNoteInGroup(group.toObject(), created._id.toString())).toBe(
-      false
-    );
+    expect(hasNoteInGroup(refreshedGroup, created._id.toString())).toBe(true);
   });
 
   it("updates and deletes a note only for the matching role", async () => {

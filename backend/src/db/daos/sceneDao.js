@@ -25,7 +25,9 @@ export function addDelta(fileRefDeltas, fileId, delta) {
  */
 export function hasFileRef(component) {
   if (!component) return false;
-  return ["audio", "image"].includes(component.type) && component.fileId;
+  return (
+    ["audio", "image"].includes(component.type) && Boolean(component.fileId)
+  );
 }
 
 /**
@@ -124,16 +126,53 @@ const assertDirectLinkInScenario = async (scenarioId, directLinkId) => {
  * @returns the created database scene object
  */
 export const createScene = async (scenarioId, scene) => {
+  if (scene.directLink == null) {
+    const scenarioExists = await Scenario.exists({ _id: scenarioId });
+    if (!scenarioExists) {
+      throw new HttpError("scenario not found", status.NOT_FOUND);
+    }
+  }
+
   await assertDirectLinkInScenario(scenarioId, scene.directLink);
+
+  const fileRefDeltas = computeCreateFileRefDeltas(scene.components);
   const dbScene = new Scene(scene);
-  await dbScene.save();
 
-  await Scenario.updateOne(
-    { _id: scenarioId },
-    { $push: { scenes: dbScene._id } }
-  );
+  try {
+    await dbScene.save();
 
-  return dbScene;
+    const scenarioUpdate = await Scenario.updateOne(
+      { _id: scenarioId },
+      { $push: { scenes: dbScene._id } }
+    );
+
+    if (scenarioUpdate.matchedCount === 0) {
+      await Scene.deleteOne({ _id: dbScene._id });
+      throw new HttpError("scenario not found", status.NOT_FOUND);
+    }
+
+    await applyReferenceDeltas(fileRefDeltas);
+    return dbScene;
+  } catch (error) {
+    if (dbScene._id) {
+      await Promise.all([
+        Scene.deleteOne({ _id: dbScene._id }),
+        Scenario.updateOne(
+          { _id: scenarioId },
+          { $pull: { scenes: dbScene._id } }
+        ),
+        applyReferenceDeltas(
+          new Map(
+            Array.from(fileRefDeltas.entries()).map(([fileId, delta]) => [
+              fileId,
+              -delta,
+            ])
+          )
+        ),
+      ]).catch(() => {});
+    }
+    throw error;
+  }
 };
 
 /**
@@ -255,9 +294,7 @@ export const duplicateScene = async (scenarioId, sceneId) => {
  * @returns nothing
  */
 export const incrementVisisted = async (sceneId) => {
-  const prevDbScene = await Scene.findById(sceneId);
-  const countVisited = prevDbScene.visited;
-  await Scene.updateOne({ _id: sceneId }, { visited: countVisited + 1 });
+  await Scene.updateOne({ _id: sceneId }, { $inc: { visited: 1 } });
 };
 
 /**
@@ -284,11 +321,24 @@ export const getComponent = async (sceneId, componentId) => {
  * @returns {Promise<Object>} updated scenario object
  */
 export const updateSceneOrder = async (scenarioId, sceneIds) => {
+  const scenario = await Scenario.findById(scenarioId, { scenes: 1 }).lean();
+  if (!scenario) return null;
+
+  const currentSceneIds = scenario.scenes.map((id) => id.toString());
+  if (sceneIds.length !== currentSceneIds.length) return null;
+
+  const seen = new Set();
+  const invalid = sceneIds.some((id) => {
+    const idString = id.toString();
+    if (seen.has(idString)) return true;
+    seen.add(idString);
+    return !currentSceneIds.includes(idString);
+  });
+
+  if (invalid) return null;
+
   const updatedScenario = await Scenario.findOneAndUpdate(
-    {
-      _id: scenarioId,
-      $expr: { $eq: [{ $size: "$scenes" }, sceneIds.length] },
-    },
+    { _id: scenarioId },
     { scenes: sceneIds },
     { new: true }
   );

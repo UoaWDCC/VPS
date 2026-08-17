@@ -37,6 +37,14 @@ describe("groupDao", () => {
         { id: "missing", name: "hp", value: 1 },
       ])
     ).rejects.toBeInstanceOf(HttpError);
+    await expect(
+      setGroupStateVariables(new mongoose.Types.ObjectId().toString(), [
+        { id: "missing", name: "hp", value: 1 },
+      ])
+    ).rejects.toMatchObject({
+      status: 404,
+      message: "group not found",
+    });
   });
 
   it("creates a group and removes a matching user by email", async () => {

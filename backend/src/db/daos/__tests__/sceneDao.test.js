@@ -179,33 +179,84 @@ describe("Scene DAO patchScene tests", () => {
   });
 
   it("rejects direct links that reference a scene outside the current scenario", async () => {
-    const otherScenario = await Scenario.create({
-      name: "Other scenario",
+    const scenario = await Scenario.create({
+      name: "Source scenario",
       uid: "author-2",
-      scenes: [new mongoose.Types.ObjectId()],
+      scenes: [],
     });
 
-    const otherScene = await Scene.create({
+    const localScene = await Scene.create({
       _id: new mongoose.Types.ObjectId("000000000000000000000002"),
-      name: "Other Scene",
+      name: "Local Scene",
       components: [],
     });
 
     await Scenario.updateOne(
-      { _id: otherScenario._id },
-      { $push: { scenes: otherScene._id } }
+      { _id: scenario._id },
+      { $push: { scenes: localScene._id } }
     );
 
+    const otherScene = await Scene.create({
+      _id: new mongoose.Types.ObjectId("000000000000000000000003"),
+      name: "Other Scene",
+      components: [],
+    });
+
     await expect(
-      createScene(
-        new mongoose.Types.ObjectId("000000000000000000000003").toString(),
-        {
-          name: "Linked scene",
-          directLink: otherScene._id,
-          components: [],
-        }
-      )
+      createScene(scenario._id.toString(), {
+        name: "Linked scene",
+        directLink: otherScene._id,
+        components: [],
+      })
     ).rejects.toMatchObject({ status: 400 });
+  });
+
+  it("rejects createScene for an unknown scenario parent and increments file refs for created scenes", async () => {
+    const missingScenarioId = new mongoose.Types.ObjectId().toString();
+    await expect(
+      createScene(missingScenarioId, {
+        name: "Missing parent",
+        components: [],
+        directLink: null,
+      })
+    ).rejects.toMatchObject({
+      status: 404,
+      message: "scenario not found",
+    });
+
+    const scenario = await Scenario.create({
+      name: "File scenario",
+      uid: "author-3",
+      scenes: [],
+    });
+
+    const uploadedFile = await UploadedFile.create({
+      name: "clip.png",
+      type: "image",
+      path: "images/clip.png",
+      url: "https://example.com/clip.png",
+      contentType: "image/png",
+      size: 128,
+      uploaderUid: "uploader-3",
+      scenarioId: scenario._id,
+      refCount: 0,
+    });
+
+    const created = await createScene(scenario._id.toString(), {
+      name: "File scene",
+      components: [
+        { id: "img-1", type: "image", fileId: uploadedFile._id.toString() },
+      ],
+      directLink: null,
+    });
+
+    expect(created).toMatchObject({ name: "File scene" });
+    expect(await Scenario.findById(scenario._id)).toMatchObject({
+      scenes: expect.arrayContaining([created._id]),
+    });
+
+    const refreshedFile = await UploadedFile.findById(uploadedFile._id);
+    expect(refreshedFile.refCount).toBe(1);
   });
 
   it("deletes a scene and decrements the file reference count for linked media", async () => {
@@ -317,6 +368,42 @@ describe("Scene DAO patchScene tests", () => {
       sceneId.toString(),
       duplicate._id.toString(),
     ]);
+  });
+
+  it("increments visited atomically across concurrent calls for the same scene", async () => {
+    const scene = await Scene.create({
+      name: "Concurrent visit scene",
+      components: [],
+      visited: 0,
+    });
+
+    await Promise.all(
+      Array.from({ length: 12 }, () => incrementVisisted(scene._id.toString()))
+    );
+
+    const refreshedScene = await Scene.findById(scene._id);
+    expect(refreshedScene.visited).toBe(12);
+  });
+
+  it("rejects reorder updates when a same-length list contains a foreign scene id", async () => {
+    const sceneA = await Scene.create({
+      name: "Scene A",
+      components: [],
+    });
+    const sceneB = await Scene.create({
+      name: "Scene B",
+      components: [],
+    });
+    const scenario = await Scenario.create({
+      name: "Foreign reorder scenario",
+      uid: "author-7",
+      scenes: [sceneA._id, sceneB._id],
+    });
+
+    const foreignId = new mongoose.Types.ObjectId();
+    await expect(
+      updateSceneOrder(scenario._id.toString(), [sceneA._id, foreignId])
+    ).resolves.toBeNull();
   });
 
   it("covers null direct links, not-found deletes, and scene retrieval edge cases", async () => {

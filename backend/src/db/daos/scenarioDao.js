@@ -169,7 +169,7 @@ export const retrieveRoleList = async (scenarioId) => {
  * @returns updated database scenario object
  */
 export const updateScenario = async (scenarioId, updatedScenario) => {
-  const scenario = await Scenario.findById(scenarioId);
+  const scenario = await getScenarioOrThrow(scenarioId);
 
   if (updatedScenario.name?.trim()) {
     scenario.name = updatedScenario.name;
