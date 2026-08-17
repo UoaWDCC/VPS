@@ -11,11 +11,16 @@ export function handleContextGlobal(e: React.MouseEvent) {
 }
 
 function handleComponentContext(e: React.MouseEvent) {
-  const { selected } = useEditorStore.getState();
+  const target = e.target as HTMLElement;
+  const id = target.dataset.id as string;
+  const { selected, setSelected } = useEditorStore.getState();
+  const ids = selected.includes(id) ? selected : [id];
+
+  if (ids !== selected) setSelected(ids);
 
   e.preventDefault();
   render({
-    menu: ComponentMenu({ ids: selected }),
+    menu: ComponentMenu({ ids }),
     position: { x: e.clientX, y: e.clientY },
   });
 }
