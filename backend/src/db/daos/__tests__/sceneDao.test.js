@@ -153,6 +153,7 @@ describe("Scene DAO patchScene tests", () => {
         name: "Updated Scene Name",
         roles: ["patient"],
         time: 120,
+        directLinkKey: "W",
       },
       components: [],
       deletedComponentIds: [],
@@ -163,6 +164,7 @@ describe("Scene DAO patchScene tests", () => {
     expect(updatedScene.name).toBe("Updated Scene Name");
     expect(updatedScene.roles).toEqual(["patient"]);
     expect(updatedScene.time).toBe(120);
+    expect(updatedScene.directLinkKey).toBe("W");
     expect(updatedScene.components).toHaveLength(3);
   });
 });

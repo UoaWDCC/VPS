@@ -8,6 +8,52 @@ import Image from "../authoring/elements/Image";
 import Line from "../authoring/elements/Line";
 import { resolveSceneBindings } from "../../components/StateVariables/componentBindings";
 import { useMemo } from "react";
+import { expandBoxVerts, getBoxCenter, rotateMany } from "../authoring/util";
+import { displayKeyBinding } from "../authoring/keyBindings";
+
+// Small, subtle "[KEY]" badge so it stays legible over arbitrary video
+// backgrounds regardless of app theme.
+function KeyHint({ bounds, keyBinding }) {
+  const corners = rotateMany(
+    expandBoxVerts(bounds.verts),
+    getBoxCenter(bounds.verts),
+    bounds.rotation
+  );
+  const topRight = corners[1];
+  const label = `[${displayKeyBinding(keyBinding)}]`;
+  const fontSize = 26;
+  const paddingX = 10;
+  const paddingY = 6;
+  const width = label.length * fontSize * 0.6 + paddingX * 2;
+  const height = fontSize + paddingY * 2;
+  const x = topRight.x - width - 10;
+  const y = topRight.y + 10;
+
+  return (
+    <g className="pointer-events-none" opacity={0.75}>
+      <rect
+        x={x}
+        y={y}
+        width={width}
+        height={height}
+        rx={6}
+        fill="#000000"
+        opacity={0.55}
+      />
+      <text
+        x={x + width / 2}
+        y={y + height / 2}
+        textAnchor="middle"
+        dominantBaseline="central"
+        fontSize={fontSize}
+        fontFamily="monospace"
+        fill="#ffffff"
+      >
+        {label}
+      </text>
+    </g>
+  );
+}
 
 const componentMap = {
   textbox: TextBox,
@@ -194,6 +240,9 @@ export default function PlayScenarioCanvas({
             onClick={() => buttonPressed(c)}
           >
             {resolved}
+            {c.keyBinding && c.showKeyHint && (
+              <KeyHint bounds={c.bounds} keyBinding={c.keyBinding} />
+            )}
           </g>
         );
       }

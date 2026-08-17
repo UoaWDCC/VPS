@@ -14,6 +14,7 @@ export interface Scene {
   roles: string[];
   time: number | null;
   directLink: string | null;
+  directLinkKey: string | null;
   timerStateOperations: Record<string, unknown>[] | null;
 }
 
@@ -47,6 +48,8 @@ interface GenericComponent {
   zIndex: number;
   clickable?: boolean;
   stateBindings?: StateBinding[];
+  keyBinding?: string | null;
+  showKeyHint?: boolean;
 }
 
 export interface StateBinding {

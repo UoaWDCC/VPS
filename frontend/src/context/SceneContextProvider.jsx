@@ -59,13 +59,18 @@ function generatePatch(modified, saved) {
     if (!currentComponents[c.id]) deletedComponentIds.push(c.id);
   });
 
-  ["name", "roles", "time", "directLink", "timerStateOperations"].forEach(
-    (field) => {
-      if (JSON.stringify(modified[field]) !== JSON.stringify(saved[field])) {
-        fields[field] = structuredClone(modified[field]);
-      }
+  [
+    "name",
+    "roles",
+    "time",
+    "directLink",
+    "directLinkKey",
+    "timerStateOperations",
+  ].forEach((field) => {
+    if (JSON.stringify(modified[field]) !== JSON.stringify(saved[field])) {
+      fields[field] = structuredClone(modified[field]);
     }
-  );
+  });
 
   return {
     _id: modified._id,

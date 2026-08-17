@@ -309,13 +309,18 @@ const patchScene = async (sceneId, patch, scenarioId) => {
   const { fields = {}, components = [], deletedComponentIds = [] } = patch;
 
   const allowedFields = {};
-  ["name", "roles", "time", "directLink", "timerStateOperations"].forEach(
-    (field) => {
-      if (Object.prototype.hasOwnProperty.call(fields, field)) {
-        allowedFields[field] = fields[field];
-      }
+  [
+    "name",
+    "roles",
+    "time",
+    "directLink",
+    "directLinkKey",
+    "timerStateOperations",
+  ].forEach((field) => {
+    if (Object.prototype.hasOwnProperty.call(fields, field)) {
+      allowedFields[field] = fields[field];
     }
-  );
+  });
 
   if ("directLink" in allowedFields) {
     await assertDirectLinkInScenario(scenarioId, allowedFields.directLink);

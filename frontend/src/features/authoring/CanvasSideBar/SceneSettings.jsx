@@ -7,11 +7,14 @@ import { getScene } from "../scene/scene";
 
 import useVisualScene from "../stores/visual";
 import { modifySceneProp } from "../scene/operations/modifiers";
+import { modifyComponentProp } from "../scene/operations/component";
 import useDirectLink from "./useDirectLink";
 import shallow from "zustand/shallow";
 import toast from "react-hot-toast";
 import TimerStateOperationMenu from "../../../components/StateVariables/TimerStateOperationMenu";
 import SelectInput from "../components/Select";
+import KeyCapture from "../components/KeyCapture";
+import { KEY_BINDING_OPTIONS, DEFAULT_DIRECT_LINK_KEYS } from "../keyBindings";
 
 /**
  * This component displays the settings of a scene, such as the scene name
@@ -29,11 +32,38 @@ export default function SceneSettings() {
     disabled: directLinkDisabled,
     defaultTarget: defaultDirectLinkScene,
   } = useDirectLink();
+  const directLinkKey = useVisualScene((scene) => scene.directLinkKey);
+  const components = useVisualScene((scene) => scene.components);
   const time = useVisualScene((scene) => scene.time);
 
   const [selectedRoles, setSelectedRoles] = useState(roles ?? []);
   const [sceneName, setSceneName] = useState(name ?? "");
   const [timerDuration, setTimerDuration] = useState(time ?? "");
+  const [keyValue, setKeyValue] = useState(directLinkKey ?? null);
+  const [keyMode, setKeyMode] = useState(directLinkKey ? "CUSTOM" : "DEFAULT");
+
+  useEffect(() => {
+    if ((directLinkKey ?? null) !== keyValue)
+      setKeyValue(directLinkKey ?? null);
+    setKeyMode(directLinkKey ? "CUSTOM" : "DEFAULT");
+  }, [directLinkKey]);
+
+  const usedByComponentKeys = Object.values(components ?? {})
+    .filter((c) => c.clickable && c.keyBinding)
+    .map((c) => c.keyBinding);
+  const availableDirectLinkKeys = KEY_BINDING_OPTIONS.filter(
+    (k) => !usedByComponentKeys.includes(k)
+  );
+
+  function saveDirectLinkKey(v) {
+    setKeyValue(v);
+    modifySceneProp("directLinkKey", v);
+  }
+
+  function changeKeyMode(nextMode) {
+    setKeyMode(nextMode);
+    if (nextMode === "DEFAULT") saveDirectLinkKey(null);
+  }
 
   useEffect(() => {
     if (!name || name === sceneName) return;
@@ -166,6 +196,8 @@ export default function SceneSettings() {
                   const checked = e.target.checked;
                   if (!checked) {
                     modifySceneProp("directLink", null);
+                    modifySceneProp("directLinkKey", null);
+                    setKeyValue(null);
                     return;
                   }
                   const selfId = useVisualScene.getState().id;
@@ -174,6 +206,22 @@ export default function SceneSettings() {
                     defaultDirectLinkScene ??
                     scenes?.find((s) => s._id !== selfId)?._id ??
                     null;
+
+                  // Direct Link defaults to Space/ArrowRight; clear those
+                  // keys off any button so they're not silently unreachable.
+                  if (!directLinkKey) {
+                    Object.values(getScene().components)
+                      .filter(
+                        (c) =>
+                          c.clickable &&
+                          DEFAULT_DIRECT_LINK_KEYS.includes(c.keyBinding)
+                      )
+                      .forEach((c) => {
+                        modifyComponentProp(c.id, "keyBinding", null);
+                        modifyComponentProp(c.id, "showKeyHint", false);
+                      });
+                  }
+
                   modifySceneProp("directLink", target);
                 }}
               />
@@ -191,28 +239,49 @@ export default function SceneSettings() {
               )}
               <span
                 className="label-text tooltip tooltip-top cursor-help before:!whitespace-normal before:!max-w-[130px] before:!text-[0.75rem]"
-                data-tip="The player will be sent to this scene when they press either the 'space' or 'right arrow' keyboard button, instead of having to click an on screen element."
+                data-tip="The player will be sent to a chosen scene when they press a key, instead of having to click an on screen element. Defaults to Space or the right arrow key."
               >
                 ⓘ
               </span>
             </label>
-            <SelectInput
-              nullable
-              disabled={!directLink || directLinkDisabled}
-              value={directLink}
-              values={
-                scenes
-                  ?.filter((scene) => scene._id !== sceneId)
-                  .map((scene) => scene._id) ?? []
-              }
-              display={(targetId) =>
-                scenes?.find((scene) => scene._id === targetId)?.name ??
-                "Unknown scene"
-              }
-              onChange={(targetId) =>
-                modifySceneProp("directLink", targetId || null)
-              }
-            />
+            {directLink && !directLinkDisabled && (
+              <>
+                <SelectInput
+                  nullable
+                  value={directLink}
+                  values={
+                    scenes
+                      ?.filter((scene) => scene._id !== sceneId)
+                      .map((scene) => scene._id) ?? []
+                  }
+                  display={(targetId) =>
+                    scenes?.find((scene) => scene._id === targetId)?.name ??
+                    "Unknown scene"
+                  }
+                  onChange={(targetId) =>
+                    modifySceneProp("directLink", targetId || null)
+                  }
+                />
+                <label className="label mt-2">Key Binding</label>
+                <SelectInput
+                  value={keyMode}
+                  values={["DEFAULT", "CUSTOM"]}
+                  display={(v) =>
+                    v === "DEFAULT" ? "Default (Space or →)" : "Custom"
+                  }
+                  onChange={changeKeyMode}
+                />
+                {keyMode === "CUSTOM" && (
+                  <div className="mt-2">
+                    <KeyCapture
+                      value={keyValue}
+                      availableKeys={availableDirectLinkKeys}
+                      onChange={saveDirectLinkKey}
+                    />
+                  </div>
+                )}
+              </>
+            )}
           </fieldset>
         </div>
       </div>
