@@ -2,7 +2,13 @@ import React, { useEffect, useRef, useState, useContext } from "react";
 import toast from "react-hot-toast";
 import { useParams } from "react-router-dom";
 import { useHistory } from "react-router-dom";
-import { ArrowLeftIcon, PencilIcon, PlusIcon, XIcon } from "lucide-react";
+import {
+  ArrowLeftIcon,
+  CheckIcon,
+  PencilIcon,
+  PlusIcon,
+  XIcon,
+} from "lucide-react";
 import AddGroup from "./components/AddGroup";
 import StateConditionalMenu from "../../components/StateVariables/StateConditionalMenu";
 import { api } from "../../util/api";
@@ -296,76 +302,63 @@ export default function ManageResourcesPage() {
                               )}
                               {resource.children.map((child) => (
                                 <li key={child._id} className="overflow-hidden">
-                                  <div
-                                    className="grid items-center gap-1 overflow-hidden"
-                                    style={{
-                                      gridTemplateColumns:
-                                        "minmax(0, 1fr) auto",
-                                    }}
-                                  >
-                                    <ResourceNameField
-                                      resource={child}
-                                      disabled={isTemp(child)}
-                                      onSelect={() =>
-                                        setSelectedResourceId(child._id)
-                                      }
-                                      onRename={(name) =>
-                                        renameResourceMutation.mutate({
-                                          resourceId: child._id,
-                                          name,
-                                        })
-                                      }
-                                    />
-                                    <button
-                                      className="btn btn-phantom btn-xs px-0"
-                                      onClick={(e) => {
-                                        e.stopPropagation();
-                                        deleteResourceMutation.mutate(
-                                          child._id
-                                        );
-                                      }}
-                                      title="Delete file"
-                                      disabled={isTemp(child)}
-                                    >
-                                      <XIcon size={16} />
-                                    </button>
-                                  </div>
+                                  <ResourceNameField
+                                    resource={child}
+                                    disabled={isTemp(child)}
+                                    onSelect={() =>
+                                      setSelectedResourceId(child._id)
+                                    }
+                                    onRename={(name) =>
+                                      renameResourceMutation.mutate({
+                                        resourceId: child._id,
+                                        name,
+                                      })
+                                    }
+                                    actions={
+                                      <button
+                                        className="btn btn-phantom btn-xs px-0"
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          deleteResourceMutation.mutate(
+                                            child._id
+                                          );
+                                        }}
+                                        title="Delete file"
+                                        disabled={isTemp(child)}
+                                      >
+                                        <XIcon size={16} />
+                                      </button>
+                                    }
+                                  />
                                 </li>
                               ))}
                             </ul>
                           </details>
                         ) : (
-                          <div
-                            className="grid items-center gap-1 overflow-hidden"
-                            style={{
-                              gridTemplateColumns: "minmax(0, 1fr) auto",
-                            }}
-                          >
-                            <ResourceNameField
-                              resource={resource}
-                              disabled={isTemp(resource)}
-                              onSelect={() =>
-                                setSelectedResourceId(resource._id)
-                              }
-                              onRename={(name) =>
-                                renameResourceMutation.mutate({
-                                  resourceId: resource._id,
-                                  name,
-                                })
-                              }
-                            />
-                            <button
-                              className="btn btn-phantom btn-xs px-0"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                deleteResourceMutation.mutate(resource._id);
-                              }}
-                              title="Delete file"
-                              disabled={isTemp(resource)}
-                            >
-                              <XIcon size={16} />
-                            </button>
-                          </div>
+                          <ResourceNameField
+                            resource={resource}
+                            disabled={isTemp(resource)}
+                            onSelect={() => setSelectedResourceId(resource._id)}
+                            onRename={(name) =>
+                              renameResourceMutation.mutate({
+                                resourceId: resource._id,
+                                name,
+                              })
+                            }
+                            actions={
+                              <button
+                                className="btn btn-phantom btn-xs px-0"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  deleteResourceMutation.mutate(resource._id);
+                                }}
+                                title="Delete file"
+                                disabled={isTemp(resource)}
+                              >
+                                <XIcon size={16} />
+                              </button>
+                            }
+                          />
                         )}
                       </li>
                     ))}
@@ -405,7 +398,13 @@ function splitFileName(name) {
   return { base: name.slice(0, dotIndex), ext: name.slice(dotIndex) };
 }
 
-function ResourceNameField({ resource, disabled, onSelect, onRename }) {
+function ResourceNameField({
+  resource,
+  disabled,
+  onSelect,
+  onRename,
+  actions,
+}) {
   const [editing, setEditing] = useState(false);
   const [value, setValue] = useState(() => splitFileName(resource.name).base);
   const inputRef = useRef(null);
@@ -415,7 +414,6 @@ function ResourceNameField({ resource, disabled, onSelect, onRename }) {
   useEffect(() => {
     if (editing) {
       inputRef.current?.focus();
-      inputRef.current?.select();
     }
   }, [editing]);
 
@@ -445,53 +443,84 @@ function ResourceNameField({ resource, disabled, onSelect, onRename }) {
     }
   }
 
-  if (editing) {
-    return (
-      <div className="flex min-w-0 items-center gap-1">
-        <input
-          ref={inputRef}
-          type="text"
-          className="input input-xs input-bordered min-w-0 flex-1"
-          value={value}
-          maxLength={Math.max(RESOURCE_NAME_MAX_LENGTH - ext.length, 1)}
-          onChange={(e) => setValue(e.target.value)}
-          onBlur={commitEdit}
-          onKeyDown={handleKeyDown}
-          onClick={(e) => e.stopPropagation()}
-        />
-        {ext && (
-          <span
-            className="shrink-0 text--1 opacity-60"
-            title="File type can't be changed"
-          >
-            {ext}
-          </span>
-        )}
-      </div>
-    );
-  }
+  const rowStyle = editing
+    ? {
+        gridTemplateColumns: "minmax(0, 1fr) auto",
+        backgroundColor: "transparent",
+        boxShadow: "none",
+        color: "var(--color-base-content)",
+        cursor: "auto",
+      }
+    : { gridTemplateColumns: "minmax(0, 1fr) auto auto" };
 
   return (
-    <div
-      className="grid items-center gap-1 overflow-hidden"
-      style={{ gridTemplateColumns: "minmax(0, 1fr) auto" }}
-    >
-      <a
-        className={`text--1 truncate ${isTemp(resource) ? "text-primary" : ""}`}
-        title={resource.name}
-        onClick={() => !disabled && onSelect()}
-      >
-        {resource.name}
-      </a>
-      <button
-        type="button"
-        className="btn btn-phantom btn-xs px-0"
-        onClick={startEditing}
-        title="Rename"
-        disabled={disabled}
-      >
-        <PencilIcon size={14} />
-      </button>
+    <div className="grid items-center gap-1 overflow-hidden" style={rowStyle}>
+      {editing ? (
+        <div className="flex min-w-0 items-center gap-1">
+          <input
+            ref={inputRef}
+            type="text"
+            className="input input-xs input-bordered min-w-0 flex-1"
+            style={{
+              "--input-color":
+                "color-mix(in oklab, var(--color-base-content) 20%, transparent)",
+              backgroundColor: "var(--color-base-100)",
+              borderColor:
+                "color-mix(in oklab, var(--color-base-content) 20%, transparent)",
+              color: "var(--color-base-content)",
+              boxShadow: "none",
+              outline: "none",
+              userSelect: "text",
+              WebkitUserSelect: "text",
+            }}
+            value={value}
+            maxLength={Math.max(RESOURCE_NAME_MAX_LENGTH - ext.length, 1)}
+            onChange={(e) => setValue(e.target.value)}
+            onBlur={commitEdit}
+            onKeyDown={handleKeyDown}
+            onClick={(e) => e.stopPropagation()}
+          />
+          {ext && (
+            <span
+              className="shrink-0 text--1 opacity-60"
+              title="File type can't be changed"
+            >
+              {ext}
+            </span>
+          )}
+        </div>
+      ) : (
+        <>
+          <a
+            className={`text--1 truncate ${isTemp(resource) ? "text-primary" : ""}`}
+            title={resource.name}
+            onClick={() => !disabled && onSelect()}
+          >
+            {resource.name}
+          </a>
+          <button
+            type="button"
+            className="btn btn-phantom btn-xs px-0"
+            onClick={startEditing}
+            title="Rename"
+            disabled={disabled}
+          >
+            <PencilIcon size={14} />
+          </button>
+        </>
+      )}
+      {editing ? (
+        <button
+          type="button"
+          className="btn btn-phantom btn-xs px-0"
+          onClick={() => inputRef.current?.blur()}
+          title="Confirm rename"
+        >
+          <CheckIcon size={14} />
+        </button>
+      ) : (
+        actions
+      )}
     </div>
   );
 }
