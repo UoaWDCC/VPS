@@ -50,7 +50,13 @@ function Topbar({ saving, save }: { saving: boolean; save: () => void }) {
           <a onClick={toggleSVMenu}>State Variables</a>
         </li>
         <li className="text-xs">
-          <a onClick={() => setShowBackgroundMenu(true)}>Background</a>
+          <button
+            type="button"
+            className="p-1.5"
+            onClick={() => setShowBackgroundMenu(true)}
+          >
+            Background
+          </button>
         </li>
 
         <div className="divider divider-horizontal" />

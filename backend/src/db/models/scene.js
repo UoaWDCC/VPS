@@ -39,6 +39,21 @@ const backgroundSchema = new Schema(
   { _id: false }
 );
 
+backgroundSchema.pre("validate", function () {
+  if (this.kind === "color") {
+    if (this.fileId != null) {
+      this.invalidate("fileId", "fileId is only valid for image backgrounds");
+    }
+    if (this.href != null) {
+      this.invalidate("href", "href is only valid for image backgrounds");
+    }
+  }
+
+  if (this.kind === "image" && this.color != null) {
+    this.invalidate("color", "color is only valid for color backgrounds");
+  }
+});
+
 const sceneSchema = new Schema({
   name: {
     type: String,

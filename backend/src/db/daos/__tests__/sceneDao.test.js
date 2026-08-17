@@ -237,4 +237,83 @@ describe("Scene DAO patchScene tests", () => {
     await patchScene(sceneId, { fields: { background: null } });
     expect((await Scene.findById(sceneId).lean()).background).toBeNull();
   });
+
+  it("rejects incomplete or conflicting background payloads", async () => {
+    const fileId = new mongoose.Types.ObjectId();
+    const invalidBackgrounds = [
+      {
+        kind: "color",
+        color: "#123456",
+        fileId,
+        href: "https://example.com/conflict.png",
+      },
+      {
+        kind: "image",
+        fileId,
+        href: "https://example.com/conflict.png",
+        color: "#123456",
+      },
+      { kind: "image", fileId },
+      { kind: "color" },
+      { kind: "gradient", color: "#123456" },
+    ];
+
+    for (const background of invalidBackgrounds) {
+      await expect(
+        patchScene(sceneId, { fields: { background } })
+      ).rejects.toThrow();
+    }
+
+    expect((await Scene.findById(sceneId).lean()).background).toBeNull();
+  });
+
+  it("keeps background reference counts consistent across concurrent patches", async () => {
+    const files = await UploadedFile.create(
+      ["first.png", "second.png", "third.png"].map((name) => ({
+        name,
+        type: "image",
+        path: `images/${name}`,
+        url: `https://example.com/${name}`,
+        contentType: "image/png",
+        size: 100,
+        uploaderUid: "test-user",
+        scenarioId: new mongoose.Types.ObjectId(),
+      }))
+    );
+
+    const backgroundFor = (file) => ({
+      kind: "image",
+      fileId: file._id,
+      href: file.url,
+      fit: "cover",
+    });
+
+    await patchScene(sceneId, {
+      fields: { background: backgroundFor(files[0]) },
+    });
+
+    await Promise.all([
+      patchScene(sceneId, {
+        fields: { background: backgroundFor(files[1]) },
+      }),
+      patchScene(sceneId, {
+        fields: { background: backgroundFor(files[2]) },
+      }),
+    ]);
+
+    const [scene, storedFiles] = await Promise.all([
+      Scene.findById(sceneId).lean(),
+      UploadedFile.find({ _id: { $in: files.map((file) => file._id) } }).lean(),
+    ]);
+    const finalFileId = scene.background.fileId.toString();
+
+    expect(finalFileId).not.toBe(files[0]._id.toString());
+    expect(
+      storedFiles.find((file) => file._id.equals(files[0]._id)).refCount
+    ).toBe(0);
+    expect(storedFiles.reduce((sum, file) => sum + file.refCount, 0)).toBe(1);
+    expect(
+      storedFiles.find((file) => file._id.toString() === finalFileId).refCount
+    ).toBe(1);
+  });
 });
