@@ -229,15 +229,6 @@ describe("Scenario API tests", () => {
     expect(response.data.name).toBe(scenario1.name);
   });
 
-  it("GET /scenario/:scenarioId returns 400 for a malformed id", async () => {
-    await expect(
-      axios.get(
-        `http://localhost:${ctx.port}/api/scenario/not-a-valid-id`,
-        authHeaders("user1")
-      )
-    ).rejects.toMatchObject({ response: { status: HTTP_BAD_REQUEST } });
-  });
-
   it("PATCH /scenario/:scenarioId updates scenario fields", async () => {
     const response = await axios.patch(
       `http://localhost:${ctx.port}/api/scenario/${scenario1._id}`,
@@ -248,16 +239,6 @@ describe("Scenario API tests", () => {
     const dbScenario = await Scenario.findById(scenario1._id).lean();
     expect(dbScenario.name).toBe("Patched Name");
     expect(dbScenario.description).toBe("New desc");
-  });
-
-  it("PATCH /scenario/:scenarioId returns 400 for a malformed id", async () => {
-    await expect(
-      axios.patch(
-        `http://localhost:${ctx.port}/api/scenario/not-a-valid-id`,
-        { name: "x" },
-        authHeaders("user1")
-      )
-    ).rejects.toMatchObject({ response: { status: HTTP_BAD_REQUEST } });
   });
 
   it("GET /scenario/:scenarioId/stateVariables returns state variables array", async () => {

@@ -14,11 +14,11 @@ import UploadedFile from "../../db/models/uploadedFile.js";
 const router = Router();
 
 router.use(auth);
-router.use("/:scenarioId", scenarioAuth);
 
 /**
  * @route GET /api/resources/:scenarioId
  * @desc Get all resources for a scenario
+ * NOTE: this route is unprotected currently, will be addressed with assignment refactor
  */
 router.get(
   "/:scenarioId",
@@ -33,6 +33,8 @@ router.get(
     return res.json(resources);
   })
 );
+
+router.use("/:scenarioId", scenarioAuth);
 
 /**
  * @route POST /api/resources/:scenarioId
