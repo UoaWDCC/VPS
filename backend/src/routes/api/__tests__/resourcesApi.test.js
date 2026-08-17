@@ -224,6 +224,24 @@ describe("Resources API tests", () => {
     expect(dbResource.name).toBe("image.png");
   });
 
+  it("PATCH /resources/:scenarioId/:resourceId allows renaming a legacy resource with untrimmed whitespace in its stored name", async () => {
+    // Bypass the schema's trim:true setter to simulate a resource that was
+    // written before that option existed, with whitespace still in `name`.
+    await Resource.collection.updateOne(
+      { _id: resource._id },
+      { $set: { name: "image.png " } }
+    );
+
+    const response = await axios.patch(
+      `http://localhost:${ctx.port}/api/resources/${scenarioId}/${resource._id}`,
+      { name: "vacation.png" },
+      authHeaders("user1")
+    );
+
+    expect(response.status).toBe(200);
+    expect(response.data.name).toBe("vacation.png");
+  });
+
   it("PATCH /resources/:scenarioId/:resourceId allows renaming a collection without an extension restriction", async () => {
     const response = await axios.patch(
       `http://localhost:${ctx.port}/api/resources/${scenarioId}/${collection._id}`,

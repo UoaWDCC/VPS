@@ -7,7 +7,9 @@ import {
   applyReferenceDelta,
   applyReferenceDeltas,
 } from "../../db/daos/fileDao.js";
-import Resource from "../../db/models/resource.js";
+import Resource, {
+  RESOURCE_NAME_MAX_LENGTH,
+} from "../../db/models/resource.js";
 import { isValidObjectId } from "../../util/validation.js";
 import UploadedFile from "../../db/models/uploadedFile.js";
 
@@ -16,8 +18,9 @@ const router = Router();
 router.use(auth);
 
 function getExtension(name) {
-  const dotIndex = name.lastIndexOf(".");
-  return dotIndex <= 0 ? "" : name.slice(dotIndex).toLowerCase();
+  const trimmed = name.trim();
+  const dotIndex = trimmed.lastIndexOf(".");
+  return dotIndex <= 0 ? "" : trimmed.slice(dotIndex).toLowerCase();
 }
 
 /**
@@ -179,9 +182,9 @@ router.patch(
     if (!trimmedName)
       throw new HttpError("name is required", HttpStatusCode.BadRequest);
 
-    if (trimmedName.length > 255)
+    if (trimmedName.length > RESOURCE_NAME_MAX_LENGTH)
       throw new HttpError(
-        "name must be 255 characters or fewer",
+        `name must be ${RESOURCE_NAME_MAX_LENGTH} characters or fewer`,
         HttpStatusCode.BadRequest
       );
 
