@@ -1,18 +1,35 @@
 import SceneContext from "context/SceneContext";
 
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useMemo, useState } from "react";
 import { modifyComponentProp } from "../scene/operations/component";
 import useVisualScene from "../stores/visual";
 import StateOperationMenu from "../../../components/StateVariables/StateOperationMenu";
 import SelectInput from "../components/Select";
 import KeyCapture from "../components/KeyCapture";
 import StateBindingMenu from "../../../components/StateVariables/StateBindingMenu";
-import { availableKeyBindings } from "../keyBindings";
+import { availableKeyBindings, hasClickAction } from "../keyBindings";
 import {
   KEY_HINT_POSITIONS,
   DEFAULT_KEY_HINT_POSITION,
   displayKeyHintPosition,
 } from "../keyHintPosition";
+
+const identity = (v) => v;
+const orNull = (v) => v ?? null;
+const toBoolean = (v) => !!v;
+const orDefaultPosition = (v) => v ?? DEFAULT_KEY_HINT_POSITION;
+
+// Mirrors a component prop field into local editable state so edits survive
+// re-renders, resyncing only when the field's value actually changes on the
+// incoming component (preserves in-flight local edits otherwise).
+function usePropMirror(component, field, normalize) {
+  const [value, setValue] = useState(() => normalize(component?.[field]));
+  useEffect(() => {
+    const next = normalize(component?.[field]);
+    setValue((prev) => (prev === next ? prev : next));
+  }, [component, field, normalize]);
+  return [value, setValue];
+}
 
 /**
  * This component displays the properties the selected scene component
@@ -28,22 +45,18 @@ export default function ComponentProperties({ component }) {
   const directLink = useVisualScene((scene) => scene.directLink);
   const directLinkKey = useVisualScene((scene) => scene.directLinkKey);
 
-  const [value, setValue] = useState(component?.nextScene);
-  const [keyValue, setKeyValue] = useState(component?.keyBinding ?? null);
-  const [hintValue, setHintValue] = useState(!!component?.showKeyHint);
-  const [positionValue, setPositionValue] = useState(
-    component?.keyHintPosition ?? DEFAULT_KEY_HINT_POSITION
+  const [value, setValue] = usePropMirror(component, "nextScene", identity);
+  const [keyValue, setKeyValue] = usePropMirror(component, "keyBinding", orNull);
+  const [hintValue, setHintValue] = usePropMirror(
+    component,
+    "showKeyHint",
+    toBoolean
   );
-
-  useEffect(() => {
-    if (component?.nextScene !== value) setValue(component?.nextScene);
-    if ((component?.keyBinding ?? null) !== keyValue)
-      setKeyValue(component?.keyBinding ?? null);
-    if (!!component?.showKeyHint !== hintValue)
-      setHintValue(!!component?.showKeyHint);
-    const nextPosition = component?.keyHintPosition ?? DEFAULT_KEY_HINT_POSITION;
-    if (nextPosition !== positionValue) setPositionValue(nextPosition);
-  }, [component]);
+  const [positionValue, setPositionValue] = usePropMirror(
+    component,
+    "keyHintPosition",
+    orDefaultPosition
+  );
 
   function saveLink(v) {
     setValue(v);
@@ -69,15 +82,19 @@ export default function ComponentProperties({ component }) {
     modifyComponentProp(component.id, "keyHintPosition", v);
   }
 
-  if (!component) return null;
+  const availableKeys = useMemo(
+    () =>
+      component?.clickable
+        ? availableKeyBindings(Object.values(sceneComponents ?? {}), {
+            excludeComponentId: component.id,
+            directLink,
+            directLinkKey,
+          })
+        : [],
+    [component, sceneComponents, directLink, directLinkKey]
+  );
 
-  const availableKeys = component.clickable
-    ? availableKeyBindings(Object.values(sceneComponents ?? {}), {
-        excludeComponentId: component.id,
-        directLink,
-        directLinkKey,
-      })
-    : [];
+  if (!component) return null;
 
   return (
     <>
@@ -111,7 +128,7 @@ export default function ComponentProperties({ component }) {
                   type="checkbox"
                   className="toggle"
                   checked={hintValue}
-                  disabled={!keyValue}
+                  disabled={!keyValue || !hasClickAction(component)}
                   onChange={(e) => saveHint(e.target.checked)}
                 />
                 Show key hint

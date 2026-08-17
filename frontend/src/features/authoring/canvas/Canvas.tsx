@@ -19,6 +19,7 @@ import LoadingOverlay from "./LoadingOverlay.tsx";
 import useEditorStore from "../stores/editor.ts";
 import { CANVAS_HEIGHT, CANVAS_WIDTH } from "../../../util/canvas";
 import KeyHintBadge from "../components/KeyHintBadge";
+import { hasClickAction } from "../keyBindings";
 
 const componentMap: Record<string, React.FC<Record<string, unknown>>> = {
   textbox: (props) => <TextBox {...props} editable={true} />,
@@ -77,12 +78,7 @@ function Canvas() {
     .flatMap((c) => {
       const rendered = resolve(c);
       if (!rendered) return [];
-      if (
-        c.clickable &&
-        c.keyBinding &&
-        c.showKeyHint &&
-        (c.nextScene || c.stateOperations)
-      ) {
+      if (c.keyBinding && c.showKeyHint && hasClickAction(c)) {
         return [
           rendered,
           <KeyHintBadge

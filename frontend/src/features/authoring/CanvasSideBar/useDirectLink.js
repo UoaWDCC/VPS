@@ -4,6 +4,7 @@ import { modifySceneProp } from "../scene/operations/modifiers";
 
 export default function useDirectLink() {
   const directLink = useVisualScene((scene) => scene.directLink);
+  const directLinkKey = useVisualScene((scene) => scene.directLinkKey);
   const components = useVisualScene((scene) => scene.components);
 
   const uniqueLinkedScenes = [
@@ -19,7 +20,9 @@ export default function useDirectLink() {
     uniqueLinkedScenes.length === 1 ? uniqueLinkedScenes[0] : null;
 
   useEffect(() => {
-    if (disabled && directLink) modifySceneProp("directLink", null);
+    if (!disabled) return;
+    if (directLink) modifySceneProp("directLink", null);
+    if (directLinkKey != null) modifySceneProp("directLinkKey", null);
   }, [disabled]);
 
   return { directLink, disabled, defaultTarget };

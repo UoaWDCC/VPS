@@ -1,4 +1,4 @@
-import { useContext, useState, useEffect } from "react";
+import { useContext, useState, useEffect, useMemo } from "react";
 import { Check, ChevronDown } from "lucide-react";
 import ScenarioContext from "context/ScenarioContext";
 import SceneContext from "context/SceneContext";
@@ -40,20 +40,19 @@ export default function SceneSettings() {
   const [sceneName, setSceneName] = useState(name ?? "");
   const [timerDuration, setTimerDuration] = useState(time ?? "");
   const [keyValue, setKeyValue] = useState(directLinkKey ?? null);
-  // null/undefined = Default mode; "" or a real key = Custom mode (see
-  // directLinkKeysFor in keyBindings.ts for what each value claims).
-  const [keyMode, setKeyMode] = useState(
-    directLinkKey != null ? "CUSTOM" : "DEFAULT"
-  );
 
   useEffect(() => {
     if ((directLinkKey ?? null) !== keyValue)
       setKeyValue(directLinkKey ?? null);
-    setKeyMode(directLinkKey != null ? "CUSTOM" : "DEFAULT");
   }, [directLinkKey]);
 
-  const availableDirectLinkKeys = availableKeyBindings(
-    Object.values(components ?? {})
+  // null/undefined = Default mode; "" or a real key = Custom mode (see
+  // directLinkKeysFor in keyBindings.ts for what each value claims).
+  const keyMode = keyValue != null ? "CUSTOM" : "DEFAULT";
+
+  const availableDirectLinkKeys = useMemo(
+    () => availableKeyBindings(Object.values(components ?? {})),
+    [components]
   );
 
   function saveDirectLinkKey(v) {
@@ -75,7 +74,6 @@ export default function SceneSettings() {
   }
 
   function changeKeyMode(nextMode) {
-    setKeyMode(nextMode);
     if (nextMode === "DEFAULT") {
       saveDirectLinkKey(null);
       clearDefaultDirectLinkCollisions();
@@ -219,7 +217,6 @@ export default function SceneSettings() {
                   if (!checked) {
                     modifySceneProp("directLink", null);
                     modifySceneProp("directLinkKey", null);
-                    setKeyValue(null);
                     return;
                   }
                   const selfId = useVisualScene.getState().id;

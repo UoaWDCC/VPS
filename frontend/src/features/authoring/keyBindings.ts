@@ -67,6 +67,23 @@ interface KeyBoundComponent {
   keyBinding?: string | null;
 }
 
+interface ActionableComponent {
+  clickable?: boolean;
+  nextScene?: string | null;
+  stateOperations?: unknown;
+}
+
+// Whether a component actually does something when clicked/keyed, as opposed
+// to being clickable with nothing wired up yet. Shared so the editor canvas,
+// the play canvas, and the play keydown handler can't drift on what counts
+// as "actionable".
+export function hasClickAction(component: ActionableComponent): boolean {
+  return !!(
+    component.clickable &&
+    (component.nextScene || component.stateOperations)
+  );
+}
+
 // Keys already claimed by clickable components, so a new binding can't
 // collide with one of them. Pass excludeComponentId when checking a
 // component against its scene-mates (so it doesn't count its own key).

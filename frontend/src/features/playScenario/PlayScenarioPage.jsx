@@ -13,7 +13,11 @@ import NotesPanel from "./components/NotesPanel";
 import ResourcesPanel from "./components/ResourcesPanel";
 import SceneTimer from "./components/SceneTimer";
 import { PlayIcon } from "lucide-react";
-import { normalizeEventKey, directLinkKeysFor } from "../authoring/keyBindings";
+import {
+  normalizeEventKey,
+  directLinkKeysFor,
+  hasClickAction,
+} from "../authoring/keyBindings";
 
 const sceneCache = new Map();
 
@@ -225,10 +229,7 @@ export default function PlayScenarioPage({ group }) {
       if (!boundKey) return;
 
       const component = currScene?.components?.find(
-        (c) =>
-          c.clickable &&
-          c.keyBinding === boundKey &&
-          (c.nextScene || c.stateOperations)
+        (c) => c.keyBinding === boundKey && hasClickAction(c)
       );
       if (component) {
         e.preventDefault();

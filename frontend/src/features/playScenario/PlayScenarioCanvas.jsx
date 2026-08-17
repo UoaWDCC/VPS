@@ -9,6 +9,7 @@ import Line from "../authoring/elements/Line";
 import { resolveSceneBindings } from "../../components/StateVariables/componentBindings";
 import { useMemo } from "react";
 import KeyHintBadge from "../authoring/components/KeyHintBadge";
+import { hasClickAction } from "../authoring/keyBindings";
 
 const componentMap = {
   textbox: TextBox,
@@ -187,7 +188,7 @@ export default function PlayScenarioCanvas({
     .sort((a, b) => a.zIndex - b.zIndex)
     .map((c) => {
       const resolved = resolve(c);
-      if (c.clickable && (c.nextScene || c.stateOperations)) {
+      if (hasClickAction(c)) {
         return (
           <g
             key={c.id}

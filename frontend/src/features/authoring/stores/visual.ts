@@ -11,6 +11,7 @@ export interface VisualSceneState {
   name: string | null;
   roles: string[] | null;
   directLink: string | null;
+  directLinkKey: string | null;
   time: number | null;
   timerStateOperations: Record<string, unknown>[] | null;
 
@@ -26,6 +27,7 @@ const useVisualScene = create<VisualSceneState>((set) => ({
   name: null,
   roles: null,
   directLink: null,
+  directLinkKey: null,
   time: null,
   timerStateOperations: null,
 
@@ -35,6 +37,7 @@ const useVisualScene = create<VisualSceneState>((set) => ({
         ({
           ...state,
           directLink: null,
+          directLinkKey: null,
           time: null,
           timerStateOperations: null,
           ...scene,
