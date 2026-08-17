@@ -19,7 +19,7 @@ const resourceSchema = new Schema(
       enum: ["file", "collection"],
       required: true,
     },
-    name: { type: String, required: true },
+    name: { type: String, required: true, trim: true, maxlength: 255 },
     fileId: {
       type: Schema.Types.ObjectId,
       ref: "UploadedFile",

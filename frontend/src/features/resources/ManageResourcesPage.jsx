@@ -1,8 +1,8 @@
-import React, { useRef, useState, useContext } from "react";
+import React, { useEffect, useRef, useState, useContext } from "react";
 import toast from "react-hot-toast";
 import { useParams } from "react-router-dom";
 import { useHistory } from "react-router-dom";
-import { ArrowLeftIcon, PlusIcon, XIcon } from "lucide-react";
+import { ArrowLeftIcon, PencilIcon, PlusIcon, XIcon } from "lucide-react";
 import AddGroup from "./components/AddGroup";
 import StateConditionalMenu from "../../components/StateVariables/StateConditionalMenu";
 import { api } from "../../util/api";
@@ -12,6 +12,8 @@ import { filterTreeBySearch, normaliseFile } from "./util";
 import { v4 as uuid } from "uuid";
 import ResourcePreview from "./ResourcePreview";
 import SkeletonBody from "./ResourcesSkeleton";
+
+const RESOURCE_NAME_MAX_LENGTH = 255;
 
 function isTemp(resource) {
   return resource._id.startsWith("temp.");
@@ -44,6 +46,15 @@ async function createResourceCollection(user, scenarioId, name) {
 
 async function removeResource(user, scenarioId, resourceId) {
   await api.delete(user, `/api/resources/${scenarioId}/${resourceId}`);
+}
+
+async function renameResource(user, scenarioId, resourceId, name) {
+  const res = await api.patch(
+    user,
+    `/api/resources/${scenarioId}/${resourceId}`,
+    { name }
+  );
+  return res.data;
 }
 
 function buildResourceTree(resources) {
@@ -153,6 +164,27 @@ export default function ManageResourcesPage() {
     onSettled: () => queryClient.invalidateQueries(["resources", scenarioId]),
   });
 
+  const renameResourceMutation = useMutation({
+    mutationFn: ({ resourceId, name }) =>
+      renameResource(user, scenarioId, resourceId, name),
+    onMutate: async ({ resourceId, name }) => {
+      await queryClient.cancelQueries(["resources", scenarioId]);
+      const previous = queryClient.getQueryData(["resources", scenarioId]);
+      queryClient.setQueryData(["resources", scenarioId], (prev) =>
+        (prev ?? []).map((r) => (r._id === resourceId ? { ...r, name } : r))
+      );
+      return { previous };
+    },
+    onError: (e, _, context) => {
+      if (context?.previous) {
+        queryClient.setQueryData(["resources", scenarioId], context.previous);
+      }
+      console.error(e);
+      toast.error("Something went wrong renaming the resource");
+    },
+    onSettled: () => queryClient.invalidateQueries(["resources", scenarioId]),
+  });
+
   function goBack() {
     history.push(`/scenario/${scenarioId}`);
   }
@@ -187,7 +219,7 @@ export default function ManageResourcesPage() {
           ) : (
             <div className="grid grid-cols-1 gap-4 lg:h-full lg:min-h-0 lg:grid-cols-3">
               {/* LEFT: Groups and files */}
-              <div className="card min-h-[35dvh] bg-base-100 shadow-md lg:h-full lg:min-h-0">
+              <div className="card min-h-[35dvh] min-w-0 overflow-hidden bg-base-100 shadow-md lg:h-full lg:min-h-0">
                 <div className="card-body flex min-h-0 flex-col gap-4 px-0">
                   <h1 className="flex-none text-xl">Uploaded Resources</h1>
 
@@ -217,9 +249,9 @@ export default function ManageResourcesPage() {
                       </li>
                     )}
                     {filteredTree.map((resource) => (
-                      <li key={resource._id}>
+                      <li key={resource._id} className="overflow-hidden">
                         {resource.type === "collection" ? (
-                          <details>
+                          <details className="overflow-hidden">
                             <summary
                               className={`flex items-center ${isTemp(resource) ? "text-primary" : ""} ${selectedResource?._id === resource._id ? "bg-base-200" : ""}`}
                               onClick={() =>
@@ -227,7 +259,10 @@ export default function ManageResourcesPage() {
                                 setSelectedResourceId(resource._id)
                               }
                             >
-                              <span className="text--1 truncate">
+                              <span
+                                className="text--1 truncate"
+                                title={resource.name}
+                              >
                                 {resource.name}
                               </span>
                               <div className="flex items-center ml-auto">
@@ -255,22 +290,32 @@ export default function ManageResourcesPage() {
                               </div>
                             </summary>
 
-                            <ul>
+                            <ul className="overflow-hidden">
                               {resource.children.length === 0 && (
                                 <li className="opacity-60 p-2">No files yet</li>
                               )}
                               {resource.children.map((child) => (
-                                <li key={child._id}>
-                                  <div className="flex items-center justify-between">
-                                    <a
-                                      className={`min-w-0 flex-1 text--1 truncate ${isTemp(child) ? "text-primary" : ""}`}
-                                      onClick={() => {
-                                        if (!child._id.startsWith("temp."))
-                                          setSelectedResourceId(child._id);
-                                      }}
-                                    >
-                                      {child.name}
-                                    </a>
+                                <li key={child._id} className="overflow-hidden">
+                                  <div
+                                    className="grid items-center gap-1 overflow-hidden"
+                                    style={{
+                                      gridTemplateColumns:
+                                        "minmax(0, 1fr) auto",
+                                    }}
+                                  >
+                                    <ResourceNameField
+                                      resource={child}
+                                      disabled={isTemp(child)}
+                                      onSelect={() =>
+                                        setSelectedResourceId(child._id)
+                                      }
+                                      onRename={(name) =>
+                                        renameResourceMutation.mutate({
+                                          resourceId: child._id,
+                                          name,
+                                        })
+                                      }
+                                    />
                                     <button
                                       className="btn btn-phantom btn-xs px-0"
                                       onClick={(e) => {
@@ -290,16 +335,25 @@ export default function ManageResourcesPage() {
                             </ul>
                           </details>
                         ) : (
-                          <div className="flex items-center justify-between">
-                            <a
-                              className={`min-w-0 flex-1 text--1 truncate ${isTemp(resource) ? "text-primary" : ""}`}
-                              onClick={() => {
-                                if (!resource._id.startsWith("temp."))
-                                  setSelectedResourceId(resource._id);
-                              }}
-                            >
-                              {resource.name}
-                            </a>
+                          <div
+                            className="grid items-center gap-1 overflow-hidden"
+                            style={{
+                              gridTemplateColumns: "minmax(0, 1fr) auto",
+                            }}
+                          >
+                            <ResourceNameField
+                              resource={resource}
+                              disabled={isTemp(resource)}
+                              onSelect={() =>
+                                setSelectedResourceId(resource._id)
+                              }
+                              onRename={(name) =>
+                                renameResourceMutation.mutate({
+                                  resourceId: resource._id,
+                                  name,
+                                })
+                              }
+                            />
                             <button
                               className="btn btn-phantom btn-xs px-0"
                               onClick={(e) => {
@@ -345,6 +399,103 @@ export default function ManageResourcesPage() {
 }
 
 // Helper components
+function splitFileName(name) {
+  const dotIndex = name.lastIndexOf(".");
+  if (dotIndex <= 0) return { base: name, ext: "" };
+  return { base: name.slice(0, dotIndex), ext: name.slice(dotIndex) };
+}
+
+function ResourceNameField({ resource, disabled, onSelect, onRename }) {
+  const [editing, setEditing] = useState(false);
+  const [value, setValue] = useState(() => splitFileName(resource.name).base);
+  const inputRef = useRef(null);
+
+  const { ext } = splitFileName(resource.name);
+
+  useEffect(() => {
+    if (editing) {
+      inputRef.current?.focus();
+      inputRef.current?.select();
+    }
+  }, [editing]);
+
+  function startEditing(e) {
+    e.stopPropagation();
+    if (disabled) return;
+    setValue(splitFileName(resource.name).base);
+    setEditing(true);
+  }
+
+  function commitEdit() {
+    setEditing(false);
+    const trimmedBase = value.trim();
+    if (!trimmedBase) return;
+    const newName = `${trimmedBase}${ext}`;
+    if (newName === resource.name) return;
+    onRename(newName);
+  }
+
+  function handleKeyDown(e) {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      inputRef.current?.blur();
+    } else if (e.key === "Escape") {
+      setValue(splitFileName(resource.name).base);
+      setEditing(false);
+    }
+  }
+
+  if (editing) {
+    return (
+      <div className="flex min-w-0 items-center gap-1">
+        <input
+          ref={inputRef}
+          type="text"
+          className="input input-xs input-bordered min-w-0 flex-1"
+          value={value}
+          maxLength={Math.max(RESOURCE_NAME_MAX_LENGTH - ext.length, 1)}
+          onChange={(e) => setValue(e.target.value)}
+          onBlur={commitEdit}
+          onKeyDown={handleKeyDown}
+          onClick={(e) => e.stopPropagation()}
+        />
+        {ext && (
+          <span
+            className="shrink-0 text--1 opacity-60"
+            title="File type can't be changed"
+          >
+            {ext}
+          </span>
+        )}
+      </div>
+    );
+  }
+
+  return (
+    <div
+      className="grid items-center gap-1 overflow-hidden"
+      style={{ gridTemplateColumns: "minmax(0, 1fr) auto" }}
+    >
+      <a
+        className={`text--1 truncate ${isTemp(resource) ? "text-primary" : ""}`}
+        title={resource.name}
+        onClick={() => !disabled && onSelect()}
+      >
+        {resource.name}
+      </a>
+      <button
+        type="button"
+        className="btn btn-phantom btn-xs px-0"
+        onClick={startEditing}
+        title="Rename"
+        disabled={disabled}
+      >
+        <PencilIcon size={14} />
+      </button>
+    </div>
+  );
+}
+
 function UploadButton({
   onFiles,
   multiple = true,

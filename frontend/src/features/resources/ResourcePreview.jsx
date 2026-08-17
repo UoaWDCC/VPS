@@ -38,9 +38,9 @@ function ResourcePreview({ file }) {
 
   return (
     <div className="flex h-full min-h-0 flex-col gap-3 p-3 font-ibm">
-      <div className="flex items-center justify-between gap-2">
-        <h3 className="text-m truncate">{file.name}</h3>
-        <a className="btn btn-phantom btn-xs" href={file.url} download>
+      <div className="flex items-start justify-between gap-2">
+        <h3 className="text-m min-w-0 break-all">{file.name}</h3>
+        <a className="btn btn-phantom btn-xs shrink-0" href={file.url} download>
           Download
         </a>
       </div>
