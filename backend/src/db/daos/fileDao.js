@@ -7,7 +7,7 @@ import UploadedFile from "../models/uploadedFile.js";
  * @returns {Promise<void>} Resolves once the bulk update completes.
  */
 export async function applyReferenceDeltas(fileRefDeltas) {
-  if (fileRefDeltas.size === 0) return;
+  if (fileRefDeltas.size === 0) return true;
 
   const fileOperations = Array.from(fileRefDeltas.entries())
     .filter(([, delta]) => delta !== 0)
@@ -27,8 +27,18 @@ export async function applyReferenceDeltas(fileRefDeltas) {
       },
     }));
 
-  if (fileOperations.length > 0) {
-    await UploadedFile.bulkWrite(fileOperations, { ordered: false });
+  if (fileOperations.length === 0) return true;
+
+  try {
+    const result = await UploadedFile.bulkWrite(fileOperations, {
+      ordered: false,
+    });
+    const hasWriteErrors = Array.isArray(result?.writeErrors)
+      ? result.writeErrors.length > 0
+      : false;
+    return result?.ok === 1 && !hasWriteErrors;
+  } catch {
+    return false;
   }
 }
 

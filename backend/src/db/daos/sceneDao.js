@@ -137,6 +137,8 @@ export const createScene = async (scenarioId, scene) => {
 
   const fileRefDeltas = computeCreateFileRefDeltas(scene.components);
   const dbScene = new Scene(scene);
+  let scenarioUpdateSucceeded = false;
+  let fileReferenceUpdateSucceeded = false;
 
   try {
     await dbScene.save();
@@ -147,30 +149,41 @@ export const createScene = async (scenarioId, scene) => {
     );
 
     if (scenarioUpdate.matchedCount === 0) {
-      await Scene.deleteOne({ _id: dbScene._id });
       throw new HttpError("scenario not found", status.NOT_FOUND);
     }
+    scenarioUpdateSucceeded = true;
 
-    await applyReferenceDeltas(fileRefDeltas);
+    fileReferenceUpdateSucceeded = await applyReferenceDeltas(fileRefDeltas);
+    if (!fileReferenceUpdateSucceeded) {
+      throw new Error("scene file reference updates failed");
+    }
+
     return dbScene;
   } catch (error) {
-    if (dbScene._id) {
-      await Promise.all([
-        Scene.deleteOne({ _id: dbScene._id }),
-        Scenario.updateOne(
-          { _id: scenarioId },
-          { $pull: { scenes: dbScene._id } }
-        ),
-        applyReferenceDeltas(
-          new Map(
-            Array.from(fileRefDeltas.entries()).map(([fileId, delta]) => [
-              fileId,
-              -delta,
-            ])
-          )
-        ),
-      ]).catch(() => {});
+    if (!dbScene._id) throw error;
+
+    if (scenarioUpdateSucceeded) {
+      await Scenario.updateOne(
+        { _id: scenarioId },
+        { $pull: { scenes: dbScene._id } }
+      ).catch(() => {});
     }
+
+    if (dbScene._id && !scenarioUpdateSucceeded) {
+      await Scene.deleteOne({ _id: dbScene._id }).catch(() => {});
+    }
+
+    if (fileReferenceUpdateSucceeded && scenarioUpdateSucceeded) {
+      await applyReferenceDeltas(
+        new Map(
+          Array.from(fileRefDeltas.entries()).map(([fileId, delta]) => [
+            fileId,
+            -delta,
+          ])
+        )
+      ).catch(() => {});
+    }
+
     throw error;
   }
 };
@@ -338,12 +351,15 @@ export const updateSceneOrder = async (scenarioId, sceneIds) => {
   if (invalid) return null;
 
   const updatedScenario = await Scenario.findOneAndUpdate(
-    { _id: scenarioId },
+    {
+      _id: scenarioId,
+      scenes: scenario.scenes,
+    },
     { scenes: sceneIds },
     { new: true }
   );
 
-  return updatedScenario;
+  return updatedScenario ?? null;
 };
 
 export const patchScene = async (sceneId, patch, scenarioId) => {
