@@ -256,12 +256,13 @@ describe("Scene DAO patchScene tests", () => {
       { kind: "image", fileId },
       { kind: "color" },
       { kind: "gradient", color: "#123456" },
+      "blue",
     ];
 
     for (const background of invalidBackgrounds) {
       await expect(
         patchScene(sceneId, { fields: { background } })
-      ).rejects.toThrow();
+      ).rejects.toMatchObject({ status: 400 });
     }
 
     expect((await Scene.findById(sceneId).lean()).background).toBeNull();

@@ -342,13 +342,27 @@ const updateSceneOrder = async (scenarioId, sceneIds) => {
 async function validateBackground(background) {
   if (background == null) return null;
 
-  const validationScene = new Scene({
-    name: "Background validation",
-    components: [],
-    background,
-  });
-  await validationScene.background.validate();
-  return validationScene.background.toObject();
+  if (typeof background !== "object") {
+    throw new HttpError(
+      "background must be an object or null",
+      status.BAD_REQUEST
+    );
+  }
+
+  try {
+    const validationScene = new Scene({
+      name: "Background validation",
+      components: [],
+      background,
+    });
+    await validationScene.background.validate();
+    return validationScene.background.toObject();
+  } catch (error) {
+    throw new HttpError(
+      `invalid background: ${error.message}`,
+      status.BAD_REQUEST
+    );
+  }
 }
 
 const patchScene = async (sceneId, patch, scenarioId) => {
