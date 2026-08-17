@@ -264,9 +264,13 @@ export default function SceneSettings() {
                     scenes?.find((scene) => scene._id === targetId)?.name ??
                     "Unknown scene"
                   }
-                  onChange={(targetId) =>
-                    modifySceneProp("directLink", targetId || null)
-                  }
+                  onChange={(targetId) => {
+                    modifySceneProp("directLink", targetId || null);
+                    // Clearing the target turns Direct Link off the same way
+                    // the toggle does - keep directLinkKey in sync so it
+                    // doesn't linger stale for a link that's no longer set.
+                    if (!targetId) modifySceneProp("directLinkKey", null);
+                  }}
                 />
                 <label className="label mt-2">Key Binding</label>
                 <SelectInput

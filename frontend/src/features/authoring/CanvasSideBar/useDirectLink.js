@@ -23,7 +23,11 @@ export default function useDirectLink() {
     if (!disabled) return;
     if (directLink) modifySceneProp("directLink", null);
     if (directLinkKey != null) modifySceneProp("directLinkKey", null);
-  }, [disabled]);
+    // directLink/directLinkKey are deps (not just disabled) so switching
+    // straight from one already-disabled scene to another still re-checks
+    // and clears that scene's own stale values, rather than skipping the
+    // cleanup because `disabled` itself didn't change across the switch.
+  }, [disabled, directLink, directLinkKey]);
 
   return { directLink, disabled, defaultTarget };
 }

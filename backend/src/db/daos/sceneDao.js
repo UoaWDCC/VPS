@@ -133,6 +133,7 @@ const assertUniqueKeyBindings = (components, directLink, directLinkKey) => {
  */
 const createScene = async (scenarioId, scene) => {
   await assertDirectLinkInScenario(scenarioId, scene.directLink);
+  assertUniqueKeyBindings(scene.components, scene.directLink, scene.directLinkKey);
   const dbScene = new Scene(scene);
   await dbScene.save();
 
@@ -350,6 +351,20 @@ const updateSceneOrder = async (scenarioId, sceneIds) => {
 
 const patchScene = async (sceneId, patch, scenarioId) => {
   const { fields = {}, components = [], deletedComponentIds = [] } = patch;
+
+  // A component can't be both deleted and updated in the same patch - the
+  // $pull/$push bulkWrite below would actually resurrect it (re-inserted by
+  // the "insert if it doesn't already exist" op after $pull removes it),
+  // silently diverging from what gets validated as "effective" below.
+  const deletedAndUpdated = components
+    .map((c) => c.id)
+    .filter((id) => deletedComponentIds.includes(id));
+  if (deletedAndUpdated.length > 0) {
+    throw new HttpError(
+      `Component(s) ${deletedAndUpdated.join(", ")} cannot be both deleted and updated in the same patch`,
+      status.BAD_REQUEST
+    );
+  }
 
   // Keep this list in sync with the field list in generatePatch,
   // frontend/src/context/SceneContextProvider.jsx - a field missing from
