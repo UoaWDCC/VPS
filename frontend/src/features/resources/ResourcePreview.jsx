@@ -8,6 +8,22 @@ async function loadText(url) {
   });
 }
 
+async function downloadFile(url, name) {
+  const res = await fetch(url);
+  if (!res.ok) throw new Error(`failed to load file (${res.status})`);
+  const blob = await res.blob();
+  const blobUrl = window.URL.createObjectURL(blob);
+
+  const link = document.createElement("a");
+  link.href = blobUrl;
+  link.download = name || "";
+  document.body.appendChild(link);
+  link.click();
+
+  document.body.removeChild(link);
+  window.URL.revokeObjectURL(blobUrl);
+}
+
 function ResourcePreview({ file }) {
   const canPreviewText = !!(
     file?.fileType === "document" &&
@@ -40,9 +56,17 @@ function ResourcePreview({ file }) {
     <div className="flex h-full min-h-0 flex-col gap-3 p-3 font-ibm">
       <div className="flex items-start justify-between gap-2">
         <h3 className="text-m min-w-0 break-all">{file.name}</h3>
-        <a className="btn btn-phantom btn-xs shrink-0" href={file.url} download>
+        <button
+          type="button"
+          className="btn btn-phantom btn-xs shrink-0"
+          onClick={() =>
+            downloadFile(file.url, file.name).catch((err) =>
+              console.error("Failed to download file:", err)
+            )
+          }
+        >
           Download
-        </a>
+        </button>
       </div>
 
       <div className="min-h-0 flex-1">
