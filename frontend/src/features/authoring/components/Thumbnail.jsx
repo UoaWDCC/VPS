@@ -6,6 +6,7 @@ import Speech from "../elements/Speech";
 import TextBox from "../elements/TextBox";
 import { buildVisualComponents } from "../pipeline";
 import { CANVAS_HEIGHT, CANVAS_WIDTH } from "../../../util/canvas";
+import Background from "../elements/Background";
 
 const componentMap = {
   textbox: TextBox,
@@ -22,7 +23,7 @@ function resolve(component) {
   return null;
 }
 
-const Thumbnail = ({ components }) => {
+const Thumbnail = ({ components, background }) => {
   const visual = buildVisualComponents(components);
   const visualComponents = visual
     .sort((a, b) => a.zIndex - b.zIndex)
@@ -37,6 +38,7 @@ const Thumbnail = ({ components }) => {
         height={CANVAS_HEIGHT}
         fill="var(--color-canvas)"
       />
+      <Background background={background ?? null} />
       {visualComponents}
     </svg>
   );

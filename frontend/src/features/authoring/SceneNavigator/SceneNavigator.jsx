@@ -23,7 +23,9 @@ import useVisualScene from "../stores/visual";
 import { PlusIcon } from "lucide-react";
 
 function ThumbOverlay({ scene }) {
-  return <Thumbnail components={scene.components} />;
+  return (
+    <Thumbnail components={scene.components} background={scene.background} />
+  );
 }
 
 // TODO: sort out animation flickering here
@@ -115,6 +117,7 @@ const SceneNavigator = () => {
             {scenes.find((s) => s._id === activeId) && (
               <Thumbnail
                 components={scenes.find((s) => s._id === activeId).components}
+                background={scenes.find((s) => s._id === activeId).background}
               />
             )}
           </div>

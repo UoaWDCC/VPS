@@ -15,6 +15,15 @@ export interface Scene {
   time: number | null;
   directLink: string | null;
   timerStateOperations: Record<string, unknown>[] | null;
+  background: SceneBackground | null;
+}
+
+export type BackgroundFit = "cover" | "contain" | "fill";
+
+export interface SceneBackground {
+  fileId: string;
+  href: string;
+  fit: BackgroundFit;
 }
 
 export interface Vec2 {

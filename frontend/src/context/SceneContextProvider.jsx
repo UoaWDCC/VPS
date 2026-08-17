@@ -59,7 +59,14 @@ function generatePatch(modified, saved) {
     if (!currentComponents[c.id]) deletedComponentIds.push(c.id);
   });
 
-  ["name", "roles", "time", "directLink", "timerStateOperations"].forEach(
+  [
+    "name",
+    "roles",
+    "time",
+    "directLink",
+    "timerStateOperations",
+    "background",
+  ].forEach(
     (field) => {
       if (JSON.stringify(modified[field]) !== JSON.stringify(saved[field])) {
         fields[field] = structuredClone(modified[field]);
