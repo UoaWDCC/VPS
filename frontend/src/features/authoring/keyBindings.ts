@@ -2,7 +2,9 @@
 // link) to during playback. Excludes anything still reserved: Enter/Tab/
 // Escape/Backspace/Delete/F-keys/modifiers, and "/" and "'" (both trigger
 // Firefox's Quick Find when pressed unmodified).
-const LETTERS = Array.from({ length: 26 }, (_, i) => String.fromCharCode(65 + i));
+const LETTERS = Array.from({ length: 26 }, (_, i) =>
+  String.fromCharCode(65 + i)
+);
 const DIGITS = Array.from({ length: 10 }, (_, i) => String(i));
 const PUNCTUATION = ["-", "=", "[", "]", ";", ",", ".", "`", "\\"];
 

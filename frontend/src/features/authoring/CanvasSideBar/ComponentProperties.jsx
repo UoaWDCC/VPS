@@ -46,7 +46,11 @@ export default function ComponentProperties({ component }) {
   const directLinkKey = useVisualScene((scene) => scene.directLinkKey);
 
   const [value, setValue] = usePropMirror(component, "nextScene", identity);
-  const [keyValue, setKeyValue] = usePropMirror(component, "keyBinding", orNull);
+  const [keyValue, setKeyValue] = usePropMirror(
+    component,
+    "keyBinding",
+    orNull
+  );
   const [hintValue, setHintValue] = usePropMirror(
     component,
     "showKeyHint",

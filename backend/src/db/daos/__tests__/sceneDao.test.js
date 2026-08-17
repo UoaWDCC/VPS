@@ -40,7 +40,11 @@ describe("Scene DAO patchScene tests", () => {
 
   beforeEach(async () => {
     await Scene.create(baseScene);
-    await Scene.create({ _id: otherSceneId, name: "Other Scene", components: [] });
+    await Scene.create({
+      _id: otherSceneId,
+      name: "Other Scene",
+      components: [],
+    });
     await Scenario.create({
       _id: scenarioId,
       name: "Test Scenario",
@@ -191,7 +195,9 @@ describe("Scene DAO patchScene tests", () => {
     ).rejects.toThrow(/claimed by more than one component/);
 
     const scene = await Scene.findById(sceneId);
-    expect(scene.components.find((c) => c.id === "component-a").keyBinding).toBeUndefined();
+    expect(
+      scene.components.find((c) => c.id === "component-a").keyBinding
+    ).toBeUndefined();
   });
 
   it("rejects a component key binding that collides with the direct link's default keys", async () => {
