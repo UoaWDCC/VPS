@@ -1,3 +1,4 @@
+import { fastIsEqual } from "fast-is-equal";
 import { modifyComponentBounds } from "../../scene/operations/component";
 import useEditorStore from "../../stores/editor";
 import useVisualScene from "../../stores/visual";
@@ -228,19 +229,8 @@ function isWordCharAt(
   return char !== undefined && WORD_CHAR.test(char);
 }
 
-function sameVisualCursor(a: VisualCursor, b: VisualCursor) {
-  return (
-    a.blockI === b.blockI &&
-    a.lineI === b.lineI &&
-    a.spanI === b.spanI &&
-    a.charI === b.charI
-  );
-}
-
-// walks in one direction while the adjacent char is a word char. the
-// sameVisualCursor check is just a safety net -- moveCursorVisual should
-// always make progress here now, but a walk that trusted that blindly is
-// exactly what caused the freeze this was built to fix in the first place
+// walks in one direction while the adjacent char is a word char. stops if
+// moveCursorVisual ever fails to advance, to guard against an infinite loop
 function walkWhileWord(
   blocks: VisualBlock[],
   cursor: VisualCursor,
@@ -249,7 +239,7 @@ function walkWhileWord(
   let pos = cursor;
   while (isWordCharAt(blocks, pos, dir)) {
     const next = moveCursorVisual(blocks, pos, dir);
-    if (sameVisualCursor(next, pos)) break;
+    if (fastIsEqual(next, pos)) break;
     pos = next;
   }
   return pos;
