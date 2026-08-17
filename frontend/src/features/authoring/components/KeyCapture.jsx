@@ -12,6 +12,7 @@ export default function KeyCapture({
   availableKeys,
   onChange,
   disabled = false,
+  clearValue = null,
 }) {
   const [capturing, setCapturing] = useState(false);
   const [error, setError] = useState(null);
@@ -22,6 +23,11 @@ export default function KeyCapture({
     function handleKeyDown(e) {
       e.preventDefault();
       e.stopPropagation();
+      // Only one KeyCapture may claim a given keypress - without this, two
+      // instances capturing at once (e.g. a component's and the scene's
+      // direct-link picker) would both see the key as available and both
+      // assign it from a single physical keystroke.
+      e.stopImmediatePropagation();
 
       if (e.key === "Escape") {
         setCapturing(false);
@@ -70,7 +76,7 @@ export default function KeyCapture({
           type="button"
           className="btn btn-sm btn-ghost"
           disabled={disabled}
-          onClick={() => onChange(null)}
+          onClick={() => onChange(clearValue)}
         >
           Clear
         </button>

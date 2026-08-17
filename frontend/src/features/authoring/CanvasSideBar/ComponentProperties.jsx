@@ -2,12 +2,12 @@ import SceneContext from "context/SceneContext";
 
 import { useContext, useEffect, useState } from "react";
 import { modifyComponentProp } from "../scene/operations/component";
-import { getScene } from "../scene/scene";
+import useVisualScene from "../stores/visual";
 import StateOperationMenu from "../../../components/StateVariables/StateOperationMenu";
 import SelectInput from "../components/Select";
 import KeyCapture from "../components/KeyCapture";
 import StateBindingMenu from "../../../components/StateVariables/StateBindingMenu";
-import { KEY_BINDING_OPTIONS, directLinkKeysFor } from "../keyBindings";
+import { availableKeyBindings } from "../keyBindings";
 import {
   KEY_HINT_POSITIONS,
   DEFAULT_KEY_HINT_POSITION,
@@ -20,6 +20,13 @@ import {
  */
 export default function ComponentProperties({ component }) {
   const { scenes } = useContext(SceneContext);
+
+  // Subscribed (not read via a one-off getScene() call) so this panel
+  // re-renders - and its available-keys list stays current - when another
+  // component or the scene's direct link claims/frees a key elsewhere.
+  const sceneComponents = useVisualScene((scene) => scene.components);
+  const directLink = useVisualScene((scene) => scene.directLink);
+  const directLinkKey = useVisualScene((scene) => scene.directLinkKey);
 
   const [value, setValue] = useState(component?.nextScene);
   const [keyValue, setKeyValue] = useState(component?.keyBinding ?? null);
@@ -64,18 +71,13 @@ export default function ComponentProperties({ component }) {
 
   if (!component) return null;
 
-  const scene = getScene();
-  const usedKeys = component.clickable
-    ? [
-        ...Object.values(scene.components)
-          .filter((c) => c.id !== component.id && c.clickable && c.keyBinding)
-          .map((c) => c.keyBinding),
-        ...(scene.directLink ? directLinkKeysFor(scene.directLinkKey) : []),
-      ]
+  const availableKeys = component.clickable
+    ? availableKeyBindings(Object.values(sceneComponents ?? {}), {
+        excludeComponentId: component.id,
+        directLink,
+        directLinkKey,
+      })
     : [];
-  const availableKeys = KEY_BINDING_OPTIONS.filter(
-    (k) => !usedKeys.includes(k)
-  );
 
   return (
     <>

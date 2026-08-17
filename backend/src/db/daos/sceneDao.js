@@ -236,6 +236,7 @@ const duplicateScene = async (scenarioId, sceneId) => {
     components: sceneToCopy.components,
     time: sceneToCopy.time,
     directLink: sceneToCopy.directLink ?? null,
+    directLinkKey: sceneToCopy.directLinkKey ?? null,
   };
   const dbScene = new Scene(newScene);
   await dbScene.save();
@@ -308,6 +309,9 @@ const updateSceneOrder = async (scenarioId, sceneIds) => {
 const patchScene = async (sceneId, patch, scenarioId) => {
   const { fields = {}, components = [], deletedComponentIds = [] } = patch;
 
+  // Keep this list in sync with the field list in generatePatch,
+  // frontend/src/context/SceneContextProvider.jsx - a field missing from
+  // either side either gets silently dropped here or never sent from there.
   const allowedFields = {};
   [
     "name",

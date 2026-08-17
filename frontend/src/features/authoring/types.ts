@@ -49,6 +49,8 @@ interface GenericComponent {
   bounds: Bounds;
   zIndex: number;
   clickable?: boolean;
+  nextScene?: string | null;
+  stateOperations?: Record<string, unknown>[] | null;
   stateBindings?: StateBinding[];
   keyBinding?: string | null;
   showKeyHint?: boolean;

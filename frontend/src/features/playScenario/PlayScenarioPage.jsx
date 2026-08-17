@@ -225,7 +225,10 @@ export default function PlayScenarioPage({ group }) {
       if (!boundKey) return;
 
       const component = currScene?.components?.find(
-        (c) => c.clickable && c.keyBinding === boundKey
+        (c) =>
+          c.clickable &&
+          c.keyBinding === boundKey &&
+          (c.nextScene || c.stateOperations)
       );
       if (component) {
         e.preventDefault();

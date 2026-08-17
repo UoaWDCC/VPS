@@ -14,7 +14,7 @@ import toast from "react-hot-toast";
 import TimerStateOperationMenu from "../../../components/StateVariables/TimerStateOperationMenu";
 import SelectInput from "../components/Select";
 import KeyCapture from "../components/KeyCapture";
-import { KEY_BINDING_OPTIONS, DEFAULT_DIRECT_LINK_KEYS } from "../keyBindings";
+import { availableKeyBindings, DEFAULT_DIRECT_LINK_KEYS } from "../keyBindings";
 
 /**
  * This component displays the settings of a scene, such as the scene name
@@ -40,19 +40,20 @@ export default function SceneSettings() {
   const [sceneName, setSceneName] = useState(name ?? "");
   const [timerDuration, setTimerDuration] = useState(time ?? "");
   const [keyValue, setKeyValue] = useState(directLinkKey ?? null);
-  const [keyMode, setKeyMode] = useState(directLinkKey ? "CUSTOM" : "DEFAULT");
+  // null/undefined = Default mode; "" or a real key = Custom mode (see
+  // directLinkKeysFor in keyBindings.ts for what each value claims).
+  const [keyMode, setKeyMode] = useState(
+    directLinkKey != null ? "CUSTOM" : "DEFAULT"
+  );
 
   useEffect(() => {
     if ((directLinkKey ?? null) !== keyValue)
       setKeyValue(directLinkKey ?? null);
-    setKeyMode(directLinkKey ? "CUSTOM" : "DEFAULT");
+    setKeyMode(directLinkKey != null ? "CUSTOM" : "DEFAULT");
   }, [directLinkKey]);
 
-  const usedByComponentKeys = Object.values(components ?? {})
-    .filter((c) => c.clickable && c.keyBinding)
-    .map((c) => c.keyBinding);
-  const availableDirectLinkKeys = KEY_BINDING_OPTIONS.filter(
-    (k) => !usedByComponentKeys.includes(k)
+  const availableDirectLinkKeys = availableKeyBindings(
+    Object.values(components ?? {})
   );
 
   function saveDirectLinkKey(v) {
@@ -60,9 +61,30 @@ export default function SceneSettings() {
     modifySceneProp("directLinkKey", v);
   }
 
+  // Direct Link's default mode claims Space/ArrowRight; clear those keys off
+  // any button so they're not silently unreachable or colliding.
+  function clearDefaultDirectLinkCollisions() {
+    Object.values(getScene().components)
+      .filter(
+        (c) => c.clickable && DEFAULT_DIRECT_LINK_KEYS.includes(c.keyBinding)
+      )
+      .forEach((c) => {
+        modifyComponentProp(c.id, "keyBinding", null);
+        modifyComponentProp(c.id, "showKeyHint", false);
+      });
+  }
+
   function changeKeyMode(nextMode) {
     setKeyMode(nextMode);
-    if (nextMode === "DEFAULT") saveDirectLinkKey(null);
+    if (nextMode === "DEFAULT") {
+      saveDirectLinkKey(null);
+      clearDefaultDirectLinkCollisions();
+    } else {
+      // Explicitly mark "Custom, nothing picked yet" so direct link claims
+      // no key at all until the author sets one via KeyCapture below -
+      // distinct from null, which falls back to Space/ArrowRight.
+      saveDirectLinkKey("");
+    }
   }
 
   useEffect(() => {
@@ -207,20 +229,7 @@ export default function SceneSettings() {
                     scenes?.find((s) => s._id !== selfId)?._id ??
                     null;
 
-                  // Direct Link defaults to Space/ArrowRight; clear those
-                  // keys off any button so they're not silently unreachable.
-                  if (!directLinkKey) {
-                    Object.values(getScene().components)
-                      .filter(
-                        (c) =>
-                          c.clickable &&
-                          DEFAULT_DIRECT_LINK_KEYS.includes(c.keyBinding)
-                      )
-                      .forEach((c) => {
-                        modifyComponentProp(c.id, "keyBinding", null);
-                        modifyComponentProp(c.id, "showKeyHint", false);
-                      });
-                  }
+                  if (!directLinkKey) clearDefaultDirectLinkCollisions();
 
                   modifySceneProp("directLink", target);
                 }}
@@ -277,6 +286,7 @@ export default function SceneSettings() {
                       value={keyValue}
                       availableKeys={availableDirectLinkKeys}
                       onChange={saveDirectLinkKey}
+                      clearValue=""
                     />
                   </div>
                 )}

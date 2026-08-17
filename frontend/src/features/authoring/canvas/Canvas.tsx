@@ -77,7 +77,12 @@ function Canvas() {
     .flatMap((c) => {
       const rendered = resolve(c);
       if (!rendered) return [];
-      if (c.clickable && c.keyBinding && c.showKeyHint) {
+      if (
+        c.clickable &&
+        c.keyBinding &&
+        c.showKeyHint &&
+        (c.nextScene || c.stateOperations)
+      ) {
         return [
           rendered,
           <KeyHintBadge
