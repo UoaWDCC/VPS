@@ -10,6 +10,19 @@ const preserveAspectRatioByFit = {
 function Background({ background }: { background: SceneBackground | null }) {
   if (!background) return null;
 
+  if (background.kind === "color") {
+    return (
+      <rect
+        x="0"
+        y="0"
+        width={CANVAS_WIDTH}
+        height={CANVAS_HEIGHT}
+        fill={background.color}
+        pointerEvents="none"
+      />
+    );
+  }
+
   return (
     <image
       x="0"

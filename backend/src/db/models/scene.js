@@ -4,19 +4,36 @@ const { Schema } = mongoose;
 
 const backgroundSchema = new Schema(
   {
+    kind: {
+      type: String,
+      enum: ["image", "color"],
+      default: "image",
+      required: true,
+    },
     fileId: {
       type: Schema.Types.ObjectId,
       ref: "UploadedFile",
-      required: true,
+      required() {
+        return this.kind === "image";
+      },
     },
     href: {
       type: String,
-      required: true,
+      required() {
+        return this.kind === "image";
+      },
     },
     fit: {
       type: String,
       enum: ["cover", "contain", "fill"],
       default: "cover",
+    },
+    color: {
+      type: String,
+      match: /^#[0-9a-fA-F]{6}([0-9a-fA-F]{2})?$/,
+      required() {
+        return this.kind === "color";
+      },
     },
   },
   { _id: false }

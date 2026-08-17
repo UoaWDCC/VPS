@@ -192,6 +192,7 @@ describe("Scene DAO patchScene tests", () => {
     await patchScene(sceneId, {
       fields: {
         background: {
+          kind: "image",
           fileId: firstFile._id,
           href: firstFile.url,
           fit: "cover",
@@ -201,6 +202,7 @@ describe("Scene DAO patchScene tests", () => {
 
     let updatedScene = await Scene.findById(sceneId).lean();
     expect(updatedScene.background).toMatchObject({
+      kind: "image",
       fileId: firstFile._id,
       href: firstFile.url,
       fit: "cover",
@@ -210,6 +212,7 @@ describe("Scene DAO patchScene tests", () => {
     await patchScene(sceneId, {
       fields: {
         background: {
+          kind: "image",
           fileId: secondFile._id,
           href: secondFile.url,
           fit: "contain",
@@ -220,10 +223,18 @@ describe("Scene DAO patchScene tests", () => {
     expect((await UploadedFile.findById(firstFile._id)).refCount).toBe(0);
     expect((await UploadedFile.findById(secondFile._id)).refCount).toBe(1);
 
-    await patchScene(sceneId, { fields: { background: null } });
+    await patchScene(sceneId, {
+      fields: { background: { kind: "color", color: "#1769aaff" } },
+    });
 
     updatedScene = await Scene.findById(sceneId).lean();
-    expect(updatedScene.background).toBeNull();
+    expect(updatedScene.background).toMatchObject({
+      kind: "color",
+      color: "#1769aaff",
+    });
     expect((await UploadedFile.findById(secondFile._id)).refCount).toBe(0);
+
+    await patchScene(sceneId, { fields: { background: null } });
+    expect((await Scene.findById(sceneId).lean()).background).toBeNull();
   });
 });
