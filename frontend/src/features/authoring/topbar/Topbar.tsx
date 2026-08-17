@@ -56,15 +56,15 @@ function Topbar({ saving, save }: { saving: boolean; save: () => void }) {
 
         <div className="divider divider-horizontal" />
 
-        <li>
-          <a onClick={() => undo()}>
+        <li className="tooltip tooltip-bottom" data-tip="Undo">
+          <button type="button" aria-label="Undo" onClick={() => undo()}>
             <Undo2Icon size={16} />
-          </a>
+          </button>
         </li>
-        <li>
-          <a onClick={() => redo()}>
+        <li className="tooltip tooltip-bottom" data-tip="Redo">
+          <button type="button" aria-label="Redo" onClick={() => redo()}>
             <Redo2Icon size={16} />
-          </a>
+          </button>
         </li>
 
         <div className="divider divider-horizontal" />
