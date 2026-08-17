@@ -8,7 +8,7 @@ import {
   type Dispatch,
   type SetStateAction,
 } from "react";
-import { ImageIcon, PaletteIcon, UploadIcon } from "lucide-react";
+import { UploadIcon } from "lucide-react";
 import { useParams } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import type { User } from "firebase/auth";
@@ -16,11 +16,18 @@ import toast from "react-hot-toast";
 import AuthenticationContext from "../../../context/AuthenticationContext";
 import ImageListContainer from "../../../components/ListContainer/ImageListContainer";
 import ModalDialog from "../../../components/ModalDialogue";
+import Thumbnail from "../components/Thumbnail";
 import useVisualScene from "../stores/visual";
 import useEditorStore from "../stores/editor";
+import { getScene } from "../scene/scene";
 import { modifySceneProp } from "../scene/operations/modifiers";
 import { getImages, uploadImage } from "../imageFiles";
-import type { BackgroundFit, ImageBackground, UploadedFile } from "../types";
+import type {
+  BackgroundFit,
+  ImageBackground,
+  SceneBackground,
+  UploadedFile,
+} from "../types";
 
 const fitOptions: { value: BackgroundFit; label: string }[] = [
   { value: "cover", label: "Cover (crop to fit)" },
@@ -28,7 +35,7 @@ const fitOptions: { value: BackgroundFit; label: string }[] = [
   { value: "fill", label: "Fill (stretch to fit)" },
 ];
 
-type BackgroundMode = "color" | "image";
+type BackgroundSource = "color" | "image";
 
 function toImageBackground(
   image: UploadedFile,
@@ -50,11 +57,12 @@ function BackgroundMenu({
   setShow: Dispatch<SetStateAction<boolean>>;
 }) {
   const background = useVisualScene((state) => state.background);
+  const visualComponents = useVisualScene((state) => state.components);
   const { user } = useContext(AuthenticationContext as Context<{ user: User }>);
   const { scenarioId } = useParams<{ scenarioId: string }>();
   const queryClient = useQueryClient();
   const fileInputRef = useRef<HTMLInputElement | null>(null);
-  const [mode, setMode] = useState<BackgroundMode>("color");
+  const [source, setSource] = useState<BackgroundSource>("color");
   const [color, setColor] = useState("#ffffff");
   const [fit, setFit] = useState<BackgroundFit>("cover");
   const [selectedImage, setSelectedImage] = useState<UploadedFile | null>(null);
@@ -68,40 +76,51 @@ function BackgroundMenu({
   useEffect(() => {
     if (!show) return;
 
+    setSelectedImage(null);
     if (!background) {
-      setMode("color");
+      setSource("color");
       setColor("#ffffff");
       setFit("cover");
-      setSelectedImage(null);
-      return;
-    }
-
-    if (background?.kind === "color") {
-      setMode("color");
+    } else if (background.kind === "color") {
+      setSource("color");
       setColor(background.color.slice(0, 7));
-      setSelectedImage(null);
+    } else {
+      setSource("image");
+      setFit(background.fit ?? "cover");
+    }
+  }, [show, background]);
+
+  useEffect(() => {
+    if (!show || selectedImage || !background || background.kind === "color") {
       return;
     }
 
-    setMode("image");
-    setFit(background?.fit ?? "cover");
-    setSelectedImage(
-      imagesQuery.data?.find((image) => image._id === background?.fileId) ??
-        null
+    const current = imagesQuery.data?.find(
+      (image) => image._id === background.fileId
     );
-  }, [show, background, imagesQuery.data]);
+    if (current) setSelectedImage(current);
+  }, [show, background, imagesQuery.data, selectedImage]);
+
+  const existingImage =
+    background && background.kind !== "color" ? { ...background, fit } : null;
+  const previewBackground: SceneBackground | null =
+    source === "color"
+      ? { kind: "color", color }
+      : selectedImage
+        ? toImageBackground(selectedImage, fit)
+        : existingImage;
+
+  const sceneComponents = Object.keys(visualComponents)
+    .map((id) => getScene().components[id])
+    .filter(Boolean);
 
   function close() {
     setShow(false);
   }
 
-  function applyColor() {
-    modifySceneProp("background", { kind: "color", color });
-    close();
-  }
-
-  function applyImage(image: UploadedFile) {
-    modifySceneProp("background", toImageBackground(image, fit));
+  function applyBackground() {
+    if (!previewBackground) return;
+    modifySceneProp("background", previewBackground);
     close();
   }
 
@@ -117,10 +136,11 @@ function BackgroundMenu({
     useEditorStore.getState().setLoading(true);
     try {
       const image = await uploadImage(user, scenarioId, file);
+      setSelectedImage(image);
+      setSource("image");
       await queryClient.invalidateQueries({
         queryKey: ["images", scenarioId],
       });
-      applyImage(image);
     } catch (error) {
       console.error(error);
       toast.error("Background upload failed");
@@ -136,141 +156,158 @@ function BackgroundMenu({
 
   return (
     <ModalDialog wide title="Background" open={show} onClose={close}>
-      <div role="tablist" className="tabs tabs-box mb-4">
-        <button
-          type="button"
-          role="tab"
-          className={`tab gap-2 ${mode === "color" ? "tab-active" : ""}`}
-          onClick={() => setMode("color")}
-        >
-          <PaletteIcon size={16} />
-          Solid colour
-        </button>
-        <button
-          type="button"
-          role="tab"
-          className={`tab gap-2 ${mode === "image" ? "tab-active" : ""}`}
-          onClick={() => setMode("image")}
-        >
-          <ImageIcon size={16} />
-          Image
-        </button>
-      </div>
-
-      {mode === "color" ? (
-        <div className="grid grid-cols-[minmax(12rem,1fr)_2fr] gap-6 items-start">
-          <fieldset className="fieldset">
-            <label className="label" htmlFor="background-color">
-              Background colour
+      <div className="grid grid-cols-[minmax(20rem,1fr)_minmax(22rem,1.25fr)] gap-6 items-start">
+        <div className="flex min-h-0 flex-col gap-4">
+          <fieldset
+            className={`rounded-sm border p-4 ${
+              source === "color" ? "border-accent" : "border-base-300"
+            }`}
+          >
+            <label className="flex cursor-pointer items-center gap-3">
+              <input
+                type="radio"
+                name="background-source"
+                className="radio radio-sm"
+                checked={source === "color"}
+                onChange={() => setSource("color")}
+              />
+              <span className="font-medium">Solid colour</span>
             </label>
-            <div className="flex items-center gap-3">
+            <div className="mt-3 flex items-center gap-3 pl-7">
               <input
                 id="background-color"
                 type="color"
-                className="size-12 cursor-pointer rounded-sm bg-transparent"
+                className="size-11 cursor-pointer rounded-sm bg-transparent"
                 value={color}
-                onChange={(event) => setColor(event.target.value)}
+                onFocus={() => setSource("color")}
+                onChange={(event) => {
+                  setColor(event.target.value);
+                  setSource("color");
+                }}
               />
-              <span className="font-mono uppercase">{color}</span>
-            </div>
-            <button
-              type="button"
-              className="btn btn-primary mt-4"
-              onClick={applyColor}
-            >
-              Apply colour
-            </button>
-          </fieldset>
-          <div
-            className="aspect-video w-full rounded-sm border border-base-300"
-            style={{ backgroundColor: color }}
-            aria-label={`Background colour preview: ${color}`}
-          />
-        </div>
-      ) : (
-        <div className="flex flex-col gap-4">
-          <div className="flex items-end gap-3">
-            <fieldset className="fieldset flex-1">
-              <label className="label" htmlFor="background-fit">
-                Image fit
+              <label htmlFor="background-color" className="font-mono uppercase">
+                {color}
               </label>
-              <select
-                id="background-fit"
-                className="select w-full"
-                value={fit}
-                onChange={(event) =>
-                  setFit(event.target.value as BackgroundFit)
-                }
+            </div>
+          </fieldset>
+
+          <fieldset
+            className={`flex min-h-0 flex-col rounded-sm border p-4 ${
+              source === "image" ? "border-accent" : "border-base-300"
+            }`}
+          >
+            <label className="flex cursor-pointer items-center gap-3">
+              <input
+                type="radio"
+                name="background-source"
+                className="radio radio-sm"
+                checked={source === "image"}
+                onChange={() => setSource("image")}
+              />
+              <span className="font-medium">Image</span>
+            </label>
+
+            <div className="mt-3 flex items-end gap-3 pl-7">
+              <fieldset className="fieldset flex-1">
+                <label className="label" htmlFor="background-fit">
+                  Image fit
+                </label>
+                <select
+                  id="background-fit"
+                  className="select w-full"
+                  value={fit}
+                  onChange={(event) => {
+                    setFit(event.target.value as BackgroundFit);
+                    setSource("image");
+                  }}
+                >
+                  {fitOptions.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+              </fieldset>
+              <button
+                type="button"
+                className="btn"
+                onClick={() => fileInputRef.current?.click()}
               >
-                {fitOptions.map((option) => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </select>
-            </fieldset>
+                <UploadIcon size={16} />
+                Upload
+              </button>
+            </div>
+
+            <input
+              ref={fileInputRef}
+              type="file"
+              className="hidden"
+              accept="image/*"
+              onChange={(event) => void handleFileChange(event)}
+            />
+
+            <div className="mt-4 min-h-0 pl-7">
+              <p className="label mb-2">Uploaded images</p>
+              {imagesQuery.isLoading ? (
+                <p>Loading images...</p>
+              ) : imagesQuery.data?.length ? (
+                <div className="max-h-[28vh] overflow-y-auto pr-1">
+                  <ImageListContainer
+                    data={imagesQuery.data}
+                    selectedId={selectedImage?._id}
+                    onItemSelected={(image: UploadedFile) => {
+                      setSelectedImage(image);
+                      setSource("image");
+                    }}
+                  />
+                </div>
+              ) : (
+                <div className="rounded-sm bg-base-200 p-5 text-center">
+                  No uploaded images yet.
+                </div>
+              )}
+            </div>
+          </fieldset>
+
+          <div className="flex items-center justify-between gap-3">
+            {background ? (
+              <button
+                type="button"
+                className="btn btn-ghost text-error"
+                onClick={removeBackground}
+              >
+                Remove background
+              </button>
+            ) : (
+              <span />
+            )}
             <button
               type="button"
-              className="btn"
-              onClick={() => fileInputRef.current?.click()}
+              className="btn btn-primary"
+              disabled={!previewBackground}
+              onClick={applyBackground}
             >
-              <UploadIcon size={16} />
-              Upload image
+              Apply background
             </button>
           </div>
-
-          <input
-            ref={fileInputRef}
-            type="file"
-            className="hidden"
-            accept="image/*"
-            onChange={(event) => void handleFileChange(event)}
-          />
-
-          <div className="min-h-0">
-            <p className="label mb-2">Uploaded images</p>
-            {imagesQuery.isLoading ? (
-              <p>Loading images...</p>
-            ) : imagesQuery.data?.length ? (
-              <div className="max-h-[45vh] overflow-y-auto pr-1">
-                <ImageListContainer
-                  data={imagesQuery.data}
-                  selectedId={selectedImage?._id}
-                  onItemSelected={(image: UploadedFile) =>
-                    setSelectedImage(image)
-                  }
-                />
-              </div>
-            ) : (
-              <div className="rounded-sm bg-base-200 p-6 text-center">
-                No uploaded images yet.
-              </div>
-            )}
-          </div>
-
-          <button
-            type="button"
-            className="btn btn-primary self-end"
-            disabled={!selectedImage}
-            onClick={() => selectedImage && applyImage(selectedImage)}
-          >
-            Set background
-          </button>
         </div>
-      )}
 
-      {background && (
-        <>
-          <div className="divider" />
-          <button
-            type="button"
-            className="btn btn-ghost text-error"
-            onClick={removeBackground}
-          >
-            Remove background
-          </button>
-        </>
-      )}
+        <div className="sticky top-0">
+          <p className="label mb-2">Current scene preview</p>
+          <div className="aspect-video w-full overflow-hidden rounded-sm border border-base-300 bg-base-200">
+            <Thumbnail
+              components={sceneComponents}
+              background={previewBackground}
+              className="block h-full w-full"
+            />
+          </div>
+          {source === "image" && !previewBackground && (
+            <p className="mt-2 text-xs opacity-70">
+              Select or upload an image to preview it.
+            </p>
+          )}
+        </div>
+      </div>
     </ModalDialog>
   );
 }

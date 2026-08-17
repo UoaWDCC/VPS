@@ -23,14 +23,14 @@ function resolve(component) {
   return null;
 }
 
-const Thumbnail = ({ components, background }) => {
+const Thumbnail = ({ components, background, className = "" }) => {
   const visual = buildVisualComponents(components);
   const visualComponents = visual
     .sort((a, b) => a.zIndex - b.zIndex)
     .map(resolve);
 
   return (
-    <svg viewBox={`0 0 ${CANVAS_WIDTH} ${CANVAS_HEIGHT}`}>
+    <svg className={className} viewBox={`0 0 ${CANVAS_WIDTH} ${CANVAS_HEIGHT}`}>
       <rect
         x="0"
         y="0"
