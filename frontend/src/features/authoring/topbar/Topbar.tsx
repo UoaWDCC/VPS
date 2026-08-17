@@ -9,7 +9,7 @@ import ShapeSection from "./ShapeSection";
 import TextSection from "./TextSection";
 import useEditorStore from "../stores/editor";
 import { getComponent } from "../scene/scene";
-import { handleHistoryChange } from "../scene/history";
+import { undo, redo } from "../scene/history";
 import { bringToFront, sendToBack } from "../scene/operations/component";
 import { useState } from "react";
 import StateVariableMenu from "../../../components/StateVariables/StateVariableMenu";
@@ -57,12 +57,12 @@ function Topbar({ saving, save }: { saving: boolean; save: () => void }) {
         <div className="divider divider-horizontal" />
 
         <li>
-          <a onClick={() => handleHistoryChange("undo")}>
+          <a onClick={() => undo()}>
             <Undo2Icon size={16} />
           </a>
         </li>
         <li>
-          <a onClick={() => handleHistoryChange("redo")}>
+          <a onClick={() => redo()}>
             <Redo2Icon size={16} />
           </a>
         </li>

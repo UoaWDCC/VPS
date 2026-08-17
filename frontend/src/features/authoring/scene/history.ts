@@ -48,8 +48,6 @@ export interface ChangeRecord {
   prevState: Component | null;
 }
 
-type ActionHistory = "redo" | "undo";
-
 let undoStack: HistoryRecord[][] = [];
 let redoStack: HistoryRecord[][] = [];
 
@@ -93,18 +91,26 @@ export function updateHistory(incomingChanges: ChangeRecord[]) {
   );
 }
 
-export function handleHistoryChange(action: ActionHistory) {
-  const isUndo = action === "undo";
-  const sourceStack = isUndo ? undoStack : redoStack;
-  const targetStack = isUndo ? redoStack : undoStack;
-
-  const batch = sourceStack.pop();
+export function undo() {
+  const batch = undoStack.pop();
   if (!batch || batch.length === 0) return;
 
-  targetStack.push(batch);
+  redoStack.push(batch);
 
   historyEvents.dispatchTypedEvent(
     "update",
-    new HistoryEvent(action, cloneHistoryBatch(batch))
+    new HistoryEvent("undo", cloneHistoryBatch(batch))
+  );
+}
+
+export function redo() {
+  const batch = redoStack.pop();
+  if (!batch || batch.length === 0) return;
+
+  undoStack.push(batch);
+
+  historyEvents.dispatchTypedEvent(
+    "update",
+    new HistoryEvent("redo", cloneHistoryBatch(batch))
   );
 }
