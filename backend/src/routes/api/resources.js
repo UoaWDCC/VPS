@@ -15,6 +15,11 @@ const router = Router();
 
 router.use(auth);
 
+function getExtension(name) {
+  const dotIndex = name.lastIndexOf(".");
+  return dotIndex <= 0 ? "" : name.slice(dotIndex).toLowerCase();
+}
+
 /**
  * @route GET /api/resources/:scenarioId
  * @desc Get all resources for a scenario
@@ -153,6 +158,51 @@ router.delete(
     await applyReferenceDeltas(fileRefDeltas);
 
     return res.status(HttpStatusCode.NoContent).send();
+  })
+);
+
+/**
+ * @route PATCH /api/resources/:scenarioId/:resourceId
+ * @desc Rename a resource
+ */
+router.patch(
+  "/:scenarioId/:resourceId",
+  handle(async (req, res) => {
+    const { scenarioId, resourceId } = req.params;
+    const { name } = req.body;
+
+    if (!isValidObjectId(resourceId))
+      throw new HttpError("invalid resource id", HttpStatusCode.BadRequest);
+
+    const trimmedName = typeof name === "string" ? name.trim() : "";
+
+    if (!trimmedName)
+      throw new HttpError("name is required", HttpStatusCode.BadRequest);
+
+    if (trimmedName.length > 255)
+      throw new HttpError(
+        "name must be 255 characters or fewer",
+        HttpStatusCode.BadRequest
+      );
+
+    const existing = await Resource.findOne({ _id: resourceId, scenarioId });
+    if (!existing)
+      throw new HttpError("resource not found", HttpStatusCode.NotFound);
+
+    if (
+      existing.type === "file" &&
+      getExtension(trimmedName) !== getExtension(existing.name)
+    )
+      throw new HttpError(
+        "file extension cannot be changed",
+        HttpStatusCode.BadRequest
+      );
+
+    existing.name = trimmedName;
+    await existing.save();
+    await existing.populate("fileId", "url type contentType size");
+
+    return res.json(existing);
   })
 );
 
