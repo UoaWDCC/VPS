@@ -36,7 +36,11 @@ export async function applyReferenceDeltas(fileRefDeltas) {
     const hasWriteErrors = Array.isArray(result?.writeErrors)
       ? result.writeErrors.length > 0
       : false;
-    return result?.ok === 1 && !hasWriteErrors;
+    return (
+      result?.ok === 1 &&
+      !hasWriteErrors &&
+      result?.matchedCount === fileOperations.length
+    );
   } catch {
     return false;
   }
