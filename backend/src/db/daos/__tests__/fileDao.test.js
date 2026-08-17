@@ -105,7 +105,7 @@ describe("fileDao", () => {
       refCount: 3,
     });
 
-    await expect(applyReferenceDeltas(new Map())).resolves.toBeUndefined();
+    await expect(applyReferenceDeltas(new Map())).resolves.toBe(true);
     await expect(
       applyReferenceDelta(file._id.toString(), 0)
     ).resolves.toBeUndefined();
