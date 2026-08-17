@@ -136,7 +136,7 @@
   prefersdark: false;
   color-scheme: dark;
 
-  --color-base-100: #1A1A1E;
+  --color-base-100: #1a1a1e;
   --color-base-200: color-mix(
     in srgb,
     var(--color-base-100) 96%,
