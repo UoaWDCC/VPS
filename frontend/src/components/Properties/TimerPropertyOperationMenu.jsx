@@ -84,7 +84,7 @@ export default function TimerPropertyOperationMenu() {
 
   return (
     <>
-      <div className="collapse overflow-visible collapse-arrow bg-base-300 rounded-sm text-s">
+      <div className="collapse overflow-visible collapse-arrow bg-base-200 border-base-300 rounded-sm text-s">
         <input type="checkbox" />
         <div className="collapse-title flex items-center justify-between">
           On Timeout
