@@ -3,6 +3,7 @@ import useVisualScene from "../stores/visual";
 import AudioManager from "../audio/AudioManager";
 import ComponentProperties from "./ComponentProperties";
 import SceneSettings from "./SceneSettings";
+import BackgroundSettings from "./BackgroundSettings";
 
 /**
  * This component displays the properties of scene components in a sidebar
@@ -18,6 +19,7 @@ export default function CanvasSideBar() {
   return (
     <div className="flex pb-m flex-col w-[18vw] gap-s overflow-y-auto overflow-x-hidden no-scrollbar">
       <SceneSettings />
+      <BackgroundSettings />
       <AudioManager />
       <ComponentProperties component={component} />
     </div>

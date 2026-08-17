@@ -17,7 +17,10 @@ function Background({ background }: { background: SceneBackground | null }) {
       width={CANVAS_WIDTH}
       height={CANVAS_HEIGHT}
       href={background.href}
-      preserveAspectRatio={preserveAspectRatioByFit[background.fit]}
+      preserveAspectRatio={
+        preserveAspectRatioByFit[background.fit] ??
+        preserveAspectRatioByFit.cover
+      }
       pointerEvents="none"
     />
   );

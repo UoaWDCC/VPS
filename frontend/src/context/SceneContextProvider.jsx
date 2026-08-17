@@ -66,13 +66,11 @@ function generatePatch(modified, saved) {
     "directLink",
     "timerStateOperations",
     "background",
-  ].forEach(
-    (field) => {
-      if (JSON.stringify(modified[field]) !== JSON.stringify(saved[field])) {
-        fields[field] = structuredClone(modified[field]);
-      }
+  ].forEach((field) => {
+    if (JSON.stringify(modified[field]) !== JSON.stringify(saved[field])) {
+      fields[field] = structuredClone(modified[field]);
     }
-  );
+  });
 
   return {
     _id: modified._id,
