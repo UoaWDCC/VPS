@@ -1,3 +1,7 @@
+export function isTemp(resource) {
+  return resource._id.startsWith("temp.");
+}
+
 export function getExtension(name) {
   if (!name) return "";
   const dotIndex = name.lastIndexOf(".");

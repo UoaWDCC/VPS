@@ -1,29 +1,18 @@
-import React, { useEffect, useRef, useState, useContext } from "react";
+import React, { useRef, useState, useContext } from "react";
 import toast from "react-hot-toast";
 import { useParams } from "react-router-dom";
 import { useHistory } from "react-router-dom";
-import {
-  ArrowLeftIcon,
-  CheckIcon,
-  PencilIcon,
-  PlusIcon,
-  XIcon,
-} from "lucide-react";
+import { ArrowLeftIcon, PlusIcon, XIcon } from "lucide-react";
 import AddGroup from "./components/AddGroup";
+import ResourceNameField from "./components/ResourceNameField";
 import StateConditionalMenu from "../../components/StateVariables/StateConditionalMenu";
 import { api } from "../../util/api";
 import AuthenticationContext from "../../context/AuthenticationContext";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { filterTreeBySearch, normaliseFile } from "./util";
+import { filterTreeBySearch, isTemp, normaliseFile } from "./util";
 import { v4 as uuid } from "uuid";
 import ResourcePreview from "./ResourcePreview";
 import SkeletonBody from "./ResourcesSkeleton";
-
-const RESOURCE_NAME_MAX_LENGTH = 255;
-
-function isTemp(resource) {
-  return resource._id.startsWith("temp.");
-}
 
 async function uploadFileResource(user, scenarioId, parentId, file) {
   const formData = new FormData();
@@ -392,121 +381,6 @@ export default function ManageResourcesPage() {
 }
 
 // Helper components
-function ResourceNameField({
-  resource,
-  disabled,
-  onSelect,
-  onRename,
-  actions,
-}) {
-  const [editing, setEditing] = useState(false);
-  const [value, setValue] = useState(resource.name);
-  const inputRef = useRef(null);
-
-  useEffect(() => {
-    if (editing) {
-      inputRef.current?.focus();
-    }
-  }, [editing]);
-
-  function startEditing(e) {
-    e.stopPropagation();
-    if (disabled) return;
-    setValue(resource.name);
-    setEditing(true);
-  }
-
-  function commitEdit() {
-    setEditing(false);
-    const trimmedName = value.trim();
-    if (!trimmedName || trimmedName === resource.name) return;
-    onRename(trimmedName);
-  }
-
-  function handleKeyDown(e) {
-    if (e.key === "Enter") {
-      e.preventDefault();
-      inputRef.current?.blur();
-    } else if (e.key === "Escape") {
-      setValue(resource.name);
-      setEditing(false);
-    }
-  }
-
-  const rowStyle = editing
-    ? {
-        gridTemplateColumns: "minmax(0, 1fr) auto",
-        backgroundColor: "transparent",
-        boxShadow: "none",
-        color: "var(--color-base-content)",
-        cursor: "auto",
-      }
-    : { gridTemplateColumns: "minmax(0, 1fr) auto auto" };
-
-  return (
-    <div className="grid items-center gap-1 overflow-hidden" style={rowStyle}>
-      {editing ? (
-        <input
-          ref={inputRef}
-          type="text"
-          className="input input-xs input-bordered min-w-0"
-          style={{
-            "--input-color":
-              "color-mix(in oklab, var(--color-base-content) 20%, transparent)",
-            backgroundColor: "var(--color-base-100)",
-            borderColor:
-              "color-mix(in oklab, var(--color-base-content) 20%, transparent)",
-            color: "var(--color-base-content)",
-            boxShadow: "none",
-            outline: "none",
-            userSelect: "text",
-            WebkitUserSelect: "text",
-          }}
-          value={value}
-          maxLength={RESOURCE_NAME_MAX_LENGTH}
-          onChange={(e) => setValue(e.target.value)}
-          onBlur={commitEdit}
-          onKeyDown={handleKeyDown}
-          onClick={(e) => e.stopPropagation()}
-        />
-      ) : (
-        <>
-          <button
-            type="button"
-            className={`min-w-0 truncate bg-transparent px-0 text-left text--1 border-none cursor-pointer disabled:cursor-not-allowed focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary ${isTemp(resource) ? "text-primary" : ""}`}
-            title={resource.name}
-            onClick={onSelect}
-            disabled={disabled}
-          >
-            {resource.name}
-          </button>
-          <button
-            type="button"
-            className="btn btn-phantom btn-xs px-0"
-            onClick={startEditing}
-            title="Rename"
-            disabled={disabled}
-          >
-            <PencilIcon size={14} />
-          </button>
-        </>
-      )}
-      {editing ? (
-        <button
-          type="button"
-          className="btn btn-phantom btn-xs px-0"
-          onClick={() => inputRef.current?.blur()}
-          title="Confirm rename"
-        >
-          <CheckIcon size={14} />
-        </button>
-      ) : (
-        actions
-      )}
-    </div>
-  );
-}
-
 function UploadButton({
   onFiles,
   multiple = true,
