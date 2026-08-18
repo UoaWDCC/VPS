@@ -1,17 +1,24 @@
+import { fastIsEqual } from "fast-is-equal";
 import { modifyComponentBounds } from "../../scene/operations/component";
 import useEditorStore from "../../stores/editor";
 import useVisualScene from "../../stores/visual";
 import {
   getRelativePosition,
+  moveCursorVisual,
   parseHit,
   syncModelSelection,
 } from "../../text/cursor";
 import type { Vec2 } from "../../types";
-import type { VisualDocument } from "../../text/types";
+import type {
+  VisualBlock,
+  VisualCursor,
+  VisualDocument,
+} from "../../text/types";
 import { subtract, translate } from "../../util";
 import { handleCreateDrag, handleCreateEnd, handleCreateStart } from "./create";
 import { handleResizeDrag, handleResizeStart } from "./resize";
 import { snapTranslation } from "./snap";
+import { handleSelectAll } from "../keyboard/text";
 
 export function handleMouseDownGlobal(e: React.MouseEvent, position: Vec2) {
   const target = e.target as HTMLElement;
@@ -148,22 +155,116 @@ function handleDocumentClick(e: React.MouseEvent, position: Vec2) {
   const scene = useVisualScene.getState().components;
 
   const target = e.target as HTMLElement;
+  const id = target.dataset.id as string;
   const { document: doc } = useVisualScene.getState().components[
-    target.dataset.id as string
+    id
   ] as unknown as { document: VisualDocument };
   const cursor = parseHit(
     getRelativePosition(position, doc.bounds),
     doc.blocks
   );
 
-  setSelected(target.dataset.id as string);
+  setSelected(id);
   setMode(["text"]);
 
-  const component = scene[target.dataset.id as string];
+  const component = scene[id];
   setMutationBounds({ ...component.bounds });
 
   setDesiredColumn(null);
+
+  // triple (or more) click selects the whole document, same as ctrl/cmd+a
+  if (e.detail >= 3) {
+    handleSelectAll(id);
+    return;
+  }
+
+  // double click selects the word under the cursor
+  if (e.detail === 2) {
+    selectWordAtCursor(cursor, doc.blocks);
+    return;
+  }
+
   setVisualSelection({ start: cursor, end: null });
+  syncModelSelection();
+}
+
+// \p{L}/\p{N} (rather than \w) so double-click word selection works for
+// accented and non-Latin scripts, not just ASCII letters/digits
+const WORD_CHAR = /[\p{L}\p{N}_']/u;
+
+// the character immediately before (dir -1) or after (dir 1) a cursor,
+// peeking into the adjacent span if the cursor sits at a span boundary
+// (e.g. a word split across a style change). does not cross line/block
+// boundaries, since those already fall on natural word breaks
+function charAt(
+  blocks: VisualBlock[],
+  cursor: VisualCursor,
+  dir: 1 | -1
+): string | undefined {
+  const line = blocks[cursor.blockI]?.lines[cursor.lineI];
+  if (!line) return undefined;
+
+  let spanI = cursor.spanI;
+  let idx = dir === 1 ? cursor.charI : cursor.charI - 1;
+
+  if (idx < 0) {
+    if (spanI === 0) return undefined; // start of line
+    spanI--;
+    idx = line.spans[spanI].text.length - 1;
+  } else if (idx >= line.spans[spanI].text.length) {
+    if (spanI === line.spans.length - 1) return undefined; // end of line
+    spanI++;
+    idx = 0;
+  }
+
+  return line.spans[spanI].text[idx];
+}
+
+function isWordCharAt(
+  blocks: VisualBlock[],
+  cursor: VisualCursor,
+  dir: 1 | -1
+) {
+  const char = charAt(blocks, cursor, dir);
+  return char !== undefined && WORD_CHAR.test(char);
+}
+
+// walks in one direction while the adjacent char is a word char. stops if
+// moveCursorVisual ever fails to advance, to guard against an infinite loop
+function walkWhileWord(
+  blocks: VisualBlock[],
+  cursor: VisualCursor,
+  dir: 1 | -1
+) {
+  let pos = cursor;
+  while (isWordCharAt(blocks, pos, dir)) {
+    const next = moveCursorVisual(blocks, pos, dir);
+    if (fastIsEqual(next, pos)) break;
+    pos = next;
+  }
+  return pos;
+}
+
+// selects the word touching the click position by walking the visual
+// cursor left/right with moveCursorVisual -- clicking on a non-word
+// character (whitespace/punctuation) selects just that one character
+function selectWordAtCursor(cursor: VisualCursor, blocks: VisualBlock[]) {
+  const { setVisualSelection } = useEditorStore.getState();
+
+  if (!isWordCharAt(blocks, cursor, 1) && !isWordCharAt(blocks, cursor, -1)) {
+    const hasRight = charAt(blocks, cursor, 1) !== undefined;
+    setVisualSelection({
+      start: hasRight ? cursor : moveCursorVisual(blocks, cursor, -1),
+      end: hasRight ? moveCursorVisual(blocks, cursor, 1) : cursor,
+    });
+    syncModelSelection();
+    return;
+  }
+
+  setVisualSelection({
+    start: walkWhileWord(blocks, cursor, -1),
+    end: walkWhileWord(blocks, cursor, 1),
+  });
   syncModelSelection();
 }
 
