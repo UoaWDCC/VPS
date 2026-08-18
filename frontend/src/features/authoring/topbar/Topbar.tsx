@@ -35,6 +35,7 @@ function Topbar({ saving, save }: { saving: boolean; save: () => void }) {
   };
 
   const component = selected ? getComponent(selected) : null;
+  console.log(component?.document.blocks?.[0]?.spans?.[0]?.text?.length > 0)
 
   return (
     <>
@@ -94,7 +95,7 @@ function Topbar({ saving, save }: { saving: boolean; save: () => void }) {
             )}
 
             {/* text content styles */}
-            {component.type === "textbox" && (
+            {(component.type === "textbox" || component?.document.blocks?.[0]?.spans?.[0]?.text?.length > 0) && (
               <>
                 <div className="divider divider-horizontal" />
                 <TextSection />
