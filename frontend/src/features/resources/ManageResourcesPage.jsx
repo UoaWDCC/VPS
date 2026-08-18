@@ -308,7 +308,9 @@ export default function ManageResourcesPage() {
                                 <button
                                   className="btn btn-phantom btn-xs"
                                   disabled={isTemp(resource)}
-                                  onClick={() => {
+                                  onClick={(event) => {
+                                    event.preventDefault();
+                                    event.stopPropagation();
                                     pendingParentIdRef.current = resource._id;
                                     inputRef.current?.click();
                                   }}
