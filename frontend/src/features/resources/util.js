@@ -1,3 +1,9 @@
+export function getExtension(name) {
+  if (!name) return "";
+  const dotIndex = name.lastIndexOf(".");
+  return dotIndex <= 0 ? "" : name.slice(dotIndex).toLowerCase();
+}
+
 export function normaliseFile(resource) {
   return {
     _id: resource._id,
@@ -10,6 +16,7 @@ export function normaliseFile(resource) {
     fileType: resource.fileId?.type,
     contentType: resource.fileId?.contentType,
     size: resource.fileId?.size,
+    extension: getExtension(resource.fileId?.name),
   };
 }
 

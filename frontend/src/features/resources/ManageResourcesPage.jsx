@@ -392,12 +392,6 @@ export default function ManageResourcesPage() {
 }
 
 // Helper components
-function splitFileName(name) {
-  const dotIndex = name.lastIndexOf(".");
-  if (dotIndex <= 0) return { base: name, ext: "" };
-  return { base: name.slice(0, dotIndex), ext: name.slice(dotIndex) };
-}
-
 function ResourceNameField({
   resource,
   disabled,
@@ -406,10 +400,8 @@ function ResourceNameField({
   actions,
 }) {
   const [editing, setEditing] = useState(false);
-  const [value, setValue] = useState(() => splitFileName(resource.name).base);
+  const [value, setValue] = useState(resource.name);
   const inputRef = useRef(null);
-
-  const { ext } = splitFileName(resource.name);
 
   useEffect(() => {
     if (editing) {
@@ -420,17 +412,15 @@ function ResourceNameField({
   function startEditing(e) {
     e.stopPropagation();
     if (disabled) return;
-    setValue(splitFileName(resource.name).base);
+    setValue(resource.name);
     setEditing(true);
   }
 
   function commitEdit() {
     setEditing(false);
-    const trimmedBase = value.trim();
-    if (!trimmedBase) return;
-    const newName = `${trimmedBase}${ext}`;
-    if (newName === resource.name) return;
-    onRename(newName);
+    const trimmedName = value.trim();
+    if (!trimmedName || trimmedName === resource.name) return;
+    onRename(trimmedName);
   }
 
   function handleKeyDown(e) {
@@ -438,7 +428,7 @@ function ResourceNameField({
       e.preventDefault();
       inputRef.current?.blur();
     } else if (e.key === "Escape") {
-      setValue(splitFileName(resource.name).base);
+      setValue(resource.name);
       setEditing(false);
     }
   }
@@ -456,44 +446,34 @@ function ResourceNameField({
   return (
     <div className="grid items-center gap-1 overflow-hidden" style={rowStyle}>
       {editing ? (
-        <div className="flex min-w-0 items-center gap-1">
-          <input
-            ref={inputRef}
-            type="text"
-            className="input input-xs input-bordered min-w-0 flex-1"
-            style={{
-              "--input-color":
-                "color-mix(in oklab, var(--color-base-content) 20%, transparent)",
-              backgroundColor: "var(--color-base-100)",
-              borderColor:
-                "color-mix(in oklab, var(--color-base-content) 20%, transparent)",
-              color: "var(--color-base-content)",
-              boxShadow: "none",
-              outline: "none",
-              userSelect: "text",
-              WebkitUserSelect: "text",
-            }}
-            value={value}
-            maxLength={Math.max(RESOURCE_NAME_MAX_LENGTH - ext.length, 1)}
-            onChange={(e) => setValue(e.target.value)}
-            onBlur={commitEdit}
-            onKeyDown={handleKeyDown}
-            onClick={(e) => e.stopPropagation()}
-          />
-          {ext && (
-            <span
-              className="shrink-0 text--1 opacity-60"
-              title="File type can't be changed"
-            >
-              {ext}
-            </span>
-          )}
-        </div>
+        <input
+          ref={inputRef}
+          type="text"
+          className="input input-xs input-bordered min-w-0"
+          style={{
+            "--input-color":
+              "color-mix(in oklab, var(--color-base-content) 20%, transparent)",
+            backgroundColor: "var(--color-base-100)",
+            borderColor:
+              "color-mix(in oklab, var(--color-base-content) 20%, transparent)",
+            color: "var(--color-base-content)",
+            boxShadow: "none",
+            outline: "none",
+            userSelect: "text",
+            WebkitUserSelect: "text",
+          }}
+          value={value}
+          maxLength={RESOURCE_NAME_MAX_LENGTH}
+          onChange={(e) => setValue(e.target.value)}
+          onBlur={commitEdit}
+          onKeyDown={handleKeyDown}
+          onClick={(e) => e.stopPropagation()}
+        />
       ) : (
         <>
           <button
             type="button"
-            className={`btn btn-phantom btn-xs min-w-0 justify-start truncate px-0 text--1 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary ${isTemp(resource) ? "text-primary" : ""}`}
+            className={`min-w-0 truncate bg-transparent px-0 text-left text--1 border-none cursor-pointer disabled:cursor-not-allowed focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary ${isTemp(resource) ? "text-primary" : ""}`}
             title={resource.name}
             onClick={onSelect}
             disabled={disabled}

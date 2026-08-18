@@ -9,7 +9,19 @@ async function loadText(url) {
   });
 }
 
-async function downloadFile(url, name) {
+function fileTypeLabel(file) {
+  if (file.extension) return file.extension.slice(1).toUpperCase();
+  const subtype = file.contentType?.split("/")[1];
+  return subtype ? subtype.toUpperCase() : null;
+}
+
+function downloadFilename(name, extension) {
+  const trimmed = name?.trim() || "";
+  if (!extension || trimmed.toLowerCase().endsWith(extension)) return trimmed;
+  return `${trimmed}${extension}`;
+}
+
+async function downloadFile(url, name, extension) {
   const res = await fetch(url);
   if (!res.ok) throw new Error(`failed to load file (${res.status})`);
   const blob = await res.blob();
@@ -17,7 +29,7 @@ async function downloadFile(url, name) {
 
   const link = document.createElement("a");
   link.href = blobUrl;
-  link.download = name || "";
+  link.download = downloadFilename(name, extension);
   document.body.appendChild(link);
   link.click();
 
@@ -52,16 +64,27 @@ function ResourcePreview({ file }) {
   const isImage = file.fileType === "image";
   const isText = canPreviewText;
   const isPDF = file.contentType === "application/pdf";
+  const typeLabel = fileTypeLabel(file);
 
   return (
     <div className="flex h-full min-h-0 flex-col gap-3 p-3 font-ibm">
       <div className="flex items-start justify-between gap-2">
-        <h3 className="text-m min-w-0 break-all">{file.name}</h3>
+        <div className="flex min-w-0 flex-wrap items-center gap-2">
+          <h3 className="text-m min-w-0 break-all">{file.name}</h3>
+          {typeLabel && (
+            <span
+              className="badge badge-ghost badge-sm shrink-0"
+              title={`File type: ${typeLabel}`}
+            >
+              {typeLabel}
+            </span>
+          )}
+        </div>
         <button
           type="button"
           className="btn btn-phantom btn-xs shrink-0"
           onClick={() =>
-            downloadFile(file.url, file.name).catch((err) => {
+            downloadFile(file.url, file.name, file.extension).catch((err) => {
               console.error("Failed to download file:", err);
               toast.error("Failed to download file. Please try again.");
             })
