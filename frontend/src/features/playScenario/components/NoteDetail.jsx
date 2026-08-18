@@ -18,8 +18,8 @@ export default function NoteDetail({
   const [showConfirm, setShowConfirm] = useState(false);
 
   const canEdit = !!(userRole && note?.role === userRole);
-  const authorName =
-    group?.users?.find((u) => u.role === note?.role)?.name ?? note?.role ?? "-";
+  const authorUser = group?.users?.find((u) => u.role === note?.role);
+const authorName = authorUser ? `${note?.role} - ${authorUser.name}` : note?.role ?? "-";
 
   useEffect(() => {
     if (!note) return;
