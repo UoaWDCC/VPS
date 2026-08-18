@@ -137,55 +137,17 @@ export const createScene = async (scenarioId, scene) => {
 
   const fileRefDeltas = computeCreateFileRefDeltas(scene.components);
   const dbScene = new Scene(scene);
-  let scenarioUpdateSucceeded = false;
-  let fileReferenceUpdateSucceeded = false;
 
-  try {
-    await dbScene.save();
+  await dbScene.save();
 
-    const scenarioUpdate = await Scenario.updateOne(
-      { _id: scenarioId },
-      { $push: { scenes: dbScene._id } }
-    );
+  await Scenario.updateOne(
+    { _id: scenarioId },
+    { $push: { scenes: dbScene._id } }
+  );
 
-    if (scenarioUpdate.matchedCount === 0) {
-      throw new HttpError("scenario not found", status.NOT_FOUND);
-    }
-    scenarioUpdateSucceeded = true;
+  await applyReferenceDeltas(fileRefDeltas);
 
-    fileReferenceUpdateSucceeded = await applyReferenceDeltas(fileRefDeltas);
-    if (!fileReferenceUpdateSucceeded) {
-      throw new Error("scene file reference updates failed");
-    }
-
-    return dbScene;
-  } catch (error) {
-    if (!dbScene._id) throw error;
-
-    if (scenarioUpdateSucceeded) {
-      await Scenario.updateOne(
-        { _id: scenarioId },
-        { $pull: { scenes: dbScene._id } }
-      ).catch(() => {});
-    }
-
-    if (dbScene._id && !scenarioUpdateSucceeded) {
-      await Scene.deleteOne({ _id: dbScene._id }).catch(() => {});
-    }
-
-    if (fileReferenceUpdateSucceeded && scenarioUpdateSucceeded) {
-      await applyReferenceDeltas(
-        new Map(
-          Array.from(fileRefDeltas.entries()).map(([fileId, delta]) => [
-            fileId,
-            -delta,
-          ])
-        )
-      ).catch(() => {});
-    }
-
-    throw error;
-  }
+  return dbScene;
 };
 
 /**
