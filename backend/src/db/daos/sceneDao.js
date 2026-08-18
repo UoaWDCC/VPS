@@ -83,6 +83,48 @@ const assertDirectLinkInScenario = async (scenarioId, directLinkId) => {
   }
 };
 
+// A scene's direct link defaults to responding to Space/ArrowRight when no
+// directLinkKey is set. Mirrors directLinkKeysFor in
+// frontend/src/features/authoring/keyBindings.ts.
+const DEFAULT_DIRECT_LINK_KEYS = ["SPACE", "ARROWRIGHT"];
+
+const directLinkKeysFor = (directLinkKey) => {
+  if (directLinkKey == null) return DEFAULT_DIRECT_LINK_KEYS;
+  if (!directLinkKey) return [];
+  return [directLinkKey];
+};
+
+// Enforce that no two clickable components, and no component and the scene's
+// direct link, claim the same key. The authoring UI already filters pickers
+// to avoid this, but that only guards the flows that go through those
+// pickers - this is the backstop at the point scenes are actually saved.
+const assertUniqueKeyBindings = (components, directLink, directLinkKey) => {
+  const claimedBy = new Map();
+
+  (components ?? []).forEach((c) => {
+    if (!c.clickable || !c.keyBinding) return;
+    const priorClaimant = claimedBy.get(c.keyBinding);
+    if (priorClaimant && priorClaimant !== c.id) {
+      throw new HttpError(
+        `Key binding "${c.keyBinding}" is claimed by more than one component`,
+        status.BAD_REQUEST
+      );
+    }
+    claimedBy.set(c.keyBinding, c.id);
+  });
+
+  if (directLink) {
+    directLinkKeysFor(directLinkKey).forEach((key) => {
+      if (claimedBy.has(key)) {
+        throw new HttpError(
+          `Key binding "${key}" is claimed by both a component and the scene's direct link`,
+          status.BAD_REQUEST
+        );
+      }
+    });
+  }
+};
+
 /**
  * Creates a scene in the database, and updates its parent scenario to contain the scene
  * @param {String} scenarioId MongoDB ID of parent scenario
@@ -91,6 +133,11 @@ const assertDirectLinkInScenario = async (scenarioId, directLinkId) => {
  */
 const createScene = async (scenarioId, scene) => {
   await assertDirectLinkInScenario(scenarioId, scene.directLink);
+  assertUniqueKeyBindings(
+    scene.components,
+    scene.directLink,
+    scene.directLinkKey
+  );
   const dbScene = new Scene(scene);
   await dbScene.save();
 
@@ -236,6 +283,7 @@ const duplicateScene = async (scenarioId, sceneId) => {
     components: sceneToCopy.components,
     time: sceneToCopy.time,
     directLink: sceneToCopy.directLink ?? null,
+    directLinkKey: sceneToCopy.directLinkKey ?? null,
   };
   const dbScene = new Scene(newScene);
   await dbScene.save();
@@ -308,22 +356,70 @@ const updateSceneOrder = async (scenarioId, sceneIds) => {
 const patchScene = async (sceneId, patch, scenarioId) => {
   const { fields = {}, components = [], deletedComponentIds = [] } = patch;
 
+  // A component can't be both deleted and updated in the same patch - the
+  // $pull/$push bulkWrite below would actually resurrect it (re-inserted by
+  // the "insert if it doesn't already exist" op after $pull removes it),
+  // silently diverging from what gets validated as "effective" below.
+  const deletedAndUpdated = components
+    .map((c) => c.id)
+    .filter((id) => deletedComponentIds.includes(id));
+  if (deletedAndUpdated.length > 0) {
+    throw new HttpError(
+      `Component(s) ${deletedAndUpdated.join(", ")} cannot be both deleted and updated in the same patch`,
+      status.BAD_REQUEST
+    );
+  }
+
+  // Keep this list in sync with the field list in generatePatch,
+  // frontend/src/context/SceneContextProvider.jsx - a field missing from
+  // either side either gets silently dropped here or never sent from there.
   const allowedFields = {};
-  ["name", "roles", "time", "directLink", "timerStateOperations"].forEach(
-    (field) => {
-      if (Object.prototype.hasOwnProperty.call(fields, field)) {
-        allowedFields[field] = fields[field];
-      }
+  [
+    "name",
+    "roles",
+    "time",
+    "directLink",
+    "directLinkKey",
+    "timerStateOperations",
+  ].forEach((field) => {
+    if (Object.prototype.hasOwnProperty.call(fields, field)) {
+      allowedFields[field] = fields[field];
     }
-  );
+  });
 
   if ("directLink" in allowedFields) {
     await assertDirectLinkInScenario(scenarioId, allowedFields.directLink);
   }
 
-  const existingScene = await Scene.findById(sceneId, { components: 1 });
+  const existingScene = await Scene.findById(sceneId, {
+    components: 1,
+    directLink: 1,
+    directLinkKey: 1,
+  });
   if (!existingScene)
     throw new HttpError("scene not found", HttpStatusCode.NotFound);
+
+  const effectiveComponents = existingScene.components
+    .filter((c) => !deletedComponentIds.includes(c.id))
+    .map((c) => components.find((uc) => uc.id === c.id) ?? c)
+    .concat(
+      components.filter(
+        (uc) => !existingScene.components.some((c) => c.id === uc.id)
+      )
+    );
+  const effectiveDirectLink =
+    "directLink" in allowedFields
+      ? allowedFields.directLink
+      : existingScene.directLink;
+  const effectiveDirectLinkKey =
+    "directLinkKey" in allowedFields
+      ? allowedFields.directLinkKey
+      : existingScene.directLinkKey;
+  assertUniqueKeyBindings(
+    effectiveComponents,
+    effectiveDirectLink,
+    effectiveDirectLinkKey
+  );
 
   const fileRefDeltas = computePatchFileRefDeltas(
     existingScene.components,
