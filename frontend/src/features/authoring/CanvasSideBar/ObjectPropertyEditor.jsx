@@ -1,4 +1,5 @@
 import { getBoxCenter, translate } from "../../authoring/util";
+import { resizeByWidth, resizeByHeight } from "../../authoring/handlers/pointer/resize";
 import { useEffect, useState, useRef } from "react";
 import { modifyComponentProp } from "../scene/operations/component";
 import {
@@ -140,21 +141,25 @@ export function ObjectPropertyEditor({ component }) {
       );
       // increase bottom y to expand height and same idea with x
     } else if (type === "width") {
-      modifyComponentProp(component.id, "bounds.verts", (prev) => {
-        return [
-          prev[0],
-          { x: prev[0].x + value, y: prev[1].y },
-          prev[2],
-        ].filter(Boolean);
-      });
+      modifyComponentProp(component.id, "bounds.verts", (prev) => resizeByWidth(prev, value, component.bounds.rotation || 0)
+      // {
+      //   return [
+      //     prev[0],
+      //     { x: prev[0].x + value, y: prev[1].y },
+      //     prev[2],
+      //   ].filter(Boolean);
+      // }
+      );
     } else if (type === "height") {
-      modifyComponentProp(component.id, "bounds.verts", (prev) => {
-        return [
-          prev[0],
-          { x: prev[1].x, y: prev[0].y + value },
-          prev[2],
-        ].filter(Boolean);
-      });
+      modifyComponentProp(component.id, "bounds.verts", (prev) => resizeByHeight(prev, value, component.bounds.rotation || 0)
+      // {
+      //   return [
+      //     prev[0],
+      //     { x: prev[1].x, y: prev[0].y + value },
+      //     prev[2],
+      //   ].filter(Boolean);
+      // }
+      );
     } else if (type === "rotation") {
       modifyComponentProp(component.id, "bounds.rotation", value % 360);
     }
