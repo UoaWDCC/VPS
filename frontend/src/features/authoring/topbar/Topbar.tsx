@@ -15,8 +15,16 @@ import { useState } from "react";
 import StateVariableMenu from "../../../components/StateVariables/StateVariableMenu";
 import ImageCreateMenu from "../images";
 import ShapeCreateMenu from "./ShapeCreateMenu";
-
+import type { Component } from "../types";
 import "./topbar.css";
+
+function hasDocument(component: Component): boolean {
+  return (
+    "document" in component &&
+    !!component.document &&
+    component?.document.blocks?.[0]?.spans?.[0]?.text?.length > 0
+  );
+}
 
 function Topbar({ saving, save }: { saving: boolean; save: () => void }) {
   const selected = useEditorStore((state) => state.selected);
@@ -35,7 +43,6 @@ function Topbar({ saving, save }: { saving: boolean; save: () => void }) {
   };
 
   const component = selected ? getComponent(selected) : null;
-  console.log(component?.document.blocks?.[0]?.spans?.[0]?.text?.length > 0)
 
   return (
     <>
@@ -95,7 +102,7 @@ function Topbar({ saving, save }: { saving: boolean; save: () => void }) {
             )}
 
             {/* text content styles */}
-            {(component.type === "textbox" || component?.document.blocks?.[0]?.spans?.[0]?.text?.length > 0) && (
+            {(component.type === "textbox" || hasDocument(component)) && (
               <>
                 <div className="divider divider-horizontal" />
                 <TextSection />
