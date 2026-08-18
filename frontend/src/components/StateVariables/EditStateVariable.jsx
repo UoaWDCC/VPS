@@ -8,6 +8,12 @@ import SelectInput from "../../features/authoring/components/Select";
 import { stateTypes } from "./stateTypes";
 import { arrayToObject } from "../../features/authoring/scene/util";
 
+const TYPE_LABELS = {
+  string: "Text",
+  number: "Number",
+  boolean: "True/False",
+};
+
 const EditStateVariable = ({ stateVariable, scenarioId }) => {
   const { user } = useContext(AuthenticationContext);
   const { setStateVariables } = useContext(ScenarioContext);
@@ -155,6 +161,7 @@ const EditStateVariable = ({ stateVariable, scenarioId }) => {
             <SelectInput
               value={newType}
               values={["string", "number", "boolean"]}
+              display={(val) => TYPE_LABELS[val] ?? val}
               onChange={setNewType}
             />
           </div>

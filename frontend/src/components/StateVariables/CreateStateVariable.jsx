@@ -6,6 +6,12 @@ import toast from "react-hot-toast";
 import ScenarioContext from "../../context/ScenarioContext";
 import SelectInput from "../../features/authoring/components/Select";
 
+const TYPE_LABELS = {
+  string: "Text",
+  number: "Number",
+  boolean: "True/False",
+};
+
 const DEFAULT_STATE_TYPE = stateTypes.STRING;
 
 /**
@@ -79,6 +85,7 @@ const CreateStateVariable = ({ scenarioId }) => {
           <SelectInput
             value={type}
             values={["string", "number", "boolean"]}
+            display={(val) => TYPE_LABELS[val] ?? val}
             onChange={setType}
           />
         </div>
