@@ -5,7 +5,7 @@ import UploadedFile from "../models/uploadedFile.js";
  * @param {Map<string, number>} fileRefDeltas Map of file ID to delta to increment by
  * @returns {Promise<void>}
  */
-export async function applyReferenceDeltas(fileRefDeltas, { session } = {}) {
+export async function applyReferenceDeltas(fileRefDeltas) {
   if (fileRefDeltas.size === 0) return;
 
   const fileOperations = Array.from(fileRefDeltas.entries())
@@ -27,7 +27,7 @@ export async function applyReferenceDeltas(fileRefDeltas, { session } = {}) {
     }));
 
   if (fileOperations.length > 0) {
-    await UploadedFile.bulkWrite(fileOperations, { ordered: false, session });
+    await UploadedFile.bulkWrite(fileOperations, { ordered: false });
   }
 }
 

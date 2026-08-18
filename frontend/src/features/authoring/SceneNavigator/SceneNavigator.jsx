@@ -64,6 +64,7 @@ const SceneNavigator = () => {
   );
 
   const sceneIds = scenes.map((s) => s._id);
+  const activeScene = scenes.find((scene) => scene._id === activeId);
   const activeIndexDragging = activeIdDragging
     ? sceneIds.indexOf(activeIdDragging)
     : -1;
@@ -114,10 +115,10 @@ const SceneNavigator = () => {
             </ul>
           </div>
           <div className="flex-1 p-4 bg-base-100">
-            {scenes.find((s) => s._id === activeId) && (
+            {activeScene && (
               <Thumbnail
-                components={scenes.find((s) => s._id === activeId).components}
-                background={scenes.find((s) => s._id === activeId).background}
+                components={activeScene.components}
+                background={activeScene.background}
               />
             )}
           </div>

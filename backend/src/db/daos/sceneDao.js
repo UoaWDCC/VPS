@@ -392,101 +392,88 @@ const patchScene = async (sceneId, patch, scenarioId) => {
     );
   }
 
-  const session = await Scene.startSession();
-  let updatedScene;
+  const existingScene = await Scene.findById(sceneId, {
+    components: 1,
+    background: 1,
+  });
+  if (!existingScene) {
+    throw new HttpError("scene not found", HttpStatusCode.NotFound);
+  }
 
-  try {
-    // withTransaction retries the callback for transient transaction conflicts.
-    // Keep the read and delta calculation inside so every attempt uses current state.
-    await session.withTransaction(async () => {
-      const existingScene = await Scene.findById(
-        sceneId,
-        { components: 1, background: 1 },
-        { session }
-      );
-      if (!existingScene) {
-        throw new HttpError("scene not found", HttpStatusCode.NotFound);
-      }
+  const fileRefDeltas = computePatchFileRefDeltas(
+    existingScene.components,
+    components,
+    deletedComponentIds
+  );
+  if (Object.prototype.hasOwnProperty.call(allowedFields, "background")) {
+    addBackgroundPatchFileRefDeltas(
+      fileRefDeltas,
+      existingScene.background,
+      allowedFields.background
+    );
+  }
 
-      const fileRefDeltas = computePatchFileRefDeltas(
-        existingScene.components,
-        components,
-        deletedComponentIds
-      );
-      if (Object.prototype.hasOwnProperty.call(allowedFields, "background")) {
-        addBackgroundPatchFileRefDeltas(
-          fileRefDeltas,
-          existingScene.background,
-          allowedFields.background
-        );
-      }
+  const operations = [];
 
-      const operations = [];
+  if (Object.keys(allowedFields).length > 0) {
+    operations.push({
+      updateOne: {
+        filter: { _id: sceneId },
+        update: { $set: allowedFields },
+      },
+    });
+  }
 
-      if (Object.keys(allowedFields).length > 0) {
-        operations.push({
-          updateOne: {
-            filter: { _id: sceneId },
-            update: { $set: allowedFields },
+  if (deletedComponentIds.length > 0) {
+    operations.push({
+      updateOne: {
+        filter: { _id: sceneId },
+        update: {
+          $pull: {
+            components: { id: { $in: deletedComponentIds } },
           },
-        });
-      }
+        },
+      },
+    });
+  }
 
-      if (deletedComponentIds.length > 0) {
-        operations.push({
-          updateOne: {
-            filter: { _id: sceneId },
-            update: {
-              $pull: {
-                components: { id: { $in: deletedComponentIds } },
-              },
-            },
+  for (const component of components) {
+    operations.push({
+      updateOne: {
+        filter: {
+          _id: sceneId,
+          "components.id": component.id,
+        },
+        update: {
+          $set: {
+            "components.$": component,
           },
-        });
-      }
-
-      for (const component of components) {
-        operations.push({
-          updateOne: {
-            filter: {
-              _id: sceneId,
-              "components.id": component.id,
-            },
-            update: {
-              $set: {
-                "components.$": component,
-              },
-            },
-          },
-        });
-
-        operations.push({
-          updateOne: {
-            filter: {
-              _id: sceneId,
-              "components.id": { $ne: component.id },
-            },
-            update: {
-              $push: {
-                components: component,
-              },
-            },
-          },
-        });
-      }
-
-      if (operations.length > 0) {
-        await Scene.bulkWrite(operations, { ordered: true, session });
-      }
-
-      await applyReferenceDeltas(fileRefDeltas, { session });
-      updatedScene = await Scene.findById(sceneId).session(session);
+        },
+      },
     });
 
-    return updatedScene;
-  } finally {
-    await session.endSession();
+    operations.push({
+      updateOne: {
+        filter: {
+          _id: sceneId,
+          "components.id": { $ne: component.id },
+        },
+        update: {
+          $push: {
+            components: component,
+          },
+        },
+      },
+    });
   }
+
+  if (operations.length > 0) {
+    await Scene.bulkWrite(operations, { ordered: true });
+  }
+
+  await applyReferenceDeltas(fileRefDeltas);
+
+  return Scene.findById(sceneId);
 };
 
 export {

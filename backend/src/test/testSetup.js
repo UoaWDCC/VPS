@@ -1,4 +1,4 @@
-import { MongoMemoryReplSet } from "mongodb-memory-server";
+import { MongoMemoryServer } from "mongodb-memory-server";
 import mongoose from "mongoose";
 import { beforeAll, afterEach, afterAll } from "@jest/globals";
 
@@ -6,11 +6,9 @@ export function useMongoMemoryServer() {
   let mongoServer;
 
   beforeAll(async () => {
-    mongoServer = await MongoMemoryReplSet.create({
-      replSet: { count: 1, storageEngine: "wiredTiger" },
-    });
+    mongoServer = await MongoMemoryServer.create();
     await mongoose.connect(mongoServer.getUri());
-  }, 30000);
+  });
 
   afterEach(async () => {
     await mongoose.connection.db.dropDatabase();
@@ -19,7 +17,7 @@ export function useMongoMemoryServer() {
   afterAll(async () => {
     await mongoose.disconnect();
     await mongoServer.stop();
-  }, 30000);
+  });
 }
 
 export function useExpressServer(configureApp) {
