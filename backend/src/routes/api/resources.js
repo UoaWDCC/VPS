@@ -17,12 +17,6 @@ const router = Router();
 
 router.use(auth);
 
-function getExtension(name) {
-  const trimmed = name.trim();
-  const dotIndex = trimmed.lastIndexOf(".");
-  return dotIndex <= 0 ? "" : trimmed.slice(dotIndex).toLowerCase();
-}
-
 /**
  * @route GET /api/resources/:scenarioId
  * @desc Get all resources for a scenario
@@ -34,7 +28,7 @@ router.get(
     const { scenarioId } = req.params;
 
     const resources = await Resource.find({ scenarioId })
-      .populate("fileId", "url type contentType size")
+      .populate("fileId", "name url type contentType size")
       .sort({ parentId: 1, createdAt: -1 })
       .lean();
 
@@ -88,7 +82,7 @@ router.post(
       name,
       fileId,
     });
-    await resource.populate("fileId", "url type contentType size");
+    await resource.populate("fileId", "name url type contentType size");
 
     await applyReferenceDelta(fileId, 1);
 
@@ -188,24 +182,16 @@ router.patch(
         HttpStatusCode.BadRequest
       );
 
-    const existing = await Resource.findOne({ _id: resourceId, scenarioId });
-    if (!existing)
+    const resource = await Resource.findOneAndUpdate(
+      { _id: resourceId, scenarioId },
+      { name: trimmedName },
+      { new: true, runValidators: true }
+    ).populate("fileId", "name url type contentType size");
+
+    if (!resource)
       throw new HttpError("resource not found", HttpStatusCode.NotFound);
 
-    if (
-      existing.type === "file" &&
-      getExtension(trimmedName) !== getExtension(existing.name)
-    )
-      throw new HttpError(
-        "file extension cannot be changed",
-        HttpStatusCode.BadRequest
-      );
-
-    existing.name = trimmedName;
-    await existing.save();
-    await existing.populate("fileId", "url type contentType size");
-
-    return res.json(existing);
+    return res.json(resource);
   })
 );
 
@@ -224,7 +210,7 @@ router.post(
       { $push: { stateConditionals: stateConditional } },
       { new: true, runValidators: true }
     )
-      .populate("fileId", "url type contentType size")
+      .populate("fileId", "name url type contentType size")
       .lean();
 
     if (!resource)
@@ -253,7 +239,7 @@ router.put(
       { $set: { "stateConditionals.$": stateConditional } },
       { new: true, runValidators: true }
     )
-      .populate("fileId", "url type contentType size")
+      .populate("fileId", "name url type contentType size")
       .lean();
 
     if (!resource)
@@ -277,7 +263,7 @@ router.delete(
       { $pull: { stateConditionals: { _id: conditionalId } } },
       { new: true }
     )
-      .populate("fileId", "url type contentType size")
+      .populate("fileId", "name url type contentType size")
       .lean();
 
     if (!resource)
