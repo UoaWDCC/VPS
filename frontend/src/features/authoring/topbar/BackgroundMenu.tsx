@@ -21,7 +21,7 @@ import useVisualScene from "../stores/visual";
 import useEditorStore from "../stores/editor";
 import { getScene } from "../scene/scene";
 import { modifySceneProp } from "../scene/operations/modifiers";
-import { getImages, uploadImage } from "../imageFiles";
+import { getImages, uploadImage } from "../images";
 import type {
   BackgroundFit,
   ImageBackground,

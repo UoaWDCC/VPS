@@ -19,7 +19,7 @@ import AuthenticationContext from "../../context/AuthenticationContext.jsx";
 import SceneContext from "../../context/SceneContext.jsx";
 import { getScene, getSceneId } from "./scene/scene";
 import { v4 } from "uuid";
-import { getImages, uploadImage } from "./imageFiles";
+import { getImages, uploadImage } from "./images";
 
 type ModifyScene = (scene: Scene) => Promise<unknown> | undefined;
 
