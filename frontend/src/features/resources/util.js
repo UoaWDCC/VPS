@@ -5,7 +5,9 @@ export function isTemp(resource) {
 export function getExtension(name) {
   if (!name) return "";
   const dotIndex = name.lastIndexOf(".");
-  return dotIndex <= 0 ? "" : name.slice(dotIndex).toLowerCase();
+  return dotIndex <= 0 || dotIndex === name.length - 1
+    ? ""
+    : name.slice(dotIndex).toLowerCase();
 }
 
 export function normaliseFile(resource) {
