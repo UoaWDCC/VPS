@@ -29,6 +29,16 @@ auth.mockImplementation(async (req, res, next) => {
   next();
 });
 
+// notifyNextRole is fire-and-forget (not awaited by the request handler), so
+// the response can arrive before the mocked sendEmail call is recorded.
+const waitForMockCall = async (mockFn, timeoutMs = 1000) => {
+  const start = Date.now();
+  while (mockFn.mock.calls.length === 0) {
+    if (Date.now() - start > timeoutMs) return;
+    await new Promise((resolve) => setTimeout(resolve, 10));
+  }
+};
+
 describe("Navigate Group API tests", () => {
   useMongoMemoryServer();
   const ctx = useExpressServer(() => {
@@ -316,6 +326,8 @@ describe("Navigate Group API tests", () => {
     const dbGroup = await Group.findById(group._id);
     expect(dbGroup.path[0]).toBe(nurseScene._id.toString());
 
+    // Notification is fire-and-forget, so wait for the background call.
+    await waitForMockCall(sendEmail);
     expect(sendEmail).toHaveBeenCalledWith({
       to: "nurse@auckland.ac.nz",
       template: EmailTemplate.YOUR_TURN,

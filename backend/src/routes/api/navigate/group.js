@@ -174,8 +174,20 @@ const syncStateVariables = async (group) => {
 };
 
 // Emails the group member(s) whose role the new scene is for, letting them
-// know it's their turn. Never throws — a failed notification shouldn't block
-// navigation.
+// know it's their turn. Fire-and-forget (see call site in groupNavigate) —
+// never awaited on the navigation request, and never throws, so a slow or
+// failed notification can't delay or block navigation. Each send is bounded
+// so a stalled Resend request can't hang in the background indefinitely.
+const EMAIL_NOTIFICATION_TIMEOUT_MS = 10_000;
+
+const withTimeout = (promise, ms) => {
+  let timer;
+  const timeout = new Promise((_, reject) => {
+    timer = setTimeout(() => reject(new Error(`timed out after ${ms}ms`)), ms);
+  });
+  return Promise.race([promise, timeout]).finally(() => clearTimeout(timer));
+};
+
 const notifyNextRole = async (group, nextSceneId, currentRole) => {
   try {
     const nextScene = await Scene.findById(nextSceneId, { roles: 1 }).lean();
@@ -192,11 +204,14 @@ const notifyNextRole = async (group, nextSceneId, currentRole) => {
 
     await Promise.all(
       recipients.map((user) =>
-        sendEmail({
-          to: user.email,
-          template: EmailTemplate.YOUR_TURN,
-          data: { name: user.name, scenarioName: scenario?.name },
-        })
+        withTimeout(
+          sendEmail({
+            to: user.email,
+            template: EmailTemplate.YOUR_TURN,
+            data: { name: user.name, scenarioName: scenario?.name },
+          }),
+          EMAIL_NOTIFICATION_TIMEOUT_MS
+        )
       )
     );
   } catch (err) {
@@ -286,10 +301,11 @@ export const groupNavigate = async (req) => {
       removeFlagsFromGroup(group._id, removeFlags),
     ]);
 
-    // Runs before getConnectedScenes below, which throws FORBIDDEN when nextScene
-    // isn't for this user's role — the expected signal that they just handed off
-    // to a teammate. The notification must fire regardless of that throw.
-    await notifyNextRole(group, nextScene, role);
+    // Fire-and-forget: kicked off before getConnectedScenes below (which
+    // throws FORBIDDEN when nextScene isn't for this user's role — the
+    // expected signal that they just handed off to a teammate), but not
+    // awaited, so notification latency/failures never delay this response.
+    notifyNextRole(group, nextScene, role);
 
     scenes = await getConnectedScenes(nextScene, role, true);
   }
