@@ -61,6 +61,7 @@ export default function ResourceNameField({
         <input
           ref={inputRef}
           type="text"
+          aria-label={`Rename ${resource.name}`}
           className="input input-xs input-bordered min-w-0"
           style={{
             "--input-color":
