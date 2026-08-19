@@ -422,14 +422,6 @@ export default function PlayScenarioPage({ group }) {
           />
         </div>
       )}
-      {!audioAllowed && (
-        <div className="absolute top-4 left-4 z-30">
-          <button className="btn" onClick={() => setAudioAllowed(true)}>
-            <PlayIcon size={16} />
-            Enable Audio
-          </button>
-        </div>
-      )}
       <PlayScenarioCanvas
         scene={currScene}
         incrementor={isMultiplayer ? incrementor : undefined}
@@ -441,6 +433,29 @@ export default function PlayScenarioPage({ group }) {
       />
 
       <div className="absolute top-2 right-2 z-30 flex items-center gap-2">
+        {audioAllowed ? (
+          <div className="tooltip tooltip-bottom" data-tip="Disable audio">
+            <button
+              className="btn"
+              onClick={() => setAudioAllowed(false)}
+              type="button"
+              aria-label="Disable audio"
+            >
+              <Volume2Icon size={16} />
+            </button>
+          </div>
+        ) : (
+          <div className="tooltip tooltip-left" data-tip="Enable audio">
+            <button
+              className="btn"
+              onClick={() => setAudioAllowed(true)}
+              type="button"
+              aria-label="Enable audio"
+            >
+              <VolumeOffIcon size={16} />
+            </button>
+          </div>
+        )}
         {isMultiplayer && (
           <div className="tooltip tooltip-left" data-tip="Open notes">
             <button
