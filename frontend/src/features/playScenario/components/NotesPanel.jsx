@@ -50,7 +50,7 @@ export default function NotesPanel({ group, open, onClose }) {
     setError(null);
     try {
       const token = await getToken();
-      const { data } = await axios.get(`/api/note/retrieveAll/${group._id}`, {
+      const { data } = await axios.get(`/api/group/${group._id}/notes`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       const fetched = data || [];
@@ -93,12 +93,12 @@ export default function NotesPanel({ group, open, onClose }) {
       const token = await getToken();
       const prevIds = new Set(notes.map((n) => n._id));
       await axios.post(
-        "/api/note/",
-        { groupId: group._id, title: "New Note" },
+        `/api/group/${group._id}/notes`,
+        { title: "New Note" },
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
-      const { data } = await axios.get(`/api/note/retrieveAll/${group._id}`, {
+      const { data } = await axios.get(`/api/group/${group._id}/notes`, {
         headers: { Authorization: `Bearer ${await getToken()}` },
       });
       const fetched = data || [];

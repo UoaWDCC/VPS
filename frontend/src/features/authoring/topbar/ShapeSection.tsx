@@ -1,5 +1,6 @@
 import { PaintBucket, Pencil, RulerIcon } from "lucide-react";
 import ChromePicker from "../wrapper/ChromePicker";
+
 import useEditorStore from "../stores/editor";
 import { useEffect, useState } from "react";
 import { getComponent } from "../scene/scene";
@@ -12,15 +13,15 @@ interface ShapeProps {
   strokeWidth: number;
 }
 
-function extractProps(selected: string): ShapeProps {
-  const c = getComponent(selected) as unknown as ShapeProps;
+function extractProps(selected: string[]): ShapeProps {
+  const c = getComponent(selected[0]) as unknown as ShapeProps;
   return { fill: c.fill, stroke: c.stroke, strokeWidth: c.strokeWidth };
 }
 
 const widths = [1, 2, 3, 4, 8, 12, 16, 24];
 
 function ShapeSection() {
-  const selected = useEditorStore((state) => state.selected)!;
+  const selected = useEditorStore((state) => state.selected);
 
   const [props, setProps] = useState(extractProps(selected));
 

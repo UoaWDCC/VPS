@@ -4,18 +4,15 @@ import { useParams } from "react-router-dom";
 import { useHistory } from "react-router-dom";
 import { ArrowLeftIcon, PlusIcon, XIcon } from "lucide-react";
 import AddGroup from "./components/AddGroup";
+import ResourceNameField from "./components/ResourceNameField";
 import StateConditionalMenu from "../../components/StateVariables/StateConditionalMenu";
 import { api } from "../../util/api";
 import AuthenticationContext from "../../context/AuthenticationContext";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { filterTreeBySearch, normaliseFile } from "./util";
+import { filterTreeBySearch, isTemp, normaliseFile } from "./util";
 import { v4 as uuid } from "uuid";
 import ResourcePreview from "./ResourcePreview";
 import SkeletonBody from "./ResourcesSkeleton";
-
-function isTemp(resource) {
-  return resource._id.startsWith("temp.");
-}
 
 async function uploadFileResource(user, scenarioId, parentId, file) {
   const formData = new FormData();
@@ -44,6 +41,15 @@ async function createResourceCollection(user, scenarioId, name) {
 
 async function removeResource(user, scenarioId, resourceId) {
   await api.delete(user, `/api/resources/${scenarioId}/${resourceId}`);
+}
+
+async function renameResource(user, scenarioId, resourceId, name) {
+  const res = await api.patch(
+    user,
+    `/api/resources/${scenarioId}/${resourceId}`,
+    { name }
+  );
+  return res.data;
 }
 
 function buildResourceTree(resources) {
@@ -153,6 +159,27 @@ export default function ManageResourcesPage() {
     onSettled: () => queryClient.invalidateQueries(["resources", scenarioId]),
   });
 
+  const renameResourceMutation = useMutation({
+    mutationFn: ({ resourceId, name }) =>
+      renameResource(user, scenarioId, resourceId, name),
+    onMutate: async ({ resourceId, name }) => {
+      await queryClient.cancelQueries(["resources", scenarioId]);
+      const previous = queryClient.getQueryData(["resources", scenarioId]);
+      queryClient.setQueryData(["resources", scenarioId], (prev) =>
+        (prev ?? []).map((r) => (r._id === resourceId ? { ...r, name } : r))
+      );
+      return { previous };
+    },
+    onError: (e, _, context) => {
+      if (context?.previous) {
+        queryClient.setQueryData(["resources", scenarioId], context.previous);
+      }
+      console.error(e);
+      toast.error("Something went wrong renaming the resource");
+    },
+    onSettled: () => queryClient.invalidateQueries(["resources", scenarioId]),
+  });
+
   function goBack() {
     history.push(`/scenario/${scenarioId}`);
   }
@@ -187,7 +214,7 @@ export default function ManageResourcesPage() {
           ) : (
             <div className="grid grid-cols-1 gap-4 lg:h-full lg:min-h-0 lg:grid-cols-3">
               {/* LEFT: Groups and files */}
-              <div className="card min-h-[35dvh] bg-base-100 shadow-md lg:h-full lg:min-h-0">
+              <div className="card min-h-[35dvh] min-w-0 overflow-hidden bg-base-100 shadow-md lg:h-full lg:min-h-0">
                 <div className="card-body flex min-h-0 flex-col gap-4 px-0">
                   <h1 className="flex-none text-xl">Uploaded Resources</h1>
 
@@ -217,9 +244,9 @@ export default function ManageResourcesPage() {
                       </li>
                     )}
                     {filteredTree.map((resource) => (
-                      <li key={resource._id}>
+                      <li key={resource._id} className="overflow-hidden">
                         {resource.type === "collection" ? (
-                          <details>
+                          <details className="overflow-hidden">
                             <summary
                               className={`flex items-center ${isTemp(resource) ? "text-primary" : ""} ${selectedResource?._id === resource._id ? "bg-base-200" : ""}`}
                               onClick={() =>
@@ -227,7 +254,10 @@ export default function ManageResourcesPage() {
                                 setSelectedResourceId(resource._id)
                               }
                             >
-                              <span className="text--1 truncate">
+                              <span
+                                className="text--1 truncate"
+                                title={resource.name}
+                              >
                                 {resource.name}
                               </span>
                               <div className="flex items-center ml-auto">
@@ -255,63 +285,69 @@ export default function ManageResourcesPage() {
                               </div>
                             </summary>
 
-                            <ul>
+                            <ul className="overflow-hidden">
                               {resource.children.length === 0 && (
                                 <li className="opacity-60 p-2">No files yet</li>
                               )}
                               {resource.children.map((child) => (
-                                <li key={child._id}>
-                                  <div className="flex items-center justify-between">
-                                    <a
-                                      className={`min-w-0 flex-1 text--1 truncate ${isTemp(child) ? "text-primary" : ""}`}
-                                      onClick={() => {
-                                        if (!child._id.startsWith("temp."))
-                                          setSelectedResourceId(child._id);
-                                      }}
-                                    >
-                                      {child.name}
-                                    </a>
-                                    <button
-                                      className="btn btn-phantom btn-xs px-0"
-                                      onClick={(e) => {
-                                        e.stopPropagation();
-                                        deleteResourceMutation.mutate(
-                                          child._id
-                                        );
-                                      }}
-                                      title="Delete file"
-                                      disabled={isTemp(child)}
-                                    >
-                                      <XIcon size={16} />
-                                    </button>
-                                  </div>
+                                <li key={child._id} className="overflow-hidden">
+                                  <ResourceNameField
+                                    resource={child}
+                                    disabled={isTemp(child)}
+                                    onSelect={() =>
+                                      setSelectedResourceId(child._id)
+                                    }
+                                    onRename={(name) =>
+                                      renameResourceMutation.mutate({
+                                        resourceId: child._id,
+                                        name,
+                                      })
+                                    }
+                                    actions={
+                                      <button
+                                        className="btn btn-phantom btn-xs px-0"
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          deleteResourceMutation.mutate(
+                                            child._id
+                                          );
+                                        }}
+                                        title="Delete file"
+                                        disabled={isTemp(child)}
+                                      >
+                                        <XIcon size={16} />
+                                      </button>
+                                    }
+                                  />
                                 </li>
                               ))}
                             </ul>
                           </details>
                         ) : (
-                          <div className="flex items-center justify-between">
-                            <a
-                              className={`min-w-0 flex-1 text--1 truncate ${isTemp(resource) ? "text-primary" : ""}`}
-                              onClick={() => {
-                                if (!resource._id.startsWith("temp."))
-                                  setSelectedResourceId(resource._id);
-                              }}
-                            >
-                              {resource.name}
-                            </a>
-                            <button
-                              className="btn btn-phantom btn-xs px-0"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                deleteResourceMutation.mutate(resource._id);
-                              }}
-                              title="Delete file"
-                              disabled={isTemp(resource)}
-                            >
-                              <XIcon size={16} />
-                            </button>
-                          </div>
+                          <ResourceNameField
+                            resource={resource}
+                            disabled={isTemp(resource)}
+                            onSelect={() => setSelectedResourceId(resource._id)}
+                            onRename={(name) =>
+                              renameResourceMutation.mutate({
+                                resourceId: resource._id,
+                                name,
+                              })
+                            }
+                            actions={
+                              <button
+                                className="btn btn-phantom btn-xs px-0"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  deleteResourceMutation.mutate(resource._id);
+                                }}
+                                title="Delete file"
+                                disabled={isTemp(resource)}
+                              >
+                                <XIcon size={16} />
+                              </button>
+                            }
+                          />
                         )}
                       </li>
                     ))}

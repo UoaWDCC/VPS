@@ -7,7 +7,7 @@ export function handleCreateStart(_: React.MouseEvent, position: Vec2) {
   const { setSelected, setOffset, setMutationBounds } =
     useEditorStore.getState();
 
-  setSelected(null);
+  setSelected([]);
   setOffset(position);
   setMutationBounds({ verts: [position, position], rotation: 0 });
 }
@@ -25,6 +25,7 @@ export function handleCreateDrag(_: React.MouseEvent, position: Vec2) {
     useEditorStore.getState();
 
   const verts = [offset, position];
+
   if (createType === "speech") verts.push(getTailVert(verts));
   setMutationBounds((prev) => ({ ...prev, verts }));
   addMode("mutation");
@@ -33,7 +34,7 @@ export function handleCreateDrag(_: React.MouseEvent, position: Vec2) {
 export function handleCreateEnd() {
   const { mutationBounds, setMode, setSelected, createType } =
     useEditorStore.getState();
-  const id = createComponentFromBounds(createType!, mutationBounds);
-  setSelected(id);
+  const id = createComponentFromBounds(createType, mutationBounds);
+  setSelected([id]);
   setMode(["normal"]);
 }
