@@ -184,9 +184,6 @@ export function ObjectPropertyEditor({ component }) {
                 onChange={(e) => {
                   saveProp(e.target.value, "width", setInputWidth);
                 }}
-                // onBlur={(e) => {
-                //   noFields(e.target.value, "width", setInputWidth);
-                // }}
               />
               <input
                 className="input flex-1 min-w-0"
@@ -194,9 +191,6 @@ export function ObjectPropertyEditor({ component }) {
                 onChange={(e) => {
                   saveProp(e.target.value, "height", setInputHeight);
                 }}
-                // onBlur={(e) => {
-                //   noFields(e.target.value, "height", setInputHeight);
-                // }}
               />
             </div>
 
