@@ -1,30 +1,35 @@
 import Group from "../models/group.js";
-import Scene from "../models/scene.js";
+import { HttpError } from "../../util/error.js";
 
-const getGroup = async (groupId) => {
+/**
+ * Retrieves a group by its MongoDB ID.
+ *
+ * @param {string} groupId - MongoDB ID of the group.
+ * @returns {Promise<object|null>} The matching group object, or null if it does not exist.
+ */
+export const getGroup = async (groupId) => {
   const group = await Group.findById(groupId);
   return group;
 };
 
-const getGroupByScenarioId = async (SId) => {
+/**
+ * Retrieves all groups for a given scenario.
+ *
+ * @param {string} scenarioId - MongoDB ID of the parent scenario.
+ * @returns {Promise<Array<object>>} The database group objects for that scenario.
+ */
+export const getGroupByScenarioId = async (SId) => {
   return Group.find({ scenarioId: SId });
 };
 
-const getCurrentScene = async (groupId) => {
-  const group = await Group.findById(groupId);
-  const { path } = group;
-  if (!path.length) return null;
-  return Scene.findById(path[path.length - 1]);
-};
-
 /**
- * Creates a group in the database,
- * @param {Map{String: String}} map of user_id: role
- * @param {Map{String: Array}} map of role: array of notes
- * @param {Array[String]} array of scene
- * @returns the created database group object
+ * Creates a group in the database.
+ *
+ * @param {string} scenarioId - MongoDB ID of the parent scenario.
+ * @param {Array<object>} userList - List of user entries for the group.
+ * @returns {Promise<object>} The created group document.
  */
-const createGroup = async (scenarioId, userList) => {
+export const createGroup = async (scenarioId, userList) => {
   const dbGroup = new Group({
     users: userList,
     notes: new Map(),
@@ -36,13 +41,14 @@ const createGroup = async (scenarioId, userList) => {
 };
 
 /**
- * Removes a single user from a group's member list by email
- * @param {String} groupId MongoDB ID of group
- * @param {String} scenarioId ID of the scenario the group must belong to
- * @param {String} email email of the user to remove
- * @returns the updated group object, or null if no matching group exists
+ * Removes a single user from a group's member list by email.
+ *
+ * @param {string} groupId - MongoDB ID of the group.
+ * @param {string} scenarioId - ID of the scenario the group must belong to.
+ * @param {string} email - Email address of the user to remove.
+ * @returns {Promise<object|null>} The updated group document, or null if no matching group exists.
  */
-const removeUserFromGroup = async (groupId, scenarioId, email) => {
+export const removeUserFromGroup = async (groupId, scenarioId, email) => {
   const escapedEmail = email.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
   const group = await Group.findOneAndUpdate(
     { _id: groupId, scenarioId },
@@ -57,35 +63,25 @@ const removeUserFromGroup = async (groupId, scenarioId, email) => {
 };
 
 /**
- * Sets the state variables for a group
- * @param {String} groupId MongoDB ID of group
- * @param {Object} stateVariables Object containing state variables
- * @returns updated group object with state variables set
+ * Sets the state variables for a group.
+ *
+ * @param {string} groupId - MongoDB ID of the group.
+ * @param {object} stateVariables - Object containing the state variables to set.
+ * @returns {Promise<Array>} A tuple containing the updated state variables and version.
  */
-const setGroupStateVariables = async (groupId, stateVariables) => {
-  try {
-    const group = await Group.findOneAndUpdate(
-      { _id: groupId },
-      {
-        $set: { stateVariables },
-        $inc: { stateVersion: 1 },
-      },
-      { new: true }
-    );
-    if (!group) {
-      throw new Error("Group not found");
-    }
-    return [group.stateVariables, group.stateVersion];
-  } catch (error) {
-    throw new Error(`Error initiating state variables: ${error.message}`);
-  }
-};
+export const setGroupStateVariables = async (groupId, stateVariables) => {
+  const group = await Group.findOneAndUpdate(
+    { _id: groupId },
+    {
+      $set: { stateVariables },
+      $inc: { stateVersion: 1 },
+    },
+    { new: true }
+  );
 
-export {
-  getGroup,
-  getCurrentScene,
-  createGroup,
-  getGroupByScenarioId,
-  removeUserFromGroup,
-  setGroupStateVariables,
+  if (!group) {
+    throw new HttpError("group not found", 404);
+  }
+
+  return [group.stateVariables, group.stateVersion];
 };
