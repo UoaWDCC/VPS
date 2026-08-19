@@ -11,7 +11,12 @@ import PlayScenarioCanvas from "./PlayScenarioCanvas";
 import { applyPropertyOperations } from "../../components/Properties/propertyOperations";
 import NotesPanel from "./components/NotesPanel";
 import SceneTimer from "./components/SceneTimer";
-import { PlayIcon } from "lucide-react";
+import {
+  BookMarkedIcon,
+  NotebookPenIcon,
+  Volume2Icon,
+  VolumeOffIcon,
+} from "lucide-react";
 import ResourcesOverlay from "../resources/ResourcesOverlay";
 
 const sceneCache = new Map();
@@ -437,21 +442,27 @@ export default function PlayScenarioPage({ group }) {
 
       <div className="absolute top-2 right-2 z-30 flex items-center gap-2">
         {isMultiplayer && (
-          <button
-            className="btn btn-sm"
-            onClick={() => setNoteOpen(true)}
-            aria-label="Open notes"
-          >
-            Notes
-          </button>
+          <div className="tooltip tooltip-left" data-tip="Open notes">
+            <button
+              className="btn"
+              onClick={() => setNoteOpen(true)}
+              type="button"
+              aria-label="Open notes"
+            >
+              <NotebookPenIcon size={16} />
+            </button>
+          </div>
         )}
-        <button
-          className="btn btn-sm"
-          onClick={() => setResourcesOpen(true)}
-          aria-label="Open resources"
-        >
-          Resources
-        </button>
+        <div className="tooltip tooltip-left" data-tip="Open resources">
+          <button
+            className="btn"
+            onClick={() => setResourcesOpen(true)}
+            type="button"
+            aria-label="Open resources"
+          >
+            <BookMarkedIcon size={16} />
+          </button>
+        </div>
       </div>
 
       {isMultiplayer && (
