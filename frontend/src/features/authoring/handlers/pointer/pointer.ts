@@ -8,7 +8,11 @@ import {
   parseHit,
   syncModelSelection,
 } from "../../text/cursor";
-import type { VisualBlock, VisualCursor, VisualDocument } from "../../text/types";
+import type {
+  VisualBlock,
+  VisualCursor,
+  VisualDocument,
+} from "../../text/types";
 import type { Component, Vec2 } from "../../types";
 import {
   divide,
