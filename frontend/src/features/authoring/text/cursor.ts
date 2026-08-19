@@ -296,7 +296,8 @@ export function moveCursorVisual(
         spanI < line.spans.length - 1 &&
         !(
           spanI === line.spans.length - 2 &&
-          line.spans[spanI + 1].text.length === 1
+          line.spans[spanI + 1].text.length === 1 &&
+          lineI < block.lines.length - 1
         )
       ) {
         spanI++;

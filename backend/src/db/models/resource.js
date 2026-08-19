@@ -1,5 +1,7 @@
 import { model, Schema } from "mongoose";
 
+export const RESOURCE_NAME_MAX_LENGTH = 255;
+
 const resourceSchema = new Schema(
   {
     scenarioId: {
@@ -19,7 +21,12 @@ const resourceSchema = new Schema(
       enum: ["file", "collection"],
       required: true,
     },
-    name: { type: String, required: true },
+    name: {
+      type: String,
+      required: true,
+      trim: true,
+      maxlength: RESOURCE_NAME_MAX_LENGTH,
+    },
     fileId: {
       type: Schema.Types.ObjectId,
       ref: "UploadedFile",
