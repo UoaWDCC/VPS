@@ -29,42 +29,6 @@ export function handleResizeStart(e: React.MouseEvent) {
   setMode(["resize"]);
 }
 
-export function resizeByWidth(verts: Vec2[], newWidth: number, rotation: number) {
-  // const center = getBoxCenter(verts);
-  // const coords = [1, 0.5];
-  
-  // const rotatedPosition = {
-  //   x: verts[0].x + newWidth,
-  //   y: center.y
-  // };
-  
-  // const newPosition = rotate(
-  //   rotatedPosition,
-  //   center,
-  //   rotation
-  // );
-  
-  // return modifyVerts(verts, coords, newPosition);
-}
-
-export function resizeByHeight(verts: Vec2[], newHeight: number, rotation: number) {
-  const center = getBoxCenter(verts);
-  const coords = [0.5, 1];
-  
-  const rotatedPosition = {
-    x: center.x,
-    y: verts[0].y + newHeight
-  };
-  
-  const newPosition = rotate(
-    rotatedPosition,
-    center,
-    rotation
-  );
-  
-  return modifyVerts(verts, coords, newPosition);
-}
-
 export function handleResizeDrag(e: React.MouseEvent, position: Vec2) {
   const { addMode, setMutationBounds, selected } = useEditorStore.getState();
   addMode("mutation");

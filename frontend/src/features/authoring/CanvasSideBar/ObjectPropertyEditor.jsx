@@ -1,5 +1,4 @@
 import { getBoxCenter, translate } from "../../authoring/util";
-import { resizeByWidth, resizeByHeight } from "../../authoring/handlers/pointer/resize";
 import { useEffect, useState, useRef } from "react";
 import { modifyComponentProp } from "../scene/operations/component";
 import {
@@ -7,7 +6,6 @@ import {
   SquareCenterlineDashedVertical,
 } from "lucide-react";
 import { correct } from "../../authoring/util";
-
 
 export function ObjectPropertyEditor({ component }) {
   // x and y vals used for setting and current
@@ -53,11 +51,18 @@ export function ObjectPropertyEditor({ component }) {
   }, [component.bounds.verts, component.bounds.rotation]);
 
   const latestValues = useRef({});
-  latestValues.current = { inputX, inputY, inputWidth, inputHeight, inputAngle };
-  
+  latestValues.current = {
+    inputX,
+    inputY,
+    inputWidth,
+    inputHeight,
+    inputAngle,
+  };
+
   useEffect(() => {
     return () => {
-      const { inputX, inputY, inputWidth, inputHeight, inputAngle } = latestValues.current;
+      const { inputX, inputY, inputWidth, inputHeight, inputAngle } =
+        latestValues.current;
       noFields([
         [inputX, "x", setInputX],
         [inputY, "y", setInputY],
