@@ -6,6 +6,8 @@ import {
   SquareCenterlineDashedHorizontal,
   SquareCenterlineDashedVertical,
 } from "lucide-react";
+import { correct } from "../../authoring/util";
+
 
 export function ObjectPropertyEditor({ component }) {
   // x and y vals used for setting and current
@@ -141,25 +143,27 @@ export function ObjectPropertyEditor({ component }) {
       );
       // increase bottom y to expand height and same idea with x
     } else if (type === "width") {
-      modifyComponentProp(component.id, "bounds.verts", (prev) => resizeByWidth(prev, value, component.bounds.rotation || 0)
-      // {
-      //   return [
-      //     prev[0],
-      //     { x: prev[0].x + value, y: prev[1].y },
-      //     prev[2],
-      //   ].filter(Boolean);
-      // }
-      );
+      const rotation = component.bounds.rotation ?? 0;
+      modifyComponentProp(component.id, "bounds.verts", (prev) => {
+        const center = getBoxCenter(prev);
+        const newVerts = [
+          prev[0],
+          { x: prev[0].x + value, y: prev[1].y },
+          prev[2],
+        ].filter(Boolean);
+        return correct(newVerts, center, rotation);
+      });
     } else if (type === "height") {
-      modifyComponentProp(component.id, "bounds.verts", (prev) => resizeByHeight(prev, value, component.bounds.rotation || 0)
-      // {
-      //   return [
-      //     prev[0],
-      //     { x: prev[1].x, y: prev[0].y + value },
-      //     prev[2],
-      //   ].filter(Boolean);
-      // }
-      );
+      const rotation = component.bounds.rotation ?? 0;
+      modifyComponentProp(component.id, "bounds.verts", (prev) => {
+        const center = getBoxCenter(prev);
+        const newVerts = [
+          prev[0],
+          { x: prev[1].x, y: prev[0].y + value },
+          prev[2],
+        ].filter(Boolean);
+        return correct(newVerts, center, rotation);
+      });
     } else if (type === "rotation") {
       modifyComponentProp(component.id, "bounds.rotation", value % 360);
     }
