@@ -1,6 +1,10 @@
 import { useContext, useEffect, useState } from "react";
 import ScenarioContext from "context/ScenarioContext";
-import { getDefaultValue, stateTypes, validOperations } from "./stateTypes";
+import {
+  getDefaultValue,
+  propertyTypes,
+  validOperations,
+} from "./propertyTypes";
 import { modifySceneProp } from "../../features/authoring/scene/operations/modifiers";
 import SelectInput from "../../features/authoring/components/Select";
 import ModalDialog from "../ModalDialogue";
@@ -21,7 +25,7 @@ export function OperationField({
         value={operation}
         onChange={onOperationChange}
       />
-      {type === stateTypes.BOOLEAN ? (
+      {type === propertyTypes.BOOLEAN ? (
         <SelectInput
           values={[true, false]}
           value={value}
@@ -29,7 +33,7 @@ export function OperationField({
         />
       ) : (
         <input
-          type={type === stateTypes.STRING ? "text" : "number"}
+          type={type === propertyTypes.STRING ? "text" : "number"}
           value={value ?? ""}
           onChange={(e) => onValueChange(e.target.value)}
           onBlur={onValueBlur}
@@ -42,70 +46,73 @@ export function OperationField({
 }
 
 export default function CreateTimerOperationModal({ open, onClose }) {
-  const { stateVariables } = useContext(ScenarioContext);
+  const { properties } = useContext(ScenarioContext);
   const timerStateOperations = useVisualScene((s) => s.timerStateOperations);
 
-  const [selectedState, setSelectedState] = useState(null);
+  const [selectedProperty, setSelectedProperty] = useState(null);
   const [operation, setOperation] = useState(null);
   const [value, setValue] = useState(null);
 
   useEffect(() => {
     if (open) {
-      setSelectedState(null);
+      setSelectedProperty(null);
       setOperation(null);
       setValue(null);
     }
   }, [open]);
 
-  function onVariableChange(variable) {
-    setSelectedState(variable);
+  function onPropertyChange(property) {
+    setSelectedProperty(property);
     setOperation(null);
-    setValue(getDefaultValue(variable.type));
+    setValue(getDefaultValue(property.type));
   }
 
   function handleCreate() {
-    if (!selectedState?.id || !operation) return;
+    if (!selectedProperty?.id || !operation) return;
 
     modifySceneProp("timerStateOperations", [
       ...(timerStateOperations ?? []),
       {
-        stateVariableId: selectedState.id,
-        displayName: selectedState.name,
+        stateVariableId: selectedProperty.id,
+        displayName: selectedProperty.name,
         operation,
-        value: selectedState.type === stateTypes.NUMBER ? Number(value) : value,
+        value:
+          selectedProperty.type === propertyTypes.NUMBER
+            ? Number(value)
+            : value,
       },
     ]);
 
     onClose();
   }
 
-  const isSubmittable = selectedState && operation && value != null;
+  const isSubmittable = selectedProperty && operation && value != null;
 
   return (
     <ModalDialog
-      title="Add Timeout State Operation"
+      title="Add Timeout Property Operation"
       open={open}
       onClose={onClose}
     >
-      {!stateVariables?.length ? (
+      {!properties?.length ? (
         <div className="text-s">
-          No state variables found for this scenario. You can create some in the
-          &apos;State Variables&apos; menu in the toolbar above.
+          No properties found for this scenario. You can create some in the
+          &apos;Properties&apos; menu in the toolbar above.
         </div>
       ) : (
         <fieldset className="fieldset">
-          <label className="label">State Variable</label>
+          <label className="label">Property</label>
           <SelectInput
-            values={stateVariables}
-            value={selectedState}
-            display={(s) => s.name}
-            onChange={onVariableChange}
+            values={properties}
+            value={selectedProperty}
+            display={(p) => p.name}
+            onChange={onPropertyChange}
           />
-          {selectedState && (
+          {selectedProperty && (
             <>
               <label className="label">Operation</label>
               <OperationField
-                type={selectedState.type}
+                type={selectedProperty.type}
                 operation={operation}
                 value={value}
                 onOperationChange={setOperation}

@@ -6,7 +6,7 @@ import Ellipse from "../authoring/elements/Ellipse";
 import Box from "../authoring/elements/Box";
 import Image from "../authoring/elements/Image";
 import Line from "../authoring/elements/Line";
-import { resolveSceneBindings } from "../../components/StateVariables/componentBindings";
+import { resolveSceneBindings } from "../../components/Properties/componentBindings";
 import { useMemo } from "react";
 
 const componentMap = {
@@ -24,10 +24,10 @@ function resolve(component) {
   return null;
 }
 
-function injectStateVariables(scene, stateVariables) {
-  if (!stateVariables) return scene;
+function injectProperties(scene, properties) {
+  if (!properties) return scene;
 
-  const varMap = new Map(stateVariables.map((v) => [v.name, v.value]));
+  const varMap = new Map(properties.map((v) => [v.name, v.value]));
   const regex = /\$\$(.*?)\$\$/g;
 
   return {
@@ -175,12 +175,12 @@ function injectStateVariables(scene, stateVariables) {
 export default function PlayScenarioCanvas({
   scene,
   buttonPressed,
-  stateVariables,
+  properties,
 }) {
   const sceneToRender = useMemo(() => {
-    const boundScene = resolveSceneBindings(scene, stateVariables);
-    return injectStateVariables(boundScene, stateVariables);
-  }, [scene, stateVariables]);
+    const boundScene = resolveSceneBindings(scene, properties);
+    return injectProperties(boundScene, properties);
+  }, [scene, properties]);
 
   const components = Object.values(buildVisualScene(sceneToRender).components)
     .sort((a, b) => a.zIndex - b.zIndex)

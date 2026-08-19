@@ -1,4 +1,4 @@
-export const stateTypes = {
+export const propertyTypes = {
   STRING: "string",
   NUMBER: "number",
   BOOLEAN: "boolean",
@@ -6,11 +6,11 @@ export const stateTypes = {
 
 export const getDefaultValue = (type) => {
   switch (type) {
-    case stateTypes.STRING:
+    case propertyTypes.STRING:
       return "";
-    case stateTypes.NUMBER:
+    case propertyTypes.NUMBER:
       return 0;
-    case stateTypes.BOOLEAN:
+    case propertyTypes.BOOLEAN:
       return false;
     default:
       return "";
@@ -24,7 +24,7 @@ export const operations = {
 };
 
 export const validOperations = {
-  [stateTypes.STRING]: [operations.SET],
-  [stateTypes.NUMBER]: [operations.SET, operations.ADD, operations.SUBTRACT],
-  [stateTypes.BOOLEAN]: [operations.SET],
+  [propertyTypes.STRING]: [operations.SET],
+  [propertyTypes.NUMBER]: [operations.SET, operations.ADD, operations.SUBTRACT],
+  [propertyTypes.BOOLEAN]: [operations.SET],
 };

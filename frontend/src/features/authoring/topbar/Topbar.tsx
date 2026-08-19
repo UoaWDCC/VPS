@@ -12,7 +12,7 @@ import { getComponent } from "../scene/scene";
 import { undo, redo } from "../scene/history";
 import { bringToFront, sendToBack } from "../scene/operations/component";
 import { useState } from "react";
-import StateVariableMenu from "../../../components/StateVariables/StateVariableMenu";
+import PropertyMenu from "../../../components/Properties/PropertyMenu";
 import ImageCreateMenu from "../images";
 import ShapeCreateMenu from "./ShapeCreateMenu";
 
@@ -23,10 +23,10 @@ function Topbar({ saving, save }: { saving: boolean; save: () => void }) {
   const setMode = useEditorStore((state) => state.setMode);
   const setCreateType = useEditorStore((state) => state.setCreateType);
 
-  const [showSVMenu, setShowSVMenu] = useState(false);
+  const [showPropertyMenu, setShowPropertyMenu] = useState(false);
 
-  function toggleSVMenu() {
-    setShowSVMenu((prev) => !prev);
+  function togglePropertyMenu() {
+    setShowPropertyMenu((prev) => !prev);
   }
 
   const switchCreate = (type: string) => {
@@ -48,10 +48,10 @@ function Topbar({ saving, save }: { saving: boolean; save: () => void }) {
 
   return (
     <>
-      <StateVariableMenu show={showSVMenu} setShow={setShowSVMenu} />
+      <PropertyMenu show={showPropertyMenu} setShow={setShowPropertyMenu} />
       <ul className="topbar gap-0.5 menu menu-horizontal w-full bg-base-300 rounded-box p-1">
         <li className="text-xs">
-          <a onClick={toggleSVMenu}>State Variables</a>
+          <a onClick={togglePropertyMenu}>Properties</a>
         </li>
 
         <div className="divider divider-horizontal" />

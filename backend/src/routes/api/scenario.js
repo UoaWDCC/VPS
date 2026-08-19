@@ -4,17 +4,17 @@ import scenarioAuth from "../../middleware/scenarioAuth.js";
 
 import {
   createScenario,
-  createStateVariable,
+  createProperty,
   deleteScenario,
-  getStateVariables,
+  getProperties,
   retrieveScenario,
   retrieveScenarioList,
   retrieveRoleList,
   retrieveAccessibleScenarios,
   updateDurations,
   updateScenario,
-  editStateVariable,
-  deleteStateVariable,
+  editProperty,
+  deleteProperty,
   createRole,
   deleteRole,
 } from "../../db/daos/scenarioDao.js";
@@ -138,44 +138,44 @@ router.delete("/:scenarioId", async (req, res) => {
   }
 });
 
-// Get the state variables of a scenario
-router.get("/:scenarioId/stateVariables", async (req, res) => {
-  const scenario = await getStateVariables(req.params.scenarioId);
+// Get the properties of a scenario
+router.get("/:scenarioId/properties", async (req, res) => {
+  const scenario = await getProperties(req.params.scenarioId);
   res.status(HTTP_OK).json(scenario);
 });
 
-// Create a new state variable for a scenario
-router.post("/:scenarioId/stateVariables", async (req, res) => {
-  const { newStateVariable } = req.body;
-  let updatedStateVariables = await createStateVariable(
+// Create a new property for a scenario
+router.post("/:scenarioId/properties", async (req, res) => {
+  const { newProperty } = req.body;
+  let updatedProperties = await createProperty(
     req.params.scenarioId,
-    newStateVariable
+    newProperty
   );
 
-  res.status(HTTP_OK).json(updatedStateVariables);
+  res.status(HTTP_OK).json(updatedProperties);
 });
 
-// Edit a state variable for a scenario
-router.put("/:scenarioId/stateVariables", async (req, res) => {
-  const { originalName, newStateVariable } = req.body;
-  let updatedStateVariables = await editStateVariable(
+// Edit a property for a scenario
+router.put("/:scenarioId/properties", async (req, res) => {
+  const { originalName, newProperty } = req.body;
+  let updatedProperties = await editProperty(
     req.params.scenarioId,
     originalName,
-    newStateVariable
+    newProperty
   );
 
-  res.status(HTTP_OK).json(updatedStateVariables);
+  res.status(HTTP_OK).json(updatedProperties);
 });
 
-// Delete a state variable from a scenario
+// Delete a property from a scenario
 router.delete(
-  "/:scenarioId/stateVariables/:stateVariableIdentifier",
+  "/:scenarioId/properties/:propertyIdentifier",
   async (req, res) => {
-    let updatedStateVariables = await deleteStateVariable(
+    let updatedProperties = await deleteProperty(
       req.params.scenarioId,
-      req.params.stateVariableIdentifier
+      req.params.propertyIdentifier
     );
-    res.status(HTTP_OK).json(updatedStateVariables);
+    res.status(HTTP_OK).json(updatedProperties);
   }
 );
 

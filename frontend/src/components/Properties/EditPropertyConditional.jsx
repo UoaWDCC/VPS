@@ -1,38 +1,42 @@
 import { useContext, useEffect, useState } from "react";
 import ScenarioContext from "../../context/ScenarioContext";
 import SelectInput from "../../features/authoring/components/Select";
-import { stateTypes, validComparators } from "./stateTypes";
+import { propertyTypes, validComparators } from "./propertyTypes";
 import AuthenticationContext from "../../context/AuthenticationContext";
 import { api } from "../../util/api";
 import toast from "react-hot-toast";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useParams } from "react-router-dom";
 
-function deleteStateConditional(user, scenarioId, resourceId, conditionalId) {
+function deletePropertyConditional(
+  user,
+  scenarioId,
+  resourceId,
+  conditionalId
+) {
   return api.delete(
     user,
     `api/resources/${scenarioId}/${resourceId}/conditionals/${conditionalId}`
   );
 }
 
-function editStateConditional(user, scenarioId, resourceId, conditional) {
+function editPropertyConditional(user, scenarioId, resourceId, conditional) {
   return api.put(
     user,
     `api/resources/${scenarioId}/${resourceId}/conditionals`,
-    { stateConditional: conditional }
+    { propertyConditional: conditional }
   );
 }
 
 /**
- * Component used for editing state operations
- * State operations are used to manipulate state variables while playing through a scenario
+ * Component used for editing property conditionals
  *
  * @component
  */
-const EditStateConditional = ({ resource, conditional }) => {
+const EditPropertyConditional = ({ resource, conditional }) => {
   const { scenarioId } = useParams();
   const { user } = useContext(AuthenticationContext);
-  const { stateVariables } = useContext(ScenarioContext);
+  const { properties } = useContext(ScenarioContext);
 
   const [comparator, setComparator] = useState(conditional.comparator);
   const [value, setValue] = useState(conditional.value);
@@ -47,7 +51,7 @@ const EditStateConditional = ({ resource, conditional }) => {
 
   const deleteConditionalMutation = useMutation({
     mutationFn: (conditionalId) =>
-      deleteStateConditional(user, scenarioId, resource._id, conditionalId),
+      deletePropertyConditional(user, scenarioId, resource._id, conditionalId),
     onMutate: (conditionalId) => {
       queryClient.cancelQueries(["resources", scenarioId]);
       queryClient.setQueryData(["resources", scenarioId], (prev) => {
@@ -66,13 +70,13 @@ const EditStateConditional = ({ resource, conditional }) => {
     onSettled: () => queryClient.invalidateQueries(["resources", scenarioId]),
     onError: (e) => {
       console.error(e);
-      toast.error("Error deleting state conditional");
+      toast.error("Error deleting property conditional");
     },
   });
 
   const updateConditionalMutation = useMutation({
     mutationFn: (conditional) =>
-      editStateConditional(user, scenarioId, resource._id, conditional),
+      editPropertyConditional(user, scenarioId, resource._id, conditional),
     onMutate: (conditional) => {
       queryClient.cancelQueries(["resources", scenarioId]);
       queryClient.setQueryData(["resources", scenarioId], (prev) => {
@@ -91,21 +95,21 @@ const EditStateConditional = ({ resource, conditional }) => {
     onSettled: () => queryClient.invalidateQueries(["resources", scenarioId]),
     onError: (e) => {
       console.error(e);
-      toast.error("Error updating state conditional");
+      toast.error("Error updating property conditional");
     },
   });
 
-  const stateVariable = stateVariables?.find(
-    (v) => v.id === conditional.stateVariableId
+  const property = properties?.find(
+    (p) => p.id === conditional.stateVariableId
   );
-  if (!stateVariable) return null;
+  if (!property) return null;
 
   function constructConditional() {
     return {
       _id: conditional._id,
       stateVariableId: conditional.stateVariableId,
       comparator,
-      value: stateVariable.type === stateTypes.NUMBER ? Number(value) : value,
+      value: property.type === propertyTypes.NUMBER ? Number(value) : value,
     };
   }
 
@@ -125,17 +129,17 @@ const EditStateConditional = ({ resource, conditional }) => {
       }`}
     >
       <div>
-        <span className="text--1">{stateVariable.name}</span>
-        <span className="text-xs ml-2xs text-primary">{`${stateVariable.type} operation`}</span>
+        <span className="text--1">{property.name}</span>
+        <span className="text-xs ml-2xs text-primary">{`${property.type} operation`}</span>
       </div>
       <fieldset className="fieldset mt-[0.5rem]">
         <div className="join">
           <SelectInput
-            values={validComparators[stateVariable.type]}
+            values={validComparators[property.type]}
             value={comparator}
             onChange={setComparator}
           />
-          {stateVariable.type === stateTypes.BOOLEAN ? (
+          {property.type === propertyTypes.BOOLEAN ? (
             <SelectInput
               values={[true, false]}
               value={value}
@@ -144,9 +148,7 @@ const EditStateConditional = ({ resource, conditional }) => {
             />
           ) : (
             <input
-              type={
-                stateVariable.type === stateTypes.STRING ? "text" : "number"
-              }
+              type={property.type === propertyTypes.STRING ? "text" : "number"}
               value={value}
               onChange={(e) => setValue(e.target.value)}
               placeholder="Value"
@@ -178,4 +180,4 @@ const EditStateConditional = ({ resource, conditional }) => {
   );
 };
 
-export default EditStateConditional;
+export default EditPropertyConditional;

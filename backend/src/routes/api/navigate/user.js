@@ -1,12 +1,12 @@
-import { getStateVariables } from "../../../db/daos/scenarioDao.js";
+import { getProperties } from "../../../db/daos/scenarioDao.js";
 import { getComponent } from "../../../db/daos/sceneDao.js";
-import { setUserStateVariables } from "../../../db/daos/userDao.js";
+import { setUserProperties } from "../../../db/daos/userDao.js";
 import { isAuthor } from "../../../middleware/scenarioAuth.js";
 import Scene from "../../../db/models/scene.js";
 import User from "../../../db/models/user.js";
 
 import { HttpError } from "../../../util/error.js";
-import { applyStateOperations } from "../../../util/statevariables/stateOperations.js";
+import { applyPropertyOperations } from "../../../util/properties/propertyOperations.js";
 import STATUS from "../../../util/status.js";
 
 import { getScenarioFirstScene, getSimpleScene } from "./group.js";
@@ -68,19 +68,19 @@ const addSceneToPath = async (
   return STATUS.OK;
 };
 
-// Initiates state variables for a user
-const initiateStateVariables = async (userId, scenarioId) => {
-  const stateVariables = await getStateVariables(scenarioId);
-  return await setUserStateVariables(userId, scenarioId, stateVariables);
+// Initiates properties for a user
+const initiateProperties = async (userId, scenarioId) => {
+  const properties = await getProperties(scenarioId);
+  return await setUserProperties(userId, scenarioId, properties);
 };
 
-// Sync state variables for a user (author may have changed state in-between playthroughs)
-const syncStateVariables = async (user, scenarioId) => {
-  const stateVariables = user.stateVariables[scenarioId];
-  const scenarioStateVariables = await getStateVariables(scenarioId);
+// Sync properties for a user (author may have changed state in-between playthroughs)
+const syncProperties = async (user, scenarioId) => {
+  const properties = user.stateVariables[scenarioId];
+  const scenarioProperties = await getProperties(scenarioId);
 
-  const newStateVariables = scenarioStateVariables.map((scenarioVar) => {
-    const existingVar = stateVariables.find((v) => v.id === scenarioVar.id);
+  const newProperties = scenarioProperties.map((scenarioVar) => {
+    const existingVar = properties.find((v) => v.id === scenarioVar.id);
 
     if (existingVar && existingVar.type === scenarioVar.type) {
       return existingVar;
@@ -89,24 +89,24 @@ const syncStateVariables = async (user, scenarioId) => {
     }
   });
 
-  if (JSON.stringify(newStateVariables) !== JSON.stringify(stateVariables)) {
-    return await setUserStateVariables(user._id, scenarioId, newStateVariables);
+  if (JSON.stringify(newProperties) !== JSON.stringify(properties)) {
+    return await setUserProperties(user._id, scenarioId, newProperties);
   }
-  return [stateVariables, user.stateVersions[scenarioId]];
+  return [properties, user.stateVersions[scenarioId]];
 };
 
-// Update state variables for a user
-const updateStateVariables = async (user, scenarioId, component) => {
+// Update properties for a user
+const updateProperties = async (user, scenarioId, component) => {
   if (!component || !component.stateOperations) {
     return [user.stateVariables[scenarioId], user.stateVersions[scenarioId]];
   }
 
-  const stateVariables = applyStateOperations(
+  const properties = applyPropertyOperations(
     user.stateVariables[scenarioId],
     component.stateOperations
   );
 
-  return await setUserStateVariables(user._id, scenarioId, stateVariables);
+  return await setUserProperties(user._id, scenarioId, properties);
 };
 
 export const userNavigate = async (req) => {
@@ -142,17 +142,17 @@ export const userNavigate = async (req) => {
   if (!path) {
     const firstSceneId =
       startScene || (await getScenarioFirstScene(scenarioId));
-    const [, scenes, [stateVariables, stateVersion]] = await Promise.all([
+    const [, scenes, [properties, propertyVersion]] = await Promise.all([
       addSceneToPath(user._id, scenarioId, null, firstSceneId),
       getConnectedScenes(firstSceneId),
-      initiateStateVariables(user._id, scenarioId),
+      initiateProperties(user._id, scenarioId),
     ]);
     return {
       status: STATUS.OK,
       json: {
         ...scenes,
-        stateVariables,
-        stateVersion,
+        properties,
+        propertyVersion,
         remainingTime: freshRemainingTime(scenes),
       },
     };
@@ -177,7 +177,7 @@ export const userNavigate = async (req) => {
       getConnectedScenes(activeSceneId),
     ]);
 
-    const [stateVariables, stateVersion] = await syncStateVariables(
+    const [properties, propertyVersion] = await syncProperties(
       user,
       scenarioId
     );
@@ -190,7 +190,7 @@ export const userNavigate = async (req) => {
 
     return {
       status: STATUS.OK,
-      json: { ...scenes, stateVariables, stateVersion, remainingTime },
+      json: { ...scenes, properties, propertyVersion, remainingTime },
     };
   }
 
@@ -220,7 +220,7 @@ export const userNavigate = async (req) => {
     ]);
   }
 
-  const [stateVariables, stateVersion] = await updateStateVariables(
+  const [properties, propertyVersion] = await updateProperties(
     user,
     scenarioId,
     component
@@ -230,8 +230,8 @@ export const userNavigate = async (req) => {
     status: STATUS.OK,
     json: {
       ...scenes,
-      stateVariables,
-      stateVersion,
+      properties,
+      propertyVersion,
       ...movedRemainingTimeField(scenes),
     },
   };

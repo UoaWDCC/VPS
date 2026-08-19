@@ -5,7 +5,7 @@ import {
   ListChevronsUpDownIcon,
   XIcon,
 } from "lucide-react";
-import { filterTreeByConditions } from "../../../utils/stateConditionalEvaluator";
+import { filterTreeByConditions } from "../../../utils/propertyConditionalEvaluator";
 import { filterTreeBySearch, normaliseFile } from "../../resources/util";
 import { api } from "../../../util/api";
 import { useQuery } from "@tanstack/react-query";
@@ -39,7 +39,7 @@ async function getResources(user, scenarioId) {
 
 export default function ResourcesPanel({
   scenarioId,
-  stateVariables,
+  properties,
   open,
   onClose,
 }) {
@@ -64,16 +64,16 @@ export default function ResourcesPanel({
     queryFn: () => getResources(user, scenarioId),
   });
 
-  // NOTE: state variable filters can't change while the resources panel is
+  // NOTE: property filters can't change while the resources panel is
   // open, so deselecting on resource hiding isn't a concern
   const foundResource = data?.find((r) => r._id === selectedResourceId);
   const selectedResource = foundResource ? normaliseFile(foundResource) : null;
 
   const resourceTree = buildResourceTree(data ?? []);
-  // NOTE: the filtering by state variables should ideally be done on the
+  // NOTE: the filtering by properties should ideally be done on the
   // server to prevent cheating, but here we filter before rendering
   const filteredTree = (() => {
-    const filtered = filterTreeByConditions(resourceTree, stateVariables);
+    const filtered = filterTreeByConditions(resourceTree, properties);
     return filterTreeBySearch(filtered, search);
   })();
 

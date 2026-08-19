@@ -3,15 +3,15 @@ import ScenarioContext from "../../context/ScenarioContext";
 import { modifyComponentProp } from "../../features/authoring/scene/operations/component";
 import { getComponentBindingTargets } from "./componentBindings";
 
-export default function StateBinding({ component, binding }) {
-  const { stateVariables } = useContext(ScenarioContext);
+export default function PropertyBinding({ component, binding }) {
+  const { properties } = useContext(ScenarioContext);
   const target = getComponentBindingTargets(component).find(
     (candidate) => candidate.key === binding.target
   );
-  const stateVariable = stateVariables?.find(
-    (variable) => variable.id === binding.stateVariableId
+  const property = properties?.find(
+    (candidate) => candidate.id === binding.stateVariableId
   );
-  const valid = target && stateVariable?.type === target.stateType;
+  const valid = target && property?.type === target.propertyType;
 
   function remove() {
     modifyComponentProp(
@@ -31,9 +31,9 @@ export default function StateBinding({ component, binding }) {
               valid ? "text-primary" : "text-warning"
             }`}
           >
-            {stateVariable
-              ? `${stateVariable.name} (${stateVariable.type})`
-              : "State variable no longer exists"}
+            {property
+              ? `${property.name} (${property.type})`
+              : "Property no longer exists"}
           </div>
         </div>
         <button className="btn btn-xs btn-phantom ml-auto" onClick={remove}>

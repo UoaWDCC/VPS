@@ -19,7 +19,7 @@ Tracked values are any values that you want to keep track of as the player progr
 - A character's health
 - Some player input
 
-To create a tracked value, press the **State Variables** button on the very left of the toolbar. On the modal, enter a name that describes what this value is tracking, the type of the value, and what the value should be initially (when the player first begins the scenario), and then press **Create** on the bottom right of the input section.
+To create a tracked value, press the **Properties** button on the very left of the toolbar. On the modal, enter a name that describes what this value is tracking, the type of the value, and what the value should be initially (when the player first begins the scenario), and then press **Create** on the bottom right of the input section.
 
 This table explains the different types:
 
@@ -31,7 +31,7 @@ This table explains the different types:
 
 ## Actions
 
-To make tracked values useful, you need to update them as the player progresses through the scenario. To do this, you need to add actions to **scene elements**, just like adding links. After selecting an element, press the plus button in the **State Operations** section on the right; a modal should appear. In this dialog box, select the tracked value you want to update and how to update it. This can be either:
+To make tracked values useful, you need to update them as the player progresses through the scenario. To do this, you need to add actions to **scene elements**, just like adding links. After selecting an element, press the plus button in the **Property Operations** section on the right; a modal should appear. In this dialog box, select the tracked value you want to update and how to update it. This can be either:
 
 - Set
 - Add (number only)
@@ -64,7 +64,7 @@ changes `playerX`.
 To create a binding:
 
 1. Select the scene element on the canvas.
-2. Open **State Bindings** in the right sidebar and press the plus button.
+2. Open **Property Bindings** in the right sidebar and press the plus button.
 3. Select the component property to control.
 4. Select a tracked value of the required type and press **Create**.
 

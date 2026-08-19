@@ -20,7 +20,7 @@ To get started, you need to first create a collection by pressing the **Create**
 
 Sometimes you might not want a resource to be available to the player at all times. For example, the scenario could involve the player requesting certain scans for a patient. In that case, you would only want the player to see the scan results after they've made that decision. You can do this using [tracked values](/state/).
 
-First, set up the tracked value for that resource if it doesn't yet exist. Then, select a resource and press the plus button on the **State Conditionals** section on the right. In the modal that appears, select the _comparator_ and the _comparison value_. The comparator can be either:
+First, set up the tracked value for that resource if it doesn't yet exist. Then, select a resource and press the plus button on the **Visibility Conditionals** section on the right. In the modal that appears, select the _comparator_ and the _comparison value_. The comparator can be either:
 
 | Comparator | Meaning                                                       |
 | ---------- | ------------------------------------------------------------- |

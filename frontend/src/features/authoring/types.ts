@@ -46,10 +46,10 @@ interface GenericComponent {
   bounds: Bounds;
   zIndex: number;
   clickable?: boolean;
-  stateBindings?: StateBinding[];
+  stateBindings?: PropertyBinding[];
 }
 
-export interface StateBinding {
+export interface PropertyBinding {
   target: string;
   stateVariableId: string;
 }

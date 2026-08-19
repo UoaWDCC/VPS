@@ -5,9 +5,9 @@ import Scenario from "../../../db/models/scenario.js";
 import Note from "../../../db/models/note.js";
 import { HttpError } from "../../../util/error.js";
 import STATUS from "../../../util/status.js";
-import { getStateVariables } from "../../../db/daos/scenarioDao.js";
-import { setGroupStateVariables } from "../../../db/daos/groupDao.js";
-import { applyStateOperations } from "../../../util/statevariables/stateOperations.js";
+import { getProperties } from "../../../db/daos/scenarioDao.js";
+import { setGroupProperties } from "../../../db/daos/groupDao.js";
+import { applyPropertyOperations } from "../../../util/properties/propertyOperations.js";
 import { getComponent } from "../../../db/daos/sceneDao.js";
 import {
   freshRemainingTime,
@@ -167,19 +167,19 @@ const removeFlagsFromGroup = async (groupId, flags) => {
   }
 };
 
-// Initiates state variables for a group
-const initiateStateVariables = async (groupId, scenarioId) => {
-  const stateVariables = await getStateVariables(scenarioId);
-  return await setGroupStateVariables(groupId, stateVariables);
+// Initiates properties for a group
+const initiateProperties = async (groupId, scenarioId) => {
+  const properties = await getProperties(scenarioId);
+  return await setGroupProperties(groupId, properties);
 };
 
-// Sync state variables for a group (author may have changed state in-between playthroughs)
-const syncStateVariables = async (group) => {
-  const stateVariables = group.stateVariables;
-  const scenarioStateVariables = await getStateVariables(group.scenarioId);
+// Sync properties for a group (author may have changed state in-between playthroughs)
+const syncProperties = async (group) => {
+  const properties = group.stateVariables;
+  const scenarioProperties = await getProperties(group.scenarioId);
 
-  const newStateVariables = scenarioStateVariables.map((scenarioVar) => {
-    const existingVar = stateVariables.find((v) => v.id === scenarioVar.id);
+  const newProperties = scenarioProperties.map((scenarioVar) => {
+    const existingVar = properties.find((v) => v.id === scenarioVar.id);
 
     if (existingVar && existingVar.type === scenarioVar.type) {
       return existingVar;
@@ -188,24 +188,24 @@ const syncStateVariables = async (group) => {
     }
   });
 
-  if (JSON.stringify(newStateVariables) !== JSON.stringify(stateVariables)) {
-    return await setGroupStateVariables(group._id, newStateVariables);
+  if (JSON.stringify(newProperties) !== JSON.stringify(properties)) {
+    return await setGroupProperties(group._id, newProperties);
   }
-  return [stateVariables, group.stateVersions];
+  return [properties, group.stateVersions];
 };
 
-// Updates state variables for a group
-const updateStateVariables = async (group, component) => {
+// Updates properties for a group
+const updateProperties = async (group, component) => {
   if (!component || !component.stateOperations) {
     return [group.stateVariables, group.stateVersion];
   }
 
-  const stateVariables = applyStateOperations(
+  const properties = applyPropertyOperations(
     group.stateVariables,
     component.stateOperations
   );
 
-  return await setGroupStateVariables(group._id, stateVariables);
+  return await setGroupProperties(group._id, properties);
 };
 
 export const groupNavigate = async (req) => {
@@ -224,19 +224,19 @@ export const groupNavigate = async (req) => {
   // the first time any user in the group is navigating
   if (!group.path.length) {
     const firstSceneId = await getScenarioFirstScene(group.scenarioId);
-    const [, , , scenes, [stateVariables, stateVersion]] = await Promise.all([
+    const [, , , scenes, [properties, propertyVersion]] = await Promise.all([
       addSceneToPath(group._id, null, firstSceneId),
       addFlagsToGroup(group._id, addFlags),
       removeFlagsFromGroup(group._id, removeFlags),
       getConnectedScenes(firstSceneId, role),
-      initiateStateVariables(group._id, group.scenarioId),
+      initiateProperties(group._id, group.scenarioId),
     ]);
     return {
       status: STATUS.OK,
       json: {
         ...scenes,
-        stateVariables,
-        stateVersion,
+        properties,
+        propertyVersion,
         remainingTime: freshRemainingTime(scenes),
       },
     };
@@ -246,14 +246,14 @@ export const groupNavigate = async (req) => {
   if (!currentScene) {
     const scenes = await getConnectedScenes(group.path[0], role);
 
-    const [stateVariables, stateVersion] = await syncStateVariables(group);
+    const [properties, propertyVersion] = await syncProperties(group);
 
     return {
       status: STATUS.OK,
       json: {
         ...scenes,
-        stateVariables,
-        stateVersion,
+        properties,
+        propertyVersion,
         remainingTime: resumedRemainingTime(
           scenes,
           group.currentSceneEnteredAt
@@ -291,7 +291,7 @@ export const groupNavigate = async (req) => {
     ]);
   }
 
-  const [stateVariables, stateVersion] = await updateStateVariables(
+  const [properties, propertyVersion] = await updateProperties(
     group,
     component
   );
@@ -300,8 +300,8 @@ export const groupNavigate = async (req) => {
     status: STATUS.OK,
     json: {
       ...scenes,
-      stateVariables,
-      stateVersion,
+      properties,
+      propertyVersion,
       ...movedRemainingTimeField(scenes),
     },
   };

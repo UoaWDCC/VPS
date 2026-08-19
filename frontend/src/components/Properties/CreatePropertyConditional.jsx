@@ -1,6 +1,10 @@
 import { useContext, useState } from "react";
 import ScenarioContext from "context/ScenarioContext";
-import { getDefaultValue, stateTypes, validComparators } from "./stateTypes";
+import {
+  getDefaultValue,
+  propertyTypes,
+  validComparators,
+} from "./propertyTypes";
 import SelectInput from "../../features/authoring/components/Select";
 import ModalDialog from "../ModalDialogue";
 import { api } from "../../util/api";
@@ -9,26 +13,26 @@ import toast from "react-hot-toast";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useParams } from "react-router-dom";
 
-function createStateConditional(user, scenarioId, resourceId, conditional) {
+function createPropertyConditional(user, scenarioId, resourceId, conditional) {
   return api.post(
     user,
     `api/resources/${scenarioId}/${resourceId}/conditionals`,
-    { stateConditional: conditional }
+    { propertyConditional: conditional }
   );
 }
 
 /**
- * Component used for creating state conditionals
- * State conditionals are used to check whether state variables meet certain conditions
+ * Component used for creating property conditionals
+ * Property conditionals are used to check whether properties meet certain conditions
  *
  * @component
  */
-const CreateStateConditional = ({ resource, open, setOpen }) => {
+const CreatePropertyConditional = ({ resource, open, setOpen }) => {
   const { scenarioId } = useParams();
   const { user } = useContext(AuthenticationContext);
-  const { stateVariables } = useContext(ScenarioContext);
+  const { properties } = useContext(ScenarioContext);
 
-  const [selectedState, setSelectedState] = useState(null);
+  const [selectedProperty, setSelectedProperty] = useState(null);
   const [comparator, setComparator] = useState(null);
   const [value, setValue] = useState(null);
 
@@ -36,30 +40,30 @@ const CreateStateConditional = ({ resource, open, setOpen }) => {
 
   const createConditionalMutation = useMutation({
     mutationFn: (conditional) =>
-      createStateConditional(user, scenarioId, resource._id, conditional),
+      createPropertyConditional(user, scenarioId, resource._id, conditional),
     onSettled: () => queryClient.invalidateQueries(["resources", scenarioId]),
     onError: (e) => {
       console.error(e);
-      toast.error("Error creating state conditional");
+      toast.error("Error creating property conditional");
     },
     onSuccess: () => {
-      setSelectedState(null);
+      setSelectedProperty(null);
       setComparator(null);
       setValue(null);
       setOpen(false);
-      toast.success("State conditional created!");
+      toast.success("Property conditional created!");
     },
   });
 
-  if (!stateVariables?.length) {
+  if (!properties?.length) {
     return (
       <ModalDialog
-        title="Create State Conditional"
+        title="Create Property Conditional"
         open={open}
         onClose={() => setOpen(false)}
       >
         <div className="text-xs">
-          No state variables found, create some in the state variable menu
+          No properties found, create some in the Properties menu
         </div>
         <div className="modal-action">
           <button className="btn" onClick={() => setOpen(false)}>
@@ -71,52 +75,53 @@ const CreateStateConditional = ({ resource, open, setOpen }) => {
   }
 
   const handleSubmit = () => {
-    if (!selectedState?.id || !comparator) return;
+    if (!selectedProperty?.id || !comparator) return;
 
     createConditionalMutation.mutate({
-      stateVariableId: selectedState.id,
+      stateVariableId: selectedProperty.id,
       comparator,
-      value: selectedState.type === stateTypes.NUMBER ? Number(value) : value,
+      value:
+        selectedProperty.type === propertyTypes.NUMBER ? Number(value) : value,
     });
   };
 
-  function onVariableChange(variable) {
-    setSelectedState(variable);
-    setValue(getDefaultValue(variable.type));
+  function onPropertyChange(property) {
+    setSelectedProperty(property);
+    setValue(getDefaultValue(property.type));
     setComparator("=");
   }
 
-  const isSubmittable = selectedState && comparator && value != null;
+  const isSubmittable = selectedProperty && comparator && value != null;
 
   return (
     <ModalDialog
-      title="Create State Conditional"
+      title="Create Property Conditional"
       open={open}
       onClose={() => {
-        setSelectedState(null);
+        setSelectedProperty(null);
         setComparator(null);
         setValue(null);
         setOpen(false);
       }}
     >
       <fieldset className="fieldset">
-        <label className="label">State Variable</label>
+        <label className="label">Property</label>
         <SelectInput
-          values={stateVariables}
-          value={selectedState}
-          display={(s) => s.name}
-          onChange={onVariableChange}
+          values={properties}
+          value={selectedProperty}
+          display={(p) => p.name}
+          onChange={onPropertyChange}
         />
-        {selectedState ? (
+        {selectedProperty ? (
           <>
             <label className="label">Comparator</label>
             <div className="join">
               <SelectInput
-                values={validComparators[selectedState.type]}
+                values={validComparators[selectedProperty.type]}
                 value={comparator}
                 onChange={setComparator}
               />
-              {selectedState.type === stateTypes.BOOLEAN ? (
+              {selectedProperty.type === propertyTypes.BOOLEAN ? (
                 <SelectInput
                   values={[true, false]}
                   value={value}
@@ -126,7 +131,9 @@ const CreateStateConditional = ({ resource, open, setOpen }) => {
               ) : (
                 <input
                   type={
-                    selectedState.type === stateTypes.STRING ? "text" : "number"
+                    selectedProperty.type === propertyTypes.STRING
+                      ? "text"
+                      : "number"
                   }
                   value={value ?? ""}
                   onChange={(e) => setValue(e.target.value)}
@@ -150,4 +157,4 @@ const CreateStateConditional = ({ resource, open, setOpen }) => {
   );
 };
 
-export default CreateStateConditional;
+export default CreatePropertyConditional;
