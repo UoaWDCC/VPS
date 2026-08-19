@@ -18,6 +18,7 @@ import { handleContextGlobal } from "../handlers/pointer/context";
 import LoadingOverlay from "./LoadingOverlay.tsx";
 import useEditorStore from "../stores/editor.ts";
 import { CANVAS_HEIGHT, CANVAS_WIDTH } from "../../../util/canvas";
+import Background from "../elements/Background";
 
 const componentMap: Record<string, React.FC<Record<string, unknown>>> = {
   textbox: (props) => <TextBox {...props} editable={true} />,
@@ -36,6 +37,7 @@ function resolve(component: Component) {
 
 function Canvas() {
   const scene = useVisualScene((state) => state.components);
+  const background = useVisualScene((state) => state.background);
 
   const mode = useEditorStore((state) => state.mode);
   const createType = useEditorStore((state) => state.createType);
@@ -143,6 +145,7 @@ function Canvas() {
             height={CANVAS_HEIGHT}
             fill="var(--color-canvas)"
           />
+          <Background background={background} />
           {components}
         </svg>
       </div>

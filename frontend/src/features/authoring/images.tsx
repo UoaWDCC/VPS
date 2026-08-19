@@ -7,15 +7,15 @@ import { ImageIcon } from "lucide-react";
 import { add } from "./scene/operations/modifiers";
 import { defaults } from "./scene/operations/component";
 import type { ImageComponent, UploadedFile, Scene } from "./types";
-import { api, handleGeneric } from "../../util/api";
+import { handleGeneric } from "../../util/api";
 import ModalDialog from "../../components/ModalDialogue";
 import useEditorStore from "./stores/editor.ts";
 import toast from "react-hot-toast";
 import AuthenticationContext from "../../context/AuthenticationContext.jsx";
-import type { AxiosResponse } from "axios";
 import SceneContext from "../../context/SceneContext.jsx";
 import { getScene, getSceneId } from "./scene/scene";
 import { v4 } from "uuid";
+import { getImages, uploadImage } from "./imageFiles";
 
 type ModifyScene = (scene: Scene) => Promise<unknown> | undefined;
 
@@ -65,16 +65,8 @@ async function addNewImage(
   setLoading(true);
 
   try {
-    const formData = new FormData();
-    formData.append("file", file);
-
-    const response = (await api.post(
-      user,
-      `api/files/${scenarioId}`,
-      formData
-    )) as AxiosResponse<UploadedFile>;
-
-    await addImageToScene(response.data, originScene, modifyScene);
+    const image = await uploadImage(user, scenarioId, file);
+    await addImageToScene(image, originScene, modifyScene);
   } catch (e) {
     console.error(e);
     toast.error("Image upload failed");
@@ -92,14 +84,6 @@ async function getImageDimensions(url: string, defaultHeight = 300) {
     { x: 0, y: 0 },
     { x: scaledWidth, y: defaultHeight },
   ];
-}
-
-async function getImages(user: User, scenarioId: string) {
-  const res = (await api.get(
-    user,
-    `api/files/${scenarioId}/type/image`
-  )) as AxiosResponse<UploadedFile[]>;
-  return res.data;
 }
 
 function ImageCreateMenu() {

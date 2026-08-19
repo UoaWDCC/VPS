@@ -32,7 +32,14 @@ const roleMatches = (roles, role) => {
 export const getSimpleScene = async (sceneId) => {
   const scene = await Scene.findOne(
     { _id: sceneId },
-    { roles: 1, components: 1, directLink: 1, time: 1, timerStateOperations: 1 }
+    {
+      roles: 1,
+      components: 1,
+      directLink: 1,
+      time: 1,
+      timerStateOperations: 1,
+      background: 1,
+    }
   ).lean();
   if (!scene)
     throw new HttpError("No scene exists with that id", STATUS.NOT_FOUND);
@@ -100,7 +107,14 @@ const getConnectedScenes = async (sceneID, role, active = true) => {
     .filter(Boolean);
   const connectedScenes = await Scene.find(
     { _id: { $in: connectedIds } },
-    { roles: 1, components: 1, directLink: 1, time: 1, timerStateOperations: 1 }
+    {
+      roles: 1,
+      components: 1,
+      directLink: 1,
+      time: 1,
+      timerStateOperations: 1,
+      background: 1,
+    }
   ).lean();
   const filtered = connectedScenes.map((s) => {
     if (!s.roles.length || roleMatches(s.roles, role)) return s;

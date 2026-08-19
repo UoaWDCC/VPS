@@ -92,7 +92,10 @@ function ContextableThumb({
           }`}
           key={scene._id}
         >
-          <Thumbnail components={scene.components} />
+          <Thumbnail
+            components={scene.components}
+            background={scene.background}
+          />
         </button>
       </div>
     </RightContextMenu>
