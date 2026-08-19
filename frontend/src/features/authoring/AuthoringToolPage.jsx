@@ -84,26 +84,40 @@ export default function AuthoringToolPage() {
         editorState.setSelection({ start: null, end: null });
         editorState.setVisualSelection({ start: null, end: null });
 
-        if (record.sceneId !== sceneId) switchScene(getScene(), record.sceneId);
-        const state = operation === "undo" ? record.before : record.after;
-        replaceComponent(record.id, state);
-        if (state !== null) setSelected(record.id);
+        const batch = record;
+        const targetSceneId = batch[0]?.sceneId;
+        if (targetSceneId && targetSceneId !== sceneId) {
+          switchScene(getScene(), targetSceneId);
+        }
+
+        const restoredIds = [];
+        batch.forEach((item) => {
+          const state = operation === "undo" ? item.before : item.after;
+          replaceComponent(item.id, state);
+          if (state !== null) restoredIds.push(item.id);
+        });
+        setSelected(restoredIds);
 
         // jump straight to the exact text that was undone/redone, the way
         // undo/redo works in any text editor, by diffing the before/after
         // documents rather than relying on wherever the cursor used to be
-        const beforeBlocks = record.before?.document?.blocks;
-        const afterBlocks = record.after?.document?.blocks;
-        const targetBlocks = state?.document?.blocks;
-        const diff =
-          beforeBlocks?.length && afterBlocks?.length
-            ? findEditDiff(beforeBlocks, afterBlocks)
-            : null;
-        if (diff && targetBlocks?.length) {
-          const selection = diffToSelection(targetBlocks, diff);
-          editorState.setMode(["text"]);
-          editorState.setSelection(selection);
-          syncVisualCursor();
+        // -- only meaningful when the batch touches a single component
+        if (batch.length === 1) {
+          const [item] = batch;
+          const state = operation === "undo" ? item.before : item.after;
+          const beforeBlocks = item.before?.document?.blocks;
+          const afterBlocks = item.after?.document?.blocks;
+          const targetBlocks = state?.document?.blocks;
+          const diff =
+            beforeBlocks?.length && afterBlocks?.length
+              ? findEditDiff(beforeBlocks, afterBlocks)
+              : null;
+          if (diff && targetBlocks?.length) {
+            const selection = diffToSelection(targetBlocks, diff);
+            editorState.setMode(["text"]);
+            editorState.setSelection(selection);
+            syncVisualCursor();
+          }
         }
       }
 

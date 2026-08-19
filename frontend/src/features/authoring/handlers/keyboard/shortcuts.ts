@@ -1,4 +1,4 @@
-import { redo, undo } from "../../scene/history";
+import { undo, redo } from "../../scene/history";
 import {
   bringForward,
   bringToFront,
@@ -41,10 +41,10 @@ const shortcuts: Shortcut[] = [
   },
   {
     combos: ["mod+d"],
-    when: () => Boolean(useEditorStore.getState().selected),
+    when: () => useEditorStore.getState().selected.length > 0,
     run: () => {
       const { selected, setSelected } = useEditorStore.getState();
-      if (!selected) return;
+      if (!selected.length) return;
       setSelected(duplicateComponent(selected));
     },
   },
@@ -52,11 +52,12 @@ const shortcuts: Shortcut[] = [
     combos: ["backspace", "delete"],
     when: () => {
       const { mode, selected } = useEditorStore.getState();
-      return !mode.includes("text") && Boolean(selected);
+      return !mode.includes("text") && selected.length > 0;
     },
     run: () => {
-      const { selected } = useEditorStore.getState();
-      if (!selected) return;
+      const { selected, setSelected } = useEditorStore.getState();
+      if (!selected.length) return;
+      setSelected([]);
       remove(selected);
     },
   },
@@ -64,11 +65,11 @@ const shortcuts: Shortcut[] = [
     combos: ["mod+arrowup"],
     when: () => {
       const { mode, selected } = useEditorStore.getState();
-      return !mode.includes("text") && Boolean(selected);
+      return !mode.includes("text") && selected.length > 0;
     },
     run: () => {
       const { selected } = useEditorStore.getState();
-      if (!selected) return;
+      if (!selected.length) return;
       bringForward(selected);
     },
   },
@@ -76,11 +77,11 @@ const shortcuts: Shortcut[] = [
     combos: ["mod+shift+arrowup"],
     when: () => {
       const { mode, selected } = useEditorStore.getState();
-      return !mode.includes("text") && Boolean(selected);
+      return !mode.includes("text") && selected.length > 0;
     },
     run: () => {
       const { selected } = useEditorStore.getState();
-      if (!selected) return;
+      if (!selected.length) return;
       bringToFront(selected);
     },
   },
@@ -88,11 +89,11 @@ const shortcuts: Shortcut[] = [
     combos: ["mod+arrowdown"],
     when: () => {
       const { mode, selected } = useEditorStore.getState();
-      return !mode.includes("text") && Boolean(selected);
+      return !mode.includes("text") && selected.length > 0;
     },
     run: () => {
       const { selected } = useEditorStore.getState();
-      if (!selected) return;
+      if (!selected.length) return;
       sendBackward(selected);
     },
   },
@@ -100,11 +101,11 @@ const shortcuts: Shortcut[] = [
     combos: ["mod+shift+arrowdown"],
     when: () => {
       const { mode, selected } = useEditorStore.getState();
-      return !mode.includes("text") && Boolean(selected);
+      return !mode.includes("text") && selected.length > 0;
     },
     run: () => {
       const { selected } = useEditorStore.getState();
-      if (!selected) return;
+      if (!selected.length) return;
       sendToBack(selected);
     },
   },
@@ -113,8 +114,8 @@ const shortcuts: Shortcut[] = [
     when: () => useEditorStore.getState().mode.includes("text"),
     run: () => {
       const { selected } = useEditorStore.getState();
-      if (!selected) return;
-      handleSelectAll(selected);
+      if (!selected.length) return;
+      handleSelectAll(selected[0]);
     },
   },
   {
@@ -122,8 +123,8 @@ const shortcuts: Shortcut[] = [
     when: () => useEditorStore.getState().mode.includes("text"),
     run: () => {
       const { selected } = useEditorStore.getState();
-      if (!selected) return;
-      toggleTextStyle(selected, "fontWeight", "bold", "normal");
+      if (!selected.length) return;
+      toggleTextStyle(selected[0], "fontWeight", "bold", "normal");
     },
   },
   {
@@ -131,8 +132,8 @@ const shortcuts: Shortcut[] = [
     when: () => useEditorStore.getState().mode.includes("text"),
     run: () => {
       const { selected } = useEditorStore.getState();
-      if (!selected) return;
-      toggleTextStyle(selected, "fontStyle", "italic", "normal");
+      if (!selected.length) return;
+      toggleTextStyle(selected[0], "fontStyle", "italic", "normal");
     },
   },
   {
@@ -140,8 +141,8 @@ const shortcuts: Shortcut[] = [
     when: () => useEditorStore.getState().mode.includes("text"),
     run: () => {
       const { selected } = useEditorStore.getState();
-      if (!selected) return;
-      toggleTextStyle(selected, "textDecoration", "underline", "none");
+      if (!selected.length) return;
+      toggleTextStyle(selected[0], "textDecoration", "underline", "none");
     },
   },
 ];
