@@ -184,6 +184,110 @@ describe("Resources API tests", () => {
     expect(dbResource).not.toBeNull();
   });
 
+  // --- Rename resource ---
+
+  it("PATCH /resources/:scenarioId/:resourceId renames a resource", async () => {
+    const response = await axios.patch(
+      `http://localhost:${ctx.port}/api/resources/${scenarioId}/${resource._id}`,
+      { name: "renamed.png" },
+      authHeaders("user1")
+    );
+
+    expect(response.status).toBe(200);
+    expect(response.data.name).toBe("renamed.png");
+
+    const dbResource = await Resource.findById(resource._id);
+    expect(dbResource.name).toBe("renamed.png");
+  });
+
+  it("PATCH /resources/:scenarioId/:resourceId trims whitespace from the name", async () => {
+    const response = await axios.patch(
+      `http://localhost:${ctx.port}/api/resources/${scenarioId}/${resource._id}`,
+      { name: "  padded.png  " },
+      authHeaders("user1")
+    );
+
+    expect(response.status).toBe(200);
+    expect(response.data.name).toBe("padded.png");
+  });
+
+  it("PATCH /resources/:scenarioId/:resourceId allows a name that no longer matches the file's real extension", async () => {
+    const response = await axios.patch(
+      `http://localhost:${ctx.port}/api/resources/${scenarioId}/${resource._id}`,
+      { name: "renamed.txt" },
+      authHeaders("user1")
+    );
+
+    expect(response.status).toBe(200);
+    expect(response.data.name).toBe("renamed.txt");
+  });
+
+  it("PATCH /resources/:scenarioId/:resourceId allows removing the file extension entirely", async () => {
+    const response = await axios.patch(
+      `http://localhost:${ctx.port}/api/resources/${scenarioId}/${resource._id}`,
+      { name: "Patient Info Sheet" },
+      authHeaders("user1")
+    );
+
+    expect(response.status).toBe(200);
+    expect(response.data.name).toBe("Patient Info Sheet");
+
+    const dbResource = await Resource.findById(resource._id);
+    expect(dbResource.name).toBe("Patient Info Sheet");
+  });
+
+  it("PATCH /resources/:scenarioId/:resourceId allows a name containing a period, such as a trailing full stop", async () => {
+    const response = await axios.patch(
+      `http://localhost:${ctx.port}/api/resources/${scenarioId}/${resource._id}`,
+      { name: "image." },
+      authHeaders("user1")
+    );
+
+    expect(response.status).toBe(200);
+    expect(response.data.name).toBe("image.");
+  });
+
+  it("PATCH /resources/:scenarioId/:resourceId renames a collection", async () => {
+    const response = await axios.patch(
+      `http://localhost:${ctx.port}/api/resources/${scenarioId}/${collection._id}`,
+      { name: "Renamed Group" },
+      authHeaders("user1")
+    );
+
+    expect(response.status).toBe(200);
+    expect(response.data.name).toBe("Renamed Group");
+  });
+
+  it("PATCH /resources/:scenarioId/:resourceId returns 400 for a blank name", async () => {
+    await expect(
+      axios.patch(
+        `http://localhost:${ctx.port}/api/resources/${scenarioId}/${resource._id}`,
+        { name: "   " },
+        authHeaders("user1")
+      )
+    ).rejects.toMatchObject({ response: { status: 400 } });
+  });
+
+  it("PATCH /resources/:scenarioId/:resourceId returns 400 for a name over 255 characters", async () => {
+    await expect(
+      axios.patch(
+        `http://localhost:${ctx.port}/api/resources/${scenarioId}/${resource._id}`,
+        { name: "a".repeat(256) },
+        authHeaders("user1")
+      )
+    ).rejects.toMatchObject({ response: { status: 400 } });
+  });
+
+  it("PATCH /resources/:scenarioId/:resourceId returns 404 when resource not found", async () => {
+    await expect(
+      axios.patch(
+        `http://localhost:${ctx.port}/api/resources/${scenarioId}/000000000000000000000099`,
+        { name: "renamed.png" },
+        authHeaders("user1")
+      )
+    ).rejects.toMatchObject({ response: { status: 404 } });
+  });
+
   // --- Delete resource ---
 
   it("DELETE /resources/:scenarioId/:resourceId deletes the Resource and decrements the file reference count", async () => {
