@@ -16,6 +16,7 @@ import {
 } from "../handlers/pointer/pointer";
 import { handleContextGlobal } from "../handlers/pointer/context";
 import LoadingOverlay from "./LoadingOverlay.tsx";
+import ZoomControls from "./ZoomControls";
 import useEditorStore from "../stores/editor.ts";
 import { CANVAS_HEIGHT, CANVAS_WIDTH } from "../../../util/canvas";
 
@@ -39,6 +40,7 @@ function Canvas() {
 
   const mode = useEditorStore((state) => state.mode);
   const createType = useEditorStore((state) => state.createType);
+  const zoom = useEditorStore((state) => state.zoom);
 
   const canvasRef = useRef<SVGSVGElement | null>(null);
 
@@ -79,13 +81,9 @@ function Canvas() {
   return (
     <CanvasContext.Provider value={{ toSVGSpace, canvasRef }}>
       <div
-        className={`flex-grow relative ${loading ? "pointer-events-none" : ""} ${
+        className={`flex-1 min-w-0 relative overflow-hidden ${loading ? "pointer-events-none" : ""} ${
           mode.includes("create") ? "cursor-crosshair" : ""
         }`}
-        onMouseMove={handleMouseMove}
-        onMouseUp={handleMouseUp}
-        onMouseDown={handleMouseDown}
-        onContextMenu={handleContextMenu}
       >
         {mode.includes("create") && (
           <div
@@ -109,42 +107,56 @@ function Canvas() {
             Click or drag to create {createType}
           </div>
         )}
-        <Overlay />
         {loading && <LoadingOverlay />}
 
-        {/* scene outline */}
-        <svg
-          id="outline"
-          className="w-full h-full absolute pointer-events-none"
-          viewBox={`-50 -50 ${CANVAS_WIDTH + 50 * 2} ${CANVAS_HEIGHT + 50 * 2}`}
-          style={{ mixBlendMode: "difference" }}
-        >
-          <rect
-            x="0"
-            y="0"
-            width={CANVAS_WIDTH}
-            height={CANVAS_HEIGHT}
-            fill="none"
-            stroke="var(--color-backdrop-content)"
-            strokeWidth="1"
-          />
-        </svg>
+        <div className="w-full h-full overflow-auto flex items-center justify-center">
+          <div
+            className="relative shrink-0"
+            style={{ width: `${zoom * 100}%`, height: `${zoom * 100}%` }}
+            onMouseMove={handleMouseMove}
+            onMouseUp={handleMouseUp}
+            onMouseDown={handleMouseDown}
+            onContextMenu={handleContextMenu}
+          >
+            <Overlay />
 
-        <svg
-          id="main"
-          className="w-full h-full"
-          viewBox={`-50 -50 ${CANVAS_WIDTH + 50 * 2} ${CANVAS_HEIGHT + 50 * 2}`}
-          ref={canvasRef}
-        >
-          <rect
-            x="0"
-            y="0"
-            width={CANVAS_WIDTH}
-            height={CANVAS_HEIGHT}
-            fill="var(--color-canvas)"
-          />
-          {components}
-        </svg>
+            {/* scene outline */}
+            <svg
+              id="outline"
+              className="w-full h-full absolute pointer-events-none"
+              viewBox={`-50 -50 ${CANVAS_WIDTH + 50 * 2} ${CANVAS_HEIGHT + 50 * 2}`}
+              style={{ mixBlendMode: "difference" }}
+            >
+              <rect
+                x="0"
+                y="0"
+                width={CANVAS_WIDTH}
+                height={CANVAS_HEIGHT}
+                fill="none"
+                stroke="var(--color-backdrop-content)"
+                strokeWidth="1"
+              />
+            </svg>
+
+            <svg
+              id="main"
+              className="w-full h-full"
+              viewBox={`-50 -50 ${CANVAS_WIDTH + 50 * 2} ${CANVAS_HEIGHT + 50 * 2}`}
+              ref={canvasRef}
+            >
+              <rect
+                x="0"
+                y="0"
+                width={CANVAS_WIDTH}
+                height={CANVAS_HEIGHT}
+                fill="var(--color-canvas)"
+              />
+              {components}
+            </svg>
+          </div>
+        </div>
+
+        <ZoomControls />
       </div>
     </CanvasContext.Provider>
   );

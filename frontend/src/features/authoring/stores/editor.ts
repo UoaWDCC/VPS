@@ -6,6 +6,11 @@ import { getStyleForSelection } from "../scene/operations/text";
 
 type Mode = "normal" | "resize" | "create" | "text" | "mutation";
 
+const ZOOM_LEVELS = [0.5, 0.75, 1, 1.25, 1.5, 2];
+export const MIN_ZOOM = ZOOM_LEVELS[0];
+export const MAX_ZOOM = ZOOM_LEVELS[ZOOM_LEVELS.length - 1];
+const DEFAULT_ZOOM = 1;
+
 interface EditorState {
   loading: boolean;
   selected: string[];
@@ -15,6 +20,7 @@ interface EditorState {
   mutationBounds: Bounds;
   offset: Vec2;
   activeGuides: Guide[];
+  zoom: number;
 
   setSelected: (id: string[]) => void;
   setHovered: (id: string | null) => void;
@@ -23,6 +29,10 @@ interface EditorState {
   setMutationBounds: Dynamic<Bounds>;
   setOffset: (offset: Vec2) => void;
   setActiveGuides: (guides: Guide[]) => void;
+  setZoom: (zoom: number) => void;
+  zoomIn: () => void;
+  zoomOut: () => void;
+  resetZoom: () => void;
 
   // text editing
   selection: ModelSelection;
@@ -70,6 +80,7 @@ const useEditorStore = create<EditorState>((set) => ({
   mutationBounds: { verts: [], rotation: 0 },
   offset: { x: 0, y: 0 },
   activeGuides: [],
+  zoom: DEFAULT_ZOOM,
 
   setLoading: (value: boolean) => set({ loading: value }),
   setSelected: (id) => set({ selected: id }),
@@ -79,6 +90,19 @@ const useEditorStore = create<EditorState>((set) => ({
   setMutationBounds: setter(set, "mutationBounds"),
   setOffset: (offset) => set({ offset }),
   setActiveGuides: (guides) => set({ activeGuides: guides }),
+  setZoom: (zoom) =>
+    set({ zoom: Math.min(Math.max(zoom, MIN_ZOOM), MAX_ZOOM) }),
+  zoomIn: () =>
+    set((state) => ({
+      zoom: ZOOM_LEVELS.find((level) => level > state.zoom) ?? MAX_ZOOM,
+    })),
+  zoomOut: () =>
+    set((state) => ({
+      zoom:
+        [...ZOOM_LEVELS].reverse().find((level) => level < state.zoom) ??
+        MIN_ZOOM,
+    })),
+  resetZoom: () => set({ zoom: DEFAULT_ZOOM }),
 
   selection: { start: null, end: null },
   visualSelection: { start: null, end: null },
