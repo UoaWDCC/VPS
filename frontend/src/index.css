@@ -283,6 +283,10 @@ body,
   margin: 0;
 }
 
+.btn:active:not(.btn-active) {
+  @apply translate-none;
+}
+
 .btn.btn-phantom {
   @apply btn-ghost font-normal text-primary hover:text-secondary border-none shadow-none bg-transparent;
 }
