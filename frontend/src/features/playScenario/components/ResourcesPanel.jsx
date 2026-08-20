@@ -1,34 +1,53 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
-import { getAuth } from "firebase/auth";
-import axios from "axios";
-import toast from "react-hot-toast";
+import React, { useContext, useEffect, useState } from "react";
 import ResourceTree from "./ResourceTree";
-import ResourcePreview from "./ResourcePreview";
 import {
   ListChevronsDownUpIcon,
   ListChevronsUpDownIcon,
   XIcon,
 } from "lucide-react";
-import { getDownloadUrl } from "../hooks/useDownloadUrl";
-import { filterTreeByConditions } from "../../../utils/stateConditionalEvaluator";
+import { filterTreeByConditions } from "../../../utils/propertyConditionalEvaluator";
+import { filterTreeBySearch, normaliseFile } from "../../resources/util";
+import { api } from "../../../util/api";
+import { useQuery } from "@tanstack/react-query";
+import AuthenticationContext from "../../../context/AuthenticationContext";
+import ResourcePreview from "../../resources/ResourcePreview";
+import SkeletonBody from "../../resources/ResourcesSkeleton";
+
+function buildResourceTree(resources) {
+  const collections = resources.filter((r) => r.type === "collection");
+  const files = resources.filter((r) => r.type === "file").map(normaliseFile);
+
+  const grouped = collections.map((collection) => ({
+    _id: collection._id,
+    name: collection.name,
+    type: "collection",
+    stateConditionals: collection.stateConditionals,
+    children: files.filter(
+      (f) => String(f.parentId) === String(collection._id)
+    ),
+  }));
+
+  const orphanFiles = files.filter((f) => !f.parentId);
+
+  return [...grouped, ...orphanFiles];
+}
+
+async function getResources(user, scenarioId) {
+  const res = await api.get(user, `/api/resources/${scenarioId}`);
+  return res.data;
+}
 
 export default function ResourcesPanel({
   scenarioId,
-  stateVariables,
+  properties,
   open,
   onClose,
 }) {
-  const [loading, setLoading] = useState(false);
-  const [tree, setTree] = useState([]);
-  const [error, setError] = useState(null);
+  const { user } = useContext(AuthenticationContext);
 
   const [search, setSearch] = useState("");
-  const [selectedFileId, setSelectedFileId] = useState(null);
-  const [selectedFile, setSelectedFile] = useState(null);
-
-  // Expanded groups
+  const [selectedResourceId, setSelectedResourceId] = useState(null);
   const [openGroups, setOpenGroups] = useState(() => new Set());
-  const dialogRef = useRef(null);
 
   // Close on Escape
   useEffect(() => {
@@ -40,86 +59,23 @@ export default function ResourcesPanel({
     return () => window.removeEventListener("keydown", onKey);
   }, [open, onClose]);
 
-  async function fetchTree() {
-    try {
-      setLoading(true);
-      setError(null);
-      const user = getAuth().currentUser;
-      if (!user) {
-        toast.error("You must be logged in to view resources.");
-        setLoading(false);
-        return;
-      }
-      const idToken = await user.getIdToken();
-      const { data } = await axios.get(`/api/collections/tree/${scenarioId}`, {
-        headers: { Authorization: `Bearer ${idToken}` },
-      });
+  const { data, isLoading, isError, error } = useQuery({
+    queryKey: ["resources", scenarioId, user],
+    queryFn: () => getResources(user, scenarioId),
+  });
 
-      // ✅ Normalized: groups → files
-      const normalized =
-        (data || []).map((g) => ({
-          id: g._id,
-          name: g.name,
-          order: g.order ?? 0,
-          stateConditionals: g.stateConditionals || [],
-          files: (g.files || []).map((f) => ({
-            id: f._id,
-            name: f.name,
-            size: f.size,
-            type: f.type,
-            createdAt: f.createdAt,
-            stateConditionals: f.stateConditionals || [],
-          })),
-        })) || [];
+  // NOTE: property filters can't change while the resources panel is
+  // open, so deselecting on resource hiding isn't a concern
+  const foundResource = data?.find((r) => r._id === selectedResourceId);
+  const selectedResource = foundResource ? normaliseFile(foundResource) : null;
 
-      const filteredTree = filterTreeByConditions(normalized, stateVariables);
-
-      setTree(filteredTree);
-      setLoading(false);
-
-      if (selectedFileId) {
-        const f = findFileById(filteredTree, selectedFileId);
-        setSelectedFile(f || null);
-      }
-    } catch (err) {
-      console.error(err);
-      setError(
-        err?.response?.data?.error || err.message || "Failed to load resources"
-      );
-      toast.error("Failed to load resources");
-      setLoading(false);
-    }
-  }
-
-  useEffect(() => {
-    if (open && scenarioId) fetchTree();
-  }, [open, scenarioId, stateVariables]);
-
-  // Filtered tree for search
-  const filteredTree = useMemo(() => {
-    if (!search.trim()) return tree;
-    const q = search.trim().toLowerCase();
-    return tree
-      .map((g) => {
-        const matchingFiles = (g.files || []).filter((f) => {
-          const inName = f.name.toLowerCase().includes(q);
-          const inPath = g.name.toLowerCase().includes(q);
-          return inName || inPath;
-        });
-        if (matchingFiles.length === 0) return null;
-        return { ...g, files: matchingFiles };
-      })
-      .filter(Boolean);
-  }, [tree, search]);
-
-  function handleSelectFile(file) {
-    setSelectedFileId(file?.id || null);
-    setSelectedFile(file || null);
-  }
-
-  function handleRetry() {
-    fetchTree();
-  }
+  const resourceTree = buildResourceTree(data ?? []);
+  // NOTE: the filtering by properties should ideally be done on the
+  // server to prevent cheating, but here we filter before rendering
+  const filteredTree = (() => {
+    const filtered = filterTreeByConditions(resourceTree, properties);
+    return filterTreeBySearch(filtered, search);
+  })();
 
   const toggleGroup = (gid) => {
     setOpenGroups((prev) => {
@@ -131,7 +87,7 @@ export default function ResourcesPanel({
   };
 
   const expandAll = () => {
-    const allGroups = new Set(tree.map((g) => g.id));
+    const allGroups = new Set(resourceTree.map((g) => g._id));
     setOpenGroups(allGroups);
   };
 
@@ -144,7 +100,7 @@ export default function ResourcesPanel({
   return (
     <>
       <div
-        className={`fixed inset-0 z-50 bg-black/90 transition-opacity ${
+        className={`fixed inset-0 z-50 bg-base-100/95 transition-opacity ${
           open
             ? "opacity-100 pointer-events-auto"
             : "opacity-0 pointer-events-none"
@@ -165,127 +121,98 @@ export default function ResourcesPanel({
         onClick={onClose}
       >
         <div
-          ref={dialogRef}
-          className="shadow-2xl w-full h-full overflow-hidden font-ibm"
+          className="relative h-dvh w-full overflow-hidden font-ibm shadow-2xl"
           onClick={stopPropagation}
         >
-          <div className="u-container w-full pt-4xl">
-            <div className="flex justify-between items-center mb-l">
-              <h1 className="text-xl">Resources </h1>
-              <button
-                className="btn btn-phantom btn-sm"
-                onClick={onClose}
-                aria-label="Close"
-              >
-                <XIcon size={32} />
-              </button>
-            </div>
-            {/* Search */}
-            <div className="p-3">
-              <div className="flex gap-2 mb-2">
-                <input
-                  type="text"
-                  className="flex-1 outline-none pb-3 border-0 border-b-1 border-primary"
-                  placeholder="Search files or group name"
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                />
-                <button
-                  className="btn btn-phantom btn-sm"
-                  onClick={expandAll}
-                  title="Expand all"
-                  disabled={loading || !tree.length}
-                >
-                  <ListChevronsDownUpIcon size={20} />
-                </button>
-                <button
-                  className="btn btn-phantom btn-sm"
-                  onClick={collapseAll}
-                  title="Collapse all"
-                  disabled={loading || !tree.length}
-                >
-                  <ListChevronsUpDownIcon size={20} />
-                </button>
-              </div>
-            </div>
-            <div className="p-3 h-[calc(100%-112px)] overflow-hidden">
-              {loading ? (
-                <SkeletonBody />
-              ) : error ? (
-                <div className="h-full flex flex-col items-center justify-center gap-3">
-                  <div className="alert alert-error max-w-md">
-                    <span>{error}</span>
-                  </div>
-                  <button className="btn btn-sm" onClick={handleRetry}>
-                    Retry
+          <div className="u-container h-full w-full overflow-y-auto py-l lg:overflow-hidden lg:py-4xl">
+            <div className="grid min-h-full grid-cols-1 gap-3 lg:h-full lg:min-h-0 lg:grid-cols-3">
+              <div className="flex min-h-[35dvh] flex-col lg:min-h-0">
+                <h1 className="mb-l pr-3xl text-xl">Resources</h1>
+
+                <div className="mb-2 flex flex-none gap-2 py-3">
+                  <label htmlFor="resource-search" className="sr-only">
+                    Search files and collections
+                  </label>
+                  <input
+                    id="resource-search"
+                    type="search"
+                    className="flex-1 border-0 border-b-1 border-primary pb-3 outline-none"
+                    placeholder="Search files and collections"
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                  />
+                  <button
+                    className="btn btn-phantom btn-sm"
+                    onClick={expandAll}
+                    title="Expand all"
+                    disabled={isLoading || !resourceTree.length}
+                  >
+                    <ListChevronsDownUpIcon size={20} />
+                  </button>
+                  <button
+                    className="btn btn-phantom btn-sm"
+                    onClick={collapseAll}
+                    title="Collapse all"
+                    disabled={isLoading || !resourceTree.length}
+                  >
+                    <ListChevronsUpDownIcon size={20} />
                   </button>
                 </div>
-              ) : (filteredTree?.length ?? 0) === 0 ? (
-                <div className="h-full flex items-center justify-center">
-                  <div className="text-center opacity-70">
-                    <p>No resources available for this scenario.</p>
-                    <p className="text-sm">
-                      Ask the author to upload files in the authoring UI.
-                    </p>
-                  </div>
-                </div>
-              ) : (
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 h-full">
-                  <div className="overflow-auto rounded-lg">
+
+                <div className="min-h-0 flex-1 overflow-auto rounded-lg py-3">
+                  {isLoading ? (
+                    <SkeletonBody />
+                  ) : isError ? (
+                    <div className="flex h-full flex-col items-center justify-center gap-3">
+                      <div className="alert alert-error max-w-md">
+                        <span>{error.message}</span>
+                      </div>
+                    </div>
+                  ) : (filteredTree?.length ?? 0) === 0 ? (
+                    <div className="flex h-full items-center justify-center">
+                      <div className="text-center opacity-70">
+                        {search.trim() ? (
+                          <p>No matching resources found.</p>
+                        ) : (
+                          <>
+                            <p>No resources available for this scenario.</p>
+                            <p className="text-sm">
+                              Ask the author to upload files in the authoring
+                              UI.
+                            </p>
+                          </>
+                        )}
+                      </div>
+                    </div>
+                  ) : (
                     <ResourceTree
                       tree={filteredTree}
                       search={search}
-                      onSelectFile={handleSelectFile}
-                      selectedFileId={selectedFileId}
+                      onSelectFile={(r) => setSelectedResourceId(r._id)}
+                      selectedFileId={selectedResource?._id}
                       openGroups={openGroups}
                       toggleGroup={toggleGroup}
                     />
-                  </div>
-                  <div className="col-span-2 overflow-auto rounded-lg">
-                    <ResourcePreview
-                      file={selectedFile}
-                      getDownloadUrl={getDownloadUrl}
-                    />
-                  </div>
+                  )}
                 </div>
-              )}
+              </div>
+
+              <div className="relative min-h-[60dvh] rounded-lg lg:col-span-2 lg:min-h-0">
+                <button
+                  className="btn btn-phantom btn-sm absolute right-3 top-2 z-10"
+                  onClick={onClose}
+                  aria-label="Close"
+                >
+                  <XIcon size={32} />
+                </button>
+                <div className="h-full overflow-auto pb-[max(1rem,env(safe-area-inset-bottom))]">
+                  <ResourcePreview file={selectedResource} />
+                </div>
+              </div>
             </div>
           </div>
         </div>
       </div>
     </>
   );
-}
-
-function SkeletonBody() {
-  return (
-    <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 h-full">
-      <div className="space-y-2">
-        <div className="skeleton h-5 w-1/2" />
-        <div className="skeleton h-4 w-2/3" />
-        <div className="skeleton h-4 w-3/5" />
-        <div className="skeleton h-4 w-1/2" />
-        <div className="skeleton h-4 w-2/3" />
-      </div>
-      <div className="space-y-2 col-span-2">
-        <div className="skeleton h-6 w-3/4" />
-        <div className="skeleton h-48 w-full" />
-        <div className="skeleton h-4 w-1/3" />
-      </div>
-    </div>
-  );
-}
-
-function findFileById(tree, id) {
-  for (const g of tree) {
-    for (const f of g.files || []) {
-      if (f.id === id)
-        return {
-          ...f,
-          groupId: g.id,
-          groupName: g.name,
-        };
-    }
-  }
-  return null;
 }

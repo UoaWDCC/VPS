@@ -1,20 +1,22 @@
 import { Router } from "express";
 import auth from "../../middleware/firebaseAuth.js";
 import scenarioAuth from "../../middleware/scenarioAuth.js";
-import validScenarioId from "../../middleware/validScenarioId.js";
 
 import {
   createScenario,
-  createStateVariable,
+  createProperty,
   deleteScenario,
-  getStateVariables,
+  getProperties,
   retrieveScenario,
   retrieveScenarioList,
+  retrieveRoleList,
   retrieveAccessibleScenarios,
   updateDurations,
   updateScenario,
-  editStateVariable,
-  deleteStateVariable,
+  editProperty,
+  deleteProperty,
+  createRole,
+  deleteRole,
 } from "../../db/daos/scenarioDao.js";
 
 import { retrieveAssignedScenarioList } from "../../db/daos/userDao.js";
@@ -22,6 +24,7 @@ import { retrieveAssignedScenarioList } from "../../db/daos/userDao.js";
 import scene from "./scene.js";
 import { deleteAccessList } from "../../db/daos/accessDao.js";
 import { handle, HttpError } from "../../util/error.js";
+import { normaliseString } from "../../util/normalise.js";
 
 const router = Router();
 
@@ -81,7 +84,6 @@ router.post(
 );
 
 // Apply scenario auth middleware
-router.use("/:scenarioId", validScenarioId);
 router.use("/:scenarioId", scenarioAuth);
 
 // Get a scenario by id.
@@ -125,7 +127,7 @@ router.patch(
   })
 );
 
-// Delete a scenario of a user
+// Delete a scenario
 router.delete("/:scenarioId", async (req, res) => {
   const deleted = await deleteScenario(req.params.scenarioId);
   await deleteAccessList(req.params.scenarioId);
@@ -136,45 +138,76 @@ router.delete("/:scenarioId", async (req, res) => {
   }
 });
 
-// Get the state variables of a scenario
-router.get("/:scenarioId/stateVariables", async (req, res) => {
-  const scenario = await getStateVariables(req.params.scenarioId);
+// Get the properties of a scenario
+router.get("/:scenarioId/properties", async (req, res) => {
+  const scenario = await getProperties(req.params.scenarioId);
   res.status(HTTP_OK).json(scenario);
 });
 
-// Create a new state variable for a scenario
-router.post("/:scenarioId/stateVariables", async (req, res) => {
-  const { newStateVariable } = req.body;
-  let updatedStateVariables = await createStateVariable(
+// Create a new property for a scenario
+router.post("/:scenarioId/properties", async (req, res) => {
+  const { newProperty } = req.body;
+  let updatedProperties = await createProperty(
     req.params.scenarioId,
-    newStateVariable
+    newProperty
   );
 
-  res.status(HTTP_OK).json(updatedStateVariables);
+  res.status(HTTP_OK).json(updatedProperties);
 });
 
-// Edit a state variable for a scenario
-router.put("/:scenarioId/stateVariables", async (req, res) => {
-  const { originalName, newStateVariable } = req.body;
-  let updatedStateVariables = await editStateVariable(
+// Edit a property for a scenario
+router.put("/:scenarioId/properties", async (req, res) => {
+  const { originalName, newProperty } = req.body;
+  let updatedProperties = await editProperty(
     req.params.scenarioId,
     originalName,
-    newStateVariable
+    newProperty
   );
 
-  res.status(HTTP_OK).json(updatedStateVariables);
+  res.status(HTTP_OK).json(updatedProperties);
 });
 
-// Delete a state variable from a scenario
+// Delete a property from a scenario
 router.delete(
-  "/:scenarioId/stateVariables/:stateVariableIdentifier",
+  "/:scenarioId/properties/:propertyIdentifier",
   async (req, res) => {
-    let updatedStateVariables = await deleteStateVariable(
+    let updatedProperties = await deleteProperty(
       req.params.scenarioId,
-      req.params.stateVariableIdentifier
+      req.params.propertyIdentifier
     );
-    res.status(HTTP_OK).json(updatedStateVariables);
+    res.status(HTTP_OK).json(updatedProperties);
   }
+);
+
+// Get the role list of a scenario
+router.get(
+  "/:scenarioId/roles",
+  handle(async (req, res) => {
+    const roleList = await retrieveRoleList(req.params.scenarioId);
+    res.status(HTTP_OK).json(roleList);
+  })
+);
+
+// Create a new role for a scenario
+router.post(
+  "/:scenarioId/roles",
+  handle(async (req, res) => {
+    const { role } = req.body;
+    if (!normaliseString(role))
+      throw new HttpError("role name is required", HTTP_BAD_REQUEST);
+    const roleList = await createRole(req.params.scenarioId, role);
+    res.status(HTTP_OK).json(roleList);
+  })
+);
+
+// Delete a role from a scenario
+router.delete(
+  "/:scenarioId/roles/:role",
+  handle(async (req, res) => {
+    const { scenarioId, role } = req.params;
+    const roleList = await deleteRole(scenarioId, role);
+    res.status(HTTP_OK).json(roleList);
+  })
 );
 
 export default router;

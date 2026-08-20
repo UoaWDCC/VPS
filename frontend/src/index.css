@@ -11,6 +11,11 @@
   --color-white-rgb: 255, 255, 255;
   --color-grey: #898989;
   --color-offwhite: #fafafa;
+  --color-canvas: var(--color-white);
+  --color-canvas-surround: var(--color-black);
+  --color-backdrop: var(--color-black);
+  --color-backdrop-content: var(--color-white);
+  --color-selection: #4997ff80;
 
   /* Utopia Fluid Type */
   /* @link https://utopia.fyi/type/calculator?c=1024,14,1.125,1600,16,1.125,6,2,&s=0.75|0.5|0.25,1.5|2|3|4|6,s-l&g=s,l,xl,12 */
@@ -98,29 +103,65 @@
   color-scheme: light;
 
   --color-base-100: var(--color-offwhite);
+  --color-base-200: color-mix(
+    in srgb,
+    var(--color-base-100) 96%,
+    var(--color-base-content)
+  );
+  --color-base-300: color-mix(
+    in srgb,
+    var(--color-base-100) 92%,
+    var(--color-base-content)
+  );
   --color-base-content: var(--color-black);
   --color-base-content-rgb: var(--color-black-rgb);
   --color-base-content-box-shadow: 0 0 2px 1px rgba(var(--color-black-rgb), 0.2);
   --color-primary: var(--color-grey);
+  --color-primary-content: var(--color-black);
   --color-secondary: var(--color-black);
+  --color-secondary-content: var(--color-white);
+  --color-accent: #0080a7;
+  --color-accent-content: var(--color-white);
+  --color-neutral: var(--color-base-content);
+  --color-neutral-content: var(--color-base-100);
+  --color-success: #367a2f;
+  --color-success-content: var(--color-white);
   --color-error: #c13216;
+  --color-error-content: var(--color-white);
 }
 
 @plugin "daisyui/theme" {
   name: "vps-dark";
   default: true;
-  prefersdark: true;
+  prefersdark: false;
   color-scheme: dark;
 
-  --color-base-100: var(--color-black);
-  --color-base-200: #0d0d0d;
-  --color-base-300: #151515;
+  --color-base-100: #1a1a1e;
+  --color-base-200: color-mix(
+    in srgb,
+    var(--color-base-100) 96%,
+    var(--color-base-content)
+  );
+  --color-base-300: color-mix(
+    in srgb,
+    var(--color-base-100) 92%,
+    var(--color-base-content)
+  );
   --color-base-content: var(--color-white);
   --color-base-content-rgb: var(--color-white-rgb);
   --color-base-content-box-shadow: 0 0 2px 1px rgba(var(--color-white-rgb), 0.2);
   --color-primary: var(--color-grey);
+  --color-primary-content: var(--color-black);
   --color-secondary: var(--color-white);
+  --color-secondary-content: var(--color-black);
+  --color-accent: #0080a7;
+  --color-accent-content: var(--color-white);
+  --color-neutral: var(--color-base-content);
+  --color-neutral-content: var(--color-base-100);
+  --color-success: #367a2f;
+  --color-success-content: var(--color-white);
   --color-error: #c13216;
+  --color-error-content: var(--color-white);
 }
 
 /* MonaSans - licensed under OFL. See https://github.com/github/mona-sans/blob/main/LICENSE */
@@ -148,6 +189,7 @@ body,
   width: 100%;
   height: 100%;
   background-color: var(--color-base-100);
+  color: var(--color-base-content);
 }
 
 /* Utopia Grid Styles */
@@ -206,11 +248,11 @@ body,
 
 /* Hover effect: drop-shadow */
 .btn.vps-diamond:hover {
-  box-shadow: 0 0 32px 8px rgba(255, 255, 255, 0.15);
+  box-shadow: 0 0 32px 8px rgba(var(--color-base-content-rgb), 0.15);
 }
 
 .btn.important {
-  @apply bg-error border-error text-primary hover:opacity-85;
+  @apply bg-error border-error text-error-content hover:opacity-85;
 }
 
 .btn:disabled {

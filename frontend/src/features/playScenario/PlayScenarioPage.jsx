@@ -8,13 +8,31 @@ import { usePost } from "hooks/crudHooks";
 
 import LoadingPage from "../status/LoadingPage";
 import PlayScenarioCanvas from "./PlayScenarioCanvas";
-import { applyStateOperations } from "../../components/StateVariables/stateOperations";
+import { applyPropertyOperations } from "../../components/Properties/propertyOperations";
 import NotesPanel from "./components/NotesPanel";
 import ResourcesPanel from "./components/ResourcesPanel";
 import SceneTimer from "./components/SceneTimer";
 import { PlayIcon } from "lucide-react";
 
 const sceneCache = new Map();
+
+// Caches the scenes from a navigate response and patches in the
+// server-authoritative remaining time for the active scene, so a refresh
+// resumes the countdown instead of restarting it.
+function cacheNavigateResponse(data) {
+  if (data.scenes) {
+    data.scenes.forEach((scene) => sceneCache.set(scene._id, scene));
+  }
+  if (data.active && data.remainingTime != null) {
+    const active = sceneCache.get(data.active);
+    if (active) active.remainingTime = data.remainingTime;
+  }
+  return {
+    newSceneId: data.active,
+    properties: data.properties,
+    newPropertyVersion: data.propertyVersion,
+  };
+}
 
 const navigateSingleplayer = async (
   user,
@@ -44,14 +62,7 @@ const navigateSingleplayer = async (
     },
   };
   const res = await axios.request(config);
-  if (res.data.scenes) {
-    res.data.scenes.forEach((scene) => sceneCache.set(scene._id, scene));
-  }
-  return {
-    newSceneId: res.data.active,
-    stateVariables: res.data.stateVariables,
-    newStateVersion: res.data.stateVersion,
-  };
+  return cacheNavigateResponse(res.data);
 };
 
 const navigateMultiplayer = async (
@@ -74,14 +85,7 @@ const navigateMultiplayer = async (
     data: { currentScene, addFlags, removeFlags, componentId, nextScene },
   };
   const res = await axios.request(config);
-  if (res.data.scenes) {
-    res.data.scenes.forEach((scene) => sceneCache.set(scene._id, scene));
-  }
-  return {
-    newSceneId: res.data.active,
-    stateVariables: res.data.stateVariables,
-    newStateVersion: res.data.stateVersion,
-  };
+  return cacheNavigateResponse(res.data);
 };
 
 function playAudios(scene) {
@@ -118,8 +122,8 @@ export default function PlayScenarioPage({ group }) {
   );
 
   const [sceneId, setSceneId] = useState(null);
-  const [stateVariables, setStateVariables] = useState([]);
-  const [stateVersion, setStateVersion] = useState(0);
+  const [properties, setProperties] = useState([]);
+  const [propertyVersion, setPropertyVersion] = useState(0);
   const [addFlags, setAddFlags] = useState([]);
   const [removeFlags, setRemoveFlags] = useState([]);
 
@@ -151,12 +155,10 @@ export default function PlayScenarioPage({ group }) {
       const component = currScene?.components?.find(
         (comp) => comp.id === componentId
       );
-      const stateOperations = component?.stateOperations;
-      if (stateOperations) {
-        setStateVersion(stateVersion + 1);
-        setStateVariables(
-          applyStateOperations(stateVariables, stateOperations)
-        );
+      const propertyOperations = component?.stateOperations;
+      if (propertyOperations) {
+        setPropertyVersion(propertyVersion + 1);
+        setProperties(applyPropertyOperations(properties, propertyOperations));
       }
     }
 
@@ -164,7 +166,7 @@ export default function PlayScenarioPage({ group }) {
     startSceneRef.current = null; // Clear before the await so a concurrent retry (409 handler) never replays it.
 
     try {
-      const { newSceneId, stateVariables, newStateVersion } = isMultiplayer
+      const { newSceneId, properties, newPropertyVersion } = isMultiplayer
         ? await navigateMultiplayer(
             user,
             group._id,
@@ -184,9 +186,9 @@ export default function PlayScenarioPage({ group }) {
             startScene
           );
 
-      if (stateVersion < newStateVersion) {
-        setStateVariables(stateVariables);
-        setStateVersion(newStateVersion);
+      if (propertyVersion < newPropertyVersion) {
+        setProperties(properties);
+        setPropertyVersion(newPropertyVersion);
       }
       if (!sceneId && newSceneId) {
         setSceneId(newSceneId);
@@ -219,7 +221,7 @@ export default function PlayScenarioPage({ group }) {
       if (e.code === "Space" || e.key === "ArrowRight") {
         e.preventDefault();
         try {
-          const { newSceneId, stateVariables, newStateVersion } = isMultiplayer
+          const { newSceneId, properties, newPropertyVersion } = isMultiplayer
             ? await navigateMultiplayer(
                 user,
                 group._id,
@@ -238,9 +240,9 @@ export default function PlayScenarioPage({ group }) {
                 null,
                 currScene.directLink
               );
-          if (stateVersion < newStateVersion) {
-            setStateVariables(stateVariables);
-            setStateVersion(newStateVersion);
+          if (propertyVersion < newPropertyVersion) {
+            setProperties(properties);
+            setPropertyVersion(newPropertyVersion);
           }
           if (newSceneId) {
             if (sceneCache.get(newSceneId)?.error) {
@@ -257,14 +259,14 @@ export default function PlayScenarioPage({ group }) {
 
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-  }, [currScene, sceneId, stateVariables, stateVersion, addFlags, removeFlags]);
+  }, [currScene, sceneId, properties, propertyVersion, addFlags, removeFlags]);
 
   const handleTimerTimeout = () => {
     const timerStateOperations = currScene?.timerStateOperations;
     if (!timerStateOperations?.length) return;
-    setStateVersion((v) => v + 1);
-    setStateVariables((prev) =>
-      applyStateOperations(prev, timerStateOperations)
+    setPropertyVersion((v) => v + 1);
+    setProperties((prev) =>
+      applyPropertyOperations(prev, timerStateOperations)
     );
   };
 
@@ -330,6 +332,7 @@ export default function PlayScenarioPage({ group }) {
           <SceneTimer
             key={sceneId}
             duration={currScene.time}
+            initialSeconds={currScene.remainingTime ?? currScene.time}
             onTimeout={handleTimerTimeout}
           />
         </div>
@@ -349,7 +352,7 @@ export default function PlayScenarioPage({ group }) {
         setAddFlags={setAddFlags}
         setRemoveFlags={setRemoveFlags}
         buttonPressed={buttonPressed}
-        stateVariables={stateVariables}
+        properties={properties}
       />
 
       <div className="absolute top-2 right-2 z-30 flex items-center gap-2">
@@ -380,7 +383,7 @@ export default function PlayScenarioPage({ group }) {
       )}
       <ResourcesPanel
         scenarioId={scenarioId}
-        stateVariables={stateVariables}
+        properties={properties}
         open={resourcesOpen}
         onClose={() => setResourcesOpen(false)}
       />

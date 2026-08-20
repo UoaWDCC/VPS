@@ -8,7 +8,6 @@ import Scene from "../../../db/models/scene.js";
 import Group from "../../../db/models/group.js";
 import User from "../../../db/models/user.js";
 import Note from "../../../db/models/note.js";
-import Resource from "../../../db/models/resource.js";
 import auth from "../../../middleware/firebaseAuth.js";
 import { authHeaders } from "./testHelpers.js";
 import {
@@ -89,7 +88,7 @@ describe("Navigate Group API tests", () => {
     expect(response.status).toBe(200);
     // Returns the active scene and connected scenes
     expect(response.data.active).toBe(scene1._id.toString());
-    expect(response.data.stateVariables).toBeDefined();
+    expect(response.data.properties).toBeDefined();
 
     // Group path should now contain scene1
     const dbGroup = await Group.findById(group._id);
@@ -119,6 +118,55 @@ describe("Navigate Group API tests", () => {
     ).rejects.toMatchObject({ response: { status: 404 } });
   });
 
+  it("POST /navigate/group/:groupId allows access when role casing differs (case-insensitive match)", async () => {
+    // scene1 is gated to "doctor" (lowercase), but the group member's role
+    // was uploaded as "Doctor" (capitalised) - access should still be granted
+    await Scene.findByIdAndUpdate(scene1._id, { roles: ["doctor"] });
+    await Group.findByIdAndUpdate(group._id, {
+      users: [{ email: user.email, name: user.name, role: "Doctor" }],
+    });
+
+    const response = await axios.post(
+      `http://localhost:${ctx.port}/api/navigate/group/${group._id}`,
+      { uid: "uid-player", addFlags: [], removeFlags: [] },
+      authHeaders("uid-player")
+    );
+    expect(response.status).toBe(200);
+    expect(response.data.active).toBe(scene1._id.toString());
+  });
+
+  it("POST /navigate/group/:groupId allows access when role has stray whitespace (trim-insensitive match)", async () => {
+    // scene1 is gated to "doctor", but the group member's role has stray
+    // whitespace from an untrimmed CSV cell - access should still be granted
+    await Scene.findByIdAndUpdate(scene1._id, { roles: ["doctor"] });
+    await Group.findByIdAndUpdate(group._id, {
+      users: [{ email: user.email, name: user.name, role: " doctor " }],
+    });
+
+    const response = await axios.post(
+      `http://localhost:${ctx.port}/api/navigate/group/${group._id}`,
+      { uid: "uid-player", addFlags: [], removeFlags: [] },
+      authHeaders("uid-player")
+    );
+    expect(response.status).toBe(200);
+    expect(response.data.active).toBe(scene1._id.toString());
+  });
+
+  it("POST /navigate/group/:groupId returns 403 when the group member's role has no access", async () => {
+    await Scene.findByIdAndUpdate(scene1._id, { roles: ["nurse"] });
+    await Group.findByIdAndUpdate(group._id, {
+      users: [{ email: user.email, name: user.name, role: "doctor" }],
+    });
+
+    await expect(
+      axios.post(
+        `http://localhost:${ctx.port}/api/navigate/group/${group._id}`,
+        { uid: "uid-player", addFlags: [], removeFlags: [] },
+        authHeaders("uid-player")
+      )
+    ).rejects.toMatchObject({ response: { status: 403 } });
+  });
+
   it("POST /navigate/group/:groupId returns 404 when user exists but is not in the group", async () => {
     // Create a user that is NOT a member of the group
     await User.create({
@@ -133,56 +181,6 @@ describe("Navigate Group API tests", () => {
         `http://localhost:${ctx.port}/api/navigate/group/${group._id}`,
         { uid: "uid-stranger", addFlags: [], removeFlags: [] },
         authHeaders("uid-stranger")
-      )
-    ).rejects.toMatchObject({ response: { status: 404 } });
-  });
-
-  // --- GET /navigate/group/resources/:groupId ---
-
-  it("GET /navigate/group/resources/:groupId returns resources visible to the group", async () => {
-    // Resource with no required flags is always visible
-    await Resource.create({
-      name: "Open Resource",
-      type: "text",
-      scenarioId: scenario._id.toString(),
-      textContent: "content",
-      imageContent: "",
-      requiredFlags: [],
-    });
-
-    const response = await axios.get(
-      `http://localhost:${ctx.port}/api/navigate/group/resources/${group._id}`,
-      authHeaders("uid-player")
-    );
-    expect(response.status).toBe(200);
-    expect(response.data).toHaveLength(1);
-    expect(response.data[0].name).toBe("Open Resource");
-  });
-
-  it("GET /navigate/group/resources/:groupId filters resources by required flags", async () => {
-    await Resource.create({
-      name: "Gated Resource",
-      type: "text",
-      scenarioId: scenario._id.toString(),
-      textContent: "content",
-      imageContent: "",
-      requiredFlags: ["flag-unlocked"],
-    });
-
-    // group has no currentFlags → gated resource is not returned
-    const response = await axios.get(
-      `http://localhost:${ctx.port}/api/navigate/group/resources/${group._id}`,
-      authHeaders("uid-player")
-    );
-    expect(response.status).toBe(200);
-    expect(response.data).toHaveLength(0);
-  });
-
-  it("GET /navigate/group/resources/:groupId returns 404 for unknown group", async () => {
-    await expect(
-      axios.get(
-        `http://localhost:${ctx.port}/api/navigate/group/resources/000000000000000000000099`,
-        authHeaders("uid-player")
       )
     ).rejects.toMatchObject({ response: { status: 404 } });
   });
@@ -258,5 +256,185 @@ describe("Navigate Group API tests", () => {
 
     const dbNote = await Note.findById(note._id);
     expect(dbNote).toBeNull();
+  });
+
+  // --- Server-authoritative scene timer ---
+
+  describe("scene timer", () => {
+    it("returns the full remainingTime and stamps entry on first navigation", async () => {
+      await Scene.findByIdAndUpdate(scene1._id, { time: 120 });
+
+      const response = await axios.post(
+        `http://localhost:${ctx.port}/api/navigate/group/${group._id}`,
+        { uid: "uid-player", addFlags: [], removeFlags: [] },
+        authHeaders("uid-player")
+      );
+      expect(response.status).toBe(200);
+      expect(response.data.remainingTime).toBe(120);
+
+      const dbGroup = await Group.findById(group._id);
+      expect(dbGroup.currentSceneEnteredAt).toBeInstanceOf(Date);
+    });
+
+    it("resumes with a decreased remainingTime on re-entry (refresh cannot reset it)", async () => {
+      const timedScene = await Scene.create({
+        name: "Timed",
+        components: [],
+        roles: [],
+        time: 120,
+      });
+      const enteredAt = new Date(Date.now() - 30_000);
+      await Group.findByIdAndUpdate(group._id, {
+        path: [timedScene._id.toString()],
+        currentSceneEnteredAt: enteredAt,
+      });
+
+      const response = await axios.post(
+        `http://localhost:${ctx.port}/api/navigate/group/${group._id}`,
+        { uid: "uid-player", addFlags: [], removeFlags: [] }, // no currentScene → refresh
+        authHeaders("uid-player")
+      );
+      expect(response.status).toBe(200);
+      expect(response.data.remainingTime).toBeGreaterThan(85);
+      expect(response.data.remainingTime).toBeLessThanOrEqual(91);
+
+      const dbGroup = await Group.findById(group._id);
+      expect(dbGroup.currentSceneEnteredAt.getTime()).toBe(enteredAt.getTime());
+    });
+
+    it("resets remainingTime to full and restamps on a real scene move", async () => {
+      const componentId = "btn-go";
+      const clickScene = await Scene.create({
+        name: "Click",
+        components: [
+          {
+            id: componentId,
+            clickable: true,
+            nextScene: scene2._id,
+            type: "BUTTON",
+          },
+        ],
+        roles: [],
+        time: 60,
+      });
+      await Scene.findByIdAndUpdate(scene2._id, { time: 90 });
+
+      const enteredAt = new Date(Date.now() - 45_000);
+      await Group.findByIdAndUpdate(group._id, {
+        path: [clickScene._id.toString()],
+        currentSceneEnteredAt: enteredAt,
+      });
+
+      const response = await axios.post(
+        `http://localhost:${ctx.port}/api/navigate/group/${group._id}`,
+        {
+          uid: "uid-player",
+          currentScene: clickScene._id.toString(),
+          componentId,
+          addFlags: [],
+          removeFlags: [],
+        },
+        authHeaders("uid-player")
+      );
+      expect(response.status).toBe(200);
+      expect(response.data.active).toBe(scene2._id.toString());
+      expect(response.data.remainingTime).toBe(90);
+
+      const dbGroup = await Group.findById(group._id);
+      expect(dbGroup.currentSceneEnteredAt.getTime()).toBeGreaterThan(
+        enteredAt.getTime()
+      );
+    });
+
+    it("includes `time` on connected (not-yet-entered) scenes, not just the active one", async () => {
+      const componentId = "btn-go";
+      const timedTarget = await Scene.create({
+        name: "Timed Target",
+        components: [],
+        roles: [],
+        time: 75,
+      });
+      const linkingScene = await Scene.create({
+        name: "Linking",
+        components: [
+          {
+            id: componentId,
+            clickable: true,
+            nextScene: timedTarget._id,
+            type: "BUTTON",
+          },
+        ],
+        roles: [],
+      });
+      await Group.findByIdAndUpdate(group._id, {
+        path: [linkingScene._id.toString()],
+      });
+
+      const response = await axios.post(
+        `http://localhost:${ctx.port}/api/navigate/group/${group._id}`,
+        { uid: "uid-player", addFlags: [], removeFlags: [] }, // no currentScene → refresh
+        authHeaders("uid-player")
+      );
+      expect(response.status).toBe(200);
+      // linkingScene has no timer, so this is a refresh-style response whose
+      // `scenes` still includes the connected (not-yet-active) timed target.
+      const connected = response.data.scenes.find(
+        (s) => s._id === timedTarget._id.toString()
+      );
+      expect(connected.time).toBe(75);
+    });
+
+    it("returns the configured remainingTime for a scene that links back to itself", async () => {
+      const componentId = "btn-retry";
+      const selfLoopScene = await Scene.create({
+        name: "Self Loop",
+        components: [],
+        roles: [],
+        time: 45,
+      });
+      await Scene.findByIdAndUpdate(selfLoopScene._id, {
+        components: [
+          {
+            id: componentId,
+            clickable: true,
+            nextScene: selfLoopScene._id,
+            type: "BUTTON",
+          },
+        ],
+      });
+      await Group.findByIdAndUpdate(group._id, {
+        path: [selfLoopScene._id.toString()],
+      });
+
+      const response = await axios.post(
+        `http://localhost:${ctx.port}/api/navigate/group/${group._id}`,
+        { uid: "uid-player", addFlags: [], removeFlags: [] }, // no currentScene → refresh
+        authHeaders("uid-player")
+      );
+      expect(response.status).toBe(200);
+      expect(response.data.remainingTime).toBe(45);
+    });
+
+    it("clears the entry stamp on reset", async () => {
+      const resetScene = await Scene.create({
+        name: "Reset Timed",
+        components: [{ type: "RESET_BUTTON" }],
+        roles: [],
+        time: 60,
+      });
+      await Group.findByIdAndUpdate(group._id, {
+        path: [resetScene._id.toString()],
+        currentSceneEnteredAt: new Date(),
+      });
+
+      await axios.post(
+        `http://localhost:${ctx.port}/api/navigate/group/reset/${group._id}`,
+        { uid: "uid-player", currentScene: resetScene._id.toString() },
+        authHeaders("uid-player")
+      );
+
+      const dbGroup = await Group.findById(group._id);
+      expect(dbGroup.currentSceneEnteredAt).toBeNull();
+    });
   });
 });

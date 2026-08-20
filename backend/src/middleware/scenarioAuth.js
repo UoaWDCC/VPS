@@ -1,6 +1,8 @@
 import { HttpStatusCode } from "axios";
 import { retrieveScenario } from "../db/daos/scenarioDao.js";
 import { hasAccess } from "../db/daos/accessDao.js";
+import { isValidObjectId } from "../util/validation.js";
+import { HttpError } from "../util/error.js";
 
 /**
  * Checks if the scenario is accessable by the user
@@ -8,15 +10,20 @@ import { hasAccess } from "../db/daos/accessDao.js";
  */
 export default async function scenarioAuth(req, res, next) {
   try {
-    const scenario = await retrieveScenario(req.params.scenarioId);
-    if (!scenario) return res.sendStatus(HttpStatusCode.NotFound);
+    const { scenarioId } = req.params;
+    if (!isValidObjectId(scenarioId))
+      throw new HttpError("invalid scenario id", HttpStatusCode.BadRequest);
+
+    const scenario = await retrieveScenario(scenarioId);
+    if (!scenario)
+      throw new HttpError("scenario not found", HttpStatusCode.NotFound);
 
     // is direct owner or has been given access
     const { uid } = req.body;
     if (uid === scenario.uid || (await hasAccess(scenario._id, uid)))
       return next();
 
-    return res.sendStatus(HttpStatusCode.Unauthorized);
+    throw new HttpError("unauthorised", HttpStatusCode.Unauthorized);
   } catch (err) {
     return next(err);
   }
@@ -35,12 +42,17 @@ export async function isAuthor(scenarioId, uid) {
  */
 export async function scenarioOwnerAuth(req, res, next) {
   try {
-    const scenario = await retrieveScenario(req.params.scenarioId);
-    if (!scenario) return res.sendStatus(HttpStatusCode.NotFound);
+    const { scenarioId } = req.params;
+    if (!isValidObjectId(scenarioId))
+      throw new HttpError("invalid scenario id", HttpStatusCode.BadRequest);
+
+    const scenario = await retrieveScenario(scenarioId);
+    if (!scenario)
+      throw new HttpError("scenario not found", HttpStatusCode.NotFound);
 
     if (req.body.uid === scenario.uid) return next();
 
-    return res.sendStatus(HttpStatusCode.Unauthorized);
+    throw new HttpError("unauthorised", HttpStatusCode.Unauthorized);
   } catch (err) {
     return next(err);
   }

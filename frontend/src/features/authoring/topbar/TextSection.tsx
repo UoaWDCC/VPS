@@ -14,41 +14,24 @@ import NumberInput from "../wrapper/NumberInput";
 import ToggleInput from "../wrapper/ToggleInput";
 import ChromePicker from "../wrapper/ChromePicker";
 import MultiInput from "../wrapper/MultiInput";
-import { applySelectionStyle } from "../scene/operations/text";
-import { modifyComponentProp } from "../scene/operations/component";
 import type { BaseTextStyle } from "../types";
-import { syncVisualCursor } from "../text/cursor";
+import { setTextStyle } from "../text/style";
+import { getComponent } from "../scene/scene";
 
 function TextSection() {
-  const selected = useEditorStore((state) => state.selected)!; // this comp only renders when a text el is selected
-  const selection = useEditorStore((state) => state.selection);
+  const selected = useEditorStore((state) => state.selected); // this comp only renders when a text el is selected
 
   const style = useEditorStore((state) => state.activeStyle);
-  const setStyle = useEditorStore((state) => state.setActiveStyle);
 
   if (!style) return null;
 
   function modifyStyle(prop: keyof BaseTextStyle, value: string | number) {
-    if (selection?.end) {
-      const newSelection = applySelectionStyle(selected, selection, {
-        [prop]: value,
-      });
-      if (!newSelection) return;
-      useEditorStore.getState().setSelection(newSelection);
-      syncVisualCursor();
-    } else if (selection?.start) {
-      if (prop === "lineHeight" || prop === "alignment") {
-        modifyComponentProp(
-          selected,
-          `document.blocks.${selection.start.blockI}.style.${prop}`,
-          value
-        );
-      }
-    } else {
-      modifyComponentProp(selected, `document.style.${prop}`, value);
-    }
-
-    setStyle({ ...style!, [prop]: value });
+    // apply to every selected textbox
+    // a mixed selection can include non-textbox components (e.g. a shape),
+    // which don't have a `document` to write text style props onto
+    selected
+      .filter((id) => getComponent(id)?.type === "textbox")
+      .forEach((id) => setTextStyle(id, prop, value));
   }
 
   return (

@@ -1,94 +1,80 @@
-import { useRef, useState } from "react";
+import { useContext, useRef, useState, type Context } from "react";
 import { useQuery } from "@tanstack/react-query";
 import ImageListContainer from "../../components/ListContainer/ImageListContainer";
-import { getAuth } from "firebase/auth";
-import {
-  addDoc,
-  collection,
-  getDocs,
-  getFirestore,
-  query,
-  setDoc,
-  where,
-} from "firebase/firestore";
+import { type User } from "firebase/auth";
 import { useParams } from "react-router-dom";
 import { ImageIcon } from "lucide-react";
 import { add } from "./scene/operations/modifiers";
 import { defaults } from "./scene/operations/component";
-import type { ImageComponent } from "./types";
-import { getDownloadURL, getStorage, ref, uploadBytes } from "firebase/storage";
+import type { ImageComponent, UploadedFile, Scene } from "./types";
 import { api, handleGeneric } from "../../util/api";
 import ModalDialog from "../../components/ModalDialogue";
 import useEditorStore from "./stores/editor.ts";
 import toast from "react-hot-toast";
+import AuthenticationContext from "../../context/AuthenticationContext.jsx";
+import type { AxiosResponse } from "axios";
+import SceneContext from "../../context/SceneContext.jsx";
+import { getScene, getSceneId } from "./scene/scene";
+import { v4 } from "uuid";
 
-const storage = getStorage();
-const db = getFirestore();
+type ModifyScene = (scene: Scene) => Promise<unknown> | undefined;
 
-interface Image {
-  fileName: string;
-  id: string;
-  uid: string;
-  uploadedAt: string;
-  url: string;
-}
+const ACCEPTED_IMAGE_MIME_TYPES = [
+  "image/png",
+  "image/jpeg",
+  "image/webp",
+  "image/gif",
+];
 
-async function addExistingImage(image: Image | null) {
-  if (!image?.url) {
-    console.error("invalid image object:", image);
+async function addImageToScene(
+  image: UploadedFile,
+  originScene: Scene,
+  modifyScene: ModifyScene
+) {
+  const newImage = structuredClone(defaults.image) as Partial<ImageComponent>;
+
+  const imageId = v4();
+
+  newImage.id = imageId;
+  newImage.fileId = image._id;
+  newImage.href = image.url;
+  newImage.bounds!.verts = await getImageDimensions(image.url);
+
+  // Still on the slide where the operation began:
+  // add normally so visual state/history are updated.
+  if (getSceneId() === originScene._id) {
+    add(newImage);
     return;
   }
 
-  const newImage = structuredClone(defaults.image) as Partial<ImageComponent>;
-  newImage.href = image.url;
-  newImage.bounds!.verts = await getImageDimensions(image.url);
-  add(newImage);
+  // User moved to another slide while the image was loading.
+  // Add it to the original slide instead of the currently active one.
+  originScene.components[imageId] = newImage as ImageComponent;
+
+  await modifyScene(originScene);
 }
 
-// NOTE: this should be handled in the backend instead, and asynchronously (uploaded on save)
-
-async function addNewImage(fileObject: File) {
+async function addNewImage(
+  file: File,
+  scenarioId: string,
+  user: User,
+  originScene: Scene,
+  modifyScene: ModifyScene
+) {
   const { setLoading } = useEditorStore.getState();
-
   setLoading(true);
 
   try {
-    const auth = getAuth();
-    const user = auth.currentUser;
+    const formData = new FormData();
+    formData.append("file", file);
 
-    if (!user) return;
+    const response = (await api.post(
+      user,
+      `api/files/${scenarioId}`,
+      formData
+    )) as AxiosResponse<UploadedFile>;
 
-    // Upload image to Firebase Storage
-    const storageRef = ref(storage, `uploads/${fileObject.name}_${Date.now()}`);
-    const snapshot = await uploadBytes(storageRef, fileObject);
-    const downloadURL = await getDownloadURL(snapshot.ref);
-
-    // Save image URL and metadata in Firestore
-    const uploadedAt = new Date().toISOString();
-    const docRef = await addDoc(collection(db, "uploadedImages"), {
-      url: downloadURL,
-      uploadedAt,
-      fileName: fileObject.name,
-      uid: user.uid,
-    });
-    await setDoc(docRef, { id: docRef.id }, { merge: true });
-
-    // Notify your backend using centralized axios client (auth handled)
-    await api.post(user, "/api/image", {
-      images: [
-        {
-          id: docRef.id,
-          url: downloadURL,
-          fileName: fileObject.name,
-          uploadedAt,
-        },
-      ],
-    });
-
-    const newImage = structuredClone(defaults.image) as Partial<ImageComponent>;
-    newImage.href = downloadURL;
-    newImage.bounds!.verts = await getImageDimensions(downloadURL);
-    add(newImage);
+    await addImageToScene(response.data, originScene, modifyScene);
   } catch (e) {
     console.error(e);
     toast.error("Image upload failed");
@@ -108,44 +94,51 @@ async function getImageDimensions(url: string, defaultHeight = 300) {
   ];
 }
 
-async function fetchImages() {
-  const auth = getAuth();
-  const user = auth.currentUser;
-
-  if (!user) return;
-
-  const q = query(
-    collection(db, "uploadedImages"),
-    where("uid", "==", user.uid)
-  );
-
-  const snapshot = await getDocs(q);
-  const result = snapshot.docs.map((doc) => ({
-    id: doc.id,
-    ...doc.data(),
-  }));
-
-  return result;
+async function getImages(user: User, scenarioId: string) {
+  const res = (await api.get(
+    user,
+    `api/files/${scenarioId}/type/image`
+  )) as AxiosResponse<UploadedFile[]>;
+  return res.data;
 }
 
-const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-  const file = event.target.files?.[0];
-  if (file) addNewImage(file).catch(handleGeneric);
-};
-
 function ImageCreateMenu() {
-  const { scenarioId } = useParams<{ scenarioId?: string }>();
-  const [selectedImage, setSelectedImage] = useState<Image | null>(null);
+  const { scenarioId } = useParams<{ scenarioId: string }>();
+  const [selectedImage, setSelectedImage] = useState<UploadedFile | null>(null);
 
+  const { user } = useContext(AuthenticationContext as Context<{ user: User }>);
+  const { modifyScene } = useContext(
+    SceneContext as Context<{
+      modifyScene: ModifyScene;
+    }>
+  );
   const [modalOpen, setModalOpen] = useState(false);
 
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   const imagesQuery = useQuery({
-    queryFn: fetchImages,
+    queryFn: () => getImages(user, scenarioId),
     queryKey: ["images", scenarioId],
     enabled: !!scenarioId,
   });
+
+  function handleFileChange(event: React.ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0];
+    event.target.value = "";
+
+    if (!file) return;
+
+    if (!ACCEPTED_IMAGE_MIME_TYPES.includes(file.type)) {
+      toast.error("Unsupported file type");
+      return;
+    }
+
+    const originScene = getScene();
+
+    addNewImage(file, scenarioId, user, originScene, modifyScene).catch(
+      handleGeneric
+    );
+  }
 
   const showFilePicker = () => {
     fileInputRef.current?.click();
@@ -154,11 +147,16 @@ function ImageCreateMenu() {
   function showModal() {
     setModalOpen(true);
   }
-
   function handleSubmit() {
     if (!selectedImage) return;
+
     setModalOpen(false);
-    addExistingImage(selectedImage).catch(handleGeneric);
+
+    const originScene = getScene();
+
+    addImageToScene(selectedImage, originScene, modifyScene).catch(
+      handleGeneric
+    );
   }
 
   return (
@@ -191,6 +189,7 @@ function ImageCreateMenu() {
       <input
         ref={fileInputRef}
         type="file"
+        accept={ACCEPTED_IMAGE_MIME_TYPES.join(",")}
         className="hidden"
         onChange={handleFileChange}
       />
@@ -205,8 +204,8 @@ function ImageCreateMenu() {
       >
         <ImageListContainer
           data={imagesQuery.data}
-          selectedId={selectedImage?.id}
-          onItemSelected={(img: Image) => setSelectedImage(img)}
+          selectedId={selectedImage?._id}
+          onItemSelected={(img: UploadedFile) => setSelectedImage(img)}
         />
         <div className="modal-action">
           <form method="dialog">

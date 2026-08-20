@@ -36,17 +36,38 @@ const createGroup = async (scenarioId, userList) => {
 };
 
 /**
- * Sets the state variables for a group
+ * Removes a single user from a group's member list by email
  * @param {String} groupId MongoDB ID of group
- * @param {Object} stateVariables Object containing state variables
- * @returns updated group object with state variables set
+ * @param {String} scenarioId ID of the scenario the group must belong to
+ * @param {String} email email of the user to remove
+ * @returns the updated group object, or null if no matching group exists
  */
-const setGroupStateVariables = async (groupId, stateVariables) => {
+const removeUserFromGroup = async (groupId, scenarioId, email) => {
+  const escapedEmail = email.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const group = await Group.findOneAndUpdate(
+    { _id: groupId, scenarioId },
+    {
+      $pull: {
+        users: { email: { $regex: `^${escapedEmail}$`, $options: "i" } },
+      },
+    },
+    { new: true }
+  );
+  return group;
+};
+
+/**
+ * Sets the properties for a group
+ * @param {String} groupId MongoDB ID of group
+ * @param {Object} properties Object containing properties
+ * @returns updated group object with properties set
+ */
+const setGroupProperties = async (groupId, properties) => {
   try {
     const group = await Group.findOneAndUpdate(
       { _id: groupId },
       {
-        $set: { stateVariables },
+        $set: { stateVariables: properties },
         $inc: { stateVersion: 1 },
       },
       { new: true }
@@ -56,7 +77,7 @@ const setGroupStateVariables = async (groupId, stateVariables) => {
     }
     return [group.stateVariables, group.stateVersion];
   } catch (error) {
-    throw new Error(`Error initiating state variables: ${error.message}`);
+    throw new Error(`Error initiating properties: ${error.message}`);
   }
 };
 
@@ -65,5 +86,6 @@ export {
   getCurrentScene,
   createGroup,
   getGroupByScenarioId,
-  setGroupStateVariables,
+  removeUserFromGroup,
+  setGroupProperties,
 };

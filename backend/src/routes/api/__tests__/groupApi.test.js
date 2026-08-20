@@ -80,60 +80,6 @@ describe("Group API tests", () => {
     expect(response.data).toHaveLength(0);
   });
 
-  it("GET /group/path/:groupId returns current scene when path is non-empty", async () => {
-    const response = await axios.get(
-      `http://localhost:${ctx.port}/api/group/path/${group._id}`,
-      authHeaders("user1")
-    );
-    expect(response.status).toBe(200);
-    expect(response.data._id).toBe(scene._id.toString());
-  });
-
-  it("GET /group/path/:groupId returns null when path is empty", async () => {
-    const emptyGroup = await Group.create({
-      users: [],
-      notes: {},
-      path: [],
-      scenarioId: scenario._id.toString(),
-      currentFlags: [],
-    });
-
-    const response = await axios.get(
-      `http://localhost:${ctx.port}/api/group/path/${emptyGroup._id}`,
-      authHeaders("user1")
-    );
-    expect(response.status).toBe(200);
-    expect(response.data).toBeNull();
-  });
-
-  it("GET /group/retrieve/:groupId returns a group by id", async () => {
-    const response = await axios.get(
-      `http://localhost:${ctx.port}/api/group/retrieve/${group._id}`,
-      authHeaders("user1")
-    );
-    expect(response.status).toBe(200);
-    expect(response.data._id).toBe(group._id.toString());
-    expect(response.data.users).toHaveLength(2);
-  });
-
-  it("GET /group/retrieve/:groupId returns 404 for unknown group", async () => {
-    await expect(
-      axios.get(
-        `http://localhost:${ctx.port}/api/group/retrieve/000000000000000000000099`,
-        authHeaders("user1")
-      )
-    ).rejects.toMatchObject({ response: { status: 404 } });
-  });
-
-  it("GET /group/:scenarioId/roleList returns the role list for a scenario", async () => {
-    const response = await axios.get(
-      `http://localhost:${ctx.port}/api/group/${scenario._id}/roleList`,
-      authHeaders("user1")
-    );
-    expect(response.status).toBe(200);
-    expect(response.data).toEqual(["doctor", "nurse"]);
-  });
-
   it("POST /group/:scenarioId creates groups for a scenario", async () => {
     const groupList = [
       [
@@ -203,6 +149,72 @@ describe("Group API tests", () => {
         authHeaders("user1")
       )
     ).rejects.toMatchObject({ response: { status: 400 } });
+  });
+
+  it("POST /group/:scenarioId merges new roles into the scenario's existing role list", async () => {
+    const groupList = [
+      [
+        {
+          email: "h@example.com",
+          name: "Hank",
+          role: "nurse",
+          group: "E",
+        },
+        {
+          email: "i@example.com",
+          name: "Ivy",
+          role: "medic",
+          group: "E",
+        },
+      ],
+    ];
+
+    const response = await axios.post(
+      `http://localhost:${ctx.port}/api/group/${scenario._id}`,
+      { groupList, roleList: ["nurse", "medic"] },
+      authHeaders("user1")
+    );
+    expect(response.status).toBe(200);
+
+    const dbScenario = await Scenario.findById(scenario._id).lean();
+    expect(dbScenario.roleList).toEqual(
+      expect.arrayContaining(["doctor", "nurse", "medic"])
+    );
+    expect(dbScenario.roleList).toHaveLength(3);
+  });
+
+  it("POST /group/:scenarioId does not create a case-insensitive duplicate role on merge", async () => {
+    const groupList = [
+      [
+        {
+          email: "j@example.com",
+          name: "Jan",
+          role: "Doctor",
+          group: "F",
+        },
+        {
+          email: "k@example.com",
+          name: "Kim",
+          role: "medic",
+          group: "F",
+        },
+      ],
+    ];
+
+    const response = await axios.post(
+      `http://localhost:${ctx.port}/api/group/${scenario._id}`,
+      { groupList, roleList: ["Doctor", "medic"] },
+      authHeaders("user1")
+    );
+    expect(response.status).toBe(200);
+
+    // scenario already had "doctor" (lowercase) from beforeEach, so the
+    // capitalised "Doctor" from this upload should not create a duplicate
+    const dbScenario = await Scenario.findById(scenario._id).lean();
+    expect(dbScenario.roleList).toEqual(
+      expect.arrayContaining(["doctor", "nurse", "medic"])
+    );
+    expect(dbScenario.roleList).toHaveLength(3);
   });
 
   it("POST /group/:scenarioId returns 400 when duplicate roles exist within a group", async () => {
