@@ -15,7 +15,7 @@ export default function PropertyBinding({ component, binding }) {
 
   function remove() {
     modifyComponentProp(
-      component.id,
+      [component.id],
       "stateBindings",
       component.stateBindings.filter((candidate) => candidate !== binding)
     );

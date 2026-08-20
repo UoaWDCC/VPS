@@ -37,13 +37,13 @@ const EditPropertyOperation = ({
 
   const deletePropertyOperation = () => {
     const filtered = component.stateOperations.toSpliced(operationIndex, 1);
-    modifyComponentProp(component.id, "stateOperations", filtered);
+    modifyComponentProp([component.id], "stateOperations", filtered);
   };
 
   function saveOperation(v) {
     setOperation(v);
     modifyComponentProp(
-      component.id,
+      [component.id],
       `stateOperations.${operationIndex}.operation`,
       v
     );
@@ -52,7 +52,7 @@ const EditPropertyOperation = ({
   function saveValue(v) {
     setValue(v);
     modifyComponentProp(
-      component.id,
+      [component.id],
       `stateOperations.${operationIndex}.value`,
       v
     );
