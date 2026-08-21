@@ -138,7 +138,7 @@ export default function ManageResourcesPage() {
 
               {/* RIGHT: File list and preview */}
               <div className="card min-h-[60dvh] overflow-auto pb-[max(1rem,env(safe-area-inset-bottom))] lg:col-span-2 lg:h-full lg:min-h-0">
-                <div className="card-body flex min-h-full flex-col gap-4">
+                <div className="card-body flex min-h-full flex-col gap-4 pr-0">
                   {selectedResource ? (
                     <>
                       <PropertyConditionalMenu resource={selectedResource} />
