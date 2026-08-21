@@ -155,11 +155,45 @@ function ScenarioInfo() {
               </div>
 
               {/* Scenario Thumbnail */}
-              <div className="w-full max-w-[750px] flex-shrink-0">
-                <div className="w-full aspect-video bg-canvas border border-primary rounded-lg overflow-hidden flex items-center justify-center">
+              <div className="w-full flex-shrink-0">
+                <div className="w-full aspect-video bg-canvas border border-primary rounded-lg overflow-hidden flex items-center justify-center relative">
                   <Thumbnail
                     components={selectedScenario.thumbnail.components}
                   />
+                  {/* Corner Overlay */}
+                  <svg
+                    viewBox="0 0 1920 1080"
+                    preserveAspectRatio="none"
+                    className="absolute inset-0 w-full h-full pointer-events-none"
+                  >
+                    <defs>
+                      <filter
+                        id="edgeBlur"
+                        x="-20%"
+                        y="-20%"
+                        width="140%"
+                        height="140%"
+                      >
+                        <feGaussianBlur stdDeviation="100" />
+                      </filter>
+                      <clipPath id="boxClip">
+                        <rect x="0" y="0" width="1930" height="1090" />
+                      </clipPath>
+                    </defs>
+                    <g clipPath="url(#boxClip)">
+                      <path
+                        d="M 2120,1280 L 2120,0 L 1920,0 C 1920,0 2020,1180 0,1080 L 0,1280 Z"
+                        fill="rgba(0,0,0,0.9)"
+                        filter="url(#edgeBlur)"
+                      />
+                    </g>
+                  </svg>
+                  {/* Play Button */}
+                  <div className="p-8 absolute right-s bottom-s">
+                    <DiamondPlayButton
+                      onClick={() => handlePlayScenario(selectedScenario)}
+                    />
+                  </div>
                 </div>
               </div>
 
@@ -173,12 +207,6 @@ function ScenarioInfo() {
                     {selectedScenario.description ||
                       "This scenario doesn't have a description."}
                   </p>
-                </div>
-                {/* Play Button */}
-                <div className="p-8">
-                  <DiamondPlayButton
-                    onClick={() => handlePlayScenario(selectedScenario)}
-                  />
                 </div>
               </div>
             </div>
