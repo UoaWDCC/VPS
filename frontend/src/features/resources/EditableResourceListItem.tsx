@@ -11,10 +11,12 @@ interface ResourceListItemProps {
     name: string;
   };
   setSelectedResourceId: React.Dispatch<React.SetStateAction<string | null>>;
+  selectedResourceId: string | null;
 }
 
 function EditableResourceListItem({
   resource,
+  selectedResourceId,
   setSelectedResourceId,
 }: ResourceListItemProps) {
   const { renameResourceMutation, deleteResourceMutation } = useResources();
@@ -24,6 +26,7 @@ function EditableResourceListItem({
       resource={resource}
       disabled={isTemp(resource) as boolean}
       onSelect={() => setSelectedResourceId(resource._id)}
+      isSelected={selectedResourceId === resource._id}
       onRename={(name: string) =>
         (renameResourceMutation as UseMutationResult).mutate({
           resourceId: resource._id,
@@ -32,7 +35,7 @@ function EditableResourceListItem({
       }
       actions={
         <button
-          className="btn btn-phantom btn-xs px-0"
+          className="btn btn-phantom btn-xs px-1.5 h-full"
           onClick={(e) => {
             e.stopPropagation();
             (deleteResourceMutation as UseMutationResult).mutate(resource._id);

@@ -119,7 +119,7 @@ export default function ManageResourcesPage() {
                     </button>
                   </div>
 
-                  <ul className="menu min-h-0 w-full flex-1 overflow-auto rounded-box bg-base-100 p-0">
+                  <ul className="menu min-h-0 w-full flex-1 overflow-auto p-0">
                     {search.trim() && filteredTree.length === 0 && (
                       <li className="p-2 opacity-60">
                         No matching resources found.
