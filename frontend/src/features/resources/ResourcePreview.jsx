@@ -67,7 +67,7 @@ function ResourcePreview({ file }) {
   const typeLabel = fileTypeLabel(file);
 
   return (
-    <div className="flex h-full min-h-0 flex-col gap-3 p-3 font-ibm">
+    <div className="flex h-full min-h-0 flex-col gap-3 font-ibm">
       <div className="flex items-start justify-between gap-2">
         <div className="flex min-w-0 flex-wrap items-center gap-2">
           <h3 className="text-m min-w-0 break-all">{file.name}</h3>
