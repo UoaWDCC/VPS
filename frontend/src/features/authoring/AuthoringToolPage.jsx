@@ -195,18 +195,20 @@ export default function AuthoringToolPage() {
     <>
       <div className="font-ibm flex flex-col h-screen w-screen overflow-hidden gap-m">
         <div className="flex pt-l px-l">
-          <button onClick={goBack} className="btn btn-phantom text-m">
+          <button onClick={goBack} className="btn btn-phantom text-m px-0">
             <ArrowLeftIcon size={20} />
-            Back
           </button>
           {isOwner && (
-            <div className="flex flex-1 min-w-0">
+            <div className="flex flex-1 min-w-0 items-bottom">
               <button
                 onClick={() => setShowEditModal(true)}
-                className="btn btn-phantom text-m max-w-full min-w-0"
+                className="btn btn-phantom text-m max-w-full min-w-0 tooltip tooltip-bottom"
+                data-tip="Edit Details"
               >
-                <PencilIcon size={20} className="shrink-0" />
-                <span className="min-w-0 truncate">{ownedScenario.name}</span>
+                <span className="min-w-0 flex items-baseline gap-2">
+                  <span className="truncate">{ownedScenario.name}</span>
+                  <PencilIcon size={14} className="shrink-0" />
+                </span>
               </button>
             </div>
           )}
