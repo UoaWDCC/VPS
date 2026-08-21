@@ -5,7 +5,6 @@ import Thumbnail from "../authoring/components/Thumbnail";
 import ModalDialog from "../../components/ModalDialogue";
 import DetailEditModal from "../scenarioInfo/components/DetailEditModal";
 import TopNavBar from "../../features/TopNavBar/TopNavBar";
-import FabMenu from "../../components/FabMenu";
 import { PlusIcon, SearchIcon, Trash2Icon } from "lucide-react";
 import { handle } from "../../components/ContextMenu/portal";
 import RightContextMenu from "../../components/ContextMenu/RightContextMenu";
@@ -136,8 +135,6 @@ export default function CreateLandingPage() {
           onSave={handleCreate}
         />
       </ModalDialog>
-
-      <FabMenu />
     </div>
   );
 }
