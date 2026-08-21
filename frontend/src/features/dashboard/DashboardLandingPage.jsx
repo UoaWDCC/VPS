@@ -5,6 +5,7 @@ import TopNavBar from "../TopNavBar/TopNavBar";
 import Thumbnail from "../authoring/components/Thumbnail";
 import { SearchIcon } from "lucide-react";
 import FabMenu from "../../components/FabMenu";
+import { dedupById } from "../../util/dedup";
 
 export default function DashboardLandingPage() {
   const { allScenarios } = useContext(ScenarioContext);
@@ -12,14 +13,10 @@ export default function DashboardLandingPage() {
 
   const [search, setSearch] = useState("");
 
-  const scenarios = Array.from(
-    new Map(
-      [...allScenarios.owned, ...allScenarios.accessible].map((scenario) => [
-        scenario._id,
-        scenario,
-      ])
-    ).values()
-  );
+  const scenarios = dedupById([
+    ...allScenarios.owned,
+    ...allScenarios.accessible,
+  ]);
 
   const filteredScenarios = scenarios.filter((scenario) =>
     scenario.name.toLowerCase().includes(search.toLowerCase())
