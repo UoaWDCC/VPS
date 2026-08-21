@@ -5,6 +5,7 @@ import Thumbnail from "../authoring/components/Thumbnail";
 import TopNavBar from "../../features/TopNavBar/TopNavBar";
 import FabMenu from "../../components/FabMenu";
 import { SearchIcon } from "lucide-react";
+import { dedupById } from "../../util/dedup";
 
 export default function PlayLandingPage() {
   const { allScenarios } = useContext(ScenarioContext);
@@ -13,15 +14,11 @@ export default function PlayLandingPage() {
 
   const [search, setSearch] = useState("");
 
-  const scenarios = Array.from(
-    new Map(
-      [
-        ...allScenarios.owned,
-        ...allScenarios.assigned,
-        ...allScenarios.accessible,
-      ].map((scenario) => [scenario._id, scenario])
-    ).values()
-  );
+  const scenarios = dedupById([
+    ...allScenarios.owned,
+    ...allScenarios.assigned,
+    ...allScenarios.accessible,
+  ]);
 
   const filteredScenarios = scenarios.filter((scenario) =>
     scenario.name.toLowerCase().includes(search.toLowerCase())

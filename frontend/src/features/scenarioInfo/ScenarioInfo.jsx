@@ -8,29 +8,30 @@ import FabMenu from "../../components/FabMenu";
 import { ArrowLeftIcon, SearchIcon } from "lucide-react";
 import ModalDialog from "../../components/ModalDialogue";
 import DetailEditModal from "./components/DetailEditModal";
+import { dedupById } from "../../util/dedup";
 
 function ScenarioInfo() {
-  const [search, setSearch] = useState("");
   const { user } = useContext(AuthenticationContext);
   const { allScenarios, updateScenarioDetails } = useContext(ScenarioContext);
 
   const history = useHistory();
   const location = useLocation();
 
+  const [search, setSearch] = useState("");
   const [showEditModal, setShowEditModal] = useState(false);
 
-  const scenarios = [
-    allScenarios.owned,
-    allScenarios.accessible,
-    allScenarios.assigned,
-  ].flat();
-
-  const selectedScenarioId = new URLSearchParams(location.search).get("id");
-  const selectedScenario = scenarios.find((s) => s._id === selectedScenarioId);
+  const scenarios = dedupById([
+    ...allScenarios.owned,
+    ...allScenarios.accessible,
+    ...allScenarios.assigned,
+  ]);
 
   const filteredScenarios = scenarios.filter((scenario) =>
     scenario.name.toLowerCase().includes(search.toLowerCase())
   );
+
+  const selectedScenarioId = new URLSearchParams(location.search).get("id");
+  const selectedScenario = scenarios.find((s) => s._id === selectedScenarioId);
 
   const handleScenarioSelect = (scenario) => {
     history.replace(`/scenario-info?id=${scenario._id}`);
