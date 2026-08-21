@@ -1,21 +1,17 @@
 import React, { useEffect, useState } from "react";
 import ResourceTree from "./ResourceTree";
 import { SearchIcon, XIcon } from "lucide-react";
-import { filterTreeByConditions } from "../../../utils/propertyConditionalEvaluator";
-import {
-  buildResourceTree,
-  filterTreeBySearch,
-  normaliseFile,
-} from "../../resources/util";
-import ResourcePreview from "../../resources/ResourcePreview";
-import SkeletonBody from "../../resources/ResourcesSkeleton";
-import { useResources } from "../../resources/useResources";
-import { findById } from "../../../util/search";
+import { useResources } from "./useResources";
+import { findById } from "../../util/search";
+import { buildResourceTree, filterTreeBySearch, normaliseFile } from "./util";
+import { filterTreeByConditions } from "../../utils/propertyConditionalEvaluator";
+import SkeletonBody from "./ResourcesSkeleton";
+import ResourcePreview from "./ResourcePreview";
 
 // NOTE: property filters can't change while the resources panel is
 // open, so deselecting on resource hiding isn't a concern
 
-export default function ResourcesPanel({ properties, open, onClose }) {
+export default function ResourcesOverlay({ properties, open, onClose }) {
   const { resourcesQuery } = useResources();
 
   const [selectedResourceId, setSelectedResourceId] = useState(null);
@@ -55,7 +51,6 @@ export default function ResourcesPanel({ properties, open, onClose }) {
             ? "opacity-100 pointer-events-auto"
             : "opacity-0 pointer-events-none"
         }`}
-        id="god"
         aria-hidden="true"
       />
 
