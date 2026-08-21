@@ -42,3 +42,22 @@ export function filterTreeBySearch(tree, string) {
     })
     .filter(Boolean);
 }
+
+export function buildResourceTree(resources) {
+  const collections = resources.filter((r) => r.type === "collection");
+  const files = resources.filter((r) => r.type === "file").map(normaliseFile);
+
+  const grouped = collections.map((collection) => ({
+    _id: collection._id,
+    name: collection.name,
+    type: "collection",
+    stateConditionals: collection.stateConditionals,
+    children: files.filter(
+      (f) => String(f.parentId) === String(collection._id)
+    ),
+  }));
+
+  const orphanFiles = files.filter((f) => !f.parentId);
+
+  return [...grouped, ...orphanFiles];
+}
