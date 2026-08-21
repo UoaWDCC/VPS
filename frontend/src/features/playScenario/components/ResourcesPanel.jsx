@@ -71,7 +71,7 @@ export default function ResourcesPanel({ properties, open, onClose }) {
         onClick={onClose}
       >
         <button
-          className="absolute top-8 left-8 bg-transparent border-none p-2 cursor-pointer z-10"
+          className="absolute top-l left-xl bg-transparent border-none p-2 cursor-pointer z-10"
           onClick={onClose}
           aria-label="Close"
         >
@@ -118,7 +118,7 @@ export default function ResourcesPanel({ properties, open, onClose }) {
                       </label>
                     </div>
 
-                    <ul className="menu min-h-0 w-full flex-1 overflow-auto rounded-box p-0">
+                    <ul className="menu min-h-0 w-full flex-1 overflow-auto p-0">
                       {search.trim() && filteredTree.length === 0 && (
                         <li className="p-2 opacity-60">
                           No matching resources found.

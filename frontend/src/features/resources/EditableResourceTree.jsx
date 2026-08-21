@@ -19,7 +19,7 @@ function EditableResourceTree({
           {resource.type === "collection" ? (
             <details className="overflow-hidden">
               <summary
-                className={`flex items-center ${isTemp(resource) ? "text-primary" : ""} ${selectedResourceId === resource._id ? "bg-base-200" : ""}`}
+                className={`flex items-center ${isTemp(resource) ? "text-primary" : ""} ${selectedResourceId === resource._id ? "bg-base-content/5" : ""}`}
                 onClick={() =>
                   !isTemp(resource) && setSelectedResourceId(resource._id)
                 }
@@ -63,6 +63,7 @@ function EditableResourceTree({
                   <li key={child._id} className="overflow-hidden">
                     <EditableResourceListItem
                       resource={child}
+                      selectedResourceId={selectedResourceId}
                       setSelectedResourceId={setSelectedResourceId}
                     />
                   </li>
@@ -72,6 +73,7 @@ function EditableResourceTree({
           ) : (
             <EditableResourceListItem
               resource={resource}
+              selectedResourceId={selectedResourceId}
               setSelectedResourceId={setSelectedResourceId}
             />
           )}
