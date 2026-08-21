@@ -7,7 +7,6 @@ import ScenarioContextProvider from "./context/ScenarioContextProvider";
 import SceneContextProvider from "./context/SceneContextProvider";
 import ProtectedRoute from "./firebase/ProtectedRoute";
 import LoginPage from "./features/login/LoginPage/LoginPage";
-import ManageGroupsPage from "./features/groups/ManageGroupsPage";
 import PlayScenarioResolver from "./features/playScenario/PlayScenarioResolver";
 import PlayLandingPage from "./features/playScenario/PlayLandingPage";
 import ScenarioInfo from "./features/scenarioInfo/ScenarioInfo";
@@ -117,10 +116,6 @@ export default function App() {
                   <Switch>
                     <ProtectedRoute path="/scenario/:scenarioId/manage-resources">
                       <ManageResourcesPage />
-                    </ProtectedRoute>
-
-                    <ProtectedRoute path="/scenario/:scenarioId/manage-groups">
-                      <ManageGroupsPage />
                     </ProtectedRoute>
 
                     <ProtectedRoute path="/scenario/:scenarioId">

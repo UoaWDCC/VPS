@@ -16,10 +16,10 @@ import { syncVisualCursor } from "./text/cursor";
 import {
   ArrowLeftIcon,
   FilesIcon,
+  LayoutDashboardIcon,
   PencilIcon,
   PlayIcon,
   UserPlusIcon,
-  UsersIcon,
 } from "lucide-react";
 import { handleGlobal } from "./handlers/keyboard/keyboard";
 import { clearHistory, historyEvents } from "./scene/history";
@@ -167,12 +167,12 @@ export default function AuthoringToolPage() {
     window.open(`/play/${scenarioId}${startScene}`, "_blank");
   }
 
-  function goToGroups() {
-    history.push(`/scenario/${scenarioId}/manage-groups`);
-  }
-
   function goToResources() {
     history.push(`/scenario/${scenarioId}/manage-resources`);
+  }
+
+  function goToDashboard() {
+    history.push(`/dashboard/${scenarioId}?from=canvas`);
   }
 
   function goBack() {
@@ -217,9 +217,9 @@ export default function AuthoringToolPage() {
             <FilesIcon size={20} />
             Resources
           </button>
-          <button onClick={goToGroups} className="btn btn-phantom text-m">
-            <UsersIcon size={20} />
-            Groups
+          <button onClick={goToDashboard} className="btn btn-phantom text-m">
+            <LayoutDashboardIcon size={20} />
+            Dashboard
           </button>
           {isOwner && (
             <button
