@@ -54,12 +54,13 @@ function ScenarioInfo() {
     <div className="bg-base-100 text-base-content">
       {/* Responsive Container optimised for 900x500 min to 1600x900 max */}
       <button
-        className="fixed z-10 btn btn-phantom text-m ml-xl mt-l font-dm px-0"
+        className="fixed z-10 btn btn-phantom text-m left-xl top-l font-dm px-0"
         onClick={handleBackToPlay}
       >
         <ArrowLeftIcon size={20} />
         Back
       </button>
+      <FabMenu className="right-xl top-l" />
       <div className="min-w-[900px] max-w-[1500px] mx-auto flex gap-3xl px-xl">
         {/* Sidebar */}
         {/* the calc used in the padding top is to get the searchbar to align with the scenario metadata, by imitating the same sizing flow */}
@@ -210,8 +211,6 @@ function ScenarioInfo() {
           onClose={() => setShowEditModal(false)}
         />
       </ModalDialog>
-
-      <FabMenu />
     </div>
   );
 }

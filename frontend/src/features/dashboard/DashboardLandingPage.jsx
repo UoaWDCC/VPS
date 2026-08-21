@@ -4,7 +4,6 @@ import ScenarioContext from "../../context/ScenarioContext";
 import TopNavBar from "../TopNavBar/TopNavBar";
 import Thumbnail from "../authoring/components/Thumbnail";
 import { SearchIcon } from "lucide-react";
-import FabMenu from "../../components/FabMenu";
 
 export default function DashboardLandingPage() {
   const { allScenarios } = useContext(ScenarioContext);
@@ -65,8 +64,6 @@ export default function DashboardLandingPage() {
           </div>
         ))}
       </div>
-
-      <FabMenu />
     </div>
   );
 }

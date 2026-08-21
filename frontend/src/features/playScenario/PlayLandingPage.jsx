@@ -3,7 +3,6 @@ import { useHistory } from "react-router-dom";
 import ScenarioContext from "../../context/ScenarioContext";
 import Thumbnail from "../authoring/components/Thumbnail";
 import TopNavBar from "../../features/TopNavBar/TopNavBar";
-import FabMenu from "../../components/FabMenu";
 import { SearchIcon } from "lucide-react";
 
 export default function PlayLandingPage() {
@@ -67,8 +66,6 @@ export default function PlayLandingPage() {
           </div>
         ))}
       </div>
-
-      <FabMenu />
     </div>
   );
 }
