@@ -1,84 +1,58 @@
-import React, { useEffect } from "react";
+import React from "react";
 
 export default function ResourceTree({
   tree,
-  search,
-  onSelectFile,
-  selectedFileId,
-  openGroups,
-  toggleGroup,
+  selectedResourceId,
+  setSelectedResourceId,
 }) {
-  // Automatically expand all groups when searching
-  useEffect(() => {
-    if (search.trim()) {
-      const allG = new Set(tree.map((g) => g._id));
-      allG.forEach((gid) => !openGroups.has(gid) && toggleGroup(gid));
-    }
-  }, [search, tree, openGroups, toggleGroup]);
-
   return (
     <ul className="menu w-full p-0">
-      {tree.map((group) => (
-        <li key={group._id} className="mb-1">
-          <button
-            className="flex items-center justify-between px-2 py-1 rounded hover:bg-base-200 focus:outline-none"
-            onClick={() => toggleGroup(group._id)}
-            aria-expanded={openGroups.has(group._id)}
-          >
-            <span className="font-medium truncate">{group.name}</span>
-            <span className="text-xs opacity-70">
-              {(group.children || []).length}{" "}
-              {openGroups.has(group._id) ? "▾" : "▸"}
-            </span>
-          </button>
+      {tree.map((resource) => (
+        <li key={resource._id} className="overflow-hidden">
+          {resource.type === "collection" ? (
+            <details className="overflow-hidden">
+              <summary
+                className={`flex items-center ${selectedResourceId === resource._id ? "bg-base-200" : ""}`}
+              >
+                <span className="text--1 truncate flex-1" title={resource.name}>
+                  {resource.name}
+                </span>
+              </summary>
 
-          {openGroups.has(group._id) && (
-            <ul className="ml-3">
-              {(group.children || []).map((f) => (
-                <li key={f._id}>
-                  <button
-                    className={`flex w-full items-center justify-between px-2 py-1 rounded hover:bg-base-200 text-left ${
-                      selectedFileId === f._id ? "bg-base-200" : ""
-                    }`}
-                    onClick={() =>
-                      onSelectFile({
-                        ...f,
-                        groupId: group._id,
-                        groupName: group.name,
-                      })
-                    }
-                    title={`${group.name}/${f.name}`}
-                  >
-                    <span className="truncate">{f.name}</span>
-                    <span className="text-[10px] opacity-60 ml-2 whitespace-nowrap">
-                      {formatBytes(f.size)} · {shortType(f.contentType)}
-                    </span>
-                  </button>
-                </li>
-              ))}
-            </ul>
+              <ul className="overflow-hidden">
+                {resource.children.length === 0 && (
+                  <li className="opacity-60 p-2">No files yet</li>
+                )}
+                {resource.children.map((child) => (
+                  <li key={child._id} className="overflow-hidden">
+                    <div>
+                      <button
+                        type="button"
+                        className={`min-w-0 truncate bg-transparent px-0 text-left text--1 border-none cursor-pointer ${selectedResourceId === resource._id ? "bg-base-200" : ""}`}
+                        title={child.name}
+                        onClick={() => setSelectedResourceId(child._id)}
+                      >
+                        {child.name}
+                      </button>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            </details>
+          ) : (
+            <div>
+              <button
+                type="button"
+                className={`min-w-0 truncate bg-transparent px-0 text-left text--1 border-none cursor-pointer ${selectedResourceId === resource._id ? "bg-base-200" : ""}`}
+                title={resource.name}
+                onClick={() => setSelectedResourceId(resource._id)}
+              >
+                {resource.name}
+              </button>
+            </div>
           )}
         </li>
       ))}
     </ul>
   );
-}
-
-function shortType(t) {
-  if (!t) return "-";
-  if (t.startsWith("image/")) return "image";
-  if (t.startsWith("text/")) return "text";
-  if (/json/.test(t)) return "json";
-  if (/csv/.test(t)) return "csv";
-  if (/pdf/.test(t)) return "pdf";
-  return t.split("/").pop();
-}
-
-function formatBytes(n) {
-  if (!Number.isFinite(n)) return "-";
-  const k = 1024;
-  const sizes = ["B", "KB", "MB", "GB", "TB"];
-  if (n < k) return `${n} B`;
-  const i = Math.floor(Math.log(n) / Math.log(k));
-  return `${(n / Math.pow(k, i)).toFixed(1)} ${sizes[i]}`;
 }
