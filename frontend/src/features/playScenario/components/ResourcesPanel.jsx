@@ -70,11 +70,18 @@ export default function ResourcesPanel({ properties, open, onClose }) {
         aria-label="Resources"
         onClick={onClose}
       >
+        <button
+          className="absolute top-8 left-8 bg-transparent border-none p-2 cursor-pointer z-10"
+          onClick={onClose}
+          aria-label="Close"
+        >
+          <XIcon size={32} />
+        </button>
         <div
           className="relative h-dvh w-full overflow-hidden font-ibm shadow-2xl"
           onClick={(e) => e.stopPropagation()}
         >
-          <div className="u-container h-full w-full overflow-y-auto py-l lg:overflow-hidden lg:py-4xl">
+          <div className="u-container h-full w-full overflow-y-auto py-l lg:overflow-hidden lg:pt-4xl">
             {isLoading ? (
               <SkeletonBody />
             ) : isError ? (
@@ -96,7 +103,7 @@ export default function ResourcesPanel({ properties, open, onClose }) {
               <div className="grid min-h-full grid-cols-1 gap-3 lg:h-full lg:min-h-0 lg:grid-cols-3">
                 {/* left */}
                 <div className="min-h-[35dvh] min-w-0 overflow-hidden lg:h-full lg:min-h-0">
-                  <div className="card-body flex min-h-0 flex-col gap-4 px-0">
+                  <div className="flex min-h-0 flex-col gap-4 px-0">
                     <h1 className="text-xl">Resources</h1>
 
                     <div className="flex items-center gap-4">
@@ -128,14 +135,7 @@ export default function ResourcesPanel({ properties, open, onClose }) {
 
                 {/* right */}
                 <div className="card min-h-[60dvh] overflow-auto pb-[max(1rem,env(safe-area-inset-bottom))] lg:col-span-2 lg:h-full lg:min-h-0">
-                  <div className="card-body flex min-h-full flex-col gap-4">
-                    <button
-                      className="btn btn-phantom btn-sm absolute right-0 top-8 z-10"
-                      onClick={onClose}
-                      aria-label="Close"
-                    >
-                      <XIcon size={32} />
-                    </button>
+                  <div className="pl-8 flex min-h-full flex-col gap-4">
                     {selectedResource ? (
                       selectedResource?.type === "file" && (
                         <div className="min-h-[50dvh] flex-1 lg:min-h-0">
