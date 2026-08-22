@@ -28,7 +28,7 @@ export default function ResourceTree({
                     >
                       <button
                         type="button"
-                        className="min-w-0 truncate px-0 text-left text--1 border-none cursor-pointer flex-1 px-3 py-1.5 h-9"
+                        className="min-w-0 truncate text-left text--1 border-none cursor-pointer flex-1 px-3 py-1.5 h-9"
                         title={child.name}
                         onClick={() => setSelectedResourceId(child._id)}
                       >
@@ -45,7 +45,7 @@ export default function ResourceTree({
             >
               <button
                 type="button"
-                className="min-w-0 truncate px-0 text-left text--1 border-none cursor-pointer flex-1 px-3 py-1.5 h-9"
+                className="min-w-0 truncate text-left text--1 border-none cursor-pointer flex-1 px-3 py-1.5 h-9"
                 title={resource.name}
                 onClick={() => setSelectedResourceId(resource._id)}
               >
