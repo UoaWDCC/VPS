@@ -195,11 +195,15 @@ export default function AuthoringToolPage() {
     <>
       <div className="font-ibm flex flex-col h-screen w-screen overflow-hidden gap-m">
         <div className="flex pt-l px-l">
-          <button onClick={goBack} className="btn btn-phantom text-m px-0">
+          <button
+            onClick={goBack}
+            aria-label="Back"
+            className="btn btn-phantom text-m px-0"
+          >
             <ArrowLeftIcon size={20} />
           </button>
           {isOwner && (
-            <div className="flex flex-1 min-w-0 items-bottom">
+            <div className="flex flex-1 min-w-0">
               <button
                 onClick={() => setShowEditModal(true)}
                 className="btn btn-phantom text-m max-w-full min-w-0 tooltip tooltip-bottom"
