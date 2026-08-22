@@ -1,4 +1,4 @@
-import React, { useRef, useState, createRef } from "react";
+import React, { useRef, useState } from "react";
 import { useParams, useHistory } from "react-router-dom";
 import PropertyConditionalMenu from "../../components/Properties/PropertyConditionalMenu";
 import {
@@ -28,7 +28,7 @@ export default function ManageResourcesPage() {
   const [selectedResourceId, setSelectedResourceId] = useState(null);
   const [search, setSearch] = useState("");
 
-  const inputRef = createRef(null);
+  const inputRef = useRef(null);
   const pendingParentIdRef = useRef(null);
 
   function goBack() {
@@ -150,7 +150,7 @@ export default function ManageResourcesPage() {
                       )}
                     </>
                   ) : (
-                    <div className="min-h-[50dvh] flex flex-1 flex-col gap-4 lg:min-h-0 justify-center items-center border-1 border-primary rounded-xl">
+                    <div className="min-h-[50dvh] flex flex-1 flex-col gap-4 lg:min-h-0 justify-center items-center border border-primary rounded-xl">
                       <FileTextIcon size={32} />
                       <span className="text--1">
                         Select a resource to show the preview

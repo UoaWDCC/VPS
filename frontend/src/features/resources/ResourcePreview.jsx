@@ -99,14 +99,14 @@ function ResourcePreview({ file }) {
           <img
             src={file.url}
             alt={file.name}
-            className="rounded-xl object-contain w-full"
+            className="rounded-xl object-contain max-h-full h-full w-full"
           />
         ) : isPDF ? (
           <div className="h-full min-h-0 w-full">
             <iframe
               src={file.url}
               title={file.name}
-              className="block h-full min-h-[50dvh] w-full rounded-xl border-1 border-primary lg:min-h-0"
+              className="block h-full min-h-[50dvh] w-full rounded-xl border border-primary lg:min-h-0"
             />
           </div>
         ) : isText && text.isInitialLoading ? (

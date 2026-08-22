@@ -90,7 +90,7 @@ export default function ResourceNameField({
         <>
           <button
             type="button"
-            className={`min-w-0 truncate bg-transparent px-0 text-left text--1 border-none cursor-pointer disabled:cursor-not-allowed focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary px-3 py-1.5 h-9 ${isTemp(resource) ? "text-primary" : ""}`}
+            className={`min-w-0 truncate bg-transparent text-left text--1 border-none cursor-pointer disabled:cursor-not-allowed focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary px-3 py-1.5 h-9 ${isTemp(resource) ? "text-primary" : ""}`}
             title={resource.name}
             onClick={onSelect}
             disabled={disabled}
