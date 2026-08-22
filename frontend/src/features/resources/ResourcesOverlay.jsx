@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import ResourceTree from "./ResourceTree";
-import { SearchIcon, XIcon } from "lucide-react";
+import { FileTextIcon, SearchIcon, XIcon } from "lucide-react";
 import { useResources } from "./useResources";
 import { findById } from "../../util/search";
 import { buildResourceTree, filterTreeBySearch, normaliseFile } from "./util";
@@ -138,7 +138,12 @@ export default function ResourcesOverlay({ properties, open, onClose }) {
                         </div>
                       )
                     ) : (
-                      <span>Select a resource to show the preview</span>
+                      <div className="min-h-[50dvh] flex flex-1 flex-col gap-4 lg:min-h-0 justify-center items-center border-1 border-primary rounded-xl">
+                        <FileTextIcon size={32} />
+                        <span className="text--1">
+                          Select a resource to show the preview
+                        </span>
+                      </div>
                     )}
                   </div>
                 </div>

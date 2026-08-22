@@ -4,6 +4,7 @@ import PropertyConditionalMenu from "../../components/Properties/PropertyConditi
 import {
   ArrowLeftIcon,
   FilePlusIcon,
+  FileTextIcon,
   FolderPlusIcon,
   SearchIcon,
 } from "lucide-react";
@@ -149,7 +150,12 @@ export default function ManageResourcesPage() {
                       )}
                     </>
                   ) : (
-                    <span>Select a resource to show the preview</span>
+                    <div className="min-h-[50dvh] flex flex-1 flex-col gap-4 lg:min-h-0 justify-center items-center border-1 border-primary rounded-xl">
+                      <FileTextIcon size={32} />
+                      <span className="text--1">
+                        Select a resource to show the preview
+                      </span>
+                    </div>
                   )}
                 </div>
               </div>
