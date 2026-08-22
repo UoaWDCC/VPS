@@ -3,7 +3,7 @@ import useVisualScene from "../stores/visual";
 import AudioManager from "../audio/AudioManager";
 import ComponentSettings from "./ComponentSettings";
 import SceneSettings from "./SceneSettings";
-import useVisualScene from "../stores/visual";
+import { ObjectPropertyEditor } from "./ObjectPropertyEditor";
 
 /**
  * This component displays the properties of scene components in a sidebar
@@ -19,6 +19,7 @@ export default function CanvasSideBar() {
       <SceneSettings />
       <AudioManager />
       <ComponentSettings component={component} />
+      <ObjectPropertyEditor component={component}></ObjectPropertyEditor>
     </div>
   );
 }
