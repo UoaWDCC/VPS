@@ -1,4 +1,4 @@
-import { PlusIcon, XIcon } from "lucide-react";
+import { FilePlusIcon, XIcon } from "lucide-react";
 import { useResources } from "./useResources";
 import { isTemp } from "./util";
 import EditableResourceListItem from "./EditableResourceListItem";
@@ -29,7 +29,7 @@ function EditableResourceTree({
                 </span>
                 <div className="flex items-center ml-auto">
                   <button
-                    className="btn btn-phantom btn-xs"
+                    className="btn btn-phantom btn-xs px-1.5"
                     disabled={isTemp(resource)}
                     onClick={(event) => {
                       event.preventDefault();
@@ -37,17 +37,17 @@ function EditableResourceTree({
                       pendingParentIdRef.current = resource._id;
                       inputRef.current?.click();
                     }}
-                    title="Add files"
+                    title="Add file"
                   >
-                    <PlusIcon size={16} />
+                    <FilePlusIcon size={16} />
                   </button>
                   <button
-                    className="btn btn-phantom btn-xs"
+                    className="btn btn-phantom btn-xs px-1.5"
                     onClick={(e) => {
                       e.stopPropagation();
                       deleteResourceMutation.mutate(resource._id);
                     }}
-                    title="Delete group"
+                    title="Delete collection"
                     disabled={isTemp(resource)}
                   >
                     <XIcon size={16} />
