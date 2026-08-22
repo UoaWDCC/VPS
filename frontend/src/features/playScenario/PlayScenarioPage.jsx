@@ -10,9 +10,9 @@ import LoadingPage from "../status/LoadingPage";
 import PlayScenarioCanvas from "./PlayScenarioCanvas";
 import { applyPropertyOperations } from "../../components/Properties/propertyOperations";
 import NotesPanel from "./components/NotesPanel";
-import ResourcesPanel from "./components/ResourcesPanel";
 import SceneTimer from "./components/SceneTimer";
 import { PlayIcon } from "lucide-react";
+import ResourcesOverlay from "../resources/ResourcesOverlay";
 
 const sceneCache = new Map();
 
@@ -381,7 +381,7 @@ export default function PlayScenarioPage({ group }) {
           onClose={() => setNoteOpen(false)}
         />
       )}
-      <ResourcesPanel
+      <ResourcesOverlay
         scenarioId={scenarioId}
         properties={properties}
         open={resourcesOpen}
