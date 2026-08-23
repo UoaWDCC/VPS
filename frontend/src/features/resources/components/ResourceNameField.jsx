@@ -8,7 +8,6 @@ export default function ResourceNameField({
   resource,
   disabled,
   onSelect,
-  isSelected,
   onRename,
   actions,
 }) {
@@ -46,21 +45,8 @@ export default function ResourceNameField({
     }
   }
 
-  const rowStyle = editing
-    ? {
-        gridTemplateColumns: "minmax(0, 1fr) auto",
-        backgroundColor: "transparent",
-        boxShadow: "none",
-        color: "var(--color-base-content)",
-        cursor: "auto",
-      }
-    : { gridTemplateColumns: "minmax(0, 1fr) auto auto" };
-
   return (
-    <div
-      className={`grid items-center overflow-hidden p-0 gap-0 ${isSelected ? "bg-base-content/5" : ""}`}
-      style={rowStyle}
-    >
+    <>
       {editing ? (
         <input
           ref={inputRef}
@@ -120,6 +106,6 @@ export default function ResourceNameField({
       ) : (
         actions
       )}
-    </div>
+    </>
   );
 }
