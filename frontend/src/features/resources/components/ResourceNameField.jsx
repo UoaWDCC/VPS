@@ -1,18 +1,17 @@
 import { useEffect, useRef, useState } from "react";
 import { CheckIcon, PencilIcon } from "lucide-react";
-import { isTemp } from "../util";
 
 const RESOURCE_NAME_MAX_LENGTH = 255;
 
 export default function ResourceNameField({
-  resource,
+  name,
   disabled,
   onSelect,
   onRename,
   actions,
 }) {
   const [editing, setEditing] = useState(false);
-  const [value, setValue] = useState(resource.name);
+  const [value, setValue] = useState(name);
   const inputRef = useRef(null);
 
   useEffect(() => {
@@ -24,14 +23,14 @@ export default function ResourceNameField({
   function startEditing(e) {
     e.stopPropagation();
     if (disabled) return;
-    setValue(resource.name);
+    setValue(name);
     setEditing(true);
   }
 
   function commitEdit() {
     setEditing(false);
     const trimmedName = value.trim();
-    if (!trimmedName || trimmedName === resource.name) return;
+    if (!trimmedName || trimmedName === name) return;
     onRename(trimmedName);
   }
 
@@ -40,7 +39,7 @@ export default function ResourceNameField({
       e.preventDefault();
       inputRef.current?.blur();
     } else if (e.key === "Escape") {
-      setValue(resource.name);
+      setValue(name);
       setEditing(false);
     }
   }
@@ -51,7 +50,7 @@ export default function ResourceNameField({
         <input
           ref={inputRef}
           type="text"
-          aria-label={`Rename ${resource.name}`}
+          aria-label={`Rename ${name}`}
           className="input input-bordered min-w-0 h-9"
           style={{
             "--input-color":
@@ -76,12 +75,12 @@ export default function ResourceNameField({
         <>
           <button
             type="button"
-            className={`min-w-0 truncate bg-transparent text-left text--1 border-none cursor-pointer disabled:cursor-not-allowed focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary px-3 py-1.5 h-9 ${isTemp(resource) ? "text-primary" : ""}`}
-            title={resource.name}
+            className={`min-w-0 truncate bg-transparent text-left text--1 border-none cursor-pointer disabled:cursor-not-allowed focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary px-3 py-1.5 h-9 ${disabled ? "text-primary" : ""}`}
+            title={name}
             onClick={onSelect}
             disabled={disabled}
           >
-            {resource.name}
+            {name}
           </button>
           <button
             type="button"

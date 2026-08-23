@@ -1,5 +1,8 @@
 import { isTemp } from "./util";
 import EditableResourceListItem from "./EditableResourceListItem";
+import ResourceNameField from "./components/ResourceNameField";
+import { useResources } from "./useResources";
+import { FilePlusIcon, XIcon } from "lucide-react";
 
 function EditableResourceTree({
   tree,
@@ -8,6 +11,12 @@ function EditableResourceTree({
   pendingParentIdRef,
   inputRef,
 }) {
+  const { renameResourceMutation, deleteResourceMutation } = useResources();
+
+  function renameResource(resource, name) {
+    renameResourceMutation.mutate({ resourceId: resource._id, name });
+  }
+
   return (
     <>
       {tree.map((resource) => (
@@ -16,18 +25,43 @@ function EditableResourceTree({
             <details className="overflow-hidden">
               <summary
                 className={`flex items-center p-0 pr-3 w-full ${isTemp(resource) ? "text-primary" : ""} ${selectedResourceId === resource._id ? "bg-base-content/5" : ""}`}
-                onClick={() =>
-                  !isTemp(resource) && setSelectedResourceId(resource._id)
-                }
               >
-                <EditableResourceListItem
-                  resource={resource}
-                  selectedResourceId={selectedResourceId}
-                  setSelectedResourceId={setSelectedResourceId}
-                  isCollection={true}
-                  pendingParentIdRef={pendingParentIdRef}
-                  inputRef={inputRef}
-                />
+                <div className="grid items-center overflow-hidden p-0 gap-0 w-full grid-cols-[minmax(0,1fr)_auto_auto_auto]">
+                  <ResourceNameField
+                    name={resource.name}
+                    disabled={isTemp(resource)}
+                    onSelect={() => setSelectedResourceId(resource._id)}
+                    onRename={(name) => renameResource(resource, name)}
+                    actions={
+                      <>
+                        <button
+                          className="btn btn-phantom btn-xs px-1.5 h-full"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            deleteResourceMutation.mutate(resource._id);
+                          }}
+                          title="Delete collection"
+                          disabled={isTemp(resource)}
+                        >
+                          <XIcon size={16} />
+                        </button>
+                        <button
+                          className="btn btn-phantom btn-xs px-1.5 h-full"
+                          disabled={isTemp(resource)}
+                          onClick={(event) => {
+                            event.preventDefault();
+                            event.stopPropagation();
+                            pendingParentIdRef.current = resource._id;
+                            inputRef.current?.click();
+                          }}
+                          title="Add file"
+                        >
+                          <FilePlusIcon size={16} />
+                        </button>
+                      </>
+                    }
+                  />
+                </div>
               </summary>
 
               <ul className="overflow-hidden">

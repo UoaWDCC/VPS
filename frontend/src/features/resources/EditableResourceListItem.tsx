@@ -1,7 +1,7 @@
 import type React from "react";
 import ResourceNameField from "./components/ResourceNameField";
 import { isTemp } from "./util";
-import { FilePlusIcon, XIcon } from "lucide-react";
+import { XIcon } from "lucide-react";
 import { useResources } from "./useResources";
 import type { UseMutationResult } from "@tanstack/react-query";
 
@@ -12,7 +12,6 @@ interface ResourceListItemProps {
   };
   setSelectedResourceId: React.Dispatch<React.SetStateAction<string | null>>;
   selectedResourceId: string | null;
-  isCollection: boolean;
   pendingParentIdRef?: React.MutableRefObject<string>;
   inputRef?: React.MutableRefObject<HTMLInputElement>;
 }
@@ -21,58 +20,40 @@ function EditableResourceListItem({
   resource,
   selectedResourceId,
   setSelectedResourceId,
-  isCollection,
-  pendingParentIdRef,
-  inputRef,
 }: ResourceListItemProps) {
-  const { renameResourceMutation, deleteResourceMutation } = useResources();
+  const { renameResourceMutation, deleteResourceMutation } = useResources() as {
+    renameResourceMutation: UseMutationResult;
+    deleteResourceMutation: UseMutationResult;
+  };
 
   const isSelected = selectedResourceId === resource._id;
 
+  function renameResource(name: string) {
+    renameResourceMutation.mutate({ resourceId: resource._id, name });
+  }
+
   return (
     <div
-      className={`grid items-center overflow-hidden p-0 gap-0 w-full grid-cols-[minmax(0,1fr)_auto_auto_auto] ${isSelected && !isCollection ? "bg-base-content/5" : ""}`}
+      className={`grid items-center overflow-hidden p-0 gap-0 w-full grid-cols-[minmax(0,1fr)_auto_auto] ${isSelected ? "bg-base-content/5" : ""}`}
     >
       <ResourceNameField
-        resource={resource}
+        name={resource.name}
         disabled={isTemp(resource) as boolean}
         onSelect={() => setSelectedResourceId(resource._id)}
-        onRename={(name: string) =>
-          (renameResourceMutation as UseMutationResult).mutate({
-            resourceId: resource._id,
-            name,
-          })
-        }
+        onRename={renameResource}
         actions={
           <>
             <button
               className="btn btn-phantom btn-xs px-1.5 h-full"
               onClick={(e) => {
                 e.stopPropagation();
-                (deleteResourceMutation as UseMutationResult).mutate(
-                  resource._id
-                );
+                deleteResourceMutation.mutate(resource._id);
               }}
-              title={`Delete ${isCollection ? "collection" : "file"}`}
+              title="Delete file"
               disabled={isTemp(resource) as boolean}
             >
               <XIcon size={16} />
             </button>
-            {isCollection && (
-              <button
-                className="btn btn-phantom btn-xs px-1.5"
-                disabled={isTemp(resource) as boolean}
-                onClick={(event) => {
-                  event.preventDefault();
-                  event.stopPropagation();
-                  pendingParentIdRef!.current = resource._id;
-                  inputRef!.current?.click();
-                }}
-                title="Add file"
-              >
-                <FilePlusIcon size={16} />
-              </button>
-            )}
           </>
         }
       />
