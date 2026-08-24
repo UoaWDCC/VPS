@@ -13,7 +13,7 @@ import { undo, redo } from "../scene/history";
 import { bringToFront, sendToBack } from "../scene/operations/component";
 import { useState } from "react";
 import PropertyMenu from "../../../components/Properties/PropertyMenu";
-import ImageCreateMenu from "../images";
+import ImageCreateMenu from "../ImageCreateMenu";
 import ShapeCreateMenu from "./ShapeCreateMenu";
 import BackgroundMenu from "./BackgroundMenu";
 
