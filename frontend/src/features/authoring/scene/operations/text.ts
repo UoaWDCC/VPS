@@ -105,7 +105,12 @@ export const deleteSelection = modify((id: string[], sel: ModelSelection) => {
   if (!newSpans.length)
     newSpans = [{ text: "", style: startBlock.spans[0].style }];
 
-  const newBlock = { spans: newSpans, style: startBlock.style };
+  const newBlock = {
+    spans: newSpans,
+    style: startBlock.style,
+    list: startBlock.list ? { ...startBlock.list } : undefined,
+    softBreak: startBlock.softBreak,
+  };
   blocks.splice(start.blockI, end.blockI - start.blockI + 1, newBlock);
 
   // needs normalisation to merge adjacent spans with the same style

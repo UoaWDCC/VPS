@@ -2,7 +2,7 @@ import type { MarkerSelection, VisualBlock, VisualDocument } from "./types";
 import Cursor from "./Cursor.tsx";
 import Highlight from "./Highlight";
 import Rectangle from "../canvas/Rectangle";
-import { buildStyle, LIST_MARKER_GAP } from "./build";
+import { buildStyle, scriptShift, LIST_MARKER_GAP } from "./build";
 import useEditorStore from "../stores/editor";
 import TextHighlight from "./TextHighlight.tsx";
 
@@ -210,20 +210,35 @@ function buildGroups(
           i >= markerSelection.start &&
           i <= markerSelection.end
       )}
-      {block.lines.map((line, j) => (
-        <text
-          key={j}
-          x={line.x}
-          y={block.y + line.y + line.baseline}
-          style={{ whiteSpace: "pre" }}
-        >
-          {line.spans.map((span, k) => (
-            <tspan key={k} style={buildStyle(span.style)}>
-              {span.text}
-            </tspan>
-          ))}
-        </text>
-      ))}
+      {block.lines.map((line, j) => {
+        // dy is relative to the previous tspan's position, so a super/sub
+        // shift has to be undone by the following span's delta -- otherwise
+        // the whole rest of the line stays shifted
+        let prevShift = 0;
+        return (
+          <text
+            key={j}
+            x={line.x}
+            y={block.y + line.y + line.baseline}
+            style={{ whiteSpace: "pre" }}
+          >
+            {line.spans.map((span, k) => {
+              const shift = scriptShift(span.style);
+              const dy = shift - prevShift;
+              prevShift = shift;
+              return (
+                <tspan
+                  key={k}
+                  dy={dy || undefined}
+                  style={buildStyle(span.style)}
+                >
+                  {span.text}
+                </tspan>
+              );
+            })}
+          </text>
+        );
+      })}
     </g>
   ));
 }

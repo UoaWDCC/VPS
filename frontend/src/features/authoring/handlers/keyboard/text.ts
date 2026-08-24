@@ -12,6 +12,7 @@ import {
   isStartOfListBlock,
   setBlockListStyle,
 } from "../../scene/operations/text";
+import { getBlockRange } from "../../text/list";
 import useEditorStore from "../../stores/editor";
 import useVisualScene from "../../stores/visual";
 import {
@@ -47,16 +48,10 @@ export function handleTextMode(e: KeyboardEvent) {
 }
 
 function handleIndent(e: KeyboardEvent, selected: string) {
-  const { selection } = useEditorStore.getState();
-  const { start, end } = selection;
-  if (!start) return;
+  const range = getBlockRange(selected);
+  if (!range) return;
 
   e.preventDefault();
-
-  const range = {
-    start: Math.min(start.blockI, end?.blockI ?? start.blockI),
-    end: Math.max(start.blockI, end?.blockI ?? start.blockI),
-  };
 
   indentBlocks([selected], range, e.shiftKey ? -1 : 1);
   syncVisualCursor();

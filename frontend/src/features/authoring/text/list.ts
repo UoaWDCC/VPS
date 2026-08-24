@@ -18,7 +18,7 @@ export function getListGroupRange(doc: VisualDocument, blockI: number) {
 // resolves the block range an action should apply to for a given textbox:
 // an active text selection/cursor takes priority, otherwise falls back to
 // a marker selection (bullets selected as objects, not text) on that box
-function getBlockRange(id: string) {
+export function getBlockRange(id: string) {
   const { selection, markerSelection } = useEditorStore.getState();
   const { start, end } = selection;
 

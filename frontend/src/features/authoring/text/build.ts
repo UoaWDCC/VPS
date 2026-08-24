@@ -66,11 +66,22 @@ export function buildStyle(derived: Partial<BaseTextStyle>) {
     font: buildFont(derived),
     fill: derived.textColor,
     textDecoration: derived.textDecoration,
-    baselineShift:
-      derived.verticalAlign && derived.verticalAlign !== "normal"
-        ? derived.verticalAlign
-        : undefined,
   };
+}
+
+const SUPER_SHIFT = -0.35;
+const SUB_SHIFT = 0.15;
+
+// vertical offset (in px, baseline-relative) for super/subscript, sized off
+// the *unscaled* fontSize -- Chrome/Edge dropped CSS `baseline-shift` as a
+// settable style property (SVG2 kept it only as a raw presentation
+// attribute), so the shift has to be applied as an SVG `dy` instead
+export function scriptShift(
+  style: Pick<BaseTextStyle, "fontSize" | "verticalAlign">
+) {
+  if (style.verticalAlign === "super") return style.fontSize * SUPER_SHIFT;
+  if (style.verticalAlign === "sub") return style.fontSize * SUB_SHIFT;
+  return 0;
 }
 
 function generateOffsets(text: string, style: BaseTextStyle) {
