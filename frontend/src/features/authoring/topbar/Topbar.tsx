@@ -61,16 +61,6 @@ function Topbar({ saving, save }: { saving: boolean; save: () => void }) {
             Properties
           </button>
         </li>
-        <li className="text-xs">
-          <button
-            type="button"
-            className="p-1.5"
-            onClick={() => setShowBackgroundMenu(true)}
-          >
-            Background
-          </button>
-        </li>
-
         <div className="divider divider-horizontal" />
 
         <li className="tooltip tooltip-bottom" data-tip="Undo">
@@ -94,6 +84,14 @@ function Topbar({ saving, save }: { saving: boolean; save: () => void }) {
           </a>
         </li>
         <ShapeCreateMenu />
+
+        <div className="divider divider-horizontal" />
+
+        <li className="text-xs">
+          <button type="button" onClick={() => setShowBackgroundMenu(true)}>
+            Background
+          </button>
+        </li>
 
         {/* element properties */}
         {hasSelection && (
