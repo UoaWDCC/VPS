@@ -15,6 +15,7 @@ import { useState } from "react";
 import PropertyMenu from "../../../components/Properties/PropertyMenu";
 import ImageCreateMenu from "../images";
 import ShapeCreateMenu from "./ShapeCreateMenu";
+import BackgroundMenu from "./BackgroundMenu";
 
 import "./topbar.css";
 
@@ -24,6 +25,7 @@ function Topbar({ saving, save }: { saving: boolean; save: () => void }) {
   const setCreateType = useEditorStore((state) => state.setCreateType);
 
   const [showPropertyMenu, setShowPropertyMenu] = useState(false);
+  const [showBackgroundMenu, setShowBackgroundMenu] = useState(false);
 
   function togglePropertyMenu() {
     setShowPropertyMenu((prev) => !prev);
@@ -49,9 +51,24 @@ function Topbar({ saving, save }: { saving: boolean; save: () => void }) {
   return (
     <>
       <PropertyMenu show={showPropertyMenu} setShow={setShowPropertyMenu} />
+      <BackgroundMenu
+        show={showBackgroundMenu}
+        setShow={setShowBackgroundMenu}
+      />
       <ul className="topbar gap-0.5 menu menu-horizontal w-full bg-base-300 rounded-box p-1">
         <li className="text-xs">
-          <a onClick={togglePropertyMenu}>Properties</a>
+          <button type="button" onClick={togglePropertyMenu}>
+            Properties
+          </button>
+        </li>
+        <li className="text-xs">
+          <button
+            type="button"
+            className="p-1.5"
+            onClick={() => setShowBackgroundMenu(true)}
+          >
+            Background
+          </button>
         </li>
 
         <div className="divider divider-horizontal" />

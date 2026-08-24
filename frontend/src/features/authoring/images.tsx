@@ -1,5 +1,9 @@
 import { useContext, useRef, useState, type Context } from "react";
-import { useQuery } from "@tanstack/react-query";
+import {
+  useQuery,
+  useQueryClient,
+  type QueryClient,
+} from "@tanstack/react-query";
 import ImageListContainer from "../../components/ListContainer/ImageListContainer";
 import { type User } from "firebase/auth";
 import { useParams } from "react-router-dom";
@@ -7,15 +11,15 @@ import { ImageIcon } from "lucide-react";
 import { add } from "./scene/operations/modifiers";
 import { defaults } from "./scene/operations/component";
 import type { ImageComponent, UploadedFile, Scene } from "./types";
-import { api, handleGeneric } from "../../util/api";
+import { handleGeneric } from "../../util/api";
 import ModalDialog from "../../components/ModalDialogue";
 import useEditorStore from "./stores/editor.ts";
 import toast from "react-hot-toast";
 import AuthenticationContext from "../../context/AuthenticationContext.jsx";
-import type { AxiosResponse } from "axios";
 import SceneContext from "../../context/SceneContext.jsx";
 import { getScene, getSceneId } from "./scene/scene";
 import { v4 } from "uuid";
+import { getImages, uploadImage } from "./imageFiles";
 
 type ModifyScene = (scene: Scene) => Promise<unknown> | undefined;
 
@@ -59,22 +63,18 @@ async function addNewImage(
   scenarioId: string,
   user: User,
   originScene: Scene,
-  modifyScene: ModifyScene
+  modifyScene: ModifyScene,
+  queryClient: QueryClient
 ) {
   const { setLoading } = useEditorStore.getState();
   setLoading(true);
 
   try {
-    const formData = new FormData();
-    formData.append("file", file);
-
-    const response = (await api.post(
-      user,
-      `api/files/${scenarioId}`,
-      formData
-    )) as AxiosResponse<UploadedFile>;
-
-    await addImageToScene(response.data, originScene, modifyScene);
+    const image = await uploadImage(user, scenarioId, file);
+    await queryClient.invalidateQueries({
+      queryKey: ["images", scenarioId],
+    });
+    await addImageToScene(image, originScene, modifyScene);
   } catch (e) {
     console.error(e);
     toast.error("Image upload failed");
@@ -94,16 +94,9 @@ async function getImageDimensions(url: string, defaultHeight = 300) {
   ];
 }
 
-async function getImages(user: User, scenarioId: string) {
-  const res = (await api.get(
-    user,
-    `api/files/${scenarioId}/type/image`
-  )) as AxiosResponse<UploadedFile[]>;
-  return res.data;
-}
-
 function ImageCreateMenu() {
   const { scenarioId } = useParams<{ scenarioId: string }>();
+  const queryClient = useQueryClient();
   const [selectedImage, setSelectedImage] = useState<UploadedFile | null>(null);
 
   const { user } = useContext(AuthenticationContext as Context<{ user: User }>);
@@ -135,9 +128,14 @@ function ImageCreateMenu() {
 
     const originScene = getScene();
 
-    addNewImage(file, scenarioId, user, originScene, modifyScene).catch(
-      handleGeneric
-    );
+    addNewImage(
+      file,
+      scenarioId,
+      user,
+      originScene,
+      modifyScene,
+      queryClient
+    ).catch(handleGeneric);
   }
 
   const showFilePicker = () => {
