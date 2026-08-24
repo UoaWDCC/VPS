@@ -270,6 +270,7 @@ export const indentBlocks = modify(
         block.list.level -= 1;
       } else {
         block.list = undefined;
+        block.softBreak = undefined;
       }
     }
   }
@@ -289,6 +290,7 @@ export const setBlockListStyle = modify(
       const block = doc.blocks[i];
       if (markerStyle === "none") {
         block.list = undefined;
+        block.softBreak = undefined;
       } else {
         block.list = {
           markerStyle,

@@ -19,10 +19,13 @@ export function getListGroupRange(doc: VisualDocument, blockI: number) {
 // an active text selection/cursor takes priority, otherwise falls back to
 // a marker selection (bullets selected as objects, not text) on that box
 export function getBlockRange(id: string) {
-  const { selection, markerSelection } = useEditorStore.getState();
+  const { selected, selection, markerSelection } = useEditorStore.getState();
   const { start, end } = selection;
 
-  if (start) {
+  // the active text selection has no owning id of its own -- it's only
+  // meaningful for the single textbox currently focused for text editing,
+  // so it must never be reused as-is for any other selected textbox
+  if (start && selected.length === 1 && selected[0] === id) {
     return {
       start: Math.min(start.blockI, end?.blockI ?? start.blockI),
       end: Math.max(start.blockI, end?.blockI ?? start.blockI),
@@ -34,6 +37,16 @@ export function getBlockRange(id: string) {
   }
 
   return null;
+}
+
+// a range covering every block in the given textbox's document -- used as
+// the per-target fallback when there's no active in-text selection to
+// derive a range from, so a bulk action still has a valid range for each
+// document instead of reusing one that belongs to a different textbox
+function getFullBlockRange(id: string) {
+  const doc = getComponentProp(id, "document") as ModelDocument;
+  if (!doc?.blocks?.length) return null;
+  return { start: 0, end: doc.blocks.length - 1 };
 }
 
 export function getListStyleForSelection(id: string): ListMarkerStyle | "none" {
@@ -48,7 +61,7 @@ export function setListStyle(
   selected: string,
   value: ListMarkerStyle | "none"
 ) {
-  const range = getBlockRange(selected);
+  const range = getBlockRange(selected) ?? getFullBlockRange(selected);
   if (!range) return;
 
   setBlockListStyle([selected], range, value);

@@ -129,8 +129,9 @@ function handleEditing(e: KeyboardEvent, selected: string) {
     setSelection({ start: newCursor, end: null });
   } else if (e.key === "Enter" && e.shiftKey) {
     // soft line break: a new line within the same list item, no new marker
-    const newCursor = createSoftBreak([selected], start);
-    setSelection({ start: newCursor, end });
+    const cursor = end ? deleteSelection([selected], selection) : start;
+    const newCursor = createSoftBreak([selected], cursor);
+    setSelection({ start: newCursor, end: null });
   } else if (e.key === "Enter" && isEmptyListBlock(selected, start)) {
     // enter on an empty bullet line (i.e. a second enter right after the
     // previous one created it) ends the list instead of adding another line

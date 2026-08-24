@@ -52,7 +52,7 @@ export function handleMouseDownGlobal(e: React.MouseEvent, position: Vec2) {
   } else if (target.dataset.type === "checkbox") {
     handleCheckboxClick(e);
   } else if (target.dataset.type === "marker") {
-    handleMarkerClick(e);
+    handleMarkerClick(e, position);
   } else if (target.dataset.type === "document") {
     handleDocumentClick(e, position);
   } else if (target.dataset.id) {
@@ -165,7 +165,7 @@ function handleCheckboxClick(e: React.MouseEvent) {
 // so it can be bulk-deleted without touching the content -- a single click
 // selects the whole contiguous run of list blocks (the "list group"), a
 // double click selects just that one item
-function handleMarkerClick(e: React.MouseEvent) {
+function handleMarkerClick(e: React.MouseEvent, position: Vec2) {
   const target = e.target as HTMLElement;
   const id = target.dataset.id as string;
   const blockI = Number(target.dataset.blockIndex);
@@ -177,6 +177,7 @@ function handleMarkerClick(e: React.MouseEvent) {
     setSelection,
     setVisualSelection,
     setMarkerSelection,
+    setOffset,
   } = useEditorStore.getState();
   const component = useVisualScene.getState().components[id];
   const { document: doc } = component as unknown as {
@@ -186,6 +187,7 @@ function handleMarkerClick(e: React.MouseEvent) {
   setSelected([id]);
   setMode(["normal"]);
   setMutationBounds({ ...component.bounds });
+  setOffset(position);
   // a marker selection is distinct from a text selection -- clear any
   // active text cursor/highlight so they don't compete visually
   setSelection({ start: null, end: null });
