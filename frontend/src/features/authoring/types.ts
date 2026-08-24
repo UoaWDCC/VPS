@@ -119,6 +119,7 @@ export interface ModelBlock {
 export interface PropertyRef {
   id: string;
   displayName: string;
+  missing?: boolean;
 }
 
 export interface ModelSpan {

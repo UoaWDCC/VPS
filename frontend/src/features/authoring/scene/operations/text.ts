@@ -5,12 +5,21 @@ import type {
   ModelBlock,
   ModelDocument,
   ModelSpan,
+  PropertyRef,
 } from "../../types";
 import { squash } from "../../text/build";
 import useEditorStore from "../../stores/editor";
 import { objectDiff } from "../../util";
 import shallow from "zustand/shallow";
 import { modify } from "./modifiers";
+import {
+  findPropertyIdByName,
+  isProperty,
+  PROPERTY_CHAR,
+  spanToText,
+} from "../../text/property";
+
+const PROPERTY_REGEX = /\$\$([^$]+)\$\$$/;
 
 export const insertChar = modify(
   (id: string[], cursor: ModelCursor, char: string) => {
@@ -24,7 +33,7 @@ export const insertChar = modify(
     const block = doc.blocks[cursor.blockI];
     const target = block.spans[cursor.spanI];
 
-    if (shallow(diff, target.style)) {
+    if (!isProperty(target) && shallow(diff, target.style)) {
       // if we're the same style as prev span
       const modified =
         target.text.slice(0, cursor.charI) +
@@ -109,6 +118,70 @@ export const deleteSelection = modify((id: string[], sel: ModelSelection) => {
 
   // needs normalisation to merge adjacent spans with the same style
   return normaliseDocument(doc, start);
+});
+
+//insert property into textbox
+export const insertProperty = modify(
+  (id: string[], cursor: ModelCursor, ref: PropertyRef) => {
+    const doc = getComponentProp(id[0], "document") as ModelDocument;
+
+    //active style diff
+    const diff = objectDiff(
+      useEditorStore.getState().activeStyle!,
+      squash(doc.style)
+    );
+    const block = doc.blocks[cursor.blockI];
+
+    //new property span at cursor
+    splitSpan(doc.blocks, cursor);
+    const at = cursor.charI > 0 ? cursor.spanI + 1 : cursor.spanI;
+    block.spans.splice(at, 0, {
+      text: PROPERTY_CHAR,
+      style: diff,
+      property: { ...ref },
+    });
+
+    //return cursor after chip
+    return normaliseDocument(doc, {
+      blockI: cursor.blockI,
+      spanI: at,
+      charI: 1,
+    });
+  }
+);
+
+export const convertToChip = modify((id: string[], cursor: ModelCursor) => {
+  const { properties } = useEditorStore.getState();
+  if (!properties.length) return cursor;
+
+  const doc = getComponentProp(id[0], "document") as ModelDocument;
+  const block = doc.blocks[cursor.blockI];
+  const span = block.spans[cursor.spanI];
+  if (isProperty(span)) return cursor;
+
+  //check for regex match and valid property
+  const match = PROPERTY_REGEX.exec(span.text.slice(0, cursor.charI));
+  if (!match) return cursor;
+
+  const property = findPropertyIdByName(properties, match[1]);
+  if (!property) return cursor;
+
+  //isolate property name, convert to chip span
+  const from = cursor.charI - match[0].length;
+  splitSpan(doc.blocks, cursor);
+  splitSpan(doc.blocks, { ...cursor, charI: from });
+
+  const at = from > 0 ? cursor.spanI + 1 : cursor.spanI;
+  block.spans.splice(at, 1, {
+    text: PROPERTY_CHAR,
+    style: span.style,
+    property: {
+      id: property,
+      displayName: match[1],
+    },
+  });
+
+  return normaliseDocument(doc, { ...cursor, spanI: at, charI: 1 });
 });
 
 export const createBlock = modify((id: string[], cursor: ModelCursor) => {
@@ -373,6 +446,8 @@ function* spanRange(
 function splitSpan(blocks: ModelBlock[], cursor: ModelCursor) {
   const block = blocks[cursor.blockI];
   const span = block.spans[cursor.spanI];
+  //atomic prop spans cannot be split
+  if (isProperty(span)) return cursor;
 
   const left = span.text.slice(0, cursor.charI);
   const right = span.text.slice(cursor.charI);
@@ -424,14 +499,21 @@ export function normaliseDocument(doc: ModelDocument, cursor: ModelCursor) {
 
       // remove empty spans except for ones that are the only in a block
       if (span.text.length === 0) {
-        if (isCursorBlock && s < cursor.spanI) newCursor.spanI--;
+        //cursor on removed chip span is collapsed to the previous span
+        if (isCursorBlock && s <= cursor.spanI && newCursor.spanI > 0)
+          newCursor.spanI--;
         continue;
       }
 
       // merge adjacent spans with the same style
       const style = objectDiff(span.style!, squash(doc.style));
       const prev = normdSpans[normdSpans.length - 1];
-      if (prev && shallow(style, prev.style)) {
+      if (
+        prev &&
+        !isProperty(span) &&
+        !isProperty(prev) &&
+        shallow(style, prev.style)
+      ) {
         if (isCursorBlock && s <= cursor.spanI) {
           newCursor.spanI--;
           if (s === cursor.spanI) newCursor.charI += prev.text.length;
@@ -445,7 +527,11 @@ export function normaliseDocument(doc: ModelDocument, cursor: ModelCursor) {
     }
 
     // if the block has no meaningful text, ensure that it keeps one empty span
-    if (normdSpans.length === 0) normdSpans.push(block.spans[0]);
+    if (normdSpans.length === 0) {
+      const fallback = { ...block.spans[0], text: "" };
+      delete fallback.property;
+      normdSpans.push(fallback);
+    }
 
     block.spans = normdSpans;
   }
@@ -459,11 +545,25 @@ export function getDocumentText(id: string) {
   let text = "";
   for (const block of blocks) {
     for (const span of block.spans) {
-      text += span.text;
+      text += spanToText(span);
     }
     text += "\n";
   }
   return text;
+}
+
+//determine what the clipboard recieves when copy/cutting a text selection (from-to)
+function cutSpan(span: ModelSpan, from = 0, to = span.text.length) {
+  //normal plain text slice
+  if (!isProperty(span)) {
+    const slice = span.text.slice(from, to);
+    return { text: slice, raw: slice };
+  }
+
+  //any selection overlap onto chip means $$text$$ gets saved to clipboard
+  //raw unicode char kept for internal app paste
+  const taken = to > from;
+  return { text: taken ? spanToText(span) : "", raw: taken ? span.text : "" };
 }
 
 export function getSelectionContent(id: string, sel: ModelSelection) {
@@ -478,12 +578,17 @@ export function getSelectionContent(id: string, sel: ModelSelection) {
   if (start.blockI === end.blockI && start.spanI === end.spanI) {
     const block = blocks[start.blockI];
     const span = block.spans[start.spanI];
-    const text = span.text.slice(start.charI, end.charI);
+    const cut = cutSpan(span, start.charI, end.charI);
     const newDoc = {
       ...doc,
-      blocks: [{ ...block, spans: [{ ...span, text }] }],
+      blocks: [
+        {
+          ...block,
+          spans: [{ ...span, text: cut.raw }],
+        },
+      ],
     };
-    return { text, doc: newDoc };
+    return { text: cut.text, doc: newDoc };
   }
 
   let text = "";
@@ -501,16 +606,17 @@ export function getSelectionContent(id: string, sel: ModelSelection) {
       const span = blocks[b].spans[s];
 
       if (b === start.blockI && s === start.spanI) {
-        const content = span.text.slice(start.charI);
-        text += content;
-        newDoc.blocks[nb].spans.push({ ...span, text: content });
+        const cut = cutSpan(span, start.charI);
+        text += cut.text;
+        newDoc.blocks[nb].spans.push({ ...span, text: cut.raw });
       } else if (b === end.blockI && s === end.spanI) {
-        const content = span.text.slice(0, end.charI);
-        text += content;
-        newDoc.blocks[nb].spans.push({ ...span, text: content });
+        const cut = cutSpan(span, 0, end.charI);
+        text += cut.text;
+        newDoc.blocks[nb].spans.push({ ...span, text: cut.raw });
       } else {
-        text += span.text;
-        newDoc.blocks[nb].spans.push({ ...span });
+        const cut = cutSpan(span);
+        text += cut.text;
+        newDoc.blocks[nb].spans.push({ ...span, text: cut.raw });
       }
     }
 

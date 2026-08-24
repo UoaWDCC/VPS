@@ -15,6 +15,10 @@ export function isProperty(
   return span.property !== undefined;
 }
 
+export function findPropertyIdByName(properties: Property[], name: string) {
+  return properties.find((p) => p.name === name)?.id ?? null;
+}
+
 //convert span chip to $$name$$ text
 export function spanToText(span: ModelSpan) {
   if (!span.property) return span.text;
