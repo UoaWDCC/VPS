@@ -1,5 +1,9 @@
 import { useContext, useRef, useState, type Context } from "react";
-import { useQuery } from "@tanstack/react-query";
+import {
+  useQuery,
+  useQueryClient,
+  type QueryClient,
+} from "@tanstack/react-query";
 import ImageListContainer from "../../components/ListContainer/ImageListContainer";
 import { type User } from "firebase/auth";
 import { useParams } from "react-router-dom";
@@ -59,13 +63,17 @@ async function addNewImage(
   scenarioId: string,
   user: User,
   originScene: Scene,
-  modifyScene: ModifyScene
+  modifyScene: ModifyScene,
+  queryClient: QueryClient
 ) {
   const { setLoading } = useEditorStore.getState();
   setLoading(true);
 
   try {
     const image = await uploadImage(user, scenarioId, file);
+    await queryClient.invalidateQueries({
+      queryKey: ["images", scenarioId],
+    });
     await addImageToScene(image, originScene, modifyScene);
   } catch (e) {
     console.error(e);
@@ -88,6 +96,7 @@ async function getImageDimensions(url: string, defaultHeight = 300) {
 
 function ImageCreateMenu() {
   const { scenarioId } = useParams<{ scenarioId: string }>();
+  const queryClient = useQueryClient();
   const [selectedImage, setSelectedImage] = useState<UploadedFile | null>(null);
 
   const { user } = useContext(AuthenticationContext as Context<{ user: User }>);
@@ -119,9 +128,14 @@ function ImageCreateMenu() {
 
     const originScene = getScene();
 
-    addNewImage(file, scenarioId, user, originScene, modifyScene).catch(
-      handleGeneric
-    );
+    addNewImage(
+      file,
+      scenarioId,
+      user,
+      originScene,
+      modifyScene,
+      queryClient
+    ).catch(handleGeneric);
   }
 
   const showFilePicker = () => {

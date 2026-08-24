@@ -205,7 +205,7 @@ const syncProperties = async (group) => {
   if (JSON.stringify(newProperties) !== JSON.stringify(properties)) {
     return await setGroupProperties(group._id, newProperties);
   }
-  return [properties, group.stateVersions];
+  return [properties, group.stateVersion];
 };
 
 // Updates properties for a group
