@@ -25,10 +25,22 @@ function resolve(component) {
 }
 
 function injectProperties(scene, properties) {
-  if (!properties) return scene;
+  const props = properties ?? [];
 
-  const varMap = new Map(properties.map((v) => [v.name, v.value]));
+  //legacy $$name$$ substitution resolves by name
+  //chips resolve by id
+  const varMap = new Map(props.map((v) => [v.name, v.value]));
+  const valById = new Map(props.map((v) => [v.id, v.value]));
   const regex = /\$\$(.*?)\$\$/g;
+
+  function resolveSpan(span) {
+    if (!span.property) return span;
+    const { property, ...rest } = span;
+    return {
+      ...rest,
+      text: String(valById.get(property.id) ?? property.displayName),
+    };
+  }
 
   return {
     ...scene,
@@ -37,7 +49,7 @@ function injectProperties(scene, properties) {
         if (component.type !== "textbox") return [id, component];
 
         const newBlocks = component.document.blocks.map((block) => {
-          const spans = block.spans ?? [];
+          const spans = (block.spans ?? []).map(resolveSpan);
           if (spans.length === 0) return block;
 
           // join all span texts for full-block regex scanning
@@ -60,7 +72,7 @@ function injectProperties(scene, properties) {
             });
           }
 
-          if (matches.length === 0) return block;
+          if (matches.length === 0) return { ...block, spans };
 
           // map spans to absolute offsets in blockText
           const offsets = [];
