@@ -57,7 +57,9 @@ function Topbar({ saving, save }: { saving: boolean; save: () => void }) {
       />
       <ul className="topbar gap-0.5 menu menu-horizontal w-full bg-base-300 rounded-box p-1">
         <li className="text-xs">
-          <a onClick={togglePropertyMenu}>Properties</a>
+          <button type="button" onClick={togglePropertyMenu}>
+            Properties
+          </button>
         </li>
         <li className="text-xs">
           <button
