@@ -4,6 +4,12 @@ import { HttpError } from "../../util/error.js";
 import status from "../../util/status.js";
 import { applyReferenceDeltas } from "./fileDao.js";
 import { HttpStatusCode } from "axios";
+// Single source of truth for direct-link key defaults lives in the
+// frontend, since it started there and the frontend has richer consumers
+// (key pickers, display strings) of the same concept. This is a plain .js
+// file specifically so this backend, which has no TypeScript loader, can
+// import it directly.
+import { directLinkKeysFor } from "../../../../frontend/src/features/authoring/keyBindingDefaults.js";
 
 export function addDelta(fileRefDeltas, fileId, delta) {
   fileRefDeltas.set(fileId, (fileRefDeltas.get(fileId) ?? 0) + delta);
@@ -81,17 +87,6 @@ const assertDirectLinkInScenario = async (scenarioId, directLinkId) => {
       status.BAD_REQUEST
     );
   }
-};
-
-// A scene's direct link defaults to responding to Space/ArrowRight when no
-// directLinkKey is set. Mirrors directLinkKeysFor in
-// frontend/src/features/authoring/keyBindings.ts.
-const DEFAULT_DIRECT_LINK_KEYS = ["SPACE", "ARROWRIGHT"];
-
-const directLinkKeysFor = (directLinkKey) => {
-  if (directLinkKey == null) return DEFAULT_DIRECT_LINK_KEYS;
-  if (!directLinkKey) return [];
-  return [directLinkKey];
 };
 
 // Enforce that no two clickable components, and no component and the scene's
@@ -257,6 +252,47 @@ const deleteScene = async (scenarioId, sceneId) => {
     { directLink: sceneId },
     { $set: { directLink: null } }
   );
+
+  // Components elsewhere that linked to the scene being deleted would
+  // otherwise keep pointing at a scene that no longer exists. Clear the
+  // link, and drop the key binding along with it for any component left
+  // with no other action (no State Operations) - a binding with nothing
+  // left to trigger is a dead binding. Components that still have State
+  // Operations keep their key binding, since it still does something.
+  //
+  // components is untyped (Schema.Types.Mixed), so nextScene is stored as
+  // whatever the frontend sent - always a plain string, never a cast
+  // ObjectId - unlike directLink above. Compare against the string form so
+  // this still matches regardless of what type the caller passed in.
+  const sceneIdStr = sceneId.toString();
+  await Scene.updateMany(
+    { "components.nextScene": sceneIdStr },
+    {
+      $set: {
+        "components.$[elem].nextScene": null,
+        "components.$[elem].keyBinding": null,
+        "components.$[elem].showKeyHint": false,
+      },
+    },
+    {
+      arrayFilters: [
+        {
+          "elem.nextScene": sceneIdStr,
+          $or: [
+            { "elem.stateOperations": { $exists: false } },
+            { "elem.stateOperations": null },
+            { "elem.stateOperations": { $size: 0 } },
+          ],
+        },
+      ],
+    }
+  );
+  await Scene.updateMany(
+    { "components.nextScene": sceneIdStr },
+    { $set: { "components.$[elem].nextScene": null } },
+    { arrayFilters: [{ "elem.nextScene": sceneIdStr }] }
+  );
+
   const res = await Scene.findOneAndDelete({ _id: sceneId });
 
   if (res) {
@@ -399,27 +435,38 @@ const patchScene = async (sceneId, patch, scenarioId) => {
   if (!existingScene)
     throw new HttpError("scene not found", HttpStatusCode.NotFound);
 
-  const effectiveComponents = existingScene.components
-    .filter((c) => !deletedComponentIds.includes(c.id))
-    .map((c) => components.find((uc) => uc.id === c.id) ?? c)
-    .concat(
-      components.filter(
-        (uc) => !existingScene.components.some((c) => c.id === uc.id)
-      )
+  // Key bindings can only change via a component add/edit/delete or a
+  // directLink/directLinkKey field change - skip building the effective
+  // state and validating it when the patch touches neither.
+  const keyBindingsMayHaveChanged =
+    components.length > 0 ||
+    deletedComponentIds.length > 0 ||
+    "directLink" in allowedFields ||
+    "directLinkKey" in allowedFields;
+
+  if (keyBindingsMayHaveChanged) {
+    const effectiveComponents = existingScene.components
+      .filter((c) => !deletedComponentIds.includes(c.id))
+      .map((c) => components.find((uc) => uc.id === c.id) ?? c)
+      .concat(
+        components.filter(
+          (uc) => !existingScene.components.some((c) => c.id === uc.id)
+        )
+      );
+    const effectiveDirectLink =
+      "directLink" in allowedFields
+        ? allowedFields.directLink
+        : existingScene.directLink;
+    const effectiveDirectLinkKey =
+      "directLinkKey" in allowedFields
+        ? allowedFields.directLinkKey
+        : existingScene.directLinkKey;
+    assertUniqueKeyBindings(
+      effectiveComponents,
+      effectiveDirectLink,
+      effectiveDirectLinkKey
     );
-  const effectiveDirectLink =
-    "directLink" in allowedFields
-      ? allowedFields.directLink
-      : existingScene.directLink;
-  const effectiveDirectLinkKey =
-    "directLinkKey" in allowedFields
-      ? allowedFields.directLinkKey
-      : existingScene.directLinkKey;
-  assertUniqueKeyBindings(
-    effectiveComponents,
-    effectiveDirectLink,
-    effectiveDirectLinkKey
-  );
+  }
 
   const fileRefDeltas = computePatchFileRefDeltas(
     existingScene.components,

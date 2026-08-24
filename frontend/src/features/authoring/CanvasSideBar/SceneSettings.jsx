@@ -31,7 +31,8 @@ export default function SceneSettings() {
     directLink,
     disabled: directLinkDisabled,
     defaultTarget: defaultDirectLinkScene,
-  } = useDirectLink();
+    hasOtherScenes,
+  } = useDirectLink(scenes);
   const directLinkKey = useVisualScene((scene) => scene.directLinkKey);
   const components = useVisualScene((scene) => scene.components);
   const time = useVisualScene((scene) => scene.time);
@@ -226,7 +227,7 @@ export default function SceneSettings() {
                     scenes?.find((s) => s._id !== selfId)?._id ??
                     null;
 
-                  if (!directLinkKey) clearDefaultDirectLinkCollisions();
+                  if (directLinkKey == null) clearDefaultDirectLinkCollisions();
 
                   modifySceneProp("directLink", target);
                 }}
@@ -237,7 +238,9 @@ export default function SceneSettings() {
                 <span
                   className="tooltip tooltip-warning tooltip-top cursor-help text-warning text-xs before:!whitespace-normal before:!max-w-[150px] before:!text-[0.75rem]"
                   data-tip={
-                    "Disabled: scene has buttons leading to multiple different scenes"
+                    hasOtherScenes
+                      ? "Disabled: scene has buttons leading to multiple different scenes"
+                      : "Disabled: no other scenes to link to"
                   }
                 >
                   ⚠
@@ -289,6 +292,12 @@ export default function SceneSettings() {
                       onChange={saveDirectLinkKey}
                       clearValue=""
                     />
+                    {!keyValue && (
+                      <p className="text-warning text-xs mt-1">
+                        ⚠ No key set - the player will have no way to trigger
+                        Direct Link until you pick one.
+                      </p>
+                    )}
                   </div>
                 )}
               </>

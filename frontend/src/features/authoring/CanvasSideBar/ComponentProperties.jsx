@@ -1,4 +1,5 @@
 import SceneContext from "context/SceneContext";
+import { Info } from "lucide-react";
 
 import { useContext, useEffect, useMemo, useState } from "react";
 import { modifyComponentProp } from "../scene/operations/component";
@@ -25,8 +26,7 @@ const orDefaultPosition = (v) => v ?? DEFAULT_KEY_HINT_POSITION;
 function usePropMirror(component, field, normalize) {
   const [value, setValue] = useState(() => normalize(component?.[field]));
   useEffect(() => {
-    const next = normalize(component?.[field]);
-    setValue((prev) => (prev === next ? prev : next));
+    setValue(normalize(component?.[field]));
   }, [component, field, normalize]);
   return [value, setValue];
 }
@@ -98,7 +98,42 @@ export default function ComponentProperties({ component }) {
     [component, sceneComponents, directLink, directLinkKey]
   );
 
+  // A Next Scene that no longer exists (its scene was deleted elsewhere)
+  // shouldn't linger as a dangling id - null it out the moment it's
+  // noticed, so Link Details reads "None" instead of a blank scene name.
+  // A key binding with nothing to trigger (no Next Scene and no State
+  // Operations) is a dead binding - clear that too, whether it's this
+  // cleanup or an edit here that removed its last action. Mirrors the
+  // cleanup pattern in useDirectLink.js.
+  useEffect(() => {
+    if (!component?.clickable) return;
+
+    const linksToMissingScene =
+      component.nextScene != null &&
+      !scenes?.some((s) => s._id === component.nextScene);
+
+    if (linksToMissingScene) {
+      modifyComponentProp(component.id, "nextScene", null);
+    }
+
+    const stillActionable = hasClickAction({
+      ...component,
+      nextScene: linksToMissingScene ? null : component.nextScene,
+    });
+
+    if (!stillActionable) {
+      if (component.keyBinding) {
+        modifyComponentProp(component.id, "keyBinding", null);
+      }
+      if (component.showKeyHint) {
+        modifyComponentProp(component.id, "showKeyHint", false);
+      }
+    }
+  }, [component, scenes]);
+
   if (!component) return null;
+
+  const canBindKey = hasClickAction(component);
 
   return (
     <>
@@ -116,23 +151,45 @@ export default function ComponentProperties({ component }) {
                   values={scenes.map((s) => s._id)}
                   value={value}
                   onChange={saveLink}
-                  display={(v) => scenes.find((s) => s._id === v)?.name}
+                  display={(v) =>
+                    scenes.find((s) => s._id === v)?.name ?? "None"
+                  }
                 />
               </fieldset>
+            </div>
+          </div>
+          <div className="collapse overflow-visible collapse-arrow bg-base-300 rounded-sm text-s">
+            <input type="checkbox" />
+            <div className="collapse-title">Key Binding</div>
+            <div className="collapse-content text--1 bg-base-200">
               <fieldset className="fieldset pt-2">
                 <label className="label">Key Binding</label>
-                <KeyCapture
-                  value={keyValue}
-                  availableKeys={availableKeys}
-                  onChange={saveKey}
-                />
+                <div className="flex items-center gap-2">
+                  <KeyCapture
+                    value={keyValue}
+                    availableKeys={availableKeys}
+                    onChange={saveKey}
+                    disabled={!canBindKey}
+                  />
+                  <span
+                    className="text-base-content/60 tooltip tooltip-top cursor-help before:!whitespace-normal before:!max-w-[180px] before:!text-[0.75rem]"
+                    data-tip="Lets the player trigger this element by pressing a key instead of clicking - fires the Next Scene link above and/or the State Operations below, whichever are set."
+                  >
+                    <Info size={16} />
+                  </span>
+                </div>
+                {!canBindKey && (
+                  <span className="text-xs text-base-content/60">
+                    Set a Next Scene or a State Operation before binding a key.
+                  </span>
+                )}
               </fieldset>
               <label className="label cursor-pointer justify-start gap-3 mt-2 mb-2">
                 <input
                   type="checkbox"
                   className="toggle"
                   checked={hintValue}
-                  disabled={!keyValue || !hasClickAction(component)}
+                  disabled={!keyValue || !canBindKey}
                   onChange={(e) => saveHint(e.target.checked)}
                 />
                 Show key hint

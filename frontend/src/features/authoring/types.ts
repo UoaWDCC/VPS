@@ -44,7 +44,7 @@ export interface Guide {
   isCanvasCenter?: boolean;
 }
 
-interface GenericComponent {
+export interface GenericComponent {
   id: string;
   bounds: Bounds;
   zIndex: number;

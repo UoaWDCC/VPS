@@ -4,7 +4,7 @@ import mongoose from "mongoose";
 
 import Scene from "../../models/scene.js";
 import Scenario from "../../models/scenario.js";
-import { patchScene } from "../sceneDao.js";
+import { patchScene, deleteScene } from "../sceneDao.js";
 import { useMongoMemoryServer } from "../../../test/testSetup.js";
 
 describe("Scene DAO patchScene tests", () => {
@@ -279,5 +279,85 @@ describe("Scene DAO patchScene tests", () => {
     expect(
       updatedScene.components.find((c) => c.id === "component-a").keyBinding
     ).toBe("Q");
+  });
+});
+
+describe("Scene DAO deleteScene tests", () => {
+  useMongoMemoryServer();
+
+  const sceneAId = new mongoose.Types.ObjectId("000000000000000000000011");
+  const sceneBId = new mongoose.Types.ObjectId("000000000000000000000012");
+  const sceneCId = new mongoose.Types.ObjectId("000000000000000000000013");
+  const scenarioId = new mongoose.Types.ObjectId("000000000000000000000098");
+
+  beforeEach(async () => {
+    await Scene.create({
+      _id: sceneAId,
+      name: "Scene A",
+      components: [
+        {
+          id: "link-only",
+          type: "box",
+          clickable: true,
+          nextScene: sceneBId.toString(),
+          keyBinding: "Q",
+          showKeyHint: true,
+        },
+        {
+          id: "link-and-state",
+          type: "box",
+          clickable: true,
+          nextScene: sceneBId.toString(),
+          keyBinding: "W",
+          stateOperations: [{ type: "SET_FLAG", flag: "visited" }],
+        },
+        {
+          id: "unrelated",
+          type: "box",
+          clickable: true,
+          nextScene: sceneCId.toString(),
+          keyBinding: "E",
+        },
+      ],
+    });
+    await Scene.create({ _id: sceneBId, name: "Scene B", components: [] });
+    await Scene.create({ _id: sceneCId, name: "Scene C", components: [] });
+    await Scenario.create({
+      _id: scenarioId,
+      name: "Test Scenario",
+      uid: "test-uid",
+      scenes: [sceneAId, sceneBId, sceneCId],
+    });
+  });
+
+  it("clears nextScene and the key binding for a component with no other action, when the linked scene is deleted", async () => {
+    await deleteScene(scenarioId, sceneBId);
+
+    const sceneA = await Scene.findById(sceneAId);
+    const component = sceneA.components.find((c) => c.id === "link-only");
+
+    expect(component.nextScene).toBeNull();
+    expect(component.keyBinding).toBeNull();
+    expect(component.showKeyHint).toBe(false);
+  });
+
+  it("clears nextScene but keeps the key binding for a component that still has state operations", async () => {
+    await deleteScene(scenarioId, sceneBId);
+
+    const sceneA = await Scene.findById(sceneAId);
+    const component = sceneA.components.find((c) => c.id === "link-and-state");
+
+    expect(component.nextScene).toBeNull();
+    expect(component.keyBinding).toBe("W");
+  });
+
+  it("leaves components linked to a different, still-existing scene untouched", async () => {
+    await deleteScene(scenarioId, sceneBId);
+
+    const sceneA = await Scene.findById(sceneAId);
+    const component = sceneA.components.find((c) => c.id === "unrelated");
+
+    expect(component.nextScene).toBe(sceneCId.toString());
+    expect(component.keyBinding).toBe("E");
   });
 });
