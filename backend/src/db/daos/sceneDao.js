@@ -283,8 +283,8 @@ const deleteScene = async (scenarioId, sceneId) => {
   // Components elsewhere that linked to the scene being deleted would
   // otherwise keep pointing at a scene that no longer exists. Clear the
   // link, and drop the key binding along with it for any component left
-  // with no other action (no State Operations) - a binding with nothing
-  // left to trigger is a dead binding. Components that still have State
+  // with no other action (no Property Operations) - a binding with nothing
+  // left to trigger is a dead binding. Components that still have Property
   // Operations keep their key binding, since it still does something.
   //
   // components is untyped (Schema.Types.Mixed), so nextScene is stored as
@@ -451,6 +451,25 @@ async function validateBackground(background) {
 
 const patchScene = async (sceneId, patch, scenarioId) => {
   const { fields = {}, components = [], deletedComponentIds = [] } = patch;
+
+  // Duplicate ids in the same patch are rejected outright rather than
+  // silently letting the last one win - effectiveComponents below only
+  // validates the first occurrence (Array.find), while bulkWrite applies
+  // updates in order, so a later duplicate could persist an unvalidated,
+  // actually-conflicting keyBinding.
+  const duplicateComponentIds = [
+    ...new Set(
+      components
+        .map((c) => c.id)
+        .filter((id, index, ids) => ids.indexOf(id) !== index)
+    ),
+  ];
+  if (duplicateComponentIds.length > 0) {
+    throw new HttpError(
+      `Component(s) ${duplicateComponentIds.join(", ")} appear more than once in the same patch`,
+      status.BAD_REQUEST
+    );
+  }
 
   // A component can't be both deleted and updated in the same patch - the
   // $pull/$push bulkWrite below would actually resurrect it (re-inserted by

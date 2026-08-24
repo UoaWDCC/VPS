@@ -183,6 +183,32 @@ describe("Scene DAO patchScene tests", () => {
     expect(updatedScene.components).toHaveLength(3);
   });
 
+  it("rejects a patch where the same component id appears twice", async () => {
+    await expect(
+      patchScene(sceneId, {
+        fields: {},
+        components: [
+          {
+            id: "component-a",
+            type: "box",
+            bounds: { verts: [{ x: 1, y: 1 }] },
+          },
+          {
+            id: "component-a",
+            type: "box",
+            bounds: { verts: [{ x: 2, y: 2 }] },
+          },
+        ],
+        deletedComponentIds: [],
+      })
+    ).rejects.toThrow(/appear more than once/);
+
+    const scene = await Scene.findById(sceneId);
+    expect(
+      scene.components.find((c) => c.id === "component-a").bounds.verts[0]
+    ).toEqual({ x: 0, y: 0 });
+  });
+
   it("rejects a patch where two clickable components claim the same key", async () => {
     await expect(
       patchScene(sceneId, {

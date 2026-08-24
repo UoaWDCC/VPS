@@ -101,7 +101,7 @@ export default function ComponentSettings({ component }) {
   // A Next Scene that no longer exists (its scene was deleted elsewhere)
   // shouldn't linger as a dangling id - null it out the moment it's
   // noticed, so Link Details reads "None" instead of a blank scene name.
-  // A key binding with nothing to trigger (no Next Scene and no State
+  // A key binding with nothing to trigger (no Next Scene and no Property
   // Operations) is a dead binding - clear that too, whether it's this
   // cleanup or an edit here that removed its last action. Mirrors the
   // cleanup pattern in useDirectLink.js.
@@ -173,14 +173,15 @@ export default function ComponentSettings({ component }) {
                   />
                   <span
                     className="text-base-content/60 tooltip tooltip-top cursor-help before:!whitespace-normal before:!max-w-[180px] before:!text-[0.75rem]"
-                    data-tip="Lets the player trigger this element by pressing a key instead of clicking - fires the Next Scene link above and/or the State Operations below, whichever are set."
+                    data-tip="Lets the player trigger this element by pressing a key instead of clicking - fires the Next Scene link above and/or the Property Operations below, whichever are set."
                   >
                     <Info size={16} />
                   </span>
                 </div>
                 {!canBindKey && (
                   <span className="text-xs text-base-content/60">
-                    Set a Next Scene or a State Operation before binding a key.
+                    Set a Next Scene or a Property Operation before binding a
+                    key.
                   </span>
                 )}
               </fieldset>
