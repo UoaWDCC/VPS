@@ -1,7 +1,9 @@
 import { fastIsEqual } from "fast-is-equal";
 import { modifyComponentBounds } from "../../scene/operations/component";
+import { toggleChecked } from "../../scene/operations/text";
 import useEditorStore from "../../stores/editor";
 import useVisualScene from "../../stores/visual";
+import { getListGroupRange } from "../../text/list";
 import {
   getRelativePosition,
   moveCursorVisual,
@@ -40,12 +42,17 @@ const MIN_COMPONENT_SIZE = 1;
 export function handleMouseDownGlobal(e: React.MouseEvent, position: Vec2) {
   const target = e.target as HTMLElement;
 
-  const { mode, setVisualSelection, setSelection } = useEditorStore.getState();
+  const { mode, setVisualSelection, setSelection, setMarkerSelection } =
+    useEditorStore.getState();
 
   if (mode.includes("create")) {
     handleCreateStart(e, position);
   } else if (target.dataset.handle) {
     handleResizeStart(e);
+  } else if (target.dataset.type === "checkbox") {
+    handleCheckboxClick(e);
+  } else if (target.dataset.type === "marker") {
+    handleMarkerClick(e);
   } else if (target.dataset.type === "document") {
     handleDocumentClick(e, position);
   } else if (target.dataset.id) {
@@ -54,7 +61,12 @@ export function handleMouseDownGlobal(e: React.MouseEvent, position: Vec2) {
     handleCanvasClick();
   }
 
-  if (target.dataset.type !== "document") {
+  // a marker click sets its own markerSelection (see handleMarkerClick);
+  // anything else clears it so it doesn't linger and catch a later
+  // Backspace/Delete meant for something else
+  if (target.dataset.type !== "marker") setMarkerSelection(null);
+
+  if (!["document", "marker"].includes(target.dataset.type ?? "")) {
     setVisualSelection({ start: null, end: null });
     setSelection({ start: null, end: null });
   }
@@ -139,6 +151,53 @@ function handleComponentClick(e: React.MouseEvent, position: Vec2) {
   if (bounds) setMutationBounds(bounds);
 
   setMode(["normal"]);
+}
+
+function handleCheckboxClick(e: React.MouseEvent) {
+  const target = e.target as HTMLElement;
+  const id = target.dataset.id as string;
+  const blockI = Number(target.dataset.blockIndex);
+
+  toggleChecked([id], blockI);
+}
+
+// clicking a dash/bullet marker selects the marker itself (not its text)
+// so it can be bulk-deleted without touching the content -- a single click
+// selects the whole contiguous run of list blocks (the "list group"), a
+// double click selects just that one item
+function handleMarkerClick(e: React.MouseEvent) {
+  const target = e.target as HTMLElement;
+  const id = target.dataset.id as string;
+  const blockI = Number(target.dataset.blockIndex);
+
+  const {
+    setSelected,
+    setMode,
+    setMutationBounds,
+    setSelection,
+    setVisualSelection,
+    setMarkerSelection,
+  } = useEditorStore.getState();
+  const component = useVisualScene.getState().components[id];
+  const { document: doc } = component as unknown as {
+    document: VisualDocument;
+  };
+
+  setSelected([id]);
+  setMode(["normal"]);
+  setMutationBounds({ ...component.bounds });
+  // a marker selection is distinct from a text selection -- clear any
+  // active text cursor/highlight so they don't compete visually
+  setSelection({ start: null, end: null });
+  setVisualSelection({ start: null, end: null });
+
+  if (e.detail >= 2) {
+    setMarkerSelection({ id, start: blockI, end: blockI });
+    return;
+  }
+
+  const { start, end } = getListGroupRange(doc, blockI);
+  setMarkerSelection({ id, start, end });
 }
 
 function handleComponentDrag(_: React.MouseEvent, position: Vec2) {

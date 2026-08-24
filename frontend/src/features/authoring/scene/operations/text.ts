@@ -2,6 +2,7 @@ import { getComponentProp } from "../scene";
 import type { ModelCursor, ModelSelection } from "../../text/types";
 import type {
   BaseTextStyle,
+  ListMarkerStyle,
   ModelBlock,
   ModelDocument,
   ModelSpan,
@@ -111,8 +112,10 @@ export const deleteSelection = modify((id: string[], sel: ModelSelection) => {
   return normaliseDocument(doc, start);
 });
 
-export const createBlock = modify((id: string[], cursor: ModelCursor) => {
-  const blocks = getComponentProp(id[0], `document.blocks`) as ModelBlock[];
+// splits the block at the cursor into "before"/"after" span lists, leaving
+// the "before" half in place -- shared by createBlock and createSoftBreak,
+// which differ only in what they attach to the new "after" block
+function splitBlockAtCursor(blocks: ModelBlock[], cursor: ModelCursor) {
   const block = blocks[cursor.blockI];
 
   splitSpan(blocks, cursor);
@@ -133,13 +136,178 @@ export const createBlock = modify((id: string[], cursor: ModelCursor) => {
   }
 
   block.spans = oldSpans;
+  return { block, newSpans };
+}
+
+export const createBlock = modify((id: string[], cursor: ModelCursor) => {
+  const blocks = getComponentProp(id[0], `document.blocks`) as ModelBlock[];
+  const { block, newSpans } = splitBlockAtCursor(blocks, cursor);
+
   blocks.splice(cursor.blockI + 1, 0, {
     spans: newSpans,
     style: { ...block.style },
+    list: block.list ? { ...block.list, checked: false } : undefined,
   });
 
   return { blockI: cursor.blockI + 1, spanI: 0, charI: 0 };
 });
+
+// Shift+Enter: a soft line break -- stays part of the same list item (same
+// marker/level) but renders no marker of its own
+export const createSoftBreak = modify((id: string[], cursor: ModelCursor) => {
+  const blocks = getComponentProp(id[0], `document.blocks`) as ModelBlock[];
+  const { block, newSpans } = splitBlockAtCursor(blocks, cursor);
+
+  blocks.splice(cursor.blockI + 1, 0, {
+    spans: newSpans,
+    style: { ...block.style },
+    list: block.list ? { ...block.list } : undefined,
+    softBreak: true,
+  });
+
+  return { blockI: cursor.blockI + 1, spanI: 0, charI: 0 };
+});
+
+const AUTO_BULLET_TRIGGERS: Record<string, ListMarkerStyle> = {
+  "-": "dash",
+  "*": "bullet",
+};
+
+// true when the cursor sits right after a leading "-" or "*" as the very
+// first character of the line and the block isn't already a list -- the
+// trigger for markdown-style "- "/"* " auto-bulleting on the next space.
+// any text already following that leading character is left alone.
+export function canAutoBullet(id: string, cursor: ModelCursor) {
+  const doc = getComponentProp(id, "document") as ModelDocument;
+  const block = doc.blocks[cursor.blockI];
+  if (!block || block.list) return false;
+
+  return (
+    cursor.spanI === 0 &&
+    cursor.charI === 1 &&
+    block.spans[0].text[0] in AUTO_BULLET_TRIGGERS
+  );
+}
+
+// consumes the leading "-"/"*" (the triggering space is not inserted) and
+// turns the block into a list -- "-" becomes a dash marker, "*" becomes a
+// round bullet -- preserving any text that already followed it
+export const applyAutoBullet = modify((id: string[], cursor: ModelCursor) => {
+  const doc = getComponentProp(id[0], "document") as ModelDocument;
+  const block = doc.blocks[cursor.blockI];
+  const span = block.spans[0];
+  const trigger = span.text[0];
+  const remaining = span.text.slice(1);
+
+  if (remaining === "" && block.spans.length > 1) {
+    block.spans.shift();
+  } else {
+    span.text = remaining;
+  }
+
+  block.list = { markerStyle: AUTO_BULLET_TRIGGERS[trigger], level: 0 };
+  return { blockI: cursor.blockI, spanI: 0, charI: 0 };
+});
+
+// true when the cursor sits at the very start of an empty list block --
+// the trigger for Enter to exit list formatting instead of adding another
+// bulleted line
+export function isEmptyListBlock(id: string, cursor: ModelCursor) {
+  const doc = getComponentProp(id, "document") as ModelDocument;
+  const block = doc.blocks[cursor.blockI];
+  if (!block?.list) return false;
+
+  return (
+    cursor.spanI === 0 &&
+    cursor.charI === 0 &&
+    block.spans.length === 1 &&
+    block.spans[0].text === ""
+  );
+}
+
+// true when the cursor sits at the very start of a list block, whether or
+// not it has content -- the trigger for Backspace to strip the bullet
+// instead of merging into the previous block. a soft-break continuation
+// has no marker of its own to strip, so it's excluded here and left to the
+// normal merge-into-previous-block behaviour, which undoes the soft break
+export function isStartOfListBlock(id: string, cursor: ModelCursor) {
+  const doc = getComponentProp(id, "document") as ModelDocument;
+  const block = doc.blocks[cursor.blockI];
+  if (!block?.list || block.softBreak) return false;
+
+  return cursor.spanI === 0 && cursor.charI === 0;
+}
+
+export const toggleChecked = modify((id: string[], blockI: number) => {
+  const doc = getComponentProp(id[0], "document") as ModelDocument;
+  const block = doc.blocks[blockI];
+  if (!block.list) return;
+  block.list.checked = !block.list.checked;
+});
+
+// 9 nesting levels, 0-indexed: 0-8
+export const MAX_LIST_LEVEL = 8;
+
+// applies to every block in the (inclusive) index range that already has a
+// list marker -- plain paragraphs are left untouched, matching Tab's no-op
+// behaviour on non-list lines
+export const indentBlocks = modify(
+  (id: string[], range: { start: number; end: number }, direction: 1 | -1) => {
+    const doc = getComponentProp(id[0], "document") as ModelDocument;
+
+    for (let i = range.start; i <= range.end; i++) {
+      const block = doc.blocks[i];
+      if (!block.list) continue;
+
+      if (direction > 0) {
+        block.list.level = Math.min(MAX_LIST_LEVEL, block.list.level + 1);
+      } else if (block.list.level > 0) {
+        block.list.level -= 1;
+      } else {
+        block.list = undefined;
+      }
+    }
+  }
+);
+
+// applies to every block in the (inclusive) index range: switching marker
+// style preserves an existing level/checked state, "none" clears the list
+export const setBlockListStyle = modify(
+  (
+    id: string[],
+    range: { start: number; end: number },
+    markerStyle: ListMarkerStyle | "none"
+  ) => {
+    const doc = getComponentProp(id[0], "document") as ModelDocument;
+
+    for (let i = range.start; i <= range.end; i++) {
+      const block = doc.blocks[i];
+      if (markerStyle === "none") {
+        block.list = undefined;
+      } else {
+        block.list = {
+          markerStyle,
+          level: block.list?.level ?? 0,
+          checked: block.list?.checked ?? false,
+        };
+      }
+    }
+  }
+);
+
+export const setBlockStyle = modify(
+  (
+    id: string[],
+    blockI: number,
+    prop: "alignment" | "lineHeight",
+    value: string | number
+  ) => {
+    const doc = getComponentProp(id[0], "document") as ModelDocument;
+    const block = doc.blocks[blockI];
+    if (!block) return;
+    block.style = { ...block.style, [prop]: value };
+  }
+);
 
 export const applySelectionStyle = modify(
   (id: string[], sel: ModelSelection, style: Partial<BaseTextStyle>) => {
@@ -149,9 +317,10 @@ export const applySelectionStyle = modify(
     const { start, end } = isolateSelection(id[0], normaliseSelection(sel));
 
     if (style.alignment || style.lineHeight) {
-      for (let i = sel.start!.blockI; i <= sel.end!.blockI; i++) {
-        if (style.alignment) blocks[i].style!.alignment = style.alignment;
-        if (style.lineHeight) blocks[i].style!.lineHeight = style.lineHeight;
+      for (let i = start.blockI; i <= end.blockI; i++) {
+        const blockStyle = (blocks[i].style ??= {});
+        if (style.alignment) blockStyle.alignment = style.alignment;
+        if (style.lineHeight) blockStyle.lineHeight = style.lineHeight;
       }
     }
 
@@ -184,7 +353,10 @@ function collectSelectedSpans(
     let startSpan = b === start.blockI ? start.spanI : 0;
     const endSpan = b === end.blockI ? end.spanI : block.spans.length - 1;
 
-    if (b === start.blockI && start.charI === block.spans[startSpan].text.length) {
+    if (
+      b === start.blockI &&
+      start.charI === block.spans[startSpan].text.length
+    ) {
       startSpan++;
     }
 
@@ -205,7 +377,10 @@ export function getStyleForSelection(id: string, sel: ModelSelection) {
     // superscript/bold run that's been entirely highlighted), use that
     // format -- so typing over it keeps the formatting instead of
     // picking up whatever style happens to sit at either endpoint
-    const normd = normaliseSelection(sel) as { start: ModelCursor; end: ModelCursor };
+    const normd = normaliseSelection(sel) as {
+      start: ModelCursor;
+      end: ModelCursor;
+    };
     const spans = collectSelectedSpans(doc.blocks, normd.start, normd.end);
     const first = spans[0];
     const uniform =

@@ -12,6 +12,7 @@ const ResizeHandle = ({ x, y }: Props) => {
   const mode = useEditorStore((s) => s.mode);
 
   const bounds = getSelectedComponentBounds();
+  if (!bounds) return null;
   const verts = bounds.verts;
 
   let point = {

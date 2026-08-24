@@ -7,6 +7,7 @@ const RotationHandle = () => {
   const mode = useEditorStore((s) => s.mode);
 
   const bounds = getSelectedComponentBounds();
+  if (!bounds) return null;
   const center = getBoxCenter(bounds.verts);
 
   const y = Math.min(bounds.verts[0].y, bounds.verts[1].y);

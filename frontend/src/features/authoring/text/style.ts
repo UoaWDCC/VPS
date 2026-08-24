@@ -1,5 +1,5 @@
 import { modifyComponentProp } from "../scene/operations/component";
-import { applySelectionStyle } from "../scene/operations/text";
+import { applySelectionStyle, setBlockStyle } from "../scene/operations/text";
 import useEditorStore from "../stores/editor";
 import { syncVisualCursor } from "./cursor";
 import type { BaseTextStyle } from "../types";
@@ -22,11 +22,7 @@ export function setTextStyle(
     syncVisualCursor();
   } else if (selection?.start) {
     if (prop === "lineHeight" || prop === "alignment") {
-      modifyComponentProp(
-        [selected],
-        `document.blocks.${selection.start.blockI}.style.${prop}`,
-        value
-      );
+      setBlockStyle([selected], selection.start.blockI, prop, value);
     } else {
       modifyComponentProp([selected], `document.style.${prop}`, value);
     }
