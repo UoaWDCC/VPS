@@ -168,6 +168,32 @@ export const applySelectionStyle = modify(
   }
 );
 
+// spans actually covered by a (raw, unsplit) selection range -- a cursor at
+// a span boundary is normalised to the end of the preceding span (see
+// normaliseCursor), so the first touched span is the *next* one whenever
+// the start cursor sits exactly at such a boundary
+function collectSelectedSpans(
+  blocks: ModelBlock[],
+  start: ModelCursor,
+  end: ModelCursor
+) {
+  const spans: ModelSpan[] = [];
+
+  for (let b = start.blockI; b <= end.blockI; b++) {
+    const block = blocks[b];
+    let startSpan = b === start.blockI ? start.spanI : 0;
+    const endSpan = b === end.blockI ? end.spanI : block.spans.length - 1;
+
+    if (b === start.blockI && start.charI === block.spans[startSpan].text.length) {
+      startSpan++;
+    }
+
+    for (let s = startSpan; s <= endSpan; s++) spans.push(block.spans[s]);
+  }
+
+  return spans;
+}
+
 export function getStyleForSelection(id: string, sel: ModelSelection) {
   const doc = getComponentProp(id, "document") as ModelDocument;
   const { start, end } = sel;
@@ -175,10 +201,23 @@ export function getStyleForSelection(id: string, sel: ModelSelection) {
   if (start == null) return squash(doc.style); // no selection
 
   if (end) {
-    // full sel
-    // TODO: choose the least specificity present across selected spans (prefer false for toggles, unknown for values)
-    const block = doc.blocks[end.blockI];
-    return squash(doc.style, block.style, block.spans[end.spanI].style);
+    // full sel: when the whole selection shares one format (e.g. a
+    // superscript/bold run that's been entirely highlighted), use that
+    // format -- so typing over it keeps the formatting instead of
+    // picking up whatever style happens to sit at either endpoint
+    const normd = normaliseSelection(sel) as { start: ModelCursor; end: ModelCursor };
+    const spans = collectSelectedSpans(doc.blocks, normd.start, normd.end);
+    const first = spans[0];
+    const uniform =
+      first && spans.every((s) => shallow(s.style ?? {}, first.style ?? {}));
+
+    const block = doc.blocks[normd.end.blockI];
+    const fallbackSpan = block.spans[normd.end.spanI];
+    return squash(
+      doc.style,
+      block.style,
+      (uniform ? first : fallbackSpan).style
+    );
   }
 
   // start only (cursor)

@@ -19,15 +19,23 @@ const fallback: BaseTextStyle = {
   textDecoration: "none",
   textColor: "#000000",
   highlightColor: "#00000000",
+  verticalAlign: "normal",
 };
+
+// sub/superscript glyphs are rendered smaller, matching common word processor conventions
+const SCRIPT_SCALE = 0.7;
 
 function measure(text: string) {
   return ctx.measureText(text);
 }
 
 function buildFont(styles: Partial<BaseTextStyle>) {
-  const { fontFamily, fontSize, fontWeight, fontStyle, lineHeight } = styles;
-  return `${fontStyle} ${fontWeight} ${fontSize}px/${lineHeight! * fontSize!}px "${fontFamily}"`;
+  const { fontFamily, fontSize, fontWeight, fontStyle, lineHeight, verticalAlign } = styles;
+  const size =
+    verticalAlign && verticalAlign !== "normal"
+      ? fontSize! * SCRIPT_SCALE
+      : fontSize;
+  return `${fontStyle} ${fontWeight} ${size}px/${lineHeight! * fontSize!}px "${fontFamily}"`;
 }
 
 function setFont(style?: Partial<BaseTextStyle>) {
@@ -48,6 +56,10 @@ export function buildStyle(derived: Partial<BaseTextStyle>) {
     font: buildFont(derived),
     fill: derived.textColor,
     textDecoration: derived.textDecoration,
+    baselineShift:
+      derived.verticalAlign && derived.verticalAlign !== "normal"
+        ? derived.verticalAlign
+        : undefined,
   };
 }
 

@@ -153,6 +153,7 @@ export interface SpanTextStyle {
   textDecoration: string;
   textColor: HexString;
   highlightColor: HexString;
+  verticalAlign: "normal" | "super" | "sub";
 }
 
 type HexString = string;

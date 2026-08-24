@@ -20,8 +20,8 @@ type Shortcut = {
 
 function toggleTextStyle(
   selected: string,
-  prop: "fontWeight" | "fontStyle" | "textDecoration",
-  enabledValue: "bold" | "italic" | "underline",
+  prop: "fontWeight" | "fontStyle" | "textDecoration" | "verticalAlign",
+  enabledValue: "bold" | "italic" | "underline" | "super" | "sub",
   disabledValue: "normal" | "none"
 ) {
   const current = useEditorStore.getState().activeStyle;
@@ -143,6 +143,24 @@ const shortcuts: Shortcut[] = [
       const { selected } = useEditorStore.getState();
       if (!selected.length) return;
       toggleTextStyle(selected[0], "textDecoration", "underline", "none");
+    },
+  },
+  {
+    combos: ["mod+."],
+    when: () => useEditorStore.getState().mode.includes("text"),
+    run: () => {
+      const { selected } = useEditorStore.getState();
+      if (!selected.length) return;
+      toggleTextStyle(selected[0], "verticalAlign", "super", "normal");
+    },
+  },
+  {
+    combos: ["mod+,"],
+    when: () => useEditorStore.getState().mode.includes("text"),
+    run: () => {
+      const { selected } = useEditorStore.getState();
+      if (!selected.length) return;
+      toggleTextStyle(selected[0], "verticalAlign", "sub", "normal");
     },
   },
 ];

@@ -6,6 +6,8 @@ import {
   Bold,
   Highlighter,
   Italic,
+  Subscript,
+  Superscript,
   Underline,
 } from "lucide-react";
 import useEditorStore from "../stores/editor";
@@ -76,6 +78,24 @@ function TextSection() {
         tooltip="Underline"
       >
         <Underline size={16} />
+      </ToggleInput>
+      <ToggleInput
+        value={style.verticalAlign}
+        onToggle={(value) => modifyStyle("verticalAlign", value)}
+        enabled="super"
+        disabled="normal"
+        tooltip="Superscript"
+      >
+        <Superscript size={16} />
+      </ToggleInput>
+      <ToggleInput
+        value={style.verticalAlign}
+        onToggle={(value) => modifyStyle("verticalAlign", value)}
+        enabled="sub"
+        disabled="normal"
+        tooltip="Subscript"
+      >
+        <Subscript size={16} />
       </ToggleInput>
       <ChromePicker
         value={style.textColor}
