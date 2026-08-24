@@ -58,7 +58,7 @@ function ChromePicker({
           className={`btn btn-sm gap-2 ${open ? "bg-base-100" : ""}`}
           aria-label={tooltip ?? "Choose colour"}
           onClick={() => {
-            onOpen?.();
+            if (!open) onOpen?.();
             setOpen(!open);
           }}
         >
