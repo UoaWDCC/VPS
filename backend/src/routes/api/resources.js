@@ -7,7 +7,9 @@ import {
   applyReferenceDelta,
   applyReferenceDeltas,
 } from "../../db/daos/fileDao.js";
-import Resource from "../../db/models/resource.js";
+import Resource, {
+  RESOURCE_NAME_MAX_LENGTH,
+} from "../../db/models/resource.js";
 import { isValidObjectId } from "../../util/validation.js";
 import UploadedFile from "../../db/models/uploadedFile.js";
 
@@ -26,7 +28,7 @@ router.get(
     const { scenarioId } = req.params;
 
     const resources = await Resource.find({ scenarioId })
-      .populate("fileId", "url type contentType size")
+      .populate("fileId", "name url type contentType size")
       .sort({ parentId: 1, createdAt: -1 })
       .lean();
 
@@ -80,7 +82,7 @@ router.post(
       name,
       fileId,
     });
-    await resource.populate("fileId", "url type contentType size");
+    await resource.populate("fileId", "name url type contentType size");
 
     await applyReferenceDelta(fileId, 1);
 
@@ -157,21 +159,58 @@ router.delete(
 );
 
 /**
+ * @route PATCH /api/resources/:scenarioId/:resourceId
+ * @desc Rename a resource
+ */
+router.patch(
+  "/:scenarioId/:resourceId",
+  handle(async (req, res) => {
+    const { scenarioId, resourceId } = req.params;
+    const { name } = req.body;
+
+    if (!isValidObjectId(resourceId))
+      throw new HttpError("invalid resource id", HttpStatusCode.BadRequest);
+
+    const trimmedName = typeof name === "string" ? name.trim() : "";
+
+    if (!trimmedName)
+      throw new HttpError("name is required", HttpStatusCode.BadRequest);
+
+    if (trimmedName.length > RESOURCE_NAME_MAX_LENGTH)
+      throw new HttpError(
+        `name must be ${RESOURCE_NAME_MAX_LENGTH} characters or fewer`,
+        HttpStatusCode.BadRequest
+      );
+
+    const resource = await Resource.findOneAndUpdate(
+      { _id: resourceId, scenarioId },
+      { name: trimmedName },
+      { new: true, runValidators: true }
+    ).populate("fileId", "name url type contentType size");
+
+    if (!resource)
+      throw new HttpError("resource not found", HttpStatusCode.NotFound);
+
+    return res.json(resource);
+  })
+);
+
+/**
  * @route POST /api/resources/:scenarioId/:resourceId/conditionals
- * @desc Add a state conditional to a resource
+ * @desc Add a property conditional to a resource
  */
 router.post(
   "/:scenarioId/:resourceId/conditionals",
   handle(async (req, res) => {
     const { scenarioId, resourceId } = req.params;
-    const { stateConditional } = req.body;
+    const { propertyConditional } = req.body;
 
     const resource = await Resource.findOneAndUpdate(
       { _id: resourceId, scenarioId },
-      { $push: { stateConditionals: stateConditional } },
+      { $push: { stateConditionals: propertyConditional } },
       { new: true, runValidators: true }
     )
-      .populate("fileId", "url type contentType size")
+      .populate("fileId", "name url type contentType size")
       .lean();
 
     if (!resource)
@@ -183,24 +222,24 @@ router.post(
 
 /**
  * @route PUT /api/resources/:scenarioId/:resourceId/conditionals
- * @desc Update a state conditional on a resource
+ * @desc Update a property conditional on a resource
  */
 router.put(
   "/:scenarioId/:resourceId/conditionals",
   handle(async (req, res) => {
     const { scenarioId, resourceId } = req.params;
-    const { stateConditional } = req.body;
+    const { propertyConditional } = req.body;
 
     const resource = await Resource.findOneAndUpdate(
       {
         _id: resourceId,
         scenarioId,
-        "stateConditionals._id": stateConditional._id,
+        "stateConditionals._id": propertyConditional._id,
       },
-      { $set: { "stateConditionals.$": stateConditional } },
+      { $set: { "stateConditionals.$": propertyConditional } },
       { new: true, runValidators: true }
     )
-      .populate("fileId", "url type contentType size")
+      .populate("fileId", "name url type contentType size")
       .lean();
 
     if (!resource)
@@ -212,7 +251,7 @@ router.put(
 
 /**
  * @route DELETE /api/resources/:scenarioId/:resourceId/conditionals/:conditionalId
- * @desc Delete a state conditional from a resource
+ * @desc Delete a property conditional from a resource
  */
 router.delete(
   "/:scenarioId/:resourceId/conditionals/:conditionalId",
@@ -224,7 +263,7 @@ router.delete(
       { $pull: { stateConditionals: { _id: conditionalId } } },
       { new: true }
     )
-      .populate("fileId", "url type contentType size")
+      .populate("fileId", "name url type contentType size")
       .lean();
 
     if (!resource)

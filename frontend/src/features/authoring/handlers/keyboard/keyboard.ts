@@ -12,16 +12,22 @@ export function handleGlobal(e: KeyboardEvent) {
   const { selected } = useEditorStore.getState();
 
   // don't want to interfere with input elements
+
+  const target = e.target as HTMLElement;
+  if (target.tagName === "INPUT" || target.tagName === "TEXTAREA") return;
   if (isEditableShortcutTarget(e.target)) return;
 
   if (handleShortcut(e)) return;
 
   if (mode.includes("text")) handleTextMode(e);
-  else if (selected) handleComponentOperations(e, selected);
+  else if (selected.length) handleComponentOperations(e, selected);
 }
 
-function handleComponentOperations(e: KeyboardEvent, selected: string) {
+function handleComponentOperations(e: KeyboardEvent, selected: string[]) {
+  const { setSelected } = useEditorStore.getState();
+
   if (e.key === "Backspace") {
+    setSelected([]);
     remove(selected);
   } else if (e.key === "ArrowUp") {
     modifyComponentProp(selected, "bounds.verts", (prev: Vec2[]) =>

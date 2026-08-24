@@ -3,7 +3,7 @@ import TablePaginationActions from "./TablePaginationAction";
 import getComparator from "../../utils/TableHelper";
 import CustomSortHeader from "./CustomSortHeader";
 import CustomPagination from "./CustomPagination";
-const StateVarTable = ({ data, hasStateVar }) => {
+const PropertyTable = ({ data, hasStateVar }) => {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const emptyRows =
@@ -36,8 +36,8 @@ const StateVarTable = ({ data, hasStateVar }) => {
     return (
       <p>
         {hasStateVar
-          ? "State variables will show up once the group has started the scenario."
-          : "No state variables has been created for this scenario."}
+          ? "Properties will show up once the group has started the scenario."
+          : "No properties have been created for this scenario."}
       </p>
     );
   } else {
@@ -107,4 +107,4 @@ const StateVarTable = ({ data, hasStateVar }) => {
   }
 };
 
-export default StateVarTable;
+export default PropertyTable;

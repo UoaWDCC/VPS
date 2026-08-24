@@ -4,10 +4,10 @@ import { Info } from "lucide-react";
 import { useContext, useEffect, useMemo, useState } from "react";
 import { modifyComponentProp } from "../scene/operations/component";
 import useVisualScene from "../stores/visual";
-import StateOperationMenu from "../../../components/StateVariables/StateOperationMenu";
+import PropertyOperationMenu from "../../../components/Properties/PropertyOperationMenu";
 import SelectInput from "../components/Select";
 import KeyCapture from "../components/KeyCapture";
-import StateBindingMenu from "../../../components/StateVariables/StateBindingMenu";
+import PropertyBindingMenu from "../../../components/Properties/PropertyBindingMenu";
 import { availableKeyBindings, hasClickAction } from "../keyBindings";
 import {
   KEY_HINT_POSITIONS,
@@ -35,7 +35,7 @@ function usePropMirror(component, field, normalize) {
  * This component displays the properties the selected scene component
  * @component
  */
-export default function ComponentProperties({ component }) {
+export default function ComponentSettings({ component }) {
   const { scenes } = useContext(SceneContext);
 
   // Subscribed (not read via a one-off getScene() call) so this panel
@@ -64,7 +64,7 @@ export default function ComponentProperties({ component }) {
 
   function saveLink(v) {
     setValue(v);
-    modifyComponentProp(component.id, "nextScene", v);
+    modifyComponentProp([component.id], "nextScene", v);
   }
 
   function saveKey(v) {
@@ -137,7 +137,7 @@ export default function ComponentProperties({ component }) {
 
   return (
     <>
-      <StateBindingMenu component={component} />
+      <PropertyBindingMenu component={component} />
       {component.clickable && (
         <>
           <div className="collapse overflow-visible collapse-arrow bg-base-300 rounded-sm text-s">
@@ -207,7 +207,7 @@ export default function ComponentProperties({ component }) {
               )}
             </div>
           </div>
-          <StateOperationMenu component={component} />
+          <PropertyOperationMenu component={component} />
         </>
       )}
     </>

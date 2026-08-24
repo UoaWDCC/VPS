@@ -1,9 +1,9 @@
 import { useState } from "react";
 import { PlusIcon } from "lucide-react";
-import CreateStateBinding from "./CreateStateBinding";
-import StateBinding from "./StateBinding";
+import CreatePropertyBinding from "./CreatePropertyBinding";
+import PropertyBinding from "./PropertyBinding";
 
-export default function StateBindingMenu({ component }) {
+export default function PropertyBindingMenu({ component }) {
   const [createOpen, setCreateOpen] = useState(false);
   const bindings = component?.stateBindings ?? [];
 
@@ -12,7 +12,7 @@ export default function StateBindingMenu({ component }) {
       <div className="collapse overflow-visible collapse-arrow bg-base-300 rounded-sm text-s">
         <input type="checkbox" />
         <div className="collapse-title flex items-center justify-between">
-          State Bindings
+          Property Bindings
           <PlusIcon
             size={18}
             className="z-1"
@@ -24,7 +24,7 @@ export default function StateBindingMenu({ component }) {
         </div>
         <div className="collapse-content text--1 bg-base-200 px-0">
           {bindings.map((binding, index) => (
-            <StateBinding
+            <PropertyBinding
               component={component}
               binding={binding}
               key={`${binding.target}-${binding.stateVariableId}-${index}`}
@@ -32,7 +32,7 @@ export default function StateBindingMenu({ component }) {
           ))}
         </div>
       </div>
-      <CreateStateBinding
+      <CreatePropertyBinding
         component={component}
         open={createOpen}
         setOpen={setCreateOpen}

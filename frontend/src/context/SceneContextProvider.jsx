@@ -69,6 +69,7 @@ function generatePatch(modified, saved) {
     "directLink",
     "directLinkKey",
     "timerStateOperations",
+    "background",
   ].forEach((field) => {
     if (JSON.stringify(modified[field]) !== JSON.stringify(saved[field])) {
       fields[field] = structuredClone(modified[field]);

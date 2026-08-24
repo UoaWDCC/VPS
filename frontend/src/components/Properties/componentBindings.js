@@ -93,35 +93,35 @@ export const componentBindingTargets = [
   {
     key: "x",
     label: "X position",
-    stateType: "number",
+    propertyType: "number",
     supports: supports(allComponentTypes),
     apply: (component, value) => translateAxis(component, "x", value),
   },
   {
     key: "y",
     label: "Y position",
-    stateType: "number",
+    propertyType: "number",
     supports: supports(allComponentTypes),
     apply: (component, value) => translateAxis(component, "y", value),
   },
   {
     key: "width",
     label: "Width",
-    stateType: "number",
+    propertyType: "number",
     supports: supports(allComponentTypes),
     apply: (component, value) => resizeAxis(component, "x", value),
   },
   {
     key: "height",
     label: "Height",
-    stateType: "number",
+    propertyType: "number",
     supports: supports(allComponentTypes),
     apply: (component, value) => resizeAxis(component, "y", value),
   },
   {
     key: "rotation",
     label: "Rotation",
-    stateType: "number",
+    propertyType: "number",
     supports: supports(rotatableComponentTypes),
     apply: (component, value) => {
       component.bounds = { ...component.bounds, rotation: value };
@@ -130,35 +130,35 @@ export const componentBindingTargets = [
   {
     key: "zIndex",
     label: "Layer order",
-    stateType: "number",
+    propertyType: "number",
     supports: supports(allComponentTypes),
     apply: setProp("zIndex"),
   },
   {
     key: "clickable",
     label: "Clickable",
-    stateType: "boolean",
+    propertyType: "boolean",
     supports: supports(allComponentTypes),
     apply: setProp("clickable"),
   },
   {
     key: "fill",
     label: "Fill colour",
-    stateType: "string",
+    propertyType: "string",
     supports: supports(shapeComponentTypes),
     apply: setValidatedProp("fill", isSafeColor),
   },
   {
     key: "stroke",
     label: "Stroke colour",
-    stateType: "string",
+    propertyType: "string",
     supports: supports(strokedComponentTypes),
     apply: setValidatedProp("stroke", isSafeColor),
   },
   {
     key: "strokeWidth",
     label: "Stroke width",
-    stateType: "number",
+    propertyType: "number",
     supports: supports(strokedComponentTypes),
     apply: (component, value) => {
       component.strokeWidth = clamp1(value, 0, Infinity);
@@ -171,14 +171,14 @@ export function getComponentBindingTargets(component) {
   return componentBindingTargets.filter((target) => target.supports(component));
 }
 
-export function resolveComponentBindings(component, stateVariables) {
-  if (!component?.stateBindings?.length || !stateVariables?.length) {
+export function resolveComponentBindings(component, properties) {
+  if (!component?.stateBindings?.length || !properties?.length) {
     return component;
   }
 
   const resolved = structuredClone(component);
-  const stateById = new Map(
-    stateVariables.map((stateVariable) => [stateVariable.id, stateVariable])
+  const propertyById = new Map(
+    properties.map((property) => [property.id, property])
   );
   const bindingByTarget = new Map(
     component.stateBindings.map((binding) => [binding.target, binding])
@@ -188,24 +188,24 @@ export function resolveComponentBindings(component, stateVariables) {
     const binding = bindingByTarget.get(target.key);
     if (!binding) continue;
 
-    const stateVariable = stateById.get(binding.stateVariableId);
-    if (!stateVariable || stateVariable.type !== target.stateType) continue;
+    const property = propertyById.get(binding.stateVariableId);
+    if (!property || property.type !== target.propertyType) continue;
 
-    target.apply(resolved, stateVariable.value);
+    target.apply(resolved, property.value);
   }
 
   return resolved;
 }
 
-export function resolveSceneBindings(scene, stateVariables) {
-  if (!scene?.components || !stateVariables?.length) return scene;
+export function resolveSceneBindings(scene, properties) {
+  if (!scene?.components || !properties?.length) return scene;
 
   return {
     ...scene,
     components: Object.fromEntries(
       Object.entries(scene.components).map(([id, component]) => [
         id,
-        resolveComponentBindings(component, stateVariables),
+        resolveComponentBindings(component, properties),
       ])
     ),
   };

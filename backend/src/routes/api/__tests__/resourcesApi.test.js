@@ -184,6 +184,110 @@ describe("Resources API tests", () => {
     expect(dbResource).not.toBeNull();
   });
 
+  // --- Rename resource ---
+
+  it("PATCH /resources/:scenarioId/:resourceId renames a resource", async () => {
+    const response = await axios.patch(
+      `http://localhost:${ctx.port}/api/resources/${scenarioId}/${resource._id}`,
+      { name: "renamed.png" },
+      authHeaders("user1")
+    );
+
+    expect(response.status).toBe(200);
+    expect(response.data.name).toBe("renamed.png");
+
+    const dbResource = await Resource.findById(resource._id);
+    expect(dbResource.name).toBe("renamed.png");
+  });
+
+  it("PATCH /resources/:scenarioId/:resourceId trims whitespace from the name", async () => {
+    const response = await axios.patch(
+      `http://localhost:${ctx.port}/api/resources/${scenarioId}/${resource._id}`,
+      { name: "  padded.png  " },
+      authHeaders("user1")
+    );
+
+    expect(response.status).toBe(200);
+    expect(response.data.name).toBe("padded.png");
+  });
+
+  it("PATCH /resources/:scenarioId/:resourceId allows a name that no longer matches the file's real extension", async () => {
+    const response = await axios.patch(
+      `http://localhost:${ctx.port}/api/resources/${scenarioId}/${resource._id}`,
+      { name: "renamed.txt" },
+      authHeaders("user1")
+    );
+
+    expect(response.status).toBe(200);
+    expect(response.data.name).toBe("renamed.txt");
+  });
+
+  it("PATCH /resources/:scenarioId/:resourceId allows removing the file extension entirely", async () => {
+    const response = await axios.patch(
+      `http://localhost:${ctx.port}/api/resources/${scenarioId}/${resource._id}`,
+      { name: "Patient Info Sheet" },
+      authHeaders("user1")
+    );
+
+    expect(response.status).toBe(200);
+    expect(response.data.name).toBe("Patient Info Sheet");
+
+    const dbResource = await Resource.findById(resource._id);
+    expect(dbResource.name).toBe("Patient Info Sheet");
+  });
+
+  it("PATCH /resources/:scenarioId/:resourceId allows a name containing a period, such as a trailing full stop", async () => {
+    const response = await axios.patch(
+      `http://localhost:${ctx.port}/api/resources/${scenarioId}/${resource._id}`,
+      { name: "image." },
+      authHeaders("user1")
+    );
+
+    expect(response.status).toBe(200);
+    expect(response.data.name).toBe("image.");
+  });
+
+  it("PATCH /resources/:scenarioId/:resourceId renames a collection", async () => {
+    const response = await axios.patch(
+      `http://localhost:${ctx.port}/api/resources/${scenarioId}/${collection._id}`,
+      { name: "Renamed Group" },
+      authHeaders("user1")
+    );
+
+    expect(response.status).toBe(200);
+    expect(response.data.name).toBe("Renamed Group");
+  });
+
+  it("PATCH /resources/:scenarioId/:resourceId returns 400 for a blank name", async () => {
+    await expect(
+      axios.patch(
+        `http://localhost:${ctx.port}/api/resources/${scenarioId}/${resource._id}`,
+        { name: "   " },
+        authHeaders("user1")
+      )
+    ).rejects.toMatchObject({ response: { status: 400 } });
+  });
+
+  it("PATCH /resources/:scenarioId/:resourceId returns 400 for a name over 255 characters", async () => {
+    await expect(
+      axios.patch(
+        `http://localhost:${ctx.port}/api/resources/${scenarioId}/${resource._id}`,
+        { name: "a".repeat(256) },
+        authHeaders("user1")
+      )
+    ).rejects.toMatchObject({ response: { status: 400 } });
+  });
+
+  it("PATCH /resources/:scenarioId/:resourceId returns 404 when resource not found", async () => {
+    await expect(
+      axios.patch(
+        `http://localhost:${ctx.port}/api/resources/${scenarioId}/000000000000000000000099`,
+        { name: "renamed.png" },
+        authHeaders("user1")
+      )
+    ).rejects.toMatchObject({ response: { status: 404 } });
+  });
+
   // --- Delete resource ---
 
   it("DELETE /resources/:scenarioId/:resourceId deletes the Resource and decrements the file reference count", async () => {
@@ -228,9 +332,9 @@ describe("Resources API tests", () => {
     expect(dbFile.orphanedAt).toBeInstanceOf(Date);
   });
 
-  // --- State conditionals ---
+  // --- Property conditionals ---
 
-  it("POST /resources/:scenarioId/:resourceId/conditionals adds a state conditional", async () => {
+  it("POST /resources/:scenarioId/:resourceId/conditionals adds a property conditional", async () => {
     const conditional = {
       stateVariableId: "var-1",
       comparator: "=",
@@ -239,7 +343,7 @@ describe("Resources API tests", () => {
 
     const response = await axios.post(
       `http://localhost:${ctx.port}/api/resources/${scenarioId}/${resource._id}/conditionals`,
-      { stateConditional: conditional },
+      { propertyConditional: conditional },
       authHeaders("user1")
     );
 
@@ -253,18 +357,22 @@ describe("Resources API tests", () => {
       axios.post(
         `http://localhost:${ctx.port}/api/resources/${scenarioId}/000000000000000000000099/conditionals`,
         {
-          stateConditional: { stateVariableId: "x", comparator: "=", value: 1 },
+          propertyConditional: {
+            stateVariableId: "x",
+            comparator: "=",
+            value: 1,
+          },
         },
         authHeaders("user1")
       )
     ).rejects.toMatchObject({ response: { status: 404 } });
   });
 
-  it("PUT /resources/:scenarioId/:resourceId/conditionals updates an existing state conditional", async () => {
+  it("PUT /resources/:scenarioId/:resourceId/conditionals updates an existing property conditional", async () => {
     const addResp = await axios.post(
       `http://localhost:${ctx.port}/api/resources/${scenarioId}/${resource._id}/conditionals`,
       {
-        stateConditional: {
+        propertyConditional: {
           stateVariableId: "var-1",
           comparator: "=",
           value: "old",
@@ -277,7 +385,7 @@ describe("Resources API tests", () => {
     const response = await axios.put(
       `http://localhost:${ctx.port}/api/resources/${scenarioId}/${resource._id}/conditionals`,
       {
-        stateConditional: {
+        propertyConditional: {
           _id: addedId,
           stateVariableId: "var-1",
           comparator: "!=",
@@ -297,7 +405,7 @@ describe("Resources API tests", () => {
       axios.put(
         `http://localhost:${ctx.port}/api/resources/${scenarioId}/000000000000000000000099/conditionals`,
         {
-          stateConditional: {
+          propertyConditional: {
             _id: new mongoose.mongo.ObjectId(),
             stateVariableId: "var-1",
             comparator: "=",
@@ -313,7 +421,7 @@ describe("Resources API tests", () => {
     const addResp = await axios.post(
       `http://localhost:${ctx.port}/api/resources/${scenarioId}/${resource._id}/conditionals`,
       {
-        stateConditional: {
+        propertyConditional: {
           stateVariableId: "var-1",
           comparator: "=",
           value: "x",

@@ -11,7 +11,7 @@ import { modifyComponentProp } from "../scene/operations/component";
 import useDirectLink from "./useDirectLink";
 import shallow from "zustand/shallow";
 import toast from "react-hot-toast";
-import TimerStateOperationMenu from "../../../components/StateVariables/TimerStateOperationMenu";
+import TimerPropertyOperationMenu from "../../../components/Properties/TimerPropertyOperationMenu";
 import SelectInput from "../components/Select";
 import KeyCapture from "../components/KeyCapture";
 import { availableKeyBindings, DEFAULT_DIRECT_LINK_KEYS } from "../keyBindings";
@@ -305,7 +305,7 @@ export default function SceneSettings() {
           </fieldset>
         </div>
       </div>
-      {time > 0 && <TimerStateOperationMenu />}
+      {time > 0 && <TimerPropertyOperationMenu />}
     </>
   );
 }

@@ -1,90 +1,94 @@
 import { useContext, useState } from "react";
 import ScenarioContext from "context/ScenarioContext";
-import { getDefaultValue, stateTypes, validOperations } from "./stateTypes";
+import {
+  getDefaultValue,
+  propertyTypes,
+  validOperations,
+} from "./propertyTypes";
 import { modifyComponentProp } from "../../features/authoring/scene/operations/component";
 import SelectInput from "../../features/authoring/components/Select";
 import ModalDialog from "../ModalDialogue";
 
 /**
- * Component used for creating state operations
- * State operations are used to manipulate state variables while playing through a scenario
+ * Component used for creating property operations
+ * Property operations are used to manipulate properties while playing through a scenario
  *
  * @component
  */
-const CreateStateOperation = ({ component, open, setOpen }) => {
-  const { stateVariables } = useContext(ScenarioContext);
+const CreatePropertyOperation = ({ component, open, setOpen }) => {
+  const { properties } = useContext(ScenarioContext);
 
-  const [selectedState, setSelectedState] = useState(null);
+  const [selectedProperty, setSelectedProperty] = useState(null);
   const [operation, setOperation] = useState(null);
   const [value, setValue] = useState(null);
 
-  if (!stateVariables?.length) {
+  if (!properties?.length) {
     return (
       <ModalDialog
-        title="Create State Operation"
+        title="Create Property Operation"
         open={open}
         onClose={() => setOpen(false)}
       >
         <div className="text-s">
-          No state variables found for this scenario. You can create some in the
-          &apos;State Variables&apos; menu in the toolbar above.
+          No properties found for this scenario. You can create some in the
+          &apos;Properties&apos; menu in the toolbar above.
         </div>
       </ModalDialog>
     );
   }
 
   const handleSubmit = () => {
-    // Validate that all required fields are filled
-    if (!selectedState?.id || !operation) return;
+    if (!selectedProperty?.id || !operation) return;
 
     const newOperation = {
-      stateVariableId: selectedState.id,
-      displayName: selectedState.name,
+      stateVariableId: selectedProperty.id,
+      displayName: selectedProperty.name,
       operation,
-      value: selectedState.type === stateTypes.NUMBER ? Number(value) : value,
+      value:
+        selectedProperty.type === propertyTypes.NUMBER ? Number(value) : value,
     };
 
-    modifyComponentProp(component.id, "stateOperations", (prev) => [
+    modifyComponentProp([component.id], "stateOperations", (prev) => [
       ...(prev ?? []),
       newOperation,
     ]);
 
-    setSelectedState(null);
+    setSelectedProperty(null);
     setOperation(null);
     setValue(null);
   };
 
-  function onVariableChange(variable) {
-    setSelectedState(variable);
-    setValue(getDefaultValue(variable.type));
+  function onPropertyChange(property) {
+    setSelectedProperty(property);
+    setValue(getDefaultValue(property.type));
   }
 
-  const isSubmittable = selectedState && operation && value != null;
+  const isSubmittable = selectedProperty && operation && value != null;
 
   return (
     <ModalDialog
-      title="Create State Operation"
+      title="Create Property Operation"
       open={open}
       onClose={() => setOpen(false)}
     >
       <fieldset className="fieldset">
-        <label className="label">State Variable</label>
+        <label className="label">Property</label>
         <SelectInput
-          values={stateVariables}
-          value={selectedState}
-          display={(s) => s.name}
-          onChange={onVariableChange}
+          values={properties}
+          value={selectedProperty}
+          display={(p) => p.name}
+          onChange={onPropertyChange}
         />
-        {selectedState ? (
+        {selectedProperty ? (
           <>
             <label className="label">Operation</label>
             <div className="join">
               <SelectInput
-                values={validOperations[selectedState.type]}
+                values={validOperations[selectedProperty.type]}
                 value={operation}
                 onChange={setOperation}
               />
-              {selectedState.type === stateTypes.BOOLEAN ? (
+              {selectedProperty.type === propertyTypes.BOOLEAN ? (
                 <SelectInput
                   values={[true, false]}
                   value={value}
@@ -93,7 +97,9 @@ const CreateStateOperation = ({ component, open, setOpen }) => {
               ) : (
                 <input
                   type={
-                    selectedState.type === stateTypes.STRING ? "text" : "number"
+                    selectedProperty.type === propertyTypes.STRING
+                      ? "text"
+                      : "number"
                   }
                   value={value ?? ""}
                   onChange={(e) => setValue(e.target.value)}
@@ -117,4 +123,4 @@ const CreateStateOperation = ({ component, open, setOpen }) => {
   );
 };
 
-export default CreateStateOperation;
+export default CreatePropertyOperation;

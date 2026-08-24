@@ -4,6 +4,7 @@ import mongoose from "mongoose";
 
 import Scene from "../../models/scene.js";
 import Scenario from "../../models/scenario.js";
+import UploadedFile from "../../models/uploadedFile.js";
 import { patchScene, deleteScene } from "../sceneDao.js";
 import { useMongoMemoryServer } from "../../../test/testSetup.js";
 
@@ -279,6 +280,107 @@ describe("Scene DAO patchScene tests", () => {
     expect(
       updatedScene.components.find((c) => c.id === "component-a").keyBinding
     ).toBe("Q");
+  });
+
+  it("updates a background and maintains its file reference count", async () => {
+    const firstFile = await UploadedFile.create({
+      name: "first.png",
+      type: "image",
+      path: "images/first.png",
+      url: "https://example.com/first.png",
+      contentType: "image/png",
+      size: 100,
+      uploaderUid: "test-user",
+      scenarioId: new mongoose.Types.ObjectId(),
+    });
+    const secondFile = await UploadedFile.create({
+      name: "second.png",
+      type: "image",
+      path: "images/second.png",
+      url: "https://example.com/second.png",
+      contentType: "image/png",
+      size: 200,
+      uploaderUid: "test-user",
+      scenarioId: new mongoose.Types.ObjectId(),
+    });
+
+    await patchScene(sceneId, {
+      fields: {
+        background: {
+          kind: "image",
+          fileId: firstFile._id,
+          href: firstFile.url,
+          fit: "cover",
+        },
+      },
+    });
+
+    let updatedBackgroundScene = await Scene.findById(sceneId).lean();
+    expect(updatedBackgroundScene.background).toMatchObject({
+      kind: "image",
+      fileId: firstFile._id,
+      href: firstFile.url,
+      fit: "cover",
+    });
+    expect((await UploadedFile.findById(firstFile._id)).refCount).toBe(1);
+
+    await patchScene(sceneId, {
+      fields: {
+        background: {
+          kind: "image",
+          fileId: secondFile._id,
+          href: secondFile.url,
+          fit: "contain",
+        },
+      },
+    });
+
+    expect((await UploadedFile.findById(firstFile._id)).refCount).toBe(0);
+    expect((await UploadedFile.findById(secondFile._id)).refCount).toBe(1);
+
+    await patchScene(sceneId, {
+      fields: { background: { kind: "color", color: "#1769aaff" } },
+    });
+
+    updatedBackgroundScene = await Scene.findById(sceneId).lean();
+    expect(updatedBackgroundScene.background).toMatchObject({
+      kind: "color",
+      color: "#1769aaff",
+    });
+    expect((await UploadedFile.findById(secondFile._id)).refCount).toBe(0);
+
+    await patchScene(sceneId, { fields: { background: null } });
+    expect((await Scene.findById(sceneId).lean()).background).toBeNull();
+  });
+
+  it("rejects incomplete or conflicting background payloads", async () => {
+    const fileId = new mongoose.Types.ObjectId();
+    const invalidBackgrounds = [
+      {
+        kind: "color",
+        color: "#123456",
+        fileId,
+        href: "https://example.com/conflict.png",
+      },
+      {
+        kind: "image",
+        fileId,
+        href: "https://example.com/conflict.png",
+        color: "#123456",
+      },
+      { kind: "image", fileId },
+      { kind: "color" },
+      { kind: "gradient", color: "#123456" },
+      "blue",
+    ];
+
+    for (const background of invalidBackgrounds) {
+      await expect(
+        patchScene(sceneId, { fields: { background } })
+      ).rejects.toMatchObject({ status: 400 });
+    }
+
+    expect((await Scene.findById(sceneId).lean()).background).toBeNull();
   });
 });
 

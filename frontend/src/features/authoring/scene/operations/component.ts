@@ -1,8 +1,11 @@
 import type { Bounds, Component } from "../../types";
-import { getComponent, getComponentProp, getScene } from "../scene";
+import { getComponent, getScene } from "../scene";
 import { mutate, subtract, translate } from "../../util";
 import { getObject, merge } from "../util";
 import { add, modify } from "./modifiers";
+
+type LayerDirection = "forward" | "backward";
+type LayerMode = "step" | "extreme";
 
 export const defaults = {
   textbox: {
@@ -113,10 +116,10 @@ export function stringifyComponent(id: string) {
   return JSON.stringify(component);
 }
 
-export function parseComponent(component: Component) {
+export function parseComponent(component: Component, zIndex?: number) {
   const offset = { x: 10, y: 10 };
   component.bounds.verts = translate(component.bounds.verts, offset);
-  component.zIndex += 1;
+  component.zIndex = zIndex ?? component.zIndex + 1;
   // Duplicates must not inherit the source's key binding - two components
   // bound to the same key silently makes one of them unreachable.
   component.keyBinding = null;
@@ -127,10 +130,28 @@ export function parseComponent(component: Component) {
   return add(component);
 }
 
-export function duplicateComponent(id: string) {
-  const component = getComponent(id);
-  if (!component) return null;
-  return parseComponent(structuredClone(component));
+export function getNextZIndex() {
+  const zIndices = Object.values(getScene().components).map((c) => c.zIndex);
+  return zIndices.length ? Math.max(...zIndices) + 1 : 0;
+}
+
+export function duplicateComponent(ids: string[]) {
+  // assign duplicates a zIndex above everything else, in the same relative
+  // order as their originals, instead of each `zIndex + 1` independently —
+  // that can collide with an adjacent original's zIndex and interleave the
+  // duplicated group into the existing stack instead of keeping it together
+  let nextZIndex = getNextZIndex();
+  const sortedIds = [...ids].sort(
+    (a, b) => (getComponent(a)?.zIndex ?? 0) - (getComponent(b)?.zIndex ?? 0)
+  );
+
+  return sortedIds
+    .map((id: string) => {
+      const newComponent = structuredClone(getComponent(id));
+      if (!newComponent) return null;
+      return parseComponent(newComponent, nextZIndex++);
+    })
+    .filter((id): id is string => id !== null);
 }
 
 export function createComponentFromBounds(
@@ -147,98 +168,144 @@ export function createComponentFromBounds(
     component.bounds.verts = translate(component.bounds.verts, bounds.verts[0]);
   }
 
-  // Set zIndex to the current number of components on the canvas
-  const componentsCount = Object.keys(getScene().components).length;
-  component.zIndex = componentsCount;
+  // Set zIndex above the current highest zIndex on the canvas
+  const existingComponents = Object.values(getScene().components);
+  const maxZIndex = existingComponents.length
+    ? Math.max(...existingComponents.map((c) => c.zIndex))
+    : -1;
+  component.zIndex = maxZIndex + 1;
 
   return add(component);
 }
 
 export const modifyComponentProp = modify(
-  (id: string, prop: string, val: unknown) => {
-    const component = getComponent(id);
-    if (!component) return;
+  (ids: string[], prop: string, val: unknown) => {
+    ids.forEach((id) => {
+      const component = getComponent(id);
+      if (!component) return;
 
-    const [object, key] = getObject(
-      prop,
-      component as unknown as Record<PropertyKey, unknown>
-    );
-    if (typeof val === "function")
-      object[key] = (val as (prev: unknown) => unknown)(object[key]);
-    else if (val !== null && typeof val === "object" && !Array.isArray(val))
-      object[key] = merge(
-        object[key] as Record<PropertyKey, unknown>,
-        val as Record<PropertyKey, unknown>
-      );
-    else object[key] = val;
+      const [object, key] = getObject(prop, component);
+
+      if (typeof val === "function") {
+        object[key] = (val as (prev: unknown) => unknown)(object[key]);
+      } else if (
+        val !== null &&
+        typeof val === "object" &&
+        !Array.isArray(val)
+      ) {
+        object[key] = merge(
+          object[key] as Record<PropertyKey, unknown>,
+          val as Record<PropertyKey, unknown>
+        );
+      } else {
+        object[key] = val;
+      }
+    });
   }
 );
 
-export function modifyComponentBounds(id: string, bounds: Partial<Bounds>) {
-  modifyComponentProp(id, "bounds", bounds);
+export function modifyComponentBounds(
+  ids: string[],
+  bounds: Partial<Bounds> | ((prev: Bounds) => Bounds)
+) {
+  modifyComponentProp(ids, "bounds", bounds);
 }
 
-export function bringForward(id: string) {
-  const currentZIndex = getComponentProp(id, "zIndex") as number;
+function shiftComponentLayers(
+  ids: string[],
+  direction: LayerDirection,
+  mode: LayerMode
+) {
+  if (!ids.length) return;
+
   const components = Object.values(getScene().components);
+  const selectedIds = new Set(ids);
 
-  // 1. Find the highest zIndex that is strictly greater than the current one
+  // Sort components by zIndex (ascending) and capture the original zIndex scale
+  const sortedComponents = [...components].sort((a, b) => a.zIndex - b.zIndex);
+  const zIndexScale = sortedComponents.map((c) => c.zIndex);
 
-  const targetComponent = components
-    .filter((curr) => curr.zIndex > currentZIndex)
-    .reduce(
-      (prev, curr) => {
-        return prev == null || prev.zIndex > curr.zIndex ? curr : prev;
-      },
-      null as Component | null
+  let newSortedComponents: Component[] = [];
+
+  if (mode === "extreme") {
+    // Bring to Front / Send to Back
+    const selected = sortedComponents.filter((c) => selectedIds.has(c.id));
+    const unselected = sortedComponents.filter((c) => !selectedIds.has(c.id));
+
+    newSortedComponents =
+      direction === "forward"
+        ? [...unselected, ...selected] // Front: unselected first, then selected on top
+        : [...selected, ...unselected]; // Back: selected on bottom, then unselected
+  } else {
+    // Bring Forward / Send Backward (Single step)
+    newSortedComponents = [...sortedComponents];
+
+    if (direction === "forward") {
+      // Loop backward to move items up without overwriting consecutive selections
+      for (let i = newSortedComponents.length - 1; i >= 0; i--) {
+        if (
+          selectedIds.has(newSortedComponents[i].id) &&
+          i < newSortedComponents.length - 1 &&
+          !selectedIds.has(newSortedComponents[i + 1].id)
+        ) {
+          const temp = newSortedComponents[i];
+          newSortedComponents[i] = newSortedComponents[i + 1];
+          newSortedComponents[i + 1] = temp;
+        }
+      }
+    } else {
+      // Loop forward to move items down
+      for (let i = 0; i < newSortedComponents.length; i++) {
+        if (
+          selectedIds.has(newSortedComponents[i].id) &&
+          i > 0 &&
+          !selectedIds.has(newSortedComponents[i - 1].id)
+        ) {
+          const temp = newSortedComponents[i];
+          newSortedComponents[i] = newSortedComponents[i - 1];
+          newSortedComponents[i - 1] = temp;
+        }
+      }
+    }
+  }
+
+  // Apply target zIndices back to modified components
+  const changed = newSortedComponents
+    .map((comp, index) => ({
+      id: comp.id,
+      targetZIndex: zIndexScale[index],
+      zIndex: comp.zIndex,
+    }))
+    .filter(({ zIndex, targetZIndex }) => zIndex !== targetZIndex);
+
+  if (changed.length) {
+    applyZIndices(
+      changed.map((c) => c.id),
+      changed.map((c) => c.targetZIndex)
     );
-
-  // Return if component is at the top already
-  if (!targetComponent) return;
-
-  const aboveZIndex = targetComponent.zIndex;
-
-  // Swap Zindexs
-  modifyComponentProp(id, "zIndex", aboveZIndex);
-  modifyComponentProp(targetComponent.id, "zIndex", currentZIndex);
+  }
 }
 
-export function sendBackward(id: string) {
-  const currentZIndex = getComponentProp(id, "zIndex") as number;
-  const components = Object.values(getScene().components);
+const applyZIndices = modify((ids: string[], zIndices: number[]) => {
+  ids.forEach((id, index) => {
+    const component = getComponent(id);
+    if (!component) return;
+    component.zIndex = zIndices[index];
+  });
+});
 
-  // 1. Find the highest zIndex that is strictly less than the current one
-  const targetComponent = components
-    .filter((curr) => curr.zIndex < currentZIndex)
-    .reduce(
-      (prev, curr) => {
-        return prev == null || prev.zIndex < curr.zIndex ? curr : prev;
-      },
-      null as Component | null
-    );
-
-  if (!targetComponent) return;
-  const belowZIndex = targetComponent.zIndex;
-  modifyComponentProp(id, "zIndex", belowZIndex);
-  modifyComponentProp(targetComponent.id, "zIndex", currentZIndex);
+export function bringForward(ids: string[]) {
+  shiftComponentLayers(ids, "forward", "step");
 }
 
-export function bringToFront(id: string) {
-  const components = Object.values(getScene().components);
-  const max = components.reduce(
-    (p, c) => (c.zIndex >= p ? c.zIndex : p),
-    -Infinity
-  );
-  if (max == -Infinity) return;
-  modifyComponentProp(id, "zIndex", max + 1);
+export function sendBackward(ids: string[]) {
+  shiftComponentLayers(ids, "backward", "step");
 }
 
-export function sendToBack(id: string) {
-  const components = Object.values(getScene().components);
-  const min = components.reduce(
-    (p, c) => (c.zIndex <= p ? c.zIndex : p),
-    Infinity
-  );
-  if (min == Infinity) return;
-  modifyComponentProp(id, "zIndex", min - 1);
+export function bringToFront(ids: string[]) {
+  shiftComponentLayers(ids, "forward", "extreme");
+}
+
+export function sendToBack(ids: string[]) {
+  shiftComponentLayers(ids, "backward", "extreme");
 }

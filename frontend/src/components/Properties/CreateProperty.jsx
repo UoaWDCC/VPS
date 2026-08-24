@@ -1,32 +1,30 @@
 import { useState, useEffect, useContext } from "react";
-import { stateTypes, getDefaultValue } from "./stateTypes";
+import { propertyTypes, getDefaultValue } from "./propertyTypes";
 import { api } from "../../util/api";
 import AuthenticationContext from "../../context/AuthenticationContext";
 import toast from "react-hot-toast";
 import ScenarioContext from "../../context/ScenarioContext";
 import SelectInput from "../../features/authoring/components/Select";
 
-const DEFAULT_STATE_TYPE = stateTypes.STRING;
+const DEFAULT_PROPERTY_TYPE = propertyTypes.STRING;
 
 /**
- * Component used for creating state variables
+ * Component used for creating properties
  *
  * @component
  * @example
  * return (
- *  <CreateStateVariable />
+ *  <CreateProperty />
  * )
  */
-const CreateStateVariable = ({ scenarioId }) => {
+const CreateProperty = ({ scenarioId }) => {
   const { user } = useContext(AuthenticationContext);
-  const { setStateVariables } = useContext(ScenarioContext);
+  const { setProperties } = useContext(ScenarioContext);
 
-  // Info for the new state variable
   const [name, setName] = useState(null);
-  const [type, setType] = useState(DEFAULT_STATE_TYPE);
-  const [value, setValue] = useState(getDefaultValue(DEFAULT_STATE_TYPE));
+  const [type, setType] = useState(DEFAULT_PROPERTY_TYPE);
+  const [value, setValue] = useState(getDefaultValue(DEFAULT_PROPERTY_TYPE));
 
-  // Reset to default value upon type change
   useEffect(() => {
     setValue(getDefaultValue(type));
   }, [type]);
@@ -34,27 +32,26 @@ const CreateStateVariable = ({ scenarioId }) => {
   function handleSubmit(e) {
     e.preventDefault();
 
-    const newStateVariable = { name, type, value };
+    const newProperty = { name, type, value };
     api
-      .post(user, `/api/scenario/${scenarioId}/stateVariables`, {
-        newStateVariable,
+      .post(user, `/api/scenario/${scenarioId}/properties`, {
+        newProperty,
       })
       .then((response) => {
-        setStateVariables(response.data);
-        toast.success("State variable created successfully");
-        // Reset name and value fields (but not type)
+        setProperties(response.data);
+        toast.success("Property created successfully");
         setName("");
         setValue(getDefaultValue(type));
       })
       .catch((error) => {
-        console.error("Error creating state variable:", error);
-        toast.error("Error creating state variable");
+        console.error("Error creating property:", error);
+        toast.error("Error creating property");
       });
   }
 
   function parseValue(e) {
     const val = e.target.value;
-    if (type === stateTypes.NUMBER) setValue(val === "" ? "" : Number(val));
+    if (type === propertyTypes.NUMBER) setValue(val === "" ? "" : Number(val));
     else setValue(val);
   }
 
@@ -62,7 +59,7 @@ const CreateStateVariable = ({ scenarioId }) => {
 
   return (
     <fieldset className="fieldset bg-base-200 border-base-300 rounded-box border p-4">
-      <legend className="fieldset-legend">New Variable</legend>
+      <legend className="fieldset-legend">New Property</legend>
       <div className="flex wrap gap-xs">
         <div className="flex flex-col flex-1">
           <label className="label mb-1">Name</label>
@@ -84,7 +81,7 @@ const CreateStateVariable = ({ scenarioId }) => {
         </div>
         <div className="flex flex-col flex-1">
           <label className="label mb-1">Initial Value</label>
-          {type === stateTypes.BOOLEAN ? (
+          {type === propertyTypes.BOOLEAN ? (
             <SelectInput
               value={value}
               values={["true", "false"]}
@@ -92,7 +89,7 @@ const CreateStateVariable = ({ scenarioId }) => {
             />
           ) : (
             <input
-              type={type === stateTypes.NUMBER ? "number" : "text"}
+              type={type === propertyTypes.NUMBER ? "number" : "text"}
               value={value ?? ""}
               onChange={parseValue}
               placeholder="Value"
@@ -111,4 +108,4 @@ const CreateStateVariable = ({ scenarioId }) => {
   );
 };
 
-export default CreateStateVariable;
+export default CreateProperty;
