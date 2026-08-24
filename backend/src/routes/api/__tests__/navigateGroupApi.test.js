@@ -88,7 +88,7 @@ describe("Navigate Group API tests", () => {
     expect(response.status).toBe(200);
     // Returns the active scene and connected scenes
     expect(response.data.active).toBe(scene1._id.toString());
-    expect(response.data.stateVariables).toBeDefined();
+    expect(response.data.properties).toBeDefined();
 
     // Group path should now contain scene1
     const dbGroup = await Group.findById(group._id);

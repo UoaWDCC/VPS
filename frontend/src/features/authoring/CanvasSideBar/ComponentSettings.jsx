@@ -2,15 +2,15 @@ import SceneContext from "context/SceneContext";
 
 import { useContext, useEffect, useState } from "react";
 import { modifyComponentProp } from "../scene/operations/component";
-import StateOperationMenu from "../../../components/StateVariables/StateOperationMenu";
+import PropertyOperationMenu from "../../../components/Properties/PropertyOperationMenu";
 import SelectInput from "../components/Select";
-import StateBindingMenu from "../../../components/StateVariables/StateBindingMenu";
+import PropertyBindingMenu from "../../../components/Properties/PropertyBindingMenu";
 
 /**
  * This component displays the properties the selected scene component
  * @component
  */
-export default function ComponentProperties({ component }) {
+export default function ComponentSettings({ component }) {
   const { scenes } = useContext(SceneContext);
 
   const [value, setValue] = useState(component?.nextScene);
@@ -21,14 +21,14 @@ export default function ComponentProperties({ component }) {
 
   function saveLink(v) {
     setValue(v);
-    modifyComponentProp(component.id, "nextScene", v);
+    modifyComponentProp([component.id], "nextScene", v);
   }
 
   if (!component) return null;
 
   return (
     <>
-      <StateBindingMenu component={component} />
+      <PropertyBindingMenu component={component} />
       {component.clickable && (
         <>
           <div className="collapse overflow-visible collapse-arrow bg-base-300 rounded-sm text-s">
@@ -47,7 +47,7 @@ export default function ComponentProperties({ component }) {
               </fieldset>
             </div>
           </div>
-          <StateOperationMenu component={component} />
+          <PropertyOperationMenu component={component} />
         </>
       )}
     </>

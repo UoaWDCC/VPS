@@ -1,7 +1,7 @@
 import { useContext, useEffect, useState } from "react";
 import { PlusIcon } from "lucide-react";
 import ScenarioContext from "context/ScenarioContext";
-import { stateTypes } from "./stateTypes";
+import { propertyTypes } from "./propertyTypes";
 import { modifySceneProp } from "../../features/authoring/scene/operations/modifiers";
 import useVisualScene from "../../features/authoring/stores/visual";
 import CreateTimerOperationModal, {
@@ -9,11 +9,9 @@ import CreateTimerOperationModal, {
 } from "./CreateTimerOperationModal";
 
 function TimerOperationRow({ operation, index }) {
-  const { stateVariables } = useContext(ScenarioContext);
+  const { properties } = useContext(ScenarioContext);
 
-  const stateVariable = stateVariables?.find(
-    (v) => v.id === operation.stateVariableId
-  );
+  const property = properties?.find((p) => p.id === operation.stateVariableId);
 
   const [localOperation, setLocalOperation] = useState(operation.operation);
   const [localValue, setLocalValue] = useState(operation.value);
@@ -23,7 +21,7 @@ function TimerOperationRow({ operation, index }) {
     setLocalValue(operation.value);
   }, [operation]);
 
-  if (!stateVariable) return null;
+  if (!property) return null;
 
   function getCurrent() {
     return useVisualScene.getState().timerStateOperations ?? [];
@@ -46,7 +44,7 @@ function TimerOperationRow({ operation, index }) {
 
   function handleValueChange(v) {
     setLocalValue(v);
-    if (stateVariable.type === stateTypes.BOOLEAN) saveValue(v);
+    if (property.type === propertyTypes.BOOLEAN) saveValue(v);
   }
 
   function deleteOperation() {
@@ -56,8 +54,8 @@ function TimerOperationRow({ operation, index }) {
   return (
     <div className="bg-base-300 mt-xs px-[1rem] py-[0.5rem]">
       <div>
-        <span className="text--1">{stateVariable.name}</span>
-        <span className="text-xs ml-2xs text-primary">{`${stateVariable.type} operation`}</span>
+        <span className="text--1">{property.name}</span>
+        <span className="text-xs ml-2xs text-primary">{`${property.type} operation`}</span>
         <button
           className="btn btn-xs btn-phantom float-right"
           onClick={deleteOperation}
@@ -67,7 +65,7 @@ function TimerOperationRow({ operation, index }) {
       </div>
       <fieldset className="fieldset mt-[0.5rem]">
         <OperationField
-          type={stateVariable.type}
+          type={property.type}
           operation={localOperation}
           value={localValue}
           onOperationChange={saveOperation}
@@ -79,7 +77,7 @@ function TimerOperationRow({ operation, index }) {
   );
 }
 
-export default function TimerStateOperationMenu() {
+export default function TimerPropertyOperationMenu() {
   const timerStateOperations = useVisualScene((s) => s.timerStateOperations);
   const [createOpen, setCreateOpen] = useState(false);
   const ops = timerStateOperations ?? [];

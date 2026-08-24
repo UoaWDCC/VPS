@@ -8,7 +8,7 @@ type Mode = "normal" | "resize" | "create" | "text" | "mutation";
 
 interface EditorState {
   loading: boolean;
-  selected: string | null;
+  selected: string[];
   hovered: string | null;
   createType: string | null;
   mouseDown: boolean;
@@ -16,7 +16,7 @@ interface EditorState {
   offset: Vec2;
   activeGuides: Guide[];
 
-  setSelected: (id: string | null) => void;
+  setSelected: (id: string[]) => void;
   setHovered: (id: string | null) => void;
   setCreateType: (type: string) => void;
   setMouseDown: (mouseDown: boolean) => void;
@@ -63,7 +63,7 @@ function setter<K extends keyof EditorState>(set: ZustandSet, prop: K) {
 
 const useEditorStore = create<EditorState>((set) => ({
   loading: false,
-  selected: null,
+  selected: [],
   hovered: null,
   createType: null,
   mouseDown: false,
@@ -87,11 +87,13 @@ const useEditorStore = create<EditorState>((set) => ({
 
   setSelection: (selection) =>
     set(({ selected }) => {
-      if (selected && getComponent(selected)?.type === "textbox") {
-        const activeStyle = getStyleForSelection(selected, selection);
+      const mainTarget = selected[0];
+      const component = mainTarget ? getComponent(mainTarget) : null;
+      if (component?.type === "textbox") {
+        const activeStyle = getStyleForSelection(mainTarget, selection);
         return { selection, activeStyle };
       }
-      return { selection };
+      return { selection, activeStyle: null };
     }),
   setVisualSelection: setter(set, "visualSelection"),
   setActiveStyle: (style: BaseTextStyle) => set({ activeStyle: style }),
@@ -105,7 +107,7 @@ const useEditorStore = create<EditorState>((set) => ({
 
   clear: () =>
     set({
-      selected: null,
+      selected: [],
       selection: { start: null, end: null },
       visualSelection: { start: null, end: null },
       mode: ["normal"],

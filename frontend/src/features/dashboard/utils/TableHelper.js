@@ -19,7 +19,7 @@ function descendingComparator(a, b, orderBy) {
     return 0;
   }
 
-  // Members (except name which is also for state variables)
+  // Members (except name which is also for properties)
   if (orderBy === "name") {
     if (b.name < a.name) return -1;
     if (b.name > a.name) return 1;
@@ -36,7 +36,7 @@ function descendingComparator(a, b, orderBy) {
     return 0;
   }
 
-  // State Variables
+  // Properties
   if (orderBy === "type") {
     if (b.type < a.type) return -1;
     if (b.type > a.type) return 1;

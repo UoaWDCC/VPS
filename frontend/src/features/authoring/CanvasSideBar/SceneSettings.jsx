@@ -10,7 +10,7 @@ import { modifySceneProp } from "../scene/operations/modifiers";
 import useDirectLink from "./useDirectLink";
 import shallow from "zustand/shallow";
 import toast from "react-hot-toast";
-import TimerStateOperationMenu from "../../../components/StateVariables/TimerStateOperationMenu";
+import TimerPropertyOperationMenu from "../../../components/Properties/TimerPropertyOperationMenu";
 import SelectInput from "../components/Select";
 
 /**
@@ -216,7 +216,7 @@ export default function SceneSettings() {
           </fieldset>
         </div>
       </div>
-      {time > 0 && <TimerStateOperationMenu />}
+      {time > 0 && <TimerPropertyOperationMenu />}
     </>
   );
 }

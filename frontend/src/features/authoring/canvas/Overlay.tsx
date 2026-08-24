@@ -1,6 +1,6 @@
 import DragHandles from "./handles/DragHandles";
 import Ellipse from "../elements/Ellipse";
-import type { Bounds, Component } from "../types";
+import type { Bounds } from "../types";
 import Box from "../elements/Box";
 import { getBoxCenter } from "../util";
 import Speech from "../elements/Speech";
@@ -10,6 +10,7 @@ import SpeechHandles from "./handles/SpeechHandles";
 import Rectangle from "./Rectangle";
 import useEditorStore from "../stores/editor";
 import useVisualScene from "../stores/visual";
+import { getSelectedComponentBounds } from "../handlers/pointer/pointer";
 import { CANVAS_HEIGHT, CANVAS_WIDTH } from "../../../util/canvas";
 
 const componentMap: Record<string, React.FC<Record<string, unknown>>> = {
@@ -19,7 +20,7 @@ const componentMap: Record<string, React.FC<Record<string, unknown>>> = {
   line: Line,
 };
 
-function resolve(type: Component["type"], bounds: Bounds) {
+function resolve(type: string, bounds: Bounds) {
   const Fc = componentMap[type] ?? Box;
   return (
     <Fc
@@ -31,28 +32,37 @@ function resolve(type: Component["type"], bounds: Bounds) {
   );
 }
 
-function Overlay() {
-  const selected = useEditorStore((state) => state.selected)!;
-  const hovered = useEditorStore((state) => state.hovered)!;
-  const bounds = useEditorStore((state) => state.mutationBounds);
-  const activeGuides = useEditorStore((state) => state.activeGuides);
-  const scene = useVisualScene((scene) => scene.components);
-  const mode = useEditorStore((scene) => scene.mode);
-  const createType = useEditorStore((scene) => scene.createType);
-
-  const component = scene[selected];
-  const hoveredComponent = scene[hovered];
-
-  function ResolveHandles() {
-    switch (component.type) {
-      case "speech":
-        return <SpeechHandles />;
-      case "line":
-        return <LineHandles />;
-      default:
-        return <DragHandles />;
-    }
+function ResolveHandles({ type }: { type: string }) {
+  switch (type) {
+    case "speech":
+      return <SpeechHandles />;
+    case "line":
+      return <LineHandles />;
+    default:
+      return <DragHandles />;
   }
+}
+
+function Overlay() {
+  const selected = useEditorStore((s) => s.selected);
+  const hovered = useEditorStore((s) => s.hovered);
+  const mutationBounds = useEditorStore((s) => s.mutationBounds);
+  const activeGuides = useEditorStore((s) => s.activeGuides);
+  const mode = useEditorStore((s) => s.mode);
+  const createType = useEditorStore((s) => s.createType);
+  const components = useVisualScene((s) => s.components);
+
+  const hasSelection = selected.length > 0;
+  const type = hasSelection
+    ? selected.length > 1
+      ? "box"
+      : components[selected[0]].type
+    : null;
+
+  const bounds = getSelectedComponentBounds();
+  const verts = bounds?.verts;
+
+  const hoveredComponent = hovered ? components[hovered] : null;
 
   return (
     <svg
@@ -60,16 +70,16 @@ function Overlay() {
       className="w-full h-full absolute pointer-events-none"
       viewBox={`-50 -50 ${CANVAS_WIDTH + 50 * 2} ${CANVAS_HEIGHT + 50 * 2}`}
     >
-      {component && (
+      {hasSelection && bounds && (
         <>
           <Rectangle
-            bounds={component.bounds}
-            rotationOrigin={getBoxCenter(component.bounds.verts)}
+            bounds={bounds}
+            rotationOrigin={getBoxCenter(verts!)}
             fill="none"
             stroke="var(--color-accent)"
             strokeWidth={3}
           />
-          <ResolveHandles />
+          <ResolveHandles type={type!} />
         </>
       )}
       {hoveredComponent && (
@@ -82,7 +92,7 @@ function Overlay() {
         />
       )}
       {mode.includes("mutation") &&
-        resolve(component?.type ?? createType, bounds)}
+        resolve(type ?? createType!, mutationBounds)}
       {mode.includes("mutation") &&
         activeGuides.map((guide, index) => {
           const style = guide.isCanvasCenter

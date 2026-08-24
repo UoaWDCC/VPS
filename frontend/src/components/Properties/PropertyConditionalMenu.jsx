@@ -1,9 +1,9 @@
-import CreateStateConditional from "./CreateStateConditional";
+import CreatePropertyConditional from "./CreatePropertyConditional";
 import { PlusIcon } from "lucide-react";
 import { useState } from "react";
-import EditStateConditional from "./EditStateConditional";
+import EditPropertyConditional from "./EditPropertyConditional";
 
-const StateConditionalMenu = ({ resource }) => {
+const PropertyConditionalMenu = ({ resource }) => {
   const [createOpen, setCreateOpen] = useState(false);
 
   if (!resource) return null;
@@ -22,22 +22,22 @@ const StateConditionalMenu = ({ resource }) => {
               e.stopPropagation();
               setCreateOpen(true);
             }}
-            title="Create state conditional"
+            title="Create property conditional"
           >
             <PlusIcon size={18} />
           </button>
         </div>
         <div className="collapse-content text--1 bg-base-200 px-0">
-          {resource.stateConditionals?.map((stateConditional) => (
-            <EditStateConditional
+          {resource.stateConditionals?.map((propertyConditional) => (
+            <EditPropertyConditional
               resource={resource}
-              conditional={stateConditional}
-              key={stateConditional._id}
+              conditional={propertyConditional}
+              key={propertyConditional._id}
             />
           ))}
         </div>
       </div>
-      <CreateStateConditional
+      <CreatePropertyConditional
         resource={resource}
         open={createOpen}
         setOpen={setCreateOpen}
@@ -46,4 +46,4 @@ const StateConditionalMenu = ({ resource }) => {
   );
 };
 
-export default StateConditionalMenu;
+export default PropertyConditionalMenu;

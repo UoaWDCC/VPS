@@ -19,6 +19,13 @@ import { getImages, uploadImage } from "./imageFiles";
 
 type ModifyScene = (scene: Scene) => Promise<unknown> | undefined;
 
+const ACCEPTED_IMAGE_MIME_TYPES = [
+  "image/png",
+  "image/jpeg",
+  "image/webp",
+  "image/gif",
+];
+
 async function addImageToScene(
   image: UploadedFile,
   originScene: Scene,
@@ -101,14 +108,20 @@ function ImageCreateMenu() {
 
   function handleFileChange(event: React.ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0];
+    event.target.value = "";
 
-    if (file) {
-      const originScene = getScene();
+    if (!file) return;
 
-      addNewImage(file, scenarioId, user, originScene, modifyScene).catch(
-        handleGeneric
-      );
+    if (!ACCEPTED_IMAGE_MIME_TYPES.includes(file.type)) {
+      toast.error("Unsupported file type");
+      return;
     }
+
+    const originScene = getScene();
+
+    addNewImage(file, scenarioId, user, originScene, modifyScene).catch(
+      handleGeneric
+    );
   }
 
   const showFilePicker = () => {
@@ -160,6 +173,7 @@ function ImageCreateMenu() {
       <input
         ref={fileInputRef}
         type="file"
+        accept={ACCEPTED_IMAGE_MIME_TYPES.join(",")}
         className="hidden"
         onChange={handleFileChange}
       />

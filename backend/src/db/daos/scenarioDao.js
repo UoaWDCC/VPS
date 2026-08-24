@@ -292,31 +292,31 @@ const deleteScenario = async (scenarioId) => {
 };
 
 /**
- * Gets the state variables for a scenario
+ * Gets the properties for a scenario
  * @param {String} sceneId MongoDB ID of scene
- * @returns state variables for the scenario
+ * @returns properties for the scenario
  */
-const getStateVariables = async (scenarioId) => {
+const getProperties = async (scenarioId) => {
   const scenario = await Scenario.findById(scenarioId);
   return scenario.stateVariables || [];
 };
 
 /**
- * Creates a new state variable for a scenario
+ * Creates a new property for a scenario
  * @param {String} sceneId MongoDB ID of scene
- * @param {Object} stateVariable new state variable to be added
- * @returns updated state variables for the scenario
+ * @param {Object} property new property to be added
+ * @returns updated properties for the scenario
  */
-const createStateVariable = async (scenarioId, stateVariable) => {
-  // TODO Add validation for state variable (e.g. name should be unique)
+const createProperty = async (scenarioId, property) => {
+  // TODO Add validation for property (e.g. name should be unique)
   const scenario = await Scenario.findById(scenarioId);
   try {
     // Generate uuid on the backend
-    const stateVariableWithId = {
-      ...stateVariable,
+    const propertyWithId = {
+      ...property,
       id: uuidv4(),
     };
-    scenario.stateVariables.push(stateVariableWithId);
+    scenario.stateVariables.push(propertyWithId);
     await scenario.save();
     return scenario.stateVariables;
   } catch {
@@ -325,31 +325,25 @@ const createStateVariable = async (scenarioId, stateVariable) => {
 };
 
 /**
- * Edits a state variable for a scenario
+ * Edits a property for a scenario
  * @param {String} scenarioId MongoDB ID of scenario
- * @param {String} originalName name of the original state variable (legacy support)
- * @param {Object} newStateVariable state variable to replace previous
- * @returns updated state variables for the scenario
+ * @param {String} originalName name of the original property (legacy support)
+ * @param {Object} newProperty property to replace previous
+ * @returns updated properties for the scenario
  */
-const editStateVariable = async (
-  scenarioId,
-  originalName,
-  newStateVariable
-) => {
-  // TODO Add validation for state variable
+const editProperty = async (scenarioId, originalName, newProperty) => {
+  // TODO Add validation for property
   // (e.g. if name has changed, it should not conflict with existing names)
   const scenario = await Scenario.findById(scenarioId);
   try {
     for (let i = 0; i < scenario.stateVariables.length; i++) {
       // Try to match by ID first (new format), then by name (legacy format)
       const match =
-        (newStateVariable.id &&
-          scenario.stateVariables[i].id === newStateVariable.id) ||
-        (!newStateVariable.id &&
-          originalName === scenario.stateVariables[i].name);
+        (newProperty.id && scenario.stateVariables[i].id === newProperty.id) ||
+        (!newProperty.id && originalName === scenario.stateVariables[i].name);
 
       if (match) {
-        scenario.stateVariables[i] = newStateVariable;
+        scenario.stateVariables[i] = newProperty;
         break;
       }
     }
@@ -362,18 +356,17 @@ const editStateVariable = async (
 };
 
 /**
- * Deletes a state variable from a scenario
+ * Deletes a property from a scenario
  * @param {String} scenarioId MongoDB ID of scenario
- * @param {String} stateVariableIdentifier name or ID of the state variable to be deleted
- * @returns updated state variables for the scenario
+ * @param {String} propertyIdentifier name or ID of the property to be deleted
+ * @returns updated properties for the scenario
  */
-const deleteStateVariable = async (scenarioId, stateVariableIdentifier) => {
+const deleteProperty = async (scenarioId, propertyIdentifier) => {
   const scenario = await Scenario.findById(scenarioId);
   try {
     scenario.stateVariables = scenario.stateVariables.filter(
       (state) =>
-        state.name !== stateVariableIdentifier &&
-        state.id !== stateVariableIdentifier
+        state.name !== propertyIdentifier && state.id !== propertyIdentifier
     );
     await scenario.save();
     return scenario.stateVariables;
@@ -395,8 +388,8 @@ export {
   createRole,
   deleteRole,
   updateScenario,
-  getStateVariables,
-  createStateVariable,
-  editStateVariable,
-  deleteStateVariable,
+  getProperties,
+  createProperty,
+  editProperty,
+  deleteProperty,
 };

@@ -5,12 +5,12 @@ import toast from "react-hot-toast";
 import ScenarioContext from "../../context/ScenarioContext";
 import SceneContext from "../../context/SceneContext";
 import SelectInput from "../../features/authoring/components/Select";
-import { isBooleanStateType, stateTypes } from "./stateTypes";
+import { isBooleanPropertyType, propertyTypes } from "./propertyTypes";
 import { arrayToObject } from "../../features/authoring/scene/util";
 
-const EditStateVariable = ({ stateVariable, scenarioId }) => {
+const EditProperty = ({ property, scenarioId }) => {
   const { user } = useContext(AuthenticationContext);
-  const { setStateVariables } = useContext(ScenarioContext);
+  const { setProperties } = useContext(ScenarioContext);
   const sceneContext = useContext(SceneContext);
   const { scenes, modifyScene, reFetch } = sceneContext || {
     scenes: [],
@@ -18,7 +18,7 @@ const EditStateVariable = ({ stateVariable, scenarioId }) => {
     reFetch: async () => {},
   };
 
-  const { name, type, value } = stateVariable;
+  const { name, type, value } = property;
 
   const [newName, setNewName] = useState(name);
   const [newType, setNewType] = useState(type);
@@ -33,45 +33,41 @@ const EditStateVariable = ({ stateVariable, scenarioId }) => {
     setNewValue(value);
   }
 
-  function editStateVariable(e) {
+  function editProperty(e) {
     e.preventDefault();
-    const newStateVariable = {
-      id: stateVariable.id, // Preserve the UUID
+    const newProperty = {
+      id: property.id,
       name: newName,
       type: newType,
       value: newValue,
     };
     api
-      .put(user, `api/scenario/${scenarioId}/stateVariables`, {
+      .put(user, `api/scenario/${scenarioId}/properties`, {
         originalName: name,
-        newStateVariable,
+        newProperty,
       })
       .then((res) => {
-        setStateVariables(res.data);
-        toast.success("State variable edited!");
+        setProperties(res.data);
+        toast.success("Property edited!");
       })
       .catch((error) => {
-        console.error("Error editing state variable:", error);
-        toast.error("Failed to edit state variable.");
+        console.error("Error editing property:", error);
+        toast.error("Failed to edit property.");
       });
   }
 
-  async function deleteStateVariable(e) {
+  async function deleteProperty(e) {
     e.preventDefault();
 
-    // NOTE: name is legacy support, probably safe to remove
-    const identifier = stateVariable.id || name;
+    const identifier = property.id || name;
 
     try {
-      // Delete the state variable from the backend
       const res = await api.delete(
         user,
-        `api/scenario/${scenarioId}/stateVariables/${identifier}`
+        `api/scenario/${scenarioId}/properties/${identifier}`
       );
-      setStateVariables(res.data);
+      setProperties(res.data);
 
-      // Clean up state operations and bindings that reference the deleted variable
-      // Only do this if we have access to scenes (SceneContext is available)
       if (scenes && scenes.length > 0 && modifyScene) {
         const updatedScenes = scenes.map((scene) => ({
           ...scene,
@@ -79,17 +75,16 @@ const EditStateVariable = ({ stateVariable, scenarioId }) => {
             scene.components.map((component) => {
               const filteredOperations = component.stateOperations?.filter(
                 (operation) => {
-                  // Check both UUID and name references
-                  const referencesDeletedVariable =
+                  const referencesDeletedProperty =
                     (operation.stateVariableId &&
-                      operation.stateVariableId === stateVariable.id) ||
+                      operation.stateVariableId === property.id) ||
                     (!operation.stateVariableId && operation.name === name);
 
-                  return !referencesDeletedVariable;
+                  return !referencesDeletedProperty;
                 }
               );
               const filteredBindings = component.stateBindings?.filter(
-                (binding) => binding.stateVariableId !== stateVariable.id
+                (binding) => binding.stateVariableId !== property.id
               );
 
               if (!filteredOperations && !filteredBindings) return component;
@@ -112,30 +107,27 @@ const EditStateVariable = ({ stateVariable, scenarioId }) => {
         await Promise.all(updatePromises);
         await reFetch();
 
-        toast.success(
-          "State variable deleted and removed from all components!"
-        );
+        toast.success("Property deleted and removed from all components!");
       } else {
-        toast.success("State variable deleted successfully!");
+        toast.success("Property deleted successfully!");
       }
     } catch (error) {
-      console.error("Error deleting state variable:", error);
-      toast.error("Failed to delete state variable.");
+      console.error("Error deleting property:", error);
+      toast.error("Failed to delete property.");
     }
   }
 
   function parseValue(e) {
     const val = e.target.value;
-    if (newType === stateTypes.NUMBER)
+    if (newType === propertyTypes.NUMBER)
       setNewValue(val === "" ? "" : Number(val));
     else setNewValue(val);
   }
-  `bg-base-300 mt-xs px-[1rem] py-[0.5rem] `;
 
   return (
     <>
       <fieldset
-        key={stateVariable.name}
+        key={property.name}
         className={`fieldset bg-base-200 border-base-300 rounded-box border p-4 ${
           isEditing ? "ring-2 ring-grey" : ""
         }`}
@@ -161,7 +153,7 @@ const EditStateVariable = ({ stateVariable, scenarioId }) => {
           </div>
           <div className="flex-1 flex flex-col">
             <label className="label mb-1">Initial Value</label>
-            {isBooleanStateType(newType) ? (
+            {isBooleanPropertyType(newType) ? (
               <SelectInput
                 value={newValue}
                 values={["true", "false"]}
@@ -169,7 +161,7 @@ const EditStateVariable = ({ stateVariable, scenarioId }) => {
               />
             ) : (
               <input
-                type={newType === stateTypes.NUMBER ? "number" : "text"}
+                type={newType === propertyTypes.NUMBER ? "number" : "text"}
                 value={newValue ?? ""}
                 onChange={parseValue}
                 placeholder="Value"
@@ -179,19 +171,13 @@ const EditStateVariable = ({ stateVariable, scenarioId }) => {
           </div>
         </div>
         <div className="ml-auto">
-          <button
-            className="btn btn-xs btn-phantom"
-            onClick={deleteStateVariable}
-          >
+          <button className="btn btn-xs btn-phantom" onClick={deleteProperty}>
             Delete
           </button>
           <button className="btn btn-xs btn-phantom" onClick={resetFields}>
             Reset
           </button>
-          <button
-            className="btn btn-xs btn-phantom"
-            onClick={editStateVariable}
-          >
+          <button className="btn btn-xs btn-phantom" onClick={editProperty}>
             Save
           </button>
         </div>
@@ -200,4 +186,4 @@ const EditStateVariable = ({ stateVariable, scenarioId }) => {
   );
 };
 
-export default EditStateVariable;
+export default EditProperty;

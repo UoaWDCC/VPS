@@ -57,17 +57,17 @@ const removeUserFromGroup = async (groupId, scenarioId, email) => {
 };
 
 /**
- * Sets the state variables for a group
+ * Sets the properties for a group
  * @param {String} groupId MongoDB ID of group
- * @param {Object} stateVariables Object containing state variables
- * @returns updated group object with state variables set
+ * @param {Object} properties Object containing properties
+ * @returns updated group object with properties set
  */
-const setGroupStateVariables = async (groupId, stateVariables) => {
+const setGroupProperties = async (groupId, properties) => {
   try {
     const group = await Group.findOneAndUpdate(
       { _id: groupId },
       {
-        $set: { stateVariables },
+        $set: { stateVariables: properties },
         $inc: { stateVersion: 1 },
       },
       { new: true }
@@ -77,7 +77,7 @@ const setGroupStateVariables = async (groupId, stateVariables) => {
     }
     return [group.stateVariables, group.stateVersion];
   } catch (error) {
-    throw new Error(`Error initiating state variables: ${error.message}`);
+    throw new Error(`Error initiating properties: ${error.message}`);
   }
 };
 
@@ -87,5 +87,5 @@ export {
   createGroup,
   getGroupByScenarioId,
   removeUserFromGroup,
-  setGroupStateVariables,
+  setGroupProperties,
 };
