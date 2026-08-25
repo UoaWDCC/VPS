@@ -84,14 +84,15 @@ export default function TimerPropertyOperationMenu() {
 
   return (
     <>
-      <div className="collapse overflow-visible collapse-arrow bg-base-200 border-base-300 rounded-sm text-s">
+      <div className="collapse overflow-visible collapse-arrow bg-base-200 rounded-sm text-s">
         <input type="checkbox" />
-        <div className="collapse-title flex items-center justify-between">
-          On Timeout
+        <div className="collapse-title !pl-0 flex items-center justify-between text-xs after:text-base-content/50">
+          <label className="label">On Timeout</label>
           <PlusIcon
             size={18}
             onClick={() => setCreateOpen(true)}
             className="z-1"
+            opacity={0.5}
           />
         </div>
         <div className="collapse-content text--1 bg-base-200 px-0">
