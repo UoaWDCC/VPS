@@ -13,6 +13,8 @@ import { useHistory } from "react-router-dom";
 import { replace, replaceComponent } from "./scene/operations/modifiers";
 import { diffToSelection, findEditDiff } from "./scene/operations/text";
 import { syncVisualCursor } from "./text/cursor";
+import { syncPropertyChips } from "./text/property";
+import { buildVisualComponent } from "./pipeline";
 import {
   ArrowLeftIcon,
   FilesIcon,
@@ -45,7 +47,8 @@ const listeners = [
  */
 export default function AuthoringToolPage() {
   const { scenes, modifyScene, switchScene } = useContext(SceneContext);
-  const { allScenarios, updateScenarioDetails } = useContext(ScenarioContext);
+  const { allScenarios, updateScenarioDetails, properties } =
+    useContext(ScenarioContext);
   const { scenarioId } = useParams();
 
   const sceneId = useVisualScene((scene) => scene.id);
@@ -161,6 +164,28 @@ export default function AuthoringToolPage() {
       );
     };
   }, []);
+
+  useEffect(() => {
+    useEditorStore.getState().setProperties(properties);
+  }, [properties]);
+
+  //sync chips w scenario properties
+  useEffect(() => {
+    if (!properties) return;
+
+    const { components, setComponents } = useVisualScene.getState();
+    const next = { ...components };
+    let changed = false;
+
+    for (const component of Object.values(getScene()?.components ?? {})) {
+      if (component.type !== "textbox") continue;
+      if (!syncPropertyChips(component.document, properties)) continue;
+      next[component.id] = buildVisualComponent(component);
+      changed = true;
+    }
+
+    if (changed) setComponents(next);
+  }, [properties, sceneId]);
 
   function playScenario() {
     const startScene = sceneId ? `?startScene=${sceneId}` : "";

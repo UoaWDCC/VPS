@@ -112,7 +112,7 @@ function buildVisualLines(
       setFont(style);
 
       //property chips measure width from name+padding instead of unicode char
-      //offsets set w only two cursor positions (front and back)
+      //offsets have only two cursor positions (front and back)
       if (ref.span.property) {
         const width =
           measure(ref.span.property.displayName).width + CHIP_X_PADDING * 2;
