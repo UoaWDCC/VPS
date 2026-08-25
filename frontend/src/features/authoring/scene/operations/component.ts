@@ -120,7 +120,13 @@ export function parseComponent(component: Component, zIndex?: number) {
   const offset = { x: 10, y: 10 };
   component.bounds.verts = translate(component.bounds.verts, offset);
   component.zIndex = zIndex ?? component.zIndex + 1;
-  delete (component as Record<string, unknown>).id;
+  // Duplicates must not inherit the source's key binding - two components
+  // bound to the same key silently makes one of them unreachable.
+  component.keyBinding = null;
+  component.showKeyHint = false;
+  const mutableComponent = component as unknown as Record<string, unknown>;
+  delete mutableComponent.id;
+  delete mutableComponent.keyHintPosition;
   return add(component);
 }
 

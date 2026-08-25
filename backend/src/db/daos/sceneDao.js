@@ -4,6 +4,12 @@ import { HttpError } from "../../util/error.js";
 import status from "../../util/status.js";
 import { applyReferenceDeltas } from "./fileDao.js";
 import { HttpStatusCode } from "axios";
+// Single source of truth for direct-link key defaults lives in the
+// frontend, since it started there and the frontend has richer consumers
+// (key pickers, display strings) of the same concept. This is a plain .js
+// file specifically so this backend, which has no TypeScript loader, can
+// import it directly.
+import { directLinkKeysFor } from "../../../../frontend/src/features/authoring/keyBindingDefaults.js";
 
 export function addDelta(fileRefDeltas, fileId, delta) {
   fileRefDeltas.set(fileId, (fileRefDeltas.get(fileId) ?? 0) + delta);
@@ -104,6 +110,37 @@ const assertDirectLinkInScenario = async (scenarioId, directLinkId) => {
   }
 };
 
+// Enforce that no two clickable components, and no component and the scene's
+// direct link, claim the same key. The authoring UI already filters pickers
+// to avoid this, but that only guards the flows that go through those
+// pickers - this is the backstop at the point scenes are actually saved.
+const assertUniqueKeyBindings = (components, directLink, directLinkKey) => {
+  const claimedBy = new Map();
+
+  (components ?? []).forEach((c) => {
+    if (!c.clickable || !c.keyBinding) return;
+    const priorClaimant = claimedBy.get(c.keyBinding);
+    if (priorClaimant && priorClaimant !== c.id) {
+      throw new HttpError(
+        `Key binding "${c.keyBinding}" is claimed by more than one component`,
+        status.BAD_REQUEST
+      );
+    }
+    claimedBy.set(c.keyBinding, c.id);
+  });
+
+  if (directLink) {
+    directLinkKeysFor(directLinkKey).forEach((key) => {
+      if (claimedBy.has(key)) {
+        throw new HttpError(
+          `Key binding "${key}" is claimed by both a component and the scene's direct link`,
+          status.BAD_REQUEST
+        );
+      }
+    });
+  }
+};
+
 /**
  * Creates a scene in the database, and updates its parent scenario to contain the scene
  * @param {String} scenarioId MongoDB ID of parent scenario
@@ -112,6 +149,11 @@ const assertDirectLinkInScenario = async (scenarioId, directLinkId) => {
  */
 const createScene = async (scenarioId, scene) => {
   await assertDirectLinkInScenario(scenarioId, scene.directLink);
+  assertUniqueKeyBindings(
+    scene.components,
+    scene.directLink,
+    scene.directLinkKey
+  );
   const dbScene = new Scene(scene);
   await dbScene.save();
 
@@ -237,6 +279,47 @@ const deleteScene = async (scenarioId, sceneId) => {
     { directLink: sceneId },
     { $set: { directLink: null } }
   );
+
+  // Components elsewhere that linked to the scene being deleted would
+  // otherwise keep pointing at a scene that no longer exists. Clear the
+  // link, and drop the key binding along with it for any component left
+  // with no other action (no Property Operations) - a binding with nothing
+  // left to trigger is a dead binding. Components that still have Property
+  // Operations keep their key binding, since it still does something.
+  //
+  // components is untyped (Schema.Types.Mixed), so nextScene is stored as
+  // whatever the frontend sent - always a plain string, never a cast
+  // ObjectId - unlike directLink above. Compare against the string form so
+  // this still matches regardless of what type the caller passed in.
+  const sceneIdStr = sceneId.toString();
+  await Scene.updateMany(
+    { "components.nextScene": sceneIdStr },
+    {
+      $set: {
+        "components.$[elem].nextScene": null,
+        "components.$[elem].keyBinding": null,
+        "components.$[elem].showKeyHint": false,
+      },
+    },
+    {
+      arrayFilters: [
+        {
+          "elem.nextScene": sceneIdStr,
+          $or: [
+            { "elem.stateOperations": { $exists: false } },
+            { "elem.stateOperations": null },
+            { "elem.stateOperations": { $size: 0 } },
+          ],
+        },
+      ],
+    }
+  );
+  await Scene.updateMany(
+    { "components.nextScene": sceneIdStr },
+    { $set: { "components.$[elem].nextScene": null } },
+    { arrayFilters: [{ "elem.nextScene": sceneIdStr }] }
+  );
+
   const res = await Scene.findOneAndDelete({ _id: sceneId });
 
   if (res) {
@@ -266,6 +349,7 @@ const duplicateScene = async (scenarioId, sceneId) => {
     components: sceneToCopy.components,
     time: sceneToCopy.time,
     directLink: sceneToCopy.directLink ?? null,
+    directLinkKey: sceneToCopy.directLinkKey ?? null,
     background: sceneToCopy.background ?? null,
   };
   const dbScene = new Scene(newScene);
@@ -368,12 +452,49 @@ async function validateBackground(background) {
 const patchScene = async (sceneId, patch, scenarioId) => {
   const { fields = {}, components = [], deletedComponentIds = [] } = patch;
 
+  // Duplicate ids in the same patch are rejected outright rather than
+  // silently letting the last one win - effectiveComponents below only
+  // validates the first occurrence (Array.find), while bulkWrite applies
+  // updates in order, so a later duplicate could persist an unvalidated,
+  // actually-conflicting keyBinding.
+  const duplicateComponentIds = [
+    ...new Set(
+      components
+        .map((c) => c.id)
+        .filter((id, index, ids) => ids.indexOf(id) !== index)
+    ),
+  ];
+  if (duplicateComponentIds.length > 0) {
+    throw new HttpError(
+      `Component(s) ${duplicateComponentIds.join(", ")} appear more than once in the same patch`,
+      status.BAD_REQUEST
+    );
+  }
+
+  // A component can't be both deleted and updated in the same patch - the
+  // $pull/$push bulkWrite below would actually resurrect it (re-inserted by
+  // the "insert if it doesn't already exist" op after $pull removes it),
+  // silently diverging from what gets validated as "effective" below.
+  const deletedAndUpdated = components
+    .map((c) => c.id)
+    .filter((id) => deletedComponentIds.includes(id));
+  if (deletedAndUpdated.length > 0) {
+    throw new HttpError(
+      `Component(s) ${deletedAndUpdated.join(", ")} cannot be both deleted and updated in the same patch`,
+      status.BAD_REQUEST
+    );
+  }
+
+  // Keep this list in sync with the field list in generatePatch,
+  // frontend/src/context/SceneContextProvider.jsx - a field missing from
+  // either side either gets silently dropped here or never sent from there.
   const allowedFields = {};
   [
     "name",
     "roles",
     "time",
     "directLink",
+    "directLinkKey",
     "timerStateOperations",
     "background",
   ].forEach((field) => {
@@ -394,10 +515,45 @@ const patchScene = async (sceneId, patch, scenarioId) => {
 
   const existingScene = await Scene.findById(sceneId, {
     components: 1,
+    directLink: 1,
+    directLinkKey: 1,
     background: 1,
   });
   if (!existingScene) {
     throw new HttpError("scene not found", HttpStatusCode.NotFound);
+  }
+
+  // Key bindings can only change via a component add/edit/delete or a
+  // directLink/directLinkKey field change - skip building the effective
+  // state and validating it when the patch touches neither.
+  const keyBindingsMayHaveChanged =
+    components.length > 0 ||
+    deletedComponentIds.length > 0 ||
+    "directLink" in allowedFields ||
+    "directLinkKey" in allowedFields;
+
+  if (keyBindingsMayHaveChanged) {
+    const effectiveComponents = existingScene.components
+      .filter((c) => !deletedComponentIds.includes(c.id))
+      .map((c) => components.find((uc) => uc.id === c.id) ?? c)
+      .concat(
+        components.filter(
+          (uc) => !existingScene.components.some((c) => c.id === uc.id)
+        )
+      );
+    const effectiveDirectLink =
+      "directLink" in allowedFields
+        ? allowedFields.directLink
+        : existingScene.directLink;
+    const effectiveDirectLinkKey =
+      "directLinkKey" in allowedFields
+        ? allowedFields.directLinkKey
+        : existingScene.directLinkKey;
+    assertUniqueKeyBindings(
+      effectiveComponents,
+      effectiveDirectLink,
+      effectiveDirectLinkKey
+    );
   }
 
   const fileRefDeltas = computePatchFileRefDeltas(

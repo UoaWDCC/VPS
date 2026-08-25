@@ -18,6 +18,8 @@ import { handleContextGlobal } from "../handlers/pointer/context";
 import LoadingOverlay from "./LoadingOverlay.tsx";
 import useEditorStore from "../stores/editor.ts";
 import { CANVAS_HEIGHT, CANVAS_WIDTH } from "../../../util/canvas";
+import KeyHintBadge from "../components/KeyHintBadge";
+import { hasClickAction } from "../keyBindings";
 import Background from "../elements/Background";
 
 const componentMap: Record<string, React.FC<Record<string, unknown>>> = {
@@ -75,7 +77,22 @@ function Canvas() {
 
   const components = Object.values(scene)
     .sort((a, b) => a.zIndex - b.zIndex)
-    .map(resolve);
+    .flatMap((c) => {
+      const rendered = resolve(c);
+      if (!rendered) return [];
+      if (c.keyBinding && c.showKeyHint && hasClickAction(c)) {
+        return [
+          rendered,
+          <KeyHintBadge
+            key={`${c.id}-hint`}
+            bounds={c.bounds}
+            keyBinding={c.keyBinding}
+            position={c.keyHintPosition}
+          />,
+        ];
+      }
+      return [rendered];
+    });
 
   const loading = useEditorStore((state) => state.loading);
   return (

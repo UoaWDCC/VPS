@@ -1,4 +1,4 @@
-import { useContext, useState, useEffect } from "react";
+import { useContext, useState, useEffect, useMemo } from "react";
 import { Check, ChevronDown } from "lucide-react";
 import ScenarioContext from "context/ScenarioContext";
 import SceneContext from "context/SceneContext";
@@ -7,11 +7,14 @@ import { getScene } from "../scene/scene";
 
 import useVisualScene from "../stores/visual";
 import { modifySceneProp } from "../scene/operations/modifiers";
+import { modifyComponentProp } from "../scene/operations/component";
 import useDirectLink from "./useDirectLink";
 import shallow from "zustand/shallow";
 import toast from "react-hot-toast";
 import TimerPropertyOperationMenu from "../../../components/Properties/TimerPropertyOperationMenu";
 import SelectInput from "../components/Select";
+import KeyCapture from "../components/KeyCapture";
+import { availableKeyBindings, DEFAULT_DIRECT_LINK_KEYS } from "../keyBindings";
 
 /**
  * This component displays the settings of a scene, such as the scene name
@@ -28,12 +31,60 @@ export default function SceneSettings() {
     directLink,
     disabled: directLinkDisabled,
     defaultTarget: defaultDirectLinkScene,
-  } = useDirectLink();
+    hasOtherScenes,
+  } = useDirectLink(scenes);
+  const directLinkKey = useVisualScene((scene) => scene.directLinkKey);
+  const components = useVisualScene((scene) => scene.components);
   const time = useVisualScene((scene) => scene.time);
 
   const [selectedRoles, setSelectedRoles] = useState(roles ?? []);
   const [sceneName, setSceneName] = useState(name ?? "");
   const [timerDuration, setTimerDuration] = useState(time ?? "");
+  const [keyValue, setKeyValue] = useState(directLinkKey ?? null);
+
+  useEffect(() => {
+    if ((directLinkKey ?? null) !== keyValue)
+      setKeyValue(directLinkKey ?? null);
+  }, [directLinkKey]);
+
+  // null/undefined = Default mode; "" or a real key = Custom mode (see
+  // directLinkKeysFor in keyBindings.ts for what each value claims).
+  const keyMode = keyValue != null ? "CUSTOM" : "DEFAULT";
+
+  const availableDirectLinkKeys = useMemo(
+    () => availableKeyBindings(Object.values(components ?? {})),
+    [components]
+  );
+
+  function saveDirectLinkKey(v) {
+    setKeyValue(v);
+    modifySceneProp("directLinkKey", v);
+  }
+
+  // Direct Link's default mode claims Space/ArrowRight; clear those keys off
+  // any button so they're not silently unreachable or colliding.
+  function clearDefaultDirectLinkCollisions() {
+    Object.values(getScene().components)
+      .filter(
+        (c) => c.clickable && DEFAULT_DIRECT_LINK_KEYS.includes(c.keyBinding)
+      )
+      .forEach((c) => {
+        modifyComponentProp(c.id, "keyBinding", null);
+        modifyComponentProp(c.id, "showKeyHint", false);
+      });
+  }
+
+  function changeKeyMode(nextMode) {
+    if (nextMode === "DEFAULT") {
+      saveDirectLinkKey(null);
+      clearDefaultDirectLinkCollisions();
+    } else {
+      // Explicitly mark "Custom, nothing picked yet" so direct link claims
+      // no key at all until the author sets one via KeyCapture below -
+      // distinct from null, which falls back to Space/ArrowRight.
+      saveDirectLinkKey("");
+    }
+  }
 
   useEffect(() => {
     if (!name || name === sceneName) return;
@@ -166,6 +217,7 @@ export default function SceneSettings() {
                   const checked = e.target.checked;
                   if (!checked) {
                     modifySceneProp("directLink", null);
+                    modifySceneProp("directLinkKey", null);
                     return;
                   }
                   const selfId = useVisualScene.getState().id;
@@ -174,6 +226,9 @@ export default function SceneSettings() {
                     defaultDirectLinkScene ??
                     scenes?.find((s) => s._id !== selfId)?._id ??
                     null;
+
+                  if (directLinkKey == null) clearDefaultDirectLinkCollisions();
+
                   modifySceneProp("directLink", target);
                 }}
               />
@@ -183,7 +238,9 @@ export default function SceneSettings() {
                 <span
                   className="tooltip tooltip-warning tooltip-top cursor-help text-warning text-xs before:!whitespace-normal before:!max-w-[150px] before:!text-[0.75rem]"
                   data-tip={
-                    "Disabled: scene has buttons leading to multiple different scenes"
+                    hasOtherScenes
+                      ? "Disabled: scene has buttons leading to multiple different scenes"
+                      : "Disabled: no other scenes to link to"
                   }
                 >
                   ⚠
@@ -191,28 +248,60 @@ export default function SceneSettings() {
               )}
               <span
                 className="label-text tooltip tooltip-top cursor-help before:!whitespace-normal before:!max-w-[130px] before:!text-[0.75rem]"
-                data-tip="The player will be sent to this scene when they press either the 'space' or 'right arrow' keyboard button, instead of having to click an on screen element."
+                data-tip="The player will be sent to a chosen scene when they press a key, instead of having to click an on screen element. Defaults to Space or the right arrow key."
               >
                 ⓘ
               </span>
             </label>
-            <SelectInput
-              nullable
-              disabled={!directLink || directLinkDisabled}
-              value={directLink}
-              values={
-                scenes
-                  ?.filter((scene) => scene._id !== sceneId)
-                  .map((scene) => scene._id) ?? []
-              }
-              display={(targetId) =>
-                scenes?.find((scene) => scene._id === targetId)?.name ??
-                "Unknown scene"
-              }
-              onChange={(targetId) =>
-                modifySceneProp("directLink", targetId || null)
-              }
-            />
+            {directLink && !directLinkDisabled && (
+              <>
+                <SelectInput
+                  nullable
+                  value={directLink}
+                  values={
+                    scenes
+                      ?.filter((scene) => scene._id !== sceneId)
+                      .map((scene) => scene._id) ?? []
+                  }
+                  display={(targetId) =>
+                    scenes?.find((scene) => scene._id === targetId)?.name ??
+                    "Unknown scene"
+                  }
+                  onChange={(targetId) => {
+                    modifySceneProp("directLink", targetId || null);
+                    // Clearing the target turns Direct Link off the same way
+                    // the toggle does - keep directLinkKey in sync so it
+                    // doesn't linger stale for a link that's no longer set.
+                    if (!targetId) modifySceneProp("directLinkKey", null);
+                  }}
+                />
+                <label className="label mt-2">Key Binding</label>
+                <SelectInput
+                  value={keyMode}
+                  values={["DEFAULT", "CUSTOM"]}
+                  display={(v) =>
+                    v === "DEFAULT" ? "Default (Space or →)" : "Custom"
+                  }
+                  onChange={changeKeyMode}
+                />
+                {keyMode === "CUSTOM" && (
+                  <div className="mt-2">
+                    <KeyCapture
+                      value={keyValue}
+                      availableKeys={availableDirectLinkKeys}
+                      onChange={saveDirectLinkKey}
+                      clearValue=""
+                    />
+                    {!keyValue && (
+                      <p className="text-warning text-xs mt-1">
+                        ⚠ No key set - the player will have no way to trigger
+                        Direct Link until you pick one.
+                      </p>
+                    )}
+                  </div>
+                )}
+              </>
+            )}
           </fieldset>
         </div>
       </div>
