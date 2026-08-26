@@ -10,7 +10,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
 import AuthenticationContext from "../../../context/AuthenticationContext";
 import { useParams } from "react-router-dom";
-import { PlusIcon } from "lucide-react";
+import { HeadphonesIcon } from "lucide-react";
 import AudioSelectModal from "./AudioSelectModal";
 
 // before calling validation of file should already be done
@@ -66,44 +66,13 @@ function AudioManager() {
       });
   }
 
-  const showFilePicker = () => {
-    fileInputRef.current?.click();
-  };
-
-  function showModal() {
-    setModalOpen(true);
-  }
-
   return (
     <>
-      <div
-        className={`collapse overflow-visible ${
-          hasAudios ? "collapse-arrow" : ""
-        } bg-base-300 rounded-sm text-s`}
-      >
+      <div className="collapse w-24 overflow-visible bg-base-300 rounded-sm text-s">
         {hasAudios && <input type="checkbox" />}
-        <div
-          className={`collapse-title flex items-center justify-between ${
-            hasAudios ? "" : "pe-4"
-          }`}
-        >
-          Audio Elements
-          <div className="dropdown dropdown-end z-1">
-            <div tabIndex={0} role="button">
-              <PlusIcon size={18} />
-            </div>
-            <ul
-              tabIndex={-1}
-              className="dropdown-content menu bg-base-300 rounded-box z-1 w-52 p-2 shadow-sm top-[38px]"
-            >
-              <li>
-                <button onClick={showFilePicker}>Upload New Audio</button>
-              </li>
-              <li>
-                <button onClick={showModal}>Select Existing Audio</button>
-              </li>
-            </ul>
-          </div>
+        <div className="collapse-title w-24 h-24 min-h-0 p-2 flex flex-col items-center justify-center gap-1">
+          <HeadphonesIcon size={30} />
+          <span className="text-xs text-center">Audio Elements</span>
         </div>
 
         <input

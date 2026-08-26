@@ -1,5 +1,5 @@
 import { useContext, useState, useEffect } from "react";
-import { Check, ChevronDown } from "lucide-react";
+import { Check, ChevronDown, MonitorCog } from "lucide-react";
 import ScenarioContext from "context/ScenarioContext";
 import SceneContext from "context/SceneContext";
 import { generateUniqueSceneName } from "../../../utils/sceneUtils";
@@ -100,9 +100,12 @@ export default function SceneSettings() {
 
   return (
     <>
-      <div className="collapse collapse-arrow bg-base-300 rounded-sm text-s has-[>input:checked]:overflow-visible">
+      <div className="collapse w-24 overflow-visible bg-base-300 rounded-sm text-s">
         <input type="checkbox" />
-        <div className="collapse-title">Scene Details</div>
+        <div className="collapse-title w-24 h-24 min-h-0 p-2 flex flex-col items-center justify-center gap-1">
+          <MonitorCog size={30} />
+          <span className="text-xs text-center">Scene Details</span>
+        </div>
         <div className="collapse-content text--1 bg-base-200">
           <fieldset className="fieldset pt-2">
             <label className="label">Name</label>
