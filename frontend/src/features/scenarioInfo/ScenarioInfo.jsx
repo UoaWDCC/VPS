@@ -8,29 +8,30 @@ import FabMenu from "../../components/FabMenu";
 import { ArrowLeftIcon, SearchIcon } from "lucide-react";
 import ModalDialog from "../../components/ModalDialogue";
 import DetailEditModal from "./components/DetailEditModal";
+import { dedupById } from "../../util/dedup";
 
 function ScenarioInfo() {
-  const [search, setSearch] = useState("");
   const { user } = useContext(AuthenticationContext);
   const { allScenarios, updateScenarioDetails } = useContext(ScenarioContext);
 
   const history = useHistory();
   const location = useLocation();
 
+  const [search, setSearch] = useState("");
   const [showEditModal, setShowEditModal] = useState(false);
 
-  const scenarios = [
-    allScenarios.owned,
-    allScenarios.accessible,
-    allScenarios.assigned,
-  ].flat();
-
-  const selectedScenarioId = new URLSearchParams(location.search).get("id");
-  const selectedScenario = scenarios.find((s) => s._id === selectedScenarioId);
+  const scenarios = dedupById([
+    ...allScenarios.owned,
+    ...allScenarios.accessible,
+    ...allScenarios.assigned,
+  ]);
 
   const filteredScenarios = scenarios.filter((scenario) =>
     scenario.name.toLowerCase().includes(search.toLowerCase())
   );
+
+  const selectedScenarioId = new URLSearchParams(location.search).get("id");
+  const selectedScenario = scenarios.find((s) => s._id === selectedScenarioId);
 
   const handleScenarioSelect = (scenario) => {
     history.replace(`/scenario-info?id=${scenario._id}`);
@@ -54,12 +55,13 @@ function ScenarioInfo() {
     <div className="bg-base-100 text-base-content">
       {/* Responsive Container optimised for 900x500 min to 1600x900 max */}
       <button
-        className="fixed z-10 btn btn-phantom text-m ml-xl mt-l font-dm px-0"
+        className="fixed z-10 btn btn-phantom text-m left-xl top-l font-dm px-0"
         onClick={handleBackToPlay}
       >
         <ArrowLeftIcon size={20} />
         Back
       </button>
+      <FabMenu className="right-xl top-l" />
       <div className="min-w-[900px] max-w-[1500px] mx-auto flex gap-3xl px-xl">
         {/* Sidebar */}
         {/* the calc used in the padding top is to get the searchbar to align with the scenario metadata, by imitating the same sizing flow */}
@@ -238,8 +240,6 @@ function ScenarioInfo() {
           onClose={() => setShowEditModal(false)}
         />
       </ModalDialog>
-
-      <FabMenu />
     </div>
   );
 }

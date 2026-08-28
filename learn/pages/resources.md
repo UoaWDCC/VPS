@@ -18,15 +18,15 @@ To get started, you need to first create a collection by pressing the **Create**
 
 ## Conditionally Showing Resources
 
-Sometimes you might not want a resource to be available to the player at all times. For example, the scenario could involve the player requesting certain scans for a patient. In that case, you would only want the player to see the scan results after they've made that decision. You can do this using [tracked values](/state/).
+Sometimes you might not want a resource to be available to the player at all times. For example, the scenario could involve the player requesting certain scans for a patient. In that case, you would only want the player to see the scan results after they've made that decision. You can do this using [properties](/properties/).
 
-First, set up the tracked value for that resource if it doesn't yet exist. Then, select a resource and press the plus button on the **Visibility Conditionals** section on the right. In the modal that appears, select the _comparator_ and the _comparison value_. The comparator can be either:
+First, set up the property for that resource if it doesn't yet exist. Then, select a resource and press the plus button on the **Visibility Conditionals** section on the right. In the modal that appears, select the _comparator_ and the _comparison value_. The comparator can be either:
 
-| Comparator | Meaning                                                       |
-| ---------- | ------------------------------------------------------------- |
-| =          | The tracked value is the same as the comparison value         |
-| !=         | The tracked value is **not** the same as the comparison value |
-| >          | The tracked value is greater than the comparison value        |
-| <          | The tracked value is less than the comparison value           |
+| Comparator | Meaning                                                  |
+| ---------- | -------------------------------------------------------- |
+| =          | The property is the same as the comparison value         |
+| !=         | The property is **not** the same as the comparison value |
+| >          | The property is greater than the comparison value        |
+| <          | The property is less than the comparison value           |
 
 Once set, the resource will only be shown to the player while they meet the condition. This lets you swap resources in and out as the player progresses, creating a sense of change over time or through choice. In the scans example, the condition would be: _has_requested_scans_ **=** _true_.
