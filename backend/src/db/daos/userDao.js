@@ -1,5 +1,4 @@
 import User from "../models/user.js";
-import Scenario from "../models/scenario.js";
 import Groups from "../models/group.js";
 import { HttpError } from "../../util/error.js";
 import { retrieveScenarios } from "./scenarioDao.js";
@@ -12,20 +11,6 @@ import { retrieveScenarios } from "./scenarioDao.js";
  */
 export const retrieveUserByEmail = async (email) => {
   return User.findOne({ email });
-};
-
-/**
- * Retrieves all users that are assigned to a scenario.
- *
- * @param {string} scenarioId - MongoDB ID of the scenario.
- * @returns {Promise<Array<object>>} The user documents assigned to that scenario.
- */
-export const retrievePlayedUsers = async (scenarioId) => {
-  const { users: userIds } = await Scenario.findById(scenarioId);
-  const users = await User.find({
-    uid: { $in: userIds },
-  });
-  return users;
 };
 
 /**
