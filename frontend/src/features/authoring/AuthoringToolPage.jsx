@@ -15,7 +15,6 @@ import { diffToSelection, findEditDiff } from "./scene/operations/text";
 import { syncVisualCursor } from "./text/cursor";
 import {
   ArrowLeftIcon,
-  FilesIcon,
   PencilIcon,
   PlayIcon,
   UserPlusIcon,
@@ -171,10 +170,6 @@ export default function AuthoringToolPage() {
     history.push(`/scenario/${scenarioId}/manage-groups`);
   }
 
-  function goToResources() {
-    history.push(`/scenario/${scenarioId}/manage-resources`);
-  }
-
   function goBack() {
     history.push("/create");
   }
@@ -217,13 +212,9 @@ export default function AuthoringToolPage() {
             </div>
           )}
           <button
-            onClick={goToResources}
+            onClick={goToGroups}
             className="btn btn-phantom text-m ml-auto"
           >
-            <FilesIcon size={20} />
-            Resources
-          </button>
-          <button onClick={goToGroups} className="btn btn-phantom text-m">
             <UsersIcon size={20} />
             Groups
           </button>
