@@ -123,7 +123,7 @@ export default function ManageResourcesPage() {
         );
       }
       console.error(e);
-      toast.error("Something went wrong uploading the resource");
+      toast.error("Something went wrong uploading the document");
     },
   });
 
@@ -164,7 +164,7 @@ export default function ManageResourcesPage() {
     },
     onError: (e) => {
       console.error(e);
-      toast.error("Something went wrong deleting the resource");
+      toast.error("Something went wrong deleting the document");
     },
     onSettled: () => queryClient.invalidateQueries(["resources", scenarioId]),
   });
@@ -185,7 +185,7 @@ export default function ManageResourcesPage() {
         queryClient.setQueryData(["resources", scenarioId], context.previous);
       }
       console.error(e);
-      toast.error("Something went wrong renaming the resource");
+      toast.error("Something went wrong renaming the document");
     },
     onSettled: () => queryClient.invalidateQueries(["resources", scenarioId]),
   });
@@ -242,7 +242,7 @@ export default function ManageResourcesPage() {
               {/* LEFT: Groups and files */}
               <div className="card min-h-[35dvh] min-w-0 overflow-hidden bg-base-100 lg:h-full lg:min-h-0">
                 <div className="card-body flex min-h-0 flex-col gap-4 px-0">
-                  <h1 className="flex-none text-xl">Uploaded Resources</h1>
+                  <h1 className="flex-none text-xl">Player Documents</h1>
 
                   <div className="flex items-center gap-4">
                     <label className="input search search-xs flex-grow">
@@ -271,7 +271,7 @@ export default function ManageResourcesPage() {
                     {/* file upload button */}
                     <button
                       className="btn btn-phantom btn-xs p-0 tooltip tooltip-bottom"
-                      data-tip="Upload Resource"
+                      data-tip="Upload Document"
                       onClick={() => {
                         pendingParentIdRef.current = null;
                         inputRef.current?.click();
@@ -284,7 +284,7 @@ export default function ManageResourcesPage() {
                   <ul className="menu min-h-0 w-full flex-1 overflow-auto rounded-box bg-base-100 p-0">
                     {search.trim() && filteredTree.length === 0 && (
                       <li className="p-2 opacity-60">
-                        No matching resources found.
+                        No matching documents found.
                       </li>
                     )}
                     {filteredTree.map((resource) => (
@@ -415,7 +415,7 @@ export default function ManageResourcesPage() {
                       )}
                     </>
                   ) : (
-                    <span>Select a resource to show the preview</span>
+                    <span>Select a document to show the preview</span>
                   )}
                 </div>
               </div>

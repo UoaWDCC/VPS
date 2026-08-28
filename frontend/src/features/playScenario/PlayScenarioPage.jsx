@@ -368,9 +368,9 @@ export default function PlayScenarioPage({ group }) {
         <button
           className="btn btn-sm"
           onClick={() => setResourcesOpen(true)}
-          aria-label="Open resources"
+          aria-label="Open documents"
         >
-          Resources
+          Documents
         </button>
       </div>
 

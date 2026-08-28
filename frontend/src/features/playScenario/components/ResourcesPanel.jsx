@@ -117,7 +117,7 @@ export default function ResourcesPanel({
         }`}
         role="dialog"
         aria-modal="true"
-        aria-label="Resources"
+        aria-label="Documents"
         onClick={onClose}
       >
         <div
@@ -127,7 +127,7 @@ export default function ResourcesPanel({
           <div className="u-container h-full w-full overflow-y-auto py-l lg:overflow-hidden lg:py-4xl">
             <div className="grid min-h-full grid-cols-1 gap-3 lg:h-full lg:min-h-0 lg:grid-cols-3">
               <div className="flex min-h-[35dvh] flex-col lg:min-h-0">
-                <h1 className="mb-l pr-3xl text-xl">Resources</h1>
+                <h1 className="mb-l pr-3xl text-xl">Documents</h1>
 
                 <div className="mb-2 flex flex-none gap-2 py-3">
                   <label htmlFor="resource-search" className="sr-only">
@@ -172,10 +172,10 @@ export default function ResourcesPanel({
                     <div className="flex h-full items-center justify-center">
                       <div className="text-center opacity-70">
                         {search.trim() ? (
-                          <p>No matching resources found.</p>
+                          <p>No matching documents found.</p>
                         ) : (
                           <>
-                            <p>No resources available for this scenario.</p>
+                            <p>No documents available for this scenario.</p>
                             <p className="text-sm">
                               Ask the author to upload files in the authoring
                               UI.
