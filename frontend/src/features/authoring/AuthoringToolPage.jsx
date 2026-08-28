@@ -11,6 +11,8 @@ import { copy, cut, paste } from "./handlers/keyboard/clipboard";
 import useEditorStore from "./stores/editor";
 import { useHistory } from "react-router-dom";
 import { replace, replaceComponent } from "./scene/operations/modifiers";
+import { diffToSelection, findEditDiff } from "./scene/operations/text";
+import { syncVisualCursor } from "./text/cursor";
 import {
   ArrowLeftIcon,
   FilesIcon,
@@ -72,10 +74,51 @@ export default function AuthoringToolPage() {
 
     const listener = async ({ operation, record }) => {
       if (operation === "undo" || operation === "redo") {
-        if (record.sceneId !== sceneId) switchScene(getScene(), record.sceneId);
-        const state = operation === "undo" ? record.before : record.after;
-        replaceComponent(record.id, state);
-        if (state !== null) setSelected(record.id);
+        const editorState = useEditorStore.getState();
+
+        // React 17 doesn't batch these updates outside of an event handler,
+        // so the text cursor/selection must be cleared before the document
+        // is replaced -- otherwise a render can happen in between with the
+        // restored (possibly shorter) document and the stale selection,
+        // reading past the end of the document
+        editorState.setSelection({ start: null, end: null });
+        editorState.setVisualSelection({ start: null, end: null });
+
+        const batch = record;
+        const targetSceneId = batch[0]?.sceneId;
+        if (targetSceneId && targetSceneId !== sceneId) {
+          switchScene(getScene(), targetSceneId);
+        }
+
+        const restoredIds = [];
+        batch.forEach((item) => {
+          const state = operation === "undo" ? item.before : item.after;
+          replaceComponent(item.id, state);
+          if (state !== null) restoredIds.push(item.id);
+        });
+        setSelected(restoredIds);
+
+        // jump straight to the exact text that was undone/redone, the way
+        // undo/redo works in any text editor, by diffing the before/after
+        // documents rather than relying on wherever the cursor used to be
+        // -- only meaningful when the batch touches a single component
+        if (batch.length === 1) {
+          const [item] = batch;
+          const state = operation === "undo" ? item.before : item.after;
+          const beforeBlocks = item.before?.document?.blocks;
+          const afterBlocks = item.after?.document?.blocks;
+          const targetBlocks = state?.document?.blocks;
+          const diff =
+            beforeBlocks?.length && afterBlocks?.length
+              ? findEditDiff(beforeBlocks, afterBlocks)
+              : null;
+          if (diff && targetBlocks?.length) {
+            const selection = diffToSelection(targetBlocks, diff);
+            editorState.setMode(["text"]);
+            editorState.setSelection(selection);
+            syncVisualCursor();
+          }
+        }
       }
 
       setSaving(true);
@@ -152,18 +195,24 @@ export default function AuthoringToolPage() {
     <>
       <div className="font-ibm flex flex-col h-screen w-screen overflow-hidden gap-m">
         <div className="flex pt-l px-l">
-          <button onClick={goBack} className="btn btn-phantom text-m">
+          <button
+            onClick={goBack}
+            aria-label="Back"
+            className="btn btn-phantom text-m px-0"
+          >
             <ArrowLeftIcon size={20} />
-            Back
           </button>
           {isOwner && (
             <div className="flex flex-1 min-w-0">
               <button
                 onClick={() => setShowEditModal(true)}
-                className="btn btn-phantom text-m max-w-full min-w-0"
+                className="btn btn-phantom text-m max-w-full min-w-0 tooltip tooltip-bottom"
+                data-tip="Edit Details"
               >
-                <PencilIcon size={20} className="shrink-0" />
-                <span className="min-w-0 truncate">{ownedScenario.name}</span>
+                <span className="min-w-0 flex items-baseline gap-2">
+                  <span className="truncate">{ownedScenario.name}</span>
+                  <PencilIcon size={14} className="shrink-0" />
+                </span>
               </button>
             </div>
           )}

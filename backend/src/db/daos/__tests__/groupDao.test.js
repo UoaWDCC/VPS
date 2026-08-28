@@ -7,7 +7,7 @@ import { HttpError } from "../../../util/error.js";
 import {
   createGroup,
   removeUserFromGroup,
-  setGroupStateVariables,
+  setGroupProperties,
 } from "../groupDao.js";
 
 describe("groupDao", () => {
@@ -26,19 +26,19 @@ describe("groupDao", () => {
       stateVersion: 1,
     });
 
-    const updated = await setGroupStateVariables(group._id.toString(), [
+    const updated = await setGroupProperties(group._id.toString(), [
       { id: "group-var", name: "hp", value: 20 },
     ]);
 
     expect(updated).toEqual([[{ id: "group-var", name: "hp", value: 20 }], 2]);
 
     await expect(
-      setGroupStateVariables(new mongoose.Types.ObjectId().toString(), [
+      setGroupProperties(new mongoose.Types.ObjectId().toString(), [
         { id: "missing", name: "hp", value: 1 },
       ])
     ).rejects.toBeInstanceOf(HttpError);
     await expect(
-      setGroupStateVariables(new mongoose.Types.ObjectId().toString(), [
+      setGroupProperties(new mongoose.Types.ObjectId().toString(), [
         { id: "missing", name: "hp", value: 1 },
       ])
     ).rejects.toMatchObject({

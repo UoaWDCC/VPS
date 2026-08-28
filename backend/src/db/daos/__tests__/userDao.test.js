@@ -9,7 +9,7 @@ import {
   createUser,
   retrieveAssignedScenarioList,
   retrieveUserByEmail,
-  setUserStateVariables,
+  setUserProperties,
 } from "../userDao.js";
 
 describe("userDao", () => {
@@ -82,7 +82,7 @@ describe("userDao", () => {
       stateVersions: { "scenario-789": 3 },
     });
 
-    const updated = await setUserStateVariables(
+    const updated = await setUserProperties(
       user._id.toString(),
       "scenario-789",
       [{ id: "user-var", name: "score", value: 9 }]
@@ -91,14 +91,14 @@ describe("userDao", () => {
     expect(updated).toEqual([[{ id: "user-var", name: "score", value: 9 }], 4]);
 
     await expect(
-      setUserStateVariables(
+      setUserProperties(
         new mongoose.Types.ObjectId().toString(),
         "scenario-789",
         [{ id: "missing", name: "score", value: 0 }]
       )
     ).rejects.toBeInstanceOf(HttpError);
     await expect(
-      setUserStateVariables(
+      setUserProperties(
         new mongoose.Types.ObjectId().toString(),
         "scenario-789",
         [{ id: "missing", name: "score", value: 0 }]

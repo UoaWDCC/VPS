@@ -80,23 +80,19 @@ export const retrieveAssignedScenarioList = async (userId) => {
 };
 
 /**
- * Sets state variables for a user within a scenario.
+ * Sets the properties for a user within a scenario.
  *
  * @param {string} userId - The MongoDB user ID.
- * @param {string} scenarioId - The scenario ID associated with the state variables.
- * @param {object} stateVariables - The state variable payload to persist.
- * @returns {Promise<Array>} A tuple containing the updated state variables and version.
+ * @param {string} scenarioId - The scenario ID associated with the properties.
+ * @param {object} properties - The property payload to persist.
+ * @returns {Promise<Array>} A tuple containing the updated properties and version.
  */
-export const setUserStateVariables = async (
-  userId,
-  scenarioId,
-  stateVariables
-) => {
+export const setUserProperties = async (userId, scenarioId, properties) => {
   const user = await User.findOneAndUpdate(
     { _id: userId },
     {
       $set: {
-        [`stateVariables.${scenarioId}`]: stateVariables,
+        [`stateVariables.${scenarioId}`]: properties,
       },
       $inc: {
         [`stateVersions.${scenarioId}`]: 1,

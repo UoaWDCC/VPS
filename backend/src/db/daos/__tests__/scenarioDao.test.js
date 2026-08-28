@@ -6,13 +6,13 @@ import Scene from "../../models/scene.js";
 import { useMongoMemoryServer } from "../../../test/testSetup.js";
 import { HttpError } from "../../../util/error.js";
 import {
+  createProperty,
   createRole,
-  createStateVariable,
+  deleteProperty,
   deleteRole,
   deleteScenario,
-  deleteStateVariable,
-  editStateVariable,
-  getStateVariables,
+  editProperty,
+  getProperties,
   retrieveAccessibleScenarios,
   retrieveScenarioList,
   retrieveScenarios,
@@ -27,7 +27,7 @@ describe("scenarioDao", () => {
     await Scenario.deleteMany({});
   });
 
-  it("creates and removes state variables by identifier", async () => {
+  it("creates and removes properties by identifier", async () => {
     const scenario = await Scenario.create({
       name: "Stateful scenario",
       uid: "user-1",
@@ -35,7 +35,7 @@ describe("scenarioDao", () => {
       stateVariables: [{ id: "initial", name: "health", type: "number" }],
     });
 
-    const updated = await createStateVariable(scenario._id.toString(), {
+    const updated = await createProperty(scenario._id.toString(), {
       name: "score",
       type: "number",
       value: 7,
@@ -45,7 +45,7 @@ describe("scenarioDao", () => {
     expect(updated[1]).toMatchObject({ name: "score", type: "number" });
     expect(updated[1].id).toBeTruthy();
 
-    const afterDelete = await deleteStateVariable(
+    const afterDelete = await deleteProperty(
       scenario._id.toString(),
       updated[1].id
     );
@@ -71,9 +71,9 @@ describe("scenarioDao", () => {
     expect(updated.roleList).toEqual(["Doctor", "Nurse", "Engineer"]);
   });
 
-  it("throws HttpError when a scenario does not exist for state updates", async () => {
+  it("throws HttpError when a scenario does not exist for property updates", async () => {
     await expect(
-      createStateVariable(new mongoose.Types.ObjectId().toString(), {
+      createProperty(new mongoose.Types.ObjectId().toString(), {
         name: "score",
         type: "number",
       })
@@ -96,7 +96,7 @@ describe("scenarioDao", () => {
     });
   });
 
-  it("returns empty values when access and state data are absent", async () => {
+  it("returns empty values when access and property data are absent", async () => {
     await expect(retrieveAccessibleScenarios(null)).resolves.toEqual([]);
 
     const scenario = await Scenario.create({
@@ -105,15 +105,13 @@ describe("scenarioDao", () => {
       scenes: [new mongoose.Types.ObjectId()],
     });
 
-    await expect(getStateVariables(scenario._id.toString())).resolves.toEqual(
-      []
-    );
+    await expect(getProperties(scenario._id.toString())).resolves.toEqual([]);
     await expect(deleteScenario("not-a-valid-id")).resolves.toBe(false);
   });
 
-  it("throws HttpError when getStateVariables targets an absent scenario", async () => {
+  it("throws HttpError when getProperties targets an absent scenario", async () => {
     await expect(
-      getStateVariables(new mongoose.Types.ObjectId().toString())
+      getProperties(new mongoose.Types.ObjectId().toString())
     ).rejects.toMatchObject({
       status: 404,
       message: "scenario not found",
@@ -145,7 +143,7 @@ describe("scenarioDao", () => {
     expect(updatedScene.roles).toEqual([]);
   });
 
-  it("covers fallback access and legacy state-variable edit paths", async () => {
+  it("covers fallback access and legacy property edit paths", async () => {
     await expect(retrieveAccessibleScenarios(undefined)).resolves.toEqual([]);
     await expect(retrieveAccessibleScenarios("unknown-user")).resolves.toEqual(
       []
@@ -180,20 +178,20 @@ describe("scenarioDao", () => {
       name: "Legacy update",
     });
 
-    const edited = await editStateVariable(scenario._id.toString(), "hp", {
+    const edited = await editProperty(scenario._id.toString(), "hp", {
       name: "hp",
       type: "number",
       value: 9,
     });
     expect(edited[0]).toMatchObject({ value: 9 });
 
-    const byId = await createStateVariable(scenario._id.toString(), {
+    const byId = await createProperty(scenario._id.toString(), {
       name: "mana",
       type: "number",
       value: 3,
     });
     await expect(
-      deleteStateVariable(scenario._id.toString(), byId[1].id)
+      deleteProperty(scenario._id.toString(), byId[1].id)
     ).resolves.toHaveLength(1);
   });
 });

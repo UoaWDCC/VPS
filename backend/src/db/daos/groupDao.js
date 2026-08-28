@@ -63,17 +63,17 @@ export const removeUserFromGroup = async (groupId, scenarioId, email) => {
 };
 
 /**
- * Sets the state variables for a group.
+ * Sets the properties for a group.
  *
  * @param {string} groupId - MongoDB ID of the group.
- * @param {object} stateVariables - Object containing the state variables to set.
- * @returns {Promise<Array>} A tuple containing the updated state variables and version.
+ * @param {object} properties - Object containing the properties to set.
+ * @returns {Promise<Array>} A tuple containing the updated properties and version.
  */
-export const setGroupStateVariables = async (groupId, stateVariables) => {
+export const setGroupProperties = async (groupId, properties) => {
   const group = await Group.findOneAndUpdate(
     { _id: groupId },
     {
-      $set: { stateVariables },
+      $set: { stateVariables: properties },
       $inc: { stateVersion: 1 },
     },
     { new: true }

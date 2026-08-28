@@ -1,11 +1,14 @@
 import { v4 } from "uuid";
 import { buildVisualComponent, buildVisualScene } from "../../pipeline";
 import useVisualScene, { type VisualSceneState } from "../../stores/visual";
-import { dispatchModification, updateHistory } from "../history";
+import {
+  dispatchModification,
+  updateHistory,
+  type ChangeRecord,
+} from "../history";
 import { getComponent, getScene, setScene } from "../scene";
 import type { Component, Scene } from "../../types";
 import { arrayToObject } from "../util";
-import useEditorStore from "../../stores/editor";
 
 export function replace(scene: Scene) {
   const clone = structuredClone(scene);
@@ -26,38 +29,55 @@ export function modifySceneProp<K extends keyof VisualSceneState>(
 }
 
 // wrapper for state mutating functions, will capture both state and operation
-export function modify<A extends [string, ...unknown[]], R>(
+export function modify<A extends [string[], ...unknown[]], R>(
   fn: (...args: A) => R
 ) {
-  return function (...args: A): R | undefined {
-    const id = args[0];
-    const component = getComponent(id);
-    if (!component) return undefined;
+  return function (...args: A): R {
+    const ids = args[0];
 
-    const prev = structuredClone(component);
+    const previousStates: ChangeRecord[] = ids
+      .map((id) => {
+        const comp = getComponent(id);
+        if (!comp) return null;
+        return {
+          id,
+          prevState: structuredClone(comp),
+        };
+      })
+      .filter((record): record is ChangeRecord => record !== null);
+
     const output = fn(...args);
 
-    updateHistory(id, prev);
+    if (previousStates.length) updateHistory(previousStates);
 
-    useVisualScene.getState().updateComponent(buildVisualComponent(component));
+    ids.forEach((id) => {
+      const component = getComponent(id);
+      if (component) {
+        useVisualScene
+          .getState()
+          .updateComponent(buildVisualComponent(component));
+      }
+    });
 
     return output;
   };
 }
 
-export function remove(id: string, history = true) {
-  const component = getComponent(id);
-  const prev = structuredClone(component);
+export function remove(ids: string[], history = true) {
+  const previousStates: ChangeRecord[] = ids.map((id) => {
+    const comp = getComponent(id);
+    return {
+      id,
+      prevState: structuredClone(comp),
+    };
+  });
 
-  if (useEditorStore.getState().selected === id) {
-    useEditorStore.getState().setSelected(null);
-  }
+  ids.forEach((id) => {
+    delete getScene().components[id];
+    useVisualScene.getState().deleteComponent(id);
+  });
 
-  delete getScene().components[id];
-
-  if (history) updateHistory(id, prev);
-
-  useVisualScene.getState().deleteComponent(id);
+  if (history) updateHistory(previousStates);
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -66,7 +86,7 @@ export function add(props: Record<string, any>, history = true) {
   const id = props.id as string;
   getScene().components[id] = props as Component;
 
-  if (history) updateHistory(id, null);
+  if (history) updateHistory([{ id, prevState: null }]);
 
   useVisualScene
     .getState()
@@ -80,6 +100,6 @@ export function replaceComponent(
   state: Component | null,
   history = false
 ) {
-  if (state === null) remove(id, history);
+  if (state === null) remove([id], history);
   else add(state, history);
 }

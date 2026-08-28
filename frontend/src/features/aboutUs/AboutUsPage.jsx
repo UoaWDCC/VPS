@@ -33,12 +33,13 @@ const AboutUsPage = () => {
   return (
     <div className="flex h-screen w-screen relative bg-base-100 font-dm font-normal">
       <button
-        className="absolute top-8 left-8 bg-transparent border-none p-2 cursor-pointer z-10"
+        className="absolute top-l left-xl bg-transparent border-none cursor-pointer z-10"
         onClick={goBack}
         aria-label="Close"
       >
         <XIcon size={32} />
       </button>
+      <FabMenu className="top-l right-xl" />
       <div className="w-1/2 flex flex-col justify-center items-center bg-base-100">
         <div className="flex flex-col items-start leading-tight text-base-content font-normal text-[5vw] mb-[10vh]">
           <span>Virtual</span>
@@ -96,8 +97,6 @@ const AboutUsPage = () => {
           </div>
         </div>
       </div>
-
-      <FabMenu />
     </div>
   );
 };

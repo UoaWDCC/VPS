@@ -15,7 +15,24 @@ export interface Scene {
   time: number | null;
   directLink: string | null;
   timerStateOperations: Record<string, unknown>[] | null;
+  background: SceneBackground | null;
 }
+
+export type BackgroundFit = "cover" | "contain" | "fill";
+
+export interface ImageBackground {
+  kind: "image";
+  fileId: string;
+  href: string;
+  fit: BackgroundFit;
+}
+
+export interface ColorBackground {
+  kind: "color";
+  color: string;
+}
+
+export type SceneBackground = ImageBackground | ColorBackground;
 
 export interface Vec2 {
   x: number;
@@ -46,10 +63,10 @@ interface GenericComponent {
   bounds: Bounds;
   zIndex: number;
   clickable?: boolean;
-  stateBindings?: StateBinding[];
+  stateBindings?: PropertyBinding[];
 }
 
-export interface StateBinding {
+export interface PropertyBinding {
   target: string;
   stateVariableId: string;
 }
