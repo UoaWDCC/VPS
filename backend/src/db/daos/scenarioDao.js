@@ -188,19 +188,6 @@ export const updateScenario = async (scenarioId, updatedScenario) => {
 };
 
 /**
- * Updates scenario durations for users
- * @param {String} sceneId MongoDB ID of scene
- * @param {updatedDuration: Object} updatedDurations updated duration for a user
- * @returns updated database scene object
- */
-export const updateDurations = async (scenarioId, updatedDurations) => {
-  const scenario = await getScenarioOrThrow(scenarioId);
-  scenario.durations = [...(scenario.durations ?? []), updatedDurations];
-  await scenario.save();
-  return scenario;
-};
-
-/**
  * Resolves a scenario or throws a consistent domain error.
  *
  * @param {string} scenarioId - MongoDB ID of the scenario.
@@ -316,7 +303,7 @@ export const deleteScenario = async (scenarioId) => {
  * @returns state variables for the scenario
  */
 export const getStateVariables = async (scenarioId) => {
-  const scenario = await Scenario.findById(scenarioId);
+  const scenario = await getScenarioOrThrow(scenarioId);
   return scenario.stateVariables || [];
 };
 

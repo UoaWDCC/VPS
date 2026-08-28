@@ -16,7 +16,6 @@ import {
   retrieveAccessibleScenarios,
   retrieveScenarioList,
   retrieveScenarios,
-  updateDurations,
   updateRoleList,
   updateScenario,
 } from "../scenarioDao.js";
@@ -112,6 +111,15 @@ describe("scenarioDao", () => {
     await expect(deleteScenario("not-a-valid-id")).resolves.toBe(false);
   });
 
+  it("throws HttpError when getStateVariables targets an absent scenario", async () => {
+    await expect(
+      getStateVariables(new mongoose.Types.ObjectId().toString())
+    ).rejects.toMatchObject({
+      status: 404,
+      message: "scenario not found",
+    });
+  });
+
   it("does not duplicate roles and removes them from scenes when deleting a role", async () => {
     const scene = await Scene.create({
       name: "Role scene",
@@ -187,12 +195,5 @@ describe("scenarioDao", () => {
     await expect(
       deleteStateVariable(scenario._id.toString(), byId[1].id)
     ).resolves.toHaveLength(1);
-
-    await expect(
-      updateDurations(new mongoose.Types.ObjectId().toString(), {
-        userId: "missing",
-        value: 1,
-      })
-    ).rejects.toBeInstanceOf(HttpError);
   });
 });

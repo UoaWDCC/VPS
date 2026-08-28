@@ -62,4 +62,20 @@ describe("groupDao", () => {
     expect(updated.users).toHaveLength(1);
     expect(updated.users[0].email).toBe("bob@example.com");
   });
+
+  it("escapes regex special characters in the email when removing a user", async () => {
+    const group = await createGroup("scenario-group-2", [
+      { email: "alice@example.com", role: "doctor" },
+      { email: "aliceXexampleXcom", role: "nurse" },
+    ]);
+
+    const updated = await removeUserFromGroup(
+      group._id.toString(),
+      "scenario-group-2",
+      "alice@example.com"
+    );
+
+    expect(updated.users).toHaveLength(1);
+    expect(updated.users[0].email).toBe("aliceXexampleXcom");
+  });
 });

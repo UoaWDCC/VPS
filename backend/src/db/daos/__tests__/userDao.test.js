@@ -44,20 +44,24 @@ describe("userDao", () => {
       assigned: ["existing-scenario"],
     });
 
-    const withoutAssignment = await User.create({
-      uid: "firebase-user-assign-2",
-      name: "Unassigned user",
-      email: "unassigned@example.com",
-      pictureURL: "https://example.com/unassigned.png",
-    });
+    // Inserted via the raw collection so the `assigned` field is genuinely
+    // absent, rather than defaulted to [] by Mongoose (as User.create would).
+    const { insertedId: withoutAssignmentId } = await User.collection.insertOne(
+      {
+        uid: "firebase-user-assign-2",
+        name: "Unassigned user",
+        email: "unassigned@example.com",
+        pictureURL: "https://example.com/unassigned.png",
+      }
+    );
 
     await assignScenarioToUsers("new-scenario", [
       withAssignment._id.toString(),
-      withoutAssignment._id.toString(),
+      withoutAssignmentId.toString(),
     ]);
 
     const updatedWithAssignment = await User.findById(withAssignment._id);
-    const updatedWithoutAssignment = await User.findById(withoutAssignment._id);
+    const updatedWithoutAssignment = await User.findById(withoutAssignmentId);
 
     expect(updatedWithAssignment.assigned).toEqual(
       expect.arrayContaining(["existing-scenario", "new-scenario"])
