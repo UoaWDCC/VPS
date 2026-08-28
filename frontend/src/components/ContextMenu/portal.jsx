@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useLayoutEffect, useRef } from "react";
 
 const OFFSET = -5;
 
@@ -45,8 +45,13 @@ export const ContextMenuPortal = () => {
     return () => (listener = null);
   }, [setCurrent]);
 
-  useEffect(() => {
-    if (!current.menu || !menuRef.current) return;
+  // runs before paint so the menu is never shown at an unadjusted position,
+  // and clears the previous menu's position so a reopen can't flash there
+  useLayoutEffect(() => {
+    if (!current.menu || !menuRef.current) {
+      setAdjustedPosition(null);
+      return;
+    }
 
     const { innerWidth: vw, innerHeight: vh } = window;
     const rect = menuRef.current.getBoundingClientRect();
