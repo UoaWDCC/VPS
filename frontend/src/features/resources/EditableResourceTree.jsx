@@ -37,6 +37,7 @@ function EditableResourceTree({
                         <button
                           className="btn btn-phantom btn-xs px-1.5 h-full"
                           onClick={(e) => {
+                            e.preventDefault();
                             e.stopPropagation();
                             deleteResourceMutation.mutate(resource._id);
                           }}
