@@ -23,6 +23,7 @@ export default function ResourceNameField({
   }, [editing]);
 
   function startEditing(e) {
+    e.preventDefault();
     e.stopPropagation();
     if (disabled) return;
     setValue(resource.name);
@@ -92,7 +93,11 @@ export default function ResourceNameField({
             type="button"
             className={`min-w-0 truncate bg-transparent text-left text--1 border-none cursor-pointer disabled:cursor-not-allowed focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary px-3 py-1.5 h-9 ${isTemp(resource) ? "text-primary" : ""}`}
             title={resource.name}
-            onClick={onSelect}
+            onClick={(e) => {
+              e.stopPropagation();
+              e.preventDefault();
+              onSelect();
+            }}
             disabled={disabled}
           >
             {resource.name}
