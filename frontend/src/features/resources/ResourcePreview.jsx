@@ -67,7 +67,7 @@ function ResourcePreview({ file }) {
   const typeLabel = fileTypeLabel(file);
 
   return (
-    <div className="flex h-full min-h-0 flex-col gap-3 p-3 font-ibm">
+    <div className="flex h-full min-h-0 flex-col gap-3 font-ibm">
       <div className="flex items-start justify-between gap-2">
         <div className="flex min-w-0 flex-wrap items-center gap-2">
           <h3 className="text-m min-w-0 break-all">{file.name}</h3>
@@ -99,14 +99,14 @@ function ResourcePreview({ file }) {
           <img
             src={file.url}
             alt={file.name}
-            className="rounded-xl max-h-80 object-contain"
+            className="rounded-xl object-contain max-h-full h-full w-full"
           />
         ) : isPDF ? (
           <div className="h-full min-h-0 w-full">
             <iframe
               src={file.url}
               title={file.name}
-              className="block h-full min-h-[50dvh] w-full rounded-xl border lg:min-h-0"
+              className="block h-full min-h-[50dvh] w-full rounded-xl border border-primary lg:min-h-0"
             />
           </div>
         ) : isText && text.isInitialLoading ? (
