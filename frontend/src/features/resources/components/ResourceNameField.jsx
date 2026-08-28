@@ -1,17 +1,19 @@
 import { useEffect, useRef, useState } from "react";
 import { CheckIcon, PencilIcon } from "lucide-react";
+import { isTemp } from "../util";
 
 const RESOURCE_NAME_MAX_LENGTH = 255;
 
 export default function ResourceNameField({
-  name,
+  resource,
   disabled,
   onSelect,
+  isSelected,
   onRename,
   actions,
 }) {
   const [editing, setEditing] = useState(false);
-  const [value, setValue] = useState(name);
+  const [value, setValue] = useState(resource.name);
   const inputRef = useRef(null);
 
   useEffect(() => {
@@ -24,14 +26,14 @@ export default function ResourceNameField({
     e.preventDefault();
     e.stopPropagation();
     if (disabled) return;
-    setValue(name);
+    setValue(resource.name);
     setEditing(true);
   }
 
   function commitEdit() {
     setEditing(false);
     const trimmedName = value.trim();
-    if (!trimmedName || trimmedName === name) return;
+    if (!trimmedName || trimmedName === resource.name) return;
     onRename(trimmedName);
   }
 
@@ -40,18 +42,31 @@ export default function ResourceNameField({
       e.preventDefault();
       inputRef.current?.blur();
     } else if (e.key === "Escape") {
-      setValue(name);
+      setValue(resource.name);
       setEditing(false);
     }
   }
 
+  const rowStyle = editing
+    ? {
+        gridTemplateColumns: "minmax(0, 1fr) auto",
+        backgroundColor: "transparent",
+        boxShadow: "none",
+        color: "var(--color-base-content)",
+        cursor: "auto",
+      }
+    : { gridTemplateColumns: "minmax(0, 1fr) auto auto" };
+
   return (
-    <>
+    <div
+      className={`grid items-center overflow-hidden p-0 gap-0 ${isSelected ? "bg-base-content/5" : ""}`}
+      style={rowStyle}
+    >
       {editing ? (
         <input
           ref={inputRef}
           type="text"
-          aria-label={`Rename ${name}`}
+          aria-label={`Rename ${resource.name}`}
           className="input input-bordered min-w-0 h-9"
           style={{
             "--input-color":
@@ -76,8 +91,8 @@ export default function ResourceNameField({
         <>
           <button
             type="button"
-            className={`min-w-0 truncate bg-transparent text-left text--1 border-none cursor-pointer disabled:cursor-not-allowed focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary px-3 py-1.5 h-9 ${disabled ? "text-primary" : ""}`}
-            title={name}
+            className={`min-w-0 truncate bg-transparent text-left text--1 border-none cursor-pointer disabled:cursor-not-allowed focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary px-3 py-1.5 h-9 ${isTemp(resource) ? "text-primary" : ""}`}
+            title={resource.name}
             onClick={(e) => {
               e.stopPropagation();
               e.preventDefault();
@@ -85,7 +100,7 @@ export default function ResourceNameField({
             }}
             disabled={disabled}
           >
-            {name}
+            {resource.name}
           </button>
           <button
             type="button"
@@ -110,6 +125,6 @@ export default function ResourceNameField({
       ) : (
         actions
       )}
-    </>
+    </div>
   );
 }

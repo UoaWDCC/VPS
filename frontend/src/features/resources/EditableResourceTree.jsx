@@ -26,11 +26,12 @@ function EditableResourceTree({
               <summary
                 className={`flex items-center p-0 pr-3 w-full ${isTemp(resource) ? "text-primary" : ""} ${selectedResourceId === resource._id ? "bg-base-content/5" : ""}`}
               >
-                <div className="grid items-center overflow-hidden p-0 gap-0 w-full grid-cols-[minmax(0,1fr)_auto_auto_auto]">
+                <div className="flex-1 min-w-0">
                   <ResourceNameField
-                    name={resource.name}
+                    resource={resource}
                     disabled={isTemp(resource)}
                     onSelect={() => setSelectedResourceId(resource._id)}
+                    isSelected={selectedResourceId === resource._id}
                     onRename={(name) => renameResource(resource, name)}
                     actions={
                       <>
