@@ -34,7 +34,6 @@ const Thumbnail = ({ components, background }) => {
       className="w-full h-full"
       viewBox={`0 0 ${CANVAS_WIDTH} ${CANVAS_HEIGHT}`}
     >
-
       <rect
         x="0"
         y="0"
