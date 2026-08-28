@@ -27,9 +27,15 @@ export async function applyReferenceDeltas(fileRefDeltas) {
       },
     }));
 
-  if (fileOperations.length === 0) return true;
+  if (fileOperations.length === 0) return;
 
-  await UploadedFile.bulkWrite(fileOperations, { ordered: false });
+  const result = await UploadedFile.bulkWrite(fileOperations, {
+    ordered: false,
+  });
+
+  if (result.matchedCount !== fileOperations.length) {
+    throw new Error("one or more file reference updates did not match");
+  }
 }
 
 /**

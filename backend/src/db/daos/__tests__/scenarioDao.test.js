@@ -78,6 +78,15 @@ describe("scenarioDao", () => {
         type: "number",
       })
     ).rejects.toBeInstanceOf(HttpError);
+    await expect(
+      createProperty(new mongoose.Types.ObjectId().toString(), {
+        name: "score",
+        type: "number",
+      })
+    ).rejects.toMatchObject({
+      status: 404,
+      message: "scenario not found",
+    });
   });
 
   it("throws HttpError when updateScenario targets an absent scenario", async () => {
@@ -110,6 +119,9 @@ describe("scenarioDao", () => {
   });
 
   it("throws HttpError when getProperties targets an absent scenario", async () => {
+    await expect(
+      getProperties(new mongoose.Types.ObjectId().toString())
+    ).rejects.toBeInstanceOf(HttpError);
     await expect(
       getProperties(new mongoose.Types.ObjectId().toString())
     ).rejects.toMatchObject({

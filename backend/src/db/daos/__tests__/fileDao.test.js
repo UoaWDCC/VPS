@@ -91,6 +91,32 @@ describe("fileDao", () => {
     expect(updated.refCount).toBe(2);
   });
 
+  it("rejects when a delta targets a file id that does not exist", async () => {
+    const scenarioId = new mongoose.Types.ObjectId();
+    const image = await UploadedFile.create({
+      name: "exists.png",
+      type: "image",
+      path: "images/exists.png",
+      url: "https://example.com/exists.png",
+      contentType: "image/png",
+      size: 12,
+      uploaderUid: "uploader-5",
+      scenarioId,
+      refCount: 0,
+    });
+
+    const missingId = new mongoose.Types.ObjectId();
+
+    await expect(
+      applyReferenceDeltas(
+        new Map([
+          [image._id.toString(), 1],
+          [missingId.toString(), 1],
+        ])
+      )
+    ).rejects.toThrow("one or more file reference updates did not match");
+  });
+
   it("returns early for empty or zero-value deltas", async () => {
     const scenarioId = new mongoose.Types.ObjectId();
     const file = await UploadedFile.create({
