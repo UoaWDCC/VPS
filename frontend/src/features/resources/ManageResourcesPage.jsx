@@ -1,238 +1,45 @@
-import React, { useRef, useState, useEffect, useContext, useMemo } from "react";
-import { getAuth } from "firebase/auth";
-import axios from "axios";
-import toast from "react-hot-toast";
-import { useParams } from "react-router-dom";
-import { useHistory } from "react-router-dom";
+import React, { useRef, useState } from "react";
+import { useParams, useHistory } from "react-router-dom";
+import PropertyConditionalMenu from "../../components/Properties/PropertyConditionalMenu";
 import {
   ArrowLeftIcon,
-  PlayIcon,
-  UsersIcon,
-  PlusIcon,
-  XIcon,
+  FilePlusIcon,
+  FileTextIcon,
+  FolderPlusIcon,
+  SearchIcon,
 } from "lucide-react";
-import AddGroup from "./components/AddGroup";
-import StateConditionalMenu from "../../components/StateVariables/StateConditionalMenu";
-import MDTextViewer from "../playScenario/components/MDTextViewer";
-import { api } from "../../util/api";
-import AuthenticationContext from "../../context/AuthenticationContext";
-import { useQuery } from "@tanstack/react-query";
-import { normaliseFile } from "./util";
+import { buildResourceTree, filterTreeBySearch, normaliseFile } from "./util";
+import ResourcePreview from "./ResourcePreview";
+import SkeletonBody from "./ResourcesSkeleton";
+import PopoverInput from "./components/PopoverInput";
+import { useResources } from "./useResources";
+import { findById } from "../../util/search";
+import EditableResourceTree from "./EditableResourceTree";
 
-function normaliseGroup(g) {
-  return {
-    id: g._id || g.id,
-    name: g.name,
-    order: g.order ?? 0,
-    stateConditionals: g.stateConditionals || [],
-    files: (g.files || []).map((f) => normaliseFile(f)),
-  };
-}
-
-async function uploadResource(user, scenarioId, groupId, file) {
-  try {
-    const formData = new FormData();
-    formData.append("file", file);
-
-    const fileResponse = await api.post(
-      user,
-      `api/files/${scenarioId}`,
-      formData
-    );
-
-    const resourceResponse = await api.post(
-      user,
-      `api/resources/${scenarioId}`,
-      {
-        groupId,
-        name: fileResponse.data.name,
-        fileId: fileResponse.data._id,
-      }
-    );
-    toast.success(`Resource created`);
-    return resourceResponse.data;
-  } catch (err) {
-    console.error(err);
-    toast.error("Upload failed");
-  }
-}
-
-async function removeResource(user, scenarioId, resourceId) {
-  try {
-    await api.delete(user, `/api/resources/${scenarioId}/${resourceId}`);
-    toast.success("Resource deleted");
-    return resourceId;
-  } catch (err) {
-    console.error(err);
-    toast.error("Delete failed");
-  }
-}
-
-// Page for managing resources (collections and files) for a scenario
 export default function ManageResourcesPage() {
   const { scenarioId } = useParams();
   const history = useHistory();
+  const {
+    resourcesQuery,
+    addResourceCollectionMutation,
+    addFileResourceMutation,
+  } = useResources();
+
+  const [selectedResourceId, setSelectedResourceId] = useState(null);
+  const [search, setSearch] = useState("");
+
+  const inputRef = useRef(null);
+  const pendingParentIdRef = useRef(null);
+
   function goBack() {
     history.push(`/scenario/${scenarioId}`);
   }
 
-  function goToGroups() {
-    history.push(`/scenario/${scenarioId}/manage-groups`);
-  }
+  const resourceTree = buildResourceTree(resourcesQuery.data ?? []);
+  const filteredTree = filterTreeBySearch(resourceTree, search);
 
-  function playScenario() {
-    window.open(`/play/${scenarioId}`, "_blank");
-  }
-
-  // Groups (each with files)
-  const [groups, setGroups] = useState([]);
-  const [search, setSearch] = useState("");
-  const [selectedGroup, setSelectedGroup] = useState(null);
-  const [selectedFile, setSelectedFile] = useState(null);
-
-  const { user } = useContext(AuthenticationContext);
-
-  // Load groups and files
-  useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      try {
-        const { data } = await api.get(
-          user,
-          `/api/collections/tree/${scenarioId}`
-        );
-        const normalized = (data || []).map((g) => normaliseGroup(g)) || [];
-        if (!cancelled) setGroups(normalized);
-      } catch (err) {
-        console.error(err);
-        if (!cancelled) toast.error("Failed to load groups/files");
-      }
-    })();
-
-    return () => {
-      cancelled = true;
-    };
-  }, [scenarioId]);
-
-  async function addResourceToGroup(groupId, file) {
-    const resource = await uploadResource(user, scenarioId, groupId, file);
-    if (!resource) return;
-
-    setGroups((prev) =>
-      prev.map((g) =>
-        g.id === groupId
-          ? { ...g, files: [normaliseFile(resource), ...(g.files || [])] }
-          : g
-      )
-    );
-  }
-
-  async function deleteResource(resourceId) {
-    const success = await removeResource(user, scenarioId, resourceId);
-    if (!success) return;
-
-    setGroups((prev) =>
-      prev.map((g) => ({
-        ...g,
-        files: (g.files || []).filter((f) => f.id !== resourceId),
-      }))
-    );
-
-    if (selectedFile?.id === resourceId) setSelectedFile(null);
-  }
-
-  async function deleteGroup(groupId) {
-    const ok = window.confirm(
-      "Delete this group and ALL of its files? This cannot be undone."
-    );
-    if (!ok) return;
-    try {
-      const user = getAuth().currentUser;
-      if (!user) {
-        toast.error("You must be logged in to delete.");
-        return;
-      }
-      const idToken = await user.getIdToken();
-      await axios.delete(`/api/collections/groups/${groupId}`, {
-        headers: { Authorization: `Bearer ${idToken}` },
-      });
-
-      setGroups((prev) => prev.filter((g) => g.id !== groupId));
-
-      if (selectedFile && selectedFile.groupId === groupId)
-        setSelectedFile(null);
-      if (selectedGroup?.id === groupId) setSelectedGroup(null);
-
-      toast.success("Group deleted");
-    } catch (err) {
-      console.error(err);
-      toast.error(err?.response?.data?.error || "Failed to delete group");
-    }
-  }
-
-  function updateFile(updatedFile) {
-    const normalisedFile = normaliseFile(updatedFile);
-    setSelectedFile(normalisedFile);
-    setGroups((prev) =>
-      prev.map((g) =>
-        g.id === normalisedFile.groupId
-          ? {
-              ...g,
-              files: (g.files || []).map((f) =>
-                f.id === normalisedFile.id ? normalisedFile : f
-              ),
-            }
-          : g
-      )
-    );
-  }
-
-  function updateGroup(updatedGroup) {
-    const normalisedGroup = normaliseGroup(updatedGroup);
-    setSelectedGroup((prev) => ({
-      ...normalisedGroup,
-      files: prev?.files || normalisedGroup.files,
-    }));
-    setGroups((prev) =>
-      prev.map((g) =>
-        g.id === normalisedGroup.id
-          ? {
-              ...g,
-              ...normalisedGroup,
-              files: g.files || [],
-            }
-          : g
-      )
-    );
-  }
-
-  const selectedTarget = selectedFile || selectedGroup;
-  const selectedTargetType = selectedFile
-    ? "File"
-    : selectedGroup
-      ? "Collection"
-      : null;
-  const selectedTargetEndpoint = selectedFile
-    ? `/api/resources/${scenarioId}/${selectedFile.id}/conditionals`
-    : selectedGroup
-      ? `/api/collections/groups/${selectedGroup.id}/state-conditionals`
-      : "";
-
-  const filteredGroups = useMemo(() => {
-    const query = search.trim().toLowerCase();
-    if (!query) return groups;
-
-    return groups
-      .map((group) => {
-        if (group.name.toLowerCase().includes(query)) return group;
-
-        const matchingFiles = (group.files || []).filter((file) =>
-          file.name.toLowerCase().includes(query)
-        );
-        return matchingFiles.length ? { ...group, files: matchingFiles } : null;
-      })
-      .filter(Boolean);
-  }, [groups, search]);
+  const foundResource = findById(resourcesQuery.data, selectedResourceId);
+  const selectedResource = foundResource ? normaliseFile(foundResource) : null;
 
   return (
     <div className="font-ibm flex min-h-dvh w-screen flex-col gap-l overflow-y-auto lg:h-dvh lg:overflow-hidden">
@@ -241,278 +48,120 @@ export default function ManageResourcesPage() {
           <ArrowLeftIcon size={20} />
           Back
         </button>
-
-        <button onClick={goToGroups} className="btn btn-phantom text-m ml-auto">
-          <UsersIcon size={20} />
-          Groups
-        </button>
-
-        <button onClick={playScenario} className="btn btn-phantom text-m">
-          <PlayIcon size={20} />
-          Play
-        </button>
       </div>
 
-      <div className="u-container min-h-0 w-full flex-1 pb-[max(1rem,env(safe-area-inset-bottom))]">
-        <div className="container mx-auto h-full min-h-0">
-          <div className="grid grid-cols-1 gap-4 lg:h-full lg:min-h-0 lg:grid-cols-3">
-            {/* LEFT: Groups and files */}
-            <div className="card min-h-[35dvh] bg-base-100 shadow-md lg:h-full lg:min-h-0">
-              <div className="card-body flex min-h-0 flex-col gap-4 px-0">
-                <h1 className="flex-none text-xl">Uploaded Resources</h1>
-
-                <label htmlFor="authoring-resource-search" className="sr-only">
-                  Search files or collection name
-                </label>
-                <input
-                  id="authoring-resource-search"
-                  type="search"
-                  className="w-full flex-none border-0 border-b-1 border-primary pb-3 outline-none"
-                  placeholder="Search files or collection name"
-                  value={search}
-                  onChange={(event) => setSearch(event.target.value)}
-                />
-
-                <div className="flex items-center justify-between gap-2">
-                  <h2 className="text-m">Collections</h2>
-                  <AddGroup
-                    onAdd={async (name) => {
-                      try {
-                        const user = getAuth().currentUser;
-                        if (!user) return toast.error("You must be logged in.");
-                        const idToken = await user.getIdToken();
-                        const { data } = await axios.post(
-                          "/api/collections/groups",
-                          { scenarioId, name },
-                          { headers: { Authorization: `Bearer ${idToken}` } }
-                        );
-                        setGroups((g) => [
-                          ...g,
-                          {
-                            id: data._id,
-                            name: data.name,
-                            order: data.order ?? 0,
-                            stateConditionals: data.stateConditionals || [],
-                            files: [],
-                          },
-                        ]);
-                      } catch (e) {
-                        toast.error(
-                          e?.response?.data?.error || "Failed to create group"
-                        );
-                      }
-                    }}
-                  />
-                </div>
-
-                <ul className="menu min-h-0 w-full flex-1 overflow-auto rounded-box bg-base-100 p-0">
-                  {search.trim() && filteredGroups.length === 0 && (
-                    <li className="p-2 opacity-60">
-                      No matching resources found.
-                    </li>
-                  )}
-                  {filteredGroups.map((group) => (
-                    <li key={group.id}>
-                      <details open={search.trim() ? true : undefined}>
-                        <summary
-                          className={`flex items-center px-0 ${
-                            selectedGroup?.id === group.id && !selectedFile
-                              ? "bg-base-200"
-                              : ""
-                          }`}
-                          onClick={() => {
-                            setSelectedGroup(group);
-                            setSelectedFile(null);
-                          }}
-                        >
-                          <span className="text--1 truncate">{group.name}</span>
-                          <div className="flex items-center ml-auto">
-                            <UploadButton
-                              multiple={false}
-                              onFiles={(files) =>
-                                addResourceToGroup(group.id, files[0])
-                              }
-                            />
-                            <button
-                              className="btn btn-phantom btn-xs"
-                              onClick={(e) => {
-                                e.preventDefault();
-                                e.stopPropagation();
-                                deleteGroup(group.id);
-                              }}
-                              title="Delete group"
-                            >
-                              <XIcon size={16} />
-                            </button>
-                          </div>
-                        </summary>
-
-                        <ul>
-                          {group.files.length === 0 && (
-                            <li className="opacity-60 p-2">No files yet</li>
-                          )}
-
-                          {group.files.map((f) => (
-                            <li key={f.id}>
-                              <div className="flex items-center justify-between">
-                                <a
-                                  className="min-w-0 flex-1 text--1 truncate"
-                                  onClick={() =>
-                                    setSelectedFile({
-                                      ...f,
-                                      groupId: group.id,
-                                      groupName: group.name,
-                                    })
-                                  }
-                                >
-                                  {f.name}
-                                </a>
-                                <button
-                                  className="btn btn-phantom btn-xs px-0"
-                                  onClick={() => deleteResource(f.id)}
-                                  title="Delete file"
-                                >
-                                  <XIcon size={16} />
-                                </button>
-                              </div>
-                            </li>
-                          ))}
-                        </ul>
-                      </details>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </div>
-
-            {/* RIGHT: File list and preview */}
-            <div className="card min-h-[60dvh] overflow-auto pb-[max(1rem,env(safe-area-inset-bottom))] lg:col-span-2 lg:h-full lg:min-h-0">
-              <div className="card-body flex min-h-full flex-col gap-4">
-                {selectedTarget ? (
-                  <div>
-                    <div className="text-xs text-primary">
-                      {selectedTargetType}
-                    </div>
-                    <h2 className="text-m">{selectedTarget.name}</h2>
-                  </div>
-                ) : null}
-                <StateConditionalMenu
-                  target={selectedTarget}
-                  title={`${selectedTargetType || "Resource"} State Conditionals`}
-                  endpoint={selectedTargetEndpoint}
-                  updateTarget={selectedFile ? updateFile : updateGroup}
-                />
-                <div className="min-h-[50dvh] flex-1 lg:min-h-0">
-                  <Preview file={selectedFile} />
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-// Helper components
-function UploadButton({ onFiles, multiple = true, className = "" }) {
-  const inputRef = useRef(null);
-  return (
-    <>
+      {/* hidden input for resource upload */}
       <input
         ref={inputRef}
         type="file"
-        multiple={multiple}
         className="hidden"
         onChange={(e) => {
-          const files = Array.from(e.target.files || []);
-          if (files.length) onFiles(files);
+          const file = e.target.files[0];
           e.target.value = "";
+          if (!file) return;
+          addFileResourceMutation.mutate({
+            parentId: pendingParentIdRef.current,
+            file,
+          });
         }}
       />
-      <button
-        className={`btn btn-phantom btn-xs ${className}`}
-        onClick={() => inputRef.current?.click()}
-        title="Add files"
-      >
-        <PlusIcon size={16} />
-      </button>
-    </>
-  );
-}
 
-async function loadText(url) {
-  return fetch(url).then((res) => {
-    if (!res.ok) throw new Error(`failed to load file (${res.status})`);
-    return res.text();
-  });
-}
+      <div className="u-container min-h-0 w-full flex-1 pb-[max(1rem,env(safe-area-inset-bottom))]">
+        <div className="container mx-auto h-full min-h-0">
+          {resourcesQuery.isLoading ? (
+            <SkeletonBody />
+          ) : resourcesQuery.isError ? (
+            <div className="h-full flex flex-col items-center justify-center gap-3">
+              <div className="alert alert-error max-w-md">
+                <span>{resourcesQuery.error.message}</span>
+              </div>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 gap-4 lg:h-full lg:min-h-0 lg:grid-cols-3">
+              {/* LEFT: Groups and files */}
+              <div className="min-h-[35dvh] min-w-0 overflow-hidden lg:h-full lg:min-h-0">
+                <div className="card-body flex min-h-0 flex-col gap-4 px-0">
+                  <h1 className="flex-none text-xl">Uploaded Resources</h1>
 
-function Preview({ file }) {
-  const text = useQuery({
-    queryKey: ["file-text", file?.url],
-    queryFn: () => loadText(file.url),
-    enabled: !!(file?.contentType?.startsWith("text") && file?.url),
-  });
+                  <div className="flex items-center gap-4">
+                    <label className="input search search-xs flex-grow">
+                      <input
+                        type="search"
+                        placeholder="Search files and collections"
+                        value={search}
+                        onChange={(e) => setSearch(e.target.value)}
+                      />
+                      <SearchIcon size={20} />
+                    </label>
+                    {/* collection creation button */}
+                    <PopoverInput
+                      onSubmit={addResourceCollectionMutation.mutate}
+                      label="Collection Name"
+                      submitLabel="Create"
+                      trigger={
+                        <button
+                          className="btn btn-phantom btn-xs p-0 tooltip tooltip-bottom"
+                          data-tip="Create Collection"
+                        >
+                          <FolderPlusIcon size={16} />
+                        </button>
+                      }
+                    />
+                    {/* file upload button */}
+                    <button
+                      className="btn btn-phantom btn-xs p-0 tooltip tooltip-bottom"
+                      data-tip="Upload Resource"
+                      onClick={() => {
+                        pendingParentIdRef.current = null;
+                        inputRef.current?.click();
+                      }}
+                    >
+                      <FilePlusIcon size={16} />
+                    </button>
+                  </div>
 
-  if (!file)
-    return (
-      <div className="prose max-w-none opacity-70">
-        <h3>Preview</h3>
-        <p>
-          Select a file to preview. Images and PDFs files show inline;
-          Text/Markdown render below; other files provide a download.
-        </p>
-      </div>
-    );
+                  <ul className="menu min-h-0 w-full flex-1 overflow-auto p-0">
+                    {search.trim() && filteredTree.length === 0 && (
+                      <li className="p-2 opacity-60">
+                        No matching resources found.
+                      </li>
+                    )}
+                    <EditableResourceTree
+                      tree={filteredTree}
+                      selectedResourceId={selectedResourceId}
+                      setSelectedResourceId={setSelectedResourceId}
+                      pendingParentIdRef={pendingParentIdRef}
+                      inputRef={inputRef}
+                    />
+                  </ul>
+                </div>
+              </div>
 
-  const isImage = file.type === "image";
-  const isText =
-    file.type === "document" && file.contentType !== "application/pdf";
-  const isPDF = file.contentType === "application/pdf";
-
-  return (
-    <div className="flex h-full min-h-0 flex-col gap-3">
-      <div className="flex items-center justify-between">
-        <h3 className="text-m">{file.name}</h3>
-        <a className="btn btn-phantom btn-xs" href={file.url} download>
-          Download
-        </a>
-      </div>
-
-      <div className="min-h-0 flex-1">
-        {isImage ? (
-          <img
-            src={file.url}
-            alt={file.name}
-            className="rounded-xl max-h-80 object-contain"
-          />
-        ) : isPDF ? (
-          <div className="h-full min-h-0 w-full">
-            <iframe
-              src={file.url}
-              title={file.name}
-              className="block h-full min-h-[50dvh] w-full rounded-xl border lg:min-h-0"
-            />
-          </div>
-        ) : isText && text.isLoading ? (
-          <div className="space-y-2">
-            <div className="skeleton h-6 w-1/2" />
-            <div className="skeleton h-48 w-full" />
-          </div>
-        ) : isText && text.isError ? (
-          <div className="alert alert-warning">
-            <span>{text.error?.message || "Failed to load preview."}</span>
-          </div>
-        ) : isText ? (
-          <MDTextViewer file={file} content={text.data} />
-        ) : (
-          <div className="alert">
-            <span>
-              Preview not supported. You can download the file instead.
-            </span>
-          </div>
-        )}
+              {/* RIGHT: File list and preview */}
+              <div className="card min-h-[60dvh] overflow-auto pb-[max(1rem,env(safe-area-inset-bottom))] lg:col-span-2 lg:h-full lg:min-h-0">
+                <div className="card-body flex min-h-full flex-col gap-4 pr-0">
+                  {selectedResource ? (
+                    <>
+                      <PropertyConditionalMenu resource={selectedResource} />
+                      {selectedResource?.type === "file" && (
+                        <div className="min-h-[50dvh] flex-1 lg:min-h-0">
+                          <ResourcePreview file={selectedResource} />
+                        </div>
+                      )}
+                    </>
+                  ) : (
+                    <div className="min-h-[50dvh] flex flex-1 flex-col gap-4 lg:min-h-0 justify-center items-center border border-primary rounded-xl">
+                      <FileTextIcon size={32} />
+                      <span className="text--1">
+                        Select a resource to show the preview
+                      </span>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

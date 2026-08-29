@@ -1,6 +1,6 @@
 import create from "zustand";
 import type { ModelSelection, VisualSelection } from "../text/types";
-import type { BaseTextStyle, Bounds, Vec2 } from "../types";
+import type { BaseTextStyle, Bounds, Guide, Vec2 } from "../types";
 import { getComponent } from "../scene/scene";
 import { getStyleForSelection } from "../scene/operations/text";
 
@@ -8,19 +8,21 @@ type Mode = "normal" | "resize" | "create" | "text" | "mutation";
 
 interface EditorState {
   loading: boolean;
-  selected: string | null;
+  selected: string[];
   hovered: string | null;
   createType: string | null;
   mouseDown: boolean;
   mutationBounds: Bounds;
   offset: Vec2;
+  activeGuides: Guide[];
 
-  setSelected: (id: string | null) => void;
+  setSelected: (id: string[]) => void;
   setHovered: (id: string | null) => void;
   setCreateType: (type: string) => void;
   setMouseDown: (mouseDown: boolean) => void;
   setMutationBounds: Dynamic<Bounds>;
   setOffset: (offset: Vec2) => void;
+  setActiveGuides: (guides: Guide[]) => void;
 
   // text editing
   selection: ModelSelection;
@@ -61,12 +63,13 @@ function setter<K extends keyof EditorState>(set: ZustandSet, prop: K) {
 
 const useEditorStore = create<EditorState>((set) => ({
   loading: false,
-  selected: null,
+  selected: [],
   hovered: null,
   createType: null,
   mouseDown: false,
   mutationBounds: { verts: [], rotation: 0 },
   offset: { x: 0, y: 0 },
+  activeGuides: [],
 
   setLoading: (value: boolean) => set({ loading: value }),
   setSelected: (id) => set({ selected: id }),
@@ -75,6 +78,7 @@ const useEditorStore = create<EditorState>((set) => ({
   setMouseDown: (mouseDown) => set({ mouseDown }),
   setMutationBounds: setter(set, "mutationBounds"),
   setOffset: (offset) => set({ offset }),
+  setActiveGuides: (guides) => set({ activeGuides: guides }),
 
   selection: { start: null, end: null },
   visualSelection: { start: null, end: null },
@@ -83,11 +87,13 @@ const useEditorStore = create<EditorState>((set) => ({
 
   setSelection: (selection) =>
     set(({ selected }) => {
-      if (selected && getComponent(selected)?.type === "textbox") {
-        const activeStyle = getStyleForSelection(selected, selection);
+      const mainTarget = selected[0];
+      const component = mainTarget ? getComponent(mainTarget) : null;
+      if (component?.type === "textbox") {
+        const activeStyle = getStyleForSelection(mainTarget, selection);
         return { selection, activeStyle };
       }
-      return { selection };
+      return { selection, activeStyle: null };
     }),
   setVisualSelection: setter(set, "visualSelection"),
   setActiveStyle: (style: BaseTextStyle) => set({ activeStyle: style }),
@@ -101,10 +107,11 @@ const useEditorStore = create<EditorState>((set) => ({
 
   clear: () =>
     set({
-      selected: null,
+      selected: [],
       selection: { start: null, end: null },
       visualSelection: { start: null, end: null },
       mode: ["normal"],
+      activeGuides: [],
     }),
 }));
 

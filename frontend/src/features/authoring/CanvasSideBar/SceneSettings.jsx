@@ -10,7 +10,7 @@ import { modifySceneProp } from "../scene/operations/modifiers";
 import useDirectLink from "./useDirectLink";
 import shallow from "zustand/shallow";
 import toast from "react-hot-toast";
-import TimerStateOperationMenu from "../../../components/StateVariables/TimerStateOperationMenu";
+import TimerPropertyOperationMenu from "../../../components/Properties/TimerPropertyOperationMenu";
 import SelectInput from "../components/Select";
 
 /**
@@ -138,7 +138,7 @@ export default function SceneSettings() {
               </div>
               <ul
                 tabIndex={0}
-                className="dropdown-content menu bg-base-300 rounded-box z-1 w-52 p-2 shadow-sm"
+                className="dropdown-content menu bg-base-300 rounded-box z-1 w-full p-2 shadow-sm"
               >
                 {roleList?.map((role, i) => {
                   const active = selectedRoles.includes(role);
@@ -156,7 +156,7 @@ export default function SceneSettings() {
                 })}
               </ul>
             </div>
-            <label className="label cursor-pointer justify-start gap-3 mt-2">
+            <label className="label cursor-pointer justify-start gap-3 mt-2 mb-2">
               <input
                 type="checkbox"
                 className="toggle"
@@ -177,10 +177,11 @@ export default function SceneSettings() {
                   modifySceneProp("directLink", target);
                 }}
               />
+
               <span className="label-text">Direct Link</span>
               {directLinkDisabled && (
                 <span
-                  className="tooltip tooltip-warning tooltip-top cursor-help text-warning text-xs before:!whitespace-normal before:!max-w-[150px]"
+                  className="tooltip tooltip-warning tooltip-top cursor-help text-warning text-xs before:!whitespace-normal before:!max-w-[150px] before:!text-[0.75rem]"
                   data-tip={
                     "Disabled: scene has buttons leading to multiple different scenes"
                   }
@@ -188,6 +189,12 @@ export default function SceneSettings() {
                   ⚠
                 </span>
               )}
+              <span
+                className="label-text tooltip tooltip-top cursor-help before:!whitespace-normal before:!max-w-[130px] before:!text-[0.75rem]"
+                data-tip="The player will be sent to this scene when they press either the 'space' or 'right arrow' keyboard button, instead of having to click an on screen element."
+              >
+                ⓘ
+              </span>
             </label>
             <SelectInput
               nullable
@@ -209,7 +216,7 @@ export default function SceneSettings() {
           </fieldset>
         </div>
       </div>
-      {time > 0 && <TimerStateOperationMenu />}
+      {time > 0 && <TimerPropertyOperationMenu />}
     </>
   );
 }

@@ -1,7 +1,7 @@
 import useEditorStore from "../stores/editor";
 import useVisualScene from "../stores/visual";
-import AudioManager from "./AudioManager";
-import ComponentProperties from "./ComponentProperties";
+import AudioManager from "../audio/AudioManager";
+import ComponentSettings from "./ComponentSettings";
 import SceneSettings from "./SceneSettings";
 
 /**
@@ -16,10 +16,10 @@ export default function CanvasSideBar() {
   );
 
   return (
-    <div className="flex pb-m flex-col w-[18vw] gap-s overflow-y-auto no-scrollbar">
+    <div className="flex pb-m flex-col w-[18vw] gap-s overflow-y-auto overflow-x-hidden no-scrollbar">
       <SceneSettings />
       <AudioManager />
-      <ComponentProperties component={component} />
+      <ComponentSettings component={component} />
     </div>
   );
 }

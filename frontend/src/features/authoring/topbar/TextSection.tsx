@@ -16,16 +16,22 @@ import ChromePicker from "../wrapper/ChromePicker";
 import MultiInput from "../wrapper/MultiInput";
 import type { BaseTextStyle } from "../types";
 import { setTextStyle } from "../text/style";
+import { getComponent } from "../scene/scene";
 
 function TextSection() {
-  const selected = useEditorStore((state) => state.selected)!; // this comp only renders when a text el is selected
+  const selected = useEditorStore((state) => state.selected); // this comp only renders when a text el is selected
 
   const style = useEditorStore((state) => state.activeStyle);
 
   if (!style) return null;
 
   function modifyStyle(prop: keyof BaseTextStyle, value: string | number) {
-    setTextStyle(selected, prop, value);
+    // apply to every selected textbox
+    // a mixed selection can include non-textbox components (e.g. a shape),
+    // which don't have a `document` to write text style props onto
+    selected
+      .filter((id) => getComponent(id)?.type === "textbox")
+      .forEach((id) => setTextStyle(id, prop, value));
   }
 
   return (

@@ -2,22 +2,15 @@ import Note from "../models/note.js";
 import Group from "../models/group.js";
 import { HttpError } from "../../util/error.js";
 
-/**
- * Checks if a user is in a group
- * @param {String} groupId group ID
- * @param {String} email email of the user
- * @returns role of the user in the group
- * @returns null if user is not in group
- */
-const checkRole = async (groupId, email) => {
-  const group = await Group.findById(groupId);
-  let role = null;
-  group.users.forEach((userToCheck) => {
-    if (userToCheck.email === email) {
-      role = userToCheck.role;
-    }
-  });
-  return role;
+export const hasNoteInGroup = (group, noteId) => {
+  if (!group?.notes) return false;
+
+  const groupedNotes =
+    group.notes instanceof Map
+      ? Array.from(group.notes.values())
+      : Object.values(group.notes);
+
+  return groupedNotes.flat().some((id) => id === noteId);
 };
 
 /**
@@ -27,11 +20,7 @@ const checkRole = async (groupId, email) => {
  * @param {String} role role of the note
  * @returns
  */
-const createNote = async (groupId, title, email, text = "") => {
-  const role = await checkRole(groupId, email);
-  if (role === null) {
-    return null;
-  }
+const createNote = async (groupId, title, role, text = "") => {
   const dbNote = new Note({ title, role, text, date: new Date() });
   await dbNote.save();
   const updateQuery = {};
@@ -47,10 +36,9 @@ const createNote = async (groupId, title, email, text = "") => {
  * @param {String} email email of the user
  * @returns
  */
-const deleteNote = async (noteId, groupId, email) => {
-  const role = await checkRole(groupId, email);
+const deleteNote = async (noteId, groupId, role) => {
   const note = await Note.findById(noteId, { role: 1 }).lean();
-  if (note?.role !== role) throw new HttpError(403, "Forbidden");
+  if (note?.role !== role) throw new HttpError("forbidden", 403);
 
   const updateQuery = { $pull: { [`notes.${note.role}`]: noteId } };
   await Promise.all([
@@ -71,15 +59,9 @@ const deleteNote = async (noteId, groupId, email) => {
  * @param {String} email email of the user
  * @returns
  */
-const updateNote = async (noteId, updatedNote, groupId, email) => {
-  const role = await checkRole(groupId, email);
-  if (role === null) {
-    return;
-  }
+const updateNote = async (noteId, updatedNote, role) => {
   const note = await Note.findById(noteId);
-  if (note.role !== role) {
-    return;
-  }
+  if (note?.role !== role) throw new HttpError("forbidden", 403);
   note.title = updatedNote.title;
   note.text = updatedNote.text;
   note.date = updatedNote.date;
@@ -92,13 +74,10 @@ const updateNote = async (noteId, updatedNote, groupId, email) => {
  * @param {String} email email of the user
  * @returns list of database note objects
  */
-//  I know the group is fetched for twice but this is currently not used anywhere
 const retrieveNoteList = async (groupId) => {
   const { notes } = await Group.findById(groupId, { notes: 1 }).lean();
-
   const noteIds = Object.values(notes).flat();
   const dbNotes = await Note.find({ _id: { $in: noteIds } }, { __v: 0 });
-
   return dbNotes;
 };
 
@@ -108,7 +87,7 @@ const retrieveNoteList = async (groupId) => {
  * @returns database note object
  */
 const retrieveNote = async (noteId) => {
-  const note = await Note.findById(noteId);
+  const note = await Note.findOne({ _id: noteId });
   return note;
 };
 

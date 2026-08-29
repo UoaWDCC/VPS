@@ -5,11 +5,11 @@ import Thumbnail from "../authoring/components/Thumbnail";
 import ModalDialog from "../../components/ModalDialogue";
 import DetailEditModal from "../scenarioInfo/components/DetailEditModal";
 import TopNavBar from "../../features/TopNavBar/TopNavBar";
-import FabMenu from "../../components/FabMenu";
 import { PlusIcon, SearchIcon, Trash2Icon } from "lucide-react";
 import { handle } from "../../components/ContextMenu/portal";
 import RightContextMenu from "../../components/ContextMenu/RightContextMenu";
 import DeleteScenarioModal from "./DeleteScenarioModal";
+import { dedupById } from "../../util/dedup";
 
 const ScenarioMenu = ({ scenario, requestDelete }) => {
   return (
@@ -33,14 +33,10 @@ export default function CreateLandingPage() {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [scenarioToDelete, setScenarioToDelete] = useState(null);
 
-  const scenarios = Array.from(
-    new Map(
-      [...allScenarios.owned, ...allScenarios.accessible].map((scenario) => [
-        scenario._id,
-        scenario,
-      ])
-    ).values()
-  );
+  const scenarios = dedupById([
+    ...allScenarios.owned,
+    ...allScenarios.accessible,
+  ]);
 
   const filteredScenarios = scenarios.filter((scenario) =>
     scenario.name.toLowerCase().includes(search.toLowerCase())
@@ -136,8 +132,6 @@ export default function CreateLandingPage() {
           onSave={handleCreate}
         />
       </ModalDialog>
-
-      <FabMenu />
     </div>
   );
 }

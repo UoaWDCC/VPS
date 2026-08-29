@@ -1,12 +1,14 @@
 import { buildVisualScene } from "../authoring/pipeline";
+import { CANVAS_HEIGHT, CANVAS_WIDTH } from "../../util/canvas";
 import TextBox from "../authoring/elements/TextBox";
 import Speech from "../authoring/elements/Speech";
 import Ellipse from "../authoring/elements/Ellipse";
 import Box from "../authoring/elements/Box";
 import Image from "../authoring/elements/Image";
 import Line from "../authoring/elements/Line";
-import { resolveSceneBindings } from "../../components/StateVariables/componentBindings";
+import { resolveSceneBindings } from "../../components/Properties/componentBindings";
 import { useMemo } from "react";
+import Background from "../authoring/elements/Background";
 
 const componentMap = {
   textbox: TextBox,
@@ -23,10 +25,10 @@ function resolve(component) {
   return null;
 }
 
-function injectStateVariables(scene, stateVariables) {
-  if (!stateVariables) return scene;
+function injectProperties(scene, properties) {
+  if (!properties) return scene;
 
-  const varMap = new Map(stateVariables.map((v) => [v.name, v.value]));
+  const varMap = new Map(properties.map((v) => [v.name, v.value]));
   const regex = /\$\$(.*?)\$\$/g;
 
   return {
@@ -174,12 +176,12 @@ function injectStateVariables(scene, stateVariables) {
 export default function PlayScenarioCanvas({
   scene,
   buttonPressed,
-  stateVariables,
+  properties,
 }) {
   const sceneToRender = useMemo(() => {
-    const boundScene = resolveSceneBindings(scene, stateVariables);
-    return injectStateVariables(boundScene, stateVariables);
-  }, [scene, stateVariables]);
+    const boundScene = resolveSceneBindings(scene, properties);
+    return injectProperties(boundScene, properties);
+  }, [scene, properties]);
 
   const components = Object.values(buildVisualScene(sceneToRender).components)
     .sort((a, b) => a.zIndex - b.zIndex)
@@ -200,9 +202,23 @@ export default function PlayScenarioCanvas({
     });
 
   return (
-    <div className="bg-black" style={{ width: "100vw", height: "100vh" }}>
-      <svg id="play-main" className="w-full h-full" viewBox="0 0 1920 1080">
-        <rect x="0" y="0" width="1920" height="1080" fill="white" />
+    <div
+      className="bg-canvas-surround"
+      style={{ width: "100vw", height: "100vh" }}
+    >
+      <svg
+        id="play-main"
+        className="w-full h-full"
+        viewBox={`0 0 ${CANVAS_WIDTH} ${CANVAS_HEIGHT}`}
+      >
+        <rect
+          x="0"
+          y="0"
+          width={CANVAS_WIDTH}
+          height={CANVAS_HEIGHT}
+          fill="var(--color-canvas)"
+        />
+        <Background background={sceneToRender.background ?? null} />
         {components}
       </svg>
     </div>

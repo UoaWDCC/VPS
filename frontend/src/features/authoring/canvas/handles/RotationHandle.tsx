@@ -1,13 +1,12 @@
 import { getBoxCenter, rotate } from "../../util";
 import useEditorStore from "../../stores/editor";
-import useVisualScene from "../../stores/visual";
+import { getSelectedComponentBounds } from "../../handlers/pointer/pointer";
+import { HANDLE_RADIUS } from "../../../../util/canvas";
 
 const RotationHandle = () => {
-  const selected = useEditorStore((state) => state.selected)!;
-  const scene = useVisualScene((scene) => scene.components);
-  const mode = useEditorStore((state) => state.mode);
+  const mode = useEditorStore((s) => s.mode);
 
-  const bounds = scene[selected].bounds;
+  const bounds = getSelectedComponentBounds();
   const center = getBoxCenter(bounds.verts);
 
   const y = Math.min(bounds.verts[0].y, bounds.verts[1].y);
@@ -34,8 +33,8 @@ const RotationHandle = () => {
         data-coords={[0, 0]}
         cx={point.x}
         cy={point.y}
-        rx={7}
-        ry={7}
+        rx={HANDLE_RADIUS}
+        ry={HANDLE_RADIUS}
         fill="blue"
       />
     </g>
