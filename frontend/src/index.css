@@ -10,7 +10,17 @@
   --color-white: #ffffff;
   --color-white-rgb: 255, 255, 255;
   --color-grey: #898989;
-  --color-offwhite: #fafafa;
+  --color-light-base: #e6e6e6;
+  --color-light-content: #252529;
+  --color-light-content-rgb: 37, 37, 41;
+  --color-light-muted: #65656c;
+  --color-light-on-solid: #f4f4f1;
+  --color-light-neutral: #45454b;
+  --color-light-accent: #006f8f;
+  --color-light-info: #316b8a;
+  --color-light-success: #3b713a;
+  --color-light-warning: #8a5f16;
+  --color-light-error: #a94432;
   --color-canvas: var(--color-white);
   --color-canvas-surround: var(--color-black);
   --color-backdrop: var(--color-black);
@@ -102,7 +112,8 @@
   prefersdark: false;
   color-scheme: light;
 
-  --color-base-100: var(--color-offwhite);
+  /* A low-glare inversion of the dark theme's charcoal palette. */
+  --color-base-100: var(--color-light-base);
   --color-base-200: color-mix(
     in srgb,
     var(--color-base-100) 96%,
@@ -113,21 +124,26 @@
     var(--color-base-100) 92%,
     var(--color-base-content)
   );
-  --color-base-content: var(--color-black);
-  --color-base-content-rgb: var(--color-black-rgb);
-  --color-base-content-box-shadow: 0 0 2px 1px rgba(var(--color-black-rgb), 0.2);
-  --color-primary: var(--color-grey);
-  --color-primary-content: var(--color-black);
-  --color-secondary: var(--color-black);
-  --color-secondary-content: var(--color-white);
-  --color-accent: #0080a7;
-  --color-accent-content: var(--color-white);
-  --color-neutral: var(--color-base-content);
-  --color-neutral-content: var(--color-base-100);
-  --color-success: #367a2f;
-  --color-success-content: var(--color-white);
-  --color-error: #c13216;
-  --color-error-content: var(--color-white);
+  --color-base-content: var(--color-light-content);
+  --color-base-content-rgb: var(--color-light-content-rgb);
+  --color-base-content-box-shadow: 0 0 2px 1px
+    rgba(var(--color-light-content-rgb), 0.18);
+  --color-primary: var(--color-light-muted);
+  --color-primary-content: var(--color-light-on-solid);
+  --color-secondary: var(--color-light-content);
+  --color-secondary-content: var(--color-light-on-solid);
+  --color-accent: var(--color-light-accent);
+  --color-accent-content: var(--color-light-on-solid);
+  --color-neutral: var(--color-light-neutral);
+  --color-neutral-content: var(--color-light-on-solid);
+  --color-info: var(--color-light-info);
+  --color-info-content: var(--color-light-on-solid);
+  --color-success: var(--color-light-success);
+  --color-success-content: var(--color-light-on-solid);
+  --color-warning: var(--color-light-warning);
+  --color-warning-content: var(--color-light-on-solid);
+  --color-error: var(--color-light-error);
+  --color-error-content: var(--color-light-on-solid);
 }
 
 @plugin "daisyui/theme" {
@@ -283,6 +299,10 @@ body,
   margin: 0;
 }
 
+.btn:active:not(.btn-active) {
+  @apply translate-none;
+}
+
 .btn.btn-phantom {
   @apply btn-ghost font-normal text-primary hover:text-secondary border-none shadow-none bg-transparent;
 }
@@ -297,12 +317,16 @@ body,
     1;
 }
 
+.input.search input {
+  @apply grow placeholder:text-primary text-secondary;
+}
+
 .input.search {
   @apply font-dm text-s text-primary pb-2xs border-0 border-b-1 rounded-none border-primary px-0 outline-none shadow-none;
 }
 
-.input.search input {
-  @apply grow placeholder:text-primary text-secondary;
+.input.search.search-xs {
+  @apply text-xs pb-3xs h-7;
 }
 
 svg#main .box,

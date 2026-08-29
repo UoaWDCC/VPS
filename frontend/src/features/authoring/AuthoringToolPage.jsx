@@ -16,10 +16,10 @@ import { syncVisualCursor } from "./text/cursor";
 import {
   ArrowLeftIcon,
   FilesIcon,
+  LayoutDashboardIcon,
   PencilIcon,
   PlayIcon,
   UserPlusIcon,
-  UsersIcon,
 } from "lucide-react";
 import { handleGlobal } from "./handlers/keyboard/keyboard";
 import { clearHistory, historyEvents } from "./scene/history";
@@ -167,12 +167,12 @@ export default function AuthoringToolPage() {
     window.open(`/play/${scenarioId}${startScene}`, "_blank");
   }
 
-  function goToGroups() {
-    history.push(`/scenario/${scenarioId}/manage-groups`);
-  }
-
   function goToResources() {
     history.push(`/scenario/${scenarioId}/manage-resources`);
+  }
+
+  function goToDashboard() {
+    history.push(`/dashboard/${scenarioId}?from=canvas`);
   }
 
   function goBack() {
@@ -195,18 +195,24 @@ export default function AuthoringToolPage() {
     <>
       <div className="font-ibm flex flex-col h-screen w-screen overflow-hidden gap-m">
         <div className="flex pt-l px-l">
-          <button onClick={goBack} className="btn btn-phantom text-m">
+          <button
+            onClick={goBack}
+            aria-label="Back"
+            className="btn btn-phantom text-m px-0"
+          >
             <ArrowLeftIcon size={20} />
-            Back
           </button>
           {isOwner && (
             <div className="flex flex-1 min-w-0">
               <button
                 onClick={() => setShowEditModal(true)}
-                className="btn btn-phantom text-m max-w-full min-w-0"
+                className="btn btn-phantom text-m max-w-full min-w-0 tooltip tooltip-bottom"
+                data-tip="Edit Details"
               >
-                <PencilIcon size={20} className="shrink-0" />
-                <span className="min-w-0 truncate">{ownedScenario.name}</span>
+                <span className="min-w-0 flex items-baseline gap-2">
+                  <span className="truncate">{ownedScenario.name}</span>
+                  <PencilIcon size={14} className="shrink-0" />
+                </span>
               </button>
             </div>
           )}
@@ -217,9 +223,9 @@ export default function AuthoringToolPage() {
             <FilesIcon size={20} />
             Resources
           </button>
-          <button onClick={goToGroups} className="btn btn-phantom text-m">
-            <UsersIcon size={20} />
-            Groups
+          <button onClick={goToDashboard} className="btn btn-phantom text-m">
+            <LayoutDashboardIcon size={20} />
+            Dashboard
           </button>
           {isOwner && (
             <button

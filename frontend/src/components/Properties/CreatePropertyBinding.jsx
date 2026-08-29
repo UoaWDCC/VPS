@@ -43,7 +43,7 @@ export default function CreatePropertyBinding({ component, open, setOpen }) {
   function create() {
     if (!target || !selectedProperty) return;
 
-    modifyComponentProp(component.id, "stateBindings", (bindings) => {
+    modifyComponentProp([component.id], "stateBindings", (bindings) => {
       if (bindings?.some((binding) => binding.target === target.key)) {
         return bindings;
       }
