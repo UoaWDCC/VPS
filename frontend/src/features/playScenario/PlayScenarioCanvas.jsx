@@ -54,23 +54,37 @@ function injectProperties(scene, properties) {
           if (spans.length === 0) return block;
 
           // join all span texts for full-block regex scanning
-          const blockText = spans.map((s) => s.text ?? "").join("");
+          const isChip = (i) => block.spans[i]?.property !== undefined;
+          let blockText = "";
+          const chipRanges = [];
+          //goes through each resolved span
+          //marks resolved property vals to prevent regex rescan
+          spans.forEach((s, i) => {
+            const text = s.text ?? "";
+            if (isChip(i))
+              chipRanges.push([
+                blockText.length,
+                blockText.length + text.length,
+              ]);
+            blockText += text;
+          });
+          const touchesChip = (start, end) =>
+            chipRanges.some(([cs, ce]) => start < ce && end > cs);
 
           // find matches across the whole block
           regex.lastIndex = 0;
           const matches = [];
           let m;
           while ((m = regex.exec(blockText)) !== null) {
+            const start = m.index;
+            const end = regex.lastIndex;
+            //do not convert regex if property value = '$$value$$'
+            if (touchesChip(start, end)) continue;
             const variableName = m[1];
             const replacement = varMap.has(variableName)
               ? String(varMap.get(variableName))
               : null;
-            matches.push({
-              start: m.index,
-              end: regex.lastIndex,
-              original: m[0],
-              replacement,
-            });
+            matches.push({ start, end, original: m[0], replacement });
           }
 
           if (matches.length === 0) return { ...block, spans };

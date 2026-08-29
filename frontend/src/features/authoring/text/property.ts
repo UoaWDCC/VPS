@@ -35,13 +35,13 @@ export function syncPropertyChips(doc: ModelDocument, properties: Property[]) {
       if (!isProperty(span)) continue;
 
       const prop = span.property;
-      const live = byId.get(prop.id);
-      const name = live ?? prop.displayName;
+      const exists = byId.has(prop.id);
+      const name = byId.get(prop.id) ?? prop.displayName;
 
-      if (prop.displayName === name && !!prop.missing === !live) continue;
+      if (prop.displayName === name && !!prop.missing === !exists) continue;
 
       prop.displayName = name;
-      if (live) delete prop.missing;
+      if (exists) delete prop.missing;
       else prop.missing = true;
       changed = true;
     }

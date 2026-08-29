@@ -500,8 +500,12 @@ export function normaliseDocument(doc: ModelDocument, cursor: ModelCursor) {
       // remove empty spans except for ones that are the only in a block
       if (span.text.length === 0) {
         //cursor on removed chip span is collapsed to the previous span
-        if (isCursorBlock && s <= cursor.spanI && newCursor.spanI > 0)
+        if (isCursorBlock && s <= cursor.spanI && newCursor.spanI > 0) {
           newCursor.spanI--;
+          //move cursor to end of preceding span
+          if (s === cursor.spanI && normdSpans.length > 0)
+            newCursor.charI = normdSpans[normdSpans.length - 1].text.length;
+        }
         continue;
       }
 

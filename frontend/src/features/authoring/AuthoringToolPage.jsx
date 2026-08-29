@@ -96,6 +96,8 @@ export default function AuthoringToolPage() {
         const restoredIds = [];
         batch.forEach((item) => {
           const state = operation === "undo" ? item.before : item.after;
+          if (state?.type === "textbox" && state.document && properties)
+            syncPropertyChips(state.document, properties);
           replaceComponent(item.id, state);
           if (state !== null) restoredIds.push(item.id);
         });
