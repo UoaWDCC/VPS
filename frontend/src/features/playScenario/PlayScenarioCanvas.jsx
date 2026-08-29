@@ -8,6 +8,7 @@ import Image from "../authoring/elements/Image";
 import Line from "../authoring/elements/Line";
 import { resolveSceneBindings } from "../../components/Properties/componentBindings";
 import { useMemo } from "react";
+import Background from "../authoring/elements/Background";
 
 const componentMap = {
   textbox: TextBox,
@@ -229,6 +230,7 @@ export default function PlayScenarioCanvas({
           height={CANVAS_HEIGHT}
           fill="var(--color-canvas)"
         />
+        <Background background={sceneToRender.background ?? null} />
         {components}
       </svg>
     </div>

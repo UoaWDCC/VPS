@@ -48,7 +48,7 @@ const CreatePropertyOperation = ({ component, open, setOpen }) => {
         selectedProperty.type === propertyTypes.NUMBER ? Number(value) : value,
     };
 
-    modifyComponentProp(component.id, "stateOperations", (prev) => [
+    modifyComponentProp([component.id], "stateOperations", (prev) => [
       ...(prev ?? []),
       newOperation,
     ]);
