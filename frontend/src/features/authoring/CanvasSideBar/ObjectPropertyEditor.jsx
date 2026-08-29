@@ -1,11 +1,10 @@
-import { getBoxCenter, translate } from "../../authoring/util";
+import { getBoxCenter, translate, correct } from "../../authoring/util";
 import { useEffect, useState, useRef } from "react";
 import { modifyComponentProp } from "../scene/operations/component";
 import {
   SquareCenterlineDashedHorizontal,
   SquareCenterlineDashedVertical,
 } from "lucide-react";
-import { correct } from "../../authoring/util";
 
 export function ObjectPropertyEditor({ component }) {
   // x and y vals used for setting and current
@@ -74,7 +73,7 @@ export function ObjectPropertyEditor({ component }) {
   }, [component.id]);
 
   function flipComponent(axis) {
-    modifyComponentProp(component.id, "bounds.verts", (prev) => {
+    modifyComponentProp([component.id], "bounds.verts", (prev) => {
       const center = getBoxCenter(prev);
       return prev.map((v) => ({
         x: axis === "x" ? 2 * center.x - v.x : v.x,
@@ -82,7 +81,7 @@ export function ObjectPropertyEditor({ component }) {
       }));
     });
     modifyComponentProp(
-      component.id,
+      [component.id],
       "bounds.rotation",
       (prev) => 360 - (prev ?? 0)
     );
@@ -138,18 +137,18 @@ export function ObjectPropertyEditor({ component }) {
 
     if (type === "x") {
       const diff = value - verts[0].x;
-      modifyComponentProp(component.id, "bounds.verts", (prev) =>
+      modifyComponentProp([component.id], "bounds.verts", (prev) =>
         translate(prev, { x: diff, y: 0 })
       );
     } else if (type === "y") {
       const diff = value - verts[0].y;
-      modifyComponentProp(component.id, "bounds.verts", (prev) =>
+      modifyComponentProp([component.id], "bounds.verts", (prev) =>
         translate(prev, { x: 0, y: diff })
       );
       // increase bottom y to expand height and same idea with x
     } else if (type === "width") {
       const rotation = component.bounds.rotation ?? 0;
-      modifyComponentProp(component.id, "bounds.verts", (prev) => {
+      modifyComponentProp([component.id], "bounds.verts", (prev) => {
         const center = getBoxCenter(prev);
         const newVerts = [
           prev[0],
@@ -160,7 +159,7 @@ export function ObjectPropertyEditor({ component }) {
       });
     } else if (type === "height") {
       const rotation = component.bounds.rotation ?? 0;
-      modifyComponentProp(component.id, "bounds.verts", (prev) => {
+      modifyComponentProp([component.id], "bounds.verts", (prev) => {
         const center = getBoxCenter(prev);
         const newVerts = [
           prev[0],
@@ -170,7 +169,7 @@ export function ObjectPropertyEditor({ component }) {
         return correct(newVerts, center, rotation);
       });
     } else if (type === "rotation") {
-      modifyComponentProp(component.id, "bounds.rotation", value % 360);
+      modifyComponentProp([component.id], "bounds.rotation", value % 360);
     }
   }
 
