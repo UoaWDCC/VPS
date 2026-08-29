@@ -19,7 +19,9 @@ export default function CanvasSideBar() {
       <SceneSettings />
       <AudioManager />
       <ComponentSettings component={component} />
-      { component && <ObjectPropertyEditor component={component}></ObjectPropertyEditor>}
+      {component && (
+        <ObjectPropertyEditor component={component}></ObjectPropertyEditor>
+      )}
     </div>
   );
 }
