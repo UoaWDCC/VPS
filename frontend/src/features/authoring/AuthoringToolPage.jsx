@@ -132,7 +132,7 @@ export default function AuthoringToolPage() {
 
     historyEvents.addEventListener("update", listener);
     return () => historyEvents.removeEventListener("update", listener);
-  }, [sceneId, switchScene, setSelected, modifyScene]);
+  }, [sceneId, switchScene, setSelected, modifyScene, properties]);
 
   // if the active scene was deleted, switch to the first available scene
   useEffect(() => {
