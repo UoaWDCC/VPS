@@ -11,9 +11,10 @@ import PlayScenarioCanvas from "./PlayScenarioCanvas";
 import { applyPropertyOperations } from "../../components/Properties/propertyOperations";
 import NotesPanel from "./components/NotesPanel";
 import SceneTimer from "./components/SceneTimer";
+import StartAudioPanel from "./components/StartAudioPanel";
 import {
   BookMarkedIcon,
-  NotebookPenIcon,
+  FilesIcon,
   Volume2Icon,
   VolumeOffIcon,
 } from "lucide-react";
@@ -182,6 +183,7 @@ export default function PlayScenarioPage({ group }) {
 
   const [resourcesOpen, setResourcesOpen] = useState(false);
   const [noteOpen, setNoteOpen] = useState(false);
+  const [startAudioOpen, setStartAudioOpen] = useState(true);
   const [audioAllowed, setAudioAllowed] = useState(false);
 
   const currScene = sceneCache.get(sceneId);
@@ -433,29 +435,23 @@ export default function PlayScenarioPage({ group }) {
       />
 
       <div className="absolute top-2 right-2 z-30 flex items-center gap-2">
-        {audioAllowed ? (
-          <div className="tooltip tooltip-bottom" data-tip="Disable audio">
-            <button
-              className="btn"
-              onClick={() => setAudioAllowed(false)}
-              type="button"
-              aria-label="Disable audio"
-            >
+        <div
+          className="tooltip tooltip-bottom"
+          data-tip={audioAllowed ? "Disable audio" : "Enable audio"}
+        >
+          <button
+            className="btn"
+            onClick={() => setAudioAllowed(!audioAllowed)}
+            type="button"
+            aria-label={audioAllowed ? "Disable audio" : "Enable audio"}
+          >
+            {audioAllowed ? (
               <Volume2Icon size={16} />
-            </button>
-          </div>
-        ) : (
-          <div className="tooltip tooltip-left" data-tip="Enable audio">
-            <button
-              className="btn"
-              onClick={() => setAudioAllowed(true)}
-              type="button"
-              aria-label="Enable audio"
-            >
+            ) : (
               <VolumeOffIcon size={16} />
-            </button>
-          </div>
-        )}
+            )}
+          </button>
+        </div>
         {isMultiplayer && (
           <div className="tooltip tooltip-left" data-tip="Open notes">
             <button
@@ -464,7 +460,7 @@ export default function PlayScenarioPage({ group }) {
               type="button"
               aria-label="Open notes"
             >
-              <NotebookPenIcon size={16} />
+              <FilesIcon size={16} />
             </button>
           </div>
         )}
@@ -480,6 +476,11 @@ export default function PlayScenarioPage({ group }) {
         </div>
       </div>
 
+      <StartAudioPanel
+        open={startAudioOpen}
+        onClose={() => setStartAudioOpen(false)}
+        setAudioAllowed={setAudioAllowed}
+      />
       {isMultiplayer && (
         <NotesPanel
           group={group}
