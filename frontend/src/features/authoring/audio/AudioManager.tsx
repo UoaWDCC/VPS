@@ -10,8 +10,9 @@ import { useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
 import AuthenticationContext from "../../../context/AuthenticationContext";
 import { useParams } from "react-router-dom";
-import { HeadphonesIcon } from "lucide-react";
+import { HeadphonesIcon, PlusIcon } from "lucide-react";
 import AudioSelectModal from "./AudioSelectModal";
+import SidePanel from "../CanvasSideBar/SidePanel";
 
 // before calling validation of file should already be done
 async function addNewAudio(file: File, scenarioId: string, user: User) {
@@ -35,7 +36,13 @@ async function addNewAudio(file: File, scenarioId: string, user: User) {
   add(newAudio);
 }
 
-function AudioManager() {
+function AudioManager({
+  open,
+  onToggle,
+}: {
+  open: boolean;
+  onToggle: () => void;
+}) {
   const components = useVisualScene((state) => state.components);
   const { user } = useContext(AuthenticationContext as Context<{ user: User }>);
   const { scenarioId } = useParams<{ scenarioId: string }>();
@@ -45,7 +52,6 @@ function AudioManager() {
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   const audios = Object.values(components).filter((c) => c.type === "audio");
-  const hasAudios = audios.length > 0;
 
   function handleFileChange(event: React.ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0];
@@ -66,31 +72,52 @@ function AudioManager() {
       });
   }
 
+  function showFilePicker() {
+    fileInputRef.current?.click();
+  }
+
   return (
     <>
-      <div className="collapse w-24 overflow-visible bg-base-300 rounded-sm text-s">
-        {hasAudios && <input type="checkbox" />}
-        <div className="collapse-title w-24 h-24 min-h-0 p-2 flex flex-col items-center justify-center gap-1">
-          <HeadphonesIcon size={30} />
-          <span className="text-xs text-center">Audio Elements</span>
+      <SidePanel
+        label="Audio Elements"
+        Icon={HeadphonesIcon}
+        open={open}
+        onToggle={onToggle}
+      >
+        <div className="mb-3 flex flex-col gap-2">
+          <button
+            type="button"
+            className="flex w-full items-center gap-2 rounded-sm border-0 bg-base-300 px-3 py-2 text-left text-sm shadow-none transition-colors hover:bg-base-100"
+            onClick={showFilePicker}
+          >
+            <PlusIcon size={16} />
+            Upload New Audio
+          </button>
+          <button
+            type="button"
+            className="flex w-full items-center rounded-sm border-0 bg-base-300 px-3 py-2 text-left text-sm shadow-none transition-colors hover:bg-base-100"
+            onClick={() => setModalOpen(true)}
+          >
+            Select Existing Audio
+          </button>
         </div>
 
-        <input
-          ref={fileInputRef}
-          type="file"
-          className="hidden"
-          onChange={handleFileChange}
-          accept="audio/*"
-        />
-
-        {hasAudios && (
-          <div className="collapse-content text--1 bg-base-200 px-0">
-            {audios.map((audio) => (
-              <EditAudioComponent component={audio} key={audio.id} />
-            ))}
-          </div>
+        {audios.length > 0 ? (
+          audios.map((audio) => (
+            <EditAudioComponent component={audio} key={audio.id} />
+          ))
+        ) : (
+          <p className="text-xs opacity-70">No audio elements yet.</p>
         )}
-      </div>
+      </SidePanel>
+
+      <input
+        ref={fileInputRef}
+        type="file"
+        className="hidden"
+        onChange={handleFileChange}
+        accept="audio/*"
+      />
 
       <AudioSelectModal open={modalOpen} setOpen={setModalOpen} />
     </>
