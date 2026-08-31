@@ -184,7 +184,9 @@ export default function PlayScenarioPage({ group }) {
   const [resourcesOpen, setResourcesOpen] = useState(false);
   const [noteOpen, setNoteOpen] = useState(false);
   const [startAudioOpen, setStartAudioOpen] = useState(true);
-  const [audioAllowed, setAudioAllowed] = useState(false);
+  const [audioMuted, setAudioMuted] = useState(false);
+
+  const audioRefs = useRef([]);
 
   const currScene = sceneCache.get(sceneId);
 
@@ -392,15 +394,39 @@ export default function PlayScenarioPage({ group }) {
     onSceneChange();
   };
 
+  const muteAudio = (mute) => {
+    audioRefs.current.forEach((audio) => {
+      audio.muted = mute;
+    });
+    setAudioMuted(mute);
+  };
+
+  const playAudios = () => {
+    audioRefs.current.forEach((audio) => {
+      audio.play();
+    });
+  };
+
   useEffect(() => {
-    if (!currScene || !audioAllowed) return;
+    if (!currScene) return;
     try {
-      const endPlayback = playAudios(currScene);
-      return () => endPlayback();
+      const audios = currScene.components.filter((c) => c.type === "audio");
+      audioRefs.current = audios.map((audio) => new Audio(audio.url));
+      audioRefs.current.forEach((audio) => {
+        audio.loop = audios.find((a) => a.url === audio.src)?.loop || false;
+        audio.muted = true;
+      });
+      return () => {
+        audioRefs.current.forEach((audio) => {
+          audio.pause();
+          audio.currentTime = 0;
+        });
+        audioRefs.current = [];
+      };
     } catch {
       toast.error("The audio on this scene failed to play");
     }
-  }, [currScene, audioAllowed]);
+  }, [currScene]);
 
   if (loading) return <LoadingPage text="Loading Scene..." />;
   if (authError) return <></>;
@@ -437,18 +463,18 @@ export default function PlayScenarioPage({ group }) {
       <div className="absolute top-2 right-2 z-30 flex items-center gap-2">
         <div
           className="tooltip tooltip-bottom"
-          data-tip={audioAllowed ? "Disable audio" : "Enable audio"}
+          data-tip={audioMuted ? "Unmute audio" : "Mute audio"}
         >
           <button
             className="btn"
-            onClick={() => setAudioAllowed(!audioAllowed)}
+            onClick={() => muteAudio(!audioMuted)}
             type="button"
-            aria-label={audioAllowed ? "Disable audio" : "Enable audio"}
+            aria-label={audioMuted ? "Unmute audio" : "Mute audio"}
           >
-            {audioAllowed ? (
-              <Volume2Icon size={16} />
-            ) : (
+            {audioMuted ? (
               <VolumeOffIcon size={16} />
+            ) : (
+              <Volume2Icon size={16} />
             )}
           </button>
         </div>
@@ -479,7 +505,8 @@ export default function PlayScenarioPage({ group }) {
       <StartAudioPanel
         open={startAudioOpen}
         onClose={() => setStartAudioOpen(false)}
-        setAudioAllowed={setAudioAllowed}
+        muteAudio={muteAudio}
+        playAudios={playAudios}
       />
       {isMultiplayer && (
         <NotesPanel
