@@ -1,10 +1,7 @@
 import { getBoxCenter, translate, correct } from "../../authoring/util";
 import { useEffect, useState, useRef } from "react";
 import { modifyComponentProp } from "../scene/operations/component";
-import {
-  SquareCenterlineDashedHorizontal,
-  SquareCenterlineDashedVertical,
-} from "lucide-react";
+import { FlipHorizontal2, FlipVertical2 } from "lucide-react";
 
 export function ObjectPropertyEditor({ component }) {
   // x and y vals used for setting and current
@@ -249,7 +246,7 @@ export function ObjectPropertyEditor({ component }) {
                   className="hover:bg-stone-800 cursor-pointer rounded-sm"
                   onClick={() => flipComponent("x")}
                 >
-                  <SquareCenterlineDashedHorizontal className="m-2" />
+                  <FlipHorizontal2 className="m-2" />
                 </button>
                 <button
                   type="button"
@@ -258,7 +255,7 @@ export function ObjectPropertyEditor({ component }) {
                   className="hover:bg-stone-800 cursor-pointer rounded-sm"
                   onClick={() => flipComponent("y")}
                 >
-                  <SquareCenterlineDashedVertical className="m-2" />
+                  <FlipVertical2 className="m-2" />
                 </button>
               </div>
             </div>

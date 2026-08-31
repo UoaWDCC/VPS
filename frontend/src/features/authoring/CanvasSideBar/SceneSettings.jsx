@@ -124,7 +124,7 @@ export default function SceneSettings() {
               className="input"
               placeholder="No timer"
             />
-            {time > 0 && <TimerStateOperationMenu />}
+            {time > 0 && <TimerPropertyOperationMenu />}
             <label className="label">Roles</label>
             <div className="dropdown" onBlur={saveSceneRoles}>
               <div
@@ -217,7 +217,6 @@ export default function SceneSettings() {
           </fieldset>
         </div>
       </div>
-      {time > 0 && <TimerPropertyOperationMenu />}
     </>
   );
 }
