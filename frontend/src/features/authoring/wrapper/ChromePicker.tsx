@@ -39,33 +39,31 @@ function ChromePicker({
 
       const colour = latestColour.current;
 
-      if (colour !== committedColour.current) {
-        onChangeRef.current(colour);
-        committedColour.current = colour;
-      }
+      onChangeRef.current(colour);
+      committedColour.current = colour;
 
       hasPendingChange.current = false;
     }
 
-    function handleClick(event: MouseEvent) {
+    function handleOutsideMouseDown(event: MouseEvent) {
       if (ref.current && !ref.current.contains(event.target as Node)) {
         commitPendingColour();
         setOpen(false);
       }
     }
 
-    function handlePointerUp() {
+    function handleMouseUp() {
       if (open) {
         commitPendingColour();
       }
     }
 
-    document.addEventListener("mousedown", handleClick, true);
-    document.addEventListener("pointerup", handlePointerUp);
+    document.addEventListener("mousedown", handleOutsideMouseDown, true);
+    document.addEventListener("mouseup", handleMouseUp);
 
     return () => {
-      document.removeEventListener("mousedown", handleClick, true);
-      document.removeEventListener("pointerup", handlePointerUp);
+      document.removeEventListener("mousedown", handleOutsideMouseDown, true);
+      document.removeEventListener("mouseup", handleMouseUp);
     };
   }, [open]);
 

@@ -24,6 +24,32 @@ function extractProps(selected: string): ShapeProps {
   };
 }
 
+function setShapeComponentProp(
+  component: NonNullable<ReturnType<typeof getComponent>>,
+  prop: keyof ShapeProps,
+  value: string | number
+) {
+  switch (prop) {
+    case "fill":
+      if ("fill" in component && typeof value === "string") {
+        component.fill = value;
+      }
+      break;
+
+    case "stroke":
+      if ("stroke" in component && typeof value === "string") {
+        component.stroke = value;
+      }
+      break;
+
+    case "strokeWidth":
+      if ("strokeWidth" in component && typeof value === "number") {
+        component.strokeWidth = value;
+      }
+      break;
+  }
+}
+
 const widths = [1, 2, 3, 4, 8, 12, 16, 24];
 
 function ShapeSection() {
@@ -52,7 +78,7 @@ function ShapeSection() {
       previewStart.current = structuredClone(component);
     }
 
-    (component as unknown as Record<string, unknown>)[prop] = value;
+    setShapeComponentProp(component, prop, value);
 
     useVisualScene.getState().updateComponent(buildVisualComponent(component));
 
@@ -64,7 +90,7 @@ function ShapeSection() {
 
     if (!component) return;
 
-    (component as unknown as Record<string, unknown>)[prop] = value;
+    setShapeComponentProp(component, prop, value);
 
     const previous = previewStart.current;
 
