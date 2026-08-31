@@ -139,23 +139,6 @@ const refreshFromServer = async (user, scenarioId, groupId, isMultiplayer) => {
   };
 };
 
-function playAudios(scene) {
-  const audios = scene.components.filter((c) => c.type === "audio");
-  const playables = [];
-  for (const audio of audios) {
-    const playable = new Audio(audio.url);
-    playable.loop = audio.loop;
-    playable.play();
-    playables.push(playable);
-  }
-  return () => {
-    for (const p of playables) {
-      p.pause();
-      p.currentTime = 0;
-    }
-  };
-}
-
 /**
  * This page allows users to play a scenario.
  *
