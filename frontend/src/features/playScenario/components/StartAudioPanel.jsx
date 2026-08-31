@@ -4,7 +4,7 @@ import PanelOverlay from "./PanelOverlay";
 export default function StartAudioPanel({
   open,
   onClose,
-  muteAudio,
+  setAudioMuted,
   playAudios,
 }) {
   // Close on Escape
@@ -36,7 +36,7 @@ export default function StartAudioPanel({
           <button
             className="btn"
             onClick={() => {
-              muteAudio(false);
+              setAudioMuted(false);
               playAudios();
               onClose();
             }}
@@ -48,7 +48,7 @@ export default function StartAudioPanel({
           <button
             className="btn"
             onClick={() => {
-              muteAudio(true);
+              setAudioMuted(true);
               playAudios();
               onClose();
             }}
