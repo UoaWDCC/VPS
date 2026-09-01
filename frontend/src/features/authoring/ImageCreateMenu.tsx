@@ -10,7 +10,13 @@ import { useParams } from "react-router-dom";
 import { ImageIcon } from "lucide-react";
 import { add } from "./scene/operations/modifiers";
 import { defaults } from "./scene/operations/component";
-import type { ImageComponent, UploadedFile, Scene } from "./types";
+import type {
+  Bounds,
+  ImageComponent,
+  UploadedFile,
+  Scene,
+  Vec2,
+} from "./types";
 import { handleGeneric } from "../../util/api";
 import ModalDialog from "../../components/ModalDialogue";
 import useEditorStore from "./stores/editor.ts";
@@ -23,6 +29,10 @@ import { getImages, uploadImage } from "./images";
 
 type ModifyScene = (scene: Scene) => Promise<unknown> | undefined;
 
+// Time the placeholder is held over the finished image so its blur and label
+// can finish resolving, rather than the two swapping in a single frame.
+const HANDOFF_MS = 250;
+
 const ACCEPTED_IMAGE_MIME_TYPES = [
   "image/png",
   "image/jpeg",
@@ -33,7 +43,8 @@ const ACCEPTED_IMAGE_MIME_TYPES = [
 async function addImageToScene(
   image: UploadedFile,
   originScene: Scene,
-  modifyScene: ModifyScene
+  modifyScene: ModifyScene,
+  verts?: Vec2[]
 ) {
   const newImage = structuredClone(defaults.image) as Partial<ImageComponent>;
 
@@ -42,7 +53,7 @@ async function addImageToScene(
   newImage.id = imageId;
   newImage.fileId = image._id;
   newImage.href = image.url;
-  newImage.bounds!.verts = await getImageDimensions(image.url);
+  newImage.bounds!.verts = verts ?? (await getImageDimensions(image.url));
 
   // Still on the slide where the operation began:
   // add normally so visual state/history are updated.
@@ -66,21 +77,65 @@ async function addNewImage(
   modifyScene: ModifyScene,
   queryClient: QueryClient
 ) {
-  const { setLoading } = useEditorStore.getState();
-  setLoading(true);
+  const { addPendingImage, updatePendingImage, removePendingImage } =
+    useEditorStore.getState();
+
+  // Measure and preview the local file so a placeholder of the right size can
+  // be shown on the canvas for the duration of the upload.
+  const previewUrl = URL.createObjectURL(file);
+  const placeholderId = v4();
 
   try {
-    const image = await uploadImage(user, scenarioId, file);
+    const verts = await getImageDimensions(previewUrl);
+    const bounds: Bounds = { verts, rotation: 0 };
+
+    addPendingImage({
+      id: placeholderId,
+      sceneId: originScene._id,
+      bounds,
+      previewUrl,
+      progress: 0,
+      settled: false,
+    });
+
+    const image = await uploadImage(user, scenarioId, file, (fraction) =>
+      // Hold the last tenth back: the bytes are sent, but the server still has
+      // to store the file and answer.
+      updatePendingImage(placeholderId, { progress: fraction * 0.9 })
+    );
+
     await queryClient.invalidateQueries({
       queryKey: ["images", scenarioId],
     });
-    await addImageToScene(image, originScene, modifyScene);
+
+    // Decode the uploaded file before handing over, so the placeholder is
+    // never replaced by an empty frame while the browser fetches it.
+    await preload(image.url);
+    updatePendingImage(placeholderId, { progress: 1, settled: true });
+
+    await addImageToScene(image, originScene, modifyScene, verts);
+
+    // The placeholder now sits over the real image, unblurred and showing the
+    // same picture, so removing it is invisible.
+    await wait(HANDOFF_MS);
   } catch (e) {
     console.error(e);
     toast.error("Image upload failed");
   } finally {
-    setLoading(false);
+    removePendingImage(placeholderId);
+    URL.revokeObjectURL(previewUrl);
   }
+}
+
+function wait(ms: number) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+async function preload(url: string) {
+  const img = new Image();
+  img.src = url;
+  // a failure here is not fatal — the <image> element will load it anyway
+  await img.decode().catch(() => {});
 }
 
 async function getImageDimensions(url: string, defaultHeight = 300) {
