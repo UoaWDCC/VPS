@@ -1,5 +1,5 @@
 import { useContext, useState, useEffect } from "react";
-import { Check, ChevronDown, PencilIcon } from "lucide-react";
+import { Check, ChevronDown } from "lucide-react";
 import ScenarioContext from "context/ScenarioContext";
 import SceneContext from "context/SceneContext";
 import { generateUniqueSceneName } from "../../../utils/sceneUtils";
@@ -12,7 +12,6 @@ import shallow from "zustand/shallow";
 import toast from "react-hot-toast";
 import TimerPropertyOperationMenu from "../../../components/Properties/TimerPropertyOperationMenu";
 import SelectInput from "../components/Select";
-import BackgroundMenu from "./BackgroundMenu";
 
 /**
  * This component displays the settings of a scene, such as the scene name
@@ -31,12 +30,10 @@ export default function SceneSettings() {
     defaultTarget: defaultDirectLinkScene,
   } = useDirectLink();
   const time = useVisualScene((scene) => scene.time);
-  const background = useVisualScene((scene) => scene.background);
 
   const [selectedRoles, setSelectedRoles] = useState(roles ?? []);
   const [sceneName, setSceneName] = useState(name ?? "");
   const [timerDuration, setTimerDuration] = useState(time ?? "");
-  const [showBackgroundMenu, setShowBackgroundMenu] = useState(false);
 
   useEffect(() => {
     if (!name || name === sceneName) return;
@@ -101,18 +98,8 @@ export default function SceneSettings() {
     else setSelectedRoles((prev) => prev.filter((r) => r !== role));
   }
 
-  const backgroundLabel = !background
-    ? "None"
-    : background.kind === "color"
-      ? background.color
-      : "Image";
-
   return (
     <>
-      <BackgroundMenu
-        show={showBackgroundMenu}
-        setShow={setShowBackgroundMenu}
-      />
       <div className="collapse collapse-arrow bg-base-300 rounded-sm text-s has-[>input:checked]:overflow-visible">
         <input type="checkbox" />
         <div className="collapse-title">Scene Details</div>
@@ -127,23 +114,6 @@ export default function SceneSettings() {
               className="input"
               placeholder="Awesome Scene"
             />
-            <label className="label">Background</label>
-            <button
-              type="button"
-              className="justify-between input font-normal w-full"
-              onClick={() => setShowBackgroundMenu(true)}
-            >
-              <span className="flex min-w-0 items-center gap-2">
-                {background?.kind === "color" && (
-                  <span
-                    className="size-4 shrink-0 rounded-xs border border-base-300"
-                    style={{ background: background.color }}
-                  />
-                )}
-                <span className="truncate">{backgroundLabel}</span>
-              </span>
-              <PencilIcon size={14} className="shrink-0" />
-            </button>
             <label className="label">Timer Duration (seconds)</label>
             <input
               type="number"
