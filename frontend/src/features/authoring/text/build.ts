@@ -13,7 +13,7 @@ const fallback: BaseTextStyle = {
   alignment: "center",
   lineHeight: 1.1,
   fontFamily: "Arial",
-  fontSize: 16,
+  fontSize: 24,
   fontWeight: "normal",
   fontStyle: "normal",
   textDecoration: "none",

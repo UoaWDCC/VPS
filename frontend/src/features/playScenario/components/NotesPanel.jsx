@@ -6,6 +6,7 @@ import { XIcon } from "lucide-react";
 import AuthenticationContext from "context/AuthenticationContext";
 import NotesList from "./NotesList";
 import NoteDetail from "./NoteDetail";
+import PanelOverlay from "../../../components/PanelOverlay";
 
 export default function NotesPanel({ group, open, onClose }) {
   const { user } = useContext(AuthenticationContext);
@@ -131,15 +132,7 @@ export default function NotesPanel({ group, open, onClose }) {
 
   return (
     <>
-      <div
-        className={`fixed inset-0 z-50 bg-base-100/95 transition-opacity ${
-          open
-            ? "opacity-100 pointer-events-auto"
-            : "opacity-0 pointer-events-none"
-        }`}
-        onClick={onClose}
-        aria-hidden="true"
-      />
+      <PanelOverlay open={open} onClose={onClose} />
 
       <div
         className={`fixed inset-0 z-50 flex items-center justify-center transition-all ${open ? "opacity-100 scale-100 pointer-events-auto" : "opacity-0 scale-95 pointer-events-none"}`}

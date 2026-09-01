@@ -18,7 +18,7 @@ export const defaults = {
     bounds: {
       verts: [
         { x: 0, y: 0 },
-        { x: 400, y: 100 },
+        { x: 600, y: 100 },
       ],
       rotation: 0,
     },
@@ -26,11 +26,11 @@ export const defaults = {
       style: {},
       blocks: [
         {
-          style: {},
+          style: { alignment: "left" },
           spans: [
             {
               style: {},
-              text: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla venenatis.",
+              text: "",
             },
           ],
         },
@@ -126,8 +126,8 @@ export function parseComponent(component: Component, zIndex?: number) {
   return add(component);
 }
 
-export function getNextZIndex() {
-  const zIndices = Object.values(getScene().components).map((c) => c.zIndex);
+export function getNextZIndex(components = getScene().components) {
+  const zIndices = Object.values(components).map((c) => c.zIndex ?? 0);
   return zIndices.length ? Math.max(...zIndices) + 1 : 0;
 }
 
@@ -217,9 +217,20 @@ function shiftComponentLayers(
   const components = Object.values(getScene().components);
   const selectedIds = new Set(ids);
 
-  // Sort components by zIndex (ascending) and capture the original zIndex scale
-  const sortedComponents = [...components].sort((a, b) => a.zIndex - b.zIndex);
-  const zIndexScale = sortedComponents.map((c) => c.zIndex);
+  // Sort by zIndex (ascending) — this is the order the canvas renders
+  const sortedComponents = [...components].sort(
+    (a, b) => (a.zIndex ?? 0) - (b.zIndex ?? 0)
+  );
+  const rawZIndexScale = sortedComponents.map((c) => c.zIndex ?? 0);
+
+  // Components tied on one zIndex have no order to swap, so reordering them
+  // against the original scale writes back the values they already had.
+  // Renumber onto a strictly increasing scale first; the sort is stable, so
+  // this preserves the order currently on screen.
+  const hasDuplicates = new Set(rawZIndexScale).size !== rawZIndexScale.length;
+  const zIndexScale = hasDuplicates
+    ? sortedComponents.map((_, index) => index)
+    : rawZIndexScale;
 
   let newSortedComponents: Component[] = [];
 
@@ -264,6 +275,13 @@ function shiftComponentLayers(
       }
     }
   }
+
+  // Renumbering rewrites every tied component, so a reorder that moves nothing
+  // must bail out before it costs an undo step and a full-scene save.
+  const orderUnchanged = newSortedComponents.every(
+    (comp, index) => comp.id === sortedComponents[index].id
+  );
+  if (orderUnchanged) return;
 
   // Apply target zIndices back to modified components
   const changed = newSortedComponents
