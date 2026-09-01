@@ -4,7 +4,7 @@ import type { BaseTextStyle, Bounds, Guide, Vec2 } from "../types";
 import { getComponent } from "../scene/scene";
 import { getStyleForSelection } from "../scene/operations/text";
 
-type Mode = "normal" | "resize" | "create" | "text" | "mutation";
+type Mode = "normal" | "resize" | "create" | "text" | "mutation" | "marquee";
 
 // An image that is being uploaded, drawn on the canvas until the real
 // component takes its place.
