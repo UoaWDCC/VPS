@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import PanelOverlay from "./PanelOverlay";
+import PanelOverlay from "../../../components/PanelOverlay";
 
 export default function StartAudioPanel({
   open,

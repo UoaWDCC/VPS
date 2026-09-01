@@ -18,7 +18,7 @@ import {
   Volume2Icon,
   VolumeOffIcon,
 } from "lucide-react";
-import ResourcesOverlay from "../resources/ResourcesOverlay";
+import ResourcesPanel from "../resources/ResourcesOverlay";
 
 const sceneCache = new Map();
 
@@ -501,7 +501,7 @@ export default function PlayScenarioPage({ group }) {
           onClose={() => setNoteOpen(false)}
         />
       )}
-      <ResourcesOverlay
+      <ResourcesPanel
         scenarioId={scenarioId}
         properties={properties}
         open={resourcesOpen}

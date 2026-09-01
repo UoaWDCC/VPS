@@ -6,7 +6,7 @@ import { XIcon } from "lucide-react";
 import AuthenticationContext from "context/AuthenticationContext";
 import NotesList from "./NotesList";
 import NoteDetail from "./NoteDetail";
-import PanelOverlay from "./PanelOverlay";
+import PanelOverlay from "../../../components/PanelOverlay";
 
 export default function NotesPanel({ group, open, onClose }) {
   const { user } = useContext(AuthenticationContext);
