@@ -31,12 +31,11 @@ function EditableResourceTree({
                     resource={resource}
                     disabled={isTemp(resource)}
                     onSelect={() => setSelectedResourceId(resource._id)}
-                    isSelected={selectedResourceId === resource._id}
                     onRename={(name) => renameResource(resource, name)}
                     actions={
                       <>
                         <button
-                          className="btn btn-phantom btn-xs px-1.5 h-full"
+                          className="btn btn-phantom btn-xs px-1.5 h-9"
                           onClick={(e) => {
                             e.preventDefault();
                             e.stopPropagation();
@@ -48,7 +47,7 @@ function EditableResourceTree({
                           <XIcon size={16} />
                         </button>
                         <button
-                          className="btn btn-phantom btn-xs px-1.5 h-full"
+                          className="btn btn-phantom btn-xs px-1.5 h-9"
                           disabled={isTemp(resource)}
                           onClick={(event) => {
                             event.preventDefault();
