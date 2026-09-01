@@ -7,6 +7,7 @@ import SelectInput from "../components/Select";
 import PropertyBindingMenu from "../../../components/Properties/PropertyBindingMenu";
 import SidePanel from "./SidePanel";
 import { LinkIcon } from "lucide-react";
+import { ObjectPropertyEditor } from "./ObjectPropertyEditor";
 
 /**
  * This component displays the properties the selected scene component
@@ -65,6 +66,11 @@ export default function ComponentSettings({
           />
         </>
       )}
+      <ObjectPropertyEditor
+        component={component}
+        open={activePanel === "object-properties"}
+        onToggle={() => onTogglePanel("object-properties")}
+      />
     </>
   );
 }

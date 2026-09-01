@@ -4,7 +4,6 @@ import useVisualScene from "../stores/visual";
 import AudioManager from "../audio/AudioManager";
 import ComponentSettings from "./ComponentSettings";
 import SceneSettings from "./SceneSettings";
-import { ObjectPropertyEditor } from "./ObjectPropertyEditor";
 
 /**
  * This component displays the properties of scene components in a sidebar
@@ -40,9 +39,6 @@ export default function CanvasSideBar() {
         activePanel={activePanel}
         onTogglePanel={togglePanel}
       />
-      {component && (
-        <ObjectPropertyEditor component={component}></ObjectPropertyEditor>
-      )}
     </div>
   );
 }
