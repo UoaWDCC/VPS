@@ -29,7 +29,7 @@ export default function SidePanel({ label, Icon, open, onToggle, children }) {
         aria-expanded={open}
         aria-label={label}
       >
-        <Icon size={30} />
+        <Icon size={20} />
         <span className="text-xs text-center">{label}</span>
       </button>
     </div>
