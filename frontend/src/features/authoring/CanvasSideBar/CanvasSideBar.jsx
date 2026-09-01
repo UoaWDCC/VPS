@@ -78,7 +78,7 @@ export default function CanvasSideBar() {
 
     previousStackTopRef.current = currentTop;
     previousSelectionPresenceRef.current = hasSelection;
-  }, [selected, component?.clickable]);
+  }, [selected, component?.clickable, activePanel]);
 
   return (
     <div
