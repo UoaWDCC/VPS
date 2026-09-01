@@ -9,7 +9,7 @@ import { type User } from "firebase/auth";
 import { useParams } from "react-router-dom";
 import { ImageIcon } from "lucide-react";
 import { add } from "./scene/operations/modifiers";
-import { defaults } from "./scene/operations/component";
+import { defaults, getNextZIndex } from "./scene/operations/component";
 import type { ImageComponent, UploadedFile, Scene } from "./types";
 import { handleGeneric } from "../../util/api";
 import ModalDialog from "../../components/ModalDialogue";
@@ -47,12 +47,16 @@ async function addImageToScene(
   // Still on the slide where the operation began:
   // add normally so visual state/history are updated.
   if (getSceneId() === originScene._id) {
+    // Images bypass createComponentFromBounds, so the top-of-stack zIndex that
+    // every other component type gets on creation has to be assigned here.
+    newImage.zIndex = getNextZIndex();
     add(newImage);
     return;
   }
 
   // User moved to another slide while the image was loading.
   // Add it to the original slide instead of the currently active one.
+  newImage.zIndex = getNextZIndex(originScene.components);
   originScene.components[imageId] = newImage as ImageComponent;
 
   await modifyScene(originScene);

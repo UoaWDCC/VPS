@@ -126,8 +126,8 @@ export function parseComponent(component: Component, zIndex?: number) {
   return add(component);
 }
 
-export function getNextZIndex() {
-  const zIndices = Object.values(getScene().components).map((c) => c.zIndex);
+export function getNextZIndex(components = getScene().components) {
+  const zIndices = Object.values(components).map((c) => c.zIndex ?? 0);
   return zIndices.length ? Math.max(...zIndices) + 1 : 0;
 }
 
