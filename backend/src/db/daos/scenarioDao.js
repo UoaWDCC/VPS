@@ -26,6 +26,7 @@ const addThumbs = async (scenarios) => {
         };
       const thumbnail = await Scene.findById(scenario.scenes[0], {
         components: 1,
+        background: 1,
         _id: 0,
       }).lean();
       return {
