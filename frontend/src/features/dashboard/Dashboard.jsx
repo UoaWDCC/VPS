@@ -1,5 +1,11 @@
 import { useGet } from "hooks/crudHooks";
-import { useParams, useHistory, useRouteMatch, Switch } from "react-router-dom";
+import {
+  useParams,
+  useHistory,
+  useLocation,
+  useRouteMatch,
+  Switch,
+} from "react-router-dom";
 import { useContext, useEffect, useState, useMemo } from "react";
 import toast from "react-hot-toast";
 import { api } from "../../util/api";
@@ -9,8 +15,9 @@ import CreateGraphData from "./utils/GraphHelper";
 import ScenarioGraph from "./components/ScenarioGraph";
 import ProtectedRoute from "../../firebase/ProtectedRoute";
 import ViewGroup from "./components/ViewGroup";
+import ManageGroupsPage from "../groups/ManageGroupsPage";
 import AuthenticationContext from "../../context/AuthenticationContext";
-import { ArrowLeftIcon, SearchIcon } from "lucide-react";
+import { ArrowLeftIcon, SearchIcon, UsersIcon } from "lucide-react";
 
 /**
  * Could maybe add some info about the scenario? Who created what time, last edited, thumbnail of the scenario and an overlay edit button * which directs you to the edit page?
@@ -20,8 +27,11 @@ import { ArrowLeftIcon, SearchIcon } from "lucide-react";
 
 export default function Dashboard() {
   const history = useHistory();
+  const location = useLocation();
   const { scenarioId } = useParams();
   const { path, url } = useRouteMatch();
+  const cameFromCanvas =
+    new URLSearchParams(location.search).get("from") === "canvas";
 
   const [scenarioGroupInfo, setScenarioGroupInfo] = useState([]);
   const [scenario, setCurrentScenario] = useState({});
@@ -38,9 +48,14 @@ export default function Dashboard() {
   const isViewGroupMode = Boolean(matchViewGroup);
   const viewGroupId = matchViewGroup?.params.groupId || 0;
 
-  // From the group list, back goes home; from a group's page, back goes to the group list
+  // From the group list, back goes home (or the canvas, if that's where we
+  // came from); from a group's page, back goes to the group list
   function goBack() {
-    history.push(isViewGroupMode ? url : "/dashboard");
+    if (isViewGroupMode) {
+      history.push(`${url}${location.search}`);
+      return;
+    }
+    history.push(cameFromCanvas ? `/scenario/${scenarioId}` : "/dashboard");
   }
 
   useGet(`api/dashboard/scenarios/${scenarioId}`, setCurrentScenario);
@@ -65,7 +80,7 @@ export default function Dashboard() {
   );
 
   const viewGroup = async (groupId) => {
-    history.push(`${url}/view-group/${groupId}`);
+    history.push(`${url}/view-group/${groupId}${location.search}`);
   };
 
   // Jumps to the Members tab, filtered down to just this member's group
@@ -183,93 +198,117 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="flex flex-col h-[100vh] w-[100vw]">
-      <div className="flex pt-l px-l">
-        <button onClick={goBack} className="btn btn-phantom text-m">
-          <ArrowLeftIcon size={20} />
-          Back
-        </button>
-      </div>
-      <div className="h-full px-10 py-7 overflow-y-scroll ">
-        <h1 className="text-3xl font-ibm font-bold">
-          {heading ? heading : <span className="invisible">placeholder</span>}
-        </h1>
-        <div className="flex gap-10">
-          {/* Left side coloumn */}
-          <div className="w-1/2 min-w-0">
-            <Switch>
-              <ProtectedRoute exact path={path}>
-                <DashGroupInfo
-                  className={"mb-10"}
-                  groupData={scenarioGroupInfo}
-                />
-                <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-2xl font-bold">
-                    {activeTab === "groups" ? "Groups" : "Members"}
-                  </h2>
-                  <div className="join">
-                    <button
-                      className={`btn btn-ghost join-item ${activeTab === "groups" ? "text-base-content" : "text-base-content/60 hover:bg-primary/10 hover:text-primary"}`}
-                      onClick={() => setActiveTab("groups")}
-                    >
-                      Groups
-                    </button>
-                    <button
-                      className={`btn btn-ghost join-item ${activeTab === "members" ? "text-base-content" : "text-base-content/60 hover:bg-primary/10 hover:text-primary"}`}
-                      onClick={() => setActiveTab("members")}
-                    >
-                      Members
-                    </button>
-                  </div>
-                </div>
-                {activeTab === "members" && (
-                  <label className="input search w-full mb-4">
-                    <input
-                      type="search"
-                      placeholder="Search members by name, email, or group"
-                      value={memberSearch}
-                      onChange={(e) => setMemberSearch(e.target.value)}
-                    />
-                    <SearchIcon size={18} />
-                  </label>
-                )}
-                {!isLoading &&
-                  (activeTab === "groups" ? (
-                    <DashGroupTable
-                      key="groups"
-                      groupInfo={scenarioGroupInfo}
-                      rowClick={viewGroup}
-                      onMemberClick={handleMemberClick}
-                    />
-                  ) : (
-                    <DashGroupTable
-                      key="members"
-                      groupInfo={filteredMembers}
-                      onRevoke={isOwner ? handleRevoke : undefined}
-                    />
-                  ))}
-              </ProtectedRoute>
-              <ProtectedRoute path={`${path}/view-group/:groupId`}>
-                <ViewGroup groupInfo={groupInfo} />
-              </ProtectedRoute>
-            </Switch>
+    <Switch>
+      <ProtectedRoute path={`${path}/manage-groups`}>
+        <ManageGroupsPage onUpload={reFetchGroups} />
+      </ProtectedRoute>
+      <ProtectedRoute path={path}>
+        <div className="flex flex-col h-[100vh] w-[100vw]">
+          <div className="flex pt-l px-l">
+            <button onClick={goBack} className="btn btn-phantom text-m">
+              <ArrowLeftIcon size={20} />
+              Back
+            </button>
+            {!isViewGroupMode && (
+              <button
+                onClick={() =>
+                  history.push(`${url}/manage-groups${location.search}`)
+                }
+                className="btn btn-phantom text-m ml-auto"
+              >
+                <UsersIcon size={20} />
+                Assign Players
+              </button>
+            )}
           </div>
-          {/* Right side coloum - used for graph */}
-          <div className="w-1/2 min-w-0">
-            <h3 className="text-3xl font-ibm font-bold">Scenario Overview</h3>
-            <ReactFlowProvider>
-              <ScenarioGraph
-                inNodes={nodes}
-                inEdges={edges}
-                inGPathEdges={groupEdges}
-                inGPath={groupPath}
-                inSceneMap={sceneMap}
-                className="h-[700px]"
-              />
-            </ReactFlowProvider>
+          <div className="h-full px-10 py-7 overflow-y-scroll ">
+            <h1 className="text-3xl font-ibm font-bold">
+              {heading ? (
+                heading
+              ) : (
+                <span className="invisible">placeholder</span>
+              )}
+            </h1>
+            <div className="flex gap-10">
+              {/* Left side coloumn */}
+              <div className="w-1/2 min-w-0">
+                <Switch>
+                  <ProtectedRoute exact path={path}>
+                    <DashGroupInfo
+                      className={"mb-10"}
+                      groupData={scenarioGroupInfo}
+                    />
+                    <div className="flex items-center justify-between mb-4">
+                      <h2 className="text-2xl font-bold">
+                        {activeTab === "groups" ? "Groups" : "Members"}
+                      </h2>
+                      <div className="join">
+                        <button
+                          className={`btn btn-ghost join-item ${activeTab === "groups" ? "text-base-content" : "text-base-content/60 hover:bg-primary/10 hover:text-primary"}`}
+                          onClick={() => setActiveTab("groups")}
+                        >
+                          Groups
+                        </button>
+                        <button
+                          className={`btn btn-ghost join-item ${activeTab === "members" ? "text-base-content" : "text-base-content/60 hover:bg-primary/10 hover:text-primary"}`}
+                          onClick={() => setActiveTab("members")}
+                        >
+                          Members
+                        </button>
+                      </div>
+                    </div>
+                    {activeTab === "members" && (
+                      <label className="input search w-full mb-4">
+                        <input
+                          type="search"
+                          placeholder="Search members by name, email, or group"
+                          value={memberSearch}
+                          onChange={(e) => setMemberSearch(e.target.value)}
+                        />
+                        <SearchIcon size={18} />
+                      </label>
+                    )}
+                    {!isLoading &&
+                      (activeTab === "groups" ? (
+                        <DashGroupTable
+                          key="groups"
+                          groupInfo={scenarioGroupInfo}
+                          rowClick={viewGroup}
+                          onMemberClick={handleMemberClick}
+                        />
+                      ) : (
+                        <DashGroupTable
+                          key="members"
+                          groupInfo={filteredMembers}
+                          onRevoke={isOwner ? handleRevoke : undefined}
+                        />
+                      ))}
+                  </ProtectedRoute>
+                  <ProtectedRoute path={`${path}/view-group/:groupId`}>
+                    <ViewGroup groupInfo={groupInfo} />
+                  </ProtectedRoute>
+                </Switch>
+              </div>
+              {/* Right side coloum - used for graph */}
+              <div className="w-1/2 min-w-0">
+                <h3 className="text-3xl font-ibm font-bold">
+                  Scenario Overview
+                </h3>
+                <ReactFlowProvider>
+                  <ScenarioGraph
+                    inNodes={nodes}
+                    inEdges={edges}
+                    inGPathEdges={groupEdges}
+                    inGPath={groupPath}
+                    inSceneMap={sceneMap}
+                    className="h-[700px]"
+                  />
+                </ReactFlowProvider>
+              </div>
+            </div>
           </div>
         </div>
-      </div>
-    </div>
+      </ProtectedRoute>
+    </Switch>
   );
 }

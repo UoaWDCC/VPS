@@ -4,11 +4,13 @@ input[type="number"] {
   -moz-appearance: textfield;
 }
 
-.topbar.menu li > a {
+.topbar.menu li > a,
+.topbar.menu li > button {
   @apply p-1.5;
 }
 
-.topbar.menu li > a:has(> div) {
+.topbar.menu li > a:has(> div),
+.topbar.menu li > button:has(> div) {
   @apply p-1.25;
 }
 

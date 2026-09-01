@@ -8,29 +8,30 @@ import FabMenu from "../../components/FabMenu";
 import { ArrowLeftIcon, SearchIcon } from "lucide-react";
 import ModalDialog from "../../components/ModalDialogue";
 import DetailEditModal from "./components/DetailEditModal";
+import { dedupById } from "../../util/dedup";
 
 function ScenarioInfo() {
-  const [search, setSearch] = useState("");
   const { user } = useContext(AuthenticationContext);
   const { allScenarios, updateScenarioDetails } = useContext(ScenarioContext);
 
   const history = useHistory();
   const location = useLocation();
 
+  const [search, setSearch] = useState("");
   const [showEditModal, setShowEditModal] = useState(false);
 
-  const scenarios = [
-    allScenarios.owned,
-    allScenarios.accessible,
-    allScenarios.assigned,
-  ].flat();
-
-  const selectedScenarioId = new URLSearchParams(location.search).get("id");
-  const selectedScenario = scenarios.find((s) => s._id === selectedScenarioId);
+  const scenarios = dedupById([
+    ...allScenarios.owned,
+    ...allScenarios.accessible,
+    ...allScenarios.assigned,
+  ]);
 
   const filteredScenarios = scenarios.filter((scenario) =>
     scenario.name.toLowerCase().includes(search.toLowerCase())
   );
+
+  const selectedScenarioId = new URLSearchParams(location.search).get("id");
+  const selectedScenario = scenarios.find((s) => s._id === selectedScenarioId);
 
   const handleScenarioSelect = (scenario) => {
     history.replace(`/scenario-info?id=${scenario._id}`);
@@ -54,12 +55,13 @@ function ScenarioInfo() {
     <div className="bg-base-100 text-base-content">
       {/* Responsive Container optimised for 900x500 min to 1600x900 max */}
       <button
-        className="fixed z-10 btn btn-phantom text-m ml-xl mt-l font-dm px-0"
+        className="fixed z-10 btn btn-phantom text-m left-xl top-l font-dm px-0"
         onClick={handleBackToPlay}
       >
         <ArrowLeftIcon size={20} />
         Back
       </button>
+      <FabMenu className="right-xl top-l" />
       <div className="min-w-[900px] max-w-[1500px] mx-auto flex gap-3xl px-xl">
         {/* Sidebar */}
         {/* the calc used in the padding top is to get the searchbar to align with the scenario metadata, by imitating the same sizing flow */}
@@ -155,11 +157,45 @@ function ScenarioInfo() {
               </div>
 
               {/* Scenario Thumbnail */}
-              <div className="w-full max-w-[750px] flex-shrink-0">
-                <div className="w-full aspect-video bg-canvas border border-primary rounded-lg overflow-hidden flex items-center justify-center">
+              <div className="w-full flex-shrink-0">
+                <div className="w-full aspect-video bg-canvas border border-primary rounded-lg overflow-hidden flex items-center justify-center relative">
                   <Thumbnail
                     components={selectedScenario.thumbnail.components}
                   />
+                  {/* Corner Overlay */}
+                  <svg
+                    viewBox="0 0 1920 1080"
+                    preserveAspectRatio="none"
+                    className="absolute inset-0 w-full h-full pointer-events-none"
+                  >
+                    <defs>
+                      <filter
+                        id="edgeBlur"
+                        x="-20%"
+                        y="-20%"
+                        width="140%"
+                        height="140%"
+                      >
+                        <feGaussianBlur stdDeviation="100" />
+                      </filter>
+                      <clipPath id="boxClip">
+                        <rect x="0" y="0" width="1930" height="1090" />
+                      </clipPath>
+                    </defs>
+                    <g clipPath="url(#boxClip)">
+                      <path
+                        d="M 2120,1280 L 2120,0 L 1920,0 C 1920,0 2020,1180 0,1080 L 0,1280 Z"
+                        fill="rgba(0,0,0,0.9)"
+                        filter="url(#edgeBlur)"
+                      />
+                    </g>
+                  </svg>
+                  {/* Play Button */}
+                  <div className="p-8 absolute right-s bottom-s">
+                    <DiamondPlayButton
+                      onClick={() => handlePlayScenario(selectedScenario)}
+                    />
+                  </div>
                 </div>
               </div>
 
@@ -173,12 +209,6 @@ function ScenarioInfo() {
                     {selectedScenario.description ||
                       "This scenario doesn't have a description."}
                   </p>
-                </div>
-                {/* Play Button */}
-                <div className="p-8">
-                  <DiamondPlayButton
-                    onClick={() => handlePlayScenario(selectedScenario)}
-                  />
                 </div>
               </div>
             </div>
@@ -210,8 +240,6 @@ function ScenarioInfo() {
           onClose={() => setShowEditModal(false)}
         />
       </ModalDialog>
-
-      <FabMenu />
     </div>
   );
 }

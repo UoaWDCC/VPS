@@ -1,10 +1,11 @@
 import {
   defaults,
+  getNextZIndex,
   parseComponent,
-  stringifyComponent,
 } from "../../scene/operations/component";
 import { add, remove } from "../../scene/operations/modifiers";
 import {
+  deleteSelection,
   getDocumentText,
   getSelectionContent,
   mergeDocs,
@@ -28,10 +29,20 @@ function isInputTarget(e: ClipboardEvent) {
   return tag === "INPUT" || tag === "TEXTAREA";
 }
 
+// guards against treating a copied non-textbox component (e.g. a box or
+// image, which has no blocks) as a pasteable text document
+function isModelDocument(value: unknown): value is ModelDocument {
+  return (
+    !!value &&
+    typeof value === "object" &&
+    Array.isArray((value as ModelDocument).blocks)
+  );
+}
+
 export function copy(e: ClipboardEvent) {
   if (isInputTarget(e)) return;
   const { selected } = useEditorStore.getState();
-  if (!selected) return;
+  if (!selected.length) return;
 
   e.preventDefault();
 
@@ -40,12 +51,13 @@ export function copy(e: ClipboardEvent) {
 
 export function cut(e: ClipboardEvent) {
   if (isInputTarget(e)) return;
-  const { selected } = useEditorStore.getState();
-  if (!selected) return;
+  const { selected, setSelected } = useEditorStore.getState();
+  if (!selected.length) return;
 
   e.preventDefault();
 
   addToClipboard(e, selected);
+  setSelected([]);
   remove(selected);
 }
 
@@ -55,68 +67,117 @@ export function paste(e: ClipboardEvent) {
   const { mode, selected, selection, setSelected, setSelection } =
     useEditorStore.getState();
 
-  const app = e.clipboardData?.getData("application/component");
-  const text = e.clipboardData?.getData("text/plain");
+  const appData = e.clipboardData?.getData("application/component");
+  const textData = e.clipboardData?.getData("text/plain");
 
-  if (selected && mode.includes("text")) {
-    if (app) {
-      const obj = JSON.parse(app) as {
-        type?: string;
-        document?: ModelDocument;
-      };
-      const doc =
-        obj.type === "textbox"
-          ? obj.document
-          : (obj as unknown as ModelDocument);
-      if (!doc) return;
-      const cursor = mergeDocs(selected, selection.start!, doc);
-      if (!cursor) return;
-      setSelection({ start: cursor, end: null });
-    } else if (text) {
-      const doc = plainToDoc(text) as ModelDocument;
-      const cursor = mergeDocs(selected, selection.start!, doc);
-      if (!cursor) return;
-      setSelection({ start: cursor, end: null });
+  if (selected.length && mode.includes("text")) {
+    const docs: ModelDocument[] = [];
+
+    if (appData) {
+      try {
+        const parsed: unknown = JSON.parse(appData);
+        const items = (Array.isArray(parsed) ? parsed : [parsed]) as {
+          type?: string;
+          document?: ModelDocument;
+        }[];
+        for (const item of items) {
+          const candidate = item.type === "textbox" ? item.document : item;
+          if (isModelDocument(candidate)) docs.push(candidate);
+        }
+      } catch {
+        // malformed clipboard payload -- fall through to the text/plain
+        // fallback below rather than throwing out of the paste handler
+      }
     }
+    if (!docs.length && textData) {
+      docs.push(plainToDoc(textData) as ModelDocument);
+    }
+    if (!docs.length) return;
+
+    // an active range selection should be replaced by the pasted content,
+    // same as typing over a selection does -- resolved above so a paste
+    // with no usable clipboard content bails out before anything is deleted
+    let cursor = selection.end
+      ? deleteSelection(selected, selection)
+      : selection.start!;
+    if (!cursor) return;
+
+    for (const doc of docs) {
+      cursor = mergeDocs(selected, cursor, doc);
+      if (!cursor) return;
+    }
+
+    setSelection({ start: cursor, end: null });
     syncVisualCursor();
   } else {
-    if (app) {
-      const obj = JSON.parse(app) as {
-        type?: string;
-        document?: ModelDocument;
-      };
-      if (obj.type) {
-        setSelected(parseComponent(obj as Component));
-      } else {
-        const component = structuredClone(defaults["textbox"]);
-        component.document = structuredClone(obj as ModelDocument);
-        setSelected(add(component));
+    if (appData) {
+      let parsed: unknown;
+      try {
+        parsed = JSON.parse(appData);
+      } catch {
+        return;
       }
-    } else if (text) {
-      const doc = plainToDoc(text);
+
+      const items = (Array.isArray(parsed) ? parsed : [parsed]) as {
+        type?: string;
+      }[];
+      const newSelection: string[] = [];
+
+      // assign pasted items increasing zIndex above everything else so a
+      // multi-item paste can't collide with an existing component's zIndex
+      let nextZIndex = getNextZIndex();
+
+      items.forEach((obj) => {
+        if (obj.type) {
+          newSelection.push(
+            parseComponent(obj as unknown as Component, nextZIndex++)
+          );
+        } else {
+          const component = structuredClone(defaults["textbox"]);
+          component.document = structuredClone(obj as unknown as ModelDocument);
+          component.zIndex = nextZIndex++;
+          newSelection.push(add(component));
+        }
+      });
+
+      setSelected(newSelection);
+    } else if (textData) {
+      const doc = plainToDoc(textData);
       const component = structuredClone(defaults["textbox"]);
       component.document = structuredClone(doc);
-      setSelected(add(component));
+      setSelected([add(component)]);
     }
   }
 }
 
-function addToClipboard(e: ClipboardEvent, selected: string) {
+function addToClipboard(e: ClipboardEvent, selected: string[]) {
   const { mode, selection } = useEditorStore.getState();
-  if (mode.includes("text")) {
-    if (!selection.end) return;
 
-    const { text, doc } = getSelectionContent(selected, selection);
-    e.clipboardData?.setData("text/plain", text);
-    e.clipboardData?.setData("application/component", JSON.stringify(doc));
-  } else {
+  const plainTextChunks: string[] = [];
+  const components: Component[] = [];
+  selected.forEach((id: string) => {
+    if (mode.includes("text")) {
+      if (!selection.end) return;
+
+      const { text, doc } = getSelectionContent(id, selection);
+      if (text) plainTextChunks.push(text);
+      if (doc) components.push(doc);
+    } else {
+      components.push(getComponent(id));
+      if (getComponent(id).type === "textbox") {
+        const text = getDocumentText(id);
+        if (text) plainTextChunks.push(text);
+      }
+    }
+  });
+
+  if (plainTextChunks.length > 0) {
+    e.clipboardData?.setData("text/plain", plainTextChunks.join("\n"));
+  }
+  if (components.length > 0) {
     e.clipboardData?.setData(
       "application/component",
-      stringifyComponent(selected) || ""
+      JSON.stringify(components)
     );
-    if (getComponent(selected)?.type === "textbox") {
-      const text = getDocumentText(selected);
-      e.clipboardData?.setData("text/plain", text);
-    }
   }
 }

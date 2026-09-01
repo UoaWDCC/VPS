@@ -1,3 +1,15 @@
+export function isTemp(resource) {
+  return resource._id.startsWith("temp.");
+}
+
+export function getExtension(name) {
+  if (!name) return "";
+  const dotIndex = name.lastIndexOf(".");
+  return dotIndex <= 0 || dotIndex === name.length - 1
+    ? ""
+    : name.slice(dotIndex).toLowerCase();
+}
+
 export function normaliseFile(resource) {
   return {
     _id: resource._id,
@@ -10,6 +22,7 @@ export function normaliseFile(resource) {
     fileType: resource.fileId?.type,
     contentType: resource.fileId?.contentType,
     size: resource.fileId?.size,
+    extension: getExtension(resource.fileId?.name),
   };
 }
 
@@ -28,4 +41,26 @@ export function filterTreeBySearch(tree, string) {
       return { ...r, children: matchingChildren };
     })
     .filter(Boolean);
+}
+
+// NOTE: it is not possible for a resource to reference a missing or deleted
+// collection as a parent, since collection deletion is cascaded to children
+
+export function buildResourceTree(resources) {
+  const collections = resources.filter((r) => r.type === "collection");
+  const files = resources.filter((r) => r.type === "file").map(normaliseFile);
+
+  const grouped = collections.map((collection) => ({
+    _id: collection._id,
+    name: collection.name,
+    type: "collection",
+    stateConditionals: collection.stateConditionals,
+    children: files.filter(
+      (f) => String(f.parentId) === String(collection._id)
+    ),
+  }));
+
+  const orphanFiles = files.filter((f) => !f.parentId);
+
+  return [...grouped, ...orphanFiles];
 }

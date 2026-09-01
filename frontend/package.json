@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "test": "node --test src/components/StateVariables/stateTypes.test.js",
+    "test": "node --test src/components/Properties/propertyTypes.test.js",
     "lint": "eslint src",
     "lint:fix": "eslint --fix src",
     "prettier": "prettier --check src",
@@ -27,7 +27,7 @@
     "elkjs": "^0.10.0",
     "fast-is-equal": "^1.2.3",
     "firebase": "^9.0.2",
-    "lucide-react": "^0.544.0",
+    "lucide-react": "^1.0.0",
     "marked": "^18.0.4",
     "papaparse": "^5.4.1",
     "prop-types": "^15.8.1",

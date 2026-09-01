@@ -138,19 +138,19 @@ const fetchScene = async (email, scenarioId) => {
 };
 
 /**
- * Sets the state variables for a given user and scenario
+ * Sets the properties for a given user and scenario
  * @param {String} userId
  * @param {String} scenarioId
- * @param {Object} stateVariables
+ * @param {Object} properties
  * @returns updated user object
  */
-const setUserStateVariables = async (userId, scenarioId, stateVariables) => {
+const setUserProperties = async (userId, scenarioId, properties) => {
   try {
     const user = await User.findOneAndUpdate(
       { _id: userId },
       {
         $set: {
-          [`stateVariables.${scenarioId}`]: stateVariables,
+          [`stateVariables.${scenarioId}`]: properties,
         },
         $inc: {
           [`stateVersions.${scenarioId}`]: 1,
@@ -168,7 +168,7 @@ const setUserStateVariables = async (userId, scenarioId, stateVariables) => {
       user.stateVersions.get(scenarioId),
     ];
   } catch (error) {
-    throw new Error(`Error updating state variables: ${error.message}`);
+    throw new Error(`Error updating properties: ${error.message}`);
   }
 };
 
@@ -183,5 +183,5 @@ export {
   assignScenarioToUsers,
   retrieveAssignedScenarioList,
   fetchScene,
-  setUserStateVariables,
+  setUserProperties,
 };

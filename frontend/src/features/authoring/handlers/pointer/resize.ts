@@ -1,4 +1,4 @@
-import { getComponent, getComponentProp } from "../../scene/scene";
+import { getComponent } from "../../scene/scene";
 import useEditorStore from "../../stores/editor";
 import useVisualScene from "../../stores/visual";
 import type { Bounds, Vec2 } from "../../types";
@@ -14,9 +14,11 @@ import {
   scale,
   subtract,
 } from "../../util";
+import { getSelectedComponentBounds } from "./pointer";
 import { snapResizePoint } from "./snap";
 
 type HandleType = "size" | "rotation";
+const BOX_CENTER_VALUE = 0.5;
 
 let type: HandleType;
 let coords: number[];
@@ -31,12 +33,19 @@ export function handleResizeStart(e: React.MouseEvent) {
   setMode(["resize"]);
 }
 
+// exposes which handle is being dragged so callers (e.g. handleMutationEnd)
+// can tell a rotation drag apart from a size drag, since both share the
+// "resize" mode
+export function getHandleType() {
+  return type;
+}
+
 export function handleResizeDrag(e: React.MouseEvent, position: Vec2) {
-  const { addMode, setMutationBounds, setActiveGuides, selected } =
+  const { addMode, setMutationBounds, selected, setActiveGuides } =
     useEditorStore.getState();
   addMode("mutation");
 
-  const bounds = getComponentProp(selected!, "bounds") as Bounds;
+  const bounds = getSelectedComponentBounds()!;
 
   const newBounds: Partial<Bounds> = {};
 
@@ -49,7 +58,9 @@ export function handleResizeDrag(e: React.MouseEvent, position: Vec2) {
 
     // alignment guides only make sense in global space, so only snap unrotated components
     if (!bounds.rotation) {
-      const components = Object.values(useVisualScene.getState().components);
+      const components = Object.values(
+        useVisualScene.getState().components
+      ).filter((c) => !selected.includes(c.id));
 
       // resolve modifiers (shift/ctrl) against the raw point first so we snap the
       // actual resize point, not the mouse position they'd otherwise overwrite
@@ -70,7 +81,7 @@ export function handleResizeDrag(e: React.MouseEvent, position: Vec2) {
         coords,
         e.ctrlKey,
         components,
-        selected!
+        ""
       );
       setActiveGuides(snapped.guides);
 
@@ -108,13 +119,13 @@ function getNewTail(verts: Vec2[], newVerts: Vec2[], coords: number[]) {
   const inversePoint = { x: 0, y: 0 };
   const newPoint = { x: 0, y: 0 };
 
-  if (coords[0] !== 0.5) {
+  if (coords[0] !== BOX_CENTER_VALUE) {
     point.x = verts[coords[0]].x;
     inversePoint.x = verts[1 - coords[0]].x;
     newPoint.x = newVerts[coords[0]].x;
   }
 
-  if (coords[1] !== 0.5) {
+  if (coords[1] !== BOX_CENTER_VALUE) {
     point.y = verts[coords[1]].y;
     inversePoint.y = verts[1 - coords[1]].y;
     newPoint.y = newVerts[coords[1]].y;
@@ -155,7 +166,7 @@ function getAspect(verts: Vec2[]) {
   return width / height;
 }
 
-function inverse(coords: number[]) {
+export function inverse(coords: number[]) {
   return [1 - coords[0], 1 - coords[1]];
 }
 
@@ -166,7 +177,9 @@ function updateResize(
   fixed: boolean
 ) {
   const { selected } = useEditorStore.getState();
-  const { bounds, type } = getComponent(selected!);
+  const type = selected.length === 1 ? getComponent(selected[0]).type : "box";
+
+  const bounds = getSelectedComponentBounds()!;
   const center = getBoxCenter(bounds.verts);
 
   let verts = modifyVerts(bounds.verts, coords, position);
@@ -176,7 +189,7 @@ function updateResize(
     // hold shift to lock aspect ratio while resizing, except for images,
     // which lock aspect ratio by default and can be unlocked with shift
     const shouldLockAspect = type === "image" ? !fixed : fixed;
-    if (shouldLockAspect && !coords.includes(0.5)) {
+    if (shouldLockAspect && !coords.includes(BOX_CENTER_VALUE)) {
       lockAspect(bounds.verts, verts, coords);
     }
 
@@ -214,7 +227,14 @@ function getVertPoint(verts: Vec2[], coords: number[]): Vec2 {
 
 function modifyVerts(verts: Vec2[], coords: number[], v: Vec2) {
   const newVerts = verts.map((v) => ({ ...v }));
-  if (coords[1] !== 0.5) newVerts[coords[1]].y = v.y;
-  if (coords[0] !== 0.5) newVerts[coords[0]].x = v.x;
+  if (coords[1] !== BOX_CENTER_VALUE) newVerts[coords[1]].y = v.y;
+  if (coords[0] !== BOX_CENTER_VALUE) newVerts[coords[0]].x = v.x;
   return newVerts;
+}
+
+export function getCoordsVec(verts: Vec2[], coords: number[]) {
+  const center = getBoxCenter(verts);
+  const x = coords[0] !== BOX_CENTER_VALUE ? verts[coords[0]].x : center.x;
+  const y = coords[1] !== BOX_CENTER_VALUE ? verts[coords[1]].y : center.y;
+  return { x, y };
 }

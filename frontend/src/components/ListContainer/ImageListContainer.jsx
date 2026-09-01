@@ -5,15 +5,27 @@ export default function ImageListContainer({
   data,
   onItemSelected,
   selectedId,
+  horizontal = false,
 }) {
   return (
-    <div className="grid grid-cols-4 gap-2">
+    <div
+      className={
+        horizontal
+          ? "flex gap-2 overflow-x-auto pb-2"
+          : "grid grid-cols-4 gap-2"
+      }
+    >
       {data?.map((item) => (
         <button
           type="button"
           key={item._id}
           onClick={() => onItemSelected(item)}
-          className={item._id === selectedId ? "border-accent border-2" : ""}
+          className={`${horizontal ? "shrink-0" : ""} ${
+            item._id === selectedId ? "border-accent border-2" : ""
+          }`}
+          style={
+            horizontal ? { flexBasis: "calc((100% - 1.5rem) / 4)" } : undefined
+          }
         >
           <div
             className="aspect-square bg-cover bg-center hover:opacity-50 hover:cursor-pointer"
