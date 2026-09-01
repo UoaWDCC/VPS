@@ -394,7 +394,6 @@ export default function PlayScenarioPage({ group }) {
   useEffect(() => {
     if (!currScene) return;
     try {
-      cleanUpAudios();
       const audios = currScene.components.filter((c) => c.type === "audio");
       audioRefs.current = audios.map((audio) => new Audio(audio.url));
       audioRefs.current.forEach((audio) => {
