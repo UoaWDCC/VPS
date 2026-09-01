@@ -1,9 +1,11 @@
+@import url("https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Bitter:ital,wght@0,400;0,700;1,400;1,700&family=Cormorant+Garamond:ital,wght@0,400;0,700;1,400;1,700&family=Fira+Sans:ital,wght@0,400;0,700;1,400;1,700&family=Inter:ital,wght@0,400;0,700;1,400;1,700&family=Lato:ital,wght@0,400;0,700;1,400;1,700&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400;1,700&family=Lora:ital,wght@0,400;0,700;1,400;1,700&family=Merriweather:ital,wght@0,400;0,700;1,400;1,700&family=Montserrat:ital,wght@0,400;0,700;1,400;1,700&family=Open+Sans:ital,wght@0,400;0,700;1,400;1,700&family=Oswald:wght@400;700&family=Playfair+Display:ital,wght@0,400;0,700;1,400;1,700&family=Poppins:ital,wght@0,400;0,700;1,400;1,700&family=Roboto+Mono:ital,wght@0,400;0,700;1,400;1,700&family=Roboto:ital,wght@0,400;0,700;1,400;1,700&family=Source+Sans+3:ital,wght@0,400;0,700;1,400;1,700&family=Space+Grotesk:wght@400;700&family=Work+Sans:ital,wght@0,400;0,700;1,400;1,700&display=swap");
+
 @import "tailwindcss";
 @plugin "daisyui";
 
 @theme {
-  --font-ibm: "IBMPlexSans", sans-serif;
-  --font-dm: "DMSans", sans-serif;
+  --font-ibm: "IBM Plex Sans", sans-serif;
+  --font-dm: "DM Sans", sans-serif;
 
   --color-black: #000000;
   --color-black-rgb: 0, 0, 0;
@@ -182,19 +184,19 @@
 
 /* MonaSans - licensed under OFL. See https://github.com/github/mona-sans/blob/main/LICENSE */
 @font-face {
-  font-family: "MonaSans";
+  font-family: "Mona Sans";
   src: url("/fonts/MonaSans.woff2") format("woff2");
 }
 
 /* DM Sans - licensed under SIL Open Font License, Version 1.1. See https://openfontlicense.org */
 @font-face {
-  font-family: "DMSans";
+  font-family: "DM Sans";
   src: url("/fonts/DMSans-Regular.woff2") format("woff2");
 }
 
 /* IBM Plex Sans - licensed under SIL Open Font License, Version 1.1. See https://openfontlicense.org */
 @font-face {
-  font-family: "IBMPlexSans";
+  font-family: "IBM Plex Sans";
   src: url("/fonts/IBMPlexSans-Regular.woff2") format("woff2");
 }
 
