@@ -16,9 +16,10 @@ export const defaults = {
     stroke: "#00000000",
     strokeWidth: 3, // default stroke width 3
     bounds: {
+      // sized to hold the placeholder text at the 32px default font size
       verts: [
         { x: 0, y: 0 },
-        { x: 400, y: 100 },
+        { x: 600, y: 100 },
       ],
       rotation: 0,
     },
