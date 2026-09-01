@@ -15,10 +15,10 @@ import { diffToSelection, findEditDiff } from "./scene/operations/text";
 import { syncVisualCursor } from "./text/cursor";
 import {
   ArrowLeftIcon,
+  LayoutDashboardIcon,
   PencilIcon,
   PlayIcon,
   UserPlusIcon,
-  UsersIcon,
 } from "lucide-react";
 import { handleGlobal } from "./handlers/keyboard/keyboard";
 import { clearHistory, historyEvents } from "./scene/history";
@@ -166,8 +166,8 @@ export default function AuthoringToolPage() {
     window.open(`/play/${scenarioId}${startScene}`, "_blank");
   }
 
-  function goToGroups() {
-    history.push(`/scenario/${scenarioId}/manage-groups`);
+  function goToDashboard() {
+    history.push(`/dashboard/${scenarioId}?from=canvas`);
   }
 
   function goBack() {
@@ -212,11 +212,11 @@ export default function AuthoringToolPage() {
             </div>
           )}
           <button
-            onClick={goToGroups}
+            onClick={goToDashboard}
             className="btn btn-phantom text-m ml-auto"
           >
-            <UsersIcon size={20} />
-            Groups
+            <LayoutDashboardIcon size={20} />
+            Dashboard
           </button>
           {isOwner && (
             <button

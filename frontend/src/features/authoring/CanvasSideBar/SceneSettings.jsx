@@ -113,7 +113,7 @@ export default function SceneSettings() {
         show={showBackgroundMenu}
         setShow={setShowBackgroundMenu}
       />
-      <div className="collapse overflow-visible collapse-arrow bg-base-300 rounded-sm text-s">
+      <div className="collapse collapse-arrow bg-base-300 rounded-sm text-s has-[>input:checked]:overflow-visible">
         <input type="checkbox" />
         <div className="collapse-title">Scene Details</div>
         <div className="collapse-content text--1 bg-base-200">
@@ -154,6 +154,7 @@ export default function SceneSettings() {
               className="input"
               placeholder="No timer"
             />
+            {time > 0 && <TimerPropertyOperationMenu />}
             <label className="label">Roles</label>
             <div className="dropdown" onBlur={saveSceneRoles}>
               <div
@@ -246,7 +247,6 @@ export default function SceneSettings() {
           </fieldset>
         </div>
       </div>
-      {time > 0 && <TimerPropertyOperationMenu />}
     </>
   );
 }

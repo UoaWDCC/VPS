@@ -8,6 +8,7 @@ export default function ResourceNameField({
   resource,
   disabled,
   onSelect,
+  isSelected,
   onRename,
   actions,
 }) {
@@ -22,6 +23,7 @@ export default function ResourceNameField({
   }, [editing]);
 
   function startEditing(e) {
+    e.preventDefault();
     e.stopPropagation();
     if (disabled) return;
     setValue(resource.name);
@@ -56,13 +58,16 @@ export default function ResourceNameField({
     : { gridTemplateColumns: "minmax(0, 1fr) auto auto" };
 
   return (
-    <div className="grid items-center gap-1 overflow-hidden" style={rowStyle}>
+    <div
+      className={`grid items-center overflow-hidden p-0 gap-0 ${isSelected ? "bg-base-content/5" : ""}`}
+      style={rowStyle}
+    >
       {editing ? (
         <input
           ref={inputRef}
           type="text"
           aria-label={`Rename ${resource.name}`}
-          className="input input-xs input-bordered min-w-0"
+          className="input input-bordered min-w-0 h-9"
           style={{
             "--input-color":
               "color-mix(in oklab, var(--color-base-content) 20%, transparent)",
@@ -86,16 +91,20 @@ export default function ResourceNameField({
         <>
           <button
             type="button"
-            className={`min-w-0 truncate bg-transparent px-0 text-left text--1 border-none cursor-pointer disabled:cursor-not-allowed focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary ${isTemp(resource) ? "text-primary" : ""}`}
+            className={`min-w-0 truncate bg-transparent text-left text--1 border-none cursor-pointer disabled:cursor-not-allowed focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary px-3 py-1.5 h-9 ${isTemp(resource) ? "text-primary" : ""}`}
             title={resource.name}
-            onClick={onSelect}
+            onClick={(e) => {
+              e.stopPropagation();
+              e.preventDefault();
+              onSelect();
+            }}
             disabled={disabled}
           >
             {resource.name}
           </button>
           <button
             type="button"
-            className="btn btn-phantom btn-xs px-0"
+            className="btn btn-phantom btn-xs px-1.5 h-full"
             onClick={startEditing}
             title="Rename"
             disabled={disabled}
@@ -107,7 +116,7 @@ export default function ResourceNameField({
       {editing ? (
         <button
           type="button"
-          className="btn btn-phantom btn-xs px-0"
+          className="btn btn-phantom btn-xs px-1.5 h-full"
           onClick={() => inputRef.current?.blur()}
           title="Confirm rename"
         >
