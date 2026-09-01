@@ -18,7 +18,7 @@ export const defaults = {
     bounds: {
       verts: [
         { x: 0, y: 0 },
-        { x: 400, y: 100 },
+        { x: 600, y: 100 },
       ],
       rotation: 0,
     },
@@ -26,11 +26,11 @@ export const defaults = {
       style: {},
       blocks: [
         {
-          style: {},
+          style: { alignment: "left" },
           spans: [
             {
               style: {},
-              text: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla venenatis.",
+              text: "",
             },
           ],
         },
