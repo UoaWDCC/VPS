@@ -25,7 +25,7 @@ export default function CanvasSideBar() {
   }, [selected]);
 
   return (
-    <div className="relative flex pb-m flex-col w-[24vw] gap-s overflow-y-auto overflow-x-hidden no-scrollbar">
+    <div className="relative flex pb-m flex-col justify-center w-[24vw] gap-s overflow-y-auto overflow-x-hidden no-scrollbar">
       <SceneSettings
         open={activePanel === "scene"}
         onToggle={() => togglePanel("scene")}
