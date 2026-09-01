@@ -26,7 +26,7 @@ function MultiInput({
       </li>
       <ul
         tabIndex={0}
-        className="dropdown-content menu menu-horizontal bg-base-300 gap-0.5 rounded-box z-1 p-2 shadow-sm top-[38px] w-max"
+        className="dropdown-content menu menu-horizontal bg-base-300 gap-0.5 rounded-box z-1 p-2 shadow-sm top-[38px] left-0 w-max"
       >
         {values.map((v, i) => (
           <li key={i}>
