@@ -128,8 +128,8 @@ const refreshFromServer = async (user, scenarioId, groupId, isMultiplayer) => {
   }
   return {
     newSceneId: res.data.active,
-    properties: res.data.properties,
-    newPropertyVersion: res.data.propertyVersion,
+    stateVariables: res.data.stateVariables,
+    newStateVersion: res.data.stateVersion,
   };
 };
 
@@ -191,15 +191,15 @@ export default function PlayScenarioPage({ group }) {
         const currentRequestId = ++requestIdRef.current;
 
         try {
-          const { newSceneId, properties, newPropertyVersion } =
+          const { newSceneId, stateVariables, newStateVersion } =
             await refreshFromServer(user, scenarioId, group._id, isMultiplayer);
 
           // Discard response if a newer user action was triggered during request transit
           if (currentRequestId !== requestIdRef.current) return;
 
           setSceneId(newSceneId);
-          setProperties(properties);
-          setPropertyVersion(newPropertyVersion);
+          setProperties(stateVariables);
+          setPropertyVersion(newStateVersion);
           toast.success(
             isMultiplayer
               ? "Someone else made a move first, but you're back on track!"
