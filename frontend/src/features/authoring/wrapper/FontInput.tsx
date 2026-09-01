@@ -43,6 +43,11 @@ function findFonts(currentSearch = "") {
     : fonts;
 }
 
+function findFont(fontName: string) {
+  const normalizedFontName = fontName.trim().toLowerCase();
+  return fonts.find((font) => font.toLowerCase() === normalizedFontName);
+}
+
 function FontInput({
   value,
   onChange,
@@ -50,14 +55,30 @@ function FontInput({
   value: string;
   onChange: (value: string) => void;
 }) {
+  const [inputValue, setInputValue] = useState(value);
   const [searchQuery, setSearchQuery] = useState("");
   const [isOpen, setIsOpen] = useState(false);
   const matchingFonts = findFonts(searchQuery);
 
-  // Reset search query when the selected value changes externally
+  // Keep the display value in sync when the selected font changes elsewhere.
   useEffect(() => {
+    setInputValue(value);
     setSearchQuery("");
   }, [value]);
+
+  function restoreOrSelectFont() {
+    const matchingFont = findFont(inputValue);
+
+    if (matchingFont) {
+      onChange(matchingFont);
+      setInputValue(matchingFont);
+    } else {
+      setInputValue(value);
+    }
+
+    setSearchQuery("");
+    setIsOpen(false);
+  }
 
   return (
     <div className="relative">
@@ -65,21 +86,29 @@ function FontInput({
         type="text"
         className="input input-sm h-[28px] w-30"
         placeholder="Search fonts..."
-        value={searchQuery || value}
+        value={inputValue}
         aria-label="Font family"
         aria-autocomplete="list"
         aria-controls="font-options"
         aria-expanded={isOpen}
-        onFocus={() => setIsOpen(true)}
-        onBlur={() => {
-          setIsOpen(false);
+        onFocus={() => {
           setSearchQuery("");
+          setIsOpen(true);
         }}
-        onChange={(event) => setSearchQuery(event.target.value)}
+        onBlur={restoreOrSelectFont}
+        onChange={(event) => {
+          setInputValue(event.target.value);
+          setSearchQuery(event.target.value);
+        }}
         onKeyDown={(event) => {
           if (event.key === "Escape") {
-            setIsOpen(false);
+            setInputValue(value);
             setSearchQuery("");
+            setIsOpen(false);
+          }
+
+          if (event.key === "Enter") {
+            event.currentTarget.blur();
           }
         }}
       />
@@ -100,6 +129,7 @@ function FontInput({
                 onMouseDown={(event) => event.preventDefault()}
                 onClick={() => {
                   onChange(font);
+                  setInputValue(font);
                   setSearchQuery("");
                   setIsOpen(false);
                 }}
