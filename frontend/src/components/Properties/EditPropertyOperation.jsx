@@ -5,6 +5,12 @@ import { modifyComponentProp } from "../../features/authoring/scene/operations/c
 import SelectInput from "../../features/authoring/components/Select";
 import { propertyTypes, validOperations } from "./propertyTypes";
 
+const TYPE_LABELS = {
+  string: "Text",
+  number: "Number",
+  boolean: "True/False",
+};
+
 /**
  * Component used for editing property operations
  * Property operations are used to manipulate properties while playing through a scenario
@@ -77,7 +83,7 @@ const EditPropertyOperation = ({
         <span className="text--1">{property.name}</span>
 
         <span className="text-xs ml-2xs text-primary">
-          {`${property.type} operation`}
+          {`${TYPE_LABELS[property.type] ?? property.type} operation`}
         </span>
 
         <button
