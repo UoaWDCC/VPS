@@ -1,3 +1,4 @@
+import { useState } from "react";
 import {
   BringToFront,
   Redo2Icon,
@@ -11,11 +12,9 @@ import useEditorStore from "../stores/editor";
 import { getComponent } from "../scene/scene";
 import { undo, redo } from "../scene/history";
 import { bringToFront, sendToBack } from "../scene/operations/component";
-import { useState } from "react";
-import PropertyMenu from "../../../components/Properties/PropertyMenu";
 import ImageCreateMenu from "../ImageCreateMenu";
 import ShapeCreateMenu from "./ShapeCreateMenu";
-import BackgroundMenu from "./BackgroundMenu";
+import BackgroundMenu from "../CanvasSideBar/BackgroundMenu";
 
 import "./topbar.css";
 
@@ -24,12 +23,7 @@ function Topbar({ saving, save }: { saving: boolean; save: () => void }) {
   const setMode = useEditorStore((state) => state.setMode);
   const setCreateType = useEditorStore((state) => state.setCreateType);
 
-  const [showPropertyMenu, setShowPropertyMenu] = useState(false);
   const [showBackgroundMenu, setShowBackgroundMenu] = useState(false);
-
-  function togglePropertyMenu() {
-    setShowPropertyMenu((prev) => !prev);
-  }
 
   const switchCreate = (type: string) => {
     setMode(["create"]);
@@ -50,19 +44,11 @@ function Topbar({ saving, save }: { saving: boolean; save: () => void }) {
 
   return (
     <>
-      <PropertyMenu show={showPropertyMenu} setShow={setShowPropertyMenu} />
       <BackgroundMenu
         show={showBackgroundMenu}
         setShow={setShowBackgroundMenu}
       />
       <ul className="topbar gap-0.5 menu menu-horizontal w-full bg-base-300 rounded-box p-1">
-        <li className="text-xs">
-          <button type="button" onClick={togglePropertyMenu}>
-            Properties
-          </button>
-        </li>
-        <div className="divider divider-horizontal" />
-
         <li className="tooltip tooltip-bottom" data-tip="Undo">
           <button type="button" aria-label="Undo" onClick={() => undo()}>
             <Undo2Icon size={16} />
@@ -84,14 +70,6 @@ function Topbar({ saving, save }: { saving: boolean; save: () => void }) {
           </a>
         </li>
         <ShapeCreateMenu />
-
-        <div className="divider divider-horizontal" />
-
-        <li className="text-xs">
-          <button type="button" onClick={() => setShowBackgroundMenu(true)}>
-            Background
-          </button>
-        </li>
 
         {/* element properties */}
         {hasSelection && (
@@ -123,6 +101,21 @@ function Topbar({ saving, save }: { saving: boolean; save: () => void }) {
                 <TextSection />
               </>
             )}
+          </>
+        )}
+        {/* scene properties — only with an empty selection, like Google Slides */}
+        {!hasSelection && (
+          <>
+            <div className="divider divider-horizontal" />
+            <li className="text-xs">
+              <button
+                type="button"
+                className="p-1.5"
+                onClick={() => setShowBackgroundMenu(true)}
+              >
+                Background
+              </button>
+            </li>
           </>
         )}
         <li className={`ml-auto text-xs ${saving && "menu-disabled"}`}>

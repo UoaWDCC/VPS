@@ -2,6 +2,7 @@ import SceneContext from "context/SceneContext";
 import React, { useContext, useState } from "react";
 import { useParams } from "react-router-dom";
 import SceneListItem from "./SceneListItem";
+import ScenarioContentHeader from "./ScenarioContentHeader";
 import Thumbnail from "../components/Thumbnail";
 import AuthenticationContext from "../../../context/AuthenticationContext";
 import { api, handleGeneric } from "../../../util/api";
@@ -94,24 +95,27 @@ const SceneNavigator = () => {
     >
       <SortableContext items={sceneIds} strategy={verticalListSortingStrategy}>
         <div className="flex h-full">
-          <div className="flex-shrink-0 w-[200px] overflow-y-auto no-scrollbar">
-            <ul className="flex flex-col gap-s pb-m">
-              {scenes.map((scene, index) => (
-                <SceneListItem
-                  scene={scene}
-                  index={index}
-                  key={scene._id}
-                  active={scene._id === activeId}
-                />
-              ))}
-              <div className="w-full pr-3">
-                <button className="float-right" onClick={addScene}>
-                  <div className="text-primary hover:text-secondary w-[160px] h-[94px] border-3 border-primary hover:border-secondary rounded-sm flex justify-center items-center">
-                    <PlusIcon />
-                  </div>
-                </button>
-              </div>
-            </ul>
+          <div className="flex-shrink-0 w-[200px] flex flex-col min-h-0">
+            <ScenarioContentHeader />
+            <div className="flex-1 min-h-0 overflow-y-auto no-scrollbar">
+              <ul className="flex flex-col gap-s pb-m">
+                {scenes.map((scene, index) => (
+                  <SceneListItem
+                    scene={scene}
+                    index={index}
+                    key={scene._id}
+                    active={scene._id === activeId}
+                  />
+                ))}
+                <div className="w-full pr-3">
+                  <button className="float-right" onClick={addScene}>
+                    <div className="text-primary hover:text-secondary w-[160px] h-[94px] border-3 border-primary hover:border-secondary rounded-sm flex justify-center items-center">
+                      <PlusIcon />
+                    </div>
+                  </button>
+                </div>
+              </ul>
+            </div>
           </div>
         </div>
       </SortableContext>

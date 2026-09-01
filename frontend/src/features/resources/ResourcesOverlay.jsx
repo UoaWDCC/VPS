@@ -62,7 +62,7 @@ export default function ResourcesOverlay({ properties, open, onClose }) {
         }`}
         role="dialog"
         aria-modal="true"
-        aria-label="Resources"
+        aria-label="Documents"
         aria-hidden={!open}
         inert={!open ? "" : undefined}
         onClick={onClose}
@@ -91,7 +91,7 @@ export default function ResourcesOverlay({ properties, open, onClose }) {
               <div className="flex h-full items-center justify-center">
                 <div className="text-center">
                   <p>
-                    There are no resources currently available. Check back later
+                    There are no documents currently available. Check back later
                     after making progression.
                   </p>
                 </div>
@@ -101,7 +101,7 @@ export default function ResourcesOverlay({ properties, open, onClose }) {
                 {/* left */}
                 <div className="min-h-[35dvh] min-w-0 overflow-hidden lg:h-full lg:min-h-0">
                   <div className="flex min-h-0 flex-col gap-4 px-0">
-                    <h1 className="text-xl">Resources</h1>
+                    <h1 className="text-xl">Documents</h1>
 
                     <div className="flex items-center gap-4">
                       <label className="input search search-xs flex-grow bg-transparent">
@@ -118,7 +118,7 @@ export default function ResourcesOverlay({ properties, open, onClose }) {
                     <ul className="menu min-h-0 w-full flex-1 overflow-auto p-0">
                       {search.trim() && filteredTree.length === 0 && (
                         <li className="p-2 opacity-60">
-                          No matching resources found.
+                          No matching documents found.
                         </li>
                       )}
                       <ResourceTree
@@ -143,7 +143,7 @@ export default function ResourcesOverlay({ properties, open, onClose }) {
                       <div className="min-h-[50dvh] flex flex-1 flex-col gap-4 lg:min-h-0 justify-center items-center border border-primary rounded-xl">
                         <FileTextIcon size={32} />
                         <span className="text--1">
-                          Select a resource to show the preview
+                          Select a document to show the preview
                         </span>
                       </div>
                     )}
