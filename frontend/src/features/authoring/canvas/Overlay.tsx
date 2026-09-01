@@ -52,7 +52,8 @@ function Overlay() {
   const createType = useEditorStore((s) => s.createType);
   const components = useVisualScene((s) => s.components);
 
-  const hasSelection = selected.length > 0;
+  const isMarqueeing = mode.includes("marquee");
+  const hasSelection = selected.length > 0 && !isMarqueeing;
   const type = hasSelection
     ? selected.length > 1
       ? "box"
@@ -89,6 +90,15 @@ function Overlay() {
           fill="none"
           stroke="var(--color-primary)"
           strokeWidth={1}
+        />
+      )}
+      {isMarqueeing && (
+        <Rectangle
+          bounds={mutationBounds}
+          fill="var(--color-accent)"
+          fillOpacity={0.05}
+          stroke="var(--color-accent)"
+          strokeWidth={3}
         />
       )}
       {mode.includes("mutation") &&

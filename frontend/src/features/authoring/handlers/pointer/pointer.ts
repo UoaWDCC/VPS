@@ -18,6 +18,7 @@ import {
   divide,
   expandBoxVerts,
   getBoxCenter,
+  getRotatedCorners,
   rotate,
   rotateMany,
   scale,
@@ -25,6 +26,11 @@ import {
   translate,
 } from "../../util";
 import { handleCreateDrag, handleCreateEnd, handleCreateStart } from "./create";
+import {
+  handleMarqueeDrag,
+  handleMarqueeEnd,
+  handleMarqueeStart,
+} from "./marquee";
 import {
   getCoordsVec,
   getHandleType,
@@ -51,7 +57,7 @@ export function handleMouseDownGlobal(e: React.MouseEvent, position: Vec2) {
   } else if (target.dataset.id) {
     handleComponentClick(e, position);
   } else {
-    handleCanvasClick();
+    handleCanvasClick(e, position);
   }
 
   if (target.dataset.type !== "document") {
@@ -76,6 +82,8 @@ export function handleMouseMoveGlobal(e: React.MouseEvent, position: Vec2) {
     handleTextSelection(e, position);
   } else if (mode.includes("create")) {
     handleCreateDrag(e, position);
+  } else if (mode.includes("marquee")) {
+    handleMarqueeDrag(e, position);
   } else {
     handleComponentDrag(e, position);
   }
@@ -90,15 +98,15 @@ export function handleMouseUpGlobal() {
     handleCreateEnd();
   } else if (mode.includes("mutation")) {
     handleMutationEnd();
+  } else if (mode.includes("marquee")) {
+    handleMarqueeEnd();
   }
 
   setMouseDown(false);
 }
 
-function handleCanvasClick() {
-  const { setSelected, setMode } = useEditorStore.getState();
-  setSelected([]);
-  setMode(["normal"]);
+function handleCanvasClick(e: React.MouseEvent, position: Vec2) {
+  handleMarqueeStart(e, position);
 }
 
 // component handlers
@@ -268,13 +276,7 @@ function computeBounds(components: Component[]) {
   const max = { x: -Infinity, y: -Infinity };
 
   components.forEach((component) => {
-    const { verts, rotation } = component.bounds;
-
-    const rotated = rotateMany(
-      expandBoxVerts(verts),
-      getBoxCenter(verts),
-      rotation
-    );
+    const rotated = getRotatedCorners(component.bounds);
 
     rotated.forEach((pos: Vec2) => {
       min.x = Math.min(min.x, pos.x);
