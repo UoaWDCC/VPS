@@ -26,7 +26,7 @@ export default function CanvasSideBar() {
 
   useEffect(() => {
     setActivePanel(null);
-  }, [selected]);
+  }, [selected, component?.id, component?.clickable]);
 
   //side panel animation
   useLayoutEffect(() => {
