@@ -128,8 +128,22 @@ export interface ModelDocument extends BaseModelDocument {
   id: string;
 }
 
+export type ListMarkerStyle = "dash" | "bullet" | "checkbox";
+
+export interface ModelListMeta {
+  markerStyle: ListMarkerStyle;
+  level: number;
+  checked?: boolean;
+}
+
 export interface ModelBlock {
   style?: Partial<BlockTextStyle>;
+  list?: ModelListMeta;
+  // true when this block began with a soft line break (Shift+Enter) rather
+  // than a new paragraph -- keeps the same list indent but renders no
+  // marker of its own, and Backspace at its start merges it back up
+  // instead of stripping list formatting
+  softBreak?: boolean;
   spans: ModelSpan[];
 }
 
@@ -153,6 +167,7 @@ export interface SpanTextStyle {
   textDecoration: string;
   textColor: HexString;
   highlightColor: HexString;
+  verticalAlign: "normal" | "super" | "sub";
 }
 
 type HexString = string;

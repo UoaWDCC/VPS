@@ -11,6 +11,8 @@ import useEditorStore from "../../stores/editor";
 import { handleSelectAll } from "./text";
 import { matchesShortcut } from "./utils";
 import { setTextStyle } from "../../text/style";
+import { toggleBulletShortcut } from "../../text/list";
+import { syncVisualCursor } from "../../text/cursor";
 
 type Shortcut = {
   combos: string[];
@@ -20,8 +22,8 @@ type Shortcut = {
 
 function toggleTextStyle(
   selected: string,
-  prop: "fontWeight" | "fontStyle" | "textDecoration",
-  enabledValue: "bold" | "italic" | "underline",
+  prop: "fontWeight" | "fontStyle" | "textDecoration" | "verticalAlign",
+  enabledValue: "bold" | "italic" | "underline" | "super" | "sub",
   disabledValue: "normal" | "none"
 ) {
   const current = useEditorStore.getState().activeStyle;
@@ -51,8 +53,10 @@ const shortcuts: Shortcut[] = [
   {
     combos: ["backspace", "delete"],
     when: () => {
-      const { mode, selected } = useEditorStore.getState();
-      return !mode.includes("text") && selected.length > 0;
+      const { mode, selected, markerSelection } = useEditorStore.getState();
+      // a marker selection has its own Backspace/Delete handling (strip
+      // list formatting) -- this generic component-delete must yield to it
+      return !mode.includes("text") && !markerSelection && selected.length > 0;
     },
     run: () => {
       const { selected, setSelected } = useEditorStore.getState();
@@ -143,6 +147,36 @@ const shortcuts: Shortcut[] = [
       const { selected } = useEditorStore.getState();
       if (!selected.length) return;
       toggleTextStyle(selected[0], "textDecoration", "underline", "none");
+    },
+  },
+  {
+    combos: ["mod+."],
+    when: () => useEditorStore.getState().mode.includes("text"),
+    run: () => {
+      const { selected } = useEditorStore.getState();
+      if (!selected.length) return;
+      toggleTextStyle(selected[0], "verticalAlign", "super", "normal");
+    },
+  },
+  {
+    combos: ["mod+,"],
+    when: () => useEditorStore.getState().mode.includes("text"),
+    run: () => {
+      const { selected } = useEditorStore.getState();
+      if (!selected.length) return;
+      toggleTextStyle(selected[0], "verticalAlign", "sub", "normal");
+    },
+  },
+  {
+    // shift+8 usually reports e.key as "*" (the shifted character) rather
+    // than "8", so both are matched to work across browsers/layouts
+    combos: ["mod+shift+8", "mod+shift+*"],
+    when: () => useEditorStore.getState().mode.includes("text"),
+    run: () => {
+      const { selected } = useEditorStore.getState();
+      if (!selected.length) return;
+      toggleBulletShortcut(selected[0]);
+      syncVisualCursor();
     },
   },
 ];

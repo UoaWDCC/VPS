@@ -19,15 +19,33 @@ const fallback: BaseTextStyle = {
   textDecoration: "none",
   textColor: "#000000",
   highlightColor: "#00000000",
+  verticalAlign: "normal",
 };
+
+// sub/superscript glyphs are rendered smaller, matching common word processor conventions
+const SCRIPT_SCALE = 0.7;
+
+export const LIST_INDENT_STEP = 24;
+export const LIST_MARKER_GAP = 8;
 
 function measure(text: string) {
   return ctx.measureText(text);
 }
 
 function buildFont(styles: Partial<BaseTextStyle>) {
-  const { fontFamily, fontSize, fontWeight, fontStyle, lineHeight } = styles;
-  return `${fontStyle} ${fontWeight} ${fontSize}px/${lineHeight! * fontSize!}px "${fontFamily}"`;
+  const {
+    fontFamily,
+    fontSize,
+    fontWeight,
+    fontStyle,
+    lineHeight,
+    verticalAlign,
+  } = styles;
+  const size =
+    verticalAlign && verticalAlign !== "normal"
+      ? fontSize! * SCRIPT_SCALE
+      : fontSize;
+  return `${fontStyle} ${fontWeight} ${size}px/${lineHeight! * fontSize!}px "${fontFamily}"`;
 }
 
 function setFont(style?: Partial<BaseTextStyle>) {
@@ -49,6 +67,21 @@ export function buildStyle(derived: Partial<BaseTextStyle>) {
     fill: derived.textColor,
     textDecoration: derived.textDecoration,
   };
+}
+
+const SUPER_SHIFT = -0.35;
+const SUB_SHIFT = 0.15;
+
+// vertical offset (in px, baseline-relative) for super/subscript, sized off
+// the *unscaled* fontSize -- Chrome/Edge dropped CSS `baseline-shift` as a
+// settable style property (SVG2 kept it only as a raw presentation
+// attribute), so the shift has to be applied as an SVG `dy` instead
+export function scriptShift(
+  style: Pick<BaseTextStyle, "fontSize" | "verticalAlign">
+) {
+  if (style.verticalAlign === "super") return style.fontSize * SUPER_SHIFT;
+  if (style.verticalAlign === "sub") return style.fontSize * SUB_SHIFT;
+  return 0;
 }
 
 function generateOffsets(text: string, style: BaseTextStyle) {
@@ -210,14 +243,19 @@ function buildBlock(
   maxWidth: number,
   blockStyle: BaseTextStyle
 ) {
+  const indent = block.list ? LIST_INDENT_STEP * (block.list.level + 1) : 0;
+
   const visualBlock: VisualBlock = {
     lines: [],
     y: offset,
     style: blockStyle,
+    list: block.list,
+    softBreak: block.softBreak,
     height: 0,
   };
 
-  const lines = buildVisualLines(block.spans, maxWidth, blockStyle);
+  const lines = buildVisualLines(block.spans, maxWidth - indent, blockStyle);
+  if (indent > 0) lines.forEach((line) => (line.x += indent));
 
   if (lines.length > 0) {
     const { y, height } = lines[lines.length - 1];

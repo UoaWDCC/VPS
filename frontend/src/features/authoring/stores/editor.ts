@@ -1,5 +1,9 @@
 import create from "zustand";
-import type { ModelSelection, VisualSelection } from "../text/types";
+import type {
+  MarkerSelection,
+  ModelSelection,
+  VisualSelection,
+} from "../text/types";
 import type { BaseTextStyle, Bounds, Guide, Vec2 } from "../types";
 import { getComponent } from "../scene/scene";
 import { getStyleForSelection } from "../scene/operations/text";
@@ -29,12 +33,14 @@ interface EditorState {
   visualSelection: VisualSelection;
   desiredColumn: number | null;
   activeStyle: BaseTextStyle | null;
+  markerSelection: MarkerSelection | null;
 
   setLoading: (loading: boolean) => void;
   setSelection: (selection: ModelSelection) => void;
   setVisualSelection: Dynamic<VisualSelection>;
   setDesiredColumn: (column: number | null) => void;
   setActiveStyle: (style: BaseTextStyle) => void;
+  setMarkerSelection: Dynamic<MarkerSelection | null>;
 
   // modes
   mode: Mode[];
@@ -84,6 +90,7 @@ const useEditorStore = create<EditorState>((set) => ({
   visualSelection: { start: null, end: null },
   activeStyle: null,
   desiredColumn: null,
+  markerSelection: null,
 
   setSelection: (selection) =>
     set(({ selected }) => {
@@ -98,6 +105,7 @@ const useEditorStore = create<EditorState>((set) => ({
   setVisualSelection: setter(set, "visualSelection"),
   setActiveStyle: (style: BaseTextStyle) => set({ activeStyle: style }),
   setDesiredColumn: (column) => set({ desiredColumn: column }),
+  setMarkerSelection: setter(set, "markerSelection"),
 
   mode: ["normal"],
   setMode: (mode) => set({ mode }),
@@ -110,6 +118,7 @@ const useEditorStore = create<EditorState>((set) => ({
       selected: [],
       selection: { start: null, end: null },
       visualSelection: { start: null, end: null },
+      markerSelection: null,
       mode: ["normal"],
       activeGuides: [],
     }),
