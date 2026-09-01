@@ -11,7 +11,11 @@ export default function StartAudioPanel({
   useEffect(() => {
     if (!open) return;
     const onKey = (e) => {
-      if (e.key === "Escape") onClose?.();
+      if (e.key === "Escape") {
+        setAudioMuted(true);
+        playAudios();
+        onClose();
+      }
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
@@ -29,7 +33,7 @@ export default function StartAudioPanel({
         }`}
         role="dialog"
         aria-modal="true"
-        aria-label="Resources"
+        aria-label="Audio settings panel"
         onClick={onClose}
       >
         <div className="flex flex-col gap-4">
