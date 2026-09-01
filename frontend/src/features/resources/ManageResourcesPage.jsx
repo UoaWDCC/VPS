@@ -120,20 +120,53 @@ export default function ManageResourcesPage() {
                     </button>
                   </div>
 
-                  <ul className="menu min-h-0 w-full flex-1 overflow-auto p-0">
-                    {search.trim() && filteredTree.length === 0 && (
-                      <li className="p-2 opacity-60">
-                        No matching resources found.
-                      </li>
-                    )}
-                    <EditableResourceTree
-                      tree={filteredTree}
-                      selectedResourceId={selectedResourceId}
-                      setSelectedResourceId={setSelectedResourceId}
-                      pendingParentIdRef={pendingParentIdRef}
-                      inputRef={inputRef}
-                    />
-                  </ul>
+                  {resourceTree.length === 0 ? (
+                    <div className="flex flex-1 flex-col items-center justify-center gap-4 p-6 text-center">
+                      <FolderPlusIcon size={32} className="text-primary" />
+                      <span className="text--1 text-primary">
+                        No resources yet. Upload a file or create a collection
+                        to get started.
+                      </span>
+                      <div className="flex flex-col items-stretch gap-2">
+                        <PopoverInput
+                          onSubmit={addResourceCollectionMutation.mutate}
+                          label="Collection Name"
+                          submitLabel="Create"
+                          trigger={
+                            <button className="btn btn-outline btn-sm gap-2 shadow-none font-normal">
+                              <FolderPlusIcon size={16} />
+                              Create Collection
+                            </button>
+                          }
+                        />
+                        <button
+                          className="btn btn-primary btn-sm gap-2 shadow-none font-normal"
+                          onClick={() => {
+                            pendingParentIdRef.current = null;
+                            inputRef.current?.click();
+                          }}
+                        >
+                          <FilePlusIcon size={16} />
+                          Upload Resource
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <ul className="menu min-h-0 w-full flex-1 overflow-auto p-0">
+                      {search.trim() && filteredTree.length === 0 && (
+                        <li className="p-2 opacity-60">
+                          No matching resources found.
+                        </li>
+                      )}
+                      <EditableResourceTree
+                        tree={filteredTree}
+                        selectedResourceId={selectedResourceId}
+                        setSelectedResourceId={setSelectedResourceId}
+                        pendingParentIdRef={pendingParentIdRef}
+                        inputRef={inputRef}
+                      />
+                    </ul>
+                  )}
                 </div>
               </div>
 
