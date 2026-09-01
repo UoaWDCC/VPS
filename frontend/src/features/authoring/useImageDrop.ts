@@ -24,6 +24,10 @@ import type { Vec2 } from "./types";
 // stack of same-sized images does not hide all but the last one.
 const CASCADE_STEP = 24;
 
+// A single drop is capped so a stray folder drag cannot queue hundreds of
+// uploads. Also roughly where the cascade stops fitting on the canvas.
+const MAX_DROP_FILES = 20;
+
 // How many rejected filenames are listed before the message is summarised.
 const MAX_NAMED_FILES = 5;
 
@@ -111,10 +115,20 @@ export default function useImageDrop(
 
     if (images.length === 0) return;
 
+    let accepted = images;
+    if (images.length > MAX_DROP_FILES) {
+      accepted = images.slice(0, MAX_DROP_FILES);
+      toast.error(
+        `Only the first ${MAX_DROP_FILES} images were added. ` +
+          `${images.length - MAX_DROP_FILES} were skipped.`,
+        { duration: 6000 }
+      );
+    }
+
     const origin = toSVGSpace(event.clientX, event.clientY);
     const originScene = getScene();
 
-    images.forEach((file, index) => {
+    accepted.forEach((file, index) => {
       const center = {
         x: origin.x + index * CASCADE_STEP,
         y: origin.y + index * CASCADE_STEP,
