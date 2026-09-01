@@ -1,4 +1,5 @@
 import { useContext, useEffect, useState } from "react";
+import toast from "react-hot-toast";
 import ScenarioContext from "../../context/ScenarioContext";
 import { modifyComponentProp } from "../../features/authoring/scene/operations/component";
 import SelectInput from "../../features/authoring/components/Select";
@@ -17,31 +18,42 @@ const EditPropertyOperation = ({
 }) => {
   const { properties } = useContext(ScenarioContext);
 
-  if (!properties) {
-    return null;
-  }
-
   const [operation, setOperation] = useState(propertyOperation.operation);
   const [value, setValue] = useState(propertyOperation.value);
 
   useEffect(() => {
-    if (propertyOperation.operation !== operation)
+    if (propertyOperation.operation !== operation) {
       setOperation(propertyOperation.operation);
-    if (propertyOperation.value !== value) setValue(propertyOperation.value);
+    }
+
+    if (propertyOperation.value !== value) {
+      setValue(propertyOperation.value);
+    }
   }, [propertyOperation]);
+
+  if (!properties) {
+    return null;
+  }
 
   const property = properties.find(
     (p) => p.id === propertyOperation.stateVariableId
   );
-  if (!property) return null;
+
+  if (!property) {
+    return null;
+  }
 
   const deletePropertyOperation = () => {
     const filtered = component.stateOperations.toSpliced(operationIndex, 1);
+
     modifyComponentProp([component.id], "stateOperations", filtered);
+
+    toast.success("Property operation deleted");
   };
 
   function saveOperation(v) {
     setOperation(v);
+
     modifyComponentProp(
       [component.id],
       `stateOperations.${operationIndex}.operation`,
@@ -51,6 +63,7 @@ const EditPropertyOperation = ({
 
   function saveValue(v) {
     setValue(v);
+
     modifyComponentProp(
       [component.id],
       `stateOperations.${operationIndex}.value`,
@@ -62,7 +75,11 @@ const EditPropertyOperation = ({
     <div className="bg-base-300 mt-xs px-[1rem] py-[0.5rem]">
       <div>
         <span className="text--1">{property.name}</span>
-        <span className="text-xs ml-2xs text-primary">{`${property.type} operation`}</span>
+
+        <span className="text-xs ml-2xs text-primary">
+          {`${property.type} operation`}
+        </span>
+
         <button
           className="btn btn-xs btn-phantom float-right"
           onClick={deletePropertyOperation}
@@ -70,6 +87,7 @@ const EditPropertyOperation = ({
           Delete
         </button>
       </div>
+
       <fieldset className="fieldset mt-[0.5rem]">
         <div className="join">
           <SelectInput
@@ -77,6 +95,7 @@ const EditPropertyOperation = ({
             value={operation}
             onChange={saveOperation}
           />
+
           {property.type === propertyTypes.BOOLEAN ? (
             <SelectInput
               values={[true, false]}
