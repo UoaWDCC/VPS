@@ -5,29 +5,71 @@ function ChromePicker({
   children,
   value,
   onChange,
+  onPreview,
   onOpen,
   tooltip,
   compact = false,
 }: React.PropsWithChildren<{
   value: string;
   onChange: (value: string) => void;
+  onPreview?: (value: string) => void;
   onOpen?: () => void;
   tooltip?: string;
   compact?: boolean;
 }>) {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement | null>(null);
-  const prevBase = useRef<string | null>(null); // prev hex color
+  const prevBase = useRef<string | null>(null);
+
+  const latestColour = useRef(value);
+  const committedColour = useRef(value);
+  const hasPendingChange = useRef(false);
+  const onChangeRef = useRef(onChange);
 
   useEffect(() => {
-    function handleClick(event: MouseEvent) {
+    onChangeRef.current = onChange;
+  }, [onChange]);
+
+  useEffect(() => {
+    if (!hasPendingChange.current) {
+      latestColour.current = value;
+      committedColour.current = value;
+    }
+  }, [value]);
+
+  useEffect(() => {
+    function commitPendingColour() {
+      if (!hasPendingChange.current) return;
+
+      const colour = latestColour.current;
+
+      onChangeRef.current(colour);
+      committedColour.current = colour;
+
+      hasPendingChange.current = false;
+    }
+
+    function handleOutsideMouseDown(event: MouseEvent) {
       if (ref.current && !ref.current.contains(event.target as Node)) {
+        commitPendingColour();
         setOpen(false);
       }
     }
-    document.addEventListener("mousedown", handleClick, true);
-    return () => document.removeEventListener("mousedown", handleClick, true);
-  }, []);
+
+    function handleMouseUp() {
+      if (open) {
+        commitPendingColour();
+      }
+    }
+
+    document.addEventListener("mousedown", handleOutsideMouseDown, true);
+    document.addEventListener("mouseup", handleMouseUp);
+
+    return () => {
+      document.removeEventListener("mousedown", handleOutsideMouseDown, true);
+      document.removeEventListener("mouseup", handleMouseUp);
+    };
+  }, [open]);
 
   const picker = open && (
     <div
@@ -44,7 +86,16 @@ function ChromePicker({
           const fixedColour =
             isNewColor && color.slice(-2) === "00" ? `${base}ff` : color;
 
-          onChange(fixedColour);
+          latestColour.current = fixedColour;
+          hasPendingChange.current = true;
+
+          if (onPreview) {
+            onPreview(fixedColour);
+          } else {
+            onChangeRef.current(fixedColour);
+            committedColour.current = fixedColour;
+            hasPendingChange.current = false;
+          }
         }}
       />
     </div>
