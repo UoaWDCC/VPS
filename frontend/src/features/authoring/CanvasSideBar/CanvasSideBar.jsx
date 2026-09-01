@@ -81,7 +81,11 @@ export default function CanvasSideBar() {
   }, [selected, component?.clickable]);
 
   return (
-    <div className="relative flex pb-m flex-col justify-center w-[24vw] overflow-y-auto overflow-x-hidden no-scrollbar">
+    <div
+      className={`relative flex pb-m flex-col justify-center overflow-y-auto overflow-x-hidden no-scrollbar transition-[width] duration-300 ease-out motion-reduce:transition-none ${
+        activePanel ? "w-[24vw]" : "w-24"
+      }`}
+    >
       <div ref={iconStackRef} className="flex flex-col gap-s">
         <SceneSettings
           open={activePanel === "scene"}
