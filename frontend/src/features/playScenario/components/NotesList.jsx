@@ -11,7 +11,10 @@ export default function NotesList({
     <ul className="space-y-4">
       {notes.map((note) => {
         const isSelected = selectedNoteId === note._id;
-        const author = roleToName?.[note.role] ?? note.role ?? "-";
+        const authorName = roleToName?.[note.role];
+        const author = authorName
+          ? `${note.role} - ${authorName}`
+          : (note.role ?? "-");
         const date = note.date ? new Date(note.date).toLocaleDateString() : "-";
 
         return (
