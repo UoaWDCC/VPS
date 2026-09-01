@@ -159,7 +159,7 @@ function handleComponentDrag(_: React.MouseEvent, position: Vec2) {
 
   const { components } = useVisualScene.getState();
   const others = Object.values(components).filter(
-    (c) => !selected.includes(c.id)
+    (c) => c.type !== "audio" && !selected.includes(c.id)
   );
   const { delta, guides } = snapTranslation(verts, bounds.rotation, others, "");
   verts = translate(verts, delta);

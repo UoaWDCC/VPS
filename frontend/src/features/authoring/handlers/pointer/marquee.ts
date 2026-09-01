@@ -7,6 +7,7 @@ import {
   polygonsIntersect,
   subtract,
 } from "../../util";
+import { getSelectedComponentBounds } from "./pointer";
 
 // below this drag distance (canvas units), treat the gesture as a plain
 // click rather than a marquee -- this both skips the (otherwise zero-area)
@@ -34,13 +35,10 @@ export function handleMarqueeStart(e: React.MouseEvent, position: Vec2) {
   setMode(["marquee"]);
 }
 
-function getMarqueeHits(
-  rectVerts: Vec2[],
-  components: Record<string, Component>
-) {
+function getMarqueeHits(rectVerts: Vec2[], components: Component[]) {
   const rectCorners = expandBoxVerts(rectVerts);
 
-  return Object.values(components)
+  return components
     .filter((component) =>
       polygonsIntersect(rectCorners, getRotatedCorners(component.bounds))
     )
@@ -53,13 +51,26 @@ export function handleMarqueeDrag(_: React.MouseEvent, position: Vec2) {
 }
 
 export function handleMarqueeEnd() {
-  const { mutationBounds, setSelected, setMode } = useEditorStore.getState();
+  const { mutationBounds, setSelected, setMutationBounds, setMode } =
+    useEditorStore.getState();
   const { components } = useVisualScene.getState();
 
+  // filter out audio components
+  const visualComponents = Object.values(components).filter(
+    (c) => c.type !== "audio"
+  );
+
   const hits = hasMarqueeMoved(mutationBounds)
-    ? getMarqueeHits(mutationBounds.verts, components)
+    ? getMarqueeHits(mutationBounds.verts, visualComponents)
     : [];
 
   setSelected(Array.from(new Set([...baseSelection, ...hits])));
+
+  // mutationBounds still holds the marquee drag rectangle -- refresh it to
+  // match the actual selection, otherwise the next resize/rotate (which only
+  // overwrites part of mutationBounds) starts from the stale marquee rect
+  const bounds = getSelectedComponentBounds();
+  if (bounds) setMutationBounds(bounds);
+
   setMode(["normal"]);
 }
