@@ -11,6 +11,7 @@ import Rectangle from "./Rectangle";
 import useEditorStore from "../stores/editor";
 import useVisualScene from "../stores/visual";
 import { getSelectedComponentBounds } from "../handlers/pointer/pointer";
+import { hasMarqueeMoved } from "../handlers/pointer/marquee";
 import { CANVAS_HEIGHT, CANVAS_WIDTH } from "../../../util/canvas";
 
 const componentMap: Record<string, React.FC<Record<string, unknown>>> = {
@@ -52,7 +53,8 @@ function Overlay() {
   const createType = useEditorStore((s) => s.createType);
   const components = useVisualScene((s) => s.components);
 
-  const isMarqueeing = mode.includes("marquee");
+  const isMarqueeing =
+    mode.includes("marquee") && hasMarqueeMoved(mutationBounds);
   const hasSelection = selected.length > 0 && !isMarqueeing;
   const type = hasSelection
     ? selected.length > 1

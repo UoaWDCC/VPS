@@ -15,6 +15,7 @@ import {
   handleMouseUpGlobal,
 } from "../handlers/pointer/pointer";
 import { handleContextGlobal } from "../handlers/pointer/context";
+import { hasMarqueeMoved } from "../handlers/pointer/marquee";
 import LoadingOverlay from "./LoadingOverlay.tsx";
 import useEditorStore from "../stores/editor.ts";
 import { CANVAS_HEIGHT, CANVAS_WIDTH } from "../../../util/canvas";
@@ -41,6 +42,10 @@ function Canvas() {
 
   const mode = useEditorStore((state) => state.mode);
   const createType = useEditorStore((state) => state.createType);
+  const mutationBounds = useEditorStore((state) => state.mutationBounds);
+
+  const isDraggingMarquee =
+    mode.includes("marquee") && hasMarqueeMoved(mutationBounds);
 
   const canvasRef = useRef<SVGSVGElement | null>(null);
 
@@ -82,7 +87,7 @@ function Canvas() {
     <CanvasContext.Provider value={{ toSVGSpace, canvasRef }}>
       <div
         className={`flex-grow relative ${loading ? "pointer-events-none" : ""} ${
-          mode.includes("create") ? "cursor-crosshair" : ""
+          mode.includes("create") || isDraggingMarquee ? "cursor-crosshair" : ""
         }`}
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}

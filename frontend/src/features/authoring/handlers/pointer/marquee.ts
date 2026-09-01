@@ -1,6 +1,6 @@
 import useEditorStore from "../../stores/editor";
 import useVisualScene from "../../stores/visual";
-import type { Component, Vec2 } from "../../types";
+import type { Bounds, Component, Vec2 } from "../../types";
 import {
   expandBoxVerts,
   getRotatedCorners,
@@ -8,11 +8,17 @@ import {
   subtract,
 } from "../../util";
 
-// below this drag distance (canvas units), treat mouseup as a plain click
-// rather than a marquee -- otherwise a click with no movement still runs a
-// zero-area hit test, which can select a component the user never visually
-// touched (e.g. an unfilled shape whose bounds cover that point)
+// below this drag distance (canvas units), treat the gesture as a plain
+// click rather than a marquee -- this both skips the (otherwise zero-area)
+// hit test on mouseup, and gates marquee-only visuals (crosshair cursor,
+// the dashed rectangle) so they don't flash on an ordinary click
 const MIN_DRAG_DISTANCE = 2;
+
+export function hasMarqueeMoved(bounds: Bounds) {
+  const [a, b] = bounds.verts;
+  const delta = subtract(b, a);
+  return Math.hypot(delta.x, delta.y) > MIN_DRAG_DISTANCE;
+}
 
 // pre-drag selection, so a shift-drag adds to it rather than replacing it
 let baseSelection: string[] = [];
@@ -50,10 +56,9 @@ export function handleMarqueeEnd() {
   const { mutationBounds, setSelected, setMode } = useEditorStore.getState();
   const { components } = useVisualScene.getState();
 
-  const [a, b] = mutationBounds.verts;
-  const delta = subtract(b, a);
-  const dragged = Math.hypot(delta.x, delta.y) > MIN_DRAG_DISTANCE;
-  const hits = dragged ? getMarqueeHits(mutationBounds.verts, components) : [];
+  const hits = hasMarqueeMoved(mutationBounds)
+    ? getMarqueeHits(mutationBounds.verts, components)
+    : [];
 
   setSelected(Array.from(new Set([...baseSelection, ...hits])));
   setMode(["normal"]);
