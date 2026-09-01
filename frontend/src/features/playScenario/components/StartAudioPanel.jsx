@@ -1,19 +1,13 @@
 import { useEffect } from "react";
 import PanelOverlay from "../../../components/PanelOverlay";
 
-export default function StartAudioPanel({
-  open,
-  onClose,
-  setAudioMuted,
-  playAudios,
-}) {
+export default function StartAudioPanel({ open, onClose, setAudioMuted }) {
   // Close on Escape
   useEffect(() => {
     if (!open) return;
     const onKey = (e) => {
       if (e.key === "Escape") {
         setAudioMuted(true);
-        playAudios();
         onClose();
       }
     };
@@ -41,7 +35,6 @@ export default function StartAudioPanel({
             className="btn"
             onClick={() => {
               setAudioMuted(false);
-              playAudios();
               onClose();
             }}
             aria-label="Unmute audio"
@@ -53,7 +46,6 @@ export default function StartAudioPanel({
             className="btn"
             onClick={() => {
               setAudioMuted(true);
-              playAudios();
               onClose();
             }}
             aria-label="Mute audio"

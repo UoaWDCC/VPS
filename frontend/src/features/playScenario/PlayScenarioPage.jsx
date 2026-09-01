@@ -401,7 +401,7 @@ export default function PlayScenarioPage({ group }) {
         audioElement.muted = audioMuted;
         return audioElement;
       });
-      !startAudioOpen && playAudios();
+      playAudios();
       return () => cleanUpAudios();
     } catch {
       toast.error("The audio on this scene failed to play");
@@ -492,7 +492,6 @@ export default function PlayScenarioPage({ group }) {
         open={startAudioOpen}
         onClose={() => setStartAudioOpen(false)}
         setAudioMuted={setAudioMuted}
-        playAudios={playAudios}
       />
       {isMultiplayer && (
         <NotesPanel
