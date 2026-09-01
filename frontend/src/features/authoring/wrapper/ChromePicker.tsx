@@ -86,7 +86,16 @@ function ChromePicker({
           const fixedColour =
             isNewColor && color.slice(-2) === "00" ? `${base}ff` : color;
 
-          onChange(fixedColour);
+          latestColour.current = fixedColour;
+          hasPendingChange.current = true;
+
+          if (onPreview) {
+            onPreview(fixedColour);
+          } else {
+            onChangeRef.current(fixedColour);
+            committedColour.current = fixedColour;
+            hasPendingChange.current = false;
+          }
         }}
       />
     </div>

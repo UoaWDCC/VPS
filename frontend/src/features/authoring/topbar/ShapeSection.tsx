@@ -1,11 +1,10 @@
 import { PaintBucket, Pencil, RulerIcon } from "lucide-react";
 import ChromePicker from "../wrapper/ChromePicker";
-
 import useEditorStore from "../stores/editor";
 import { useEffect, useRef, useState } from "react";
 import { getComponent } from "../scene/scene";
 import { modifyComponentProp } from "../scene/operations/component";
-import { updateHistory } from "../scene/history";
+import { updateHistory, type ChangeRecord } from "../scene/history";
 import MultiInput from "../wrapper/MultiInput";
 import useVisualScene from "../stores/visual";
 import { buildVisualComponent } from "../pipeline";
@@ -16,8 +15,8 @@ interface ShapeProps {
   strokeWidth: number;
 }
 
-function extractProps(selected: string): ShapeProps {
-  const c = getComponent(selected) as unknown as ShapeProps;
+function extractProps(selected: string[]): ShapeProps {
+  const c = getComponent(selected[0]) as unknown as ShapeProps;
   return {
     fill: c.fill,
     stroke: c.stroke,
@@ -56,10 +55,12 @@ const widths = [1, 2, 3, 4, 8, 12, 16, 24];
 function ShapeSection() {
   const selected = useEditorStore((state) => state.selected);
 
-  const visualComponent = useVisualScene((state) => state.components[selected]);
+  const visualComponent = useVisualScene(
+    (state) => state.components[selected[0]]
+  );
 
   const [props, setProps] = useState(extractProps(selected));
-  const previewStart = useRef<ReturnType<typeof getComponent> | null>(null);
+  const previewStart = useRef<ChangeRecord[] | null>(null);
 
   useEffect(() => {
     setProps(extractProps(selected));
@@ -71,32 +72,41 @@ function ShapeSection() {
   }
 
   function previewProps(prop: keyof ShapeProps, value: string | number) {
-    const component = getComponent(selected);
-
-    if (!component) return;
-
     if (!previewStart.current) {
-      previewStart.current = structuredClone(component);
+      previewStart.current = selected.map((id) => ({
+        id,
+        prevState: structuredClone(getComponent(id)),
+      }));
     }
 
-    setShapeComponentProp(component, prop, value);
+    selected.forEach((id) => {
+      const component = getComponent(id);
 
-    useVisualScene.getState().updateComponent(buildVisualComponent(component));
+      if (!component) return;
+
+      setShapeComponentProp(component, prop, value);
+
+      useVisualScene
+        .getState()
+        .updateComponent(buildVisualComponent(component));
+    });
 
     setProps((current) => ({ ...current, [prop]: value }));
   }
 
   function commitPreview(prop: keyof ShapeProps, value: string | number) {
-    const component = getComponent(selected);
+    selected.forEach((id) => {
+      const component = getComponent(id);
 
-    if (!component) return;
+      if (!component) return;
 
-    setShapeComponentProp(component, prop, value);
+      setShapeComponentProp(component, prop, value);
+    });
 
     const previous = previewStart.current;
 
     if (previous) {
-      updateHistory(selected, previous);
+      updateHistory(previous);
       previewStart.current = null;
     }
 
