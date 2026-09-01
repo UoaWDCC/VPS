@@ -14,7 +14,7 @@ export default function NotesList({
         const authorName = roleToName?.[note.role];
         const author = authorName
           ? `${note.role} - ${authorName}`
-          : note.role ?? "-";
+          : (note.role ?? "-");
         const date = note.date ? new Date(note.date).toLocaleDateString() : "-";
 
         return (
