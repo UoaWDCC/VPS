@@ -16,7 +16,6 @@ export const defaults = {
     stroke: "#00000000",
     strokeWidth: 3, // default stroke width 3
     bounds: {
-      // sized to hold the placeholder text at the 32px default font size
       verts: [
         { x: 0, y: 0 },
         { x: 600, y: 100 },
@@ -27,11 +26,11 @@ export const defaults = {
       style: {},
       blocks: [
         {
-          style: {},
+          style: { alignment: "left" },
           spans: [
             {
               style: {},
-              text: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla venenatis.",
+              text: "",
             },
           ],
         },
