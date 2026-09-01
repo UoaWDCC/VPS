@@ -395,10 +395,11 @@ export default function PlayScenarioPage({ group }) {
     if (!currScene) return;
     try {
       const audios = currScene.components.filter((c) => c.type === "audio");
-      audioRefs.current = audios.map((audio) => new Audio(audio.url));
-      audioRefs.current.forEach((audio) => {
-        audio.loop = audios.find((a) => a.url === audio.src)?.loop || false;
-        audio.muted = audioMuted;
+      audioRefs.current = audios.map((audio) => {
+        const audioElement = new Audio(audio.url);
+        audioElement.loop = audio.loop || false;
+        audioElement.muted = audioMuted;
+        return audioElement;
       });
       !startAudioOpen && playAudios();
       return () => cleanUpAudios();
