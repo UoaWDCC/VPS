@@ -7,11 +7,12 @@ import { buildResourceTree, filterTreeBySearch, normaliseFile } from "./util";
 import { filterTreeByConditions } from "../../utils/propertyConditionalEvaluator";
 import SkeletonBody from "./ResourcesSkeleton";
 import ResourcePreview from "./ResourcePreview";
+import PanelOverlay from "../../components/PanelOverlay";
 
 // NOTE: property filters can't change while the resources panel is
 // open, so deselecting on resource hiding isn't a concern
 
-export default function ResourcesOverlay({ properties, open, onClose }) {
+export default function ResourcesPanel({ properties, open, onClose }) {
   const { resourcesQuery } = useResources();
 
   const [selectedResourceId, setSelectedResourceId] = useState(null);
@@ -44,15 +45,7 @@ export default function ResourcesOverlay({ properties, open, onClose }) {
 
   return (
     <>
-      {/* overlay */}
-      <div
-        className={`fixed inset-0 z-50 bg-base-100/95 transition-opacity ${
-          open
-            ? "opacity-100 pointer-events-auto"
-            : "opacity-0 pointer-events-none"
-        }`}
-        aria-hidden="true"
-      />
+      <PanelOverlay open={open} onClose={() => {}} />
 
       <div
         className={`fixed inset-0 z-50 flex items-center justify-center transition-all ${
