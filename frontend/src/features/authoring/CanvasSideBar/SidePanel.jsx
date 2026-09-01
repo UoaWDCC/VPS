@@ -1,12 +1,6 @@
 import { XIcon } from "lucide-react";
 
-export default function SidePanel({
-  label,
-  Icon,
-  open,
-  onToggle,
-  children,
-}) {
+export default function SidePanel({ label, Icon, open, onToggle, children }) {
   return (
     <div className="flex w-full justify-end">
       {open && (
