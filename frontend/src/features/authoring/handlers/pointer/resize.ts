@@ -60,7 +60,7 @@ export function handleResizeDrag(e: React.MouseEvent, position: Vec2) {
     if (!bounds.rotation) {
       const components = Object.values(
         useVisualScene.getState().components
-      ).filter((c) => !selected.includes(c.id));
+      ).filter((c) => c.type !== "audio" && !selected.includes(c.id));
 
       // resolve modifiers (shift/ctrl) against the raw point first so we snap the
       // actual resize point, not the mouse position they'd otherwise overwrite

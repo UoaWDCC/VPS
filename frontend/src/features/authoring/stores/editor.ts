@@ -4,10 +4,25 @@ import type { BaseTextStyle, Bounds, Guide, Vec2 } from "../types";
 import { getComponent } from "../scene/scene";
 import { getStyleForSelection } from "../scene/operations/text";
 
-type Mode = "normal" | "resize" | "create" | "text" | "mutation";
+type Mode = "normal" | "resize" | "create" | "text" | "mutation" | "marquee";
+
+// An image that is being uploaded, drawn on the canvas until the real
+// component takes its place.
+export interface PendingImage {
+  id: string;
+  sceneId: string;
+  bounds: Bounds;
+  // local object URL of the file being uploaded, used as a preview
+  previewUrl: string;
+  // upload progress, 0 to 1
+  progress: number;
+  // upload finished — the placeholder resolves before the real image takes over
+  settled: boolean;
+}
 
 interface EditorState {
   loading: boolean;
+  pendingImages: PendingImage[];
   selected: string[];
   hovered: string | null;
   createType: string | null;
@@ -31,6 +46,9 @@ interface EditorState {
   activeStyle: BaseTextStyle | null;
 
   setLoading: (loading: boolean) => void;
+  addPendingImage: (image: PendingImage) => void;
+  updatePendingImage: (id: string, patch: Partial<PendingImage>) => void;
+  removePendingImage: (id: string) => void;
   setSelection: (selection: ModelSelection) => void;
   setVisualSelection: Dynamic<VisualSelection>;
   setDesiredColumn: (column: number | null) => void;
@@ -63,6 +81,7 @@ function setter<K extends keyof EditorState>(set: ZustandSet, prop: K) {
 
 const useEditorStore = create<EditorState>((set) => ({
   loading: false,
+  pendingImages: [],
   selected: [],
   hovered: null,
   createType: null,
@@ -72,6 +91,18 @@ const useEditorStore = create<EditorState>((set) => ({
   activeGuides: [],
 
   setLoading: (value: boolean) => set({ loading: value }),
+  addPendingImage: (image) =>
+    set((state) => ({ pendingImages: [...state.pendingImages, image] })),
+  updatePendingImage: (id, patch) =>
+    set((state) => ({
+      pendingImages: state.pendingImages.map((image) =>
+        image.id === id ? { ...image, ...patch } : image
+      ),
+    })),
+  removePendingImage: (id) =>
+    set((state) => ({
+      pendingImages: state.pendingImages.filter((image) => image.id !== id),
+    })),
   setSelected: (id) => set({ selected: id }),
   setHovered: (id) => set({ hovered: id }),
   setCreateType: (type: string) => set({ createType: type }),

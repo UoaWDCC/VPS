@@ -1,5 +1,5 @@
 import type { Bounds, Component, Guide, Vec2 } from "../../types";
-import { expandBoxVerts, getBoxCenter, rotateMany } from "../../util";
+import { getRotatedCorners } from "../../util";
 import { CANVAS_HEIGHT, CANVAS_WIDTH } from "../../../../util/canvas";
 
 export const SNAP_THRESHOLD = 10;
@@ -14,11 +14,7 @@ interface AABB {
 }
 
 function getAABB(bounds: Bounds): AABB {
-  const corners = rotateMany(
-    expandBoxVerts(bounds.verts),
-    getBoxCenter(bounds.verts),
-    bounds.rotation
-  );
+  const corners = getRotatedCorners(bounds);
   const xs = corners.map((v) => v.x);
   const ys = corners.map((v) => v.y);
   const minX = Math.min(...xs);
