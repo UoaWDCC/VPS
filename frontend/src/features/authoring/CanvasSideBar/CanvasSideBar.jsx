@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { useLayoutEffect, useRef, useState } from "react";
 import useEditorStore from "../stores/editor";
 import useVisualScene from "../stores/visual";
 import AudioManager from "../audio/AudioManager";
@@ -24,7 +24,7 @@ export default function CanvasSideBar() {
     setActivePanel((current) => (current === panel ? null : panel));
   }
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     setActivePanel(null);
   }, [selected, component?.id, component?.clickable]);
 
