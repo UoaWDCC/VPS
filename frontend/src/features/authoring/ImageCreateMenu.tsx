@@ -26,6 +26,7 @@ import SceneContext from "../../context/SceneContext.jsx";
 import { getScene, getSceneId } from "./scene/scene";
 import { v4 } from "uuid";
 import { getImages, uploadImage } from "./images";
+import { CANVAS_HEIGHT, CANVAS_WIDTH } from "../../util/canvas";
 
 type ModifyScene = (scene: Scene) => Promise<unknown> | undefined;
 
@@ -138,14 +139,27 @@ async function preload(url: string) {
   await img.decode().catch(() => {});
 }
 
-async function getImageDimensions(url: string, defaultHeight = 300) {
+// Placed at its true pixel size and centred on the canvas. Anything larger
+// than the canvas is scaled down to fit, so it stays wholly on the slide.
+async function getImageDimensions(url: string) {
   const img = new Image();
   img.src = url;
   await img.decode();
-  const scaledWidth = img.naturalWidth * (defaultHeight / img.naturalHeight);
+
+  const scale = Math.min(
+    1,
+    CANVAS_WIDTH / img.naturalWidth,
+    CANVAS_HEIGHT / img.naturalHeight
+  );
+  const width = img.naturalWidth * scale;
+  const height = img.naturalHeight * scale;
+
+  const x = (CANVAS_WIDTH - width) / 2;
+  const y = (CANVAS_HEIGHT - height) / 2;
+
   return [
-    { x: 0, y: 0 },
-    { x: scaledWidth, y: defaultHeight },
+    { x, y },
+    { x: x + width, y: y + height },
   ];
 }
 
