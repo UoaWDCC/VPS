@@ -35,6 +35,7 @@ export default function CanvasSideBar() {
 
     const currentTop = iconStack.getBoundingClientRect().top;
     const previousTop = previousStackTopRef.current;
+    const contextualIcons = contextualIconsRef.current;
     const hasSelection = Boolean(component);
     const selectionPresenceChanged =
       previousSelectionPresenceRef.current !== null &&
@@ -47,7 +48,8 @@ export default function CanvasSideBar() {
       !reduceMotion &&
       selectionPresenceChanged &&
       previousTop !== null &&
-      previousTop !== currentTop
+      previousTop !== currentTop &&
+      typeof iconStack.animate === "function"
     ) {
       iconStack.animate(
         [
@@ -62,9 +64,10 @@ export default function CanvasSideBar() {
       !reduceMotion &&
       selectionPresenceChanged &&
       hasSelection &&
-      contextualIconsRef.current
+      contextualIcons &&
+      typeof contextualIcons.animate === "function"
     ) {
-      contextualIconsRef.current.animate(
+      contextualIcons.animate(
         [
           { opacity: 0, transform: "translateY(12px)" },
           { opacity: 1, transform: "translateY(0)" },
