@@ -5,7 +5,7 @@ export default function SidePanel({ label, Icon, open, onToggle, children }) {
     <div className="flex w-full justify-end">
       <button
         type="button"
-        className={`cursor-pointer hover:-translate-y-1 duration-100 ease w-24 h-24 p-2 flex flex-col items-center justify-center gap-1 rounded-sm text-s ${
+        className={`cursor-pointer hover:-translate-y-1 duration-100 ease w-19 h-19 p-2 flex flex-col items-center justify-center gap-1 rounded-sm text-s ${
           open ? "bg-base-100" : "bg-base-300"
         }`}
         onClick={onToggle}
