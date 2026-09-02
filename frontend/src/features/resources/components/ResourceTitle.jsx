@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { CheckIcon, PencilIcon } from "lucide-react";
 import { RESOURCE_NAME_MAX_LENGTH } from "../constants";
-import { isTemp } from "../util";
 import { useResources } from "../useResources";
 import toast from "react-hot-toast";
 
@@ -34,7 +33,7 @@ function fileTypeLabel(file) {
 }
 
 export default function ResourceTitle({ resource, editable }) {
-  const { renameResourceMutation, deleteResourceMutation } = useResources();
+  const { renameResourceMutation } = useResources();
 
   function renameResource(resource, name) {
     renameResourceMutation.mutate({ resourceId: resource._id, name });

@@ -1,5 +1,4 @@
 import { useQuery } from "@tanstack/react-query";
-import toast from "react-hot-toast";
 import MDTextViewer from "../playScenario/components/MDTextViewer";
 
 async function loadText(url) {
