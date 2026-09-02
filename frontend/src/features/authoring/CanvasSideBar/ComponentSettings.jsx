@@ -5,12 +5,19 @@ import { modifyComponentProp } from "../scene/operations/component";
 import PropertyOperationMenu from "../../../components/Properties/PropertyOperationMenu";
 import SelectInput from "../components/Select";
 import PropertyBindingMenu from "../../../components/Properties/PropertyBindingMenu";
+import SidePanel from "./SidePanel";
+import { LinkIcon } from "lucide-react";
+import { ObjectPropertyEditor } from "./ObjectPropertyEditor";
 
 /**
  * This component displays the properties the selected scene component
  * @component
  */
-export default function ComponentSettings({ component }) {
+export default function ComponentSettings({
+  component,
+  activePanel,
+  onTogglePanel,
+}) {
   const { scenes } = useContext(SceneContext);
 
   const [value, setValue] = useState(component?.nextScene);
@@ -28,28 +35,42 @@ export default function ComponentSettings({ component }) {
 
   return (
     <>
-      <PropertyBindingMenu component={component} />
+      <PropertyBindingMenu
+        component={component}
+        open={activePanel === "bindings"}
+        onToggle={() => onTogglePanel("bindings")}
+      />
       {component.clickable && (
         <>
-          <div className="collapse overflow-visible collapse-arrow bg-base-300 rounded-sm text-s">
-            <input type="checkbox" />
-            <div className="collapse-title">Link Details</div>
-            <div className="collapse-content text--1 bg-base-200">
-              <fieldset className="fieldset pt-2">
-                <label className="label">Next Scene</label>
-                <SelectInput
-                  nullable
-                  values={scenes.map((s) => s._id)}
-                  value={value}
-                  onChange={saveLink}
-                  display={(v) => scenes.find((s) => s._id === v)?.name}
-                />
-              </fieldset>
-            </div>
-          </div>
-          <PropertyOperationMenu component={component} />
+          <SidePanel
+            label="Link Details"
+            Icon={LinkIcon}
+            open={activePanel === "link"}
+            onToggle={() => onTogglePanel("link")}
+          >
+            <fieldset className="fieldset pt-2">
+              <label className="label">Next Scene</label>
+              <SelectInput
+                nullable
+                values={scenes.map((s) => s._id)}
+                value={value}
+                onChange={saveLink}
+                display={(v) => scenes.find((s) => s._id === v)?.name}
+              />
+            </fieldset>
+          </SidePanel>
+          <PropertyOperationMenu
+            component={component}
+            open={activePanel === "operations"}
+            onToggle={() => onTogglePanel("operations")}
+          />
         </>
       )}
+      <ObjectPropertyEditor
+        component={component}
+        open={activePanel === "object-properties"}
+        onToggle={() => onTogglePanel("object-properties")}
+      />
     </>
   );
 }
