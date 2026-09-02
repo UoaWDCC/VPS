@@ -1,7 +1,6 @@
 @import "tailwindcss";
 @plugin "daisyui";
 
-
 @keyframes side-panel-slide-in {
   from {
     transform: translateX(100%);
