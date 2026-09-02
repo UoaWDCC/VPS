@@ -1,8 +1,7 @@
-import { useContext, useEffect, useState } from "react";
+import { useCallback, useContext } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
 
-import { useGet } from "../hooks/crudHooks";
 import { ensurePropertyUUIDs } from "../components/Properties/migrationUtils";
 import { api } from "../util/api";
 
@@ -29,6 +28,17 @@ function updateScenarioDetails(user, scenarioId, details) {
   return api.patch(user, `/api/scenario/${scenarioId}`, details);
 }
 
+async function getRoleList(user, scenarioId) {
+  const res = await api.get(user, `api/scenario/${scenarioId}/roles`);
+  return res.data;
+}
+
+async function getProperties(user, scenarioId) {
+  const res = await api.get(user, `api/scenario/${scenarioId}/properties`);
+  // Ensure all properties have UUIDs for backward compatibility
+  return ensurePropertyUUIDs(res.data);
+}
+
 /**
  * This is a Context Provider made with the React Context API
  * ScenarioContextProvider allows access to scenario info and the refetch function
@@ -38,9 +48,6 @@ export default function ScenarioContextProvider({ children }) {
   const { scenarioId } = useParams();
 
   const queryClient = useQueryClient();
-
-  const [roleList, setRoleList] = useState();
-  const [properties, setProperties] = useState();
 
   const scenarioQuery = useQuery({
     queryKey: ["scenarios"],
@@ -89,30 +96,31 @@ export default function ScenarioContextProvider({ children }) {
     },
   });
 
-  useGet(
-    `api/scenario/${scenarioId}/roles`,
-    setRoleList,
-    true,
-    !scenarioId // Skip request if there is no current scenario.
-  );
+  // Both queries are skipped when there is no current scenario.
+  const rolesQuery = useQuery({
+    queryKey: ["roles", scenarioId],
+    queryFn: () => getRoleList(user, scenarioId),
+    enabled: Boolean(scenarioId && user),
+  });
 
   // TODO: this should also exist as prop of the scenario instead
-  useEffect(() => {
-    if (scenarioId && user) {
-      api
-        .get(user, `api/scenario/${scenarioId}/properties`)
-        .then((res) => {
-          // Ensure all properties have UUIDs for backward compatibility
-          const propertiesWithUUIDs = ensurePropertyUUIDs(res.data);
-          setProperties(propertiesWithUUIDs);
-        })
-        .catch((error) => {
-          console.error("Error fetching properties:", error);
-        });
-    } else {
-      setProperties([]);
-    }
-  }, [scenarioId, user]);
+  const propertiesQuery = useQuery({
+    queryKey: ["properties", scenarioId],
+    queryFn: () => getProperties(user, scenarioId),
+    enabled: Boolean(scenarioId && user),
+  });
+
+  // Callers already hold fresh server data after a mutation, so writing it
+  // straight into the cache keeps the old setter API without a refetch.
+  const setRoleList = useCallback(
+    (roles) => queryClient.setQueryData(["roles", scenarioId], roles),
+    [queryClient, scenarioId]
+  );
+
+  const setProperties = useCallback(
+    (props) => queryClient.setQueryData(["properties", scenarioId], props),
+    [queryClient, scenarioId]
+  );
 
   if (scenarioQuery.isLoading) {
     return <LoadingPage text="Getting scenarios..." />;
@@ -127,9 +135,9 @@ export default function ScenarioContextProvider({ children }) {
         updateScenarioDetails: updateDetailsMutation.mutateAsync,
         createScenario: createMutation.mutateAsync,
 
-        roleList,
+        roleList: rolesQuery.data,
         setRoleList,
-        properties,
+        properties: scenarioId ? propertiesQuery.data : [],
         setProperties,
       }}
     >

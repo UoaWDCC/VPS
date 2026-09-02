@@ -1,4 +1,3 @@
-import { useGet } from "hooks/crudHooks";
 import {
   useParams,
   useHistory,
@@ -7,6 +6,7 @@ import {
   Switch,
 } from "react-router-dom";
 import { useContext, useEffect, useState, useMemo } from "react";
+import { useQuery } from "@tanstack/react-query";
 import toast from "react-hot-toast";
 import { api } from "../../util/api";
 import DashGroupTable from "./components/table/DashGroupTable";
@@ -25,6 +25,14 @@ import { ArrowLeftIcon, SearchIcon, UsersIcon } from "lucide-react";
  * Todo: Need to add some type of message if no groups are assigned
  */
 
+const EMPTY_OBJECT = {};
+const EMPTY_ARRAY = [];
+
+async function fetchDashboard(user, url) {
+  const res = await api.get(user, url);
+  return res.data;
+}
+
 export default function Dashboard() {
   const history = useHistory();
   const location = useLocation();
@@ -33,15 +41,11 @@ export default function Dashboard() {
   const cameFromCanvas =
     new URLSearchParams(location.search).get("from") === "canvas";
 
-  const [scenarioGroupInfo, setScenarioGroupInfo] = useState([]);
-  const [scenario, setCurrentScenario] = useState({});
-  const [scenes, setScenes] = useState([]);
   const [groupInfo, setGroupInfo] = useState({});
   const [heading, setHeading] = useState("");
   const [activeTab, setActiveTab] = useState("groups");
   const [memberSearch, setMemberSearch] = useState("");
   const { user } = useContext(AuthenticationContext);
-  const isOwner = Boolean(user && scenario.uid && user.uid === scenario.uid);
 
   // Check what page we are on
   const matchViewGroup = useRouteMatch(`${path}/view-group/:groupId`);
@@ -58,26 +62,47 @@ export default function Dashboard() {
     history.push(cameFromCanvas ? `/scenario/${scenarioId}` : "/dashboard");
   }
 
-  useGet(`api/dashboard/scenarios/${scenarioId}`, setCurrentScenario);
+  const scenarioQuery = useQuery({
+    queryKey: ["dashboard", "scenario", scenarioId],
+    queryFn: () =>
+      fetchDashboard(user, `api/dashboard/scenarios/${scenarioId}`),
+    enabled: Boolean(user && scenarioId),
+  });
+  const scenario = scenarioQuery.data ?? EMPTY_OBJECT;
 
-  useGet(`api/dashboard/scenarios/${scenarioId}/scenes`, setScenes);
+  const scenesQuery = useQuery({
+    queryKey: ["dashboard", "scenes", scenarioId],
+    queryFn: () =>
+      fetchDashboard(user, `api/dashboard/scenarios/${scenarioId}/scenes`),
+    enabled: Boolean(user && scenarioId),
+  });
+  const scenes = scenesQuery.data ?? EMPTY_ARRAY;
 
-  const { isLoading, reFetch: reFetchGroups } = useGet(
-    `/api/dashboard/scenarios/${scenarioId}/groups`,
-    setScenarioGroupInfo
-  );
+  const groupsQuery = useQuery({
+    queryKey: ["dashboard", "groups", scenarioId],
+    queryFn: () =>
+      fetchDashboard(user, `/api/dashboard/scenarios/${scenarioId}/groups`),
+    enabled: Boolean(user && scenarioId),
+  });
+  const scenarioGroupInfo = groupsQuery.data ?? EMPTY_ARRAY;
+  const isOwner = Boolean(user && scenario.uid && user.uid === scenario.uid);
+  const isLoading = groupsQuery.isPending;
+  const reFetchGroups = groupsQuery.refetch;
 
   useEffect(() => {
     setHeading(scenario.name);
-  }, [scenario]);
+  }, [scenario.name]);
 
   // Fetch group data if in view group mode, skips if not
-  useGet(
-    `/api/dashboard/groups/${viewGroupId}`,
-    setGroupInfo,
-    true,
-    !isViewGroupMode
-  );
+  const viewGroupQuery = useQuery({
+    queryKey: ["dashboard", "group", viewGroupId],
+    queryFn: () => fetchDashboard(user, `/api/dashboard/groups/${viewGroupId}`),
+    enabled: Boolean(user && isViewGroupMode),
+  });
+
+  useEffect(() => {
+    if (viewGroupQuery.data) setGroupInfo(viewGroupQuery.data);
+  }, [viewGroupQuery.data]);
 
   const viewGroup = async (groupId) => {
     history.push(`${url}/view-group/${groupId}${location.search}`);

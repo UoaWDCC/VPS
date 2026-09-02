@@ -2,7 +2,8 @@ import { signInWithPopup } from "firebase/auth";
 import { useState } from "react";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { auth, googleProvider } from "../firebase/firebase";
-import { useGetSimplified } from "../hooks/crudHooks";
+import { useQuery } from "@tanstack/react-query";
+import { api } from "../util/api";
 import AuthenticationContext from "./AuthenticationContext";
 import toast from "react-hot-toast";
 
@@ -58,14 +59,19 @@ export default function AuthenticationContextProvider({ children }) {
   }
 
   // getting role from backend
-  const [userRole, setUserRole] = useState();
-  const userID = user == null ? "null" : user.uid; // this is to avoid null pointer exceptions while confining to hook rules
-  useGetSimplified(`/api/staff/${userID}`, setUserRole);
+  const roleQuery = useQuery({
+    queryKey: ["staffRole", user?.uid],
+    queryFn: async () => {
+      const res = await api.get(user, `/api/staff/${user.uid}`);
+      return res.data;
+    },
+    enabled: Boolean(user),
+  });
 
   // creating user object with role property
   const VpsUser = {
     firebaseUserObj: user,
-    role: userRole,
+    role: roleQuery.data,
   };
 
   return (

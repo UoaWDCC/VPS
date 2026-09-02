@@ -1,6 +1,16 @@
 import axios from "axios";
 import toast from "react-hot-toast";
 
+/**
+ * Handles the server URL for axios calls when the .env file is missing.
+ * Without VITE_SERVER_URL, requests go through the dev-server proxy at "/".
+ */
+if (import.meta.env.VITE_SERVER_URL === undefined) {
+  axios.defaults.baseURL = "/";
+} else {
+  axios.defaults.baseURL = `${import.meta.env.VITE_SERVER_URL}`;
+}
+
 export const api = {};
 
 api.request = async function (user, config) {

@@ -65,8 +65,8 @@ export default function App() {
       <ContextMenuPortal />
 
       {/* Routes */}
-      <AuthenticationContextProvider>
-        <QueryClientProvider client={queryClient}>
+      <QueryClientProvider client={queryClient}>
+        <AuthenticationContextProvider>
           <BrowserRouter>
             <Switch>
               <Route exact path="/login" component={LoginPage} />
@@ -128,8 +128,8 @@ export default function App() {
               </ProtectedRoute>
             </Switch>
           </BrowserRouter>
-        </QueryClientProvider>
-      </AuthenticationContextProvider>
+        </AuthenticationContextProvider>
+      </QueryClientProvider>
     </ErrorBoundary>
   );
 }

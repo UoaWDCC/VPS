@@ -4,7 +4,7 @@ import axios from "axios";
 import { toast } from "react-hot-toast";
 
 import AuthenticationContext from "context/AuthenticationContext";
-import { usePost } from "hooks/crudHooks";
+import { api } from "../../util/api";
 
 import LoadingPage from "../status/LoadingPage";
 import PlayScenarioCanvas from "./PlayScenarioCanvas";
@@ -361,14 +361,10 @@ export default function PlayScenarioPage({ group }) {
     const resetUrl = isMultiplayer
       ? `api/navigate/group/reset/${group._id}`
       : `api/navigate/user/reset/${scenarioId}`;
-    const res = await usePost(
-      resetUrl,
-      { currentScene: sceneId },
-      user.getIdToken.bind(user)
-    );
-
-    if (res?.status) {
-      handleError(res);
+    try {
+      await api.post(user, resetUrl, { currentScene: sceneId });
+    } catch (e) {
+      handleError(e?.response?.data);
       return;
     }
 
