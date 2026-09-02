@@ -3,6 +3,7 @@ import { CheckIcon, PencilIcon } from "lucide-react";
 import { RESOURCE_NAME_MAX_LENGTH } from "../constants";
 import { isTemp } from "../util";
 import { useResources } from "../useResources";
+import toast from "react-hot-toast";
 
 function downloadFilename(name, extension) {
   const trimmed = name?.trim() || "";
@@ -126,7 +127,7 @@ export default function ResourceTitle({ resource, editable }) {
             )}
           </div>
         )}{" "}
-        {editing ? (
+        {editing ?? (
           <button
             type="button"
             className="btn btn-phantom btn-xs px-1.5 h-9"
@@ -135,17 +136,6 @@ export default function ResourceTitle({ resource, editable }) {
           >
             <CheckIcon size={14} />
           </button>
-        ) : (
-          <button
-            className="btn btn-phantom btn-xs px-1.5 h-9"
-            onClick={(event) => {
-              event.preventDefault();
-              event.stopPropagation();
-              pendingParentIdRef.current = resource._id;
-              inputRef.current?.click();
-            }}
-            title="Add file"
-          ></button>
         )}
         {resource?.type === "file" && (
           <button
