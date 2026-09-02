@@ -53,7 +53,7 @@ const EditPropertyConditional = ({ resource, conditional }) => {
     mutationFn: (conditionalId) =>
       deletePropertyConditional(user, scenarioId, resource._id, conditionalId),
     onMutate: (conditionalId) => {
-      queryClient.cancelQueries(["resources", scenarioId]);
+      queryClient.cancelQueries({ queryKey: ["resources", scenarioId] });
       queryClient.setQueryData(["resources", scenarioId], (prev) => {
         return prev.map((r) =>
           r._id !== resource._id
@@ -67,7 +67,8 @@ const EditPropertyConditional = ({ resource, conditional }) => {
         );
       });
     },
-    onSettled: () => queryClient.invalidateQueries(["resources", scenarioId]),
+    onSettled: () =>
+      queryClient.invalidateQueries({ queryKey: ["resources", scenarioId] }),
     onError: (e) => {
       console.error(e);
       toast.error("Error deleting property conditional");
@@ -78,7 +79,7 @@ const EditPropertyConditional = ({ resource, conditional }) => {
     mutationFn: (conditional) =>
       editPropertyConditional(user, scenarioId, resource._id, conditional),
     onMutate: (conditional) => {
-      queryClient.cancelQueries(["resources", scenarioId]);
+      queryClient.cancelQueries({ queryKey: ["resources", scenarioId] });
       queryClient.setQueryData(["resources", scenarioId], (prev) => {
         return prev.map((r) =>
           r._id !== resource._id
@@ -92,7 +93,8 @@ const EditPropertyConditional = ({ resource, conditional }) => {
         );
       });
     },
-    onSettled: () => queryClient.invalidateQueries(["resources", scenarioId]),
+    onSettled: () =>
+      queryClient.invalidateQueries({ queryKey: ["resources", scenarioId] }),
     onError: (e) => {
       console.error(e);
       toast.error("Error updating property conditional");

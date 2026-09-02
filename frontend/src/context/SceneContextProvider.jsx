@@ -119,7 +119,7 @@ export default function SceneContextProvider({ children }) {
   const reorderMutation = useMutation({
     mutationFn: (ids) => updateScenes(user, scenarioId, ids),
     onMutate: async (ids) => {
-      await queryClient.cancelQueries(["scenes", scenarioId]);
+      await queryClient.cancelQueries({ queryKey: ["scenes", scenarioId] });
       queryClient.setQueryData(["scenes", scenarioId], (prev = []) => {
         return ids.map((id) => prev.find((s) => s._id === id));
       });
@@ -134,7 +134,7 @@ export default function SceneContextProvider({ children }) {
   const deleteMutation = useMutation({
     mutationFn: (id) => deleteScene(user, scenarioId, id),
     onMutate: async (id) => {
-      await queryClient.cancelQueries(["scenes", scenarioId]);
+      await queryClient.cancelQueries({ queryKey: ["scenes", scenarioId] });
       const previousScenes = queryClient.getQueryData(["scenes", scenarioId]);
 
       queryClient.setQueryData(["scenes", scenarioId], (prev) =>
@@ -161,7 +161,7 @@ export default function SceneContextProvider({ children }) {
   const modifyMutation = useMutation({
     mutationFn: (patch) => modifyScene(user, scenarioId, patch),
     onMutate: async (patch) => {
-      await queryClient.cancelQueries(["scenes", scenarioId]);
+      await queryClient.cancelQueries({ queryKey: ["scenes", scenarioId] });
       const previousScenes = queryClient.getQueryData(["scenes", scenarioId]);
       const previousScene = previousScenes.find((s) => s._id === patch._id);
 

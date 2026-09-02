@@ -50,7 +50,7 @@ export default function ScenarioContextProvider({ children }) {
   const createMutation = useMutation({
     mutationFn: (details) => createScenario(user, details),
     onSuccess: () => {
-      return queryClient.invalidateQueries(["scenarios"]);
+      return queryClient.invalidateQueries({ queryKey: ["scenarios"] });
     },
     onError: () => {
       toast.error("Something went wrong creating the scenario.");
@@ -60,7 +60,7 @@ export default function ScenarioContextProvider({ children }) {
   const deleteMutation = useMutation({
     mutationFn: (id) => deleteScenario(user, id),
     onMutate: async (id) => {
-      await queryClient.cancelQueries(["scenarios"]);
+      await queryClient.cancelQueries({ queryKey: ["scenarios"] });
       queryClient.setQueryData(["scenarios"], (prev) => ({
         ...prev,
         owned: prev.owned.filter((s) => s._id !== id),
@@ -76,7 +76,7 @@ export default function ScenarioContextProvider({ children }) {
   const updateDetailsMutation = useMutation({
     mutationFn: ({ id, details }) => updateScenarioDetails(user, id, details),
     onMutate: async ({ id, details }) => {
-      await queryClient.cancelQueries(["scenarios"]);
+      await queryClient.cancelQueries({ queryKey: ["scenarios"] });
       queryClient.setQueryData(["scenarios"], (prev) => ({
         ...prev,
         owned: prev.owned.map((s) => (s._id === id ? { ...s, ...details } : s)),

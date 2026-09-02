@@ -53,7 +53,7 @@ function ResourcePreview({ file }) {
               className="block h-full min-h-[50dvh] w-full rounded-xl border border-primary lg:min-h-0"
             />
           </div>
-        ) : isText && text.isInitialLoading ? (
+        ) : isText && text.isLoading ? (
           <div className="space-y-2">
             <div className="skeleton h-6 w-1/2" />
             <div className="skeleton h-48 w-full" />

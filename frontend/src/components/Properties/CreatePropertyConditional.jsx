@@ -41,7 +41,8 @@ const CreatePropertyConditional = ({ resource, open, setOpen }) => {
   const createConditionalMutation = useMutation({
     mutationFn: (conditional) =>
       createPropertyConditional(user, scenarioId, resource._id, conditional),
-    onSettled: () => queryClient.invalidateQueries(["resources", scenarioId]),
+    onSettled: () =>
+      queryClient.invalidateQueries({ queryKey: ["resources", scenarioId] }),
     onError: (e) => {
       console.error(e);
       toast.error("Error creating property conditional");

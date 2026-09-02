@@ -63,7 +63,7 @@ export function useResources() {
     mutationFn: ({ parentId, file }) =>
       uploadFileResource(user, scenarioId, parentId, file),
     onMutate: async ({ parentId, file }) => {
-      await queryClient.cancelQueries(["resources", scenarioId]);
+      await queryClient.cancelQueries({ queryKey: ["resources", scenarioId] });
       const tempId = `temp.${uuid()}`;
       const temp = { parentId, name: file.name, _id: tempId, type: "file" };
       queryClient.setQueryData(["resources", scenarioId], (prev) => [
@@ -72,7 +72,8 @@ export function useResources() {
       ]);
       return { tempId };
     },
-    onSuccess: () => queryClient.invalidateQueries(["resources", scenarioId]),
+    onSuccess: () =>
+      queryClient.invalidateQueries({ queryKey: ["resources", scenarioId] }),
     onError: (e, _, context) => {
       const tempId = context?.tempId;
       if (tempId) {
@@ -88,7 +89,7 @@ export function useResources() {
   const addResourceCollectionMutation = useMutation({
     mutationFn: (name) => createResourceCollection(user, scenarioId, name),
     onMutate: async (name) => {
-      await queryClient.cancelQueries(["resources", scenarioId]);
+      await queryClient.cancelQueries({ queryKey: ["resources", scenarioId] });
       const tempId = `temp.${uuid()}`;
       const temp = { name, _id: tempId, type: "collection", children: [] };
       queryClient.setQueryData(["resources", scenarioId], (prev) => [
@@ -97,7 +98,8 @@ export function useResources() {
       ]);
       return { tempId };
     },
-    onSuccess: () => queryClient.invalidateQueries(["resources", scenarioId]),
+    onSuccess: () =>
+      queryClient.invalidateQueries({ queryKey: ["resources", scenarioId] }),
     onError: (e, _, context) => {
       const tempId = context?.tempId;
       if (tempId) {
@@ -113,7 +115,7 @@ export function useResources() {
   const deleteResourceMutation = useMutation({
     mutationFn: (resourceId) => removeResource(user, scenarioId, resourceId),
     onMutate: async (resourceId) => {
-      await queryClient.cancelQueries(["resources", scenarioId]);
+      await queryClient.cancelQueries({ queryKey: ["resources", scenarioId] });
       queryClient.setQueryData(["resources", scenarioId], (prev) =>
         (prev ?? []).filter(
           (r) => r._id !== resourceId && r.parentId !== resourceId
@@ -124,14 +126,15 @@ export function useResources() {
       console.error(e);
       toast.error("Something went wrong deleting the resource");
     },
-    onSettled: () => queryClient.invalidateQueries(["resources", scenarioId]),
+    onSettled: () =>
+      queryClient.invalidateQueries({ queryKey: ["resources", scenarioId] }),
   });
 
   const renameResourceMutation = useMutation({
     mutationFn: ({ resourceId, name }) =>
       renameResource(user, scenarioId, resourceId, name),
     onMutate: async ({ resourceId, name }) => {
-      await queryClient.cancelQueries(["resources", scenarioId]);
+      await queryClient.cancelQueries({ queryKey: ["resources", scenarioId] });
       const previous = queryClient.getQueryData(["resources", scenarioId]);
       queryClient.setQueryData(["resources", scenarioId], (prev) =>
         (prev ?? []).map((r) => (r._id === resourceId ? { ...r, name } : r))
@@ -145,7 +148,8 @@ export function useResources() {
       console.error(e);
       toast.error("Something went wrong renaming the resource");
     },
-    onSettled: () => queryClient.invalidateQueries(["resources", scenarioId]),
+    onSettled: () =>
+      queryClient.invalidateQueries({ queryKey: ["resources", scenarioId] }),
   });
 
   return {
