@@ -11,8 +11,14 @@ import PlayScenarioCanvas from "./PlayScenarioCanvas";
 import { applyPropertyOperations } from "../../components/Properties/propertyOperations";
 import NotesPanel from "./components/NotesPanel";
 import SceneTimer from "./components/SceneTimer";
-import { PlayIcon } from "lucide-react";
-import ResourcesOverlay from "../resources/ResourcesOverlay";
+import StartAudioPanel from "./components/StartAudioPanel";
+import {
+  BookMarkedIcon,
+  FilesIcon,
+  Volume2Icon,
+  VolumeOffIcon,
+} from "lucide-react";
+import ResourcesPanel from "../resources/ResourcesOverlay";
 
 const sceneCache = new Map();
 
@@ -128,27 +134,10 @@ const refreshFromServer = async (user, scenarioId, groupId, isMultiplayer) => {
   }
   return {
     newSceneId: res.data.active,
-    stateVariables: res.data.stateVariables,
-    newStateVersion: res.data.stateVersion,
+    properties: res.data.properties,
+    newPropertyVersion: res.data.propertyVersion,
   };
 };
-
-function playAudios(scene) {
-  const audios = scene.components.filter((c) => c.type === "audio");
-  const playables = [];
-  for (const audio of audios) {
-    const playable = new Audio(audio.url);
-    playable.loop = audio.loop;
-    playable.play();
-    playables.push(playable);
-  }
-  return () => {
-    for (const p of playables) {
-      p.pause();
-      p.currentTime = 0;
-    }
-  };
-}
 
 /**
  * This page allows users to play a scenario.
@@ -177,7 +166,10 @@ export default function PlayScenarioPage({ group }) {
 
   const [resourcesOpen, setResourcesOpen] = useState(false);
   const [noteOpen, setNoteOpen] = useState(false);
-  const [audioAllowed, setAudioAllowed] = useState(false);
+  const [startAudioOpen, setStartAudioOpen] = useState(true);
+  const [audioMuted, setAudioMuted] = useState(true);
+
+  const audioRefs = useRef([]);
 
   const currScene = sceneCache.get(sceneId);
 
@@ -191,15 +183,15 @@ export default function PlayScenarioPage({ group }) {
         const currentRequestId = ++requestIdRef.current;
 
         try {
-          const { newSceneId, stateVariables, newStateVersion } =
+          const { newSceneId, properties, newPropertyVersion } =
             await refreshFromServer(user, scenarioId, group._id, isMultiplayer);
 
           // Discard response if a newer user action was triggered during request transit
           if (currentRequestId !== requestIdRef.current) return;
 
           setSceneId(newSceneId);
-          setProperties(stateVariables);
-          setPropertyVersion(newStateVersion);
+          setProperties(properties);
+          setPropertyVersion(newPropertyVersion);
           toast.success(
             isMultiplayer
               ? "Someone else made a move first, but you're back on track!"
@@ -385,15 +377,42 @@ export default function PlayScenarioPage({ group }) {
     onSceneChange();
   };
 
+  const cleanUpAudios = () => {
+    audioRefs.current.forEach((audio) => {
+      audio.pause();
+      audio.currentTime = 0;
+    });
+    audioRefs.current = [];
+  };
+
+  const playAudios = () => {
+    audioRefs.current.forEach((audio) => {
+      audio.play();
+    });
+  };
+
   useEffect(() => {
-    if (!currScene || !audioAllowed) return;
+    if (!currScene) return;
     try {
-      const endPlayback = playAudios(currScene);
-      return () => endPlayback();
+      const audios = currScene.components.filter((c) => c.type === "audio");
+      audioRefs.current = audios.map((audio) => {
+        const audioElement = new Audio(audio.url);
+        audioElement.loop = audio.loop || false;
+        audioElement.muted = audioMuted;
+        return audioElement;
+      });
+      playAudios();
+      return () => cleanUpAudios();
     } catch {
       toast.error("The audio on this scene failed to play");
     }
-  }, [currScene, audioAllowed]);
+  }, [currScene]);
+
+  useEffect(() => {
+    audioRefs.current.forEach((audio) => {
+      audio.muted = audioMuted;
+    });
+  }, [audioMuted]);
 
   if (loading) return <LoadingPage text="Loading Scene..." />;
   if (authError) return <></>;
@@ -417,14 +436,6 @@ export default function PlayScenarioPage({ group }) {
           />
         </div>
       )}
-      {!audioAllowed && (
-        <div className="absolute top-4 left-4 z-30">
-          <button className="btn" onClick={() => setAudioAllowed(true)}>
-            <PlayIcon size={16} />
-            Enable Audio
-          </button>
-        </div>
-      )}
       <PlayScenarioCanvas
         scene={currScene}
         incrementor={isMultiplayer ? incrementor : undefined}
@@ -436,24 +447,52 @@ export default function PlayScenarioPage({ group }) {
       />
 
       <div className="absolute top-2 right-2 z-30 flex items-center gap-2">
-        {isMultiplayer && (
-          <button
-            className="btn btn-sm"
-            onClick={() => setNoteOpen(true)}
-            aria-label="Open notes"
-          >
-            Notes
-          </button>
-        )}
-        <button
-          className="btn btn-sm"
-          onClick={() => setResourcesOpen(true)}
-          aria-label="Open resources"
+        <div
+          className="tooltip tooltip-bottom"
+          data-tip={audioMuted ? "Unmute audio" : "Mute audio"}
         >
-          Resources
-        </button>
+          <button
+            className="btn"
+            onClick={() => setAudioMuted(!audioMuted)}
+            type="button"
+            aria-label={audioMuted ? "Unmute audio" : "Mute audio"}
+          >
+            {audioMuted ? (
+              <VolumeOffIcon size={16} />
+            ) : (
+              <Volume2Icon size={16} />
+            )}
+          </button>
+        </div>
+        {isMultiplayer && (
+          <div className="tooltip tooltip-left" data-tip="Open notes">
+            <button
+              className="btn"
+              onClick={() => setNoteOpen(true)}
+              type="button"
+              aria-label="Open notes"
+            >
+              <FilesIcon size={16} />
+            </button>
+          </div>
+        )}
+        <div className="tooltip tooltip-left" data-tip="Open resources">
+          <button
+            className="btn"
+            onClick={() => setResourcesOpen(true)}
+            type="button"
+            aria-label="Open resources"
+          >
+            <BookMarkedIcon size={16} />
+          </button>
+        </div>
       </div>
 
+      <StartAudioPanel
+        open={startAudioOpen}
+        onClose={() => setStartAudioOpen(false)}
+        setAudioMuted={setAudioMuted}
+      />
       {isMultiplayer && (
         <NotesPanel
           group={group}
@@ -461,7 +500,7 @@ export default function PlayScenarioPage({ group }) {
           onClose={() => setNoteOpen(false)}
         />
       )}
-      <ResourcesOverlay
+      <ResourcesPanel
         scenarioId={scenarioId}
         properties={properties}
         open={resourcesOpen}

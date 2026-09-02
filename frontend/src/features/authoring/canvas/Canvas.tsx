@@ -15,7 +15,9 @@ import {
   handleMouseUpGlobal,
 } from "../handlers/pointer/pointer";
 import { handleContextGlobal } from "../handlers/pointer/context";
+import { hasMarqueeMoved } from "../handlers/pointer/marquee";
 import LoadingOverlay from "./LoadingOverlay.tsx";
+import ImagePlaceholder from "../elements/ImagePlaceholder";
 import useEditorStore from "../stores/editor.ts";
 import { CANVAS_HEIGHT, CANVAS_WIDTH } from "../../../util/canvas";
 import Background from "../elements/Background";
@@ -38,9 +40,16 @@ function resolve(component: Component) {
 function Canvas() {
   const scene = useVisualScene((state) => state.components);
   const background = useVisualScene((state) => state.background);
+  const sceneId = useVisualScene((state) => state.id);
+  const pendingImages = useEditorStore((state) => state.pendingImages);
+  const loading = useEditorStore((state) => state.loading);
 
   const mode = useEditorStore((state) => state.mode);
   const createType = useEditorStore((state) => state.createType);
+  const mutationBounds = useEditorStore((state) => state.mutationBounds);
+
+  const isDraggingMarquee =
+    mode.includes("marquee") && hasMarqueeMoved(mutationBounds);
 
   const canvasRef = useRef<SVGSVGElement | null>(null);
 
@@ -77,12 +86,15 @@ function Canvas() {
     .sort((a, b) => a.zIndex - b.zIndex)
     .map(resolve);
 
-  const loading = useEditorStore((state) => state.loading);
+  const placeholders = pendingImages
+    .filter((image) => image.sceneId === sceneId)
+    .map((image) => <ImagePlaceholder key={image.id} {...image} />);
+
   return (
     <CanvasContext.Provider value={{ toSVGSpace, canvasRef }}>
       <div
         className={`flex-grow relative ${loading ? "pointer-events-none" : ""} ${
-          mode.includes("create") ? "cursor-crosshair" : ""
+          mode.includes("create") || isDraggingMarquee ? "cursor-crosshair" : ""
         }`}
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
@@ -147,6 +159,7 @@ function Canvas() {
           />
           <Background background={background} />
           {components}
+          {placeholders}
         </svg>
       </div>
     </CanvasContext.Provider>

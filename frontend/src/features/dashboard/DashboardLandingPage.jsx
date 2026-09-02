@@ -53,7 +53,10 @@ export default function DashboardLandingPage() {
             onClick={() => selectDashboardScenario(scenario)}
           >
             <div className="aspect-16/9 rounded overflow-hidden mb-s border-primary/10 border-1">
-              <Thumbnail components={scenario.thumbnail?.components || []} />
+              <Thumbnail
+                components={scenario.thumbnail?.components || []}
+                background={scenario.thumbnail?.background}
+              />
             </div>
             <p className="font-ibm text-l text-nowrap truncate">
               {scenario.name}

@@ -1,6 +1,16 @@
 @import "tailwindcss";
 @plugin "daisyui";
 
+@keyframes side-panel-slide-in {
+  from {
+    transform: translateX(100%);
+  }
+
+  to {
+    transform: translateX(0);
+  }
+}
+
 @theme {
   --font-ibm: "IBMPlexSans", sans-serif;
   --font-dm: "DMSans", sans-serif;
@@ -26,6 +36,10 @@
   --color-backdrop: var(--color-black);
   --color-backdrop-content: var(--color-white);
   --color-selection: #4997ff80;
+  --color-chip: rgba(0, 0, 0, 0.12);
+  --color-chip-text: #404040;
+  --color-chip-missing: #fecaca;
+  --color-chip-missing-text: #991b1b;
 
   /* Utopia Fluid Type */
   /* @link https://utopia.fyi/type/calculator?c=1024,14,1.125,1600,16,1.125,6,2,&s=0.75|0.5|0.25,1.5|2|3|4|6,s-l&g=s,l,xl,12 */
