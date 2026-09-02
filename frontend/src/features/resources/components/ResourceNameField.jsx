@@ -1,8 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { CheckIcon, PencilIcon } from "lucide-react";
+import { RESOURCE_NAME_MAX_LENGTH } from "../constants";
 import { isTemp } from "../util";
-
-const RESOURCE_NAME_MAX_LENGTH = 255;
 
 export default function ResourceNameField({
   resource,
