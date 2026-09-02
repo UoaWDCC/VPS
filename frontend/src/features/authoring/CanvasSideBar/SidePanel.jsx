@@ -46,6 +46,19 @@ export default function SidePanel({ label, Icon, open, onToggle, children }) {
           {children}
         </section>
       )}
+
+      <button
+        type="button"
+        className={`cursor-pointer hover:-translate-y-1 duration-100 ease w-19 h-19 p-2 flex flex-col items-center justify-center gap-1 rounded-sm text-s ${
+          open ? "bg-base-100" : "bg-base-300"
+        }`}
+        onClick={onToggle}
+        aria-expanded={open}
+        aria-label={label}
+      >
+        <Icon size={20} />
+        <span className="text-xs text-center">{label}</span>
+      </button>
     </div>
   );
 }
