@@ -1,4 +1,5 @@
 import { useContext, useEffect } from "react";
+import { useMutation } from "@tanstack/react-query";
 import { useHistory, useLocation } from "react-router-dom";
 import DiamondLoginButton from "../components/DiamondLoginButton";
 import AuthenticationContext from "context/AuthenticationContext";
@@ -6,15 +7,13 @@ import AuthenticationContext from "context/AuthenticationContext";
 import toast from "react-hot-toast";
 import { api } from "../../../util/api";
 
-const handleSignIn = async (user) => {
-  const data = {
+const registerUser = (user) =>
+  api.post(user, "api/user", {
     name: user.displayName,
     uid: user.uid,
     email: user.email,
     pictureURL: user.photoURL,
-  };
-  api.post(user, "api/user", data);
-};
+  });
 
 export default function LoginPage() {
   const { user, loading, signInUsingGoogle, signOut } = useContext(
@@ -26,21 +25,24 @@ export default function LoginPage() {
   const params = new URLSearchParams(location.search);
   const redirectPath = params.get("redirect") || "/";
 
+  const { mutate: signIn } = useMutation({
+    mutationFn: registerUser,
+    onSuccess: () => history.push(redirectPath),
+    onError: (e) => {
+      if (e.response?.status === 403) {
+        toast.error("Please sign in with your UoA account");
+        signOut();
+      } else {
+        console.log(e);
+        toast.error("An unexpected error occurred while signing in");
+      }
+    },
+  });
+
   useEffect(() => {
     if (!user) return;
-
-    handleSignIn(user)
-      .then(() => history.push(redirectPath))
-      .catch((e) => {
-        if (e.response?.status === 403) {
-          toast.error("Please sign in with your UoA account");
-          signOut();
-        } else {
-          console.log(e);
-          toast.error("An unexpected error occurred while signing in");
-        }
-      });
-  }, [user]);
+    signIn(user);
+  }, [user, signIn]);
 
   return (
     <div className="min-h-screen flex flex-col">
