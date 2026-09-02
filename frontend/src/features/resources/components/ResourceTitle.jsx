@@ -126,7 +126,7 @@ export default function ResourceTitle({ resource, editable }) {
             )}
           </div>
         )}{" "}
-        {editing ?? (
+        {editing && (
           <button
             type="button"
             className="btn btn-phantom btn-xs px-1.5 h-9"
