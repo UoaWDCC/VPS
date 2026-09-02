@@ -1,14 +1,15 @@
 import CreatePropertyOperation from "./CreatePropertyOperation";
 import EditPropertyOperation from "./EditPropertyOperation";
-import { PlusIcon } from "lucide-react";
+import { PlusIcon, ZapIcon } from "lucide-react";
 import { useState } from "react";
+import SidePanel from "../../features/authoring/CanvasSideBar/SidePanel";
 
 /*
  * Component that houses property operation interface (methods for creating and editing)
  *
  * @component
  */
-const PropertyOperationMenu = ({ component }) => {
+const PropertyOperationMenu = ({ component, open, onToggle }) => {
   const [createOpen, setCreateOpen] = useState(false);
 
   const propertyOperations = component?.stateOperations ?? [];
@@ -20,24 +21,24 @@ const PropertyOperationMenu = ({ component }) => {
 
   return (
     <>
-      <div
-        className={`collapse overflow-visible ${
-          hasPropertyOperations ? "collapse-arrow" : ""
-        } bg-base-300 rounded-sm text-s`}
+      <SidePanel
+        label="Property Operations"
+        Icon={ZapIcon}
+        open={open}
+        onToggle={onToggle}
       >
-        {hasPropertyOperations && <input type="checkbox" />}
-
-        <div
-          className={`collapse-title flex items-center justify-between ${
-            hasPropertyOperations ? "" : "pe-4"
-          }`}
-        >
-          Property Operations
-          <PlusIcon size={18} onClick={createNew} className="z-1" />
+        <div className="mb-3">
+          <button
+            type="button"
+            className="flex w-full items-center gap-2 rounded-sm border-0 bg-base-300 px-3 py-2 text-left text-sm shadow-none transition-colors hover:bg-base-100"
+            onClick={createNew}
+          >
+            <PlusIcon size={16} />
+            Add Operation
+          </button>
         </div>
-
-        {hasPropertyOperations && (
-          <div className="collapse-content text--1 bg-base-200 px-0">
+        {hasPropertyOperations ? (
+          <div className="text--1">
             {propertyOperations.map((operation, i) => (
               <EditPropertyOperation
                 component={component}
@@ -47,8 +48,10 @@ const PropertyOperationMenu = ({ component }) => {
               />
             ))}
           </div>
+        ) : (
+          <p className="text-xs opacity-70">No property operations yet.</p>
         )}
-      </div>
+      </SidePanel>
       <CreatePropertyOperation
         component={component}
         open={createOpen}
