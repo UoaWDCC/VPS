@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { BrowserRouter, Redirect, Route, Switch } from "react-router-dom";
 import ErrorBoundary from "./components/ErrorBoundary";
+import "./util/api"; // sets axios.defaults.baseURL
 
 import AuthenticationContextProvider from "./context/AuthenticationContextProvider";
 import ScenarioContextProvider from "./context/ScenarioContextProvider";

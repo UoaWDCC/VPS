@@ -2,8 +2,6 @@ import { signInWithPopup } from "firebase/auth";
 import { useState } from "react";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { auth, googleProvider } from "../firebase/firebase";
-import { useQuery } from "@tanstack/react-query";
-import { api } from "../util/api";
 import AuthenticationContext from "./AuthenticationContext";
 import toast from "react-hot-toast";
 
@@ -58,22 +56,6 @@ export default function AuthenticationContextProvider({ children }) {
     auth.signOut();
   }
 
-  // getting role from backend
-  const roleQuery = useQuery({
-    queryKey: ["staffRole", user?.uid],
-    queryFn: async () => {
-      const res = await api.get(user, `/api/staff/${user.uid}`);
-      return res.data;
-    },
-    enabled: Boolean(user),
-  });
-
-  // creating user object with role property
-  const VpsUser = {
-    firebaseUserObj: user,
-    role: roleQuery.data,
-  };
-
   return (
     <AuthenticationContext.Provider
       value={{
@@ -84,7 +66,6 @@ export default function AuthenticationContextProvider({ children }) {
         error,
         signOut,
         signInUsingGoogle,
-        VpsUser,
       }}
     >
       {children}
