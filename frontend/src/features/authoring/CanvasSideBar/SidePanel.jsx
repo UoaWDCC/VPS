@@ -1,6 +1,15 @@
 import { XIcon } from "lucide-react";
 
 export default function SidePanel({ label, Icon, open, onToggle, children }) {
+  const safe = label
+    ? label
+        .replace(/\s+/g, "-")
+        .replace(/[^a-zA-Z0-9-_]/g, "")
+        .toLowerCase()
+    : "panel";
+  const panelId = `panel-${safe}`;
+  const titleId = `panel-title-${safe}`;
+
   return (
     <div className="flex w-full justify-end">
       <button
@@ -10,6 +19,7 @@ export default function SidePanel({ label, Icon, open, onToggle, children }) {
         }`}
         onClick={onToggle}
         aria-expanded={open}
+        aria-controls={panelId}
         aria-label={label}
       >
         <Icon size={20} />
@@ -17,9 +27,16 @@ export default function SidePanel({ label, Icon, open, onToggle, children }) {
       </button>
 
       {open && (
-        <section className="absolute top-0 bottom-4 right-[6.5rem] z-20 w-[calc(24vw-6.5rem)] overflow-y-auto rounded-sm bg-base-200 p-3 shadow-lg animate-[side-panel-slide-in_300ms_ease-out] motion-reduce:animate-none">
+        <section
+          id={panelId}
+          role="region"
+          aria-labelledby={titleId}
+          className="absolute top-0 bottom-4 left-0 right-[6.5rem] z-20 overflow-y-auto rounded-sm bg-base-200 p-3 shadow-lg animate-[side-panel-slide-in_300ms_ease-out] motion-reduce:animate-none"
+        >
           <div className="mb-3 flex items-center justify-between">
-            <h2 className="font-semibold">{label}</h2>
+            <h2 id={titleId} className="font-semibold">
+              {label}
+            </h2>
             <button
               type="button"
               className="btn btn-ghost btn-xs btn-square"

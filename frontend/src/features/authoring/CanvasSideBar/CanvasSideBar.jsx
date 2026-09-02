@@ -83,7 +83,7 @@ export default function CanvasSideBar() {
   return (
     <div
       className={`relative flex shrink-0 pb-m flex-col justify-center overflow-y-auto overflow-x-hidden no-scrollbar transition-[width] duration-300 ease-out motion-reduce:transition-none ${
-        activePanel ? "w-[24vw]" : "w-24"
+        activePanel ? "w-[24vw] min-w-[20rem]" : "w-24"
       }`}
     >
       <div ref={iconStackRef} className="flex flex-col gap-s">
