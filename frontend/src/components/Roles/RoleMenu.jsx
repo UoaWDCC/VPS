@@ -1,10 +1,12 @@
 import { useContext } from "react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useParams } from "react-router-dom";
 import { Trash2Icon } from "lucide-react";
 import CreateRole from "./CreateRole";
 import ScenarioContext from "context/ScenarioContext";
 import AuthenticationContext from "../../context/AuthenticationContext";
 import { api } from "../../util/api";
+import { rolesQueryKey } from "../../context/ScenarioContextProvider";
 import toast from "react-hot-toast";
 import ModalDialog from "../ModalDialogue";
 
@@ -23,25 +25,26 @@ const RoleMenu = ({ show, setShow }) => {
   const { scenarioId } = useParams();
   const { user } = useContext(AuthenticationContext);
 
-  const { roleList, setRoleList } = useContext(ScenarioContext);
+  const { roleList } = useContext(ScenarioContext);
+  const queryClient = useQueryClient();
 
-  if (!roleList) return null;
-
-  function deleteRole(role) {
-    api
-      .delete(
+  const deleteMutation = useMutation({
+    mutationFn: (role) =>
+      api.delete(
         user,
         `/api/scenario/${scenarioId}/roles/${encodeURIComponent(role)}`
-      )
-      .then((response) => {
-        setRoleList(response.data);
-        toast.success("Role deleted successfully");
-      })
-      .catch((error) => {
-        console.error("Error deleting role:", error);
-        toast.error("Error deleting role");
-      });
-  }
+      ),
+    onSuccess: (response) => {
+      queryClient.setQueryData(rolesQueryKey(scenarioId), response.data);
+      toast.success("Role deleted successfully");
+    },
+    onError: (error) => {
+      console.error("Error deleting role:", error);
+      toast.error("Error deleting role");
+    },
+  });
+
+  if (!roleList) return null;
 
   return (
     <ModalDialog title="Roles" open={show} onClose={() => setShow(false)}>
@@ -65,7 +68,8 @@ const RoleMenu = ({ show, setShow }) => {
                       type="button"
                       className="btn btn-xs btn-square btn-ghost"
                       aria-label={`Delete role ${role}`}
-                      onClick={() => deleteRole(role)}
+                      onClick={() => deleteMutation.mutate(role)}
+                      disabled={deleteMutation.isPending}
                     >
                       <Trash2Icon size={14} />
                     </button>

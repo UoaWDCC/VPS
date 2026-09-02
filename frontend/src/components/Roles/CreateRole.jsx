@@ -1,7 +1,9 @@
 import { useState, useContext } from "react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "../../util/api";
 import AuthenticationContext from "../../context/AuthenticationContext";
 import ScenarioContext from "../../context/ScenarioContext";
+import { rolesQueryKey } from "../../context/ScenarioContextProvider";
 import toast from "react-hot-toast";
 
 /**
@@ -15,9 +17,36 @@ import toast from "react-hot-toast";
  */
 const CreateRole = ({ scenarioId }) => {
   const { user } = useContext(AuthenticationContext);
-  const { roleList, setRoleList } = useContext(ScenarioContext);
+  const { roleList } = useContext(ScenarioContext);
+  const queryClient = useQueryClient();
 
   const [role, setRole] = useState("");
+
+  const createMutation = useMutation({
+    mutationFn: async (trimmed) => {
+      const previousCount = roleList?.length ?? 0;
+      const { data } = await api.post(
+        user,
+        `/api/scenario/${scenarioId}/roles`,
+        { role: trimmed }
+      );
+      return { data, previousCount, trimmed };
+    },
+    onSuccess: ({ data, previousCount, trimmed }) => {
+      queryClient.setQueryData(rolesQueryKey(scenarioId), data);
+      if (data.length > previousCount) {
+        toast.success("Role created successfully");
+        setRole("");
+      } else {
+        // another client created the same role (case-insensitively) first
+        toast.error(`Role "${trimmed}" already exists`);
+      }
+    },
+    onError: (error) => {
+      console.error("Error creating role:", error);
+      toast.error("Error creating role");
+    },
+  });
 
   function handleSubmit(e) {
     e.preventDefault();
@@ -28,27 +57,10 @@ const CreateRole = ({ scenarioId }) => {
       return;
     }
 
-    const previousCount = roleList?.length ?? 0;
-
-    api
-      .post(user, `/api/scenario/${scenarioId}/roles`, { role: trimmed })
-      .then((response) => {
-        setRoleList(response.data);
-        if (response.data.length > previousCount) {
-          toast.success("Role created successfully");
-          setRole("");
-        } else {
-          // another client created the same role (case-insensitively) first
-          toast.error(`Role "${trimmed}" already exists`);
-        }
-      })
-      .catch((error) => {
-        console.error("Error creating role:", error);
-        toast.error("Error creating role");
-      });
+    createMutation.mutate(trimmed);
   }
 
-  const isSubmittable = role.trim().length > 0;
+  const isSubmittable = role.trim().length > 0 && !createMutation.isPending;
 
   function handleKeyDown(e) {
     if (e.key !== "Enter") return;

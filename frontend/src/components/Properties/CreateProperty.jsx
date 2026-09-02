@@ -1,9 +1,10 @@
 import { useState, useEffect, useContext } from "react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { propertyTypes, getDefaultValue } from "./propertyTypes";
 import { api } from "../../util/api";
 import AuthenticationContext from "../../context/AuthenticationContext";
 import toast from "react-hot-toast";
-import ScenarioContext from "../../context/ScenarioContext";
+import { propertiesQueryKey } from "../../context/ScenarioContextProvider";
 import SelectInput from "../../features/authoring/components/Select";
 
 const DEFAULT_PROPERTY_TYPE = propertyTypes.STRING;
@@ -24,7 +25,7 @@ const TYPE_LABELS = {
  */
 const CreateProperty = ({ scenarioId }) => {
   const { user } = useContext(AuthenticationContext);
-  const { setProperties } = useContext(ScenarioContext);
+  const queryClient = useQueryClient();
 
   const [name, setName] = useState(null);
   const [type, setType] = useState(DEFAULT_PROPERTY_TYPE);
@@ -34,24 +35,26 @@ const CreateProperty = ({ scenarioId }) => {
     setValue(getDefaultValue(type));
   }, [type]);
 
+  const createMutation = useMutation({
+    mutationFn: (newProperty) =>
+      api.post(user, `/api/scenario/${scenarioId}/properties`, {
+        newProperty,
+      }),
+    onSuccess: (response) => {
+      queryClient.setQueryData(propertiesQueryKey(scenarioId), response.data);
+      toast.success("Property created successfully");
+      setName("");
+      setValue(getDefaultValue(type));
+    },
+    onError: (error) => {
+      console.error("Error creating property:", error);
+      toast.error("Error creating property");
+    },
+  });
+
   function handleSubmit(e) {
     e.preventDefault();
-
-    const newProperty = { name, type, value };
-    api
-      .post(user, `/api/scenario/${scenarioId}/properties`, {
-        newProperty,
-      })
-      .then((response) => {
-        setProperties(response.data);
-        toast.success("Property created successfully");
-        setName("");
-        setValue(getDefaultValue(type));
-      })
-      .catch((error) => {
-        console.error("Error creating property:", error);
-        toast.error("Error creating property");
-      });
+    createMutation.mutate({ name, type, value });
   }
 
   function parseValue(e) {
@@ -60,7 +63,7 @@ const CreateProperty = ({ scenarioId }) => {
     else setValue(val);
   }
 
-  const isSubmittable = name && type;
+  const isSubmittable = name && type && !createMutation.isPending;
 
   return (
     <fieldset className="fieldset bg-base-200 border-base-300 rounded-box border p-4">

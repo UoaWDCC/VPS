@@ -1,8 +1,9 @@
 import { api } from "../../util/api";
 import { useContext, useState } from "react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import AuthenticationContext from "../../context/AuthenticationContext";
 import toast from "react-hot-toast";
-import ScenarioContext from "../../context/ScenarioContext";
+import { propertiesQueryKey } from "../../context/ScenarioContextProvider";
 import SceneContext from "../../context/SceneContext";
 import SelectInput from "../../features/authoring/components/Select";
 import { isBooleanPropertyType, propertyTypes } from "./propertyTypes";
@@ -16,7 +17,7 @@ const TYPE_LABELS = {
 
 const EditProperty = ({ property, scenarioId }) => {
   const { user } = useContext(AuthenticationContext);
-  const { setProperties } = useContext(ScenarioContext);
+  const queryClient = useQueryClient();
   const sceneContext = useContext(SceneContext);
   const { scenes, modifyScene, reFetch } = sceneContext || {
     scenes: [],
@@ -39,40 +40,43 @@ const EditProperty = ({ property, scenarioId }) => {
     setNewValue(value);
   }
 
+  const setPropertiesData = (data) =>
+    queryClient.setQueryData(propertiesQueryKey(scenarioId), data);
+
+  const editMutation = useMutation({
+    mutationFn: (newProperty) =>
+      api.put(user, `api/scenario/${scenarioId}/properties`, {
+        originalName: name,
+        newProperty,
+      }),
+    onSuccess: (res) => {
+      setPropertiesData(res.data);
+      toast.success("Property edited!");
+    },
+    onError: (error) => {
+      console.error("Error editing property:", error);
+      toast.error("Failed to edit property.");
+    },
+  });
+
   function editProperty(e) {
     e.preventDefault();
-    const newProperty = {
+    editMutation.mutate({
       id: property.id,
       name: newName,
       type: newType,
       value: newValue,
-    };
-    api
-      .put(user, `api/scenario/${scenarioId}/properties`, {
-        originalName: name,
-        newProperty,
-      })
-      .then((res) => {
-        setProperties(res.data);
-        toast.success("Property edited!");
-      })
-      .catch((error) => {
-        console.error("Error editing property:", error);
-        toast.error("Failed to edit property.");
-      });
+    });
   }
 
-  async function deleteProperty(e) {
-    e.preventDefault();
-
-    const identifier = property.id || name;
-
-    try {
+  const deleteMutation = useMutation({
+    mutationFn: async () => {
+      const identifier = property.id || name;
       const res = await api.delete(
         user,
         `api/scenario/${scenarioId}/properties/${identifier}`
       );
-      setProperties(res.data);
+      setPropertiesData(res.data);
 
       if (scenes && scenes.length > 0 && modifyScene) {
         const updatedScenes = scenes.map((scene) => ({
@@ -117,11 +121,12 @@ const EditProperty = ({ property, scenarioId }) => {
       } else {
         toast.success("Property deleted successfully!");
       }
-    } catch (error) {
+    },
+    onError: (error) => {
       console.error("Error deleting property:", error);
       toast.error("Failed to delete property.");
-    }
-  }
+    },
+  });
 
   function parseValue(e) {
     const val = e.target.value;
@@ -178,7 +183,11 @@ const EditProperty = ({ property, scenarioId }) => {
           </div>
         </div>
         <div className="ml-auto">
-          <button className="btn btn-xs btn-phantom" onClick={deleteProperty}>
+          <button
+            className="btn btn-xs btn-phantom"
+            onClick={() => deleteMutation.mutate()}
+            disabled={deleteMutation.isPending}
+          >
             Delete
           </button>
           <button className="btn btn-xs btn-phantom" onClick={resetFields}>

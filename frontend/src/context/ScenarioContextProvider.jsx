@@ -1,4 +1,4 @@
-import { useCallback, useContext } from "react";
+import { useContext } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
 
@@ -27,6 +27,9 @@ function deleteScenario(user, scenarioId) {
 function updateScenarioDetails(user, scenarioId, details) {
   return api.patch(user, `/api/scenario/${scenarioId}`, details);
 }
+
+export const rolesQueryKey = (scenarioId) => ["roles", scenarioId];
+export const propertiesQueryKey = (scenarioId) => ["properties", scenarioId];
 
 async function getRoleList(user, scenarioId) {
   const res = await api.get(user, `api/scenario/${scenarioId}/roles`);
@@ -98,29 +101,17 @@ export default function ScenarioContextProvider({ children }) {
 
   // Both queries are skipped when there is no current scenario.
   const rolesQuery = useQuery({
-    queryKey: ["roles", scenarioId],
+    queryKey: rolesQueryKey(scenarioId),
     queryFn: () => getRoleList(user, scenarioId),
     enabled: Boolean(scenarioId && user),
   });
 
   // TODO: this should also exist as prop of the scenario instead
   const propertiesQuery = useQuery({
-    queryKey: ["properties", scenarioId],
+    queryKey: propertiesQueryKey(scenarioId),
     queryFn: () => getProperties(user, scenarioId),
     enabled: Boolean(scenarioId && user),
   });
-
-  // Callers already hold fresh server data after a mutation, so writing it
-  // straight into the cache keeps the old setter API without a refetch.
-  const setRoleList = useCallback(
-    (roles) => queryClient.setQueryData(["roles", scenarioId], roles),
-    [queryClient, scenarioId]
-  );
-
-  const setProperties = useCallback(
-    (props) => queryClient.setQueryData(["properties", scenarioId], props),
-    [queryClient, scenarioId]
-  );
 
   if (scenarioQuery.isLoading) {
     return <LoadingPage text="Getting scenarios..." />;
@@ -136,9 +127,7 @@ export default function ScenarioContextProvider({ children }) {
         createScenario: createMutation.mutateAsync,
 
         roleList: rolesQuery.data,
-        setRoleList,
         properties: scenarioId ? propertiesQuery.data : [],
-        setProperties,
       }}
     >
       {children}
