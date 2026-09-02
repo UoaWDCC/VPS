@@ -38,7 +38,7 @@ export default function ResourceNameField({
   function handleKeyDown(e) {
     if (e.key === "Enter") {
       e.preventDefault();
-      inputRef.current?.blur();
+      commitEdit();
     } else if (e.key === "Escape") {
       setValue(resource.name);
       setEditing(false);
@@ -68,7 +68,6 @@ export default function ResourceNameField({
           value={value}
           maxLength={RESOURCE_NAME_MAX_LENGTH}
           onChange={(e) => setValue(e.target.value)}
-          onBlur={commitEdit}
           onKeyDown={handleKeyDown}
           onClick={(e) => e.stopPropagation()}
         />
@@ -102,7 +101,7 @@ export default function ResourceNameField({
         <button
           type="button"
           className="btn btn-phantom btn-xs px-1.5 h-9"
-          onClick={() => inputRef.current?.blur()}
+          onClick={commitEdit}
           title="Confirm rename"
         >
           <CheckIcon size={14} />
