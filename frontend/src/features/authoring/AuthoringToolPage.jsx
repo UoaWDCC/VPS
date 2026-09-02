@@ -11,6 +11,7 @@ import { copy, cut, paste } from "./handlers/keyboard/clipboard";
 import useEditorStore from "./stores/editor";
 import { useHistory } from "react-router-dom";
 import { replace, replaceComponent } from "./scene/operations/modifiers";
+import { fitTextBox } from "./scene/operations/autofit";
 import { diffToSelection, findEditDiff } from "./scene/operations/text";
 import { syncVisualCursor } from "./text/cursor";
 import { syncPropertyChips } from "./text/property";
@@ -182,6 +183,8 @@ export default function AuthoringToolPage() {
     for (const component of Object.values(getScene()?.components ?? {})) {
       if (component.type !== "textbox") continue;
       if (!syncPropertyChips(component.document, properties)) continue;
+      // a renamed property changes the chip width, which can rewrap the text
+      fitTextBox(component);
       next[component.id] = buildVisualComponent(component);
       changed = true;
     }
