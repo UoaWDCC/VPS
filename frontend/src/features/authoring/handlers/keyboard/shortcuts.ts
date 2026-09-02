@@ -7,8 +7,9 @@ import {
   sendToBack,
 } from "../../scene/operations/component";
 import { remove } from "../../scene/operations/modifiers";
+import { getScene } from "../../scene/scene";
 import useEditorStore from "../../stores/editor";
-import { handleSelectAll } from "./text";
+import { handleSelectAll as handleSelectAllText } from "./text";
 import { matchesShortcut } from "./utils";
 import { setTextStyle } from "../../text/style";
 
@@ -115,7 +116,17 @@ const shortcuts: Shortcut[] = [
     run: () => {
       const { selected } = useEditorStore.getState();
       if (!selected.length) return;
-      handleSelectAll(selected[0]);
+      handleSelectAllText(selected[0]);
+    },
+  },
+  {
+    combos: ["mod+a"],
+    when: () => !useEditorStore.getState().mode.includes("text"),
+    run: () => {
+      const componentIds = Object.values(getScene().components ?? {})
+        .filter((component) => component.type !== "audio")
+        .map((component) => component.id);
+      useEditorStore.getState().setSelected(componentIds);
     },
   },
   {
