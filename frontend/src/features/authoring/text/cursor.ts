@@ -334,15 +334,18 @@ export function moveCursorVisual(
         charI = line.spans[spanI].text.length;
         amount++;
       } else if (lineI > 0) {
+        // one position back from the end of the previous line, which shares a
+        // position with this line's start
         lineI--;
         const line = block.lines[lineI];
-        const span = line.spans[line.spans.length - 1];
-        spanI =
-          span.text.length > 1 ? line.spans.length - 1 : line.spans.length - 2;
-        charI =
-          span.text.length > 1
-            ? span.text.length - 1
-            : line.spans[spanI].text.length;
+        spanI = line.spans.length - 1;
+        charI = line.spans[spanI].text.length - 1;
+
+        // a cursor at a span start is addressed as the previous span's end
+        if (charI === 0 && spanI > 0) {
+          spanI--;
+          charI = line.spans[spanI].text.length;
+        }
         amount++;
       } else if (blockI > 0) {
         blockI--;
