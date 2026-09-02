@@ -1,23 +1,21 @@
 import React, { useContext, useEffect, useMemo, useState } from "react";
-import { getAuth } from "firebase/auth";
-import axios from "axios";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
 import { XIcon } from "lucide-react";
 import AuthenticationContext from "context/AuthenticationContext";
 import NotesList from "./NotesList";
 import NoteDetail from "./NoteDetail";
 import PanelOverlay from "../../../components/PanelOverlay";
+import { createNote, getNotes, notesQueryKey } from "./notesApi";
+
+const EMPTY_NOTES = [];
 
 export default function NotesPanel({ group, open, onClose }) {
   const { user } = useContext(AuthenticationContext);
-  const [loading, setLoading] = useState(false);
-  const [notes, setNotes] = useState([]);
-  const [error, setError] = useState(null);
+  const queryClient = useQueryClient();
 
   const [search, setSearch] = useState("");
   const [selectedNoteId, setSelectedNoteId] = useState(null);
-  const [selectedNote, setSelectedNote] = useState(null);
-  const [creating, setCreating] = useState(false);
 
   const userRole = useMemo(() => {
     if (!group?.users || !user?.email) return null;
@@ -42,36 +40,18 @@ export default function NotesPanel({ group, open, onClose }) {
     return () => window.removeEventListener("keydown", onKey);
   }, [open, onClose]);
 
-  async function getToken() {
-    return getAuth().currentUser.getIdToken();
-  }
+  const notesQuery = useQuery({
+    queryKey: notesQueryKey(group?._id),
+    queryFn: () => getNotes(user, group._id),
+    enabled: Boolean(open && group?._id && user),
+  });
 
-  async function fetchNotes() {
-    setLoading(true);
-    setError(null);
-    try {
-      const token = await getToken();
-      const { data } = await axios.get(`/api/group/${group._id}/notes`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      const fetched = data || [];
-      setNotes(fetched);
-      if (selectedNoteId) {
-        setSelectedNote(fetched.find((n) => n._id === selectedNoteId) || null);
-      }
-    } catch (err) {
-      const msg =
-        err?.response?.data?.error || err.message || "Failed to load notes";
-      setError(msg);
-      toast.error("Failed to load notes");
-    } finally {
-      setLoading(false);
-    }
-  }
+  const notes = notesQuery.data ?? EMPTY_NOTES;
+  const selectedNote = notes.find((n) => n._id === selectedNoteId) ?? null;
 
   useEffect(() => {
-    if (open && group?._id) fetchNotes();
-  }, [open, group?._id]);
+    if (notesQuery.error) toast.error("Failed to load notes");
+  }, [notesQuery.error]);
 
   const filteredNotes = useMemo(() => {
     const q = search.trim().toLowerCase();
@@ -82,53 +62,21 @@ export default function NotesPanel({ group, open, onClose }) {
     );
   }, [notes, search]);
 
-  function handleSelectNote(note) {
-    setSelectedNoteId(note._id);
-    setSelectedNote(note);
-  }
-
-  async function handleCreate() {
-    if (!userRole || creating) return;
-    setCreating(true);
-    try {
-      const token = await getToken();
+  const createMutation = useMutation({
+    mutationFn: async () => {
       const prevIds = new Set(notes.map((n) => n._id));
-      await axios.post(
-        `/api/group/${group._id}/notes`,
-        { title: "New Note" },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-
-      const { data } = await axios.get(`/api/group/${group._id}/notes`, {
-        headers: { Authorization: `Bearer ${await getToken()}` },
-      });
-      const fetched = data || [];
-      setNotes(fetched);
-
-      const newNote = fetched.find((n) => !prevIds.has(n._id));
-      if (newNote) {
-        setSelectedNoteId(newNote._id);
-        setSelectedNote(newNote);
-      }
-    } catch {
-      toast.error("Failed to create note");
-    } finally {
-      setCreating(false);
-    }
-  }
-
-  function handleSaved(updated) {
-    setNotes((prev) =>
-      prev.map((n) => (n._id === updated._id ? { ...n, ...updated } : n))
-    );
-    setSelectedNote((prev) => ({ ...prev, ...updated }));
-  }
-
-  function handleDeleted(noteId) {
-    setNotes((prev) => prev.filter((n) => n._id !== noteId));
-    setSelectedNoteId(null);
-    setSelectedNote(null);
-  }
+      await createNote(user, group._id, "New Note");
+      // The create endpoint returns no body, so refetch and pick out whichever
+      // note is new in order to select it.
+      const fetched = await getNotes(user, group._id);
+      queryClient.setQueryData(notesQueryKey(group._id), fetched);
+      return fetched.find((n) => !prevIds.has(n._id));
+    },
+    onSuccess: (newNote) => {
+      if (newNote) setSelectedNoteId(newNote._id);
+    },
+    onError: () => toast.error("Failed to create note"),
+  });
 
   return (
     <>
@@ -168,12 +116,19 @@ export default function NotesPanel({ group, open, onClose }) {
             </div>
 
             <div className="p-3 h-[calc(100%-112px)] overflow-hidden">
-              {loading ? (
+              {notesQuery.isPending ? (
                 <SkeletonBody />
-              ) : error ? (
+              ) : notesQuery.error ? (
                 <div className="flex flex-col items-center gap-3">
-                  <p className="text-error text-sm">{error}</p>
-                  <button className="btn btn-sm" onClick={fetchNotes}>
+                  <p className="text-error text-sm">
+                    {notesQuery.error?.response?.data?.error ||
+                      notesQuery.error.message ||
+                      "Failed to load notes"}
+                  </p>
+                  <button
+                    className="btn btn-sm"
+                    onClick={() => notesQuery.refetch()}
+                  >
                     Retry
                   </button>
                 </div>
@@ -190,7 +145,7 @@ export default function NotesPanel({ group, open, onClose }) {
                       <NotesList
                         notes={filteredNotes}
                         selectedNoteId={selectedNoteId}
-                        onSelectNote={handleSelectNote}
+                        onSelectNote={(note) => setSelectedNoteId(note._id)}
                         roleToName={roleToName}
                       />
                     )}
@@ -200,8 +155,7 @@ export default function NotesPanel({ group, open, onClose }) {
                       note={selectedNote}
                       group={group}
                       userRole={userRole}
-                      onSaved={handleSaved}
-                      onDeleted={handleDeleted}
+                      onDeleted={() => setSelectedNoteId(null)}
                     />
                   </div>
                 </div>
@@ -212,8 +166,8 @@ export default function NotesPanel({ group, open, onClose }) {
           {userRole && (
             <button
               className="fixed bottom-8 right-8 btn btn-circle btn-lg shadow-xl z-[51]"
-              onClick={handleCreate}
-              disabled={creating}
+              onClick={() => createMutation.mutate()}
+              disabled={createMutation.isPending}
               aria-label="New note"
               title="New note"
             >

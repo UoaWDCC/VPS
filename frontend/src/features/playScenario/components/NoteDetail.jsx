@@ -1,20 +1,17 @@
-import React, { useEffect, useState } from "react";
-import { getAuth } from "firebase/auth";
-import axios from "axios";
+import React, { useContext, useEffect, useState } from "react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
+import AuthenticationContext from "context/AuthenticationContext";
 import MDTextViewer from "./MDTextViewer";
+import { deleteNote, notesQueryKey, updateNote } from "./notesApi";
 
-export default function NoteDetail({
-  note,
-  group,
-  userRole,
-  onSaved,
-  onDeleted,
-}) {
+export default function NoteDetail({ note, group, userRole, onDeleted }) {
+  const { user } = useContext(AuthenticationContext);
+  const queryClient = useQueryClient();
+
   const [editing, setEditing] = useState(false);
   const [title, setTitle] = useState("");
   const [text, setText] = useState("");
-  const [saving, setSaving] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
 
   const canEdit = !!(userRole && note?.role === userRole);
@@ -37,37 +34,27 @@ export default function NoteDetail({
     setEditing(false);
   }
 
-  async function handleSave() {
-    if (saving) return;
-    setSaving(true);
-    try {
-      const token = await getAuth().currentUser.getIdToken();
-      await axios.put(
-        `/api/group/${group._id}/notes/${note._id}`,
-        { title, text },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-      setEditing(false);
-      onSaved?.({ ...note, title, text, date: new Date().toISOString() });
-    } catch {
-      toast.error("Failed to save note");
-    } finally {
-      setSaving(false);
-    }
-  }
+  const invalidateNotes = () =>
+    queryClient.invalidateQueries({ queryKey: notesQueryKey(group._id) });
 
-  async function handleDelete() {
-    try {
-      const token = await getAuth().currentUser.getIdToken();
-      await axios.delete(`/api/group/${group._id}/notes/${note._id}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+  const saveMutation = useMutation({
+    mutationFn: () => updateNote(user, group._id, note._id, { title, text }),
+    onSuccess: () => {
+      setEditing(false);
+      return invalidateNotes();
+    },
+    onError: () => toast.error("Failed to save note"),
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: () => deleteNote(user, group._id, note._id),
+    onSuccess: () => {
       onDeleted?.(note._id);
-    } catch {
-      toast.error("Failed to delete note");
-    }
-    setShowConfirm(false);
-  }
+      return invalidateNotes();
+    },
+    onError: () => toast.error("Failed to delete note"),
+    onSettled: () => setShowConfirm(false),
+  });
 
   if (!note) {
     return (
@@ -116,10 +103,10 @@ export default function NoteDetail({
               </button>
               <button
                 className="btn btn-xs btn-primary"
-                onClick={handleSave}
-                disabled={saving}
+                onClick={() => saveMutation.mutate()}
+                disabled={saveMutation.isPending}
               >
-                {saving ? "Saving…" : "Save"}
+                {saveMutation.isPending ? "Saving…" : "Save"}
               </button>
             </>
           )}
@@ -177,7 +164,10 @@ export default function NoteDetail({
               >
                 No
               </button>
-              <button className="btn btn-sm btn-error" onClick={handleDelete}>
+              <button
+                className="btn btn-sm btn-error"
+                onClick={() => deleteMutation.mutate()}
+              >
                 Yes
               </button>
             </div>
