@@ -184,12 +184,12 @@ const shortcuts: Shortcut[] = [
     },
   },
   {
-    combos: ["ctrl+shift+>"],
+    combos: ["mod+shift+>"],
     when: canAdjustSelectedTextFontSize,
     run: () => adjustSelectedTextFontSize(1),
   },
   {
-    combos: ["ctrl+shift+<"],
+    combos: ["mod+shift+<"],
     when: canAdjustSelectedTextFontSize,
     run: () => adjustSelectedTextFontSize(-1),
   },
