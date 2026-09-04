@@ -8,8 +8,10 @@ export default function PanelIcon({ label, Icon, active, onClick }) {
   return (
     <button
       type="button"
-      className={`relative z-30 cursor-pointer hover:-translate-y-1 duration-100 ease w-14 h-14 p-2 flex flex-col items-center justify-center gap-1 rounded-sm text-s ${active ? "bg-base-300" : "bg-base-200"
-        }`}
+      className={`relative z-30 cursor-pointer hover:-translate-y-1 duration-100 ease w-14 h-14 p-2 flex flex-col items-center justify-center gap-1 rounded-sm text-s ${
+        active ? "bg-base-300" : "bg-base-200"
+      }`}
+      title={label}
       onClick={onClick}
       aria-expanded={active}
       aria-controls="canvas-side-panel"
