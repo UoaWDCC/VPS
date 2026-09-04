@@ -13,7 +13,7 @@ export default function SidePanel({ label, open, onClose, children }) {
       id="canvas-side-panel"
       role="region"
       aria-label={label}
-      className="h-full w-[24rem] min-w-[20rem] shrink-0 overflow-y-auto rounded-sm bg-base-200 p-3 shadow-lg"
+      className="h-full w-[24rem] min-w-[20rem] shrink-0 overflow-y-auto rounded-sm bg-base-200 p-5"
     >
       <div className="mb-3 flex items-center justify-between">
         <h2 className="font-semibold">{label}</h2>
