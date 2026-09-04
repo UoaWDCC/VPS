@@ -27,7 +27,11 @@ const CONTEXTUAL_PANELS = [
   { key: "actions", label: "Button Actions", Icon: ZapIcon },
 ];
 
-const PANEL_LABELS = Object.fromEntries([...ALWAYS_PANELS, ...CONTEXTUAL_PANELS].map(({ key, label }) => [key, label]));
+const PANEL_LABELS = Object.fromEntries(
+  [...ALWAYS_PANELS, ...CONTEXTUAL_PANELS].map(({ key, label }) => [key, label])
+);
+
+const CONTEXTUAL_PANEL_KEYS = new Set(CONTEXTUAL_PANELS.map((p) => p.key));
 
 /**
  * This component displays the properties of scene components in a sidebar
@@ -48,9 +52,12 @@ export default function CanvasSideBar() {
     setActivePanel((current) => (current === panel ? null : panel));
   }
 
+  // fall back to the scene details panel
   useLayoutEffect(() => {
-    setActivePanel(null);
-  }, [selected, component?.id, component?.clickable]);
+    if (!component && CONTEXTUAL_PANEL_KEYS.has(activePanel)) {
+      setActivePanel("scene");
+    }
+  }, [component, activePanel]);
 
   // FLIP: when the contextual icons appear/disappear, the icon stack
   // recenters vertically. Compensate by animating from its old position.
