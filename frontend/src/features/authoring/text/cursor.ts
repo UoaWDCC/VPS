@@ -141,6 +141,13 @@ export function syncVisualCursor() {
   );
 }
 
+// a line wrapped at whitespace ends with that space, and the position before it is addressed as the next line's start.
+// a mid-word break has nothing to skip
+function trailingSkip(line: VisualLine) {
+  const last = line.spans[line.spans.length - 1];
+  return last && /\s$/.test(last.text) ? 1 : 0;
+}
+
 // force cursor at line extreme to wrap to the start of the next line (more intuitive)
 export function normaliseVisualCursor(
   cursor: VisualCursor,
@@ -217,7 +224,7 @@ export function goToLineEnd(cursor: VisualCursor, blocks: VisualBlock[]) {
   const isFinalSpan =
     cursor.spanI === line.spans.length - 1 &&
     cursor.lineI === block.lines.length - 1;
-  cursor.charI = isFinalSpan ? span.text.length : span.text.length - 1;
+  cursor.charI = span.text.length - (isFinalSpan ? 0 : trailingSkip(line));
   return cursor;
 }
 
@@ -287,7 +294,7 @@ export function moveCursorVisual(
       if (
         charI <
         (spanI === line.spans.length - 1 && lineI < block.lines.length - 1
-          ? span.text.length - 1
+          ? span.text.length - trailingSkip(line)
           : span.text.length)
       ) {
         charI++;
@@ -327,15 +334,18 @@ export function moveCursorVisual(
         charI = line.spans[spanI].text.length;
         amount++;
       } else if (lineI > 0) {
+        // one position back from the end of the previous line, which shares a
+        // position with this line's start
         lineI--;
         const line = block.lines[lineI];
-        const span = line.spans[line.spans.length - 1];
-        spanI =
-          span.text.length > 1 ? line.spans.length - 1 : line.spans.length - 2;
-        charI =
-          span.text.length > 1
-            ? span.text.length - 1
-            : line.spans[spanI].text.length;
+        spanI = line.spans.length - 1;
+        charI = line.spans[spanI].text.length - 1;
+
+        // a cursor at a span start is addressed as the previous span's end
+        if (charI === 0 && spanI > 0) {
+          spanI--;
+          charI = line.spans[spanI].text.length;
+        }
         amount++;
       } else if (blockI > 0) {
         blockI--;
@@ -348,5 +358,8 @@ export function moveCursorVisual(
       }
     }
   }
-  return { blockI, lineI, spanI, charI };
+
+  // the end of a mid-word break is the same model position as the next line's
+  // start; collapse to the canonical one or the next keypress looks like a no-op
+  return normaliseVisualCursor({ blockI, lineI, spanI, charI }, blocks);
 }

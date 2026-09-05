@@ -3,14 +3,17 @@ import { getComponent, getScene } from "../scene";
 import { mutate, subtract, translate } from "../../util";
 import { getObject, merge } from "../util";
 import { add, modify } from "./modifiers";
+import { getSingleLineHeight } from "./autofit";
 
 type LayerDirection = "forward" | "backward";
 type LayerMode = "step" | "extreme";
 
+const TEXTBOX_PADDING = 20;
+
 export const defaults = {
   textbox: {
     type: "textbox",
-    padding: 20,
+    padding: TEXTBOX_PADDING,
     clickable: true,
     fill: "#00000000", // default value is rgba 0
     stroke: "#00000000",
@@ -18,7 +21,7 @@ export const defaults = {
     bounds: {
       verts: [
         { x: 0, y: 0 },
-        { x: 600, y: 100 },
+        { x: 600, y: getSingleLineHeight(TEXTBOX_PADDING) }, // a new box starts exactly one line high
       ],
       rotation: 0,
     },

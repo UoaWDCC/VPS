@@ -22,7 +22,7 @@ export function buildVisualScene(modelScene: Scene) {
   return { ...modelScene, id: modelScene._id, components: visualComponents };
 }
 
-function pad(verts: Vec2[], amount: number) {
+export function pad(verts: Vec2[], amount: number) {
   const center = getBoxCenter(verts);
   return verts.map((vert) => {
     const relative = subtract(center, vert);
