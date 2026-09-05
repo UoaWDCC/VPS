@@ -101,8 +101,9 @@ export default function CanvasSideBar() {
 
   return (
     <div
-      className={`flex shrink-0 items-center justify-end gap-3 overflow-hidden pb-m transition-[width] duration-150 ease-out motion-reduce:transition-none ${activePanel ? "w-[calc(24rem_+_4.25rem)]" : "w-14"
-        }`}
+      className={`flex shrink-0 items-center justify-end gap-3 overflow-hidden pb-m transition-[width] duration-150 ease-out motion-reduce:transition-none ${
+        activePanel ? "w-[calc(24rem_+_4.25rem)]" : "w-14"
+      }`}
     >
       <SidePanel
         label={PANEL_LABELS[activePanel]}
