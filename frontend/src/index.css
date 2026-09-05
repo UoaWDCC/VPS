@@ -28,6 +28,7 @@
   --color-selection: #4997ff80;
   --color-chip-scrim-dark: rgba(0, 0, 0, 0.14);
   --color-chip-scrim-light: rgba(255, 255, 255, 0.22);
+  --color-chip-edge: rgba(0, 0, 0, 0.3);
   --color-chip-missing: #fecaca;
   --color-chip-missing-text: #991b1b;
 

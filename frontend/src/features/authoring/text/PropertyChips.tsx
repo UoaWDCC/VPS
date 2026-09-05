@@ -49,7 +49,12 @@ function PropertyChips({ doc }: { doc: VisualDocument }) {
             ) : (
               <>
                 <rect {...rect} fill="var(--color-chip-scrim-dark)" />
-                <rect {...rect} fill="var(--color-chip-scrim-light)" />
+                <rect
+                  {...rect}
+                  fill="var(--color-chip-scrim-light)"
+                  stroke="var(--color-chip-edge)"
+                  strokeWidth={0.5}
+                />
               </>
             )}
           </g>
