@@ -211,7 +211,7 @@ function updateResize(
 }
 
 function mirror(verts: Vec2[], center: Vec2, coords: number[]) {
-  const point = { x: verts[coords[0]].x, y: verts[coords[1]].y };
+  const point = getCoordsVec(verts, coords);
   const inversePosition = add(scale(subtract(point, center), -1), center);
   return modifyVerts(verts, inverse(coords), inversePosition);
 }
