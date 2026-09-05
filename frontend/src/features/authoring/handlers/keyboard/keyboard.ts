@@ -25,7 +25,10 @@ export function handleGlobal(e: KeyboardEvent) {
     return;
   }
 
-  handleShortcut(e);
+  const shortcutHandled = handleShortcut(e);
+  if (shortcutHandled && !(mode.includes("text") && e.key === "Escape")) {
+    return;
+  }
 
   if (mode.includes("text")) handleTextMode(e);
   else if (selected.length) handleComponentOperations(e, selected);
