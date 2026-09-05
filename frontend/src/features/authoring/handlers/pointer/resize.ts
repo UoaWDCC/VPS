@@ -56,8 +56,9 @@ export function handleResizeDrag(e: React.MouseEvent, position: Vec2) {
       -bounds.rotation
     );
 
-    // alignment guides only make sense in global space, so only snap unrotated components
-    if (!bounds.rotation) {
+    // alignment guides only make sense in global space, so only snap unrotated
+    // components, and let alt bypass snapping entirely
+    if (!bounds.rotation && !e.altKey) {
       const components = Object.values(
         useVisualScene.getState().components
       ).filter((c) => c.type !== "audio" && !selected.includes(c.id));
@@ -211,7 +212,7 @@ function updateResize(
 }
 
 function mirror(verts: Vec2[], center: Vec2, coords: number[]) {
-  const point = { x: verts[coords[0]].x, y: verts[coords[1]].y };
+  const point = getCoordsVec(verts, coords);
   const inversePosition = add(scale(subtract(point, center), -1), center);
   return modifyVerts(verts, inverse(coords), inversePosition);
 }

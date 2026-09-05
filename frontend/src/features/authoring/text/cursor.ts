@@ -128,7 +128,7 @@ export function syncModelSelection() {
 
 export function syncVisualCursor() {
   const editorState = useEditorStore.getState();
-  if (!editorState.selected || !editorState.selection.start) return;
+  if (!editorState.selected) return;
   const blocks = (
     useVisualScene.getState().components[
       editorState.selected[0]
