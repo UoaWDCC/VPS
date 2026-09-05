@@ -1,4 +1,4 @@
-import type { Bounds, Component } from "../../types";
+import type { Bounds, Component, Vec2 } from "../../types";
 import { getComponent, getScene } from "../scene";
 import { mutate, subtract, translate } from "../../util";
 import { getObject, merge } from "../util";
@@ -118,8 +118,11 @@ export function stringifyComponent(id: string) {
   return JSON.stringify(component);
 }
 
-export function parseComponent(component: Component, zIndex?: number) {
-  const offset = { x: 10, y: 10 };
+export function parseComponent(
+  component: Component,
+  zIndex?: number,
+  offset: Vec2 = { x: 10, y: 10 }
+) {
   component.bounds.verts = translate(component.bounds.verts, offset);
   component.zIndex = zIndex ?? component.zIndex + 1;
   delete (component as Record<string, unknown>).id;
