@@ -15,6 +15,7 @@ import PopoverInput from "./components/PopoverInput";
 import { useResources } from "./useResources";
 import { findById } from "../../util/search";
 import EditableResourceTree from "./EditableResourceTree";
+import ResourceTitle from "./components/ResourceTitle";
 
 export default function ManageResourcesPage() {
   const { scenarioId } = useParams();
@@ -175,6 +176,10 @@ export default function ManageResourcesPage() {
                 <div className="card-body flex min-h-full flex-col gap-4 pr-0">
                   {selectedResource ? (
                     <>
+                      <ResourceTitle
+                        resource={selectedResource}
+                        editable={true}
+                      />
                       <PropertyConditionalMenu resource={selectedResource} />
                       {selectedResource?.type === "file" && (
                         <div className="min-h-[50dvh] flex-1 lg:min-h-0">
