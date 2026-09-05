@@ -17,6 +17,8 @@ import ImageCreateMenu from "../ImageCreateMenu";
 import ShapeCreateMenu from "./ShapeCreateMenu";
 import BackgroundMenu from "./BackgroundMenu";
 
+import "./topbar.css";
+
 function Topbar({ saving, save }: { saving: boolean; save: () => void }) {
   const selected = useEditorStore((state) => state.selected);
   const setMode = useEditorStore((state) => state.setMode);
