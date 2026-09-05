@@ -1,51 +1,44 @@
 import { getBoxCenter, translate, correct } from "../../authoring/util";
 import { useEffect, useState, useRef } from "react";
 import { modifyComponentProp } from "../scene/operations/component";
-import { BoxIcon, FlipHorizontal2, FlipVertical2 } from "lucide-react";
-import SidePanel from "./SidePanel";
+import { FlipHorizontal2, FlipVertical2 } from "lucide-react";
 
-export function ObjectPropertyEditor({ component, open, onToggle }) {
+const ZERO_VERTS = [
+  { x: 0, y: 0 },
+  { x: 0, y: 0 },
+];
+
+export function ObjectPropertyEditor({ component }) {
+  const verts = component?.bounds?.verts ?? ZERO_VERTS;
+
   // x and y vals used for setting and current
-  const [inputX, setInputX] = useState(
-    Math.round(component.bounds.verts[0].x * 100) / 100
-  );
-  const [inputY, setInputY] = useState(
-    Math.round(component.bounds.verts[0].y * 100) / 100
-  );
+  const [inputX, setInputX] = useState(Math.round(verts[0].x * 100) / 100);
+  const [inputY, setInputY] = useState(Math.round(verts[0].y * 100) / 100);
   // Width and height vals
   const [inputWidth, setInputWidth] = useState(
-    Math.round(
-      (component.bounds.verts[1].x - component.bounds.verts[0].x) * 100
-    ) / 100
+    Math.round((verts[1].x - verts[0].x) * 100) / 100
   );
   const [inputHeight, setInputHeight] = useState(
-    Math.round(
-      (component.bounds.verts[1].y - component.bounds.verts[0].y) * 100
-    ) / 100
+    Math.round((verts[1].y - verts[0].y) * 100) / 100
   );
   const [inputAngle, setInputAngle] = useState(
-    (Math.round((component.bounds.rotation ?? 0) * 100) / 100) % 360
+    (Math.round((component?.bounds?.rotation ?? 0) * 100) / 100) % 360
   );
 
   useEffect(() => {
-    const width =
-      Math.round(
-        (component.bounds.verts[1].x - component.bounds.verts[0].x) * 100
-      ) / 100;
-    const height =
-      Math.round(
-        (component.bounds.verts[1].y - component.bounds.verts[0].y) * 100
-      ) / 100;
-    const x = Math.round(component.bounds.verts[0].x * 100) / 100;
-    const y = Math.round(component.bounds.verts[0].y * 100) / 100;
-    const rotation = Math.round((component.bounds.rotation ?? 0) * 100) / 100;
+    const verts = component?.bounds?.verts ?? ZERO_VERTS;
+    const width = Math.round((verts[1].x - verts[0].x) * 100) / 100;
+    const height = Math.round((verts[1].y - verts[0].y) * 100) / 100;
+    const x = Math.round(verts[0].x * 100) / 100;
+    const y = Math.round(verts[0].y * 100) / 100;
+    const rotation = Math.round((component?.bounds?.rotation ?? 0) * 100) / 100;
 
     setInputWidth(width);
     setInputHeight(height);
     setInputX(x);
     setInputY(y);
     setInputAngle(rotation);
-  }, [component.bounds.verts, component.bounds.rotation]);
+  }, [component?.bounds?.verts, component?.bounds?.rotation]);
 
   const latestValues = useRef({});
   latestValues.current = {
@@ -68,7 +61,9 @@ export function ObjectPropertyEditor({ component, open, onToggle }) {
         [inputAngle, "rotation", setInputAngle],
       ]);
     };
-  }, [component.id]);
+  }, [component?.id]);
+
+  if (!component) return null;
 
   function flipComponent(axis) {
     modifyComponentProp([component.id], "bounds.verts", (prev) => {
@@ -120,6 +115,7 @@ export function ObjectPropertyEditor({ component, open, onToggle }) {
 
   // uses the same function as the drag box feat w modifyComponentProp
   function saveProp(v, type, set) {
+    if (!component) return;
     const value = inputValidation(
       type,
       v,
@@ -172,96 +168,87 @@ export function ObjectPropertyEditor({ component, open, onToggle }) {
   }
 
   return (
-    <SidePanel
-      label="Object Properties"
-      Icon={BoxIcon}
-      open={open}
-      onToggle={onToggle}
-    >
-      <fieldset className="fieldset pt-2">
-        {/* Width and Height num inputs*/}
-        <span className="flex gap-2 justify-between">
-          <label className="label flex-1">Object Width</label>
-          <label className="label flex-1">Object Height</label>
-        </span>
-        <div className="flex gap-2 justify-between">
-          <input
-            className="input flex-1 min-w-0"
-            value={inputWidth}
-            onChange={(e) => {
-              saveProp(e.target.value, "width", setInputWidth);
-            }}
-          />
-          <input
-            className="input flex-1 min-w-0"
-            value={inputHeight}
-            onChange={(e) => {
-              saveProp(e.target.value, "height", setInputHeight);
-            }}
-          />
-        </div>
+    <fieldset className="fieldset pt-2">
+      {/* Width and Height num inputs*/}
+      <span className="flex gap-2 justify-between">
+        <label className="label flex-1">Object Width</label>
+        <label className="label flex-1">Object Height</label>
+      </span>
+      <div className="flex gap-2 justify-between">
+        <input
+          className="input flex-1 min-w-0"
+          value={inputWidth}
+          onChange={(e) => {
+            saveProp(e.target.value, "width", setInputWidth);
+          }}
+        />
+        <input
+          className="input flex-1 min-w-0"
+          value={inputHeight}
+          onChange={(e) => {
+            saveProp(e.target.value, "height", setInputHeight);
+          }}
+        />
+      </div>
 
-        {/* positoin x and y num inputs*/}
-        <span className=" flex gap-2 justify-between">
-          <label className="label flex-1">Position X</label>
-          <label className="label flex-1">Position Y</label>
-        </span>
-        <div className="flex justify-between gap-2 w-full">
-          <input
-            className="input flex-1 min-w-0"
-            value={inputX}
-            onChange={(e) => {
-              saveProp(e.target.value, "x", setInputX);
-            }}
-            // onBlur={(e) => {
-            //   noFields(e.target.value, "x", setInputX);
-            // }}
-          />
-          <input
-            className="input flex-1 min-w-0"
-            value={inputY}
-            onChange={(e) => {
-              saveProp(e.target.value, "y", setInputY);
-            }}
-            // onBlur={(e) => {
-            //   noFields(e.target.value, "y", setInputY);
-            // }}
-          />
+      {/* positoin x and y num inputs*/}
+      <span className=" flex gap-2 justify-between">
+        <label className="label flex-1">Position X</label>
+        <label className="label flex-1">Position Y</label>
+      </span>
+      <div className="flex justify-between gap-2 w-full">
+        <input
+          className="input flex-1 min-w-0"
+          value={inputX}
+          onChange={(e) => {
+            saveProp(e.target.value, "x", setInputX);
+          }}
+          // onBlur={(e) => {
+          //   noFields(e.target.value, "x", setInputX);
+          // }}
+        />
+        <input
+          className="input flex-1 min-w-0"
+          value={inputY}
+          onChange={(e) => {
+            saveProp(e.target.value, "y", setInputY);
+          }}
+          // onBlur={(e) => {
+          //   noFields(e.target.value, "y", setInputY);
+          // }}
+        />
+      </div>
+      <label className="label">Angle (Degrees)</label>
+      <div className="flex justify-between">
+        <input
+          className="input flex-1 min-w-0"
+          value={inputAngle}
+          onChange={(e) => saveProp(e.target.value, "rotation", setInputAngle)}
+          // onBlur={(e) => {
+          //   noFields(e.target.value, "rotation", setInputAngle);
+          // }}
+        />
+        <div className="ml-6 flex-1">
+          <button
+            type="button"
+            title="Flip Horizontally"
+            aria-label="Flip horizontally"
+            className="hover:bg-stone-800 cursor-pointer rounded-sm"
+            onClick={() => flipComponent("x")}
+          >
+            <FlipHorizontal2 className="m-2" />
+          </button>
+          <button
+            type="button"
+            title="Flip Vertically"
+            aria-label="Flip vertically"
+            className="hover:bg-stone-800 cursor-pointer rounded-sm"
+            onClick={() => flipComponent("y")}
+          >
+            <FlipVertical2 className="m-2" />
+          </button>
         </div>
-        <label className="label">Angle (Degrees)</label>
-        <div className="flex justify-between">
-          <input
-            className="input flex-1 min-w-0"
-            value={inputAngle}
-            onChange={(e) =>
-              saveProp(e.target.value, "rotation", setInputAngle)
-            }
-            // onBlur={(e) => {
-            //   noFields(e.target.value, "rotation", setInputAngle);
-            // }}
-          />
-          <div className="ml-6 flex-1">
-            <button
-              type="button"
-              title="Flip Horizontally"
-              aria-label="Flip horizontally"
-              className="hover:bg-stone-800 cursor-pointer rounded-sm"
-              onClick={() => flipComponent("x")}
-            >
-              <FlipHorizontal2 className="m-2" />
-            </button>
-            <button
-              type="button"
-              title="Flip Vertically"
-              aria-label="Flip vertically"
-              className="hover:bg-stone-800 cursor-pointer rounded-sm"
-              onClick={() => flipComponent("y")}
-            >
-              <FlipVertical2 className="m-2" />
-            </button>
-          </div>
-        </div>
-      </fieldset>
-    </SidePanel>
+      </div>
+    </fieldset>
   );
 }

@@ -10,9 +10,8 @@ import { useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
 import AuthenticationContext from "../../../context/AuthenticationContext";
 import { useParams } from "react-router-dom";
-import { HeadphonesIcon, PlusIcon } from "lucide-react";
+import { PlusIcon } from "lucide-react";
 import AudioSelectModal from "./AudioSelectModal";
-import SidePanel from "../CanvasSideBar/SidePanel";
 
 // before calling validation of file should already be done
 async function addNewAudio(file: File, scenarioId: string, user: User) {
@@ -36,13 +35,7 @@ async function addNewAudio(file: File, scenarioId: string, user: User) {
   add(newAudio);
 }
 
-function AudioManager({
-  open,
-  onToggle,
-}: {
-  open: boolean;
-  onToggle: () => void;
-}) {
+function AudioManager() {
   const components = useVisualScene((state) => state.components);
   const { user } = useContext(AuthenticationContext as Context<{ user: User }>);
   const { scenarioId } = useParams<{ scenarioId: string }>();
@@ -78,38 +71,31 @@ function AudioManager({
 
   return (
     <>
-      <SidePanel
-        label="Audio Elements"
-        Icon={HeadphonesIcon}
-        open={open}
-        onToggle={onToggle}
-      >
-        <div className="mb-3 flex flex-col gap-2">
-          <button
-            type="button"
-            className="flex w-full items-center gap-2 rounded-sm border-0 bg-base-300 px-3 py-2 text-left text-sm shadow-none transition-colors hover:bg-base-100"
-            onClick={showFilePicker}
-          >
-            <PlusIcon size={16} />
-            Upload New Audio
-          </button>
-          <button
-            type="button"
-            className="flex w-full items-center rounded-sm border-0 bg-base-300 px-3 py-2 text-left text-sm shadow-none transition-colors hover:bg-base-100"
-            onClick={() => setModalOpen(true)}
-          >
-            Select Existing Audio
-          </button>
-        </div>
+      <div className="mb-3 flex flex-col gap-2">
+        <button
+          type="button"
+          className="flex w-full items-center gap-2 rounded-sm border-0 bg-base-300 px-3 py-2 text-left text-sm shadow-none transition-colors hover:bg-base-100"
+          onClick={showFilePicker}
+        >
+          <PlusIcon size={16} />
+          Upload New Audio
+        </button>
+        <button
+          type="button"
+          className="flex w-full items-center rounded-sm border-0 bg-base-300 px-3 py-2 text-left text-sm shadow-none transition-colors hover:bg-base-100"
+          onClick={() => setModalOpen(true)}
+        >
+          Select Existing Audio
+        </button>
+      </div>
 
-        {audios.length > 0 ? (
-          audios.map((audio) => (
-            <EditAudioComponent component={audio} key={audio.id} />
-          ))
-        ) : (
-          <p className="text-xs opacity-70">No audio elements yet.</p>
-        )}
-      </SidePanel>
+      {audios.length > 0 ? (
+        audios.map((audio) => (
+          <EditAudioComponent component={audio} key={audio.id} />
+        ))
+      ) : (
+        <p className="text-xs opacity-70">No audio elements yet.</p>
+      )}
 
       <input
         ref={fileInputRef}
