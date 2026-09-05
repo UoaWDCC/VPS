@@ -25,7 +25,7 @@ export function handleGlobal(e: KeyboardEvent) {
     return;
   }
 
-  if (handleShortcut(e)) return;
+  handleShortcut(e);
 
   if (mode.includes("text")) handleTextMode(e);
   else if (selected.length) handleComponentOperations(e, selected);

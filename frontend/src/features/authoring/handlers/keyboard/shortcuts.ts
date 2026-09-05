@@ -203,13 +203,14 @@ const shortcuts: Shortcut[] = [
       const { mode, setMode, setSelected, setActiveGuides, setMouseDown } =
         useEditorStore.getState();
       if (mode.some((m) => m !== "normal")) {
-        // cancel the active drag/resize/marquee/text-edit
+        // cancel the active drag/resize/marquee/create/text-edit
         setMode(["normal"]);
         setActiveGuides([]);
         setMouseDown(false);
-      } else {
-        setSelected([]);
+        if (!mode.includes("text")) setSelected([]);
+        return;
       }
+      setSelected([]);
     },
   },
 ];

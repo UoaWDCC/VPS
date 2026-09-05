@@ -95,6 +95,9 @@ function handleEditing(e: KeyboardEvent, selected: string) {
     // create a new block at cursor
     const newCursor = createBlock([selected], start);
     setSelection({ start: newCursor, end });
+  } else if (e.key === "Escape") {
+    // clear current selection
+    setSelection({ start: null, end: null });
   }
 
   setDesiredColumn(null);
