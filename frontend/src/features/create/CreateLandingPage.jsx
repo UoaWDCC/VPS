@@ -102,6 +102,7 @@ export default function CreateLandingPage() {
                 <div className="aspect-16/9 rounded overflow-hidden mb-s border-primary/10 border-1">
                   <Thumbnail
                     components={scenario.thumbnail?.components || []}
+                    background={scenario.thumbnail?.background}
                   />
                 </div>
                 <p className="font-ibm text-l text-nowrap truncate">

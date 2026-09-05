@@ -145,6 +145,7 @@ export function paste(e: ClipboardEvent) {
       const doc = plainToDoc(textData);
       const component = structuredClone(defaults["textbox"]);
       component.document = structuredClone(doc);
+      component.zIndex = getNextZIndex();
       setSelected([add(component)]);
     }
   }

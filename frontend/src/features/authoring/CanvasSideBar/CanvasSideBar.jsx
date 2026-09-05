@@ -1,3 +1,4 @@
+import { useLayoutEffect, useRef, useState } from "react";
 import useEditorStore from "../stores/editor";
 import useVisualScene from "../stores/visual";
 import AudioManager from "../audio/AudioManager";
@@ -9,17 +10,101 @@ import SceneSettings from "./SceneSettings";
  * @component
  */
 export default function CanvasSideBar() {
+  const [activePanel, setActivePanel] = useState(null);
+  const iconStackRef = useRef(null);
+  const contextualIconsRef = useRef(null);
+  const previousStackTopRef = useRef(null);
+  const previousSelectionPresenceRef = useRef(null);
   const selected = useEditorStore((state) => state.selected);
-
   const component = useVisualScene((state) =>
     selected ? state.components[selected] : null
   );
 
+  function togglePanel(panel) {
+    setActivePanel((current) => (current === panel ? null : panel));
+  }
+
+  useLayoutEffect(() => {
+    setActivePanel(null);
+  }, [selected, component?.id, component?.clickable]);
+
+  //side panel animation
+  useLayoutEffect(() => {
+    const iconStack = iconStackRef.current;
+    if (!iconStack) return;
+
+    const currentTop = iconStack.getBoundingClientRect().top;
+    const previousTop = previousStackTopRef.current;
+    const contextualIcons = contextualIconsRef.current;
+    const hasSelection = Boolean(component);
+    const selectionPresenceChanged =
+      previousSelectionPresenceRef.current !== null &&
+      previousSelectionPresenceRef.current !== hasSelection;
+    const reduceMotion = window.matchMedia(
+      "(prefers-reduced-motion: reduce)"
+    ).matches;
+
+    if (
+      !reduceMotion &&
+      selectionPresenceChanged &&
+      previousTop !== null &&
+      previousTop !== currentTop &&
+      typeof iconStack.animate === "function"
+    ) {
+      iconStack.animate(
+        [
+          { transform: `translateY(${previousTop - currentTop}px)` },
+          { transform: "translateY(0)" },
+        ],
+        { duration: 250, easing: "ease-out" }
+      );
+    }
+
+    if (
+      !reduceMotion &&
+      selectionPresenceChanged &&
+      hasSelection &&
+      contextualIcons &&
+      typeof contextualIcons.animate === "function"
+    ) {
+      contextualIcons.animate(
+        [
+          { opacity: 0, transform: "translateY(12px)" },
+          { opacity: 1, transform: "translateY(0)" },
+        ],
+        { duration: 250, easing: "ease-out" }
+      );
+    }
+
+    previousStackTopRef.current = currentTop;
+    previousSelectionPresenceRef.current = hasSelection;
+  }, [selected, component?.clickable, activePanel]);
+
   return (
-    <div className="flex pb-m flex-col w-[18vw] gap-s overflow-y-auto overflow-x-hidden no-scrollbar">
-      <SceneSettings />
-      <AudioManager />
-      <ComponentSettings component={component} />
+    <div
+      className={`relative flex shrink-0 pb-m flex-col justify-center overflow-y-auto overflow-x-hidden no-scrollbar transition-[width] duration-300 ease-out motion-reduce:transition-none ${
+        activePanel ? "w-[24vw] min-w-[20rem]" : "w-24"
+      }`}
+    >
+      <div ref={iconStackRef} className="flex flex-col gap-s">
+        <SceneSettings
+          open={activePanel === "scene"}
+          onToggle={() => togglePanel("scene")}
+        />
+        <AudioManager
+          open={activePanel === "audio"}
+          onToggle={() => togglePanel("audio")}
+        />
+        {component && (
+          <div ref={contextualIconsRef} className="flex flex-col gap-s">
+            <ComponentSettings
+              component={component}
+              activePanel={activePanel}
+              onTogglePanel={togglePanel}
+            />
+          </div>
+        )}
+      </div>
     </div>
   );
 }

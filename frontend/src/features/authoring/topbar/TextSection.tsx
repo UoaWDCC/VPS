@@ -4,6 +4,7 @@ import {
   AlignRight,
   ArrowDownNarrowWide,
   Bold,
+  Braces,
   Highlighter,
   Italic,
   Underline,
@@ -17,6 +18,70 @@ import MultiInput from "../wrapper/MultiInput";
 import type { BaseTextStyle } from "../types";
 import { setTextStyle } from "../text/style";
 import { getComponent } from "../scene/scene";
+import { deleteSelection, insertProperty } from "../scene/operations/text";
+import { syncVisualCursor } from "../text/cursor";
+import type { Property } from "../text/property";
+
+function PropertyDropdown() {
+  const selected = useEditorStore((state) => state.selected);
+  const properties = useEditorStore((state) => state.properties);
+  const selection = useEditorStore((state) => state.selection);
+
+  const canInsert = !!selection.start;
+
+  function addProperty(property: Property) {
+    if (!selection.start) return;
+
+    //delete any selected text
+    const cursor = selection.end
+      ? deleteSelection(selected, selection)
+      : selection.start;
+    if (!cursor) return;
+
+    //add property chip to textbox
+    const newCursor = insertProperty(selected, cursor, {
+      id: property.id,
+      displayName: property.name,
+    });
+    if (!newCursor) return;
+
+    useEditorStore.getState().setSelection({ start: newCursor, end: null });
+    syncVisualCursor();
+  }
+
+  return (
+    <div className="dropdown">
+      <li
+        className={`tooltip tooltip-bottom ${
+          !canInsert || !properties.length ? "menu-disabled" : ""
+        }`}
+        data-tip="Insert property"
+      >
+        <a tabIndex={canInsert && properties.length ? 0 : -1}>
+          <Braces size={16} />
+        </a>
+      </li>
+      <ul
+        tabIndex={0}
+        className="dropdown-content menu menu-sm flex-nowrap bg-base-300 rounded-box z-1 shadow-sm top-[38px] min-w-30 w-max max-w-60 max-h-60 overflow-y-auto"
+      >
+        {properties.map((property) => (
+          <li key={property.id}>
+            <button
+              type="button"
+              onClick={() => {
+                (document.activeElement as HTMLElement).blur();
+                addProperty(property);
+              }}
+            >
+              {property.name}
+            </button>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
 
 function TextSection() {
   const selected = useEditorStore((state) => state.selected); // this comp only renders when a text el is selected
@@ -116,6 +181,9 @@ function TextSection() {
       >
         <ArrowDownNarrowWide size={16} />
       </MultiInput>
+      <div className="divider divider-horizontal" />
+
+      <PropertyDropdown />
     </>
   );
 }

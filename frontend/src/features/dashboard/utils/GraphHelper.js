@@ -34,6 +34,7 @@ const CreateGraphData = (scenes, groupInfo) => {
         data: {
           label: scene.name,
           components: scene.components,
+          background: scene.background,
           visited: visitCounter.get(scene._id) != undefined,
           visitCounter: visitCounter.get(scene._id),
           isHighlighted: false,

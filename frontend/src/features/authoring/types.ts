@@ -133,9 +133,16 @@ export interface ModelBlock {
   spans: ModelSpan[];
 }
 
+export interface PropertyRef {
+  id: string;
+  displayName: string;
+  missing?: boolean;
+}
+
 export interface ModelSpan {
   text: string;
   style?: Partial<SpanTextStyle>;
+  property?: PropertyRef;
 }
 
 export interface BaseTextStyle extends BlockTextStyle, SpanTextStyle {}
