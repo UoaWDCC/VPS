@@ -193,6 +193,25 @@ const shortcuts: Shortcut[] = [
     when: canAdjustSelectedTextFontSize,
     run: () => adjustSelectedTextFontSize(-1),
   },
+  {
+    combos: ["escape"],
+    when: () => {
+      const { mode, selected } = useEditorStore.getState();
+      return mode.some((m) => m !== "normal") || selected.length > 0;
+    },
+    run: () => {
+      const { mode, setMode, setSelected, setActiveGuides, setMouseDown } =
+        useEditorStore.getState();
+      if (mode.some((m) => m !== "normal")) {
+        // cancel the active drag/resize/marquee/text-edit
+        setMode(["normal"]);
+        setActiveGuides([]);
+        setMouseDown(false);
+      } else {
+        setSelected([]);
+      }
+    },
+  },
 ];
 
 export function handleShortcut(e: KeyboardEvent) {
