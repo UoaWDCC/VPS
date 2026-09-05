@@ -21,10 +21,7 @@ function buildGroups(doc: VisualDocument) {
           {line.spans.map((span, k) => {
             const { property } = span;
             const style = buildStyle(span.style);
-            if (property)
-              style.fill = property.missing
-                ? "var(--color-chip-missing-text)"
-                : "var(--color-chip-text)";
+            if (property?.missing) style.fill = "var(--color-chip-missing-text)";
 
             return (
               <tspan
