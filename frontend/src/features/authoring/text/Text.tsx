@@ -5,7 +5,7 @@ import Rectangle from "../canvas/Rectangle";
 import { buildStyle } from "./build";
 import useEditorStore from "../stores/editor";
 import TextHighlight from "./TextHighlight.tsx";
-import { CHIP_X_PADDING } from "./property.ts";
+import { CHIP_FONT_SCALE } from "./property.ts";
 import PropertyChips from "./PropertyChips";
 
 function buildGroups(doc: VisualDocument) {
@@ -20,17 +20,37 @@ function buildGroups(doc: VisualDocument) {
         >
           {line.spans.map((span, k) => {
             const { property } = span;
-            const style = buildStyle(span.style);
+            const style = buildStyle(
+              property
+                ? {
+                    ...span.style,
+                    fontSize: span.style.fontSize * CHIP_FONT_SCALE,
+                  }
+                : span.style
+            );
             if (property?.missing)
               style.fill = "var(--color-chip-missing-text)";
 
-            return (
+            //center text within chip
+            return property ? (
               <tspan
                 key={k}
-                x={line.x + span.x + (property ? CHIP_X_PADDING : 0)}
+                x={line.x + span.x + span.width / 2}
+                y={block.y + line.y + line.height / 2}
+                textAnchor="middle"
+                dominantBaseline="central"
                 style={style}
               >
-                {property ? property.displayName : span.text}
+                {property.displayName}
+              </tspan>
+            ) : (
+              <tspan
+                key={k}
+                x={line.x + span.x}
+                y={block.y + line.y + line.baseline}
+                style={style}
+              >
+                {span.text}
               </tspan>
             );
           })}
