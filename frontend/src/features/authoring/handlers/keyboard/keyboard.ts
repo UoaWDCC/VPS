@@ -17,10 +17,28 @@ export function handleGlobal(e: KeyboardEvent) {
   if (target.tagName === "INPUT" || target.tagName === "TEXTAREA") return;
   if (isEditableShortcutTarget(e.target)) return;
 
+  // alt is used as a live drag/resize modifier (disables snapping); stop the
+  // browser's own bare-alt behaviour (e.g. Firefox focusing the menu bar)
+  // from firing while the editor has focus
+  if (e.key === "Alt") {
+    e.preventDefault();
+    return;
+  }
+
   if (handleShortcut(e)) return;
 
   if (mode.includes("text")) handleTextMode(e);
   else if (selected.length) handleComponentOperations(e, selected);
+}
+
+// mirrors the Alt guard above on keyup, since some browsers fire their
+// bare-alt behaviour there instead of on keydown
+export function handleGlobalKeyUp(e: KeyboardEvent) {
+  const target = e.target as HTMLElement;
+  if (target.tagName === "INPUT" || target.tagName === "TEXTAREA") return;
+  if (isEditableShortcutTarget(e.target)) return;
+
+  if (e.key === "Alt") e.preventDefault();
 }
 
 function handleComponentOperations(e: KeyboardEvent, selected: string[]) {

@@ -56,8 +56,9 @@ export function handleResizeDrag(e: React.MouseEvent, position: Vec2) {
       -bounds.rotation
     );
 
-    // alignment guides only make sense in global space, so only snap unrotated components
-    if (!bounds.rotation) {
+    // alignment guides only make sense in global space, so only snap unrotated
+    // components, and let alt bypass snapping entirely
+    if (!bounds.rotation && !e.altKey) {
       const components = Object.values(
         useVisualScene.getState().components
       ).filter((c) => c.type !== "audio" && !selected.includes(c.id));
