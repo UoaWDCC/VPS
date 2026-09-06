@@ -35,23 +35,69 @@ async function modifyScene(user, scenarioId, patch) {
     fields: patch.fields,
     components: parsedComponents,
     deletedComponentIds: patch.deletedComponentIds,
+    actions: patch.actions,
+    deletedActionIds: patch.deletedActionIds,
+    addDefaultActionIds: patch.addDefaultActionIds,
+    removeDefaultActionIds: patch.removeDefaultActionIds,
+    addTimerActionIds: patch.addTimerActionIds,
+    removeTimerActionIds: patch.removeTimerActionIds,
+    componentActionDiffs: patch.componentActionDiffs,
   });
+}
+
+function diffIdSets(currentIds = [], savedIds = []) {
+  const currentSet = new Set(currentIds);
+  const savedSet = new Set(savedIds);
+  return {
+    add: currentIds.filter((id) => !savedSet.has(id)),
+    remove: savedIds.filter((id) => !currentSet.has(id)),
+  };
+}
+
+function omitActions(component) {
+  const rest = { ...component };
+  delete rest.actions;
+  return rest;
+}
+
+function applyIdDiff(ids = [], { add = [], remove = [] } = {}) {
+  const result = new Set(ids);
+  remove.forEach((id) => result.delete(id));
+  add.forEach((id) => result.add(id));
+  return [...result];
 }
 
 function generatePatch(modified, saved) {
   const components = [];
   const deletedComponentIds = [];
+  const componentActionDiffs = [];
   const fields = {};
 
   const currentComponents = modified.components ?? {};
   const savedComponents = saved.components ?? [];
 
   Object.entries(currentComponents).forEach(([id, component]) => {
-    if (
-      JSON.stringify(component) !==
-      JSON.stringify(savedComponents.find((c) => c.id === id))
-    ) {
+    const savedComponent = savedComponents.find((c) => c.id === id);
+
+    if (!savedComponent) {
+      // brand new component — include its initial actions directly, there's
+      // no prior state to diff against
       components.push(structuredClone(component));
+      return;
+    }
+
+    // a component's actions travel via componentActionDiffs (add/remove),
+    // never as part of its whole-object payload, so concurrent edits to the
+    // rest of the component or to its actions don't clobber each other
+    const actionsDiff = diffIdSets(component.actions, savedComponent.actions);
+    if (actionsDiff.add.length || actionsDiff.remove.length) {
+      componentActionDiffs.push({ componentId: id, ...actionsDiff });
+    }
+
+    const currentRest = omitActions(component);
+    const savedRest = omitActions(savedComponent);
+    if (JSON.stringify(currentRest) !== JSON.stringify(savedRest)) {
+      components.push(structuredClone(currentRest));
     }
   });
 
@@ -59,15 +105,34 @@ function generatePatch(modified, saved) {
     if (!currentComponents[c.id]) deletedComponentIds.push(c.id);
   });
 
-  [
-    "name",
-    "roles",
-    "time",
-    "actions",
-    "defaultActionIds",
-    "timerActionIds",
-    "background",
-  ].forEach((field) => {
+  const currentActions = modified.actions ?? [];
+  const savedActions = saved.actions ?? [];
+  const savedActionsById = new Map(savedActions.map((a) => [a.id, a]));
+
+  const actions = [];
+  currentActions.forEach((action) => {
+    if (
+      JSON.stringify(action) !== JSON.stringify(savedActionsById.get(action.id))
+    ) {
+      actions.push(structuredClone(action));
+    }
+  });
+
+  const currentActionIds = new Set(currentActions.map((a) => a.id));
+  const deletedActionIds = savedActions
+    .filter((a) => !currentActionIds.has(a.id))
+    .map((a) => a.id);
+
+  const defaultActionIdsDiff = diffIdSets(
+    modified.defaultActionIds,
+    saved.defaultActionIds
+  );
+  const timerActionIdsDiff = diffIdSets(
+    modified.timerActionIds,
+    saved.timerActionIds
+  );
+
+  ["name", "roles", "time", "background"].forEach((field) => {
     if (JSON.stringify(modified[field]) !== JSON.stringify(saved[field])) {
       fields[field] = structuredClone(modified[field]);
     }
@@ -78,26 +143,76 @@ function generatePatch(modified, saved) {
     fields,
     components,
     deletedComponentIds,
+    actions,
+    deletedActionIds,
+    addDefaultActionIds: defaultActionIdsDiff.add,
+    removeDefaultActionIds: defaultActionIdsDiff.remove,
+    addTimerActionIds: timerActionIdsDiff.add,
+    removeTimerActionIds: timerActionIdsDiff.remove,
+    componentActionDiffs,
   };
 }
 
 function applyPatch(scene, patch) {
-  const { fields = {}, components = [], deletedComponentIds = [] } = patch;
+  const {
+    fields = {},
+    components = [],
+    deletedComponentIds = [],
+    actions = [],
+    deletedActionIds = [],
+    addDefaultActionIds = [],
+    removeDefaultActionIds = [],
+    addTimerActionIds = [],
+    removeTimerActionIds = [],
+    componentActionDiffs = [],
+  } = patch;
 
-  const updated = [];
-  const seen = new Set();
+  const componentActionDiffsById = new Map(
+    componentActionDiffs.map((d) => [d.componentId, d])
+  );
+
+  const updatedComponents = [];
+  const seenComponentIds = new Set();
 
   for (const c of scene.components) {
     if (deletedComponentIds.includes(c.id)) continue;
-    updated.push(components.find((uc) => uc.id === c.id) ?? c);
-    seen.add(c.id);
+
+    const patchedComponent = components.find((uc) => uc.id === c.id);
+    // patchedComponent never carries `.actions` for an existing component
+    // (it travels via the diff below), so merging onto `c` preserves it
+    const baseComponent = patchedComponent ? { ...c, ...patchedComponent } : c;
+    const diff = componentActionDiffsById.get(c.id);
+
+    updatedComponents.push(
+      diff
+        ? { ...baseComponent, actions: applyIdDiff(c.actions, diff) }
+        : baseComponent
+    );
+    seenComponentIds.add(c.id);
   }
 
   for (const c of components) {
-    if (!seen.has(c.id)) updated.push(c);
+    if (!seenComponentIds.has(c.id)) updatedComponents.push(c);
   }
 
-  return { ...scene, ...fields, components: updated };
+  const savedActionsById = new Map((scene.actions ?? []).map((a) => [a.id, a]));
+  actions.forEach((a) => savedActionsById.set(a.id, a));
+  deletedActionIds.forEach((id) => savedActionsById.delete(id));
+
+  return {
+    ...scene,
+    ...fields,
+    components: updatedComponents,
+    actions: [...savedActionsById.values()],
+    defaultActionIds: applyIdDiff(scene.defaultActionIds, {
+      add: addDefaultActionIds,
+      remove: removeDefaultActionIds,
+    }),
+    timerActionIds: applyIdDiff(scene.timerActionIds, {
+      add: addTimerActionIds,
+      remove: removeTimerActionIds,
+    }),
+  };
 }
 
 /**
@@ -154,7 +269,7 @@ export default function SceneContextProvider({ children }) {
 
       toast.error(
         error?.response?.data?.error ||
-          "Something went wrong updating the scenes, your last changes weren't saved"
+        "Something went wrong updating the scenes, your last changes weren't saved"
       );
     },
   });
