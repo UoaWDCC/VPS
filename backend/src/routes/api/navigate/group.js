@@ -7,13 +7,17 @@ import { HttpError } from "../../../util/error.js";
 import STATUS from "../../../util/status.js";
 import { getProperties } from "../../../db/daos/scenarioDao.js";
 import { setGroupProperties } from "../../../db/daos/groupDao.js";
-import { applyPropertyOperations } from "../../../util/properties/propertyOperations.js";
-import { getComponent } from "../../../db/daos/sceneDao.js";
+import {
+  resolveActions,
+  runActions,
+  getLinkedSceneIds,
+} from "../../../util/actions/actionRunner.js";
 import {
   freshRemainingTime,
   resumedRemainingTime,
   movedRemainingTimeField,
 } from "./timer.js";
+import { resolveTriggerActionIds } from "./trigger.js";
 import { normaliseString } from "../../../util/normalise.js";
 
 const createInvalidError = (roles) =>
@@ -35,9 +39,10 @@ export const getSimpleScene = async (sceneId) => {
     {
       roles: 1,
       components: 1,
-      directLink: 1,
+      actions: 1,
+      defaultActionIds: 1,
+      timerActionIds: 1,
       time: 1,
-      timerStateOperations: 1,
       background: 1,
     }
   ).lean();
@@ -101,18 +106,16 @@ const getGroupByIdAndUser = async (groupId, uid) => {
 
 const getConnectedScenes = async (sceneID, role, active = true) => {
   const scene = await getSceneConsideringRole(sceneID, role);
-  const connectedIds = scene.components
-    .filter((c) => c.clickable)
-    .map((b) => b.nextScene)
-    .filter(Boolean);
+  const connectedIds = getLinkedSceneIds(scene);
   const connectedScenes = await Scene.find(
     { _id: { $in: connectedIds } },
     {
       roles: 1,
       components: 1,
-      directLink: 1,
+      actions: 1,
+      defaultActionIds: 1,
+      timerActionIds: 1,
       time: 1,
-      timerStateOperations: 1,
       background: 1,
     }
   ).lean();
@@ -208,29 +211,9 @@ const syncProperties = async (group) => {
   return [properties, group.stateVersion];
 };
 
-// Updates properties for a group
-const updateProperties = async (group, component) => {
-  if (!component || !component.stateOperations) {
-    return [group.stateVariables, group.stateVersion];
-  }
-
-  const properties = applyPropertyOperations(
-    group.stateVariables,
-    component.stateOperations
-  );
-
-  return await setGroupProperties(group._id, properties);
-};
-
 export const groupNavigate = async (req) => {
-  const {
-    uid,
-    currentScene,
-    addFlags,
-    removeFlags,
-    componentId,
-    nextScene: bodyNextScene,
-  } = req.body;
+  const { uid, currentScene, addFlags, removeFlags, trigger, componentId } =
+    req.body;
 
   const group = await getGroupByIdAndUser(req.params.groupId, uid);
   const { role } = group.users[0];
@@ -279,22 +262,22 @@ export const groupNavigate = async (req) => {
   if (group.path[0] !== currentScene)
     throw new HttpError("Scene mismatch has occured", STATUS.CONFLICT);
 
-  // Validate that the user is allowed to move to this scene
-  await getSceneConsideringRole(currentScene, role);
+  if (!trigger) throw new HttpError("trigger is required", STATUS.BAD_REQUEST);
 
-  if (bodyNextScene) {
-    const scene = await Scene.findById(currentScene, { directLink: 1 }).lean();
-    if (!scene?.directLink?.equals(bodyNextScene))
-      throw new HttpError("Invalid direct link target", STATUS.FORBIDDEN);
-  }
+  // validate that the user is allowed to move to this scene
+  const scene = await getSceneConsideringRole(currentScene, role);
 
-  const component = componentId
-    ? await getComponent(currentScene, componentId)
-    : null;
+  const actionIds = resolveTriggerActionIds(scene, trigger, componentId);
+
+  const actions = resolveActions(scene.actions, actionIds);
+  const {
+    properties: resolvedProperties,
+    linkedScene,
+    changed,
+  } = runActions(actions, group.stateVariables);
+  const nextScene = linkedScene?.toString();
 
   let scenes = null;
-
-  const nextScene = component?.nextScene ?? bodyNextScene;
 
   if (nextScene && nextScene !== currentScene) {
     [, , , scenes] = await Promise.all([
@@ -305,10 +288,9 @@ export const groupNavigate = async (req) => {
     ]);
   }
 
-  const [properties, propertyVersion] = await updateProperties(
-    group,
-    component
-  );
+  const [properties, propertyVersion] = changed
+    ? await setGroupProperties(group._id, resolvedProperties)
+    : [group.stateVariables, group.stateVersion];
 
   return {
     status: STATUS.OK,
