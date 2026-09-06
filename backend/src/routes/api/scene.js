@@ -54,13 +54,23 @@ router.get("/all", async (req, res) => {
 
 // Create a scene for a scenario
 router.post("/", async (req, res) => {
-  const { name, components, time, directLink, background } = req.body;
+  const {
+    name,
+    components,
+    time,
+    actions,
+    defaultActionIds,
+    timerActionIds,
+    background,
+  } = req.body;
 
   const scene = await createScene(req.params.scenarioId, {
     name,
     components,
     time,
-    directLink,
+    actions,
+    defaultActionIds,
+    timerActionIds,
     background,
   });
 
