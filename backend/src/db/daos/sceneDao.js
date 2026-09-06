@@ -169,6 +169,20 @@ const assertUniqueActionNames = (actions) => {
   }
 };
 
+// reject duplicate action ids within a scene's actions[]
+const assertUniqueActionIds = (actions) => {
+  const seen = new Set();
+  for (const action of actions) {
+    if (seen.has(action.id)) {
+      throw new HttpError(
+        `Duplicate action id "${action.id}" in scene`,
+        status.BAD_REQUEST
+      );
+    }
+    seen.add(action.id);
+  }
+};
+
 // validate that each action's conditions/operations reference a real
 // property, using a comparator/operation that's legal for its type
 const assertActionsMatchPropertyTypes = (actions, properties) => {
@@ -233,6 +247,7 @@ const assertActionsContentValid = async (scenarioId, actions) => {
   await assertScenesInScenario(scenarioId, linkedSceneIds);
 
   if (actions.length) {
+    assertUniqueActionIds(actions);
     assertUniqueActionNames(actions);
     const properties = await getProperties(scenarioId);
     assertActionsMatchPropertyTypes(actions, properties);

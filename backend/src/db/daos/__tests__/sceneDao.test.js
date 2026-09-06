@@ -178,7 +178,7 @@ describe("Scene DAO patchScene tests", () => {
     expect(updatedScene.components).toHaveLength(3);
   });
 
-  it("rejects direct links that reference a scene outside the current scenario", async () => {
+  it("rejects an action whose linkedScene references a scene outside the current scenario", async () => {
     const scenario = await Scenario.create({
       name: "Source scenario",
       uid: "author-2",
@@ -205,8 +205,16 @@ describe("Scene DAO patchScene tests", () => {
     await expect(
       createScene(scenario._id.toString(), {
         name: "Linked scene",
-        directLink: otherScene._id,
         components: [],
+        actions: [
+          {
+            id: "action-1",
+            name: "Go elsewhere",
+            linkedScene: otherScene._id,
+            conditions: [],
+            operations: [],
+          },
+        ],
       })
     ).rejects.toMatchObject({ status: 400 });
   });
@@ -217,7 +225,6 @@ describe("Scene DAO patchScene tests", () => {
       createScene(missingScenarioId, {
         name: "Missing parent",
         components: [],
-        directLink: null,
       })
     ).rejects.toMatchObject({
       status: 404,
@@ -247,7 +254,6 @@ describe("Scene DAO patchScene tests", () => {
       components: [
         { id: "img-1", type: "image", fileId: uploadedFile._id.toString() },
       ],
-      directLink: null,
     });
 
     expect(created).toMatchObject({ name: "File scene" });
@@ -406,7 +412,7 @@ describe("Scene DAO patchScene tests", () => {
     ).resolves.toBeNull();
   });
 
-  it("covers null direct links, not-found deletes, and scene retrieval edge cases", async () => {
+  it("covers scenes with no actions, not-found deletes, and scene retrieval edge cases", async () => {
     const lastScene = await Scene.create({
       name: "Single scene",
       components: [],
@@ -426,7 +432,6 @@ describe("Scene DAO patchScene tests", () => {
     const newScene = await createScene(linkScenario._id.toString(), {
       name: "Fresh scene",
       components: [],
-      directLink: null,
     });
 
     expect(await retrieveScene(newScene._id.toString())).toMatchObject({
@@ -436,8 +441,16 @@ describe("Scene DAO patchScene tests", () => {
     await expect(
       createScene(linkScenario._id.toString(), {
         name: "Bad link",
-        directLink: new mongoose.Types.ObjectId(),
         components: [],
+        actions: [
+          {
+            id: "action-1",
+            name: "Bad link action",
+            linkedScene: new mongoose.Types.ObjectId(),
+            conditions: [],
+            operations: [],
+          },
+        ],
       })
     ).rejects.toMatchObject({ status: 400 });
 
@@ -565,5 +578,300 @@ describe("Scene DAO patchScene tests", () => {
     }
 
     expect((await Scene.findById(sceneId).lean()).background).toBeNull();
+  });
+
+  it("persists a scene with a valid action's conditions, operations, and linkedScene", async () => {
+    const targetScene = await Scene.create({
+      name: "Target scene",
+      components: [],
+    });
+    const scenario = await Scenario.create({
+      name: "Valid action scenario",
+      uid: "author-8",
+      scenes: [targetScene._id],
+      stateVariables: [{ id: "hp", name: "hp", type: "number", value: 10 }],
+    });
+
+    const created = await createScene(scenario._id.toString(), {
+      name: "Scene with action",
+      components: [
+        { id: "btn", type: "box", clickable: true, actions: ["action-1"] },
+      ],
+      actions: [
+        {
+          id: "action-1",
+          name: "Heal and advance",
+          linkedScene: targetScene._id,
+          conditions: [
+            { id: "c1", stateVariableId: "hp", comparator: "<", value: 100 },
+          ],
+          operations: [
+            { id: "op1", stateVariableId: "hp", operation: "add", value: 5 },
+          ],
+        },
+      ],
+      defaultActionIds: ["action-1"],
+      timerActionIds: ["action-1"],
+    });
+
+    expect(created.actions).toHaveLength(1);
+    expect(created.actions[0]).toMatchObject({
+      id: "action-1",
+      name: "Heal and advance",
+    });
+    expect(created.actions[0].linkedScene.toString()).toBe(
+      targetScene._id.toString()
+    );
+    expect(created.defaultActionIds).toEqual(["action-1"]);
+    expect(created.timerActionIds).toEqual(["action-1"]);
+  });
+
+  it("rejects duplicate action ids within a scene", async () => {
+    const scenario = await Scenario.create({
+      name: "Duplicate id scenario",
+      uid: "author-16",
+      scenes: [],
+    });
+
+    await expect(
+      createScene(scenario._id.toString(), {
+        name: "Scene",
+        components: [],
+        actions: [
+          { id: "action-1", name: "Advance", conditions: [], operations: [] },
+          { id: "action-1", name: "Retreat", conditions: [], operations: [] },
+        ],
+      })
+    ).rejects.toMatchObject({ status: 400 });
+  });
+
+  it("rejects duplicate action names within a scene", async () => {
+    const scenario = await Scenario.create({
+      name: "Duplicate name scenario",
+      uid: "author-9",
+      scenes: [],
+    });
+
+    await expect(
+      createScene(scenario._id.toString(), {
+        name: "Scene",
+        components: [],
+        actions: [
+          { id: "action-1", name: "Advance", conditions: [], operations: [] },
+          { id: "action-2", name: "Advance", conditions: [], operations: [] },
+        ],
+      })
+    ).rejects.toMatchObject({ status: 400 });
+  });
+
+  it("rejects an action condition referencing an unknown property", async () => {
+    const scenario = await Scenario.create({
+      name: "Unknown property scenario",
+      uid: "author-10",
+      scenes: [],
+      stateVariables: [{ id: "hp", name: "hp", type: "number", value: 10 }],
+    });
+
+    await expect(
+      createScene(scenario._id.toString(), {
+        name: "Scene",
+        components: [],
+        actions: [
+          {
+            id: "action-1",
+            name: "Advance",
+            conditions: [
+              {
+                id: "c1",
+                stateVariableId: "does-not-exist",
+                comparator: "=",
+                value: 1,
+              },
+            ],
+            operations: [],
+          },
+        ],
+      })
+    ).rejects.toMatchObject({ status: 400 });
+  });
+
+  it("rejects an action operation that isn't valid for its property's type", async () => {
+    const scenario = await Scenario.create({
+      name: "Invalid operation scenario",
+      uid: "author-11",
+      scenes: [],
+      stateVariables: [
+        { id: "flag", name: "flag", type: "boolean", value: false },
+      ],
+    });
+
+    await expect(
+      createScene(scenario._id.toString(), {
+        name: "Scene",
+        components: [],
+        actions: [
+          {
+            id: "action-1",
+            name: "Advance",
+            conditions: [],
+            // "add" is only valid for number properties, not boolean ones
+            operations: [
+              {
+                id: "op1",
+                stateVariableId: "flag",
+                operation: "add",
+                value: 1,
+              },
+            ],
+          },
+        ],
+      })
+    ).rejects.toMatchObject({ status: 400 });
+  });
+
+  it("rejects a defaultActionIds entry that doesn't resolve to a scene action", async () => {
+    const scenario = await Scenario.create({
+      name: "Dangling default scenario",
+      uid: "author-12",
+      scenes: [],
+    });
+
+    await expect(
+      createScene(scenario._id.toString(), {
+        name: "Scene",
+        components: [],
+        actions: [
+          { id: "action-1", name: "Advance", conditions: [], operations: [] },
+        ],
+        defaultActionIds: ["missing-action"],
+      })
+    ).rejects.toMatchObject({ status: 400 });
+  });
+
+  it("rejects a timerActionIds entry that doesn't resolve to a scene action", async () => {
+    const scenario = await Scenario.create({
+      name: "Dangling timer scenario",
+      uid: "author-13",
+      scenes: [],
+    });
+
+    await expect(
+      createScene(scenario._id.toString(), {
+        name: "Scene",
+        components: [],
+        actions: [
+          { id: "action-1", name: "Advance", conditions: [], operations: [] },
+        ],
+        timerActionIds: ["missing-action"],
+      })
+    ).rejects.toMatchObject({ status: 400 });
+  });
+
+  it("rejects a component actions entry that doesn't resolve to a scene action", async () => {
+    const scenario = await Scenario.create({
+      name: "Dangling component action scenario",
+      uid: "author-14",
+      scenes: [],
+    });
+
+    await expect(
+      createScene(scenario._id.toString(), {
+        name: "Scene",
+        components: [
+          {
+            id: "btn",
+            type: "box",
+            clickable: true,
+            actions: ["missing-action"],
+          },
+        ],
+        actions: [
+          { id: "action-1", name: "Advance", conditions: [], operations: [] },
+        ],
+      })
+    ).rejects.toMatchObject({ status: 400 });
+  });
+
+  it("validates patchScene's defaultActionIds against the persisted actions when the patch doesn't touch actions", async () => {
+    await Scene.updateOne(
+      { _id: sceneId },
+      {
+        $set: {
+          actions: [
+            {
+              id: "action-1",
+              name: "Advance",
+              linkedScene: null,
+              conditions: [],
+              operations: [],
+            },
+          ],
+        },
+      }
+    );
+
+    // Resolves fine: "action-1" exists on the persisted scene
+    await patchScene(
+      sceneId,
+      { fields: { defaultActionIds: ["action-1"] } },
+      new mongoose.Types.ObjectId().toString()
+    );
+    expect((await Scene.findById(sceneId).lean()).defaultActionIds).toEqual([
+      "action-1",
+    ]);
+
+    // Rejects: "missing-action" doesn't exist on the persisted scene, and
+    // this patch doesn't touch `actions` to redefine it either
+    await expect(
+      patchScene(
+        sceneId,
+        { fields: { timerActionIds: ["missing-action"] } },
+        new mongoose.Types.ObjectId().toString()
+      )
+    ).rejects.toMatchObject({ status: 400 });
+  });
+
+  it("nulls linkedScene across multiple scenes when the target scene is deleted", async () => {
+    const targetScene = await Scene.create({
+      name: "Target scene",
+      components: [],
+    });
+
+    const makeLinkingScene = (name) =>
+      Scene.create({
+        name,
+        components: [],
+        actions: [
+          {
+            id: "action-1",
+            name: "Advance",
+            linkedScene: targetScene._id,
+            conditions: [],
+            operations: [],
+          },
+        ],
+      });
+
+    const sceneA = await makeLinkingScene("Scene A");
+    const sceneB = await makeLinkingScene("Scene B");
+
+    const scenario = await Scenario.create({
+      name: "Multi-link scenario",
+      uid: "author-15",
+      scenes: [targetScene._id, sceneA._id, sceneB._id],
+    });
+
+    const result = await deleteScene(
+      scenario._id.toString(),
+      targetScene._id.toString()
+    );
+    expect(result.deleted).toBe(true);
+
+    const [refreshedA, refreshedB] = await Promise.all([
+      Scene.findById(sceneA._id).lean(),
+      Scene.findById(sceneB._id).lean(),
+    ]);
+    expect(refreshedA.actions[0].linkedScene).toBeNull();
+    expect(refreshedB.actions[0].linkedScene).toBeNull();
   });
 });
