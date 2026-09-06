@@ -63,8 +63,9 @@ function generatePatch(modified, saved) {
     "name",
     "roles",
     "time",
-    "directLink",
-    "timerStateOperations",
+    "actions",
+    "defaultActionIds",
+    "timerActionIds",
     "background",
   ].forEach((field) => {
     if (JSON.stringify(modified[field]) !== JSON.stringify(saved[field])) {
