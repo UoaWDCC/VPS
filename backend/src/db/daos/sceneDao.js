@@ -237,9 +237,13 @@ const assertActionIdsResolve = (actionIds, validIds, label) => {
   }
 };
 
-// validates an actions[] list on its own terms: unique names, linkedScene
-// targets stay in the scenario, and conditions/operations match their
-// property's type
+// uniqueness must hold across the full effective actions[]
+const assertActionsUnique = (effectiveActions) => {
+  assertUniqueActionIds(effectiveActions);
+  assertUniqueActionNames(effectiveActions);
+};
+
+// validates an actions[] list
 const assertActionsContentValid = async (scenarioId, actions) => {
   const linkedSceneIds = actions
     .map((action) => action.linkedScene)
@@ -247,30 +251,9 @@ const assertActionsContentValid = async (scenarioId, actions) => {
   await assertScenesInScenario(scenarioId, linkedSceneIds);
 
   if (actions.length) {
-    assertUniqueActionIds(actions);
-    assertUniqueActionNames(actions);
     const properties = await getProperties(scenarioId);
     assertActionsMatchPropertyTypes(actions, properties);
   }
-};
-
-// validates that defaultActionIds/timerActionIds/each component's actions
-// resolve against the given actions[]; ids that are absent/empty are a no-op
-// (handled by assertActionIdsResolve), so callers can pass values that
-// weren't part of a given write without special-casing them
-const assertActionReferencesResolve = (
-  validActionIds,
-  { defaultActionIds, timerActionIds, components }
-) => {
-  assertActionIdsResolve(defaultActionIds, validActionIds, "defaultActionIds");
-  assertActionIdsResolve(timerActionIds, validActionIds, "timerActionIds");
-  (components ?? []).forEach((component) => {
-    assertActionIdsResolve(
-      component.actions,
-      validActionIds,
-      `component "${component.id}" actions`
-    );
-  });
 };
 
 /**
@@ -286,13 +269,26 @@ export const createScene = async (scenarioId, scene) => {
   }
 
   const actions = scene.actions ?? [];
+  assertActionsUnique(actions);
   await assertActionsContentValid(scenarioId, actions);
 
   const validActionIds = actions.map((action) => action.id);
-  assertActionReferencesResolve(validActionIds, {
-    defaultActionIds: scene.defaultActionIds,
-    timerActionIds: scene.timerActionIds,
-    components: scene.components,
+  assertActionIdsResolve(
+    scene.defaultActionIds,
+    validActionIds,
+    "defaultActionIds"
+  );
+  assertActionIdsResolve(
+    scene.timerActionIds,
+    validActionIds,
+    "timerActionIds"
+  );
+  (scene.components ?? []).forEach((component) => {
+    assertActionIdsResolve(
+      component.actions,
+      validActionIds,
+      `component "${component.id}" actions`
+    );
   });
 
   const dbScene = new Scene(scene);
@@ -523,19 +519,40 @@ async function validateBackground(background) {
   }
 }
 
+// builds the update-if-present/push-if-not-present op pair for each item
+// against an id-keyed array field (e.g. actions[] or components[]) 
+const buildUpsertByIdOps = (sceneId, field, items) =>
+  items.flatMap((item) => [
+    {
+      updateOne: {
+        filter: { _id: sceneId, [`${field}.id`]: item.id },
+        update: { $set: { [`${field}.$`]: item } },
+      },
+    },
+    {
+      updateOne: {
+        filter: { _id: sceneId, [`${field}.id`]: { $ne: item.id } },
+        update: { $push: { [field]: item } },
+      },
+    },
+  ]);
+
 export const patchScene = async (sceneId, patch, scenarioId) => {
-  const { fields = {}, components = [], deletedComponentIds = [] } = patch;
+  const {
+    fields = {},
+    components = [],
+    deletedComponentIds = [],
+    actions = [],
+    deletedActionIds = [],
+    addDefaultActionIds = [],
+    removeDefaultActionIds = [],
+    addTimerActionIds = [],
+    removeTimerActionIds = [],
+    componentActionDiffs = [],
+  } = patch;
 
   const allowedFields = {};
-  [
-    "name",
-    "roles",
-    "time",
-    "actions",
-    "defaultActionIds",
-    "timerActionIds",
-    "background",
-  ].forEach((field) => {
+  ["name", "roles", "time", "background"].forEach((field) => {
     if (Object.prototype.hasOwnProperty.call(fields, field)) {
       allowedFields[field] = fields[field];
     }
@@ -556,20 +573,67 @@ export const patchScene = async (sceneId, patch, scenarioId) => {
     throw new HttpError("scene not found", HttpStatusCode.NotFound);
   }
 
-  if ("actions" in allowedFields) {
-    await assertActionsContentValid(scenarioId, allowedFields.actions);
+  const existingComponentsById = new Map(
+    (existingScene.components ?? []).map((c) => [c.id, c])
+  );
+
+  const deletedActionIdSet = new Set(deletedActionIds);
+  const incomingActionIds = new Set(actions.map((action) => action.id));
+  const effectiveActions = [
+    ...(existingScene.actions ?? []).filter(
+      (action) =>
+        !deletedActionIdSet.has(action.id) && !incomingActionIds.has(action.id)
+    ),
+    ...actions,
+  ];
+
+  if (actions.length) {
+    await assertActionsContentValid(scenarioId, actions);
+  }
+  if (actions.length || deletedActionIds.length) {
+    assertActionsUnique(effectiveActions);
   }
 
-  const effectiveActions =
-    "actions" in allowedFields
-      ? allowedFields.actions
-      : (existingScene.actions ?? []);
   const validActionIds = effectiveActions.map((action) => action.id);
 
-  assertActionReferencesResolve(validActionIds, {
-    defaultActionIds: allowedFields.defaultActionIds,
-    timerActionIds: allowedFields.timerActionIds,
-    components,
+  // only newly-added references need to resolve
+  // removals are always safe, and references untouched by this patch 
+  // are left alone even if stale
+  assertActionIdsResolve(
+    addDefaultActionIds,
+    validActionIds,
+    "defaultActionIds"
+  );
+  assertActionIdsResolve(addTimerActionIds, validActionIds, "timerActionIds");
+
+  const componentsInPatchIds = new Set(components.map((c) => c.id));
+
+  componentActionDiffs.forEach(({ componentId, add }) => {
+    if (
+      !existingComponentsById.has(componentId) &&
+      !componentsInPatchIds.has(componentId)
+    ) {
+      throw new HttpError(
+        `componentActionDiffs references unknown component "${componentId}"`,
+        status.BAD_REQUEST
+      );
+    }
+    assertActionIdsResolve(
+      add,
+      validActionIds,
+      `component "${componentId}" actions`
+    );
+  });
+  // a component created fresh in this same patch has no prior state to diff
+  // against, so its initial `actions` counts as all-new
+  components.forEach((component) => {
+    if (component.actions !== undefined) {
+      assertActionIdsResolve(
+        component.actions,
+        validActionIds,
+        `component "${component.id}" actions`
+      );
+    }
   });
 
   const fileRefDeltas = computePatchFileRefDeltas(
@@ -609,32 +673,106 @@ export const patchScene = async (sceneId, patch, scenarioId) => {
     });
   }
 
-  for (const component of components) {
+  if (deletedActionIds.length > 0) {
     operations.push({
       updateOne: {
-        filter: {
-          _id: sceneId,
-          "components.id": component.id,
-        },
+        filter: { _id: sceneId },
         update: {
-          $set: {
-            "components.$": component,
+          $pull: {
+            actions: { id: { $in: deletedActionIds } },
           },
         },
       },
     });
+  }
 
+  operations.push(...buildUpsertByIdOps(sceneId, "actions", actions));
+
+  const componentActionDiffsById = new Map(
+    componentActionDiffs.map((diff) => [diff.componentId, diff])
+  );
+  const resolveComponentForWrite = (component) => {
+    const existingActions = existingComponentsById.get(component.id)?.actions;
+    const diff = componentActionDiffsById.get(component.id);
+
+    if (!diff) {
+      return component.actions !== undefined
+        ? component
+        : { ...component, actions: existingActions ?? [] };
+    }
+
+    const merged = new Set(component.actions ?? existingActions ?? []);
+    (diff.remove ?? []).forEach((id) => merged.delete(id));
+    (diff.add ?? []).forEach((id) => merged.add(id));
+    return { ...component, actions: [...merged] };
+  };
+
+  const resolvedComponents = components.map(resolveComponentForWrite);
+  operations.push(
+    ...buildUpsertByIdOps(sceneId, "components", resolvedComponents)
+  );
+
+  // components whose *only* change is an action-list diff get a targeted
+  // $addToSet/$pull instead of a whole-object replace, so a concurrent edit
+  // to that component's other fields (by another author) isn't clobbered
+  componentActionDiffs.forEach(({ componentId, add = [], remove = [] }) => {
+    if (componentsInPatchIds.has(componentId)) return;
+
+    if (add.length > 0) {
+      operations.push({
+        updateOne: {
+          filter: { _id: sceneId, "components.id": componentId },
+          update: { $addToSet: { "components.$.actions": { $each: add } } },
+        },
+      });
+    }
+
+    if (remove.length > 0) {
+      operations.push({
+        updateOne: {
+          filter: { _id: sceneId, "components.id": componentId },
+          update: { $pull: { "components.$.actions": { $in: remove } } },
+        },
+      });
+    }
+  });
+
+  if (addDefaultActionIds.length > 0) {
     operations.push({
       updateOne: {
-        filter: {
-          _id: sceneId,
-          "components.id": { $ne: component.id },
-        },
+        filter: { _id: sceneId },
         update: {
-          $push: {
-            components: component,
-          },
+          $addToSet: { defaultActionIds: { $each: addDefaultActionIds } },
         },
+      },
+    });
+  }
+  if (removeDefaultActionIds.length > 0) {
+    operations.push({
+      updateOne: {
+        filter: { _id: sceneId },
+        update: {
+          $pull: { defaultActionIds: { $in: removeDefaultActionIds } },
+        },
+      },
+    });
+  }
+
+  if (addTimerActionIds.length > 0) {
+    operations.push({
+      updateOne: {
+        filter: { _id: sceneId },
+        update: {
+          $addToSet: { timerActionIds: { $each: addTimerActionIds } },
+        },
+      },
+    });
+  }
+  if (removeTimerActionIds.length > 0) {
+    operations.push({
+      updateOne: {
+        filter: { _id: sceneId },
+        update: { $pull: { timerActionIds: { $in: removeTimerActionIds } } },
       },
     });
   }

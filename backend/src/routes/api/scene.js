@@ -146,7 +146,18 @@ router.put("/visited/:sceneId", async (req, res) => {
 router.patch(
   "/:sceneId",
   handle(async (req, res) => {
-    const { fields = {}, components = [], deletedComponentIds = [] } = req.body;
+    const {
+      fields = {},
+      components = [],
+      deletedComponentIds = [],
+      actions = [],
+      deletedActionIds = [],
+      addDefaultActionIds = [],
+      removeDefaultActionIds = [],
+      addTimerActionIds = [],
+      removeTimerActionIds = [],
+      componentActionDiffs = [],
+    } = req.body;
 
     const scene = await patchScene(
       req.params.sceneId,
@@ -154,6 +165,13 @@ router.patch(
         fields,
         components,
         deletedComponentIds,
+        actions,
+        deletedActionIds,
+        addDefaultActionIds,
+        removeDefaultActionIds,
+        addTimerActionIds,
+        removeTimerActionIds,
+        componentActionDiffs,
       },
       req.params.scenarioId
     );
