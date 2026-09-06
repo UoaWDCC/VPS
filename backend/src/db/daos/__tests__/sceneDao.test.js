@@ -792,7 +792,7 @@ describe("Scene DAO patchScene tests", () => {
     ).rejects.toMatchObject({ status: 400 });
   });
 
-  it("validates patchScene's defaultActionIds against the persisted actions when the patch doesn't touch actions", async () => {
+  it("adds to defaultActionIds/timerActionIds via explicit add lists, validated against persisted actions", async () => {
     await Scene.updateOne(
       { _id: sceneId },
       {
@@ -813,7 +813,7 @@ describe("Scene DAO patchScene tests", () => {
     // Resolves fine: "action-1" exists on the persisted scene
     await patchScene(
       sceneId,
-      { fields: { defaultActionIds: ["action-1"] } },
+      { addDefaultActionIds: ["action-1"] },
       new mongoose.Types.ObjectId().toString()
     );
     expect((await Scene.findById(sceneId).lean()).defaultActionIds).toEqual([
@@ -821,14 +821,441 @@ describe("Scene DAO patchScene tests", () => {
     ]);
 
     // Rejects: "missing-action" doesn't exist on the persisted scene, and
-    // this patch doesn't touch `actions` to redefine it either
+    // this patch doesn't touch `actions` to add it either
     await expect(
       patchScene(
         sceneId,
-        { fields: { timerActionIds: ["missing-action"] } },
+        { addTimerActionIds: ["missing-action"] },
         new mongoose.Types.ObjectId().toString()
       )
     ).rejects.toMatchObject({ status: 400 });
+  });
+
+  it("removes from defaultActionIds/timerActionIds without validating the removed ids", async () => {
+    await Scene.updateOne(
+      { _id: sceneId },
+      { $set: { defaultActionIds: ["action-1"], timerActionIds: ["action-1"] } }
+    );
+
+    await patchScene(
+      sceneId,
+      {
+        removeDefaultActionIds: ["action-1"],
+        // never present in the first place — removal must still be a safe no-op
+        removeTimerActionIds: ["does-not-exist"],
+      },
+      new mongoose.Types.ObjectId().toString()
+    );
+
+    const updated = await Scene.findById(sceneId).lean();
+    expect(updated.defaultActionIds).toEqual([]);
+    expect(updated.timerActionIds).toEqual(["action-1"]);
+  });
+
+  it("updates one action via patchScene without re-validating other untouched actions, even if they're now stale", async () => {
+    const scenario = await Scenario.create({
+      name: "Partial update scenario",
+      uid: "author-17",
+      scenes: [sceneId],
+    });
+
+    await Scene.updateOne(
+      { _id: sceneId },
+      {
+        $set: {
+          actions: [
+            {
+              id: "action-stale",
+              name: "Stale",
+              linkedScene: null,
+              // references a property that doesn't exist in this scenario —
+              // if this untouched action were re-validated, the patch would 400
+              conditions: [
+                {
+                  id: "c1",
+                  stateVariableId: "does-not-exist",
+                  comparator: "=",
+                  value: 1,
+                },
+              ],
+              operations: [],
+            },
+            {
+              id: "action-live",
+              name: "Live",
+              linkedScene: null,
+              conditions: [],
+              operations: [],
+            },
+          ],
+        },
+      }
+    );
+
+    const updated = await patchScene(
+      sceneId,
+      {
+        actions: [
+          {
+            id: "action-live",
+            name: "Live Updated",
+            linkedScene: null,
+            conditions: [],
+            operations: [],
+          },
+        ],
+      },
+      scenario._id.toString()
+    );
+
+    expect(updated.actions.find((a) => a.id === "action-live").name).toBe(
+      "Live Updated"
+    );
+    expect(updated.actions.find((a) => a.id === "action-stale").name).toBe(
+      "Stale"
+    );
+  });
+
+  it("deletes an action via deletedActionIds while leaving stale defaultActionIds/component references untouched", async () => {
+    await Scene.updateOne(
+      { _id: sceneId },
+      {
+        $set: {
+          actions: [
+            {
+              id: "action-1",
+              name: "Advance",
+              linkedScene: null,
+              conditions: [],
+              operations: [],
+            },
+          ],
+          defaultActionIds: ["action-1"],
+          components: [
+            { id: "btn", type: "box", clickable: true, actions: ["action-1"] },
+          ],
+        },
+      }
+    );
+
+    const updated = await patchScene(
+      sceneId,
+      { deletedActionIds: ["action-1"] },
+      new mongoose.Types.ObjectId().toString()
+    );
+
+    expect(updated.actions).toHaveLength(0);
+    // no cascade — the author's UI is responsible for surfacing these as
+    // stale, not the DAO for rejecting the delete or auto-cleaning them
+    expect(updated.defaultActionIds).toEqual(["action-1"]);
+    expect(updated.components.find((c) => c.id === "btn").actions).toEqual([
+      "action-1",
+    ]);
+  });
+
+  it("applies componentActionDiffs via targeted add/remove without touching the component's other fields", async () => {
+    await Scene.updateOne(
+      { _id: sceneId },
+      {
+        $set: {
+          actions: [
+            {
+              id: "action-1",
+              name: "Advance",
+              linkedScene: null,
+              conditions: [],
+              operations: [],
+            },
+            {
+              id: "action-2",
+              name: "Retreat",
+              linkedScene: null,
+              conditions: [],
+              operations: [],
+            },
+          ],
+          components: [
+            {
+              id: "btn",
+              type: "box",
+              clickable: true,
+              actions: ["action-1"],
+              bounds: { verts: [{ x: 1, y: 1 }] },
+            },
+          ],
+        },
+      }
+    );
+
+    await patchScene(
+      sceneId,
+      {
+        componentActionDiffs: [
+          { componentId: "btn", add: ["action-2"], remove: ["action-1"] },
+        ],
+      },
+      new mongoose.Types.ObjectId().toString()
+    );
+
+    const updated = await Scene.findById(sceneId).lean();
+    const btn = updated.components.find((c) => c.id === "btn");
+    expect(btn.actions).toEqual(["action-2"]);
+    // an unrelated field must be untouched by the targeted diff
+    expect(btn.bounds).toEqual({ verts: [{ x: 1, y: 1 }] });
+  });
+
+  it("rejects a componentActionDiffs add entry that doesn't resolve to a scene action", async () => {
+    await Scene.updateOne(
+      { _id: sceneId },
+      {
+        $set: {
+          actions: [],
+          components: [
+            { id: "btn", type: "box", clickable: true, actions: [] },
+          ],
+        },
+      }
+    );
+
+    await expect(
+      patchScene(
+        sceneId,
+        {
+          componentActionDiffs: [
+            { componentId: "btn", add: ["missing-action"] },
+          ],
+        },
+        new mongoose.Types.ObjectId().toString()
+      )
+    ).rejects.toMatchObject({ status: 400 });
+  });
+
+  it("reconciles a component's actions when it also changes another field in the same patch", async () => {
+    await Scene.updateOne(
+      { _id: sceneId },
+      {
+        $set: {
+          actions: [
+            {
+              id: "action-1",
+              name: "Advance",
+              linkedScene: null,
+              conditions: [],
+              operations: [],
+            },
+            {
+              id: "action-2",
+              name: "Retreat",
+              linkedScene: null,
+              conditions: [],
+              operations: [],
+            },
+          ],
+          components: [
+            {
+              id: "btn",
+              type: "box",
+              clickable: true,
+              actions: ["action-1"],
+              bounds: { verts: [{ x: 1, y: 1 }] },
+            },
+          ],
+        },
+      }
+    );
+
+    // this patch's `components` entry for "btn" changes bounds and doesn't
+    // mention `actions` at all — the DAO must reconcile the diff into the
+    // outgoing object itself, or the whole-object $set would wipe it
+    await patchScene(
+      sceneId,
+      {
+        components: [
+          {
+            id: "btn",
+            type: "box",
+            clickable: true,
+            bounds: { verts: [{ x: 9, y: 9 }] },
+          },
+        ],
+        componentActionDiffs: [
+          { componentId: "btn", add: ["action-2"], remove: ["action-1"] },
+        ],
+      },
+      new mongoose.Types.ObjectId().toString()
+    );
+
+    const updated = await Scene.findById(sceneId).lean();
+    const btn = updated.components.find((c) => c.id === "btn");
+    expect(btn.bounds).toEqual({ verts: [{ x: 9, y: 9 }] });
+    expect(btn.actions).toEqual(["action-2"]);
+  });
+
+  it("preserves an existing component's actions when only its other fields are patched (no componentActionDiffs entry)", async () => {
+    await Scene.updateOne(
+      { _id: sceneId },
+      {
+        $set: {
+          actions: [
+            {
+              id: "action-1",
+              name: "Advance",
+              linkedScene: null,
+              conditions: [],
+              operations: [],
+            },
+          ],
+          components: [
+            {
+              id: "btn",
+              type: "box",
+              clickable: true,
+              actions: ["action-1"],
+              bounds: { verts: [{ x: 1, y: 1 }] },
+            },
+          ],
+        },
+      }
+    );
+
+    // this patch changes "btn"'s bounds only — no componentActionDiffs entry
+    // for it at all, since its action bindings weren't touched
+    await patchScene(
+      sceneId,
+      {
+        components: [
+          {
+            id: "btn",
+            type: "box",
+            clickable: true,
+            bounds: { verts: [{ x: 5, y: 5 }] },
+          },
+        ],
+      },
+      new mongoose.Types.ObjectId().toString()
+    );
+
+    const updated = await Scene.findById(sceneId).lean();
+    const btn = updated.components.find((c) => c.id === "btn");
+    expect(btn.bounds).toEqual({ verts: [{ x: 5, y: 5 }] });
+    // the whole-object $set must not have wiped the untouched actions field
+    expect(btn.actions).toEqual(["action-1"]);
+  });
+
+  it("rejects a componentActionDiffs entry targeting a component that doesn't exist", async () => {
+    await Scene.updateOne(
+      { _id: sceneId },
+      {
+        $set: {
+          actions: [
+            {
+              id: "action-1",
+              name: "Advance",
+              linkedScene: null,
+              conditions: [],
+              operations: [],
+            },
+          ],
+        },
+      }
+    );
+
+    await expect(
+      patchScene(
+        sceneId,
+        {
+          componentActionDiffs: [
+            { componentId: "does-not-exist", add: ["action-1"] },
+          ],
+        },
+        new mongoose.Types.ObjectId().toString()
+      )
+    ).rejects.toMatchObject({ status: 400 });
+  });
+
+  it("validates an existing component's actions if included directly instead of via componentActionDiffs", async () => {
+    await Scene.updateOne(
+      { _id: sceneId },
+      {
+        $set: {
+          actions: [],
+          components: [{ id: "btn", type: "box", clickable: true }],
+        },
+      }
+    );
+
+    await expect(
+      patchScene(
+        sceneId,
+        {
+          components: [
+            {
+              id: "btn",
+              type: "box",
+              clickable: true,
+              actions: ["missing-action"],
+            },
+          ],
+        },
+        new mongoose.Types.ObjectId().toString()
+      )
+    ).rejects.toMatchObject({ status: 400 });
+  });
+
+  it("validates and persists a brand-new component's inline actions", async () => {
+    await Scene.updateOne(
+      { _id: sceneId },
+      {
+        $set: {
+          actions: [
+            {
+              id: "action-1",
+              name: "Advance",
+              linkedScene: null,
+              conditions: [],
+              operations: [],
+            },
+          ],
+        },
+      }
+    );
+
+    await expect(
+      patchScene(
+        sceneId,
+        {
+          components: [
+            {
+              id: "new-btn",
+              type: "box",
+              clickable: true,
+              actions: ["missing-action"],
+              bounds: { verts: [{ x: 0, y: 0 }] },
+            },
+          ],
+        },
+        new mongoose.Types.ObjectId().toString()
+      )
+    ).rejects.toMatchObject({ status: 400 });
+
+    const updated = await patchScene(
+      sceneId,
+      {
+        components: [
+          {
+            id: "new-btn",
+            type: "box",
+            clickable: true,
+            actions: ["action-1"],
+            bounds: { verts: [{ x: 0, y: 0 }] },
+          },
+        ],
+      },
+      new mongoose.Types.ObjectId().toString()
+    );
+    expect(updated.components.find((c) => c.id === "new-btn").actions).toEqual([
+      "action-1",
+    ]);
   });
 
   it("nulls linkedScene across multiple scenes when the target scene is deleted", async () => {
