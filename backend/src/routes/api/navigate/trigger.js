@@ -14,6 +14,9 @@ export const resolveTriggerActionIds = (scene, trigger, componentId) => {
       if (!component) {
         throw new HttpError("Component does not exist", STATUS.BAD_REQUEST);
       }
+      if (!component.clickable) {
+        throw new HttpError("Component is not clickable", STATUS.BAD_REQUEST);
+      }
       return component.actions;
     }
     case "default":
