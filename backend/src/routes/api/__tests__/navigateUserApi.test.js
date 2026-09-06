@@ -127,8 +127,17 @@ describe("Navigate User API tests", () => {
         {
           id: componentId,
           clickable: true,
-          nextScene: scene2._id,
+          actions: ["action-go"],
           type: "BUTTON",
+        },
+      ],
+      actions: [
+        {
+          id: "action-go",
+          name: "Go",
+          linkedScene: scene2._id,
+          conditions: [],
+          operations: [],
         },
       ],
       roles: [],
@@ -139,12 +148,12 @@ describe("Navigate User API tests", () => {
       { $set: { [`paths.${scenario._id}`]: [clickScene._id.toString()] } }
     );
 
-    // Navigate via componentId (not bodyNextScene — that triggers directLink validation)
     const response = await axios.post(
       `http://localhost:${ctx.port}/api/navigate/user/${scenario._id}`,
       {
         uid: "uid-player",
         currentScene: clickScene._id.toString(),
+        trigger: "click",
         componentId,
       },
       authHeaders("uid-player")
@@ -158,8 +167,7 @@ describe("Navigate User API tests", () => {
     );
   });
 
-  it("POST /navigate/user/:scenarioId returns 403 when nextScene does not match directLink", async () => {
-    // scene1 has no directLink, providing nextScene without a valid directLink → 403
+  it("POST /navigate/user/:scenarioId returns 400 when trigger is missing on a move-step request", async () => {
     await User.findOneAndUpdate(
       { uid: "uid-player" },
       { $set: { [`paths.${scenario._id}`]: [scene1._id.toString()] } }
@@ -171,11 +179,10 @@ describe("Navigate User API tests", () => {
         {
           uid: "uid-player",
           currentScene: scene1._id.toString(),
-          nextScene: scene2._id.toString(), // not a directLink target
         },
         authHeaders("uid-player")
       )
-    ).rejects.toMatchObject({ response: { status: 403 } });
+    ).rejects.toMatchObject({ response: { status: 400 } });
   });
 
   // --- POST /navigate/user/reset/:scenarioId ---
@@ -301,8 +308,17 @@ describe("Navigate User API tests", () => {
           {
             id: componentId,
             clickable: true,
-            nextScene: scene2._id,
+            actions: ["action-go"],
             type: "BUTTON",
+          },
+        ],
+        actions: [
+          {
+            id: "action-go",
+            name: "Go",
+            linkedScene: scene2._id,
+            conditions: [],
+            operations: [],
           },
         ],
         roles: [],
@@ -326,6 +342,7 @@ describe("Navigate User API tests", () => {
         {
           uid: "uid-player",
           currentScene: clickScene._id.toString(),
+          trigger: "click",
           componentId,
         },
         authHeaders("uid-player")
@@ -366,6 +383,136 @@ describe("Navigate User API tests", () => {
 
       const dbUser = await User.findOne({ uid: "uid-player" });
       expect(dbUser.sceneEnteredAt.get(scenarioId())).toBeUndefined();
+    });
+  });
+
+  // --- Trigger-based action resolution ---
+
+  describe("trigger-based action resolution", () => {
+    const scenarioId = () => scenario._id.toString();
+
+    it("returns 400 for an invalid trigger value", async () => {
+      await User.findOneAndUpdate(
+        { uid: "uid-player" },
+        { $set: { [`paths.${scenarioId()}`]: [scene1._id.toString()] } }
+      );
+
+      await expect(
+        axios.post(
+          `http://localhost:${ctx.port}/api/navigate/user/${scenario._id}`,
+          {
+            uid: "uid-player",
+            currentScene: scene1._id.toString(),
+            trigger: "bogus",
+          },
+          authHeaders("uid-player")
+        )
+      ).rejects.toMatchObject({ response: { status: 400 } });
+    });
+
+    it("returns 400 when componentId is missing for a click trigger", async () => {
+      await User.findOneAndUpdate(
+        { uid: "uid-player" },
+        { $set: { [`paths.${scenarioId()}`]: [scene1._id.toString()] } }
+      );
+
+      await expect(
+        axios.post(
+          `http://localhost:${ctx.port}/api/navigate/user/${scenario._id}`,
+          {
+            uid: "uid-player",
+            currentScene: scene1._id.toString(),
+            trigger: "click",
+          },
+          authHeaders("uid-player")
+        )
+      ).rejects.toMatchObject({ response: { status: 400 } });
+    });
+
+    it("resolves a default trigger via scene.defaultActionIds and navigates", async () => {
+      const defaultScene = await Scene.create({
+        name: "Default Trigger Scene",
+        components: [],
+        roles: [],
+        actions: [
+          {
+            id: "action-default",
+            name: "Advance",
+            linkedScene: scene2._id,
+            conditions: [],
+            operations: [],
+          },
+        ],
+        defaultActionIds: ["action-default"],
+      });
+      await User.findOneAndUpdate(
+        { uid: "uid-player" },
+        { $set: { [`paths.${scenarioId()}`]: [defaultScene._id.toString()] } }
+      );
+
+      const response = await axios.post(
+        `http://localhost:${ctx.port}/api/navigate/user/${scenario._id}`,
+        {
+          uid: "uid-player",
+          currentScene: defaultScene._id.toString(),
+          trigger: "default",
+        },
+        authHeaders("uid-player")
+      );
+      expect(response.status).toBe(200);
+      expect(response.data.active).toBe(scene2._id.toString());
+    });
+
+    it("persists staged property operations without navigating when the action has no linkedScene", async () => {
+      const mutatingScene = await Scene.create({
+        name: "Mutating Scene",
+        components: [],
+        roles: [],
+        actions: [
+          {
+            id: "action-heal",
+            name: "Heal",
+            linkedScene: null,
+            conditions: [],
+            operations: [
+              { id: "op1", stateVariableId: "hp", operation: "add", value: 5 },
+            ],
+          },
+        ],
+        defaultActionIds: ["action-heal"],
+      });
+      await User.findOneAndUpdate(
+        { uid: "uid-player" },
+        {
+          $set: {
+            [`paths.${scenarioId()}`]: [mutatingScene._id.toString()],
+            [`stateVariables.${scenarioId()}`]: [
+              { id: "hp", type: "number", value: 5 },
+            ],
+            [`stateVersions.${scenarioId()}`]: 0,
+          },
+        }
+      );
+
+      const response = await axios.post(
+        `http://localhost:${ctx.port}/api/navigate/user/${scenario._id}`,
+        {
+          uid: "uid-player",
+          currentScene: mutatingScene._id.toString(),
+          trigger: "default",
+        },
+        authHeaders("uid-player")
+      );
+      expect(response.status).toBe(200);
+      expect(response.data.properties.find((p) => p.id === "hp").value).toBe(
+        10
+      );
+      expect(response.data.propertyVersion).toBe(1);
+
+      const dbUser = await User.findOne({ uid: "uid-player" });
+      expect(dbUser.paths.get(scenarioId())[0]).toBe(
+        mutatingScene._id.toString()
+      );
     });
   });
 });
