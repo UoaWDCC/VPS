@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import { actionSchema } from "./actionSchema.js";
 
 const { Schema } = mongoose;
 
@@ -71,11 +72,6 @@ const sceneSchema = new Schema({
     type: Number,
     min: 1,
   },
-  timerStateOperations: [
-    {
-      type: Object,
-    },
-  ],
   visited: {
     type: Number,
     default: 0,
@@ -85,10 +81,17 @@ const sceneSchema = new Schema({
       type: String,
     },
   ],
-  directLink: {
-    type: Schema.Types.ObjectId,
-    ref: "Scene",
-    default: null,
+  actions: {
+    type: [actionSchema],
+    default: [],
+  },
+  defaultActionIds: {
+    type: [String],
+    default: [],
+  },
+  timerActionIds: {
+    type: [String],
+    default: [],
   },
   background: {
     type: backgroundSchema,
