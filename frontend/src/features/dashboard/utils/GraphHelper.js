@@ -42,14 +42,31 @@ const CreateGraphData = (scenes, groupInfo) => {
       });
     });
 
-    // Loop through each component of a scene and check for the "nextScene" property and add it to edge graph
-    scenes.forEach((scene) =>
-      scene.components.forEach((obj) => {
-        if (obj.nextScene) {
+    // Loop through every path a scene can navigate from — clickable
+    // components' actions, plus its default (keyboard-advance) and timer
+    // actions — and add an edge to each resolved action's linkedScene.
+    // Mirrors the backend's getLinkedSceneIds (backend/src/util/actions/actionRunner.js).
+    scenes.forEach((scene) => {
+      const actionsById = new Map(
+        (scene.actions ?? []).map((action) => [action.id, action])
+      );
+      const resolveActions = (actionIds) =>
+        (actionIds ?? []).map((id) => actionsById.get(id)).filter(Boolean);
+
+      const actionLists = [
+        ...scene.components.filter((c) => c.clickable).map((c) => c.actions),
+        scene.defaultActionIds,
+        scene.timerActionIds,
+      ];
+
+      actionLists
+        .flatMap((actionIds) => resolveActions(actionIds))
+        .forEach((action) => {
+          if (!action.linkedScene) return;
           edges.push({
-            id: scene.name + "-" + sceneMap[obj.nextScene].name,
+            id: scene.name + "-" + sceneMap[action.linkedScene].name,
             source: scene._id,
-            target: obj.nextScene,
+            target: action.linkedScene,
             type: "simpleFloating",
             markerEnd: {
               ...markerEnd,
@@ -61,9 +78,8 @@ const CreateGraphData = (scenes, groupInfo) => {
             },
             animated: true,
           });
-        }
-      })
-    );
+        });
+    });
 
     /**
      * Loop through group path to create the links of the students path
