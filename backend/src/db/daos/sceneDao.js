@@ -3,6 +3,11 @@ import Scenario from "../models/scenario.js";
 import { HttpError } from "../../util/error.js";
 import status from "../../util/status.js";
 import { applyReferenceDeltas } from "./fileDao.js";
+import { getProperties } from "./scenarioDao.js";
+import {
+  isValidOperation,
+  isValidComparator,
+} from "../../util/properties/propertyTypes.js";
 import { HttpStatusCode } from "axios";
 
 /**
@@ -129,19 +134,128 @@ function addBackgroundPatchFileRefDeltas(
   if (newFileId) addDelta(fileRefDeltas, newFileId, 1);
 }
 
-// enforce direct links between scenes to be in the same scenario
-const assertDirectLinkInScenario = async (scenarioId, directLinkId) => {
-  if (directLinkId == null) return;
+// enforce that a set of scenes (e.g. action linkedScene targets) all belong
+// to the given scenario
+const assertScenesInScenario = async (scenarioId, sceneIds) => {
+  const ids = [
+    ...new Set(sceneIds.filter((id) => id != null).map((id) => id.toString())),
+  ];
+  if (ids.length === 0) return;
+
   const inScenario = await Scenario.exists({
     _id: scenarioId,
-    scenes: directLinkId,
+    scenes: { $all: ids },
   });
   if (!inScenario) {
     throw new HttpError(
-      "directLink target must belong to the same scenario",
+      "linkedScene target must belong to the same scenario",
       status.BAD_REQUEST
     );
   }
+};
+
+// reject duplicate action names within a scene's actions[]
+const assertUniqueActionNames = (actions) => {
+  const seen = new Set();
+  for (const action of actions) {
+    const name = action.name?.trim();
+    if (seen.has(name)) {
+      throw new HttpError(
+        `Duplicate action name "${name}" in scene`,
+        status.BAD_REQUEST
+      );
+    }
+    seen.add(name);
+  }
+};
+
+// validate that each action's conditions/operations reference a real
+// property, using a comparator/operation that's legal for its type
+const assertActionsMatchPropertyTypes = (actions, properties) => {
+  const propertiesById = new Map(properties.map((p) => [p.id, p]));
+
+  for (const action of actions) {
+    for (const condition of action.conditions ?? []) {
+      const property = propertiesById.get(condition.stateVariableId);
+      if (!property) {
+        throw new HttpError(
+          `Condition references unknown property "${condition.stateVariableId}"`,
+          status.BAD_REQUEST
+        );
+      }
+      if (!isValidComparator(property.type, condition.comparator)) {
+        throw new HttpError(
+          `Invalid comparator ${condition.comparator} for property type ${property.type}`,
+          status.BAD_REQUEST
+        );
+      }
+    }
+
+    for (const operation of action.operations ?? []) {
+      const property = propertiesById.get(operation.stateVariableId);
+      if (!property) {
+        throw new HttpError(
+          `Operation references unknown property "${operation.stateVariableId}"`,
+          status.BAD_REQUEST
+        );
+      }
+      if (!isValidOperation(property.type, operation.operation)) {
+        throw new HttpError(
+          `Invalid operation ${operation.operation} for property type ${property.type}`,
+          status.BAD_REQUEST
+        );
+      }
+    }
+  }
+};
+
+// reject an action-id reference (defaultActionIds/timerActionIds/a
+// component's actions) that doesn't resolve against the scene's actions[]
+const assertActionIdsResolve = (actionIds, validIds, label) => {
+  if (!actionIds?.length) return;
+  const validIdSet = new Set(validIds);
+  const danglingId = actionIds.find((id) => !validIdSet.has(id));
+  if (danglingId) {
+    throw new HttpError(
+      `${label} references unknown action id "${danglingId}"`,
+      status.BAD_REQUEST
+    );
+  }
+};
+
+// validates an actions[] list on its own terms: unique names, linkedScene
+// targets stay in the scenario, and conditions/operations match their
+// property's type
+const assertActionsContentValid = async (scenarioId, actions) => {
+  const linkedSceneIds = actions
+    .map((action) => action.linkedScene)
+    .filter(Boolean);
+  await assertScenesInScenario(scenarioId, linkedSceneIds);
+
+  if (actions.length) {
+    assertUniqueActionNames(actions);
+    const properties = await getProperties(scenarioId);
+    assertActionsMatchPropertyTypes(actions, properties);
+  }
+};
+
+// validates that defaultActionIds/timerActionIds/each component's actions
+// resolve against the given actions[]; ids that are absent/empty are a no-op
+// (handled by assertActionIdsResolve), so callers can pass values that
+// weren't part of a given write without special-casing them
+const assertActionReferencesResolve = (
+  validActionIds,
+  { defaultActionIds, timerActionIds, components }
+) => {
+  assertActionIdsResolve(defaultActionIds, validActionIds, "defaultActionIds");
+  assertActionIdsResolve(timerActionIds, validActionIds, "timerActionIds");
+  (components ?? []).forEach((component) => {
+    assertActionIdsResolve(
+      component.actions,
+      validActionIds,
+      `component "${component.id}" actions`
+    );
+  });
 };
 
 /**
@@ -151,14 +265,20 @@ const assertDirectLinkInScenario = async (scenarioId, directLinkId) => {
  * @returns the created database scene object
  */
 export const createScene = async (scenarioId, scene) => {
-  if (scene.directLink == null) {
-    const scenarioExists = await Scenario.exists({ _id: scenarioId });
-    if (!scenarioExists) {
-      throw new HttpError("scenario not found", status.NOT_FOUND);
-    }
+  const scenarioExists = await Scenario.exists({ _id: scenarioId });
+  if (!scenarioExists) {
+    throw new HttpError("scenario not found", status.NOT_FOUND);
   }
 
-  await assertDirectLinkInScenario(scenarioId, scene.directLink);
+  const actions = scene.actions ?? [];
+  await assertActionsContentValid(scenarioId, actions);
+
+  const validActionIds = actions.map((action) => action.id);
+  assertActionReferencesResolve(validActionIds, {
+    defaultActionIds: scene.defaultActionIds,
+    timerActionIds: scene.timerActionIds,
+    components: scene.components,
+  });
 
   const dbScene = new Scene(scene);
 
@@ -240,8 +360,9 @@ export const deleteScene = async (scenarioId, sceneId) => {
   }
 
   await Scene.updateMany(
-    { directLink: sceneId },
-    { $set: { directLink: null } }
+    { "actions.linkedScene": sceneId },
+    { $set: { "actions.$[elem].linkedScene": null } },
+    { arrayFilters: [{ "elem.linkedScene": sceneId }] }
   );
   const res = await Scene.findOneAndDelete({ _id: sceneId });
 
@@ -271,7 +392,9 @@ export const duplicateScene = async (scenarioId, sceneId) => {
     name: `${sceneToCopy.name} Copy`,
     components: sceneToCopy.components,
     time: sceneToCopy.time,
-    directLink: sceneToCopy.directLink ?? null,
+    actions: sceneToCopy.actions ?? [],
+    defaultActionIds: sceneToCopy.defaultActionIds ?? [],
+    timerActionIds: sceneToCopy.timerActionIds ?? [],
     background: sceneToCopy.background ?? null,
   };
   const dbScene = new Scene(newScene);
@@ -393,18 +516,15 @@ export const patchScene = async (sceneId, patch, scenarioId) => {
     "name",
     "roles",
     "time",
-    "directLink",
-    "timerStateOperations",
+    "actions",
+    "defaultActionIds",
+    "timerActionIds",
     "background",
   ].forEach((field) => {
     if (Object.prototype.hasOwnProperty.call(fields, field)) {
       allowedFields[field] = fields[field];
     }
   });
-
-  if ("directLink" in allowedFields) {
-    await assertDirectLinkInScenario(scenarioId, allowedFields.directLink);
-  }
 
   if (Object.prototype.hasOwnProperty.call(allowedFields, "background")) {
     allowedFields.background = await validateBackground(
@@ -415,10 +535,27 @@ export const patchScene = async (sceneId, patch, scenarioId) => {
   const existingScene = await Scene.findById(sceneId, {
     components: 1,
     background: 1,
+    actions: 1,
   });
   if (!existingScene) {
     throw new HttpError("scene not found", HttpStatusCode.NotFound);
   }
+
+  if ("actions" in allowedFields) {
+    await assertActionsContentValid(scenarioId, allowedFields.actions);
+  }
+
+  const effectiveActions =
+    "actions" in allowedFields
+      ? allowedFields.actions
+      : (existingScene.actions ?? []);
+  const validActionIds = effectiveActions.map((action) => action.id);
+
+  assertActionReferencesResolve(validActionIds, {
+    defaultActionIds: allowedFields.defaultActionIds,
+    timerActionIds: allowedFields.timerActionIds,
+    components,
+  });
 
   const fileRefDeltas = computePatchFileRefDeltas(
     existingScene.components,
