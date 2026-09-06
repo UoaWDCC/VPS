@@ -86,6 +86,7 @@ export default function AuthoringToolPage() {
         // reading past the end of the document
         editorState.setSelection({ start: null, end: null });
         editorState.setVisualSelection({ start: null, end: null });
+        setSelected([]);
 
         const batch = record;
         const targetSceneId = batch[0]?.sceneId;
