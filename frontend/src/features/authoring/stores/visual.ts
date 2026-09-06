@@ -1,5 +1,5 @@
 import create from "zustand";
-import type { Component, SceneBackground } from "../types";
+import type { Action, Component, SceneBackground } from "../types";
 
 type VisualComponent = Component;
 
@@ -10,9 +10,10 @@ export interface VisualSceneState {
   id: string | null;
   name: string | null;
   roles: string[] | null;
-  directLink: string | null;
+  actions: Action[];
+  defaultActionIds: string[];
+  timerActionIds: string[];
   time: number | null;
-  timerStateOperations: Record<string, unknown>[] | null;
   background: SceneBackground | null;
 
   setVisualScene: (scene: Partial<VisualSceneState>) => void;
@@ -26,9 +27,10 @@ const useVisualScene = create<VisualSceneState>((set) => ({
   id: null,
   name: null,
   roles: null,
-  directLink: null,
+  actions: [],
+  defaultActionIds: [],
+  timerActionIds: [],
   time: null,
-  timerStateOperations: null,
   background: null,
 
   setVisualScene: (scene) =>
@@ -36,9 +38,10 @@ const useVisualScene = create<VisualSceneState>((set) => ({
       (state) =>
         ({
           ...state,
-          directLink: null,
+          actions: [],
+          defaultActionIds: [],
+          timerActionIds: [],
           time: null,
-          timerStateOperations: null,
           background: null,
           ...scene,
         }) as VisualSceneState
