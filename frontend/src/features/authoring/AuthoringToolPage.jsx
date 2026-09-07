@@ -23,7 +23,7 @@ import {
   PlayIcon,
   UserPlusIcon,
 } from "lucide-react";
-import { handleGlobal } from "./handlers/keyboard/keyboard";
+import { handleGlobal, handleGlobalKeyUp } from "./handlers/keyboard/keyboard";
 import { clearHistory, historyEvents } from "./scene/history";
 import { debounce } from "../../util/debounce";
 import { getScene } from "./scene/scene";
@@ -37,6 +37,7 @@ const listeners = [
   ["cut", cut],
   ["paste", paste],
   ["keydown", handleGlobal],
+  ["keyup", handleGlobalKeyUp],
 ];
 
 // const AUTOSAVE_INTERVAL = 30000; // 30 secs
