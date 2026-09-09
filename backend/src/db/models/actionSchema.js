@@ -72,6 +72,10 @@ export const actionSchema = new Schema(
       type: [operationSchema],
       default: [],
     },
+    index: {
+      type: Number,
+      required: true,
+    },
   },
   { _id: false }
 );

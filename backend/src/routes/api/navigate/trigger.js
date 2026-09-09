@@ -1,5 +1,6 @@
 import { HttpError } from "../../../util/error.js";
 import STATUS from "../../../util/status.js";
+import { orderedActionIds } from "../../../util/actions/actionRunner.js";
 
 // Resolves the ordered action-id list for the given trigger
 export const resolveTriggerActionIds = (scene, trigger, componentId) => {
@@ -17,12 +18,12 @@ export const resolveTriggerActionIds = (scene, trigger, componentId) => {
       if (!component.clickable) {
         throw new HttpError("Component is not clickable", STATUS.BAD_REQUEST);
       }
-      return component.actions;
+      return orderedActionIds(component.actionRefs);
     }
     case "default":
-      return scene.defaultActionIds;
+      return orderedActionIds(scene.defaultActionRefs);
     case "timer":
-      return scene.timerActionIds;
+      return orderedActionIds(scene.timerActionRefs);
     default:
       throw new HttpError(`Invalid trigger ${trigger}`, STATUS.BAD_REQUEST);
   }

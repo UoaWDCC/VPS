@@ -1,6 +1,13 @@
 import { evaluateConditions } from "./conditionEvaluator.js";
 import { applyPropertyOperations } from "../properties/propertyOperations.js";
 
+// extracts action ids from a {index, id} ref list, ordered by index
+export const orderedActionIds = (refs) =>
+  (refs ?? [])
+    .slice()
+    .sort((a, b) => a.index - b.index)
+    .map((ref) => ref.id);
+
 export const resolveActions = (sceneActions, actionIds) => {
   if (!actionIds || actionIds.length === 0) return [];
 
@@ -16,9 +23,11 @@ export const resolveActions = (sceneActions, actionIds) => {
 // union of every linked scene reachable from a scene
 export const getLinkedSceneIds = (scene) => {
   const actionLists = [
-    ...scene.components.filter((c) => c.clickable).map((c) => c.actions),
-    scene.defaultActionIds,
-    scene.timerActionIds,
+    ...scene.components
+      .filter((c) => c.clickable)
+      .map((c) => orderedActionIds(c.actionRefs)),
+    orderedActionIds(scene.defaultActionRefs),
+    orderedActionIds(scene.timerActionRefs),
   ];
 
   const linkedIds = actionLists

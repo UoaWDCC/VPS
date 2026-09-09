@@ -161,11 +161,19 @@ describe("getLinkedSceneIds", () => {
   const scene = {
     actions: sceneActions,
     components: [
-      { id: "btn", clickable: true, actions: ["click-action"] },
-      { id: "label", clickable: false, actions: ["non-clickable-action"] },
+      {
+        id: "btn",
+        clickable: true,
+        actionRefs: [{ index: 0, id: "click-action" }],
+      },
+      {
+        id: "label",
+        clickable: false,
+        actionRefs: [{ index: 0, id: "non-clickable-action" }],
+      },
     ],
-    defaultActionIds: ["default-action"],
-    timerActionIds: ["timer-action"],
+    defaultActionRefs: [{ index: 0, id: "default-action" }],
+    timerActionRefs: [{ index: 0, id: "timer-action" }],
   };
 
   it("unions linkedScene targets across clickable components, defaults, and timer actions", () => {
@@ -181,9 +189,15 @@ describe("getLinkedSceneIds", () => {
   it("excludes actions with no linkedScene", () => {
     const sceneWithNoOp = {
       ...scene,
-      components: [{ id: "btn", clickable: true, actions: ["no-op-action"] }],
-      defaultActionIds: [],
-      timerActionIds: [],
+      components: [
+        {
+          id: "btn",
+          clickable: true,
+          actionRefs: [{ index: 0, id: "no-op-action" }],
+        },
+      ],
+      defaultActionRefs: [],
+      timerActionRefs: [],
     };
     expect(getLinkedSceneIds(sceneWithNoOp)).toEqual([]);
   });
@@ -192,11 +206,19 @@ describe("getLinkedSceneIds", () => {
     const dupeScene = {
       actions: sceneActions,
       components: [
-        { id: "btn1", clickable: true, actions: ["click-action"] },
-        { id: "btn2", clickable: true, actions: ["click-action"] },
+        {
+          id: "btn1",
+          clickable: true,
+          actionRefs: [{ index: 0, id: "click-action" }],
+        },
+        {
+          id: "btn2",
+          clickable: true,
+          actionRefs: [{ index: 0, id: "click-action" }],
+        },
       ],
-      defaultActionIds: [],
-      timerActionIds: [],
+      defaultActionRefs: [],
+      timerActionRefs: [],
     };
     expect(getLinkedSceneIds(dupeScene)).toEqual(["scene-click"]);
   });

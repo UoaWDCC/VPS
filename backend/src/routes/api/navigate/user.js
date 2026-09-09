@@ -28,8 +28,8 @@ const getConnectedScenes = async (sceneID, active = true) => {
     {
       components: 1,
       actions: 1,
-      defaultActionIds: 1,
-      timerActionIds: 1,
+      defaultActionRefs: 1,
+      timerActionRefs: 1,
       roles: 1,
       time: 1,
       background: 1,

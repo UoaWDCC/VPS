@@ -127,7 +127,7 @@ describe("Navigate User API tests", () => {
         {
           id: componentId,
           clickable: true,
-          actions: ["action-go"],
+          actionRefs: [{ index: 0, id: "action-go" }],
           type: "BUTTON",
         },
       ],
@@ -138,6 +138,7 @@ describe("Navigate User API tests", () => {
           linkedScene: scene2._id,
           conditions: [],
           operations: [],
+          index: 0,
         },
       ],
       roles: [],
@@ -308,7 +309,7 @@ describe("Navigate User API tests", () => {
           {
             id: componentId,
             clickable: true,
-            actions: ["action-go"],
+            actionRefs: [{ index: 0, id: "action-go" }],
             type: "BUTTON",
           },
         ],
@@ -319,6 +320,7 @@ describe("Navigate User API tests", () => {
             linkedScene: scene2._id,
             conditions: [],
             operations: [],
+            index: 0,
           },
         ],
         roles: [],
@@ -429,7 +431,7 @@ describe("Navigate User API tests", () => {
       ).rejects.toMatchObject({ response: { status: 400 } });
     });
 
-    it("resolves a default trigger via scene.defaultActionIds and navigates", async () => {
+    it("resolves a default trigger via scene.defaultActionRefs and navigates", async () => {
       const defaultScene = await Scene.create({
         name: "Default Trigger Scene",
         components: [],
@@ -441,9 +443,10 @@ describe("Navigate User API tests", () => {
             linkedScene: scene2._id,
             conditions: [],
             operations: [],
+            index: 0,
           },
         ],
-        defaultActionIds: ["action-default"],
+        defaultActionRefs: [{ index: 0, id: "action-default" }],
       });
       await User.findOneAndUpdate(
         { uid: "uid-player" },
@@ -477,9 +480,10 @@ describe("Navigate User API tests", () => {
             operations: [
               { id: "op1", stateVariableId: "hp", operation: "add", value: 5 },
             ],
+            index: 0,
           },
         ],
-        defaultActionIds: ["action-heal"],
+        defaultActionRefs: [{ index: 0, id: "action-heal" }],
       });
       await User.findOneAndUpdate(
         { uid: "uid-player" },

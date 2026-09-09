@@ -4,15 +4,23 @@ import { resolveTriggerActionIds } from "../trigger.js";
 
 const scene = {
   components: [
-    { id: "btn", clickable: true, actions: ["action-1"] },
-    { id: "label", clickable: false, actions: ["action-2"] },
+    {
+      id: "btn",
+      clickable: true,
+      actionRefs: [{ index: 0, id: "action-1" }],
+    },
+    {
+      id: "label",
+      clickable: false,
+      actionRefs: [{ index: 0, id: "action-2" }],
+    },
   ],
-  defaultActionIds: ["action-default"],
-  timerActionIds: ["action-timer"],
+  defaultActionRefs: [{ index: 0, id: "action-default" }],
+  timerActionRefs: [{ index: 0, id: "action-timer" }],
 };
 
 describe("resolveTriggerActionIds", () => {
-  it("resolves a clickable component's actions", () => {
+  it("resolves a clickable component's actionRefs, ordered by index", () => {
     expect(resolveTriggerActionIds(scene, "click", "btn")).toEqual([
       "action-1",
     ]);
@@ -32,13 +40,13 @@ describe("resolveTriggerActionIds", () => {
     ).toThrow();
   });
 
-  it("resolves defaultActionIds for the default trigger", () => {
+  it("resolves defaultActionRefs for the default trigger", () => {
     expect(resolveTriggerActionIds(scene, "default", null)).toEqual([
       "action-default",
     ]);
   });
 
-  it("resolves timerActionIds for the timer trigger", () => {
+  it("resolves timerActionRefs for the timer trigger", () => {
     expect(resolveTriggerActionIds(scene, "timer", null)).toEqual([
       "action-timer",
     ]);
