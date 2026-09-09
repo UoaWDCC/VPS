@@ -85,8 +85,7 @@ router.put("/roles", async (req, res) => {
     updatedRoles.map(async (scene) => {
       await patchScene(scene._id, {
         fields: {},
-        components: scene.components,
-        deletedComponentIds: [],
+        components: { upserted: scene.components, deleted: [] },
       });
     })
   );
@@ -148,15 +147,10 @@ router.patch(
   handle(async (req, res) => {
     const {
       fields = {},
-      components = [],
-      deletedComponentIds = [],
-      actions = [],
-      deletedActionIds = [],
-      addDefaultActionIds = [],
-      removeDefaultActionIds = [],
-      addTimerActionIds = [],
-      removeTimerActionIds = [],
-      componentActionDiffs = [],
+      components = { upserted: [], deleted: [] },
+      actions = { upserted: [], deleted: [] },
+      defaultActionRefs = { upserted: [], deleted: [] },
+      timerActionRefs = { upserted: [], deleted: [] },
     } = req.body;
 
     const scene = await patchScene(
@@ -164,14 +158,9 @@ router.patch(
       {
         fields,
         components,
-        deletedComponentIds,
         actions,
-        deletedActionIds,
-        addDefaultActionIds,
-        removeDefaultActionIds,
-        addTimerActionIds,
-        removeTimerActionIds,
-        componentActionDiffs,
+        defaultActionRefs,
+        timerActionRefs,
       },
       req.params.scenarioId
     );

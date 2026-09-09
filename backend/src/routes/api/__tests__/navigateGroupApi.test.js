@@ -310,7 +310,7 @@ describe("Navigate Group API tests", () => {
           {
             id: componentId,
             clickable: true,
-            actions: ["action-go"],
+            actionRefs: [{ index: 0, id: "action-go" }],
             type: "BUTTON",
           },
         ],
@@ -321,6 +321,7 @@ describe("Navigate Group API tests", () => {
             linkedScene: scene2._id,
             conditions: [],
             operations: [],
+            index: 0,
           },
         ],
         roles: [],
@@ -370,7 +371,7 @@ describe("Navigate Group API tests", () => {
           {
             id: componentId,
             clickable: true,
-            actions: ["action-go"],
+            actionRefs: [{ index: 0, id: "action-go" }],
             type: "BUTTON",
           },
         ],
@@ -381,6 +382,7 @@ describe("Navigate Group API tests", () => {
             linkedScene: timedTarget._id,
             conditions: [],
             operations: [],
+            index: 0,
           },
         ],
         roles: [],
@@ -416,7 +418,7 @@ describe("Navigate Group API tests", () => {
           {
             id: componentId,
             clickable: true,
-            actions: ["action-retry"],
+            actionRefs: [{ index: 0, id: "action-retry" }],
             type: "BUTTON",
           },
         ],
@@ -427,6 +429,7 @@ describe("Navigate Group API tests", () => {
             linkedScene: selfLoopScene._id,
             conditions: [],
             operations: [],
+            index: 0,
           },
         ],
       });
@@ -534,7 +537,7 @@ describe("Navigate Group API tests", () => {
       ).rejects.toMatchObject({ response: { status: 400 } });
     });
 
-    it("resolves a default trigger via scene.defaultActionIds and navigates", async () => {
+    it("resolves a default trigger via scene.defaultActionRefs and navigates", async () => {
       const defaultScene = await Scene.create({
         name: "Default Trigger Scene",
         components: [],
@@ -546,9 +549,10 @@ describe("Navigate Group API tests", () => {
             linkedScene: scene2._id,
             conditions: [],
             operations: [],
+            index: 0,
           },
         ],
-        defaultActionIds: ["action-default"],
+        defaultActionRefs: [{ index: 0, id: "action-default" }],
       });
       await Group.findByIdAndUpdate(group._id, {
         path: [defaultScene._id.toString()],
@@ -569,7 +573,7 @@ describe("Navigate Group API tests", () => {
       expect(response.data.active).toBe(scene2._id.toString());
     });
 
-    it("resolves a timer trigger via scene.timerActionIds and navigates", async () => {
+    it("resolves a timer trigger via scene.timerActionRefs and navigates", async () => {
       const timerScene = await Scene.create({
         name: "Timer Trigger Scene",
         components: [],
@@ -581,9 +585,10 @@ describe("Navigate Group API tests", () => {
             linkedScene: scene2._id,
             conditions: [],
             operations: [],
+            index: 0,
           },
         ],
-        timerActionIds: ["action-timer"],
+        timerActionRefs: [{ index: 0, id: "action-timer" }],
       });
       await Group.findByIdAndUpdate(group._id, {
         path: [timerScene._id.toString()],
@@ -619,9 +624,10 @@ describe("Navigate Group API tests", () => {
               { id: "c1", stateVariableId: "hp", comparator: ">", value: 10 },
             ],
             operations: [],
+            index: 0,
           },
         ],
-        defaultActionIds: ["action-gated"],
+        defaultActionRefs: [{ index: 0, id: "action-gated" }],
       });
       await Group.findByIdAndUpdate(group._id, {
         path: [gatedScene._id.toString()],
@@ -662,9 +668,10 @@ describe("Navigate Group API tests", () => {
               { id: "c1", stateVariableId: "hp", comparator: ">", value: 10 },
             ],
             operations: [],
+            index: 0,
           },
         ],
-        defaultActionIds: ["action-gated"],
+        defaultActionRefs: [{ index: 0, id: "action-gated" }],
       });
       await Group.findByIdAndUpdate(group._id, {
         path: [gatedScene._id.toString()],
@@ -700,9 +707,10 @@ describe("Navigate Group API tests", () => {
             operations: [
               { id: "op1", stateVariableId: "hp", operation: "add", value: 5 },
             ],
+            index: 0,
           },
         ],
-        defaultActionIds: ["action-heal"],
+        defaultActionRefs: [{ index: 0, id: "action-heal" }],
       });
       await Group.findByIdAndUpdate(group._id, {
         path: [mutatingScene._id.toString()],
