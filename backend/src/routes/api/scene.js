@@ -59,8 +59,8 @@ router.post("/", async (req, res) => {
     components,
     time,
     actions,
-    defaultActionIds,
-    timerActionIds,
+    defaultActionRefs,
+    timerActionRefs,
     background,
   } = req.body;
 
@@ -69,8 +69,8 @@ router.post("/", async (req, res) => {
     components,
     time,
     actions,
-    defaultActionIds,
-    timerActionIds,
+    defaultActionRefs,
+    timerActionRefs,
     background,
   });
 

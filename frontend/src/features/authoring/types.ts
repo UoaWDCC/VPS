@@ -32,6 +32,13 @@ export interface Action {
   operations: Operation[];
 }
 
+// a reference to an Action by id, with an index controlling evaluation order
+// among sibling refs (e.g. a component's clickable actions)
+export interface ActionRef {
+  index: number;
+  id: string;
+}
+
 export interface Scene {
   _id: string;
   name: string;
@@ -39,8 +46,8 @@ export interface Scene {
   roles: string[];
   time: number | null;
   actions: Action[];
-  defaultActionIds: string[];
-  timerActionIds: string[];
+  defaultActionRefs: ActionRef[];
+  timerActionRefs: ActionRef[];
   background: SceneBackground | null;
 }
 
@@ -90,7 +97,7 @@ interface GenericComponent {
   zIndex: number;
   clickable?: boolean;
   stateBindings?: PropertyBinding[];
-  actions?: string[];
+  actionRefs?: ActionRef[];
 }
 
 export interface PropertyBinding {

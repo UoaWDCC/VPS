@@ -82,9 +82,10 @@ function computeDeleteFileRefDeltas(components, background) {
 /**
  * Calculates the file reference deltas resulting from a component patch.
  *
+ * @param {object} componentsDiff - Structured component diff.
+ * @param {Array<object>} componentsDiff.upserted - Components created/updated by the patch.
+ * @param {Array<string>} componentsDiff.deleted - Component IDs removed by the patch.
  * @param {Array<object>} [existingComponents=[]] - The scene's previous components.
- * @param {Array<object>} modifiedComponents - The updated component list.
- * @param {Array<string>} deletedComponentIds - IDs removed in the patch.
  * @returns {Map<string, number>} The resulting reference delta map.
  */
 function computePatchFileRefDeltas({ upserted, deleted }, existingComponents) {
