@@ -557,7 +557,15 @@ function getEffectiveArray({ upserted = [], deleted = [] }, existing) {
   ];
 }
 
-export const patchScene = async (sceneId, patch, scenarioId) => {
+/**
+ * Patches a scene object using a structured diff.
+ *
+ * @param {string} sceneId - The scene ID to patch.
+ * @param {object} patch - Structured diff to apply to the scene.
+ * @param {string} scenarioId - The scenario ID the scene belongs to.
+ * @returns {void}
+ */
+export async function patchScene(sceneId, patch, scenarioId) {
   const {
     fields = {},
     components = { upserted: [], deleted: [] },
@@ -679,4 +687,4 @@ export const patchScene = async (sceneId, patch, scenarioId) => {
   await applyReferenceDeltas(fileRefDeltas);
 
   return Scene.findById(sceneId);
-};
+}

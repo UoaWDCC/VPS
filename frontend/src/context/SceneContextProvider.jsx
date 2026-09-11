@@ -10,6 +10,7 @@ import toast from "react-hot-toast";
 import { parseMedia } from "../firebase/storage";
 import useEditorStore from "../features/authoring/stores/editor";
 import { replace } from "../features/authoring/scene/operations/modifiers";
+import { fastIsEqual } from "fast-is-equal";
 
 async function getAllScenes(user, id) {
   const res = await api.get(user, `api/scenario/${id}/scene/all`);
@@ -25,193 +26,81 @@ function deleteScene(user, scenarioId, sceneId) {
 }
 
 async function modifyScene(user, scenarioId, patch) {
-  const parsedComponents = await parseMedia(
-    patch.components,
+  patch.components.upserted = await parseMedia(
+    patch.components.upserted,
     scenarioId,
     patch._id
   );
 
   await api.patch(user, `/api/scenario/${scenarioId}/scene/${patch._id}`, {
     fields: patch.fields,
-    components: parsedComponents,
-    deletedComponentIds: patch.deletedComponentIds,
+    components: patch.components,
     actions: patch.actions,
-    deletedActionIds: patch.deletedActionIds,
-    addDefaultActionIds: patch.addDefaultActionIds,
-    removeDefaultActionIds: patch.removeDefaultActionIds,
-    addTimerActionIds: patch.addTimerActionIds,
-    removeTimerActionIds: patch.removeTimerActionIds,
-    componentActionDiffs: patch.componentActionDiffs,
+    defaultActionRefs: patch.defaultActionRefs,
+    timerActionRefs: patch.timerActionRefs,
   });
 }
 
-function diffIdSets(currentIds = [], savedIds = []) {
-  const currentSet = new Set(currentIds);
-  const savedSet = new Set(savedIds);
-  return {
-    add: currentIds.filter((id) => !savedSet.has(id)),
-    remove: savedIds.filter((id) => !currentSet.has(id)),
-  };
-}
+function diffItems(current, saved) {
+  const diff = { upserted: [], deleted: [] };
+  const currentIds = new Set(current.map((i) => i.id));
 
-function omitActions(component) {
-  const rest = { ...component };
-  delete rest.actions;
-  return rest;
-}
+  current.forEach((item) => {
+    const savedItem = saved.find((i) => i.id === item.id);
+    if (!fastIsEqual(item, savedItem))
+      diff.upserted.push(structuredClone(item));
+  });
+  saved.forEach((item) => {
+    if (!currentIds.has(item.id)) diff.deleted.push(item.id);
+  });
 
-function applyIdDiff(ids = [], { add = [], remove = [] } = {}) {
-  const result = new Set(ids);
-  remove.forEach((id) => result.delete(id));
-  add.forEach((id) => result.add(id));
-  return [...result];
+  return diff;
 }
 
 function generatePatch(modified, saved) {
-  const components = [];
-  const deletedComponentIds = [];
-  const componentActionDiffs = [];
+  function generateDiff(field, isMap = false) {
+    const currentItems = isMap
+      ? Object.values(modified[field] ?? {})
+      : (modified[field] ?? []);
+    const savedItems = saved[field] ?? [];
+    return diffItems(currentItems, savedItems);
+  }
+
   const fields = {};
-
-  const currentComponents = modified.components ?? {};
-  const savedComponents = saved.components ?? [];
-
-  Object.entries(currentComponents).forEach(([id, component]) => {
-    const savedComponent = savedComponents.find((c) => c.id === id);
-
-    if (!savedComponent) {
-      // brand new component — include its initial actions directly, there's
-      // no prior state to diff against
-      components.push(structuredClone(component));
-      return;
-    }
-
-    // a component's actions travel via componentActionDiffs (add/remove),
-    // never as part of its whole-object payload, so concurrent edits to the
-    // rest of the component or to its actions don't clobber each other
-    const actionsDiff = diffIdSets(component.actions, savedComponent.actions);
-    if (actionsDiff.add.length || actionsDiff.remove.length) {
-      componentActionDiffs.push({ componentId: id, ...actionsDiff });
-    }
-
-    const currentRest = omitActions(component);
-    const savedRest = omitActions(savedComponent);
-    if (JSON.stringify(currentRest) !== JSON.stringify(savedRest)) {
-      components.push(structuredClone(currentRest));
-    }
-  });
-
-  savedComponents.forEach((c) => {
-    if (!currentComponents[c.id]) deletedComponentIds.push(c.id);
-  });
-
-  const currentActions = modified.actions ?? [];
-  const savedActions = saved.actions ?? [];
-  const savedActionsById = new Map(savedActions.map((a) => [a.id, a]));
-
-  const actions = [];
-  currentActions.forEach((action) => {
-    if (
-      JSON.stringify(action) !== JSON.stringify(savedActionsById.get(action.id))
-    ) {
-      actions.push(structuredClone(action));
-    }
-  });
-
-  const currentActionIds = new Set(currentActions.map((a) => a.id));
-  const deletedActionIds = savedActions
-    .filter((a) => !currentActionIds.has(a.id))
-    .map((a) => a.id);
-
-  const defaultActionIdsDiff = diffIdSets(
-    modified.defaultActionIds,
-    saved.defaultActionIds
-  );
-  const timerActionIdsDiff = diffIdSets(
-    modified.timerActionIds,
-    saved.timerActionIds
-  );
-
   ["name", "roles", "time", "background"].forEach((field) => {
-    if (JSON.stringify(modified[field]) !== JSON.stringify(saved[field])) {
+    if (!fastIsEqual(modified[field], saved[field]))
       fields[field] = structuredClone(modified[field]);
-    }
   });
 
   return {
     _id: modified._id,
     fields,
-    components,
-    deletedComponentIds,
-    actions,
-    deletedActionIds,
-    addDefaultActionIds: defaultActionIdsDiff.add,
-    removeDefaultActionIds: defaultActionIdsDiff.remove,
-    addTimerActionIds: timerActionIdsDiff.add,
-    removeTimerActionIds: timerActionIdsDiff.remove,
-    componentActionDiffs,
+    components: generateDiff("components", true),
+    actions: generateDiff("actions"),
+    defaultActionRefs: generateDiff("defaultActionRefs"),
+    timerActionRefs: generateDiff("timerActionRefs"),
   };
 }
 
+function applyDiff(items, diff) {
+  if (!diff) return items;
+  const byId = new Map((items ?? []).map((i) => [i.id, i]));
+  diff.upserted?.forEach((i) => byId.set(i.id, i));
+  diff.deleted?.forEach((id) => byId.delete(id));
+  return [...byId.values()];
+}
+
 function applyPatch(scene, patch) {
-  const {
-    fields = {},
-    components = [],
-    deletedComponentIds = [],
-    actions = [],
-    deletedActionIds = [],
-    addDefaultActionIds = [],
-    removeDefaultActionIds = [],
-    addTimerActionIds = [],
-    removeTimerActionIds = [],
-    componentActionDiffs = [],
-  } = patch;
-
-  const componentActionDiffsById = new Map(
-    componentActionDiffs.map((d) => [d.componentId, d])
-  );
-
-  const updatedComponents = [];
-  const seenComponentIds = new Set();
-
-  for (const c of scene.components) {
-    if (deletedComponentIds.includes(c.id)) continue;
-
-    const patchedComponent = components.find((uc) => uc.id === c.id);
-    // patchedComponent never carries `.actions` for an existing component
-    // (it travels via the diff below), so merging onto `c` preserves it
-    const baseComponent = patchedComponent ? { ...c, ...patchedComponent } : c;
-    const diff = componentActionDiffsById.get(c.id);
-
-    updatedComponents.push(
-      diff
-        ? { ...baseComponent, actions: applyIdDiff(c.actions, diff) }
-        : baseComponent
-    );
-    seenComponentIds.add(c.id);
-  }
-
-  for (const c of components) {
-    if (!seenComponentIds.has(c.id)) updatedComponents.push(c);
-  }
-
-  const savedActionsById = new Map((scene.actions ?? []).map((a) => [a.id, a]));
-  actions.forEach((a) => savedActionsById.set(a.id, a));
-  deletedActionIds.forEach((id) => savedActionsById.delete(id));
-
   return {
     ...scene,
-    ...fields,
-    components: updatedComponents,
-    actions: [...savedActionsById.values()],
-    defaultActionIds: applyIdDiff(scene.defaultActionIds, {
-      add: addDefaultActionIds,
-      remove: removeDefaultActionIds,
-    }),
-    timerActionIds: applyIdDiff(scene.timerActionIds, {
-      add: addTimerActionIds,
-      remove: removeTimerActionIds,
-    }),
+    ...(patch.fields ?? {}),
+    components: applyDiff(scene.components, patch.components),
+    actions: applyDiff(scene.actions, patch.actions),
+    defaultActionRefs: applyDiff(
+      scene.defaultActionRefs,
+      patch.defaultActionRefs
+    ),
+    timerActionRefs: applyDiff(scene.timerActionRefs, patch.timerActionRefs),
   };
 }
 
@@ -269,7 +158,7 @@ export default function SceneContextProvider({ children }) {
 
       toast.error(
         error?.response?.data?.error ||
-        "Something went wrong updating the scenes, your last changes weren't saved"
+          "Something went wrong updating the scenes, your last changes weren't saved"
       );
     },
   });
