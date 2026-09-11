@@ -53,29 +53,32 @@ router.get("/all", async (req, res) => {
 });
 
 // Create a scene for a scenario
-router.post("/", async (req, res) => {
-  const {
-    name,
-    components,
-    time,
-    actions,
-    defaultActionRefs,
-    timerActionRefs,
-    background,
-  } = req.body;
+router.post(
+  "/",
+  handle(async (req, res) => {
+    const {
+      name,
+      components,
+      time,
+      actions,
+      defaultActionRefs,
+      timerActionRefs,
+      background,
+    } = req.body;
 
-  const scene = await createScene(req.params.scenarioId, {
-    name,
-    components,
-    time,
-    actions,
-    defaultActionRefs,
-    timerActionRefs,
-    background,
-  });
+    const scene = await createScene(req.params.scenarioId, {
+      name,
+      components,
+      time,
+      actions,
+      defaultActionRefs,
+      timerActionRefs,
+      background,
+    });
 
-  res.status(HTTP_OK).json(scene);
-});
+    res.status(HTTP_OK).json(scene);
+  })
+);
 
 // update the roles
 router.put("/roles", async (req, res) => {
