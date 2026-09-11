@@ -52,11 +52,14 @@ const CreateGraphData = (scenes, groupInfo) => {
       );
       const resolveActions = (actionIds) =>
         (actionIds ?? []).map((id) => actionsById.get(id)).filter(Boolean);
+      const orderedActionIds = (refs) => (refs ?? []).map((ref) => ref.id);
 
       const actionLists = [
-        ...scene.components.filter((c) => c.clickable).map((c) => c.actions),
-        scene.defaultActionIds,
-        scene.timerActionIds,
+        ...scene.components
+          .filter((c) => c.clickable)
+          .map((c) => orderedActionIds(c.actionRefs)),
+        orderedActionIds(scene.defaultActionRefs),
+        orderedActionIds(scene.timerActionRefs),
       ];
 
       actionLists

@@ -279,7 +279,7 @@ export default function PlayScenarioPage({ group }) {
 
   useEffect(() => {
     const onKeyDown = (e) => {
-      if (e.repeat || !sceneId || !currScene?.defaultActionIds?.length) return;
+      if (e.repeat || !sceneId || !currScene?.defaultActionRefs?.length) return;
 
       const tag = document.activeElement?.tagName;
       const isTyping =
@@ -303,7 +303,7 @@ export default function PlayScenarioPage({ group }) {
   // server round-trip via triggerAction rather than a client-local operation
   // apply, since the outcome depends on server-evaluated conditions.
   const handleTimerTimeout = () => {
-    if (!currScene?.timerActionIds?.length) return;
+    if (!currScene?.timerActionRefs?.length) return;
     triggerAction("timer", null);
   };
 
