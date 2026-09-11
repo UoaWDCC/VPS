@@ -53,19 +53,32 @@ router.get("/all", async (req, res) => {
 });
 
 // Create a scene for a scenario
-router.post("/", async (req, res) => {
-  const { name, components, time, directLink, background } = req.body;
+router.post(
+  "/",
+  handle(async (req, res) => {
+    const {
+      name,
+      components,
+      time,
+      actions,
+      defaultActionRefs,
+      timerActionRefs,
+      background,
+    } = req.body;
 
-  const scene = await createScene(req.params.scenarioId, {
-    name,
-    components,
-    time,
-    directLink,
-    background,
-  });
+    const scene = await createScene(req.params.scenarioId, {
+      name,
+      components,
+      time,
+      actions,
+      defaultActionRefs,
+      timerActionRefs,
+      background,
+    });
 
-  res.status(HTTP_OK).json(scene);
-});
+    res.status(HTTP_OK).json(scene);
+  })
+);
 
 // update the roles
 router.put("/roles", async (req, res) => {
@@ -75,8 +88,7 @@ router.put("/roles", async (req, res) => {
     updatedRoles.map(async (scene) => {
       await patchScene(scene._id, {
         fields: {},
-        components: scene.components,
-        deletedComponentIds: [],
+        components: { upserted: scene.components, deleted: [] },
       });
     })
   );
@@ -136,14 +148,22 @@ router.put("/visited/:sceneId", async (req, res) => {
 router.patch(
   "/:sceneId",
   handle(async (req, res) => {
-    const { fields = {}, components = [], deletedComponentIds = [] } = req.body;
+    const {
+      fields = {},
+      components = { upserted: [], deleted: [] },
+      actions = { upserted: [], deleted: [] },
+      defaultActionRefs = { upserted: [], deleted: [] },
+      timerActionRefs = { upserted: [], deleted: [] },
+    } = req.body;
 
     const scene = await patchScene(
       req.params.sceneId,
       {
         fields,
         components,
-        deletedComponentIds,
+        actions,
+        defaultActionRefs,
+        timerActionRefs,
       },
       req.params.scenarioId
     );

@@ -7,13 +7,17 @@ import { HttpError } from "../../../util/error.js";
 import STATUS from "../../../util/status.js";
 import { getProperties } from "../../../db/daos/scenarioDao.js";
 import { setGroupProperties } from "../../../db/daos/groupDao.js";
-import { applyPropertyOperations } from "../../../util/properties/propertyOperations.js";
-import { getComponent } from "../../../db/daos/sceneDao.js";
+import {
+  resolveActions,
+  runActions,
+  getLinkedSceneIds,
+} from "../../../util/actions/actionRunner.js";
 import {
   freshRemainingTime,
   resumedRemainingTime,
   movedRemainingTimeField,
 } from "./timer.js";
+import { resolveTriggerActionIds } from "./trigger.js";
 import { normaliseString } from "../../../util/normalise.js";
 
 const createInvalidError = (roles) =>
@@ -35,9 +39,10 @@ export const getSimpleScene = async (sceneId) => {
     {
       roles: 1,
       components: 1,
-      directLink: 1,
+      actions: 1,
+      defaultActionRefs: 1,
+      timerActionRefs: 1,
       time: 1,
-      timerStateOperations: 1,
       background: 1,
     }
   ).lean();
@@ -101,18 +106,16 @@ const getGroupByIdAndUser = async (groupId, uid) => {
 
 const getConnectedScenes = async (sceneID, role, active = true) => {
   const scene = await getSceneConsideringRole(sceneID, role);
-  const connectedIds = scene.components
-    .filter((c) => c.clickable)
-    .map((b) => b.nextScene)
-    .filter(Boolean);
+  const connectedIds = getLinkedSceneIds(scene);
   const connectedScenes = await Scene.find(
     { _id: { $in: connectedIds } },
     {
       roles: 1,
       components: 1,
-      directLink: 1,
+      actions: 1,
+      defaultActionRefs: 1,
+      timerActionRefs: 1,
       time: 1,
-      timerStateOperations: 1,
       background: 1,
     }
   ).lean();
@@ -141,6 +144,36 @@ const addSceneToPath = async (groupId, currentSceneId, sceneId) => {
   );
   if (!res) throw new HttpError("Scene mismatch has occured", STATUS.CONFLICT);
   return STATUS.OK;
+};
+
+// commits a scene transition and/or a resolved property change in a single
+// conditional update
+const commitGroupTransition = async (
+  groupId,
+  currentSceneId,
+  nextSceneId,
+  stateVersion,
+  properties
+) => {
+  const filter = {
+    _id: groupId,
+    $or: [{ "path.0": currentSceneId }, { path: { $size: 0 } }],
+  };
+
+  const update = {};
+  if (nextSceneId) {
+    update.$push = { path: { $each: [nextSceneId], $position: 0 } };
+    update.$set = { currentSceneEnteredAt: new Date() };
+  }
+  if (properties) {
+    filter.stateVersion = stateVersion;
+    update.$set = { ...(update.$set ?? {}), stateVariables: properties };
+    update.$inc = { stateVersion: 1 };
+  }
+
+  const res = await Group.findOneAndUpdate(filter, update, { new: true });
+  if (!res) throw new HttpError("Scene mismatch has occured", STATUS.CONFLICT);
+  return res;
 };
 
 // Adds flags to group on scene change
@@ -208,29 +241,9 @@ const syncProperties = async (group) => {
   return [properties, group.stateVersion];
 };
 
-// Updates properties for a group
-const updateProperties = async (group, component) => {
-  if (!component || !component.stateOperations) {
-    return [group.stateVariables, group.stateVersion];
-  }
-
-  const properties = applyPropertyOperations(
-    group.stateVariables,
-    component.stateOperations
-  );
-
-  return await setGroupProperties(group._id, properties);
-};
-
 export const groupNavigate = async (req) => {
-  const {
-    uid,
-    currentScene,
-    addFlags,
-    removeFlags,
-    componentId,
-    nextScene: bodyNextScene,
-  } = req.body;
+  const { uid, currentScene, addFlags, removeFlags, trigger, componentId } =
+    req.body;
 
   const group = await getGroupByIdAndUser(req.params.groupId, uid);
   const { role } = group.users[0];
@@ -279,36 +292,52 @@ export const groupNavigate = async (req) => {
   if (group.path[0] !== currentScene)
     throw new HttpError("Scene mismatch has occured", STATUS.CONFLICT);
 
-  // Validate that the user is allowed to move to this scene
-  await getSceneConsideringRole(currentScene, role);
+  if (!trigger) throw new HttpError("trigger is required", STATUS.BAD_REQUEST);
 
-  if (bodyNextScene) {
-    const scene = await Scene.findById(currentScene, { directLink: 1 }).lean();
-    if (!scene?.directLink?.equals(bodyNextScene))
-      throw new HttpError("Invalid direct link target", STATUS.FORBIDDEN);
-  }
+  // validate that the user is allowed to move to this scene
+  const scene = await getSceneConsideringRole(currentScene, role);
 
-  const component = componentId
-    ? await getComponent(currentScene, componentId)
-    : null;
+  const actionIds = resolveTriggerActionIds(scene, trigger, componentId);
+
+  const actions = resolveActions(scene.actions, actionIds);
+  const {
+    properties: resolvedProperties,
+    linkedScene,
+    changed,
+  } = runActions(actions, group.stateVariables);
+  const nextScene = linkedScene?.toString();
 
   let scenes = null;
-
-  const nextScene = component?.nextScene ?? bodyNextScene;
+  let committedGroup = null;
 
   if (nextScene && nextScene !== currentScene) {
-    [, , , scenes] = await Promise.all([
-      addSceneToPath(group._id, currentScene, nextScene),
+    const [committed, , , connectedScenes] = await Promise.all([
+      commitGroupTransition(
+        group._id,
+        currentScene,
+        nextScene,
+        group.stateVersion,
+        changed ? resolvedProperties : null
+      ),
       addFlagsToGroup(group._id, addFlags),
       removeFlagsFromGroup(group._id, removeFlags),
       getConnectedScenes(nextScene, role, true),
     ]);
+    committedGroup = committed;
+    scenes = connectedScenes;
+  } else if (changed) {
+    committedGroup = await commitGroupTransition(
+      group._id,
+      currentScene,
+      null,
+      group.stateVersion,
+      resolvedProperties
+    );
   }
 
-  const [properties, propertyVersion] = await updateProperties(
-    group,
-    component
-  );
+  const [properties, propertyVersion] = committedGroup
+    ? [committedGroup.stateVariables, committedGroup.stateVersion]
+    : [group.stateVariables, group.stateVersion];
 
   return {
     status: STATUS.OK,
