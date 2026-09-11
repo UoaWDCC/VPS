@@ -105,7 +105,7 @@ export async function parseMedia(components, scenarioId, sceneId) {
   // upload any media to firebase
   for (const component of components) {
     if (component.type === "audio" && "fileObject" in component) {
-      if (uploads.has(component.url)) return;
+      if (uploads.has(component.url)) continue;
 
       const firebaseUrl = await uploadFile(
         component.fileObject,

@@ -46,6 +46,7 @@ const CreateGraphData = (scenes, groupInfo) => {
     // components' actions, plus its default (keyboard-advance) and timer
     // actions — and add an edge to each resolved action's linkedScene.
     // Mirrors the backend's getLinkedSceneIds (backend/src/util/actions/actionRunner.js).
+    const seenEdgeIds = new Set();
     scenes.forEach((scene) => {
       const actionsById = new Map(
         (scene.actions ?? []).map((action) => [action.id, action])
@@ -66,8 +67,16 @@ const CreateGraphData = (scenes, groupInfo) => {
         .flatMap((actionIds) => resolveActions(actionIds))
         .forEach((action) => {
           if (!action.linkedScene) return;
+          // multiple actions in the same scene (different clickable
+          // components, default, timer) can resolve to the same
+          // linkedScene — collapse those into a single edge so react-flow
+          // doesn't receive duplicate edge ids
+          const edgeId = scene.name + "-" + sceneMap[action.linkedScene].name;
+          if (seenEdgeIds.has(edgeId)) return;
+          seenEdgeIds.add(edgeId);
+
           edges.push({
-            id: scene.name + "-" + sceneMap[action.linkedScene].name,
+            id: edgeId,
             source: scene._id,
             target: action.linkedScene,
             type: "simpleFloating",

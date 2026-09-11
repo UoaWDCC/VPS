@@ -146,6 +146,36 @@ const addSceneToPath = async (groupId, currentSceneId, sceneId) => {
   return STATUS.OK;
 };
 
+// commits a scene transition and/or a resolved property change in a single
+// conditional update
+const commitGroupTransition = async (
+  groupId,
+  currentSceneId,
+  nextSceneId,
+  stateVersion,
+  properties
+) => {
+  const filter = {
+    _id: groupId,
+    $or: [{ "path.0": currentSceneId }, { path: { $size: 0 } }],
+  };
+
+  const update = {};
+  if (nextSceneId) {
+    update.$push = { path: { $each: [nextSceneId], $position: 0 } };
+    update.$set = { currentSceneEnteredAt: new Date() };
+  }
+  if (properties) {
+    filter.stateVersion = stateVersion;
+    update.$set = { ...(update.$set ?? {}), stateVariables: properties };
+    update.$inc = { stateVersion: 1 };
+  }
+
+  const res = await Group.findOneAndUpdate(filter, update, { new: true });
+  if (!res) throw new HttpError("Scene mismatch has occured", STATUS.CONFLICT);
+  return res;
+};
+
 // Adds flags to group on scene change
 const addFlagsToGroup = async (groupId, newFlags) => {
   try {
@@ -278,18 +308,35 @@ export const groupNavigate = async (req) => {
   const nextScene = linkedScene?.toString();
 
   let scenes = null;
+  let committedGroup = null;
 
   if (nextScene && nextScene !== currentScene) {
-    [, , , scenes] = await Promise.all([
-      addSceneToPath(group._id, currentScene, nextScene),
+    const [committed, , , connectedScenes] = await Promise.all([
+      commitGroupTransition(
+        group._id,
+        currentScene,
+        nextScene,
+        group.stateVersion,
+        changed ? resolvedProperties : null
+      ),
       addFlagsToGroup(group._id, addFlags),
       removeFlagsFromGroup(group._id, removeFlags),
       getConnectedScenes(nextScene, role, true),
     ]);
+    committedGroup = committed;
+    scenes = connectedScenes;
+  } else if (changed) {
+    committedGroup = await commitGroupTransition(
+      group._id,
+      currentScene,
+      null,
+      group.stateVersion,
+      resolvedProperties
+    );
   }
 
-  const [properties, propertyVersion] = changed
-    ? await setGroupProperties(group._id, resolvedProperties)
+  const [properties, propertyVersion] = committedGroup
+    ? [committedGroup.stateVariables, committedGroup.stateVersion]
     : [group.stateVariables, group.stateVersion];
 
   return {
