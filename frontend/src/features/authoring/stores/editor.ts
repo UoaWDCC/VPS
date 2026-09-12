@@ -69,7 +69,20 @@ const useEditorStore = create<EditorState>((set) => ({
   offset: { x: 0, y: 0 },
 
   setLoading: (value: boolean) => set({ loading: value }),
-  setSelected: (id) => set({ selected: id }),
+  setSelected: (id) =>
+    set(() => {
+      if (id) {
+        const component = getComponent(id);
+        if (component && "document" in component && component.document) {
+          const activeStyle = getStyleForSelection(id, {
+            start: null,
+            end: null,
+          });
+          return { selected: id, activeStyle };
+        }
+      }
+      return { selected: id };
+    }),
   setHovered: (id) => set({ hovered: id }),
   setCreateType: (type: string) => set({ createType: type }),
   setMouseDown: (mouseDown) => set({ mouseDown }),

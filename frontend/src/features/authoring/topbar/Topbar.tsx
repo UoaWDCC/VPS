@@ -19,10 +19,14 @@ import type { Component } from "../types";
 import "./topbar.css";
 
 function hasDocument(component: Component): boolean {
+  if (!component) return false;
+  if (!("document" in component)) return false;
+  const doc = component.document as {
+    blocks: { spans: { text: string }[] }[];
+  } | null;
+  const documentLength = doc?.blocks?.[0]?.spans?.[0]?.text?.length;
   return (
-    "document" in component &&
-    !!component.document &&
-    component?.document.blocks?.[0]?.spans?.[0]?.text?.length > 0
+    "document" in component && Boolean(component.document) && documentLength > 0
   );
 }
 

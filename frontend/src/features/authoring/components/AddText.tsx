@@ -4,13 +4,23 @@ import type { ShapeComponent } from "../types";
 
 export function addText(WrappedComponent: ShapeComponent) {
   return function TextableShape(props: ShapeComponent) {
-    if (!props.document) {
-      modifyComponentProp(props.id, "document", {
-        style: {},
-        blocks: [{ style: {}, spans: [{ style: {}, text: "" }] }],
-      });
-    }
     function handleDoubleClick(e: React.MouseEvent) {
+      if (!props.document) {
+        modifyComponentProp(props.id, "document", {
+          style: {},
+          blocks: [
+            {
+              style: {},
+              spans: [
+                {
+                  style: {},
+                  text: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla venenatis.",
+                },
+              ],
+            },
+          ],
+        });
+      }
       const rect = e.currentTarget.querySelector(
         '[data-type="document"]'
       ) as HTMLElement;
