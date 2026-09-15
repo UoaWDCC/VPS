@@ -98,10 +98,12 @@ const useEditorStore = create<EditorState>((set) => ({
     set(() => {
       if (!ids.length || ids.length > 1) return { selected: ids };
       const component = getComponent(ids[0]);
-      const hasDoc = component && 'document' in component && component.document;
+      const hasDoc = component && "document" in component && component.document;
       return {
         selected: ids,
-        ...(hasDoc && { activeStyle: getStyleForSelection(ids[0], { start: null, end: null }) }),
+        ...(hasDoc && {
+          activeStyle: getStyleForSelection(ids[0], { start: null, end: null }),
+        }),
       };
     }),
   addPendingImage: (image) =>
@@ -133,7 +135,8 @@ const useEditorStore = create<EditorState>((set) => ({
     set(({ selected }) => {
       const mainTarget = selected[0];
       const component = mainTarget ? getComponent(mainTarget) : null;
-      const hasDoc = component && 'document' in component && !!component.document;
+      const hasDoc =
+        component && "document" in component && !!component.document;
       if (hasDoc) {
         const activeStyle = getStyleForSelection(mainTarget, selection);
         return { selection, activeStyle };

@@ -87,7 +87,7 @@ function TextSection() {
   const selected = useEditorStore((state) => state.selected); // this comp only renders when a text el is selected
 
   const style = useEditorStore((state) => state.activeStyle);
-  console.log(style)
+  console.log(style);
 
   if (!style) return null;
 
@@ -98,7 +98,7 @@ function TextSection() {
     selected
       .filter((id) => {
         const component = getComponent(id);
-        return component && 'document' in component && !!component.document;
+        return component && "document" in component && !!component.document;
       })
       .forEach((id) => setTextStyle(id, prop, value));
   }

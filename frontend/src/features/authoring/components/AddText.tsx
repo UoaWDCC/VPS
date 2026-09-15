@@ -7,7 +7,7 @@ export function addText(WrappedComponent: ShapeComponent) {
   return function TextableShape(props: ShapeComponent) {
     function handleDoubleClick(e: React.MouseEvent) {
       const mode = useEditorStore.getState().mode;
-      if (mode.includes("text")) return; 
+      if (mode.includes("text")) return;
       const target = e.currentTarget as SVGGElement;
       const { clientX, clientY } = e;
       if (!props.document) {
