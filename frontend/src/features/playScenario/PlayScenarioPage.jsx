@@ -8,7 +8,6 @@ import { usePost } from "hooks/crudHooks";
 
 import LoadingPage from "../status/LoadingPage";
 import PlayScenarioCanvas from "./PlayScenarioCanvas";
-import { applyPropertyOperations } from "../../components/Properties/propertyOperations";
 import NotesPanel from "./components/NotesPanel";
 import SceneTimer from "./components/SceneTimer";
 import StartAudioPanel from "./components/StartAudioPanel";
@@ -46,8 +45,8 @@ const navigateSingleplayer = async (
   currentScene,
   addFlags,
   removeFlags,
+  trigger,
   componentId,
-  nextScene = null,
   startScene
 ) => {
   const token = await user.getIdToken();
@@ -62,8 +61,8 @@ const navigateSingleplayer = async (
       currentScene,
       addFlags,
       removeFlags,
+      trigger,
       componentId,
-      nextScene,
       startScene,
     },
   };
@@ -77,8 +76,8 @@ const navigateMultiplayer = async (
   currentScene,
   addFlags,
   removeFlags,
-  componentId,
-  nextScene = null
+  trigger,
+  componentId
 ) => {
   const token = await user.getIdToken();
   const config = {
@@ -88,7 +87,7 @@ const navigateMultiplayer = async (
       "Content-Type": "application/json",
       Authorization: `Bearer ${token}`,
     },
-    data: { currentScene, addFlags, removeFlags, componentId, nextScene },
+    data: { currentScene, addFlags, removeFlags, trigger, componentId },
   };
   const res = await axios.request(config);
   return cacheNavigateResponse(res.data);
@@ -109,7 +108,6 @@ const refreshFromServer = async (user, scenarioId, groupId, isMultiplayer) => {
           addFlags: [],
           removeFlags: [],
           componentId: null,
-          nextScene: null,
         },
       }
     : {
@@ -124,7 +122,6 @@ const refreshFromServer = async (user, scenarioId, groupId, isMultiplayer) => {
           addFlags: [],
           removeFlags: [],
           componentId: null,
-          nextScene: null,
           startScene: null,
         },
       };
@@ -157,6 +154,10 @@ export default function PlayScenarioPage({ group }) {
   // Track sequence of navigation & recovery requests to prevent race conditions
   const requestIdRef = useRef(0);
   const handlingConflictRef = useRef(false);
+
+  // guards against a double-click (or double keypress) dispatching the same
+  // trigger twice before the first request's response comes back
+  const pendingRef = useRef(false);
 
   const [sceneId, setSceneId] = useState(null);
   const [properties, setProperties] = useState([]);
@@ -212,22 +213,18 @@ export default function PlayScenarioPage({ group }) {
     }
   };
 
-  const onSceneChange = async (componentId, currentSceneOverride = sceneId) => {
-    const currentRequestId = ++requestIdRef.current; // Track navigation request ID
+  const triggerAction = async (
+    trigger,
+    componentId,
+    currentSceneOverride = sceneId
+  ) => {
+    if (pendingRef.current) return;
+    pendingRef.current = true;
 
-    if (componentId) {
-      const component = currScene?.components?.find(
-        (comp) => comp.id === componentId
-      );
-      const propertyOperations = component?.stateOperations;
-      if (propertyOperations) {
-        setPropertyVersion(propertyVersion + 1);
-        setProperties(applyPropertyOperations(properties, propertyOperations));
-      }
-    }
+    const currentRequestId = ++requestIdRef.current; // track navigation request ID
 
     const startScene = startSceneRef.current;
-    startSceneRef.current = null; // Clear after first use so startScene override is consumed once.
+    startSceneRef.current = null; // clear after first use so startScene override is consumed once
 
     try {
       const { newSceneId, properties, newPropertyVersion } = isMultiplayer
@@ -237,6 +234,7 @@ export default function PlayScenarioPage({ group }) {
             currentSceneOverride,
             addFlags,
             removeFlags,
+            trigger,
             componentId
           )
         : await navigateSingleplayer(
@@ -245,12 +243,12 @@ export default function PlayScenarioPage({ group }) {
             currentSceneOverride,
             addFlags,
             removeFlags,
+            trigger,
             componentId,
-            null,
             startScene
           );
 
-      // Discard stale response if a newer request was dispatched while this request was pending
+      // discard stale response if a newer request was dispatched while this request was pending
       if (currentRequestId !== requestIdRef.current) return;
 
       if (propertyVersion < newPropertyVersion) {
@@ -258,24 +256,30 @@ export default function PlayScenarioPage({ group }) {
         setPropertyVersion(newPropertyVersion);
       }
       if (newSceneId) {
+        if (sceneCache.get(newSceneId)?.error) {
+          handleError(sceneCache.get(newSceneId));
+          return;
+        }
         setSceneId(newSceneId);
       }
     } catch (e) {
       handleError(e?.response?.data);
+    } finally {
+      pendingRef.current = false;
     }
   };
 
   useEffect(() => {
-    onSceneChange();
+    triggerAction(null, null);
     return () => {
-      // Clear cached scenes when leaving or switching scenarios.
+      // clear cached scenes when leaving or switching scenarios.
       sceneCache.clear();
     };
   }, [scenarioId]);
 
   useEffect(() => {
-    const onKeyDown = async (e) => {
-      if (e.repeat || !sceneId || !currScene?.directLink) return;
+    const onKeyDown = (e) => {
+      if (e.repeat || !sceneId || !currScene?.defaultActionRefs?.length) return;
 
       const tag = document.activeElement?.tagName;
       const isTyping =
@@ -287,45 +291,7 @@ export default function PlayScenarioPage({ group }) {
 
       if (e.code === "Space" || e.key === "ArrowRight") {
         e.preventDefault();
-        const currentRequestId = ++requestIdRef.current; // Track keydown navigation request ID
-        try {
-          const { newSceneId, properties, newPropertyVersion } = isMultiplayer
-            ? await navigateMultiplayer(
-                user,
-                group._id,
-                sceneId,
-                addFlags,
-                removeFlags,
-                null,
-                currScene.directLink
-              )
-            : await navigateSingleplayer(
-                user,
-                scenarioId,
-                sceneId,
-                addFlags,
-                removeFlags,
-                null,
-                currScene.directLink
-              );
-
-          // Discard stale response if a newer request was dispatched while pending
-          if (currentRequestId !== requestIdRef.current) return;
-
-          if (propertyVersion < newPropertyVersion) {
-            setProperties(properties);
-            setPropertyVersion(newPropertyVersion);
-          }
-          if (newSceneId) {
-            if (sceneCache.get(newSceneId)?.error) {
-              handleError(sceneCache.get(newSceneId));
-              return;
-            }
-            setSceneId(newSceneId);
-          }
-        } catch (e) {
-          handleError(e?.response?.data);
-        }
+        triggerAction("default", null);
       }
     };
 
@@ -333,29 +299,15 @@ export default function PlayScenarioPage({ group }) {
     return () => window.removeEventListener("keydown", onKeyDown);
   }, [currScene, sceneId, properties, propertyVersion, addFlags, removeFlags]);
 
+  // Timer timeout can now navigate (a genuine new capability): it's a real
+  // server round-trip via triggerAction rather than a client-local operation
+  // apply, since the outcome depends on server-evaluated conditions.
   const handleTimerTimeout = () => {
-    const timerStateOperations = currScene?.timerStateOperations;
-    if (!timerStateOperations?.length) return;
-    setPropertyVersion((v) => v + 1);
-    setProperties((prev) =>
-      applyPropertyOperations(prev, timerStateOperations)
-    );
+    if (!currScene?.timerActionRefs?.length) return;
+    triggerAction("timer", null);
   };
 
-  const buttonPressed = async (component) => {
-    const currentSceneId = sceneId;
-    const nextSceneId = component.nextScene;
-    if (nextSceneId) {
-      if (!sceneCache.has(nextSceneId)) return;
-
-      if (sceneCache.get(nextSceneId)?.error)
-        handleError(sceneCache.get(nextSceneId));
-
-      setSceneId(nextSceneId);
-    }
-
-    onSceneChange(component.id, currentSceneId);
-  };
+  const buttonPressed = (component) => triggerAction("click", component.id);
 
   const reset = async () => {
     const resetUrl = isMultiplayer
@@ -374,7 +326,7 @@ export default function PlayScenarioPage({ group }) {
 
     setAddFlags([]);
     setRemoveFlags([]);
-    onSceneChange();
+    triggerAction(null, null);
   };
 
   const cleanUpAudios = () => {
