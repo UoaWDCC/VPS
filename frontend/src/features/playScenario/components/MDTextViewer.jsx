@@ -4,7 +4,7 @@ import { marked } from "marked";
 
 function renderMarkdown(content) {
   if (!content) return "";
-  // make headersId to true if you want to use custom headers (need their own ids)
+  // make headersId to true if we want custom headers (need their own ids, not sure we'll ever use this)
   const html = marked.parse(content, { headerIds: false });
   return DOMPurify.sanitize(html);
 }
