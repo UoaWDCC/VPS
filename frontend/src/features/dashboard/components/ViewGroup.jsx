@@ -1,16 +1,16 @@
 import { useState, useContext, useEffect } from "react";
 import ScenarioContext from "../../../context/ScenarioContext";
 import DashGroupTable from "./table/DashGroupTable";
-import StateVarTable from "./table/StateVarTable";
+import PropertyTable from "./table/PropertyTable";
 
 export default function ViewGroup({ groupInfo }) {
   const [hasStateVar, setHasStateVar] = useState(false);
-  const { stateVariables } = useContext(ScenarioContext);
+  const { properties } = useContext(ScenarioContext);
 
   useEffect(() => {
-    if (!Array.isArray(stateVariables)) return;
-    if (stateVariables.length != 0) setHasStateVar(true);
-  }, [stateVariables]);
+    if (!Array.isArray(properties)) return;
+    if (properties.length != 0) setHasStateVar(true);
+  }, [properties]);
 
   return (
     <div>
@@ -21,8 +21,8 @@ export default function ViewGroup({ groupInfo }) {
             <DashGroupTable groupInfo={groupInfo} />
           </div>
           <div>
-            <h1 className="text-xl">State Variables</h1>
-            <StateVarTable
+            <h1 className="text-xl">Properties</h1>
+            <PropertyTable
               data={groupInfo.stateVariables}
               hasStateVar={hasStateVar}
             />

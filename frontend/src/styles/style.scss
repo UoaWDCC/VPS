@@ -20,23 +20,23 @@ body {
 }
 
 .btn.contained.white {
-  background: #fafafa;
-  color: #0080a7;
+  background: var(--color-base-100);
+  color: var(--color-accent);
 }
 
 .btn.contained.teal {
-  background: #0080a7;
-  color: #fafafa;
+  background: var(--color-accent);
+  color: var(--color-accent-content);
 }
 
 .btn.outlined.white {
-  color: #fafafa;
-  border-color: #fafafa;
+  color: var(--color-base-content);
+  border-color: var(--color-base-content);
 }
 
 .btn.outlined.teal {
-  color: #0080a7;
-  border-color: #0080a7;
+  color: var(--color-accent);
+  border-color: var(--color-accent);
 }
 
 .btn.disabled {
@@ -44,11 +44,15 @@ body {
 }
 
 .btn.contained.red {
-  background-color: #e53935;
-  color: #fafafa;
+  background-color: var(--color-error);
+  color: var(--color-error-content);
 
   &:hover {
-    background-color: #d32f2f;
+    background-color: color-mix(
+      in srgb,
+      var(--color-error) 85%,
+      var(--color-black)
+    );
   }
 }
 
@@ -58,5 +62,5 @@ body {
 /********************************** Text Field **********************************/
 
 .textField.standard {
-  border-bottom: aquamarine;
+  border-bottom-color: var(--color-primary);
 }

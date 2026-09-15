@@ -3,7 +3,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
 
 import { useGet } from "../hooks/crudHooks";
-import { ensureStateVariableUUIDs } from "../components/StateVariables/migrationUtils";
+import { ensurePropertyUUIDs } from "../components/Properties/migrationUtils";
 import { api } from "../util/api";
 
 import AuthenticationContext from "./AuthenticationContext";
@@ -40,7 +40,7 @@ export default function ScenarioContextProvider({ children }) {
   const queryClient = useQueryClient();
 
   const [roleList, setRoleList] = useState();
-  const [stateVariables, setStateVariables] = useState();
+  const [properties, setProperties] = useState();
 
   const scenarioQuery = useQuery({
     queryKey: ["scenarios"],
@@ -100,17 +100,17 @@ export default function ScenarioContextProvider({ children }) {
   useEffect(() => {
     if (scenarioId && user) {
       api
-        .get(user, `api/scenario/${scenarioId}/stateVariables`)
+        .get(user, `api/scenario/${scenarioId}/properties`)
         .then((res) => {
-          // Ensure all state variables have UUIDs for backward compatibility
-          const stateVariablesWithUUIDs = ensureStateVariableUUIDs(res.data);
-          setStateVariables(stateVariablesWithUUIDs);
+          // Ensure all properties have UUIDs for backward compatibility
+          const propertiesWithUUIDs = ensurePropertyUUIDs(res.data);
+          setProperties(propertiesWithUUIDs);
         })
         .catch((error) => {
-          console.error("Error fetching state variables:", error);
+          console.error("Error fetching properties:", error);
         });
     } else {
-      setStateVariables([]);
+      setProperties([]);
     }
   }, [scenarioId, user]);
 
@@ -129,8 +129,8 @@ export default function ScenarioContextProvider({ children }) {
 
         roleList,
         setRoleList,
-        stateVariables,
-        setStateVariables,
+        properties,
+        setProperties,
       }}
     >
       {children}

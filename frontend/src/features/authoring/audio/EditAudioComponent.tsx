@@ -1,15 +1,9 @@
 import { useEffect, useState } from "react";
 import { remove } from "../scene/operations/modifiers";
 import { modifyComponentProp } from "../scene/operations/component";
+import type { AudioComponent } from "../types";
 
-interface AudioComponentData {
-  id: string;
-  loop: boolean;
-  name: string;
-  url: string;
-}
-
-function EditAudioComponent({ component }: { component: AudioComponentData }) {
+function EditAudioComponent({ component }: { component: AudioComponent }) {
   const [loop, setLoop] = useState<boolean>(component.loop);
   const [name, setName] = useState<string>(component.name);
 
@@ -23,8 +17,14 @@ function EditAudioComponent({ component }: { component: AudioComponentData }) {
   }, [playing]);
 
   useEffect(() => {
-    audio.addEventListener("ended", () => setPlaying(false));
-    return () => audio.removeEventListener("ended", () => setPlaying(false));
+    const onEnded = () => setPlaying(false);
+    audio.addEventListener("ended", onEnded);
+    return () => {
+      audio.removeEventListener("ended", onEnded);
+      audio.pause();
+      audio.src = "";
+      audio.load();
+    };
   }, [audio]);
 
   function togglePlayback() {
@@ -32,16 +32,16 @@ function EditAudioComponent({ component }: { component: AudioComponentData }) {
   }
 
   function deleteAudioComponent() {
-    remove(component.id);
+    remove([component.id]);
   }
 
   function saveName(v: string) {
-    modifyComponentProp(component.id, "name", v);
+    modifyComponentProp([component.id], "name", v);
   }
 
   function saveLoop(v: boolean) {
     setLoop(v);
-    modifyComponentProp(component.id, "loop", v);
+    modifyComponentProp([component.id], "loop", v);
   }
 
   return (

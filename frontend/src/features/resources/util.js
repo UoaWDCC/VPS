@@ -1,13 +1,66 @@
+export function isTemp(resource) {
+  return resource._id.startsWith("temp.");
+}
+
+export function getExtension(name) {
+  if (!name) return "";
+  const dotIndex = name.lastIndexOf(".");
+  return dotIndex <= 0 || dotIndex === name.length - 1
+    ? ""
+    : name.slice(dotIndex).toLowerCase();
+}
+
 export function normaliseFile(resource) {
   return {
-    id: resource._id,
-    groupId: resource.groupId,
+    _id: resource._id,
+    parentId: resource.parentId,
     name: resource.name,
     stateConditionals: resource.stateConditionals,
-    fileId: resource.fileId._id,
-    url: resource.fileId.url,
-    type: resource.fileId.type,
-    contentType: resource.fileId.contentType,
-    size: resource.fileId.size,
+    fileId: resource.fileId?._id,
+    url: resource.fileId?.url,
+    type: resource.type,
+    fileType: resource.fileId?.type,
+    contentType: resource.fileId?.contentType,
+    size: resource.fileId?.size,
+    extension: getExtension(resource.fileId?.name),
   };
+}
+
+export function filterTreeBySearch(tree, string) {
+  const q = string.trim()?.toLowerCase();
+  if (!q) return tree;
+
+  return tree
+    .map((r) => {
+      const isMatch = r.name.toLowerCase().includes(q);
+      if (r.type !== "collection") return isMatch ? r : null;
+      const matchingChildren = (r.children || []).filter((c) => {
+        return isMatch || c.name.toLowerCase().includes(q);
+      });
+      if (matchingChildren.length === 0) return null;
+      return { ...r, children: matchingChildren };
+    })
+    .filter(Boolean);
+}
+
+// NOTE: it is not possible for a resource to reference a missing or deleted
+// collection as a parent, since collection deletion is cascaded to children
+
+export function buildResourceTree(resources) {
+  const collections = resources.filter((r) => r.type === "collection");
+  const files = resources.filter((r) => r.type === "file").map(normaliseFile);
+
+  const grouped = collections.map((collection) => ({
+    _id: collection._id,
+    name: collection.name,
+    type: "collection",
+    stateConditionals: collection.stateConditionals,
+    children: files.filter(
+      (f) => String(f.parentId) === String(collection._id)
+    ),
+  }));
+
+  const orphanFiles = files.filter((f) => !f.parentId);
+
+  return [...grouped, ...orphanFiles];
 }

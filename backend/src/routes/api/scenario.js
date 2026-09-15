@@ -1,21 +1,19 @@
 import { Router } from "express";
 import auth from "../../middleware/firebaseAuth.js";
 import scenarioAuth from "../../middleware/scenarioAuth.js";
-import validScenarioId from "../../middleware/validScenarioId.js";
 
 import {
   createScenario,
-  createStateVariable,
+  createProperty,
   deleteScenario,
-  getStateVariables,
+  getProperties,
   retrieveScenario,
   retrieveScenarioList,
   retrieveRoleList,
   retrieveAccessibleScenarios,
-  updateDurations,
   updateScenario,
-  editStateVariable,
-  deleteStateVariable,
+  editProperty,
+  deleteProperty,
   createRole,
   deleteRole,
 } from "../../db/daos/scenarioDao.js";
@@ -85,7 +83,6 @@ router.post(
 );
 
 // Apply scenario auth middleware
-router.use("/:scenarioId", validScenarioId);
 router.use("/:scenarioId", scenarioAuth);
 
 // Get a scenario by id.
@@ -95,20 +92,19 @@ router.get("/:scenarioId", async (req, res) => {
 });
 
 // Update a scenario by a user
-router.put("/:scenarioId", async (req, res) => {
-  const { name, duration, description, estimatedTime } = req.body;
-  let scenario = await updateScenario(req.params.scenarioId, {
-    name,
-    description,
-    estimatedTime,
-  });
+router.put(
+  "/:scenarioId",
+  handle(async (req, res) => {
+    const { name, description, estimatedTime } = req.body;
+    const scenario = await updateScenario(req.params.scenarioId, {
+      name,
+      description,
+      estimatedTime,
+    });
 
-  scenario = await updateDurations(req.params.scenarioId, {
-    duration,
-  });
-
-  res.status(HTTP_OK).json(scenario);
-});
+    res.status(HTTP_OK).json(scenario);
+  })
+);
 
 router.patch(
   "/:scenarioId",
@@ -140,45 +136,54 @@ router.delete("/:scenarioId", async (req, res) => {
   }
 });
 
-// Get the state variables of a scenario
-router.get("/:scenarioId/stateVariables", async (req, res) => {
-  const scenario = await getStateVariables(req.params.scenarioId);
-  res.status(HTTP_OK).json(scenario);
-});
+// Get the properties of a scenario
+router.get(
+  "/:scenarioId/properties",
+  handle(async (req, res) => {
+    const scenario = await getProperties(req.params.scenarioId);
+    res.status(HTTP_OK).json(scenario);
+  })
+);
 
-// Create a new state variable for a scenario
-router.post("/:scenarioId/stateVariables", async (req, res) => {
-  const { newStateVariable } = req.body;
-  let updatedStateVariables = await createStateVariable(
-    req.params.scenarioId,
-    newStateVariable
-  );
-
-  res.status(HTTP_OK).json(updatedStateVariables);
-});
-
-// Edit a state variable for a scenario
-router.put("/:scenarioId/stateVariables", async (req, res) => {
-  const { originalName, newStateVariable } = req.body;
-  let updatedStateVariables = await editStateVariable(
-    req.params.scenarioId,
-    originalName,
-    newStateVariable
-  );
-
-  res.status(HTTP_OK).json(updatedStateVariables);
-});
-
-// Delete a state variable from a scenario
-router.delete(
-  "/:scenarioId/stateVariables/:stateVariableIdentifier",
-  async (req, res) => {
-    let updatedStateVariables = await deleteStateVariable(
+// Create a new property for a scenario
+router.post(
+  "/:scenarioId/properties",
+  handle(async (req, res) => {
+    const { newProperty } = req.body;
+    let updatedProperties = await createProperty(
       req.params.scenarioId,
-      req.params.stateVariableIdentifier
+      newProperty
     );
-    res.status(HTTP_OK).json(updatedStateVariables);
-  }
+
+    res.status(HTTP_OK).json(updatedProperties);
+  })
+);
+
+// Edit a property for a scenario
+router.put(
+  "/:scenarioId/properties",
+  handle(async (req, res) => {
+    const { originalName, newProperty } = req.body;
+    let updatedProperties = await editProperty(
+      req.params.scenarioId,
+      originalName,
+      newProperty
+    );
+
+    res.status(HTTP_OK).json(updatedProperties);
+  })
+);
+
+// Delete a property from a scenario
+router.delete(
+  "/:scenarioId/properties/:propertyIdentifier",
+  handle(async (req, res) => {
+    let updatedProperties = await deleteProperty(
+      req.params.scenarioId,
+      req.params.propertyIdentifier
+    );
+    res.status(HTTP_OK).json(updatedProperties);
+  })
 );
 
 // Get the role list of a scenario

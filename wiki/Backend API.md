@@ -341,8 +341,8 @@ Returns:
 {
     "active": "scene-id",
     "scenes": [],
-    "stateVariables": [],
-    "stateVersion": 1
+    "properties": [],
+    "propertyVersion": 1
 }
 ```
 

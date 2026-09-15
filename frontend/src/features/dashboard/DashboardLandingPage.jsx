@@ -4,7 +4,7 @@ import ScenarioContext from "../../context/ScenarioContext";
 import TopNavBar from "../TopNavBar/TopNavBar";
 import Thumbnail from "../authoring/components/Thumbnail";
 import { SearchIcon } from "lucide-react";
-import FabMenu from "../../components/FabMenu";
+import { dedupById } from "../../util/dedup";
 
 export default function DashboardLandingPage() {
   const { allScenarios } = useContext(ScenarioContext);
@@ -12,14 +12,10 @@ export default function DashboardLandingPage() {
 
   const [search, setSearch] = useState("");
 
-  const scenarios = Array.from(
-    new Map(
-      [...allScenarios.owned, ...allScenarios.accessible].map((scenario) => [
-        scenario._id,
-        scenario,
-      ])
-    ).values()
-  );
+  const scenarios = dedupById([
+    ...allScenarios.owned,
+    ...allScenarios.accessible,
+  ]);
 
   const filteredScenarios = scenarios.filter((scenario) =>
     scenario.name.toLowerCase().includes(search.toLowerCase())
@@ -57,7 +53,10 @@ export default function DashboardLandingPage() {
             onClick={() => selectDashboardScenario(scenario)}
           >
             <div className="aspect-16/9 rounded overflow-hidden mb-s border-primary/10 border-1">
-              <Thumbnail components={scenario.thumbnail?.components || []} />
+              <Thumbnail
+                components={scenario.thumbnail?.components || []}
+                background={scenario.thumbnail?.background}
+              />
             </div>
             <p className="font-ibm text-l text-nowrap truncate">
               {scenario.name}
@@ -65,8 +64,6 @@ export default function DashboardLandingPage() {
           </div>
         ))}
       </div>
-
-      <FabMenu />
     </div>
   );
 }

@@ -1,17 +1,11 @@
 import { Router } from "express";
-import {
-  createGroup,
-  getCurrentScene,
-  getGroup,
-  getGroupByScenarioId,
-} from "../../db/daos/groupDao.js";
+import { createGroup, getGroupByScenarioId } from "../../db/daos/groupDao.js";
 
-import { retrieveRoleList, updateRoleList } from "../../db/daos/scenarioDao.js";
+import { updateRoleList } from "../../db/daos/scenarioDao.js";
 import Group from "../../db/models/group.js";
 
 import auth from "../../middleware/firebaseAuth.js";
 import scenarioAuth from "../../middleware/scenarioAuth.js";
-import validScenarioId from "../../middleware/validScenarioId.js";
 
 const router = Router();
 
@@ -22,7 +16,7 @@ const HTTP_NOT_FOUND = 404;
 router.use(auth);
 
 // get the groups assigned to a scenario
-router.get("/scenario/:scenarioId", async (req, res) => {
+router.get("/scenario/:scenarioId", scenarioAuth, async (req, res) => {
   try {
     const { scenarioId } = req.params;
     const groups = await getGroupByScenarioId(scenarioId);
@@ -32,29 +26,7 @@ router.get("/scenario/:scenarioId", async (req, res) => {
   }
 });
 
-// get the current scene of the group
-router.get("/path/:groupId", async (req, res) => {
-  try {
-    const { groupId } = req.params;
-    const currentScene = await getCurrentScene(groupId);
-    return res.status(HTTP_OK).json(currentScene);
-  } catch (error) {
-    return res.status(HTTP_NOT_FOUND).json({ error: error.message });
-  }
-});
-
-// get a group by its id
-router.get("/retrieve/:groupId", async (req, res) => {
-  const { groupId } = req.params;
-  const group = await getGroup(groupId);
-  if (!group) {
-    return res.status(HTTP_NOT_FOUND).json({ error: "Group not found" });
-  }
-  return res.status(HTTP_OK).json(group);
-});
-
-router.use("/:scenarioId", validScenarioId);
-// create a new group — restricted to scenario owner
+// create a new group — restricted to scenario editor
 router.post("/:scenarioId", scenarioAuth, async (req, res) => {
   const { groupList, roleList } = req.body;
   const { scenarioId } = req.params;
@@ -102,14 +74,6 @@ router.post("/:scenarioId", scenarioAuth, async (req, res) => {
   await Promise.all(promises);
 
   return res.status(HTTP_OK).json(output);
-});
-
-// Kept for backward compatibility; superseded by GET /api/scenario/:scenarioId/roles
-router.get("/:scenarioId/roleList", async (req, res) => {
-  const { scenarioId } = req.params;
-  const roleList = await retrieveRoleList(scenarioId);
-
-  res.status(HTTP_OK).json(roleList);
 });
 
 export default router;

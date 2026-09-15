@@ -144,7 +144,7 @@ However, because we want to give the user an instant response where possible, we
 
 Relevant file: `frontend/src/features/playScenario/PlayScenarioPage.jsx`.
 
-We use a simple Map object (`sceneCache`) as a basic cache to store the scene data we receive from the API endpoint. We then update that cache alongside the requests we make, return the active scene’s ID, and track active play state with `sceneId`, `stateVariables`, and `stateVersion`.
+We use a simple Map object (`sceneCache`) as a basic cache to store the scene data we receive from the API endpoint. We then update that cache alongside the requests we make, return the active scene’s ID, and track active play state with `sceneId`, `properties`, and `propertyVersion`.
 
 ### Navigation Request and Response
 
@@ -152,7 +152,7 @@ We use a simple Map object (`sceneCache`) as a basic cache to store the scene da
   - `POST /api/navigate/user/:scenarioId` for singleplayer
   - `POST /api/navigate/group/:groupId` for multiplayer
 - It sends `currentScene`, `componentId`, `addFlags`, and `removeFlags`.
-- It receives `active`, `stateVariables`, `stateVersion`, and nearby `scenes`.
+- It receives `active`, `properties`, `propertyVersion`, and nearby `scenes`.
 - Returned scenes are merged into `sceneCache`.
 
 ### Scene Click Flow
@@ -163,4 +163,4 @@ We use a simple Map object (`sceneCache`) as a basic cache to store the scene da
 4. The backend confirms the move and returns the authoritative state.
 5. The page updates scene/state values and handles errors (`409`, `403`, fallback error route).
 
-In multiplayer, the page also refreshes resources from `GET /api/navigate/group/resources/:groupId` and filters them using current state variables.
+In multiplayer, the page also refreshes resources from `GET /api/navigate/group/resources/:groupId` and filters them using current properties.

@@ -5,16 +5,25 @@ import type {
   ModelBlock,
   ModelDocument,
   ModelSpan,
+  PropertyRef,
 } from "../../types";
 import { squash } from "../../text/build";
 import useEditorStore from "../../stores/editor";
 import { objectDiff } from "../../util";
 import shallow from "zustand/shallow";
 import { modify } from "./modifiers";
+import {
+  findPropertyIdByName,
+  isProperty,
+  PROPERTY_CHAR,
+  spanToText,
+} from "../../text/property";
+
+const PROPERTY_REGEX = /\$\$([^$]+)\$\$$/;
 
 export const insertChar = modify(
-  (id: string, cursor: ModelCursor, char: string) => {
-    const doc = getComponentProp(id, "document") as ModelDocument;
+  (id: string[], cursor: ModelCursor, char: string) => {
+    const doc = getComponentProp(id[0], "document") as ModelDocument;
 
     const diff = objectDiff(
       useEditorStore.getState().activeStyle!,
@@ -24,7 +33,7 @@ export const insertChar = modify(
     const block = doc.blocks[cursor.blockI];
     const target = block.spans[cursor.spanI];
 
-    if (shallow(diff, target.style)) {
+    if (!isProperty(target) && shallow(diff, target.style)) {
       // if we're the same style as prev span
       const modified =
         target.text.slice(0, cursor.charI) +
@@ -39,16 +48,16 @@ export const insertChar = modify(
       else block.spans.splice(cursor.spanI, 0, { text: char, style: diff }); // block start
     }
 
-    return moveCursor(id, cursor, 1);
+    return moveCursor(id[0], cursor, 1);
   }
 );
 
-export const deleteChar = modify((id: string, cursor: ModelCursor) => {
+export const deleteChar = modify((id: string[], cursor: ModelCursor) => {
   if (!cursor.blockI && !cursor.spanI && !cursor.charI) return cursor; // start of text
 
-  const newCursor = moveCursor(id, cursor, -1);
+  const newCursor = moveCursor(id[0], cursor, -1);
 
-  const doc = getComponentProp(id, `document`) as ModelDocument;
+  const doc = getComponentProp(id[0], `document`) as ModelDocument;
   const spans = doc.blocks[cursor.blockI].spans;
 
   if (newCursor.blockI === cursor.blockI && newCursor.spanI === cursor.spanI) {
@@ -81,17 +90,16 @@ export const deleteChar = modify((id: string, cursor: ModelCursor) => {
 
 // NOTE: will cause two distinct state operations in history
 export function insertSelection(id: string, sel: ModelSelection, char: string) {
-  const cursor = deleteSelection(id, sel);
-  if (!cursor) return;
-  return insertChar(id, cursor, char);
+  const cursor = deleteSelection([id], sel);
+  return insertChar([id], cursor, char);
 }
 
-export const deleteSelection = modify((id: string, sel: ModelSelection) => {
-  const doc = getComponentProp(id, `document`) as ModelDocument;
+export const deleteSelection = modify((id: string[], sel: ModelSelection) => {
+  const doc = getComponentProp(id[0], `document`) as ModelDocument;
   const { blocks } = doc;
 
   const normd = normaliseSelection(sel);
-  const { start, end } = isolateSelection(id, normd);
+  const { start, end } = isolateSelection(id[0], normd);
 
   const startBlock = blocks[start.blockI];
   const endBlock = blocks[end.blockI];
@@ -112,8 +120,72 @@ export const deleteSelection = modify((id: string, sel: ModelSelection) => {
   return normaliseDocument(doc, start);
 });
 
-export const createBlock = modify((id: string, cursor: ModelCursor) => {
-  const blocks = getComponentProp(id, `document.blocks`) as ModelBlock[];
+//insert property into textbox
+export const insertProperty = modify(
+  (id: string[], cursor: ModelCursor, ref: PropertyRef) => {
+    const doc = getComponentProp(id[0], "document") as ModelDocument;
+
+    //active style diff
+    const diff = objectDiff(
+      useEditorStore.getState().activeStyle!,
+      squash(doc.style)
+    );
+    const block = doc.blocks[cursor.blockI];
+
+    //new property span at cursor
+    splitSpan(doc.blocks, cursor);
+    const at = cursor.charI > 0 ? cursor.spanI + 1 : cursor.spanI;
+    block.spans.splice(at, 0, {
+      text: PROPERTY_CHAR,
+      style: diff,
+      property: { ...ref },
+    });
+
+    //return cursor after chip
+    return normaliseDocument(doc, {
+      blockI: cursor.blockI,
+      spanI: at,
+      charI: 1,
+    });
+  }
+);
+
+export const convertToChip = modify((id: string[], cursor: ModelCursor) => {
+  const { properties } = useEditorStore.getState();
+  if (!properties.length) return cursor;
+
+  const doc = getComponentProp(id[0], "document") as ModelDocument;
+  const block = doc.blocks[cursor.blockI];
+  const span = block.spans[cursor.spanI];
+  if (isProperty(span)) return cursor;
+
+  //check for regex match and valid property
+  const match = PROPERTY_REGEX.exec(span.text.slice(0, cursor.charI));
+  if (!match) return cursor;
+
+  const property = findPropertyIdByName(properties, match[1]);
+  if (!property) return cursor;
+
+  //isolate property name, convert to chip span
+  const from = cursor.charI - match[0].length;
+  splitSpan(doc.blocks, cursor);
+  splitSpan(doc.blocks, { ...cursor, charI: from });
+
+  const at = from > 0 ? cursor.spanI + 1 : cursor.spanI;
+  block.spans.splice(at, 1, {
+    text: PROPERTY_CHAR,
+    style: span.style,
+    property: {
+      id: property,
+      displayName: match[1],
+    },
+  });
+
+  return normaliseDocument(doc, { ...cursor, spanI: at, charI: 1 });
+});
+
+export const createBlock = modify((id: string[], cursor: ModelCursor) => {
+  const blocks = getComponentProp(id[0], `document.blocks`) as ModelBlock[];
   const block = blocks[cursor.blockI];
 
   splitSpan(blocks, cursor);
@@ -143,11 +215,11 @@ export const createBlock = modify((id: string, cursor: ModelCursor) => {
 });
 
 export const applySelectionStyle = modify(
-  (id: string, sel: ModelSelection, style: Partial<BaseTextStyle>) => {
-    const doc = getComponentProp(id, `document`) as ModelDocument;
+  (id: string[], sel: ModelSelection, style: Partial<BaseTextStyle>) => {
+    const doc = getComponentProp(id[0], `document`) as ModelDocument;
     const { blocks } = doc;
 
-    const { start, end } = isolateSelection(id, normaliseSelection(sel));
+    const { start, end } = isolateSelection(id[0], normaliseSelection(sel));
 
     if (style.alignment || style.lineHeight) {
       for (let i = sel.start!.blockI; i <= sel.end!.blockI; i++) {
@@ -196,6 +268,96 @@ function normaliseSelection(sel: ModelSelection) {
   let { start, end } = sel;
   if (start && end && isReversed(start, end)) [start, end] = [end, start];
   return { start, end };
+}
+
+function blockText(block: ModelBlock) {
+  return block.spans.map((s) => s.text).join("");
+}
+
+// flattens a document to plain text with block breaks as "\n", matching
+// getDocumentText, so a whole-document diff naturally covers block
+// splits/merges (Enter/Backspace) as well as in-line edits
+export function flattenBlocks(blocks: ModelBlock[]) {
+  return blocks.map(blockText).join("\n");
+}
+
+// converts a flat (block-break-inclusive) character offset into a cursor
+export function offsetToCursor(
+  blocks: ModelBlock[],
+  offset: number
+): ModelCursor {
+  let remaining = offset;
+
+  for (let blockI = 0; blockI < blocks.length; blockI++) {
+    const spans = blocks[blockI].spans;
+    const text = blockText(blocks[blockI]);
+    const isLastBlock = blockI === blocks.length - 1;
+
+    if (remaining <= text.length || isLastBlock) {
+      let inBlock = Math.min(remaining, text.length);
+      for (let spanI = 0; spanI < spans.length; spanI++) {
+        const len = spans[spanI].text.length;
+        const isLastSpan = spanI === spans.length - 1;
+        if (inBlock <= len || isLastSpan) {
+          return { blockI, spanI, charI: Math.min(inBlock, len) };
+        }
+        inBlock -= len;
+      }
+      return { blockI, spanI: 0, charI: 0 };
+    }
+
+    remaining -= text.length + 1; // +1 for the "\n" block break
+  }
+
+  return { blockI: 0, spanI: 0, charI: 0 };
+}
+
+// locates exactly which characters changed between two versions of a
+// document, so undo/redo can jump the cursor/selection straight to the
+// edit rather than an approximate/stale position. returns null when the
+// text content is identical (e.g. a style-only change like bold/alignment,
+// which still produces a history entry) since there's no text position to
+// jump to -- without this, start/end both collapse to the end of the
+// document and the cursor would jump there on every style toggle
+export function findEditDiff(
+  beforeBlocks: ModelBlock[],
+  afterBlocks: ModelBlock[]
+) {
+  const bText = flattenBlocks(beforeBlocks);
+  const aText = flattenBlocks(afterBlocks);
+
+  if (bText === aText) return null;
+
+  const maxPrefix = Math.min(bText.length, aText.length);
+  let start = 0;
+  while (start < maxPrefix && bText[start] === aText[start]) start++;
+
+  const remaining = maxPrefix - start;
+  let suffix = 0;
+  while (
+    suffix < remaining &&
+    bText[bText.length - 1 - suffix] === aText[aText.length - 1 - suffix]
+  ) {
+    suffix++;
+  }
+
+  return { start, suffix };
+}
+
+// turns an edit diff into a selection within the given (post-undo/redo)
+// document -- selects the text that reappeared, or collapses to a cursor
+// where text disappeared
+export function diffToSelection(
+  targetBlocks: ModelBlock[],
+  diff: { start: number; suffix: number }
+): ModelSelection {
+  const targetText = flattenBlocks(targetBlocks);
+  const end = Math.max(diff.start, targetText.length - diff.suffix);
+
+  return {
+    start: offsetToCursor(targetBlocks, diff.start),
+    end: end > diff.start ? offsetToCursor(targetBlocks, end) : null,
+  };
 }
 
 export function normaliseCursor(blocks: ModelBlock[], cursor: ModelCursor) {
@@ -284,6 +446,8 @@ function* spanRange(
 function splitSpan(blocks: ModelBlock[], cursor: ModelCursor) {
   const block = blocks[cursor.blockI];
   const span = block.spans[cursor.spanI];
+  //atomic prop spans cannot be split
+  if (isProperty(span)) return cursor;
 
   const left = span.text.slice(0, cursor.charI);
   const right = span.text.slice(cursor.charI);
@@ -335,14 +499,25 @@ export function normaliseDocument(doc: ModelDocument, cursor: ModelCursor) {
 
       // remove empty spans except for ones that are the only in a block
       if (span.text.length === 0) {
-        if (isCursorBlock && s < cursor.spanI) newCursor.spanI--;
+        //cursor on removed chip span is collapsed to the previous span
+        if (isCursorBlock && s <= cursor.spanI && newCursor.spanI > 0) {
+          newCursor.spanI--;
+          //move cursor to end of preceding span
+          if (s === cursor.spanI && normdSpans.length > 0)
+            newCursor.charI = normdSpans[normdSpans.length - 1].text.length;
+        }
         continue;
       }
 
       // merge adjacent spans with the same style
       const style = objectDiff(span.style!, squash(doc.style));
       const prev = normdSpans[normdSpans.length - 1];
-      if (prev && shallow(style, prev.style)) {
+      if (
+        prev &&
+        !isProperty(span) &&
+        !isProperty(prev) &&
+        shallow(style, prev.style)
+      ) {
         if (isCursorBlock && s <= cursor.spanI) {
           newCursor.spanI--;
           if (s === cursor.spanI) newCursor.charI += prev.text.length;
@@ -356,7 +531,11 @@ export function normaliseDocument(doc: ModelDocument, cursor: ModelCursor) {
     }
 
     // if the block has no meaningful text, ensure that it keeps one empty span
-    if (normdSpans.length === 0) normdSpans.push(block.spans[0]);
+    if (normdSpans.length === 0) {
+      const fallback = { ...block.spans[0], text: "" };
+      delete fallback.property;
+      normdSpans.push(fallback);
+    }
 
     block.spans = normdSpans;
   }
@@ -370,11 +549,25 @@ export function getDocumentText(id: string) {
   let text = "";
   for (const block of blocks) {
     for (const span of block.spans) {
-      text += span.text;
+      text += spanToText(span);
     }
     text += "\n";
   }
   return text;
+}
+
+//determine what the clipboard recieves when copy/cutting a text selection (from-to)
+function cutSpan(span: ModelSpan, from = 0, to = span.text.length) {
+  //normal plain text slice
+  if (!isProperty(span)) {
+    const slice = span.text.slice(from, to);
+    return { text: slice, raw: slice };
+  }
+
+  //any selection overlap onto chip means $$text$$ gets saved to clipboard
+  //raw unicode char kept for internal app paste
+  const taken = to > from;
+  return { text: taken ? spanToText(span) : "", raw: taken ? span.text : "" };
 }
 
 export function getSelectionContent(id: string, sel: ModelSelection) {
@@ -389,12 +582,17 @@ export function getSelectionContent(id: string, sel: ModelSelection) {
   if (start.blockI === end.blockI && start.spanI === end.spanI) {
     const block = blocks[start.blockI];
     const span = block.spans[start.spanI];
-    const text = span.text.slice(start.charI, end.charI);
+    const cut = cutSpan(span, start.charI, end.charI);
     const newDoc = {
       ...doc,
-      blocks: [{ ...block, spans: [{ ...span, text }] }],
+      blocks: [
+        {
+          ...block,
+          spans: [{ ...span, text: cut.raw }],
+        },
+      ],
     };
-    return { text, doc: newDoc };
+    return { text: cut.text, doc: newDoc };
   }
 
   let text = "";
@@ -412,16 +610,17 @@ export function getSelectionContent(id: string, sel: ModelSelection) {
       const span = blocks[b].spans[s];
 
       if (b === start.blockI && s === start.spanI) {
-        const content = span.text.slice(start.charI);
-        text += content;
-        newDoc.blocks[nb].spans.push({ ...span, text: content });
+        const cut = cutSpan(span, start.charI);
+        text += cut.text;
+        newDoc.blocks[nb].spans.push({ ...span, text: cut.raw });
       } else if (b === end.blockI && s === end.spanI) {
-        const content = span.text.slice(0, end.charI);
-        text += content;
-        newDoc.blocks[nb].spans.push({ ...span, text: content });
+        const cut = cutSpan(span, 0, end.charI);
+        text += cut.text;
+        newDoc.blocks[nb].spans.push({ ...span, text: cut.raw });
       } else {
-        text += span.text;
-        newDoc.blocks[nb].spans.push({ ...span });
+        const cut = cutSpan(span);
+        text += cut.text;
+        newDoc.blocks[nb].spans.push({ ...span, text: cut.raw });
       }
     }
 
@@ -431,10 +630,15 @@ export function getSelectionContent(id: string, sel: ModelSelection) {
   return { text, doc: newDoc };
 }
 
-function squashSpanStyles(doc: ModelDocument) {
+function squashSpanStyles(
+  doc: ModelDocument,
+  baseStyle: Partial<BaseTextStyle>
+) {
+  // pasted spans fully adopt the destination style — any formatting the
+  // text had at copy time (font, color, etc.) is intentionally discarded
   doc.blocks.forEach((b) => {
     b.spans.forEach((s) => {
-      s.style = { ...doc.style, ...s.style };
+      s.style = { ...baseStyle };
     });
   });
 }
@@ -450,9 +654,14 @@ function getExtremeCursor(doc: ModelDocument) {
 }
 
 export const mergeDocs = modify(
-  (id: string, cursor: ModelCursor, doc: ModelDocument) => {
-    const original = getComponentProp(id, "document") as ModelDocument;
-    squashSpanStyles(doc);
+  (id: string[], cursor: ModelCursor, doc: ModelDocument) => {
+    const original = getComponentProp(id[0], "document") as ModelDocument;
+
+    // pasted content should adopt the style of the text surrounding the
+    // insertion point rather than the style it had when it was copied
+    const baseStyle = getStyleForSelection(id[0], { start: cursor, end: null });
+    const diff = objectDiff(baseStyle, squash(original.style));
+    squashSpanStyles(doc, diff);
 
     const extreme = getExtremeCursor(doc);
 

@@ -80,60 +80,6 @@ describe("Group API tests", () => {
     expect(response.data).toHaveLength(0);
   });
 
-  it("GET /group/path/:groupId returns current scene when path is non-empty", async () => {
-    const response = await axios.get(
-      `http://localhost:${ctx.port}/api/group/path/${group._id}`,
-      authHeaders("user1")
-    );
-    expect(response.status).toBe(200);
-    expect(response.data._id).toBe(scene._id.toString());
-  });
-
-  it("GET /group/path/:groupId returns null when path is empty", async () => {
-    const emptyGroup = await Group.create({
-      users: [],
-      notes: {},
-      path: [],
-      scenarioId: scenario._id.toString(),
-      currentFlags: [],
-    });
-
-    const response = await axios.get(
-      `http://localhost:${ctx.port}/api/group/path/${emptyGroup._id}`,
-      authHeaders("user1")
-    );
-    expect(response.status).toBe(200);
-    expect(response.data).toBeNull();
-  });
-
-  it("GET /group/retrieve/:groupId returns a group by id", async () => {
-    const response = await axios.get(
-      `http://localhost:${ctx.port}/api/group/retrieve/${group._id}`,
-      authHeaders("user1")
-    );
-    expect(response.status).toBe(200);
-    expect(response.data._id).toBe(group._id.toString());
-    expect(response.data.users).toHaveLength(2);
-  });
-
-  it("GET /group/retrieve/:groupId returns 404 for unknown group", async () => {
-    await expect(
-      axios.get(
-        `http://localhost:${ctx.port}/api/group/retrieve/000000000000000000000099`,
-        authHeaders("user1")
-      )
-    ).rejects.toMatchObject({ response: { status: 404 } });
-  });
-
-  it("GET /group/:scenarioId/roleList returns the role list for a scenario", async () => {
-    const response = await axios.get(
-      `http://localhost:${ctx.port}/api/group/${scenario._id}/roleList`,
-      authHeaders("user1")
-    );
-    expect(response.status).toBe(200);
-    expect(response.data).toEqual(["doctor", "nurse"]);
-  });
-
   it("POST /group/:scenarioId creates groups for a scenario", async () => {
     const groupList = [
       [

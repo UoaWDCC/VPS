@@ -1,5 +1,7 @@
 import { model, Schema } from "mongoose";
 
+export const RESOURCE_NAME_MAX_LENGTH = 255;
+
 const resourceSchema = new Schema(
   {
     scenarioId: {
@@ -8,17 +10,27 @@ const resourceSchema = new Schema(
       required: true,
       index: true,
     },
-    groupId: {
+    parentId: {
       type: Schema.Types.ObjectId,
-      ref: "CollectionGroup",
-      required: true,
+      ref: "Resource",
+      required: false,
       index: true,
     },
-    name: { type: String, required: true },
+    type: {
+      type: String,
+      enum: ["file", "collection"],
+      required: true,
+    },
+    name: {
+      type: String,
+      required: true,
+      trim: true,
+      maxlength: RESOURCE_NAME_MAX_LENGTH,
+    },
     fileId: {
       type: Schema.Types.ObjectId,
       ref: "UploadedFile",
-      required: true,
+      required: false,
     },
     stateConditionals: {
       type: [
@@ -40,7 +52,7 @@ const resourceSchema = new Schema(
 
 resourceSchema.index({
   scenarioId: 1,
-  groupId: 1,
+  parentId: 1,
   createdAt: -1,
 });
 

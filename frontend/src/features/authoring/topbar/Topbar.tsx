@@ -9,13 +9,15 @@ import ShapeSection from "./ShapeSection";
 import TextSection from "./TextSection";
 import useEditorStore from "../stores/editor";
 import { getComponent } from "../scene/scene";
-import { redo, undo } from "../scene/history";
+import { undo, redo } from "../scene/history";
 import { bringToFront, sendToBack } from "../scene/operations/component";
 import { useState } from "react";
-import StateVariableMenu from "../../../components/StateVariables/StateVariableMenu";
-import ImageCreateMenu from "../images";
+import PropertyMenu from "../../../components/Properties/PropertyMenu";
+import ImageCreateMenu from "../ImageCreateMenu";
 import ShapeCreateMenu from "./ShapeCreateMenu";
 import type { Component } from "../types";
+import BackgroundMenu from "./BackgroundMenu";
+
 import "./topbar.css";
 
 function hasDocument(component: Component): boolean {
@@ -35,10 +37,11 @@ function Topbar({ saving, save }: { saving: boolean; save: () => void }) {
   const setMode = useEditorStore((state) => state.setMode);
   const setCreateType = useEditorStore((state) => state.setCreateType);
 
-  const [showSVMenu, setShowSVMenu] = useState(false);
+  const [showPropertyMenu, setShowPropertyMenu] = useState(false);
+  const [showBackgroundMenu, setShowBackgroundMenu] = useState(false);
 
-  function toggleSVMenu() {
-    setShowSVMenu((prev) => !prev);
+  function togglePropertyMenu() {
+    setShowPropertyMenu((prev) => !prev);
   }
 
   const switchCreate = (type: string) => {
@@ -46,27 +49,42 @@ function Topbar({ saving, save }: { saving: boolean; save: () => void }) {
     setCreateType(type);
   };
 
-  const component = selected ? getComponent(selected) : null;
+  const hasSelection = selected && selected.length > 0;
+
+  // check the whole selection — a mixed selection can hide a section just
+  // because a component of the "wrong" type happens to be first
+  const selectedComponents = selected.map(getComponent);
+  const hasShapeComponent = selectedComponents.some(
+    (c) => c && c.type !== "image"
+  );
+  const hasTextboxComponent = selectedComponents.some(
+    (c) => c?.type === "textbox"
+  );
 
   return (
     <>
-      <StateVariableMenu show={showSVMenu} setShow={setShowSVMenu} />
+      <PropertyMenu show={showPropertyMenu} setShow={setShowPropertyMenu} />
+      <BackgroundMenu
+        show={showBackgroundMenu}
+        setShow={setShowBackgroundMenu}
+      />
       <ul className="topbar gap-0.5 menu menu-horizontal w-full bg-base-300 rounded-box p-1">
-        <li className="text-xs">
-          <a onClick={toggleSVMenu}>State Variables</a>
+        <li className="ml-1.5 text-xs">
+          <button type="button" onClick={togglePropertyMenu}>
+            Properties
+          </button>
         </li>
-
         <div className="divider divider-horizontal" />
 
         <li className="tooltip tooltip-bottom" data-tip="Undo">
-          <a onClick={undo}>
+          <button type="button" aria-label="Undo" onClick={() => undo()}>
             <Undo2Icon size={16} />
-          </a>
+          </button>
         </li>
         <li className="tooltip tooltip-bottom" data-tip="Redo">
-          <a onClick={redo}>
+          <button type="button" aria-label="Redo" onClick={() => redo()}>
             <Redo2Icon size={16} />
-          </a>
+          </button>
         </li>
 
         <div className="divider divider-horizontal" />
@@ -80,11 +98,18 @@ function Topbar({ saving, save }: { saving: boolean; save: () => void }) {
         </li>
         <ShapeCreateMenu />
 
+        <div className="divider divider-horizontal" />
+
+        <li className="text-xs">
+          <button type="button" onClick={() => setShowBackgroundMenu(true)}>
+            Background
+          </button>
+        </li>
+
         {/* element properties */}
-        {selected && (
+        {hasSelection && (
           <>
             <div className="divider divider-horizontal" />
-
             {/* reorder */}
             <li className="tooltip tooltip-bottom" data-tip="Bring to front">
               <a onClick={() => bringToFront(selected)}>
@@ -96,9 +121,8 @@ function Topbar({ saving, save }: { saving: boolean; save: () => void }) {
                 <SendToBack size={16} />
               </a>
             </li>
-
             {/* shape properties */}
-            {component.type !== "image" && (
+            {hasShapeComponent && (
               <>
                 <div className="divider divider-horizontal" />
                 <ShapeSection />

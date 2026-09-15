@@ -18,8 +18,10 @@ export default function NoteDetail({
   const [showConfirm, setShowConfirm] = useState(false);
 
   const canEdit = !!(userRole && note?.role === userRole);
-  const authorName =
-    group?.users?.find((u) => u.role === note?.role)?.name ?? note?.role ?? "-";
+  const authorUser = group?.users?.find((u) => u.role === note?.role);
+  const authorName = authorUser?.name
+    ? `${note?.role} - ${authorUser.name}`
+    : (note?.role ?? "-");
 
   useEffect(() => {
     if (!note) return;
@@ -41,13 +43,8 @@ export default function NoteDetail({
     try {
       const token = await getAuth().currentUser.getIdToken();
       await axios.put(
-        "/api/note/update",
-        {
-          noteId: note._id,
-          title,
-          text,
-          groupId: group._id,
-        },
+        `/api/group/${group._id}/notes/${note._id}`,
+        { title, text },
         { headers: { Authorization: `Bearer ${token}` } }
       );
       setEditing(false);
@@ -62,8 +59,7 @@ export default function NoteDetail({
   async function handleDelete() {
     try {
       const token = await getAuth().currentUser.getIdToken();
-      await axios.delete("/api/note/delete", {
-        data: { noteId: note._id, groupId: group._id },
+      await axios.delete(`/api/group/${group._id}/notes/${note._id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       onDeleted?.(note._id);
@@ -164,7 +160,7 @@ export default function NoteDetail({
 
       {showConfirm && (
         <div
-          className="fixed inset-0 z-[60] bg-black/60 flex items-center justify-center"
+          className="fixed inset-0 z-[60] bg-backdrop/60 flex items-center justify-center"
           onClick={() => setShowConfirm(false)}
         >
           <div

@@ -1,6 +1,6 @@
 import Papa from "papaparse";
 import { useContext, useRef, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useLocation } from "react-router-dom";
 import GroupsTable from "./GroupTable";
 import {
   ArrowLeftIcon,
@@ -43,11 +43,12 @@ async function getGroups(user, scenarioId) {
  *
  * @container
  */
-export default function ManageGroupsPage() {
+export default function ManageGroupsPage({ onUpload }) {
   const { scenarioId } = useParams();
   const { user } = useContext(AuthenticationContext);
 
   const history = useHistory();
+  const location = useLocation();
 
   const fileInputRef = useRef(null);
   const [showRoleMenu, setShowRoleMenu] = useState(false);
@@ -116,6 +117,7 @@ export default function ManageGroupsPage() {
           await api.post(user, `/api/group/${scenarioId}`, jsonData);
 
           refetch();
+          onUpload?.();
 
           toast.success("Groups formed successfully!");
         } catch (error) {
@@ -154,7 +156,7 @@ export default function ManageGroupsPage() {
   }
 
   function goBack() {
-    history.push(`/scenario/${scenarioId}`);
+    history.push(`/dashboard/${scenarioId}${location.search}`);
   }
 
   return (
