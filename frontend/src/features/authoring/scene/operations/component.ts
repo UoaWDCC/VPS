@@ -65,6 +65,20 @@ export const defaults = {
       ],
       rotation: 0,
     },
+    document: {
+      style: {},
+      blocks: [
+        {
+          style: {},
+          spans: [
+            {
+              style: {},
+              text: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla venenatis.",
+            },
+          ],
+        },
+      ],
+    },
     zIndex: 0,
   },
   box: {
