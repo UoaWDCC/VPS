@@ -9,6 +9,7 @@ import {
 import { getComponent, getScene, setScene } from "../scene";
 import type { Component, Scene } from "../../types";
 import { arrayToObject } from "../util";
+import { fitTextBox } from "./autofit";
 
 export function replace(scene: Scene) {
   const clone = structuredClone(scene);
@@ -48,6 +49,12 @@ export function modify<A extends [string[], ...unknown[]], R>(
 
     const output = fn(...args);
 
+    // before updateHistory so the new bounds share the edit's undo step
+    ids.forEach((id) => {
+      const component = getComponent(id);
+      if (component) fitTextBox(component);
+    });
+
     if (previousStates.length) updateHistory(previousStates);
 
     ids.forEach((id) => {
@@ -85,6 +92,9 @@ export function add(props: Record<string, any>, history = true) {
   if (!props.id) props.id = v4();
   const id = props.id as string;
   getScene().components[id] = props as Component;
+
+  // skipped for history=false: that's undo/redo restoring an exact state
+  if (history) fitTextBox(props as Component);
 
   if (history) updateHistory([{ id, prevState: null }]);
 
