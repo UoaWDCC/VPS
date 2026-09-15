@@ -87,6 +87,7 @@ function TextSection() {
   const selected = useEditorStore((state) => state.selected); // this comp only renders when a text el is selected
 
   const style = useEditorStore((state) => state.activeStyle);
+  console.log(style)
 
   if (!style) return null;
 
@@ -95,7 +96,10 @@ function TextSection() {
     // a mixed selection can include non-textbox components (e.g. a shape),
     // which don't have a `document` to write text style props onto
     selected
-      .filter((id) => getComponent(id)?.type === "textbox")
+      .filter((id) => {
+        const component = getComponent(id);
+        return component && 'document' in component && !!component.document;
+      })
       .forEach((id) => setTextStyle(id, prop, value));
   }
 

@@ -61,6 +61,8 @@ function Topbar({ saving, save }: { saving: boolean; save: () => void }) {
     (c) => c?.type === "textbox"
   );
 
+  const component = selected ? getComponent(selected) : null;
+
   return (
     <>
       <PropertyMenu show={showPropertyMenu} setShow={setShowPropertyMenu} />
@@ -130,7 +132,7 @@ function Topbar({ saving, save }: { saving: boolean; save: () => void }) {
             )}
 
             {/* text content styles */}
-            {(component.type === "textbox" || hasDocument(component)) && (
+            {(hasTextboxComponent || hasDocument(component)) && (
               <>
                 <div className="divider divider-horizontal" />
                 <TextSection />

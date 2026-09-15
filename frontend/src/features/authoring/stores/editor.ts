@@ -94,19 +94,15 @@ const useEditorStore = create<EditorState>((set) => ({
   activeGuides: [],
 
   setLoading: (value: boolean) => set({ loading: value }),
-  setSelected: (id) =>
+  setSelected: (ids) =>
     set(() => {
-      if (id) {
-        const component = getComponent(id);
-        if (component && "document" in component && component.document) {
-          const activeStyle = getStyleForSelection(id, {
-            start: null,
-            end: null,
-          });
-          return { selected: id, activeStyle };
-        }
-      }
-      return { selected: id };
+      if (!ids.length || ids.length > 1) return { selected: ids };
+      const component = getComponent(ids[0]);
+      const hasDoc = component && 'document' in component && component.document;
+      return {
+        selected: ids,
+        ...(hasDoc && { activeStyle: getStyleForSelection(ids[0], { start: null, end: null }) }),
+      };
     }),
   addPendingImage: (image) =>
     set((state) => ({ pendingImages: [...state.pendingImages, image] })),
@@ -137,7 +133,8 @@ const useEditorStore = create<EditorState>((set) => ({
     set(({ selected }) => {
       const mainTarget = selected[0];
       const component = mainTarget ? getComponent(mainTarget) : null;
-      if (component?.type === "textbox") {
+      const hasDoc = component && 'document' in component && !!component.document;
+      if (hasDoc) {
         const activeStyle = getStyleForSelection(mainTarget, selection);
         return { selection, activeStyle };
       }
