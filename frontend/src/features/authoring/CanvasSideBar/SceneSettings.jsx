@@ -99,7 +99,7 @@ export default function SceneSettings() {
   }
 
   return (
-    <fieldset className="fieldset pt-2">
+    <fieldset className="fieldset w-full min-w-0 pt-2 [&_.input]:w-full [&_.input]:min-w-0 [&_.select]:w-full [&_.dropdown]:w-full [&_.dropdown]:min-w-0 [&_.dropdown-content]:w-full [&_.truncate]:min-w-0 [&_.truncate]:flex-1">
       <label className="label">Name</label>
       <input
         type="text"
@@ -127,7 +127,9 @@ export default function SceneSettings() {
           role="button"
           className="justify-between input mb-1 font-normal w-full"
         >
-          <span className="truncate">{selectedRoles?.join(", ") || "All"}</span>
+          <span className="truncate" title={selectedRoles?.join(", ") || "All"}>
+            {selectedRoles?.join(", ") || "All"}
+          </span>
           <ChevronDown className="shrink-0" size={16} />
         </div>
         <ul
@@ -141,9 +143,14 @@ export default function SceneSettings() {
                 className={active ? "text-secondary" : "text-primary"}
                 key={i}
               >
-                <a onClick={() => changeRole(role, !active)}>
-                  {role}
-                  {active && <Check className="ml-auto" size={14} />}
+                <a
+                  className="min-w-0"
+                  onClick={() => changeRole(role, !active)}
+                >
+                  <span className="truncate" title={role}>
+                    {role}
+                  </span>
+                  {active && <Check className="ml-auto shrink-0" size={14} />}
                 </a>
               </li>
             );
