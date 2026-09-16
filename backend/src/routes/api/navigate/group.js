@@ -180,12 +180,18 @@ const syncStateVariables = async (group) => {
 // so a stalled Resend request can't hang in the background indefinitely.
 const EMAIL_NOTIFICATION_TIMEOUT_MS = 10_000;
 
-const withTimeout = (promise, ms) => {
+const withTimeout = (fn, ms) => {
+  const controller = new AbortController();
   let timer;
   const timeout = new Promise((_, reject) => {
-    timer = setTimeout(() => reject(new Error(`timed out after ${ms}ms`)), ms);
+    timer = setTimeout(() => {
+      controller.abort();
+      reject(new Error(`timed out after ${ms}ms`));
+    }, ms);
   });
-  return Promise.race([promise, timeout]).finally(() => clearTimeout(timer));
+  return Promise.race([fn(controller.signal), timeout]).finally(() =>
+    clearTimeout(timer)
+  );
 };
 
 const notifyNextRole = async (group, nextSceneId, currentRole) => {
@@ -198,18 +204,36 @@ const notifyNextRole = async (group, nextSceneId, currentRole) => {
       Scenario.findById(group.scenarioId, { name: 1 }).lean(),
     ]);
 
-    const recipients = fullGroup.users.filter(
+    const roleRecipients = fullGroup.users.filter(
       (user) => nextScene.roles.includes(user.role) && user.role !== currentRole
+    );
+    if (!roleRecipients.length) return;
+
+    const optedOutEmails = new Set(
+      (
+        await User.find(
+          {
+            email: { $in: roleRecipients.map((user) => user.email) },
+            [`emailNotifications.${group.scenarioId}`]: false,
+          },
+          { email: 1 }
+        ).lean()
+      ).map((user) => user.email)
+    );
+    const recipients = roleRecipients.filter(
+      (user) => !optedOutEmails.has(user.email)
     );
 
     await Promise.all(
       recipients.map((user) =>
         withTimeout(
-          sendEmail({
-            to: user.email,
-            template: EmailTemplate.YOUR_TURN,
-            data: { name: user.name, scenarioName: scenario?.name },
-          }),
+          (signal) =>
+            sendEmail({
+              to: user.email,
+              template: EmailTemplate.YOUR_TURN,
+              data: { name: user.name, scenarioName: scenario?.name },
+              signal,
+            }),
           EMAIL_NOTIFICATION_TIMEOUT_MS
         )
       )

@@ -332,6 +332,7 @@ describe("Navigate Group API tests", () => {
       to: "nurse@auckland.ac.nz",
       template: EmailTemplate.YOUR_TURN,
       data: { name: "Nurse Nightingale", scenarioName: "Nav Scenario" },
+      signal: expect.any(AbortSignal),
     });
   });
 

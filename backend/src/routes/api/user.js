@@ -115,6 +115,17 @@ router.put("/:uid", async (req, res) => {
   }
 });
 
+// update the current user's email notification preference for one scenario
+router.patch("/:uid/:scenarioId/settings", async (req, res) => {
+  const { uid, scenarioId } = req.params;
+  const { emailNotifications } = req.body;
+  await User.findOneAndUpdate(
+    { uid },
+    { [`emailNotifications.${scenarioId}`]: !!emailNotifications }
+  );
+  res.sendStatus(STATUS.OK);
+});
+
 // add a scene to the user's path
 router.post("/:uid/:scenarioId/path", async (req, res) => {
   const { nextSceneId } = req.body;

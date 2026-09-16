@@ -11,9 +11,8 @@ const getClient = () => {
   return client;
 };
 
-// TODO: replace with a verified sender once a domain is added at
-// https://resend.com/domains — onboarding@resend.dev is test-only.
-const DEFAULT_FROM = "VPS <onboarding@resend.dev>";
+// Verified sender domain (added at https://resend.com/domains).
+const DEFAULT_FROM = "VPS <notifications@updates.vps.wdcc.co.nz>";
 
 export async function sendEmail({
   to,
@@ -23,28 +22,23 @@ export async function sendEmail({
   html,
   text,
   from,
+  signal,
   ...rest
 }) {
   const built = template ? buildEmail(template, data) : {};
   const resolvedFrom = from || process.env.RESEND_FROM_EMAIL || DEFAULT_FROM;
 
-  // onboarding@resend.dev (the no-domain default) can only deliver to Resend's
-  // test addresses or the Resend account owner's own email. Redirect real
-  // recipients there for now — swap automatically once RESEND_FROM_EMAIL
-  // (a verified domain) is set.
-  const usingTestSender = resolvedFrom === DEFAULT_FROM;
-  const resolvedTo = usingTestSender
-    ? process.env.RESEND_TEST_EMAIL || "delivered@resend.dev"
-    : to;
-
-  const { data: result, error } = await getClient().emails.send({
-    from: resolvedFrom,
-    to: resolvedTo,
-    subject: subject || built.subject,
-    html: html || built.html,
-    text,
-    ...rest,
-  });
+  const { data: result, error } = await getClient().emails.send(
+    {
+      from: resolvedFrom,
+      to,
+      subject: subject || built.subject,
+      html: html || built.html,
+      text,
+      ...rest,
+    },
+    { signal }
+  );
 
   if (error) {
     throw new HttpError(

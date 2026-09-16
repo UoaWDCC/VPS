@@ -8,6 +8,7 @@ import ScenarioGraph from "./components/ScenarioGraph";
 import ProtectedRoute from "../../firebase/ProtectedRoute";
 import ViewGroup from "./components/ViewGroup";
 import { ArrowLeftIcon } from "lucide-react";
+import EmailNotificationsToggle from "./EmailNotificationsToggle";
 
 /**
  * Could maybe add some info about the scenario? Who created what time, last edited, thumbnail of the scenario and an overlay edit button * which directs you to the edit page?
@@ -122,9 +123,18 @@ export default function Dashboard() {
         </button>
       </div>
       <div className="h-full px-10 py-7 overflow-y-scroll ">
-        <h1 className="text-xl font-bold">
-          {heading ? heading : <span className="invisible">placeholder</span>}
-        </h1>
+        <div className="flex items-center justify-between">
+          <h1 className="text-xl font-bold">
+            {heading ? (
+              heading
+            ) : (
+              <span className="invisible">placeholder</span>
+            )}
+          </h1>
+          {!isViewGroupMode && (
+            <EmailNotificationsToggle scenarioId={scenarioId} />
+          )}
+        </div>
         <div className="flex gap-10">
           {/* Left side coloumn */}
           <div className="w-1/2 min-w-0">
