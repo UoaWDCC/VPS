@@ -161,6 +161,7 @@ function ScenarioInfo() {
                 <div className="w-full aspect-video bg-canvas border border-primary rounded-lg overflow-hidden flex items-center justify-center relative">
                   <Thumbnail
                     components={selectedScenario.thumbnail.components}
+                    background={selectedScenario.thumbnail.background}
                   />
                   {/* Corner Overlay */}
                   <svg

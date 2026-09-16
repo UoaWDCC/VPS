@@ -13,6 +13,8 @@ import { useHistory } from "react-router-dom";
 import { replace, replaceComponent } from "./scene/operations/modifiers";
 import { diffToSelection, findEditDiff } from "./scene/operations/text";
 import { syncVisualCursor } from "./text/cursor";
+import { syncPropertyChips } from "./text/property";
+import { buildVisualComponent } from "./pipeline";
 import {
   ArrowLeftIcon,
   FilesIcon,
@@ -21,7 +23,7 @@ import {
   PlayIcon,
   UserPlusIcon,
 } from "lucide-react";
-import { handleGlobal } from "./handlers/keyboard/keyboard";
+import { handleGlobal, handleGlobalKeyUp } from "./handlers/keyboard/keyboard";
 import { clearHistory, historyEvents } from "./scene/history";
 import { debounce } from "../../util/debounce";
 import { getScene } from "./scene/scene";
@@ -35,6 +37,7 @@ const listeners = [
   ["cut", cut],
   ["paste", paste],
   ["keydown", handleGlobal],
+  ["keyup", handleGlobalKeyUp],
 ];
 
 // const AUTOSAVE_INTERVAL = 30000; // 30 secs
@@ -45,7 +48,8 @@ const listeners = [
  */
 export default function AuthoringToolPage() {
   const { scenes, modifyScene, switchScene } = useContext(SceneContext);
-  const { allScenarios, updateScenarioDetails } = useContext(ScenarioContext);
+  const { allScenarios, updateScenarioDetails, properties } =
+    useContext(ScenarioContext);
   const { scenarioId } = useParams();
 
   const sceneId = useVisualScene((scene) => scene.id);
@@ -83,6 +87,7 @@ export default function AuthoringToolPage() {
         // reading past the end of the document
         editorState.setSelection({ start: null, end: null });
         editorState.setVisualSelection({ start: null, end: null });
+        setSelected([]);
 
         const batch = record;
         const targetSceneId = batch[0]?.sceneId;
@@ -93,6 +98,8 @@ export default function AuthoringToolPage() {
         const restoredIds = [];
         batch.forEach((item) => {
           const state = operation === "undo" ? item.before : item.after;
+          if (state?.type === "textbox" && state.document && properties)
+            syncPropertyChips(state.document, properties);
           replaceComponent(item.id, state);
           if (state !== null) restoredIds.push(item.id);
         });
@@ -127,7 +134,7 @@ export default function AuthoringToolPage() {
 
     historyEvents.addEventListener("update", listener);
     return () => historyEvents.removeEventListener("update", listener);
-  }, [sceneId, switchScene, setSelected, modifyScene]);
+  }, [sceneId, switchScene, setSelected, modifyScene, properties]);
 
   // if the active scene was deleted, switch to the first available scene
   useEffect(() => {
@@ -161,6 +168,28 @@ export default function AuthoringToolPage() {
       );
     };
   }, []);
+
+  useEffect(() => {
+    useEditorStore.getState().setProperties(properties);
+  }, [properties]);
+
+  //sync chips w scenario properties
+  useEffect(() => {
+    if (!properties) return;
+
+    const { components, setComponents } = useVisualScene.getState();
+    const next = { ...components };
+    let changed = false;
+
+    for (const component of Object.values(getScene()?.components ?? {})) {
+      if (component.type !== "textbox") continue;
+      if (!syncPropertyChips(component.document, properties)) continue;
+      next[component.id] = buildVisualComponent(component);
+      changed = true;
+    }
+
+    if (changed) setComponents(next);
+  }, [properties, sceneId]);
 
   function playScenario() {
     const startScene = sceneId ? `?startScene=${sceneId}` : "";

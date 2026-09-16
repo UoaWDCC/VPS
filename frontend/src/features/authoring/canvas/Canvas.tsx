@@ -19,15 +19,20 @@ import { hasMarqueeMoved } from "../handlers/pointer/marquee";
 import LoadingOverlay from "./LoadingOverlay.tsx";
 import ImagePlaceholder from "../elements/ImagePlaceholder";
 import useEditorStore from "../stores/editor.ts";
+import { addText } from "../components/AddText.tsx";
 import { CANVAS_HEIGHT, CANVAS_WIDTH } from "../../../util/canvas";
 import Background from "../elements/Background";
 import useImageDrop from "../useImageDrop";
 
+const TextableBox = addText(Box);
+const TextableEllipse = addText(Ellipse);
+const TextableSpeech = addText(Speech);
+
 const componentMap: Record<string, React.FC<Record<string, unknown>>> = {
   textbox: (props) => <TextBox {...props} editable={true} />,
-  speech: Speech,
-  ellipse: Ellipse,
-  box: Box,
+  box: (props) => <TextableBox {...props} />,
+  ellipse: (props) => <TextableEllipse {...props} />,
+  speech: (props) => <TextableSpeech {...props} />,
   image: Image,
   line: Line,
 };

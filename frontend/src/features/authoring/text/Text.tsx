@@ -5,6 +5,8 @@ import Rectangle from "../canvas/Rectangle";
 import { buildStyle } from "./build";
 import useEditorStore from "../stores/editor";
 import TextHighlight from "./TextHighlight.tsx";
+import { CHIP_FONT_SCALE } from "./property.ts";
+import PropertyChips from "./PropertyChips";
 
 function buildGroups(doc: VisualDocument) {
   return doc.blocks.map((block, i) => (
@@ -16,11 +18,42 @@ function buildGroups(doc: VisualDocument) {
           y={block.y + line.y + line.baseline}
           style={{ whiteSpace: "pre" }}
         >
-          {line.spans.map((span, k) => (
-            <tspan key={k} style={buildStyle(span.style)}>
-              {span.text}
-            </tspan>
-          ))}
+          {line.spans.map((span, k) => {
+            const { property } = span;
+            const style = buildStyle(
+              property
+                ? {
+                    ...span.style,
+                    fontSize: span.style.fontSize * CHIP_FONT_SCALE,
+                  }
+                : span.style
+            );
+            if (property?.missing)
+              style.fill = "var(--color-chip-missing-text)";
+
+            //center text within chip
+            return property ? (
+              <tspan
+                key={k}
+                x={line.x + span.x + span.width / 2}
+                y={block.y + line.y + line.height / 2}
+                textAnchor="middle"
+                dominantBaseline="central"
+                style={style}
+              >
+                {property.displayName}
+              </tspan>
+            ) : (
+              <tspan
+                key={k}
+                x={line.x + span.x}
+                y={block.y + line.y + line.baseline}
+                style={style}
+              >
+                {span.text}
+              </tspan>
+            );
+          })}
         </text>
       ))}
     </g>
@@ -59,6 +92,7 @@ function Text({ doc, editable }: { doc: VisualDocument; editable?: boolean }) {
   return (
     <g className="select-none text">
       <TextHighlight doc={doc} />
+      <PropertyChips doc={doc} />
       {isSelected && (
         <Highlight color="var(--color-selection)" bounds={bounds} />
       )}

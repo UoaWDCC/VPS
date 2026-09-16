@@ -9,28 +9,27 @@ export default function PropertyBindingMenu({ component }) {
 
   return (
     <>
-      <div className="collapse overflow-visible collapse-arrow bg-base-300 rounded-sm text-s">
-        <input type="checkbox" />
-        <div className="collapse-title flex items-center justify-between">
-          Property Bindings
-          <PlusIcon
-            size={18}
-            className="z-1"
-            onClick={(event) => {
-              event.stopPropagation();
-              setCreateOpen(true);
-            }}
+      <div className="mb-3">
+        <button
+          type="button"
+          className="flex w-full items-center gap-2 rounded-sm border-0 bg-base-300 px-3 py-2 text-left text-sm shadow-none transition-colors hover:bg-base-100"
+          onClick={() => setCreateOpen(true)}
+        >
+          <PlusIcon size={16} />
+          Add Binding
+        </button>
+      </div>
+      <div className="text--1">
+        {bindings.map((binding, index) => (
+          <PropertyBinding
+            component={component}
+            binding={binding}
+            key={`${binding.target}-${binding.stateVariableId}-${index}`}
           />
-        </div>
-        <div className="collapse-content text--1 bg-base-200 px-0">
-          {bindings.map((binding, index) => (
-            <PropertyBinding
-              component={component}
-              binding={binding}
-              key={`${binding.target}-${binding.stateVariableId}-${index}`}
-            />
-          ))}
-        </div>
+        ))}
+        {bindings.length === 0 && (
+          <p className="text-xs opacity-70">No property bindings yet.</p>
+        )}
       </div>
       <CreatePropertyBinding
         component={component}

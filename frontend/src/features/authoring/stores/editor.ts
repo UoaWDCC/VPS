@@ -3,6 +3,7 @@ import type { ModelSelection, VisualSelection } from "../text/types";
 import type { BaseTextStyle, Bounds, Guide, Vec2 } from "../types";
 import { getComponent } from "../scene/scene";
 import { getStyleForSelection } from "../scene/operations/text";
+import type { Property } from "../text/property";
 
 type Mode = "normal" | "resize" | "create" | "text" | "mutation" | "marquee";
 
@@ -44,6 +45,7 @@ interface EditorState {
   visualSelection: VisualSelection;
   desiredColumn: number | null;
   activeStyle: BaseTextStyle | null;
+  properties: Property[];
 
   setLoading: (loading: boolean) => void;
   addPendingImage: (image: PendingImage) => void;
@@ -53,6 +55,7 @@ interface EditorState {
   setVisualSelection: Dynamic<VisualSelection>;
   setDesiredColumn: (column: number | null) => void;
   setActiveStyle: (style: BaseTextStyle) => void;
+  setProperties: (properties?: Property[]) => void;
 
   // modes
   mode: Mode[];
@@ -91,6 +94,18 @@ const useEditorStore = create<EditorState>((set) => ({
   activeGuides: [],
 
   setLoading: (value: boolean) => set({ loading: value }),
+  setSelected: (ids) =>
+    set(() => {
+      if (!ids.length || ids.length > 1) return { selected: ids };
+      const component = getComponent(ids[0]);
+      const hasDoc = component && "document" in component && component.document;
+      return {
+        selected: ids,
+        ...(hasDoc && {
+          activeStyle: getStyleForSelection(ids[0], { start: null, end: null }),
+        }),
+      };
+    }),
   addPendingImage: (image) =>
     set((state) => ({ pendingImages: [...state.pendingImages, image] })),
   updatePendingImage: (id, patch) =>
@@ -103,7 +118,6 @@ const useEditorStore = create<EditorState>((set) => ({
     set((state) => ({
       pendingImages: state.pendingImages.filter((image) => image.id !== id),
     })),
-  setSelected: (id) => set({ selected: id }),
   setHovered: (id) => set({ hovered: id }),
   setCreateType: (type: string) => set({ createType: type }),
   setMouseDown: (mouseDown) => set({ mouseDown }),
@@ -114,13 +128,16 @@ const useEditorStore = create<EditorState>((set) => ({
   selection: { start: null, end: null },
   visualSelection: { start: null, end: null },
   activeStyle: null,
+  properties: [],
   desiredColumn: null,
 
   setSelection: (selection) =>
     set(({ selected }) => {
       const mainTarget = selected[0];
       const component = mainTarget ? getComponent(mainTarget) : null;
-      if (component?.type === "textbox") {
+      const hasDoc =
+        component && "document" in component && !!component.document;
+      if (hasDoc) {
         const activeStyle = getStyleForSelection(mainTarget, selection);
         return { selection, activeStyle };
       }
@@ -129,6 +146,7 @@ const useEditorStore = create<EditorState>((set) => ({
   setVisualSelection: setter(set, "visualSelection"),
   setActiveStyle: (style: BaseTextStyle) => set({ activeStyle: style }),
   setDesiredColumn: (column) => set({ desiredColumn: column }),
+  setProperties: (properties) => set({ properties: properties ?? [] }),
 
   mode: ["normal"],
   setMode: (mode) => set({ mode }),

@@ -8,7 +8,7 @@ const NodeBase = ({ data }) => (
     className={`bg-base-300 text-base-content w-40 text-center ${data.visited ? "" : "brightness-60"} ${data.isHighlighted ? "border-error border-4" : ""}`}
   >
     <div>
-      <Thumbnail components={data.components} />
+      <Thumbnail components={data.components} background={data.background} />
       <span className="block w-full">{data.label}</span>
     </div>
     <Handle
