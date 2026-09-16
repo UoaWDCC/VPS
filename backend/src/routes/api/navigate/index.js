@@ -2,7 +2,7 @@ import { Router } from "express";
 import auth from "../../../middleware/firebaseAuth.js";
 
 import { handle } from "../../../util/error.js";
-import { groupNavigate, groupReset, groupGetResources } from "./group.js";
+import { groupNavigate, groupReset } from "./group.js";
 import { userNavigate, userReset } from "./user.js";
 
 const router = Router();
@@ -21,14 +21,6 @@ router.post(
   "/group/:groupId",
   handle(async (req, res) => {
     const response = await groupNavigate(req);
-    return res.status(response.status).json(response.json);
-  })
-);
-
-router.get(
-  "/group/resources/:groupId",
-  handle(async (req, res) => {
-    const response = await groupGetResources(req);
     return res.status(response.status).json(response.json);
   })
 );

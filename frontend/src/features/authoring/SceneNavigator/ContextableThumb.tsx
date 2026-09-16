@@ -87,11 +87,15 @@ function ContextableThumb({
         <button
           type="button"
           onMouseDown={() => switchScene(getScene(), scene._id)}
-          className="w-[160px] relative rounded-sm overflow-hidden border-3 hover:border-primary"
-          style={active ? { border: "3px solid #035084" } : {}}
+          className={`w-[160px] relative rounded-sm overflow-hidden border-3 ${
+            active ? "border-accent" : "border-transparent hover:border-primary"
+          }`}
           key={scene._id}
         >
-          <Thumbnail components={scene.components} />
+          <Thumbnail
+            components={scene.components}
+            background={scene.background}
+          />
         </button>
       </div>
     </RightContextMenu>

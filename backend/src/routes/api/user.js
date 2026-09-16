@@ -1,13 +1,8 @@
 import { Router } from "express";
 import {
-  retrieveAllUser,
   retrieveUserByEmail,
   createUser,
-  retrieveUser,
-  addPlayed,
-  retrievePlayedUsers,
   assignScenarioToUsers,
-  retrieveAllUserMinAsc,
 } from "../../db/daos/userDao.js";
 import User from "../../db/models/user.js";
 import Group from "../../db/models/group.js";
@@ -15,6 +10,7 @@ import auth from "../../middleware/firebaseAuth.js";
 
 import STATUS from "../../util/status.js";
 import { handle, HttpError } from "../../util/error.js";
+import scenarioAuth from "../../middleware/scenarioAuth.js";
 
 const router = Router();
 
@@ -52,18 +48,6 @@ router.post(
 // All routes below require Firebase authentication
 router.use(auth);
 
-// gets all users
-router.get("/", async (req, res) => {
-  const dashboard = await retrieveAllUser();
-  res.json(dashboard);
-});
-
-// Only gets the uid, name and email.
-router.get("/min", async (req, res) => {
-  const users = await retrieveAllUserMinAsc();
-  res.json(users);
-});
-
 // fetch the user's group needed for a scenario upfront
 router.get(
   "/group/:scenarioId",
@@ -80,14 +64,10 @@ router.get(
   })
 );
 
-// get users that played scenario
-router.get("/played/:scenarioId", async (req, res) => {
-  const users = await retrievePlayedUsers(req.params.scenarioId);
-  return res.json(users);
-});
+// NOTE: not currently used, but associated ui functionality will be added
 
 // assign scenario to users
-router.patch("/assigned/:scenarioId", async (req, res) => {
+router.patch("/assigned/:scenarioId", scenarioAuth, async (req, res) => {
   const { userEmails } = req.body;
   const newAssigneeIds = Object.entries(
     await User.find({ email: { $in: userEmails } }, "_id")
@@ -98,21 +78,14 @@ router.patch("/assigned/:scenarioId", async (req, res) => {
   res.status(STATUS.OK).send();
 });
 
-// get user by uid
-router.get("/:uid", async (req, res) => {
-  const user = await retrieveUser(req.params.uid);
-  res.json(user);
-});
-
-// update user's played array
-router.put("/:uid", async (req, res) => {
-  const scenarioID = Object.values(req.body)[0];
-  const added = await addPlayed(req.params.uid, req.body, scenarioID);
-  if (added) {
-    res.status(STATUS.OK).json(added);
-  } else {
-    res.sendStatus(STATUS.NOT_FOUND);
-  }
+// get the current user's email notification preference for one scenario
+router.get("/:uid/:scenarioId/settings", async (req, res) => {
+  const { uid, scenarioId } = req.params;
+  const user = await User.findOne({ uid }, { emailNotifications: 1 }).lean();
+  if (!user) return res.sendStatus(STATUS.NOT_FOUND);
+  res.json({
+    emailNotifications: user.emailNotifications?.[scenarioId] !== false,
+  });
 });
 
 // update the current user's email notification preference for one scenario
@@ -123,23 +96,6 @@ router.patch("/:uid/:scenarioId/settings", async (req, res) => {
     { uid },
     { [`emailNotifications.${scenarioId}`]: !!emailNotifications }
   );
-  res.sendStatus(STATUS.OK);
-});
-
-// add a scene to the user's path
-router.post("/:uid/:scenarioId/path", async (req, res) => {
-  const { nextSceneId } = req.body;
-  const { uid, scenarioId } = req.params;
-
-  await User.findOneAndUpdate(
-    { uid },
-    {
-      $push: {
-        [`paths.${scenarioId}`]: { $each: [nextSceneId], $position: 0 },
-      },
-    }
-  );
-
   res.sendStatus(STATUS.OK);
 });
 

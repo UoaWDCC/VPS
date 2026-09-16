@@ -38,5 +38,5 @@ Since the multiplayer playthrough of scenarios is intended to be role-based and 
 
 ## Next Steps
 
-- Track player choices and scores using [State & Logic](/state/).
+- Track player choices and scores using [Properties & Logic](/properties/).
 - Add images and PDFs for players to reference from [Resources](/resources/).

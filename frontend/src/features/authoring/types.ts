@@ -4,7 +4,8 @@ export type Component =
   | ImageComponent
   | EllipseComponent
   | SpeechComponent
-  | LineComponent;
+  | LineComponent
+  | AudioComponent;
 
 export interface Scene {
   _id: string;
@@ -14,7 +15,24 @@ export interface Scene {
   time: number | null;
   directLink: string | null;
   timerStateOperations: Record<string, unknown>[] | null;
+  background: SceneBackground | null;
 }
+
+export type BackgroundFit = "cover" | "contain" | "fill";
+
+export interface ImageBackground {
+  kind: "image";
+  fileId: string;
+  href: string;
+  fit: BackgroundFit;
+}
+
+export interface ColorBackground {
+  kind: "color";
+  color: string;
+}
+
+export type SceneBackground = ImageBackground | ColorBackground;
 
 export interface Vec2 {
   x: number;
@@ -34,22 +52,45 @@ export interface RelativeBounds {
   rotation: number;
 }
 
+export interface Guide {
+  orientation: "vertical" | "horizontal";
+  position: number;
+  isCanvasCenter?: boolean;
+}
+
 interface GenericComponent {
   id: string;
   bounds: Bounds;
   zIndex: number;
+  clickable?: boolean;
+  stateBindings?: PropertyBinding[];
 }
 
-interface ShapeComponent extends GenericComponent {
+export interface PropertyBinding {
+  target: string;
+  stateVariableId: string;
+}
+
+export interface ShapeComponent extends GenericComponent {
   fill: HexString;
   stroke: HexString;
   strokeWidth: number;
+  document?: ModelDocument;
 }
 
 export interface ImageComponent extends GenericComponent {
   type: "image";
+  fileId: string;
   href: string;
   preserveAspectRatio: string;
+}
+
+export interface AudioComponent extends GenericComponent {
+  type: "audio";
+  fileId: string;
+  url: string;
+  name: string;
+  loop: boolean;
 }
 
 export interface SpeechComponent extends ShapeComponent {
@@ -93,9 +134,16 @@ export interface ModelBlock {
   spans: ModelSpan[];
 }
 
+export interface PropertyRef {
+  id: string;
+  displayName: string;
+  missing?: boolean;
+}
+
 export interface ModelSpan {
   text: string;
   style?: Partial<SpanTextStyle>;
+  property?: PropertyRef;
 }
 
 export interface BaseTextStyle extends BlockTextStyle, SpanTextStyle {}
@@ -116,3 +164,17 @@ export interface SpanTextStyle {
 }
 
 type HexString = string;
+
+export interface UploadedFile {
+  _id: string;
+  name: string;
+  type: "image" | "audio" | "document";
+  path: string;
+  url: string;
+  contentType: string;
+  size: number;
+  uploaderUid: string;
+  scenarioId: string;
+  refCount: number;
+  deletedAt: Date | null;
+}

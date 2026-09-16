@@ -11,14 +11,9 @@ export default function EmailNotificationsToggle({ scenarioId }) {
   const [saving, setSaving] = useState(false);
 
   useGet(
-    user ? `/api/${user.uid}` : null,
+    user ? `/api/${user.uid}/${scenarioId}/settings` : null,
     (data) => {
-      const [record] = Array.isArray(data) ? data : [data];
-      if (record) {
-        setEmailNotifications(
-          record.emailNotifications?.[scenarioId] !== false
-        );
-      }
+      if (data) setEmailNotifications(data.emailNotifications !== false);
     },
     true,
     !user

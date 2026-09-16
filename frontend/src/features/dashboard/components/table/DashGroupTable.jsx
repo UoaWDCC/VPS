@@ -3,11 +3,11 @@ import TablePaginationActions from "./TablePaginationAction";
 import getComparator from "../../utils/TableHelper";
 import CustomSortHeader from "./CustomSortHeader";
 import CustomPagination from "./CustomPagination";
-import { EyeIcon } from "lucide-react";
+import { Ban, EyeIcon } from "lucide-react";
 // Need to update this to be able to take either multiple groups or individual group (to display members per row)
 // Acutally need to update this component to make it reuseable and take in params to dynamically display thead, tdata stuff with num col etc
 
-const DashGroupTable = ({ groupInfo, rowClick }) => {
+const DashGroupTable = ({ groupInfo, rowClick, onRevoke, onMemberClick }) => {
   // Check if group info is in array (Scenario Dashboard) or object (Vewiing Group)
   // Maybe just make mode default to groups?
   let mode;
@@ -48,12 +48,12 @@ const DashGroupTable = ({ groupInfo, rowClick }) => {
       [...sort]
         .sort(getComparator(order, orderBy))
         .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage),
-    [order, orderBy, page, rowsPerPage]
+    [sort, order, orderBy, page, rowsPerPage]
   );
 
   return (
     <div className="overflow-x-auto rounded-box border border-base-content/15 w-full">
-      <table className="table table-zebra ">
+      <table className="table table-zebra">
         <thead>
           {mode == "groups" ? (
             <tr>
@@ -104,6 +104,7 @@ const DashGroupTable = ({ groupInfo, rowClick }) => {
               >
                 Role
               </CustomSortHeader>
+              {onRevoke && <th>Revoke</th>}
             </tr>
           )}
         </thead>
@@ -114,11 +115,20 @@ const DashGroupTable = ({ groupInfo, rowClick }) => {
                   <td>{ginfo.users[0].group}</td>
                   <td>{ginfo.users.length}</td>
                   <td>
-                    {ginfo.users.map((user) => (
-                      <span key={user.email}>
-                        {user.name} - [{user.role}]
-                      </span>
-                    ))}
+                    <div className="flex flex-col gap-1.5 py-1">
+                      {ginfo.users.map((user) => (
+                        <button
+                          key={user.email}
+                          onClick={() => onMemberClick?.(user)}
+                          className="flex items-center gap-2 text-left hover:underline w-fit"
+                        >
+                          <span>{user.name}</span>
+                          <span className="badge badge-ghost badge-md text-sm">
+                            {user.role}
+                          </span>
+                        </button>
+                      ))}
+                    </div>
                   </td>
                   <td>
                     {ginfo.path.length != 0 ? "Started" : "Not yet started"}
@@ -135,15 +145,26 @@ const DashGroupTable = ({ groupInfo, rowClick }) => {
                   <td>{user.name}</td>
                   <td>{user.email}</td>
                   <td>{user.role}</td>
+                  {onRevoke && (
+                    <td>
+                      <button
+                        onClick={() => onRevoke(user)}
+                        aria-label={`Revoke ${user.name}`}
+                        className="hover:text-error"
+                      >
+                        <Ban size={20} />
+                      </button>
+                    </td>
+                  )}
                 </tr>
               ))}
         </tbody>
         <tfoot>
           <CustomPagination
-            colSpan={mode == "groups" ? 5 : 3}
+            colSpan={mode == "groups" ? 5 : onRevoke ? 4 : 3}
             value={rowsPerPage}
             onChange={handleChangeRowsPerPage}
-            count={group.length}
+            count={sort.length}
             page={page}
             rowsPerPage={rowsPerPage}
             onPageChange={handleChangePage}

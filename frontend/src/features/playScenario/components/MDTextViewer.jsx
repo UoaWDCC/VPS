@@ -20,8 +20,9 @@ export default function MDTextViewer({ file, content }) {
 
   // networking tab showed backend returning type html so I check for both
   const isMarkdown =
-    file.type === "text/markdown" || /\.md$/i.test(file.name || "");
-  const isHTML = file.type === "text/html" || /\.html?$/i.test(file.name || "");
+    file.contentType === "text/markdown" || /\.md$/i.test(file.name || "");
+  const isHTML =
+    file.contentType === "text/html" || /\.html?$/i.test(file.name || "");
 
   // caches res to avoid frequent updating
   const renderedHTML = useMemo(() => {

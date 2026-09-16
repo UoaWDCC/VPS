@@ -1,35 +1,59 @@
-import mongoose from "mongoose";
+import { model, Schema } from "mongoose";
 
-const { Schema } = mongoose;
+export const RESOURCE_NAME_MAX_LENGTH = 255;
 
-const resourceSchema = new Schema({
-  scenarioId: {
-    type: String,
-    required: true,
+const resourceSchema = new Schema(
+  {
+    scenarioId: {
+      type: Schema.Types.ObjectId,
+      ref: "Scenario",
+      required: true,
+      index: true,
+    },
+    parentId: {
+      type: Schema.Types.ObjectId,
+      ref: "Resource",
+      required: false,
+      index: true,
+    },
+    type: {
+      type: String,
+      enum: ["file", "collection"],
+      required: true,
+    },
+    name: {
+      type: String,
+      required: true,
+      trim: true,
+      maxlength: RESOURCE_NAME_MAX_LENGTH,
+    },
+    fileId: {
+      type: Schema.Types.ObjectId,
+      ref: "UploadedFile",
+      required: false,
+    },
+    stateConditionals: {
+      type: [
+        {
+          stateVariableId: { type: String, required: true },
+          comparator: {
+            type: String,
+            enum: ["=", "!=", "<", ">"],
+            required: true,
+          },
+          value: { type: Schema.Types.Mixed, required: true },
+        },
+      ],
+      default: [],
+    },
   },
-  name: {
-    type: String,
-    required: true,
-  },
-  type: {
-    type: String,
-    enum: ["text", "image"],
-    required: true,
-  },
-  textContent: {
-    type: String,
-    default: "",
-  },
-  imageContent: {
-    type: String,
-    default: "",
-  },
-  requiredFlags: {
-    type: [String],
-    default: [],
-  },
+  { versionKey: false, timestamps: true }
+);
+
+resourceSchema.index({
+  scenarioId: 1,
+  parentId: 1,
+  createdAt: -1,
 });
 
-const Resource = mongoose.model("Resource", resourceSchema, "resources");
-
-export default Resource;
+export default model("Resource", resourceSchema);

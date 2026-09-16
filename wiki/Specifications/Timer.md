@@ -69,7 +69,7 @@ The switching order should just cycle between the roles based on the definition 
 
 ### What Is Implemented
 
-The **single-scene timer** is implemented. Authors can set a countdown duration on any scene and attach a list of state variable operations that fire when the timer reaches zero.
+The **single-scene timer** is implemented. Authors can set a countdown duration on any scene and attach a list of property operations that fire when the timer reaches zero.
 
 #### Authoring
 
@@ -78,10 +78,10 @@ The **single-scene timer** is implemented. Authors can set a countdown duration 
 - A "Timer Duration (seconds)" number input. Saving on blur calls `modifySceneProp("time", ...)`, which persists the value via autosave.
 - When `time > 0`, an "On Timeout" collapse panel appears below the scene details panel.
 
-**On Timeout panel** (`TimerStateOperationMenu.jsx`)
+**On Timeout panel** (`TimerPropertyOperationMenu.jsx`)
 
-- Lists the current timeout state operations for the scene.
-- A `+` button opens a modal to add a new operation (same action schema as button state operations: variable → operation → value).
+- Lists the current timeout property operations for the scene.
+- A `+` button opens a modal to add a new operation (same action schema as button property operations: variable → operation → value).
 - Each row can edit or delete its operation inline.
 - All changes call `modifySceneProp("timerStateOperations", ...)` and are included in the autosave patch.
 
@@ -91,7 +91,7 @@ Scene document (MongoDB):
 
 ```js
 {
-  time: Number,                 // countdown duration in seconds; null = no timer
+  time: Number,                 // countdown duration in seconds; null = no timer, min 1 if set
   timerStateOperations: [{      // operations applied on timeout
     stateVariableId: String,
     displayName: String,
@@ -102,6 +102,20 @@ Scene document (MongoDB):
 ```
 
 Both fields are included in the `patchScene` allowlist and projected by the play navigation routes (`getSimpleScene`, `getConnectedScenes`).
+
+Server-side entry timestamps are also tracked to support resuming a timer instead of resetting it:
+
+```js
+// Group document
+{
+  currentSceneEnteredAt: Date  // when the group entered the current scene
+}
+
+// User document
+{
+  sceneEnteredAt: Map<scenarioId, Date>  // per-scenario scene entry time
+}
+```
 
 #### Play
 
@@ -120,9 +134,19 @@ Both fields are included in the `patchScene` allowlist and projected by the play
 - Reads `currScene.timerStateOperations` and calls `applyStateOperations`.
 - Increments `stateVersion` to trigger a re-render with updated state.
 
+#### Server-Side Enforcement
+
+The backend now stamps a scene-entry timestamp and returns the server-computed remaining time when entering, resuming, or moving to a scene, so the timer can't be reset by refreshing or rejoining:
+
+- `Group.currentSceneEnteredAt` (multiplayer) and `User.sceneEnteredAt` (singleplayer, keyed per scenario) record when the current scene was entered.
+- `backend/src/routes/api/navigate/timer.js` computes `remainingTime` from that timestamp and the scene's `time`; it's included when entering, resuming, or moving to a scene, and stamped on scene entry, cleared on reset.
+- The frontend seeds `SceneTimer` from this value (`initialSeconds={currScene.remainingTime ?? currScene.time}`) instead of always starting from the full duration, so a page reload or a player rejoining resumes the existing countdown rather than restarting it.
+
+This does not yet provide live sync between concurrent multiplayer clients — each client still runs its own local countdown once seeded, and clients aren't pushed updates when others act. It also doesn't implement role-locking of timed scenes.
+
 ### What Is Not Yet Implemented
 
 - **Multi-scene and global timers** — only per-scene timers exist.
-- **Scene transition on timeout** — only state variable operations are supported; navigating to a specific scene on timeout is not wired up.
-- **Backend timer for multiplayer sync** — the timer runs entirely client-side. In multiplayer, each player's timer is independent; there is no shared server-side source of truth.
+- **Scene transition on timeout** — only property operations are supported; navigating to a specific scene on timeout is not wired up.
+- **Live multiplayer timer sync** — the server prevents the timer from resetting on rejoin/refresh (see above), but there's no push mechanism keeping concurrent clients' countdowns in lockstep, and timed scenes can't be locked to a single role.
 - **Role switch action** — not implemented.

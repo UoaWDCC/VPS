@@ -203,7 +203,7 @@ export default function ScenarioGraph({
               <svg width={30} height={20}>
                 <path
                   d="M0 10 H 30 10"
-                  style={{ strokeWidth: 3, stroke: "#b1b1b7" }}
+                  style={{ strokeWidth: 3, stroke: "var(--color-primary)" }}
                   strokeDasharray="4"
                 />
               </svg>
@@ -215,7 +215,7 @@ export default function ScenarioGraph({
               <svg width={30} height={20}>
                 <path
                   d="M0 10 H 30 10"
-                  style={{ strokeWidth: 3, stroke: "#89d149" }}
+                  style={{ strokeWidth: 3, stroke: "var(--color-success)" }}
                   strokeDasharray="4"
                 />
               </svg>

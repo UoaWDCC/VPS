@@ -1,183 +1,274 @@
 import { Router } from "express";
 import auth from "../../middleware/firebaseAuth.js";
-import { handle } from "../../util/error.js";
-import Resource from "../../db/models/resource.js";
-
+import { handle, HttpError } from "../../util/error.js";
+import scenarioAuth from "../../middleware/scenarioAuth.js";
+import { HttpStatusCode } from "axios";
 import {
-  createResource,
-  getResourceById,
-  deleteResourceById,
-  getAllVisibleResources,
-  updateResourceById,
-  bulkCreateResources,
-} from "../../db/daos/resourcesDao.js";
+  applyReferenceDelta,
+  applyReferenceDeltas,
+} from "../../db/daos/fileDao.js";
+import Resource, {
+  RESOURCE_NAME_MAX_LENGTH,
+} from "../../db/models/resource.js";
+import { isValidObjectId } from "../../util/validation.js";
+import UploadedFile from "../../db/models/uploadedFile.js";
 
 const router = Router();
 
-const HTTP_OK = 200;
-const HTTP_CREATED = 201;
-const HTTP_NO_CONTENT = 204;
-const HTTP_BAD_REQUEST = 400;
-const HTTP_NOT_FOUND = 404;
-const HTTP_INTERNAL_SERVER_ERROR = 500;
-
-// All routes require Firebase auth
 router.use(auth);
 
 /**
- * @route GET /scenario/:scenarioId
- * @desc Retrieve all resources belonging to a scenario
+ * @route GET /api/resources/:scenarioId
+ * @desc Get all resources for a scenario
+ * NOTE: this route is unprotected currently, will be addressed with assignment refactor
  */
-router.get("/scenario/:scenarioId", async (req, res) => {
-  const { scenarioId } = req.params;
-  try {
-    const resources = await Resource.find({ scenarioId });
-    return res.status(HTTP_OK).json(resources);
-  } catch (err) {
-    return res.status(HTTP_INTERNAL_SERVER_ERROR).json({ error: err.message });
-  }
-});
-
-/**
- * @route GET /group/:groupId
- * @desc Retrieve all visible resources for a group
- */
-router.get("/group/:groupId", async (req, res) => {
-  const { groupId } = req.params;
-  if (!groupId) {
-    return res.status(HTTP_BAD_REQUEST).json({ error: "Missing groupId" });
-  }
-
-  try {
-    const resources = await getAllVisibleResources(groupId);
-    return res.status(HTTP_OK).json(resources);
-  } catch (err) {
-    return res.status(HTTP_INTERNAL_SERVER_ERROR).json({ error: err.message });
-  }
-});
-
-/**
- * @route POST /
- * @desc Create a new resource
- */
-router.post(
-  "/",
+router.get(
+  "/:scenarioId",
   handle(async (req, res) => {
-    const { type, content, name, scenarioId, groupId, requiredFlags } =
-      req.body;
-    if (!type || !name || !scenarioId) {
-      return res
-        .status(HTTP_BAD_REQUEST)
-        .json({ error: "Missing required fields" });
-    }
+    const { scenarioId } = req.params;
 
-    const newResource = await createResource(
-      type,
-      content,
-      name,
-      requiredFlags,
-      {
-        scenarioId,
-        groupId,
-      }
-    );
-    return res.status(HTTP_CREATED).json(newResource);
+    const resources = await Resource.find({ scenarioId })
+      .populate("fileId", "name url type contentType size")
+      .sort({ parentId: 1, createdAt: -1 })
+      .lean();
+
+    return res.json(resources);
   })
 );
 
-/**
- * @route GET /:resourceId
- * @desc Retrieve a specific resource by ID
- */
-router.get("/:resourceId", async (req, res) => {
-  const { resourceId } = req.params;
-  if (!resourceId)
-    return res.status(HTTP_BAD_REQUEST).send("Missing resourceId");
-
-  try {
-    const resource = await getResourceById(resourceId);
-    if (!resource) return res.status(HTTP_NOT_FOUND).send("Not Found");
-    return res.status(HTTP_OK).json(resource);
-  } catch (err) {
-    return res.status(HTTP_INTERNAL_SERVER_ERROR).json({ error: err.message });
-  }
-});
+router.use("/:scenarioId", scenarioAuth);
 
 /**
- * @route PUT /:resourceId
- * @desc Update an existing resource
- */
-router.put("/:resourceId", async (req, res) => {
-  const { resourceId } = req.params;
-  const { name, type, content, requiredFlags } = req.body;
-
-  if (!name || !type) {
-    return res
-      .status(HTTP_BAD_REQUEST)
-      .json({ error: "Missing required fields" });
-  }
-
-  try {
-    const updated = await updateResourceById(
-      resourceId,
-      name,
-      type,
-      content,
-      requiredFlags
-    );
-    if (!updated) return res.status(HTTP_NOT_FOUND).send("Not Found");
-    return res.status(HTTP_OK).json(updated);
-  } catch (err) {
-    return res.status(HTTP_INTERNAL_SERVER_ERROR).json({ error: err.message });
-  }
-});
-
-/**
- * @route DELETE /:resourceId
- * @desc Delete a resource
- */
-router.delete("/:resourceId", async (req, res) => {
-  const { resourceId } = req.params;
-  if (!resourceId)
-    return res.status(HTTP_BAD_REQUEST).send("Missing resourceId");
-
-  try {
-    const deleted = await deleteResourceById(resourceId);
-    if (!deleted) return res.status(HTTP_NOT_FOUND).send("Not Found");
-    return res.status(HTTP_NO_CONTENT).send();
-  } catch (err) {
-    return res.status(HTTP_INTERNAL_SERVER_ERROR).json({ error: err.message });
-  }
-});
-
-/**
- * @route POST /:scenarioId
- * @desc Bulk upload resources (e.g. from CSV)
+ * @route POST /api/resources/:scenarioId
+ * @desc Upload a file resource, optionally to a collection
  */
 router.post(
   "/:scenarioId",
   handle(async (req, res) => {
     const { scenarioId } = req.params;
-    const resources = req.body;
+    const { parentId, name, fileId } = req.body;
 
-    if (!Array.isArray(resources) || resources.length === 0) {
-      return res
-        .status(HTTP_BAD_REQUEST)
-        .json({ error: "Invalid or empty resource list" });
-    }
+    if (!name || !fileId)
+      throw new HttpError(
+        "missing required properties",
+        HttpStatusCode.BadRequest
+      );
 
-    try {
-      const saved = await bulkCreateResources(scenarioId, resources);
-      return res.status(HTTP_OK).json({
-        message: `Successfully uploaded ${saved.length} resources.`,
-        count: saved.length,
+    if (parentId && !isValidObjectId(parentId))
+      throw new HttpError("invalid parent id", HttpStatusCode.BadRequest);
+    if (!isValidObjectId(fileId))
+      throw new HttpError("invalid file id", HttpStatusCode.BadRequest);
+
+    if (parentId) {
+      const parent = await Resource.exists({
+        _id: parentId,
+        scenarioId,
+        type: "collection",
       });
-    } catch (err) {
-      console.error("Failed to upload resources:", err);
-      return res
-        .status(HTTP_INTERNAL_SERVER_ERROR)
-        .json({ error: err.message });
+      if (!parent)
+        throw new HttpError(
+          "parent collection not found",
+          HttpStatusCode.NotFound
+        );
     }
+
+    const file = await UploadedFile.exists({ _id: fileId, scenarioId });
+    if (!file) throw new HttpError("file not found", HttpStatusCode.NotFound);
+
+    const resource = await Resource.create({
+      type: "file",
+      scenarioId,
+      parentId,
+      name,
+      fileId,
+    });
+    await resource.populate("fileId", "name url type contentType size");
+
+    await applyReferenceDelta(fileId, 1);
+
+    return res.status(HttpStatusCode.Created).json(resource);
+  })
+);
+
+/**
+ * @route POST /api/resources/:scenarioId/collection
+ * @desc Create a resource collection
+ */
+router.post(
+  "/:scenarioId/collection",
+  handle(async (req, res) => {
+    const { scenarioId } = req.params;
+    const { name } = req.body;
+
+    if (!name)
+      throw new HttpError(
+        "missing required properties",
+        HttpStatusCode.BadRequest
+      );
+
+    const resource = await Resource.create({
+      type: "collection",
+      scenarioId,
+      name,
+    });
+
+    return res.status(HttpStatusCode.Created).json(resource);
+  })
+);
+
+/**
+ * @route DELETE /api/resources/:scenarioId/:resourceId
+ * @desc Delete a resource
+ */
+router.delete(
+  "/:scenarioId/:resourceId",
+  handle(async (req, res) => {
+    const { scenarioId, resourceId } = req.params;
+
+    if (!isValidObjectId(resourceId))
+      throw new HttpError("invalid resource id", HttpStatusCode.BadRequest);
+
+    const resource = await Resource.findOneAndDelete({
+      _id: resourceId,
+      scenarioId,
+    });
+    if (!resource)
+      throw new HttpError("resource not found", HttpStatusCode.NotFound);
+
+    const fileRefDeltas = new Map();
+
+    if (resource.type === "collection") {
+      const children = await Resource.find({ parentId: resource._id });
+      for (const child of children) {
+        if (child.fileId) {
+          const fileId = child.fileId.toString();
+          fileRefDeltas.set(fileId, (fileRefDeltas.get(fileId) ?? 0) - 1);
+        }
+      }
+      await Resource.deleteMany({ parentId: resource._id });
+    } else {
+      if (resource.fileId) {
+        fileRefDeltas.set(resource.fileId.toString(), -1);
+      }
+    }
+
+    await applyReferenceDeltas(fileRefDeltas);
+
+    return res.status(HttpStatusCode.NoContent).send();
+  })
+);
+
+/**
+ * @route PATCH /api/resources/:scenarioId/:resourceId
+ * @desc Rename a resource
+ */
+router.patch(
+  "/:scenarioId/:resourceId",
+  handle(async (req, res) => {
+    const { scenarioId, resourceId } = req.params;
+    const { name } = req.body;
+
+    if (!isValidObjectId(resourceId))
+      throw new HttpError("invalid resource id", HttpStatusCode.BadRequest);
+
+    const trimmedName = typeof name === "string" ? name.trim() : "";
+
+    if (!trimmedName)
+      throw new HttpError("name is required", HttpStatusCode.BadRequest);
+
+    if (trimmedName.length > RESOURCE_NAME_MAX_LENGTH)
+      throw new HttpError(
+        `name must be ${RESOURCE_NAME_MAX_LENGTH} characters or fewer`,
+        HttpStatusCode.BadRequest
+      );
+
+    const resource = await Resource.findOneAndUpdate(
+      { _id: resourceId, scenarioId },
+      { name: trimmedName },
+      { new: true, runValidators: true }
+    ).populate("fileId", "name url type contentType size");
+
+    if (!resource)
+      throw new HttpError("resource not found", HttpStatusCode.NotFound);
+
+    return res.json(resource);
+  })
+);
+
+/**
+ * @route POST /api/resources/:scenarioId/:resourceId/conditionals
+ * @desc Add a property conditional to a resource
+ */
+router.post(
+  "/:scenarioId/:resourceId/conditionals",
+  handle(async (req, res) => {
+    const { scenarioId, resourceId } = req.params;
+    const { propertyConditional } = req.body;
+
+    const resource = await Resource.findOneAndUpdate(
+      { _id: resourceId, scenarioId },
+      { $push: { stateConditionals: propertyConditional } },
+      { new: true, runValidators: true }
+    )
+      .populate("fileId", "name url type contentType size")
+      .lean();
+
+    if (!resource)
+      throw new HttpError("resource not found", HttpStatusCode.NotFound);
+
+    return res.json(resource);
+  })
+);
+
+/**
+ * @route PUT /api/resources/:scenarioId/:resourceId/conditionals
+ * @desc Update a property conditional on a resource
+ */
+router.put(
+  "/:scenarioId/:resourceId/conditionals",
+  handle(async (req, res) => {
+    const { scenarioId, resourceId } = req.params;
+    const { propertyConditional } = req.body;
+
+    const resource = await Resource.findOneAndUpdate(
+      {
+        _id: resourceId,
+        scenarioId,
+        "stateConditionals._id": propertyConditional._id,
+      },
+      { $set: { "stateConditionals.$": propertyConditional } },
+      { new: true, runValidators: true }
+    )
+      .populate("fileId", "name url type contentType size")
+      .lean();
+
+    if (!resource)
+      throw new HttpError("resource not found", HttpStatusCode.NotFound);
+
+    return res.json(resource);
+  })
+);
+
+/**
+ * @route DELETE /api/resources/:scenarioId/:resourceId/conditionals/:conditionalId
+ * @desc Delete a property conditional from a resource
+ */
+router.delete(
+  "/:scenarioId/:resourceId/conditionals/:conditionalId",
+  handle(async (req, res) => {
+    const { scenarioId, resourceId, conditionalId } = req.params;
+
+    const resource = await Resource.findOneAndUpdate(
+      { _id: resourceId, scenarioId, "stateConditionals._id": conditionalId },
+      { $pull: { stateConditionals: { _id: conditionalId } } },
+      { new: true }
+    )
+      .populate("fileId", "name url type contentType size")
+      .lean();
+
+    if (!resource)
+      throw new HttpError("resource not found", HttpStatusCode.NotFound);
+    return res.json(resource);
   })
 );
 

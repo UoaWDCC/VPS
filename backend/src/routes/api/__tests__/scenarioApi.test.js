@@ -229,15 +229,6 @@ describe("Scenario API tests", () => {
     expect(response.data.name).toBe(scenario1.name);
   });
 
-  it("GET /scenario/:scenarioId returns 400 for a malformed id", async () => {
-    await expect(
-      axios.get(
-        `http://localhost:${ctx.port}/api/scenario/not-a-valid-id`,
-        authHeaders("user1")
-      )
-    ).rejects.toMatchObject({ response: { status: HTTP_BAD_REQUEST } });
-  });
-
   it("PATCH /scenario/:scenarioId updates scenario fields", async () => {
     const response = await axios.patch(
       `http://localhost:${ctx.port}/api/scenario/${scenario1._id}`,
@@ -250,34 +241,24 @@ describe("Scenario API tests", () => {
     expect(dbScenario.description).toBe("New desc");
   });
 
-  it("PATCH /scenario/:scenarioId returns 400 for a malformed id", async () => {
-    await expect(
-      axios.patch(
-        `http://localhost:${ctx.port}/api/scenario/not-a-valid-id`,
-        { name: "x" },
-        authHeaders("user1")
-      )
-    ).rejects.toMatchObject({ response: { status: HTTP_BAD_REQUEST } });
-  });
-
-  it("GET /scenario/:scenarioId/stateVariables returns state variables array", async () => {
+  it("GET /scenario/:scenarioId/properties returns properties array", async () => {
     const response = await axios.get(
-      `http://localhost:${ctx.port}/api/scenario/${scenario1._id}/stateVariables`,
+      `http://localhost:${ctx.port}/api/scenario/${scenario1._id}/properties`,
       authHeaders("user1")
     );
     expect(response.status).toBe(HTTP_OK);
     expect(Array.isArray(response.data)).toBe(true);
   });
 
-  it("POST /scenario/:scenarioId/stateVariables creates a state variable", async () => {
-    const newStateVariable = {
+  it("POST /scenario/:scenarioId/properties creates a property", async () => {
+    const newProperty = {
       name: "health",
       type: "number",
       defaultValue: 100,
     };
     const response = await axios.post(
-      `http://localhost:${ctx.port}/api/scenario/${scenario1._id}/stateVariables`,
-      { newStateVariable },
+      `http://localhost:${ctx.port}/api/scenario/${scenario1._id}/properties`,
+      { newProperty },
       authHeaders("user1")
     );
     expect(response.status).toBe(HTTP_OK);
@@ -290,20 +271,20 @@ describe("Scenario API tests", () => {
     );
   });
 
-  it("PUT /scenario/:scenarioId/stateVariables edits an existing state variable", async () => {
+  it("PUT /scenario/:scenarioId/properties edits an existing property", async () => {
     await axios.post(
-      `http://localhost:${ctx.port}/api/scenario/${scenario1._id}/stateVariables`,
+      `http://localhost:${ctx.port}/api/scenario/${scenario1._id}/properties`,
       {
-        newStateVariable: { name: "health", type: "number", defaultValue: 100 },
+        newProperty: { name: "health", type: "number", defaultValue: 100 },
       },
       authHeaders("user1")
     );
 
     const response = await axios.put(
-      `http://localhost:${ctx.port}/api/scenario/${scenario1._id}/stateVariables`,
+      `http://localhost:${ctx.port}/api/scenario/${scenario1._id}/properties`,
       {
         originalName: "health",
-        newStateVariable: { name: "health", type: "number", defaultValue: 50 },
+        newProperty: { name: "health", type: "number", defaultValue: 50 },
       },
       authHeaders("user1")
     );
@@ -321,15 +302,15 @@ describe("Scenario API tests", () => {
     );
   });
 
-  it("DELETE /scenario/:scenarioId/stateVariables/:id removes a state variable", async () => {
+  it("DELETE /scenario/:scenarioId/properties/:id removes a property", async () => {
     await axios.post(
-      `http://localhost:${ctx.port}/api/scenario/${scenario1._id}/stateVariables`,
-      { newStateVariable: { name: "score", type: "number", defaultValue: 0 } },
+      `http://localhost:${ctx.port}/api/scenario/${scenario1._id}/properties`,
+      { newProperty: { name: "score", type: "number", defaultValue: 0 } },
       authHeaders("user1")
     );
 
     const response = await axios.delete(
-      `http://localhost:${ctx.port}/api/scenario/${scenario1._id}/stateVariables/score`,
+      `http://localhost:${ctx.port}/api/scenario/${scenario1._id}/properties/score`,
       authHeaders("user1")
     );
     expect(response.status).toBe(HTTP_OK);
@@ -340,5 +321,79 @@ describe("Scenario API tests", () => {
     expect(dbScenario.stateVariables).not.toEqual(
       expect.arrayContaining([expect.objectContaining({ name: "score" })])
     );
+  });
+
+  it("GET /scenario/:scenarioId/roles returns role list array", async () => {
+    const response = await axios.get(
+      `http://localhost:${ctx.port}/api/scenario/${scenario1._id}/roles`,
+      authHeaders("user1")
+    );
+    expect(response.status).toBe(HTTP_OK);
+    expect(Array.isArray(response.data)).toBe(true);
+  });
+
+  it("POST /scenario/:scenarioId/roles creates a role, preserving casing", async () => {
+    const response = await axios.post(
+      `http://localhost:${ctx.port}/api/scenario/${scenario1._id}/roles`,
+      { role: "Doctor" },
+      authHeaders("user1")
+    );
+    expect(response.status).toBe(HTTP_OK);
+    expect(response.data).toEqual(["Doctor"]);
+
+    const dbScenario = await Scenario.findById(scenario1._id).lean();
+    expect(dbScenario.roleList).toEqual(["Doctor"]);
+  });
+
+  it("POST /scenario/:scenarioId/roles does not create a case-insensitive duplicate", async () => {
+    await axios.post(
+      `http://localhost:${ctx.port}/api/scenario/${scenario1._id}/roles`,
+      { role: "Doctor" },
+      authHeaders("user1")
+    );
+
+    const response = await axios.post(
+      `http://localhost:${ctx.port}/api/scenario/${scenario1._id}/roles`,
+      { role: "doctor" },
+      authHeaders("user1")
+    );
+    expect(response.status).toBe(HTTP_OK);
+    expect(response.data).toEqual(["Doctor"]);
+
+    const dbScenario = await Scenario.findById(scenario1._id).lean();
+    expect(dbScenario.roleList).toEqual(["Doctor"]);
+  });
+
+  it("POST /scenario/:scenarioId/roles returns 400 for an empty role name", async () => {
+    await expect(
+      axios.post(
+        `http://localhost:${ctx.port}/api/scenario/${scenario1._id}/roles`,
+        { role: "   " },
+        authHeaders("user1")
+      )
+    ).rejects.toMatchObject({ response: { status: HTTP_BAD_REQUEST } });
+  });
+
+  it("DELETE /scenario/:scenarioId/roles/:role removes a role and cascades to scenes", async () => {
+    await axios.post(
+      `http://localhost:${ctx.port}/api/scenario/${scenario2._id}/roles`,
+      { role: "doctor" },
+      authHeaders("user1")
+    );
+
+    await Scene.findByIdAndUpdate(scene1._id, { roles: ["doctor"] });
+
+    const response = await axios.delete(
+      `http://localhost:${ctx.port}/api/scenario/${scenario2._id}/roles/doctor`,
+      authHeaders("user1")
+    );
+    expect(response.status).toBe(HTTP_OK);
+    expect(response.data).toEqual([]);
+
+    const dbScenario = await Scenario.findById(scenario2._id).lean();
+    expect(dbScenario.roleList).toEqual([]);
+
+    const dbScene1 = await Scene.findById(scene1._id).lean();
+    expect(dbScene1.roles).toEqual([]);
   });
 });

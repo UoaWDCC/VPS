@@ -8,13 +8,37 @@ import { usePost } from "hooks/crudHooks";
 
 import LoadingPage from "../status/LoadingPage";
 import PlayScenarioCanvas from "./PlayScenarioCanvas";
-import { applyStateOperations } from "../../components/StateVariables/stateOperations";
+import { applyPropertyOperations } from "../../components/Properties/propertyOperations";
 import NotesPanel from "./components/NotesPanel";
-import ResourcesPanel from "./components/ResourcesPanel";
 import SceneTimer from "./components/SceneTimer";
-import { PlayIcon } from "lucide-react";
+import StartAudioPanel from "./components/StartAudioPanel";
+import {
+  BookMarkedIcon,
+  FilesIcon,
+  Volume2Icon,
+  VolumeOffIcon,
+} from "lucide-react";
+import ResourcesPanel from "../resources/ResourcesOverlay";
 
 const sceneCache = new Map();
+
+// Caches the scenes from a navigate response and patches in the
+// server-authoritative remaining time for the active scene, so a refresh
+// resumes the countdown instead of restarting it.
+function cacheNavigateResponse(data) {
+  if (data.scenes) {
+    data.scenes.forEach((scene) => sceneCache.set(scene._id, scene));
+  }
+  if (data.active && data.remainingTime != null) {
+    const active = sceneCache.get(data.active);
+    if (active) active.remainingTime = data.remainingTime;
+  }
+  return {
+    newSceneId: data.active,
+    properties: data.properties,
+    newPropertyVersion: data.propertyVersion,
+  };
+}
 
 const navigateSingleplayer = async (
   user,
@@ -44,14 +68,7 @@ const navigateSingleplayer = async (
     },
   };
   const res = await axios.request(config);
-  if (res.data.scenes) {
-    res.data.scenes.forEach((scene) => sceneCache.set(scene._id, scene));
-  }
-  return {
-    newSceneId: res.data.active,
-    stateVariables: res.data.stateVariables,
-    newStateVersion: res.data.stateVersion,
-  };
+  return cacheNavigateResponse(res.data);
 };
 
 const navigateMultiplayer = async (
@@ -74,32 +91,53 @@ const navigateMultiplayer = async (
     data: { currentScene, addFlags, removeFlags, componentId, nextScene },
   };
   const res = await axios.request(config);
+  return cacheNavigateResponse(res.data);
+};
+
+const refreshFromServer = async (user, scenarioId, groupId, isMultiplayer) => {
+  const token = await user.getIdToken();
+  const config = isMultiplayer
+    ? {
+        method: "post",
+        url: `/api/navigate/group/${groupId}`,
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        data: {
+          currentScene: null,
+          addFlags: [],
+          removeFlags: [],
+          componentId: null,
+          nextScene: null,
+        },
+      }
+    : {
+        method: "post",
+        url: `/api/navigate/user/${scenarioId}`,
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        data: {
+          currentScene: null,
+          addFlags: [],
+          removeFlags: [],
+          componentId: null,
+          nextScene: null,
+          startScene: null,
+        },
+      };
+  const res = await axios.request(config);
   if (res.data.scenes) {
     res.data.scenes.forEach((scene) => sceneCache.set(scene._id, scene));
   }
   return {
     newSceneId: res.data.active,
-    stateVariables: res.data.stateVariables,
-    newStateVersion: res.data.stateVersion,
+    properties: res.data.properties,
+    newPropertyVersion: res.data.propertyVersion,
   };
 };
-
-function playAudios(scene) {
-  const audios = scene.components.filter((c) => c.type === "audio");
-  const playables = [];
-  for (const audio of audios) {
-    const playable = new Audio(audio.url);
-    playable.loop = audio.loop;
-    playable.play();
-    playables.push(playable);
-  }
-  return () => {
-    for (const p of playables) {
-      p.pause();
-      p.currentTime = 0;
-    }
-  };
-}
 
 /**
  * This page allows users to play a scenario.
@@ -116,28 +154,56 @@ export default function PlayScenarioPage({ group }) {
   const startSceneRef = useRef(
     new URLSearchParams(location.search).get("startScene")
   );
+  // Track sequence of navigation & recovery requests to prevent race conditions
+  const requestIdRef = useRef(0);
+  const handlingConflictRef = useRef(false);
 
   const [sceneId, setSceneId] = useState(null);
-  const [stateVariables, setStateVariables] = useState([]);
-  const [stateVersion, setStateVersion] = useState(0);
+  const [properties, setProperties] = useState([]);
+  const [propertyVersion, setPropertyVersion] = useState(0);
   const [addFlags, setAddFlags] = useState([]);
   const [removeFlags, setRemoveFlags] = useState([]);
 
   const [resourcesOpen, setResourcesOpen] = useState(false);
   const [noteOpen, setNoteOpen] = useState(false);
-  const [audioAllowed, setAudioAllowed] = useState(false);
+  const [startAudioOpen, setStartAudioOpen] = useState(true);
+  const [audioMuted, setAudioMuted] = useState(true);
+
+  const audioRefs = useRef([]);
 
   const currScene = sceneCache.get(sceneId);
 
-  const handleError = (error) => {
+  const handleError = async (error) => {
     if (!error) return;
     if (error.status === 409) {
-      onSceneChange();
-      toast.success(
-        isMultiplayer
-          ? "Someone else made a move first, but you're back on track!"
-          : "A move from somewhere else was made, but you're back on track!"
-      );
+      if (!handlingConflictRef.current) {
+        handlingConflictRef.current = true;
+
+        // Track recovery request ID
+        const currentRequestId = ++requestIdRef.current;
+
+        try {
+          const { newSceneId, properties, newPropertyVersion } =
+            await refreshFromServer(user, scenarioId, group._id, isMultiplayer);
+
+          // Discard response if a newer user action was triggered during request transit
+          if (currentRequestId !== requestIdRef.current) return;
+
+          setSceneId(newSceneId);
+          setProperties(properties);
+          setPropertyVersion(newPropertyVersion);
+          toast.success(
+            isMultiplayer
+              ? "Someone else made a move first, but you're back on track!"
+              : "A move from somewhere else was made, but you're back on track!"
+          );
+        } catch {
+          // If refresh fails, navigate to error page
+          history.push(`/play/${scenarioId}/error`);
+        } finally {
+          handlingConflictRef.current = false;
+        }
+      }
     } else if (isMultiplayer && error.status === 403) {
       const roles = JSON.stringify(error.meta.roles_with_access);
       history.push(`/play/${scenarioId}/invalid-role?roles=${roles}`);
@@ -146,29 +212,29 @@ export default function PlayScenarioPage({ group }) {
     }
   };
 
-  const onSceneChange = async (componentId) => {
+  const onSceneChange = async (componentId, currentSceneOverride = sceneId) => {
+    const currentRequestId = ++requestIdRef.current; // Track navigation request ID
+
     if (componentId) {
       const component = currScene?.components?.find(
         (comp) => comp.id === componentId
       );
-      const stateOperations = component?.stateOperations;
-      if (stateOperations) {
-        setStateVersion(stateVersion + 1);
-        setStateVariables(
-          applyStateOperations(stateVariables, stateOperations)
-        );
+      const propertyOperations = component?.stateOperations;
+      if (propertyOperations) {
+        setPropertyVersion(propertyVersion + 1);
+        setProperties(applyPropertyOperations(properties, propertyOperations));
       }
     }
 
     const startScene = startSceneRef.current;
-    startSceneRef.current = null; // Clear before the await so a concurrent retry (409 handler) never replays it.
+    startSceneRef.current = null; // Clear after first use so startScene override is consumed once.
 
     try {
-      const { newSceneId, stateVariables, newStateVersion } = isMultiplayer
+      const { newSceneId, properties, newPropertyVersion } = isMultiplayer
         ? await navigateMultiplayer(
             user,
             group._id,
-            sceneId,
+            currentSceneOverride,
             addFlags,
             removeFlags,
             componentId
@@ -176,7 +242,7 @@ export default function PlayScenarioPage({ group }) {
         : await navigateSingleplayer(
             user,
             scenarioId,
-            sceneId,
+            currentSceneOverride,
             addFlags,
             removeFlags,
             componentId,
@@ -184,11 +250,14 @@ export default function PlayScenarioPage({ group }) {
             startScene
           );
 
-      if (stateVersion < newStateVersion) {
-        setStateVariables(stateVariables);
-        setStateVersion(newStateVersion);
+      // Discard stale response if a newer request was dispatched while this request was pending
+      if (currentRequestId !== requestIdRef.current) return;
+
+      if (propertyVersion < newPropertyVersion) {
+        setProperties(properties);
+        setPropertyVersion(newPropertyVersion);
       }
-      if (!sceneId && newSceneId) {
+      if (newSceneId) {
         setSceneId(newSceneId);
       }
     } catch (e) {
@@ -218,8 +287,9 @@ export default function PlayScenarioPage({ group }) {
 
       if (e.code === "Space" || e.key === "ArrowRight") {
         e.preventDefault();
+        const currentRequestId = ++requestIdRef.current; // Track keydown navigation request ID
         try {
-          const { newSceneId, stateVariables, newStateVersion } = isMultiplayer
+          const { newSceneId, properties, newPropertyVersion } = isMultiplayer
             ? await navigateMultiplayer(
                 user,
                 group._id,
@@ -238,9 +308,13 @@ export default function PlayScenarioPage({ group }) {
                 null,
                 currScene.directLink
               );
-          if (stateVersion < newStateVersion) {
-            setStateVariables(stateVariables);
-            setStateVersion(newStateVersion);
+
+          // Discard stale response if a newer request was dispatched while pending
+          if (currentRequestId !== requestIdRef.current) return;
+
+          if (propertyVersion < newPropertyVersion) {
+            setProperties(properties);
+            setPropertyVersion(newPropertyVersion);
           }
           if (newSceneId) {
             if (sceneCache.get(newSceneId)?.error) {
@@ -257,14 +331,14 @@ export default function PlayScenarioPage({ group }) {
 
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-  }, [currScene, sceneId, stateVariables, stateVersion, addFlags, removeFlags]);
+  }, [currScene, sceneId, properties, propertyVersion, addFlags, removeFlags]);
 
   const handleTimerTimeout = () => {
     const timerStateOperations = currScene?.timerStateOperations;
     if (!timerStateOperations?.length) return;
-    setStateVersion((v) => v + 1);
-    setStateVariables((prev) =>
-      applyStateOperations(prev, timerStateOperations)
+    setPropertyVersion((v) => v + 1);
+    setProperties((prev) =>
+      applyPropertyOperations(prev, timerStateOperations)
     );
   };
 
@@ -303,15 +377,42 @@ export default function PlayScenarioPage({ group }) {
     onSceneChange();
   };
 
+  const cleanUpAudios = () => {
+    audioRefs.current.forEach((audio) => {
+      audio.pause();
+      audio.currentTime = 0;
+    });
+    audioRefs.current = [];
+  };
+
+  const playAudios = () => {
+    audioRefs.current.forEach((audio) => {
+      audio.play();
+    });
+  };
+
   useEffect(() => {
-    if (!currScene || !audioAllowed) return;
+    if (!currScene) return;
     try {
-      const endPlayback = playAudios(currScene);
-      return () => endPlayback();
+      const audios = currScene.components.filter((c) => c.type === "audio");
+      audioRefs.current = audios.map((audio) => {
+        const audioElement = new Audio(audio.url);
+        audioElement.loop = audio.loop || false;
+        audioElement.muted = audioMuted;
+        return audioElement;
+      });
+      playAudios();
+      return () => cleanUpAudios();
     } catch {
       toast.error("The audio on this scene failed to play");
     }
-  }, [currScene, audioAllowed]);
+  }, [currScene]);
+
+  useEffect(() => {
+    audioRefs.current.forEach((audio) => {
+      audio.muted = audioMuted;
+    });
+  }, [audioMuted]);
 
   if (loading) return <LoadingPage text="Loading Scene..." />;
   if (authError) return <></>;
@@ -330,16 +431,9 @@ export default function PlayScenarioPage({ group }) {
           <SceneTimer
             key={sceneId}
             duration={currScene.time}
+            initialSeconds={currScene.remainingTime ?? currScene.time}
             onTimeout={handleTimerTimeout}
           />
-        </div>
-      )}
-      {!audioAllowed && (
-        <div className="absolute top-4 left-4 z-30">
-          <button className="btn" onClick={() => setAudioAllowed(true)}>
-            <PlayIcon size={16} />
-            Enable Audio
-          </button>
         </div>
       )}
       <PlayScenarioCanvas
@@ -349,28 +443,56 @@ export default function PlayScenarioPage({ group }) {
         setAddFlags={setAddFlags}
         setRemoveFlags={setRemoveFlags}
         buttonPressed={buttonPressed}
-        stateVariables={stateVariables}
+        properties={properties}
       />
 
       <div className="absolute top-2 right-2 z-30 flex items-center gap-2">
-        {isMultiplayer && (
-          <button
-            className="btn btn-sm"
-            onClick={() => setNoteOpen(true)}
-            aria-label="Open notes"
-          >
-            Notes
-          </button>
-        )}
-        <button
-          className="btn btn-sm"
-          onClick={() => setResourcesOpen(true)}
-          aria-label="Open resources"
+        <div
+          className="tooltip tooltip-bottom"
+          data-tip={audioMuted ? "Unmute audio" : "Mute audio"}
         >
-          Resources
-        </button>
+          <button
+            className="btn"
+            onClick={() => setAudioMuted(!audioMuted)}
+            type="button"
+            aria-label={audioMuted ? "Unmute audio" : "Mute audio"}
+          >
+            {audioMuted ? (
+              <VolumeOffIcon size={16} />
+            ) : (
+              <Volume2Icon size={16} />
+            )}
+          </button>
+        </div>
+        {isMultiplayer && (
+          <div className="tooltip tooltip-left" data-tip="Open notes">
+            <button
+              className="btn"
+              onClick={() => setNoteOpen(true)}
+              type="button"
+              aria-label="Open notes"
+            >
+              <FilesIcon size={16} />
+            </button>
+          </div>
+        )}
+        <div className="tooltip tooltip-left" data-tip="Open resources">
+          <button
+            className="btn"
+            onClick={() => setResourcesOpen(true)}
+            type="button"
+            aria-label="Open resources"
+          >
+            <BookMarkedIcon size={16} />
+          </button>
+        </div>
       </div>
 
+      <StartAudioPanel
+        open={startAudioOpen}
+        onClose={() => setStartAudioOpen(false)}
+        setAudioMuted={setAudioMuted}
+      />
       {isMultiplayer && (
         <NotesPanel
           group={group}
@@ -380,7 +502,7 @@ export default function PlayScenarioPage({ group }) {
       )}
       <ResourcesPanel
         scenarioId={scenarioId}
-        stateVariables={stateVariables}
+        properties={properties}
         open={resourcesOpen}
         onClose={() => setResourcesOpen(false)}
       />

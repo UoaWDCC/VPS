@@ -72,7 +72,7 @@ describe("Navigate User API tests", () => {
     );
     expect(response.status).toBe(200);
     expect(response.data.active).toBe(scene1._id.toString());
-    expect(response.data.stateVariables).toBeDefined();
+    expect(response.data.properties).toBeDefined();
 
     // User path for this scenario should now start with scene1
     const dbUser = await User.findOne({ uid: "uid-player" });
@@ -234,5 +234,138 @@ describe("Navigate User API tests", () => {
         authHeaders("uid-player")
       )
     ).rejects.toMatchObject({ response: { status: 409 } });
+  });
+
+  // --- Server-authoritative scene timer ---
+
+  describe("scene timer", () => {
+    const scenarioId = () => scenario._id.toString();
+
+    it("returns the full remainingTime and stamps entry on first navigation", async () => {
+      // Make the first scene timed.
+      await Scene.findByIdAndUpdate(scene1._id, { time: 120 });
+
+      const response = await axios.post(
+        `http://localhost:${ctx.port}/api/navigate/user/${scenario._id}`,
+        { uid: "uid-player" },
+        authHeaders("uid-player")
+      );
+      expect(response.status).toBe(200);
+      expect(response.data.remainingTime).toBe(120);
+
+      const dbUser = await User.findOne({ uid: "uid-player" });
+      expect(dbUser.sceneEnteredAt.get(scenarioId())).toBeInstanceOf(Date);
+    });
+
+    it("resumes with a decreased remainingTime on re-entry (refresh cannot reset it)", async () => {
+      const timedScene = await Scene.create({
+        name: "Timed",
+        components: [],
+        roles: [],
+        time: 120,
+      });
+      // Entered 30s ago.
+      const enteredAt = new Date(Date.now() - 30_000);
+      await User.findOneAndUpdate(
+        { uid: "uid-player" },
+        {
+          $set: {
+            [`paths.${scenarioId()}`]: [timedScene._id.toString()],
+            [`sceneEnteredAt.${scenarioId()}`]: enteredAt,
+          },
+        }
+      );
+
+      const response = await axios.post(
+        `http://localhost:${ctx.port}/api/navigate/user/${scenario._id}`,
+        { uid: "uid-player" }, // no currentScene → re-entry / refresh
+        authHeaders("uid-player")
+      );
+      expect(response.status).toBe(200);
+      // ~90s remaining, allowing a little for execution time — crucially not 120.
+      expect(response.data.remainingTime).toBeGreaterThan(85);
+      expect(response.data.remainingTime).toBeLessThanOrEqual(91);
+
+      // The stamp must be untouched by a plain re-entry.
+      const dbUser = await User.findOne({ uid: "uid-player" });
+      expect(dbUser.sceneEnteredAt.get(scenarioId()).getTime()).toBe(
+        enteredAt.getTime()
+      );
+    });
+
+    it("resets remainingTime to full and restamps on a real scene move", async () => {
+      const componentId = "btn-go";
+      const clickScene = await Scene.create({
+        name: "Click",
+        components: [
+          {
+            id: componentId,
+            clickable: true,
+            nextScene: scene2._id,
+            type: "BUTTON",
+          },
+        ],
+        roles: [],
+        time: 60,
+      });
+      await Scene.findByIdAndUpdate(scene2._id, { time: 90 });
+
+      const enteredAt = new Date(Date.now() - 45_000);
+      await User.findOneAndUpdate(
+        { uid: "uid-player" },
+        {
+          $set: {
+            [`paths.${scenarioId()}`]: [clickScene._id.toString()],
+            [`sceneEnteredAt.${scenarioId()}`]: enteredAt,
+          },
+        }
+      );
+
+      const response = await axios.post(
+        `http://localhost:${ctx.port}/api/navigate/user/${scenario._id}`,
+        {
+          uid: "uid-player",
+          currentScene: clickScene._id.toString(),
+          componentId,
+        },
+        authHeaders("uid-player")
+      );
+      expect(response.status).toBe(200);
+      expect(response.data.active).toBe(scene2._id.toString());
+      // New scene → full duration, and the stamp is refreshed.
+      expect(response.data.remainingTime).toBe(90);
+
+      const dbUser = await User.findOne({ uid: "uid-player" });
+      expect(dbUser.sceneEnteredAt.get(scenarioId()).getTime()).toBeGreaterThan(
+        enteredAt.getTime()
+      );
+    });
+
+    it("clears the entry stamp on reset", async () => {
+      const resetScene = await Scene.create({
+        name: "Reset Timed",
+        components: [{ type: "RESET_BUTTON" }],
+        roles: [],
+        time: 60,
+      });
+      await User.findOneAndUpdate(
+        { uid: "uid-player" },
+        {
+          $set: {
+            [`paths.${scenarioId()}`]: [resetScene._id.toString()],
+            [`sceneEnteredAt.${scenarioId()}`]: new Date(),
+          },
+        }
+      );
+
+      await axios.post(
+        `http://localhost:${ctx.port}/api/navigate/user/reset/${scenario._id}`,
+        { uid: "uid-player", currentScene: resetScene._id.toString() },
+        authHeaders("uid-player")
+      );
+
+      const dbUser = await User.findOne({ uid: "uid-player" });
+      expect(dbUser.sceneEnteredAt.get(scenarioId())).toBeUndefined();
+    });
   });
 });

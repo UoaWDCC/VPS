@@ -18,11 +18,11 @@ export function setScene(newScene: Scene) {
 }
 
 export function getComponent(id: string) {
-  return scene.components[id] ?? null;
+  return scene.components?.[id] ?? null;
 }
 
-export function getComponentProp(id: string, prop: string): unknown {
-  const component = scene.components[id];
+export function getComponentProp(id: string, prop: string) {
+  const component = scene.components?.[id];
   if (!component) return;
   const [object, key] = getObject(
     prop,

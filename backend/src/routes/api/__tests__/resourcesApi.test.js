@@ -1,12 +1,23 @@
-import { jest, describe, beforeEach, it, expect } from "@jest/globals";
+import {
+  jest,
+  describe,
+  beforeEach,
+  afterEach,
+  it,
+  expect,
+} from "@jest/globals";
 
 import express from "express";
 import mongoose from "mongoose";
 import axios from "axios";
-import routes from "../../index.js";
+
+import resourcesRouter from "../resources.js";
 import Resource from "../../../db/models/resource.js";
-import Group from "../../../db/models/group.js";
+import UploadedFile from "../../../db/models/uploadedFile.js";
 import auth from "../../../middleware/firebaseAuth.js";
+import scenarioAuth from "../../../middleware/scenarioAuth.js";
+import errorHandler from "../../../middleware/errorHandler.js";
+import { applyReferenceDelta } from "../../../db/daos/fileDao.js";
 import { authHeaders } from "./testHelpers.js";
 import {
   useMongoMemoryServer,
@@ -14,10 +25,15 @@ import {
 } from "../../../test/testSetup.js";
 
 jest.mock("../../../middleware/firebaseAuth");
+jest.mock("../../../middleware/scenarioAuth");
 jest.mock("firebase-admin");
 
 auth.mockImplementation(async (req, res, next) => {
   req.body.uid = req.headers.authorization?.split(" ")[1];
+  next();
+});
+
+scenarioAuth.mockImplementation(async (req, res, next) => {
   next();
 });
 
@@ -26,215 +42,410 @@ describe("Resources API tests", () => {
   const ctx = useExpressServer(() => {
     const app = express();
     app.use(express.json());
-    app.use("/", routes);
+    app.use("/api/resources", resourcesRouter);
+    app.use(errorHandler);
     return app;
   });
 
-  const scenarioId = "scenario-abc-123";
-
-  const resource1 = {
-    _id: new mongoose.mongo.ObjectId("aaa000000000000000000001"),
-    name: "Resource 1",
-    type: "text",
-    scenarioId,
-    textContent: "Hello World",
-    imageContent: "",
-    requiredFlags: [],
-  };
-
-  const resource2 = {
-    _id: new mongoose.mongo.ObjectId("aaa000000000000000000002"),
-    name: "Resource 2",
-    type: "image",
-    scenarioId,
-    imageContent: "http://example.com/img.png",
-    textContent: "",
-    requiredFlags: ["flag1"],
-  };
-
-  const group1 = {
-    _id: new mongoose.mongo.ObjectId("bbb000000000000000000001"),
-    users: [{ email: "user@example.com", name: "User", role: "doctor" }],
-    notes: {},
-    path: [],
-    scenarioId,
-    currentFlags: ["flag1"],
-  };
+  const scenarioId = new mongoose.mongo.ObjectId("ccc000000000000000000001");
+  let collection;
+  let uploadedFile;
+  let resource;
 
   beforeEach(async () => {
-    await Resource.create([resource1, resource2]);
-    await Group.create([group1]);
+    collection = await Resource.create({
+      scenarioId,
+      name: "Test Group",
+      order: 0,
+      type: "collection",
+    });
+
+    uploadedFile = await UploadedFile.create({
+      scenarioId,
+      name: "test.png",
+      type: "image",
+      path: "files/fake-path.pdf",
+      url: "https://firebasestorage.googleapis.com/fake-url",
+      contentType: "image/png",
+      size: 1024,
+      uploaderUid: "user1",
+      orphanedAt: new Date(),
+    });
+
+    resource = await Resource.create({
+      scenarioId,
+      parentId: collection._id,
+      name: "image.png",
+      fileId: uploadedFile._id,
+      type: "file",
+    });
+
+    await applyReferenceDelta(uploadedFile._id, 1);
   });
 
-  it("GET /resources/scenario/:scenarioId returns resources for a scenario", async () => {
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
+  // --- Get resources ---
+
+  it("GET /resources/:scenarioId returns all resources", async () => {
     const response = await axios.get(
-      `http://localhost:${ctx.port}/api/resources/scenario/${scenarioId}`,
+      `http://localhost:${ctx.port}/api/resources/${scenarioId}`,
       authHeaders("user1")
     );
     expect(response.status).toBe(200);
     expect(response.data).toHaveLength(2);
-    expect(response.data.map((r) => r.name)).toContain("Resource 1");
-    expect(response.data.map((r) => r.name)).toContain("Resource 2");
+
+    const [returnedCollection, returnedFile] = response.data;
+    expect(returnedCollection.name).toBe("Test Group");
+    expect(returnedFile.name).toBe("image.png");
   });
 
-  it("GET /resources/scenario/:scenarioId returns empty array for unknown scenario", async () => {
+  it("GET /resources/:scenarioId returns empty array for unknown scenario", async () => {
+    const otherId = new mongoose.mongo.ObjectId("aaa000000000000000000099");
     const response = await axios.get(
-      `http://localhost:${ctx.port}/api/resources/scenario/unknown-scenario`,
+      `http://localhost:${ctx.port}/api/resources/${otherId}`,
       authHeaders("user1")
     );
     expect(response.status).toBe(200);
     expect(response.data).toHaveLength(0);
   });
 
-  it("GET /resources/group/:groupId returns visible resources filtered by group flags", async () => {
-    const response = await axios.get(
-      `http://localhost:${ctx.port}/api/resources/group/${group1._id}`,
+  // --- Create resource ---
+
+  it("POST /resources/:scenarioId creates a Resource document", async () => {
+    const response = await axios.post(
+      `http://localhost:${ctx.port}/api/resources/${scenarioId}`,
+      {
+        parentId: collection._id.toString(),
+        name: "second.png",
+        fileId: uploadedFile._id.toString(),
+      },
       authHeaders("user1")
     );
-    expect(response.status).toBe(200);
-    // resource1 has no requiredFlags → always visible
-    // resource2 requires "flag1" and group has "flag1" → visible
-    expect(response.data).toHaveLength(2);
+
+    expect(response.status).toBe(201);
+    expect(response.data.name).toBe("second.png");
+    expect(response.data.stateConditionals).toHaveLength(0);
+    expect(response.data.fileId._id).toBe(uploadedFile._id.toString());
+    expect(response.data.fileId.url).toBe(uploadedFile.url);
+
+    const dbResource = await Resource.findById(response.data._id);
+    expect(dbResource).not.toBeNull();
+
+    const dbFile = await UploadedFile.findById(uploadedFile._id);
+    expect(dbFile.refCount).toBe(2);
   });
 
-  it("GET /resources/group/:groupId filters out resources with unmet flags", async () => {
-    // Create a group with no flags
-    const emptyGroup = await Group.create({
-      users: [],
-      notes: {},
-      path: [],
-      scenarioId,
-      currentFlags: [],
-    });
-
-    const response = await axios.get(
-      `http://localhost:${ctx.port}/api/resources/group/${emptyGroup._id}`,
-      authHeaders("user1")
-    );
-    expect(response.status).toBe(200);
-    // Only resource1 (no requiredFlags) is visible
-    expect(response.data).toHaveLength(1);
-    expect(response.data[0].name).toBe("Resource 1");
-  });
-
-  it("GET /resources/:resourceId returns a specific resource", async () => {
-    const response = await axios.get(
-      `http://localhost:${ctx.port}/api/resources/${resource1._id}`,
-      authHeaders("user1")
-    );
-    expect(response.status).toBe(200);
-    expect(response.data.name).toBe("Resource 1");
-    expect(response.data.type).toBe("text");
-    expect(response.data.textContent).toBe("Hello World");
-  });
-
-  it("GET /resources/:resourceId returns 404 for unknown resource", async () => {
+  it("POST /resources/:scenarioId returns 400 when required fields are missing", async () => {
     await expect(
-      axios.get(
-        `http://localhost:${ctx.port}/api/resources/000000000000000000000099`,
+      axios.post(
+        `http://localhost:${ctx.port}/api/resources/${scenarioId}`,
+        { parentId: collection._id.toString() },
+        authHeaders("user1")
+      )
+    ).rejects.toMatchObject({ response: { status: 400 } });
+  });
+
+  it("POST /resources/:scenarioId returns 404 when collection does not belong to scenario", async () => {
+    const otherScenarioId = new mongoose.mongo.ObjectId(
+      "ddd000000000000000000001"
+    );
+
+    await expect(
+      axios.post(
+        `http://localhost:${ctx.port}/api/resources/${otherScenarioId}`,
+        {
+          parentId: collection._id.toString(),
+          name: "second.png",
+          fileId: uploadedFile._id.toString(),
+        },
         authHeaders("user1")
       )
     ).rejects.toMatchObject({ response: { status: 404 } });
   });
 
-  it("PUT /resources/:resourceId updates a resource", async () => {
-    const response = await axios.put(
-      `http://localhost:${ctx.port}/api/resources/${resource1._id}`,
+  // --- Create resource collection ---
+
+  it("POST /resources/:scenarioId creates a Resource collection", async () => {
+    const response = await axios.post(
+      `http://localhost:${ctx.port}/api/resources/${scenarioId}/collection`,
+      { name: "New Collection" },
+      authHeaders("user1")
+    );
+
+    expect(response.status).toBe(201);
+    expect(response.data.name).toBe("New Collection");
+    expect(response.data.stateConditionals).toHaveLength(0);
+    expect(response.data.fileId).toBeUndefined();
+
+    const dbResource = await Resource.findById(response.data._id);
+    expect(dbResource).not.toBeNull();
+  });
+
+  // --- Rename resource ---
+
+  it("PATCH /resources/:scenarioId/:resourceId renames a resource", async () => {
+    const response = await axios.patch(
+      `http://localhost:${ctx.port}/api/resources/${scenarioId}/${resource._id}`,
+      { name: "renamed.png" },
+      authHeaders("user1")
+    );
+
+    expect(response.status).toBe(200);
+    expect(response.data.name).toBe("renamed.png");
+
+    const dbResource = await Resource.findById(resource._id);
+    expect(dbResource.name).toBe("renamed.png");
+  });
+
+  it("PATCH /resources/:scenarioId/:resourceId trims whitespace from the name", async () => {
+    const response = await axios.patch(
+      `http://localhost:${ctx.port}/api/resources/${scenarioId}/${resource._id}`,
+      { name: "  padded.png  " },
+      authHeaders("user1")
+    );
+
+    expect(response.status).toBe(200);
+    expect(response.data.name).toBe("padded.png");
+  });
+
+  it("PATCH /resources/:scenarioId/:resourceId allows a name that no longer matches the file's real extension", async () => {
+    const response = await axios.patch(
+      `http://localhost:${ctx.port}/api/resources/${scenarioId}/${resource._id}`,
+      { name: "renamed.txt" },
+      authHeaders("user1")
+    );
+
+    expect(response.status).toBe(200);
+    expect(response.data.name).toBe("renamed.txt");
+  });
+
+  it("PATCH /resources/:scenarioId/:resourceId allows removing the file extension entirely", async () => {
+    const response = await axios.patch(
+      `http://localhost:${ctx.port}/api/resources/${scenarioId}/${resource._id}`,
+      { name: "Patient Info Sheet" },
+      authHeaders("user1")
+    );
+
+    expect(response.status).toBe(200);
+    expect(response.data.name).toBe("Patient Info Sheet");
+
+    const dbResource = await Resource.findById(resource._id);
+    expect(dbResource.name).toBe("Patient Info Sheet");
+  });
+
+  it("PATCH /resources/:scenarioId/:resourceId allows a name containing a period, such as a trailing full stop", async () => {
+    const response = await axios.patch(
+      `http://localhost:${ctx.port}/api/resources/${scenarioId}/${resource._id}`,
+      { name: "image." },
+      authHeaders("user1")
+    );
+
+    expect(response.status).toBe(200);
+    expect(response.data.name).toBe("image.");
+  });
+
+  it("PATCH /resources/:scenarioId/:resourceId renames a collection", async () => {
+    const response = await axios.patch(
+      `http://localhost:${ctx.port}/api/resources/${scenarioId}/${collection._id}`,
+      { name: "Renamed Group" },
+      authHeaders("user1")
+    );
+
+    expect(response.status).toBe(200);
+    expect(response.data.name).toBe("Renamed Group");
+  });
+
+  it("PATCH /resources/:scenarioId/:resourceId returns 400 for a blank name", async () => {
+    await expect(
+      axios.patch(
+        `http://localhost:${ctx.port}/api/resources/${scenarioId}/${resource._id}`,
+        { name: "   " },
+        authHeaders("user1")
+      )
+    ).rejects.toMatchObject({ response: { status: 400 } });
+  });
+
+  it("PATCH /resources/:scenarioId/:resourceId returns 400 for a name over 255 characters", async () => {
+    await expect(
+      axios.patch(
+        `http://localhost:${ctx.port}/api/resources/${scenarioId}/${resource._id}`,
+        { name: "a".repeat(256) },
+        authHeaders("user1")
+      )
+    ).rejects.toMatchObject({ response: { status: 400 } });
+  });
+
+  it("PATCH /resources/:scenarioId/:resourceId returns 404 when resource not found", async () => {
+    await expect(
+      axios.patch(
+        `http://localhost:${ctx.port}/api/resources/${scenarioId}/000000000000000000000099`,
+        { name: "renamed.png" },
+        authHeaders("user1")
+      )
+    ).rejects.toMatchObject({ response: { status: 404 } });
+  });
+
+  // --- Delete resource ---
+
+  it("DELETE /resources/:scenarioId/:resourceId deletes the Resource and decrements the file reference count", async () => {
+    const response = await axios.delete(
+      `http://localhost:${ctx.port}/api/resources/${scenarioId}/${resource._id}`,
+      authHeaders("user1")
+    );
+    expect(response.status).toBe(204);
+
+    const dbResource = await Resource.findById(resource._id);
+    expect(dbResource).toBeNull();
+
+    const dbFile = await UploadedFile.findById(uploadedFile._id);
+    expect(dbFile.refCount).toBe(0);
+    expect(dbFile.orphanedAt).toBeInstanceOf(Date);
+  });
+
+  it("DELETE /resources/:scenarioId/:resourceId returns 404 when resource not found", async () => {
+    await expect(
+      axios.delete(
+        `http://localhost:${ctx.port}/api/resources/${scenarioId}/000000000000000000000099`,
+        authHeaders("user1")
+      )
+    ).rejects.toMatchObject({ response: { status: 404 } });
+  });
+
+  it("DELETE /resources/:scenarioId/:resourceId deletes collection and all its children", async () => {
+    const response = await axios.delete(
+      `http://localhost:${ctx.port}/api/resources/${scenarioId}/${collection._id}`,
+      authHeaders("user1")
+    );
+    expect(response.status).toBe(204);
+
+    const dbCollectionResource = await Resource.findById(collection._id);
+    expect(dbCollectionResource).toBeNull();
+
+    const dbFileResource = await Resource.findById(resource._id);
+    expect(dbFileResource).toBeNull();
+
+    const dbFile = await UploadedFile.findById(uploadedFile._id);
+    expect(dbFile.refCount).toBe(0);
+    expect(dbFile.orphanedAt).toBeInstanceOf(Date);
+  });
+
+  // --- Property conditionals ---
+
+  it("POST /resources/:scenarioId/:resourceId/conditionals adds a property conditional", async () => {
+    const conditional = {
+      stateVariableId: "var-1",
+      comparator: "=",
+      value: "open",
+    };
+
+    const response = await axios.post(
+      `http://localhost:${ctx.port}/api/resources/${scenarioId}/${resource._id}/conditionals`,
+      { propertyConditional: conditional },
+      authHeaders("user1")
+    );
+
+    expect(response.status).toBe(200);
+    expect(response.data.stateConditionals).toHaveLength(1);
+    expect(response.data.stateConditionals[0].stateVariableId).toBe("var-1");
+  });
+
+  it("POST /resources/:scenarioId/:resourceId/conditionals returns 404 for unknown resource", async () => {
+    await expect(
+      axios.post(
+        `http://localhost:${ctx.port}/api/resources/${scenarioId}/000000000000000000000099/conditionals`,
+        {
+          propertyConditional: {
+            stateVariableId: "x",
+            comparator: "=",
+            value: 1,
+          },
+        },
+        authHeaders("user1")
+      )
+    ).rejects.toMatchObject({ response: { status: 404 } });
+  });
+
+  it("PUT /resources/:scenarioId/:resourceId/conditionals updates an existing property conditional", async () => {
+    const addResp = await axios.post(
+      `http://localhost:${ctx.port}/api/resources/${scenarioId}/${resource._id}/conditionals`,
       {
-        name: "Updated Resource",
-        type: "text",
-        content: "Updated content",
-        requiredFlags: ["newFlag"],
+        propertyConditional: {
+          stateVariableId: "var-1",
+          comparator: "=",
+          value: "old",
+        },
       },
       authHeaders("user1")
     );
-    expect(response.status).toBe(200);
-    expect(response.data.name).toBe("Updated Resource");
+    const addedId = addResp.data.stateConditionals[0]._id;
 
-    const dbResource = await Resource.findById(resource1._id).lean();
-    expect(dbResource.name).toBe("Updated Resource");
-  });
-
-  it("PUT /resources/:resourceId returns 400 when missing name or type", async () => {
-    await expect(
-      axios.put(
-        `http://localhost:${ctx.port}/api/resources/${resource1._id}`,
-        { content: "some content" },
-        authHeaders("user1")
-      )
-    ).rejects.toMatchObject({ response: { status: 400 } });
-  });
-
-  // NOTE: deleteResourceById currently calls findByIdAndRemove, which was removed
-  // in Mongoose 8, so the route throws 500 instead of the intended 204/404. The
-  // two tests below assert the CORRECT behaviour and are marked `it.failing`, so
-  // they stay green while the bug exists and automatically turn red once the DAO
-  // is fixed (switch to findByIdAndDelete) — signalling that they should be
-  // un-marked.
-  it.failing(
-    "DELETE /resources/:resourceId deletes the resource and returns 204",
-    async () => {
-      const response = await axios.delete(
-        `http://localhost:${ctx.port}/api/resources/${resource1._id}`,
-        authHeaders("user1")
-      );
-      expect(response.status).toBe(204);
-
-      const dbResource = await Resource.findById(resource1._id);
-      expect(dbResource).toBeNull();
-    }
-  );
-
-  it.failing(
-    "DELETE /resources/:resourceId returns 404 for unknown resource",
-    async () => {
-      await expect(
-        axios.delete(
-          `http://localhost:${ctx.port}/api/resources/000000000000000000000099`,
-          authHeaders("user1")
-        )
-      ).rejects.toMatchObject({ response: { status: 404 } });
-    }
-  );
-
-  it("POST /resources/:scenarioId bulk creates resources and replaces existing", async () => {
-    const resources = [
-      { name: "Bulk Resource 1", type: "text", content: "Text content" },
-      { name: "Bulk Resource 2", type: "image", content: "img-url" },
-    ];
-
-    const response = await axios.post(
-      `http://localhost:${ctx.port}/api/resources/${scenarioId}`,
-      resources,
+    const response = await axios.put(
+      `http://localhost:${ctx.port}/api/resources/${scenarioId}/${resource._id}/conditionals`,
+      {
+        propertyConditional: {
+          _id: addedId,
+          stateVariableId: "var-1",
+          comparator: "!=",
+          value: "new",
+        },
+      },
       authHeaders("user1")
     );
+
     expect(response.status).toBe(200);
-    expect(response.data.count).toBe(2);
-    expect(response.data.message).toContain("2 resources");
-
-    // Old resources should be deleted
-    const dbResources = await Resource.find({ scenarioId }).lean();
-    expect(dbResources).toHaveLength(2);
-    expect(dbResources.map((r) => r.name)).toContain("Bulk Resource 1");
+    expect(response.data.stateConditionals[0].comparator).toBe("!=");
+    expect(response.data.stateConditionals[0].value).toBe("new");
   });
 
-  it("POST /resources/:scenarioId returns 400 for empty resource list", async () => {
+  it("PUT /resources/:scenarioId/:resourceId/conditionals returns 404 when resource not found", async () => {
     await expect(
-      axios.post(
-        `http://localhost:${ctx.port}/api/resources/${scenarioId}`,
-        [],
+      axios.put(
+        `http://localhost:${ctx.port}/api/resources/${scenarioId}/000000000000000000000099/conditionals`,
+        {
+          propertyConditional: {
+            _id: new mongoose.mongo.ObjectId(),
+            stateVariableId: "var-1",
+            comparator: "=",
+            value: "x",
+          },
+        },
         authHeaders("user1")
       )
-    ).rejects.toMatchObject({ response: { status: 400 } });
+    ).rejects.toMatchObject({ response: { status: 404 } });
   });
 
-  it("POST /resources/ returns 400 when missing required fields", async () => {
+  it("DELETE /resources/:scenarioId/:resourceId/conditionals/:conditionalId removes a conditional", async () => {
+    const addResp = await axios.post(
+      `http://localhost:${ctx.port}/api/resources/${scenarioId}/${resource._id}/conditionals`,
+      {
+        propertyConditional: {
+          stateVariableId: "var-1",
+          comparator: "=",
+          value: "x",
+        },
+      },
+      authHeaders("user1")
+    );
+    const conditionalId = addResp.data.stateConditionals[0]._id;
+
+    const response = await axios.delete(
+      `http://localhost:${ctx.port}/api/resources/${scenarioId}/${resource._id}/conditionals/${conditionalId}`,
+      authHeaders("user1")
+    );
+
+    expect(response.status).toBe(200);
+    expect(response.data.stateConditionals).toHaveLength(0);
+  });
+
+  it("DELETE /resources/:scenarioId/:resourceId/conditionals/:conditionalId returns 404 for non-existent resource", async () => {
     await expect(
-      axios.post(
-        `http://localhost:${ctx.port}/api/resources/`,
-        { type: "text" }, // missing name and scenarioId
+      axios.delete(
+        `http://localhost:${ctx.port}/api/resources/${scenarioId}/000000000000000000000099/conditionals/000000000000000000000099`,
         authHeaders("user1")
       )
-    ).rejects.toMatchObject({ response: { status: 400 } });
+    ).rejects.toMatchObject({ response: { status: 404 } });
   });
 });

@@ -6,6 +6,7 @@ import { XIcon } from "lucide-react";
 import AuthenticationContext from "context/AuthenticationContext";
 import NotesList from "./NotesList";
 import NoteDetail from "./NoteDetail";
+import PanelOverlay from "../../../components/PanelOverlay";
 
 export default function NotesPanel({ group, open, onClose }) {
   const { user } = useContext(AuthenticationContext);
@@ -50,7 +51,7 @@ export default function NotesPanel({ group, open, onClose }) {
     setError(null);
     try {
       const token = await getToken();
-      const { data } = await axios.get(`/api/note/retrieveAll/${group._id}`, {
+      const { data } = await axios.get(`/api/group/${group._id}/notes`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       const fetched = data || [];
@@ -93,12 +94,12 @@ export default function NotesPanel({ group, open, onClose }) {
       const token = await getToken();
       const prevIds = new Set(notes.map((n) => n._id));
       await axios.post(
-        "/api/note/",
-        { groupId: group._id, title: "New Note" },
+        `/api/group/${group._id}/notes`,
+        { title: "New Note" },
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
-      const { data } = await axios.get(`/api/note/retrieveAll/${group._id}`, {
+      const { data } = await axios.get(`/api/group/${group._id}/notes`, {
         headers: { Authorization: `Bearer ${await getToken()}` },
       });
       const fetched = data || [];
@@ -131,15 +132,7 @@ export default function NotesPanel({ group, open, onClose }) {
 
   return (
     <>
-      <div
-        className={`fixed inset-0 z-50 bg-black/90 transition-opacity ${
-          open
-            ? "opacity-100 pointer-events-auto"
-            : "opacity-0 pointer-events-none"
-        }`}
-        onClick={onClose}
-        aria-hidden="true"
-      />
+      <PanelOverlay open={open} onClose={onClose} />
 
       <div
         className={`fixed inset-0 z-50 flex items-center justify-center transition-all ${open ? "opacity-100 scale-100 pointer-events-auto" : "opacity-0 scale-95 pointer-events-none"}`}

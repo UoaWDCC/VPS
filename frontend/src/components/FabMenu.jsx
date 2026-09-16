@@ -7,7 +7,7 @@ import {
   UsersRoundIcon,
 } from "lucide-react";
 
-const FabMenu = () => {
+const FabMenu = ({ className }) => {
   const history = useHistory();
 
   const handleThemeToggle = () => {
@@ -25,39 +25,39 @@ const FabMenu = () => {
 
   return (
     <div
-      className={`fixed bottom-xl right-xl z-3 ${open ? "pointer-events-auto" : "pointer-events-none"}`}
+      className={`fixed z-3 ${open ? "pointer-events-auto" : "pointer-events-none"} ${className}`}
       onMouseLeave={() => setOpen(false)}
     >
-      <div className="flex flex-col items-end gap-4">
+      <div className="flex flex-col items-end gap-2">
+        <div className="p-2">
+          <button
+            onMouseEnter={() => setOpen(true)}
+            className={`flex items-center justify-center transition-all duration-300 rounded-xs rotate-45 cursor-pointer border-1 pointer-events-auto w-8 h-8 ${open ? "border-secondary bg-secondary text-base-100" : "border-primary bg-base-100"}`}
+            aria-label="Open Menu"
+          >
+            <EllipsisVerticalIcon size={16} className="-rotate-45" />
+          </button>
+        </div>
         <div className="p-2">
           <label
-            className={`swap swap-rotate transition-all duration-300 w-12 h-12 rounded-xs rotate-45 cursor-pointer bg-base-100 border-1 border-primary ${open ? "opacity-100" : "opacity-0 pointer-events-none"} `}
+            className={`swap swap-rotate transition-all duration-300 rounded-xs rotate-45 cursor-pointer bg-base-100 border-1 border-primary w-8 h-8 ${open ? "opacity-100" : "opacity-0 pointer-events-none"} `}
           >
             <input
               type="checkbox"
               className="theme-controller"
               onChange={handleThemeToggle}
             />
-            <SunIcon size={20} className="swap-off fill-current" />
-            <MoonIcon size={20} className="swap-on fill-current" />
+            <SunIcon size={16} className="swap-off fill-current" />
+            <MoonIcon size={16} className="swap-on fill-current" />
           </label>
         </div>
         <div className="p-2">
           <button
-            className={`flex items-center justify-center transition-all duration-300 w-12 h-12 rounded-xs rotate-45 cursor-pointer bg-base-100 border-1 border-primary ${open ? "opacity-100" : "opacity-0 pointer-events-none"} `}
+            className={`flex items-center justify-center transition-all duration-300 rounded-xs rotate-45 cursor-pointer bg-base-100 border-1 border-primary w-8 h-8 ${open ? "opacity-100" : "opacity-0 pointer-events-none"} `}
             onClick={() => history.push("/aboutus")}
             aria-label="About Us"
           >
-            <UsersRoundIcon size={20} className="-rotate-45" />
-          </button>
-        </div>
-        <div className="p-2">
-          <button
-            onMouseEnter={() => setOpen(true)}
-            className={`flex items-center justify-center transition-all duration-300 w-12 h-12 rounded-xs rotate-45 cursor-pointer border-1 pointer-events-auto ${open ? "border-secondary bg-secondary text-base-100" : "border-primary bg-base-100"}`}
-            aria-label="Open Menu"
-          >
-            <EllipsisVerticalIcon size={20} className="-rotate-45" />
+            <UsersRoundIcon size={16} className="-rotate-45" />
           </button>
         </div>
       </div>

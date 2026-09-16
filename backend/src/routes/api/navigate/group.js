@@ -3,25 +3,45 @@ import User from "../../../db/models/user.js";
 import Group from "../../../db/models/group.js";
 import Scenario from "../../../db/models/scenario.js";
 import Note from "../../../db/models/note.js";
-import Resource from "../../../db/models/resource.js";
 import { HttpError } from "../../../util/error.js";
 import STATUS from "../../../util/status.js";
-import { getStateVariables } from "../../../db/daos/scenarioDao.js";
-import { setGroupStateVariables } from "../../../db/daos/groupDao.js";
-import { applyStateOperations } from "../../../util/statevariables/stateOperations.js";
+import { getProperties } from "../../../db/daos/scenarioDao.js";
+import { setGroupProperties } from "../../../db/daos/groupDao.js";
+import { applyPropertyOperations } from "../../../util/properties/propertyOperations.js";
 import { getComponent } from "../../../db/daos/sceneDao.js";
 import { sendEmail } from "../../../util/resend.js";
 import { EmailTemplate } from "../../../util/emailTemplates.js";
+import {
+  freshRemainingTime,
+  resumedRemainingTime,
+  movedRemainingTimeField,
+} from "./timer.js";
+import { normaliseString } from "../../../util/normalise.js";
 
 const createInvalidError = (roles) =>
   new HttpError("Invalid role to access this scene", STATUS.FORBIDDEN, {
     roles_with_access: roles,
   });
 
+// role names are stored with whatever casing/whitespace they were
+// authored/uploaded with, so access checks must normalize both
+const roleMatches = (roles, role) => {
+  const target = normaliseString(role);
+  if (!target) return false;
+  return roles.some((r) => normaliseString(r) === target);
+};
+
 export const getSimpleScene = async (sceneId) => {
   const scene = await Scene.findOne(
     { _id: sceneId },
-    { roles: 1, components: 1, directLink: 1, time: 1, timerStateOperations: 1 }
+    {
+      roles: 1,
+      components: 1,
+      directLink: 1,
+      time: 1,
+      timerStateOperations: 1,
+      background: 1,
+    }
   ).lean();
   if (!scene)
     throw new HttpError("No scene exists with that id", STATUS.NOT_FOUND);
@@ -55,7 +75,7 @@ export const getScenarioFirstScene = async (scenarioId) => {
 
 const getSceneConsideringRole = async (sceneId, role) => {
   const scene = await getSimpleScene(sceneId);
-  if (scene.roles.length && !scene.roles.includes(role))
+  if (scene.roles.length && !roleMatches(scene.roles, role))
     throw createInvalidError(scene.roles);
   return scene;
 };
@@ -64,7 +84,14 @@ const getGroupByIdAndUser = async (groupId, uid) => {
   const { email } = await User.findOne({ uid }, { email: 1 }).lean();
   const group = await Group.findOne(
     { _id: groupId, users: { $elemMatch: { email } } },
-    { "users.$": 1, scenarioId: 1, path: 1, stateVariables: 1, stateVersion: 1 }
+    {
+      "users.$": 1,
+      scenarioId: 1,
+      path: 1,
+      stateVariables: 1,
+      stateVersion: 1,
+      currentSceneEnteredAt: 1,
+    }
   ).lean();
   if (!group)
     throw new HttpError(
@@ -82,10 +109,17 @@ const getConnectedScenes = async (sceneID, role, active = true) => {
     .filter(Boolean);
   const connectedScenes = await Scene.find(
     { _id: { $in: connectedIds } },
-    { roles: 1, components: 1, directLink: 1 }
+    {
+      roles: 1,
+      components: 1,
+      directLink: 1,
+      time: 1,
+      timerStateOperations: 1,
+      background: 1,
+    }
   ).lean();
   const filtered = connectedScenes.map((s) => {
-    if (s.roles.includes(role) || !s.roles.length) return s;
+    if (!s.roles.length || roleMatches(s.roles, role)) return s;
     const error = createInvalidError(s.roles);
     return { _id: s._id, ...error.toJSON() };
   });
@@ -102,7 +136,10 @@ const addSceneToPath = async (groupId, currentSceneId, sceneId) => {
       _id: groupId,
       $or: [{ "path.0": currentSceneId }, { path: { $size: 0 } }],
     },
-    { $push: { path: { $each: [sceneId], $position: 0 } } }
+    {
+      $push: { path: { $each: [sceneId], $position: 0 } },
+      $set: { currentSceneEnteredAt: new Date() },
+    }
   );
   if (!res) throw new HttpError("Scene mismatch has occured", STATUS.CONFLICT);
   return STATUS.OK;
@@ -146,19 +183,19 @@ const removeFlagsFromGroup = async (groupId, flags) => {
   }
 };
 
-// Initiates state variables for a group
-const initiateStateVariables = async (groupId, scenarioId) => {
-  const stateVariables = await getStateVariables(scenarioId);
-  return await setGroupStateVariables(groupId, stateVariables);
+// Initiates properties for a group
+const initiateProperties = async (groupId, scenarioId) => {
+  const properties = await getProperties(scenarioId);
+  return await setGroupProperties(groupId, properties);
 };
 
-// Sync state variables for a group (author may have changed state in-between playthroughs)
-const syncStateVariables = async (group) => {
-  const stateVariables = group.stateVariables;
-  const scenarioStateVariables = await getStateVariables(group.scenarioId);
+// Sync properties for a group (author may have changed state in-between playthroughs)
+const syncProperties = async (group) => {
+  const properties = group.stateVariables;
+  const scenarioProperties = await getProperties(group.scenarioId);
 
-  const newStateVariables = scenarioStateVariables.map((scenarioVar) => {
-    const existingVar = stateVariables.find((v) => v.id === scenarioVar.id);
+  const newProperties = scenarioProperties.map((scenarioVar) => {
+    const existingVar = properties.find((v) => v.id === scenarioVar.id);
 
     if (existingVar && existingVar.type === scenarioVar.type) {
       return existingVar;
@@ -167,10 +204,10 @@ const syncStateVariables = async (group) => {
     }
   });
 
-  if (JSON.stringify(newStateVariables) !== JSON.stringify(stateVariables)) {
-    return await setGroupStateVariables(group._id, newStateVariables);
+  if (JSON.stringify(newProperties) !== JSON.stringify(properties)) {
+    return await setGroupProperties(group._id, newProperties);
   }
-  return [stateVariables, group.stateVersions];
+  return [properties, group.stateVersion];
 };
 
 // Emails the group member(s) whose role the new scene is for, letting them
@@ -205,7 +242,9 @@ const notifyNextRole = async (group, nextSceneId, currentRole) => {
     ]);
 
     const roleRecipients = fullGroup.users.filter(
-      (user) => nextScene.roles.includes(user.role) && user.role !== currentRole
+      (user) =>
+        roleMatches(nextScene.roles, user.role) &&
+        normaliseString(user.role) !== normaliseString(currentRole)
     );
     if (!roleRecipients.length) return;
 
@@ -243,18 +282,18 @@ const notifyNextRole = async (group, nextSceneId, currentRole) => {
   }
 };
 
-// Updates state variables for a group
-const updateStateVariables = async (group, component) => {
+// Updates properties for a group
+const updateProperties = async (group, component) => {
   if (!component || !component.stateOperations) {
     return [group.stateVariables, group.stateVersion];
   }
 
-  const stateVariables = applyStateOperations(
+  const properties = applyPropertyOperations(
     group.stateVariables,
     component.stateOperations
   );
 
-  return await setGroupStateVariables(group._id, stateVariables);
+  return await setGroupProperties(group._id, properties);
 };
 
 export const groupNavigate = async (req) => {
@@ -273,16 +312,21 @@ export const groupNavigate = async (req) => {
   // the first time any user in the group is navigating
   if (!group.path.length) {
     const firstSceneId = await getScenarioFirstScene(group.scenarioId);
-    const [, , , scenes, [stateVariables, stateVersion]] = await Promise.all([
+    const [, , , scenes, [properties, propertyVersion]] = await Promise.all([
       addSceneToPath(group._id, null, firstSceneId),
       addFlagsToGroup(group._id, addFlags),
       removeFlagsFromGroup(group._id, removeFlags),
       getConnectedScenes(firstSceneId, role),
-      initiateStateVariables(group._id, group.scenarioId),
+      initiateProperties(group._id, group.scenarioId),
     ]);
     return {
       status: STATUS.OK,
-      json: { ...scenes, stateVariables, stateVersion },
+      json: {
+        ...scenes,
+        properties,
+        propertyVersion,
+        remainingTime: freshRemainingTime(scenes),
+      },
     };
   }
 
@@ -290,11 +334,19 @@ export const groupNavigate = async (req) => {
   if (!currentScene) {
     const scenes = await getConnectedScenes(group.path[0], role);
 
-    const [stateVariables, stateVersion] = await syncStateVariables(group);
+    const [properties, propertyVersion] = await syncProperties(group);
 
     return {
       status: STATUS.OK,
-      json: { ...scenes, stateVariables, stateVersion },
+      json: {
+        ...scenes,
+        properties,
+        propertyVersion,
+        remainingTime: resumedRemainingTime(
+          scenes,
+          group.currentSceneEnteredAt
+        ),
+      },
     };
   }
   // the user is navigating from one scene to another
@@ -334,14 +386,19 @@ export const groupNavigate = async (req) => {
     scenes = await getConnectedScenes(nextScene, role, true);
   }
 
-  const [stateVariables, stateVersion] = await updateStateVariables(
+  const [properties, propertyVersion] = await updateProperties(
     group,
     component
   );
 
   return {
     status: STATUS.OK,
-    json: { ...scenes, stateVariables, stateVersion },
+    json: {
+      ...scenes,
+      properties,
+      propertyVersion,
+      ...movedRemainingTimeField(scenes),
+    },
   };
 };
 
@@ -370,33 +427,8 @@ export const groupReset = async (req) => {
 
   await Group.updateOne(
     { _id: req.params.groupId },
-    { $set: { path: [], currentFlags: [] } }
+    { $set: { path: [], currentFlags: [], currentSceneEnteredAt: null } }
   ).exec();
 
   return { status: STATUS.OK };
-};
-
-// Fetches groups flags and returns resources
-export const groupGetResources = async (req) => {
-  const group = await Group.findById(req.params.groupId);
-
-  if (!group) {
-    throw new HttpError("Group not found", STATUS.NOT_FOUND);
-  }
-
-  const flags = group.currentFlags || [];
-  const resources = [];
-
-  // Fetch all resources from the database
-  const allResources = await Resource.find({});
-
-  // Filter resources where all requiredFlags are present in the group's current flags
-  const matchingResources = allResources.filter((resource) =>
-    resource.requiredFlags.every((flag) => flags.includes(flag))
-  );
-
-  // Push the filtered resources to the resources array
-  resources.push(...matchingResources);
-
-  return { status: STATUS.OK, json: resources };
 };

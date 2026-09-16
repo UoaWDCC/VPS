@@ -8,6 +8,7 @@ import Scene from "../../../db/models/scene.js";
 import Scenario from "../../../db/models/scenario.js";
 import auth from "../../../middleware/firebaseAuth.js";
 import scenarioAuth from "../../../middleware/scenarioAuth.js";
+import errorHandler from "../../../middleware/errorHandler.js";
 import { authHeaders } from "./testHelpers.js";
 import {
   useMongoMemoryServer,
@@ -36,6 +37,7 @@ describe("Scene API tests", () => {
     const app = express();
     app.use(express.json());
     app.use("/", routes);
+    app.use(errorHandler);
     return app;
   });
 
@@ -225,6 +227,27 @@ describe("Scene API tests", () => {
     expect(dbScene.components).toEqual(scene1.components);
   });
 
+  it("PATCH rejects a primitive background with HTTP 400", async () => {
+    let error;
+
+    try {
+      await axios.patch(
+        `http://localhost:${ctx.port}/api/scenario/${scenario2._id}/scene/${scene1._id}`,
+        { fields: { background: "blue" } },
+        authHeaders("user1")
+      );
+    } catch (err) {
+      error = err;
+    }
+
+    expect(error).toBeDefined();
+    expect(error.response.status).toBe(400);
+    expect(error.response.data.error).toBe(
+      "background must be an object or null"
+    );
+    expect((await Scene.findById(scene1._id).lean()).background).toBeNull();
+  });
+
   it("PUT api/scenario/:scenarioId/scene/reorder updates scene order", async () => {
     const reqData = {
       sceneIds: [scene2._id.toString(), scene1._id.toString()],
@@ -359,8 +382,8 @@ describe("Scene API tests", () => {
     });
     expect(scenarioScenes).toEqual([
       scene1._id.toString(),
-      scene2._id.toString(),
       responseScene._id,
+      scene2._id.toString(),
     ]);
 
     // check scene is not added to unrelated scenario

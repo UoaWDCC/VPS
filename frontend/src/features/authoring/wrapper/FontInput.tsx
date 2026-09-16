@@ -1,3 +1,29 @@
+import { useState, useEffect } from "react";
+import { Check } from "lucide-react";
+
+function FontFinder(currentSearch: string = "") {
+  const fonts = [
+    "Arial",
+    "Verdana",
+    "Tahoma",
+    "Trebuchet MS",
+    "Times New Roman",
+    "Georgia",
+    "Garamond",
+    "Courier New",
+    "Helvetica",
+  ];
+
+  const filteredFonts =
+    currentSearch.length == 0
+      ? fonts
+      : fonts.filter((font) =>
+          font.toLowerCase().includes(currentSearch.toLowerCase())
+        );
+
+  return filteredFonts;
+}
+
 function FontInput({
   value,
   onChange,
@@ -5,28 +31,46 @@ function FontInput({
   value: string;
   onChange: (value: string) => void;
 }) {
+  const [searchQuery, setSearchQuery] = useState("");
+  const fonts = FontFinder(searchQuery);
+
+  // Reset search query when the selected value changes externally
+  useEffect(() => {
+    setSearchQuery("");
+  }, [value]);
+
   return (
-    <>
+    <div className="dropdown">
       <input
         type="text"
         className="input input-sm h-[28px] w-30"
-        placeholder="Font Name"
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        list="fonts"
+        placeholder="Search fonts..."
+        value={searchQuery || value}
+        onChange={(e) => {
+          setSearchQuery(e.target.value);
+        }}
       />
-      <datalist id="fonts">
-        <option value="Arial" />
-        <option value="Verdana" />
-        <option value="Tahoma" />
-        <option value="Trebuchet MS" />
-        <option value="Times New Roman" />
-        <option value="Georgia" />
-        <option value="Garamond" />
-        <option value="Courier New" />
-        <option value="Helvetica" />
-      </datalist>
-    </>
+      <ul
+        tabIndex={0}
+        className="dropdown-content menu menu-sm flex-nowrap bg-base-300 rounded-box shadow-sm min-w-30 w-max max-w-60 max-h-60 overflow-y-auto"
+      >
+        {fonts.map((font, index) => (
+          <li key={index}>
+            <button
+              type="button"
+              className={`justify-between ${font === value ? "menu-active" : ""}`}
+              onClick={() => {
+                onChange(font);
+                setSearchQuery("");
+              }}
+            >
+              {font}
+              {font === value && <Check size={14} />}
+            </button>
+          </li>
+        ))}
+      </ul>
+    </div>
   );
 }
 

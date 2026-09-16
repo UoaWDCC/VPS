@@ -1,8 +1,10 @@
 import { useEffect, useRef, useState } from "react";
 import { TimerIcon } from "lucide-react";
 
-export default function SceneTimer({ duration, onTimeout }) {
-  const [secondsLeft, setSecondsLeft] = useState(duration);
+export default function SceneTimer({ duration, initialSeconds, onTimeout }) {
+  const [secondsLeft, setSecondsLeft] = useState(
+    Math.max(0, Math.floor(initialSeconds ?? duration))
+  );
   const onTimeoutRef = useRef(onTimeout);
   onTimeoutRef.current = onTimeout;
 
