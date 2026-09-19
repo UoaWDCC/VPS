@@ -4,7 +4,7 @@ import {
   createUser,
   assignScenarioToUsers,
   getSeenResources,
-  setSeenResources,
+  updateSeenResources,
 } from "../../db/daos/userDao.js";
 import User from "../../db/models/user.js";
 import Group from "../../db/models/group.js";
@@ -73,27 +73,53 @@ router.get(
   handle(async (req, res) => {
     const { scenarioId } = req.params;
     const { uid } = req.body;
+
+    if (!isValidObjectId(scenarioId)) {
+      throw new HttpError("Invalid scenario ID", STATUS.BAD_REQUEST);
+    }
+
     const seenResources = await getSeenResources(uid, scenarioId);
+
     return res.status(STATUS.OK).json({ seenResources });
   })
 );
 
-//replace resource ids the user has seen
-router.put(
+//add or remove resource ids the user has seen
+router.patch(
   "/seen-resources/:scenarioId",
   handle(async (req, res) => {
     const { scenarioId } = req.params;
-    const { uid, resourceIds } = req.body;
+    const { uid, add, remove } = req.body;
 
-    if (!Array.isArray(resourceIds) || !resourceIds.every(isValidObjectId))
+    if (!isValidObjectId(scenarioId)) {
+      throw new HttpError("Invalid scenario ID", STATUS.BAD_REQUEST);
+    }
+
+    const hasAdd = add !== undefined;
+    const hasRemove = remove !== undefined;
+
+    if (hasAdd === hasRemove) {
       throw new HttpError(
-        "resourceIds must be an array of resource ids",
+        "Provide just one (add or remove)",
         STATUS.BAD_REQUEST
       );
+    }
 
-    const seenResources = await setSeenResources(uid, scenarioId, [
-      ...new Set(resourceIds),
-    ]);
+    const resourceIds = hasAdd ? add : remove;
+
+    if (
+      !Array.isArray(resourceIds) ||
+      !resourceIds.every((id) => typeof id === "string" && isValidObjectId(id))
+    ) {
+      throw new HttpError(
+        "Resource IDs must be a valid ID string array",
+        STATUS.BAD_REQUEST
+      );
+    }
+
+    const op = hasAdd ? { add: resourceIds } : { remove: resourceIds };
+    const seenResources = await updateSeenResources(uid, scenarioId, op);
+
     return res.status(STATUS.OK).json({ seenResources });
   })
 );

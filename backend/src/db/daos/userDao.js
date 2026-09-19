@@ -121,23 +121,29 @@ export const setUserProperties = async (userId, scenarioId, properties) => {
 export const getSeenResources = async (uid, scenarioId) => {
   const user = await User.findOne({ uid }, { seenResources: 1 });
   if (!user) throw new HttpError("user not found", 404);
-  return user.seenResources?.get(scenarioId) ?? [];
+  return user.seenResources.get(scenarioId) ?? [];
 };
 
 /**
- * Replaces resource ids a user has seen within a scenario.
+ * Atomically add/remove seen resource IDs in a scenario.
  *
  * @param {string} uid - Firebase user ID.
- * @param {string} scenarioId - Scenario ID the "seen" list belongs to.
- * @param {string[]} resourceIds - Full list of "seen" resource IDs.
+ * @param {string} scenarioId - Scenario ID.
+ * @param {{ add?: string[], remove?: string[] }} operation
  * @returns {Promise<string[]>} Persisted seen resource IDs.
  */
-export const setSeenResources = async (uid, scenarioId, resourceIds) => {
-  const user = await User.findOneAndUpdate(
-    { uid },
-    { $set: { [`seenResources.${scenarioId}`]: resourceIds } },
-    { new: true, projection: { seenResources: 1 } }
-  );
+export const updateSeenResources = async (uid, scenarioId, operation) => {
+  const path = `seenResources.${scenarioId}`;
+  const update = operation.add
+    ? { $addToSet: { [path]: { $each: operation.add } } }
+    : { $pull: { [path]: { $in: operation.remove } } };
+
+  const user = await User.findOneAndUpdate({ uid }, update, {
+    new: true,
+    projection: { seenResources: 1 },
+  });
+
   if (!user) throw new HttpError("user not found", 404);
-  return user.seenResources.get(scenarioId);
+
+  return user.seenResources.get(scenarioId) ?? [];
 };
