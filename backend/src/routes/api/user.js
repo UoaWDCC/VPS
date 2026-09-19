@@ -3,6 +3,8 @@ import {
   retrieveUserByEmail,
   createUser,
   assignScenarioToUsers,
+  getSeenResources,
+  setSeenResources,
 } from "../../db/daos/userDao.js";
 import User from "../../db/models/user.js";
 import Group from "../../db/models/group.js";
@@ -11,6 +13,7 @@ import auth from "../../middleware/firebaseAuth.js";
 import STATUS from "../../util/status.js";
 import { handle, HttpError } from "../../util/error.js";
 import scenarioAuth from "../../middleware/scenarioAuth.js";
+import { isValidObjectId } from "../../util/validation.js";
 
 const router = Router();
 
@@ -61,6 +64,37 @@ router.get(
       "users.email": user.email,
     });
     return res.status(STATUS.OK).json({ group });
+  })
+);
+
+//get resource ids that user has seen
+router.get(
+  "/seen-resources/:scenarioId",
+  handle(async (req, res) => {
+    const { scenarioId } = req.params;
+    const { uid } = req.body;
+    const seenResources = await getSeenResources(uid, scenarioId);
+    return res.status(STATUS.OK).json({ seenResources });
+  })
+);
+
+//replace resource ids the user has seen
+router.put(
+  "/seen-resources/:scenarioId",
+  handle(async (req, res) => {
+    const { scenarioId } = req.params;
+    const { uid, resourceIds } = req.body;
+
+    if (!Array.isArray(resourceIds) || !resourceIds.every(isValidObjectId))
+      throw new HttpError(
+        "resourceIds must be an array of resource ids",
+        STATUS.BAD_REQUEST
+      );
+
+    const seenResources = await setSeenResources(uid, scenarioId, [
+      ...new Set(resourceIds),
+    ]);
+    return res.status(STATUS.OK).json({ seenResources });
   })
 );
 
