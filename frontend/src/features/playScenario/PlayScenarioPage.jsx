@@ -19,6 +19,7 @@ import {
   VolumeOffIcon,
 } from "lucide-react";
 import ResourcesPanel from "../resources/ResourcesOverlay";
+import { useResourceVisibility } from "../resources/useResourceVisibility";
 
 const sceneCache = new Map();
 
@@ -172,6 +173,8 @@ export default function PlayScenarioPage({ group }) {
   const audioRefs = useRef([]);
 
   const currScene = sceneCache.get(sceneId);
+  const { filteredTree, unseenIds, markSeen, resourcesQuery } =
+    useResourceVisibility(properties, Boolean(currScene));
 
   const handleError = async (error) => {
     if (!error) return;
@@ -501,8 +504,10 @@ export default function PlayScenarioPage({ group }) {
         />
       )}
       <ResourcesPanel
-        scenarioId={scenarioId}
-        properties={properties}
+        tree={filteredTree}
+        unseenIds={unseenIds}
+        markSeen={markSeen}
+        resourcesQuery={resourcesQuery}
         open={resourcesOpen}
         onClose={() => setResourcesOpen(false)}
       />
