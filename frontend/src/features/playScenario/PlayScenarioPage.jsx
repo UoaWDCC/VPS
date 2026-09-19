@@ -481,12 +481,21 @@ export default function PlayScenarioPage({ group }) {
         )}
         <div className="tooltip tooltip-left" data-tip="Open resources">
           <button
-            className="btn"
+            className="btn relative"
             onClick={() => setResourcesOpen(true)}
             type="button"
-            aria-label="Open resources"
+            aria-label={
+              unseenIds.length > 0
+                ? `Open resources (${unseenIds.length} new)`
+                : "Open resources"
+            }
           >
             <BookMarkedIcon size={16} />
+            {unseenIds.length > 0 && (
+              <span className="badge badge-sm badge-neutral px-1.5 absolute -top-1 -right-1">
+                {unseenIds.length}
+              </span>
+            )}
           </button>
         </div>
       </div>
