@@ -334,6 +334,10 @@ body,
   @apply text-xs pb-3xs h-7;
 }
 
+#canvas-side-panel .input {
+  @apply h-7 text-xs shadow-none w-full px-2;
+}
+
 svg#main .box,
 svg#main .speech,
 svg#main .ellipse,
