@@ -59,4 +59,9 @@ const useVisualScene = create<VisualSceneState>((set) => ({
     }),
 }));
 
+// NOTE: temporary debug hook for manually seeding state from the browser console
+(
+  window as unknown as Window & { useVisualScene: typeof useVisualScene }
+).useVisualScene = useVisualScene;
+
 export default useVisualScene;
