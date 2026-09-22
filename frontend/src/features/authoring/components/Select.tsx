@@ -1,4 +1,5 @@
 import { ChevronDown } from "lucide-react";
+import { useEffect, useRef } from "react";
 
 interface SelectInputProps<T> {
   values: T[];
@@ -7,6 +8,8 @@ interface SelectInputProps<T> {
   onChange: (v: T | null) => void;
   nullable?: boolean;
   disabled?: boolean;
+  autoFocus?: boolean;
+  onBlur?: () => void;
 }
 
 function SelectInput<T>({
@@ -16,8 +19,16 @@ function SelectInput<T>({
   nullable = false,
   disabled = false,
   onChange,
+  autoFocus = false,
+  onBlur,
 }: SelectInputProps<T>) {
   const render = display ?? ((v: T) => String(v));
+  const triggerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    // only focus on mount, when this item is newly added
+    if (autoFocus) triggerRef.current?.focus();
+  }, []);
 
   function handleClick(v: T | null) {
     (document.activeElement as HTMLDivElement).blur();
@@ -31,8 +42,10 @@ function SelectInput<T>({
       }`}
     >
       <div
+        ref={triggerRef}
         tabIndex={0}
         role="button"
+        onBlur={onBlur}
         className="justify-between input mb-1 font-normal join-item w-full"
       >
         <span className="truncate">
@@ -43,6 +56,7 @@ function SelectInput<T>({
       {!disabled && (
         <ul
           tabIndex={0}
+          onMouseDown={(e) => e.preventDefault()}
           className="dropdown-content menu bg-base-300 rounded-box z-1 w-70 p-2 shadow-sm"
         >
           {values.map((v, i) => (

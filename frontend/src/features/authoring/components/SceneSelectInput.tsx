@@ -9,7 +9,12 @@ interface SceneSelectInputProps {
   disabled?: boolean;
 }
 
-function SceneSelectInput({ scenes, exclusionId, value, onChange }: SceneSelectInputProps) {
+function SceneSelectInput({
+  scenes,
+  exclusionId,
+  value,
+  onChange,
+}: SceneSelectInputProps) {
   return (
     <SelectInput
       nullable
@@ -20,12 +25,11 @@ function SceneSelectInput({ scenes, exclusionId, value, onChange }: SceneSelectI
           .map((scene) => scene._id) ?? []
       }
       display={(targetId) =>
-        scenes?.find((scene) => scene._id === targetId)?.name ??
-        "Unknown scene"
+        scenes?.find((scene) => scene._id === targetId)?.name ?? "Unknown scene"
       }
       onChange={onChange}
     />
-  )
+  );
 }
 
 export default SceneSelectInput;
