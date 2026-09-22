@@ -1,4 +1,4 @@
-import { useContext, useState, useEffect } from "react";
+import { useContext, useState, useEffect, useRef } from "react";
 import ScenarioContext from "context/ScenarioContext";
 import SceneContext from "context/SceneContext";
 import { generateUniqueSceneName } from "../../../utils/sceneUtils";
@@ -10,7 +10,6 @@ import shallow from "zustand/shallow";
 import toast from "react-hot-toast";
 import PanelSection from "./PanelSection";
 import PanelInput from "./PanelInput";
-import CreateTimerOperationModal from "../../../components/Properties/CreateTimerOperationModal";
 import MultiSelectInput from "../components/MultiSelectInput";
 import SceneSelectInput from "../components/SceneSelectInput";
 import ActionsInput from "../components/ActionsInput";
@@ -34,6 +33,9 @@ export default function SceneSettings() {
   const [sceneName, setSceneName] = useState(name ?? "");
   const [timerDuration, setTimerDuration] = useState(time ?? "");
 
+  const defaultActionsRef = useRef(null);
+  const timerActionsRef = useRef(null);
+
   useEffect(() => {
     if (!name || name === sceneName) return;
     setSceneName(name);
@@ -51,9 +53,9 @@ export default function SceneSettings() {
     if (!shallow(selected, selectedRoles)) setSelectedRoles(selected);
   }, [roleList, roles]);
 
-  function saveSceneRoles() {
-    modifySceneProp("roles", selectedRoles);
-  }
+  // function saveSceneRoles() {
+  //   modifySceneProp("roles", selectedRoles);
+  // }
 
   function saveTimerDuration() {
     const parsed = parseInt(timerDuration, 10);
@@ -97,71 +99,96 @@ export default function SceneSettings() {
     else setSelectedRoles((prev) => prev.filter((r) => r !== role));
   }
 
-  return (<>
-    <PanelSection name="Details" id="scene-details">
-      <PanelInput label="Name">
-        <input
-          type="text"
-          value={sceneName}
-          onChange={changeSceneName}
-          onBlur={saveSceneName}
-          className="input"
-          placeholder="Awesome Scene"
-        />
-      </PanelInput>
-      <PanelInput label="Allowed Roles">
-        <MultiSelectInput
-          values={roleList}
-          selected={selectedRoles}
-          onChange={changeRole}
-        />
-      </PanelInput>
-    </PanelSection >
-    <PanelSection name="Scene Link" id="scene-link">
-      <PanelInput label="Default Linked Scene">
-        <SceneSelectInput
-          scenes={scenes}
-          value={null}
-          exclusionId={sceneId}
-          onChange={console.log}
-        />
-      </PanelInput>
-      <PanelInput label="Actions" AddModal={CreateTimerOperationModal}>
-        <ActionsInput
-          items={defaultActionRefs}
-          onDelete={console.log}
-          onReorder={console.log}
-        />
-      </PanelInput>
-    </PanelSection>
-    <PanelSection name="Timer" id="scene-timer">
-      <PanelInput label="Timer Duration (Seconds)">
-        <input
-          type="number"
-          min="1"
-          value={timerDuration}
-          onChange={(e) => setTimerDuration(e.target.value)}
-          onBlur={saveTimerDuration}
-          className="input"
-          placeholder="No timer"
-        />
-      </PanelInput>
-      <PanelInput label="Timeout Default Linked Scene">
-        <SceneSelectInput
-          scenes={scenes}
-          value={null}
-          exclusionId={sceneId}
-          onChange={console.log}
-        />
-      </PanelInput>
-      <PanelInput label="Timeout Actions" AddModal={CreateTimerOperationModal}>
-        <ActionsInput
-          items={timerActionRefs}
-          onDelete={console.log}
-          onReorder={console.log}
-        />
-      </PanelInput>
-    </PanelSection >
-  </>
+  function saveDefaultActionRefs(updated) {
+    modifySceneProp("defaultActionRefs", updated);
+  }
+
+  function deleteDefaultActionRef(id) {
+    saveDefaultActionRefs(defaultActionRefs.filter((ref) => ref.id !== id));
+  }
+
+  function saveTimerActionRefs(updated) {
+    modifySceneProp("timerActionRefs", updated);
+  }
+
+  function deleteTimerActionRef(id) {
+    saveTimerActionRefs(timerActionRefs.filter((ref) => ref.id !== id));
+  }
+
+  return (
+    <>
+      <PanelSection name="Details" id="scene-details">
+        <PanelInput label="Name">
+          <input
+            type="text"
+            value={sceneName}
+            onChange={changeSceneName}
+            onBlur={saveSceneName}
+            className="input"
+            placeholder="Awesome Scene"
+          />
+        </PanelInput>
+        <PanelInput label="Allowed Roles">
+          <MultiSelectInput
+            values={roleList}
+            selected={selectedRoles}
+            onChange={changeRole}
+          />
+        </PanelInput>
+      </PanelSection>
+      <PanelSection name="Scene Link" id="scene-link">
+        <PanelInput label="Default Linked Scene">
+          <SceneSelectInput
+            scenes={scenes}
+            value={null}
+            exclusionId={sceneId}
+            onChange={console.log}
+          />
+        </PanelInput>
+        <PanelInput
+          label="Actions"
+          onAdd={() => defaultActionsRef.current?.addItem()}
+        >
+          <ActionsInput
+            ref={defaultActionsRef}
+            items={defaultActionRefs}
+            onDelete={deleteDefaultActionRef}
+            onReorder={saveDefaultActionRefs}
+          />
+        </PanelInput>
+      </PanelSection>
+      <PanelSection name="Timer" id="scene-timer">
+        <PanelInput label="Timer Duration (Seconds)">
+          <input
+            type="number"
+            min="1"
+            value={timerDuration}
+            onChange={(e) => setTimerDuration(e.target.value)}
+            onBlur={saveTimerDuration}
+            className="input"
+            placeholder="No timer"
+          />
+        </PanelInput>
+        <PanelInput label="Timeout Default Linked Scene">
+          <SceneSelectInput
+            scenes={scenes}
+            value={null}
+            exclusionId={sceneId}
+            onChange={console.log}
+          />
+        </PanelInput>
+        <PanelInput
+          label="Timeout Actions"
+          onAdd={() => timerActionsRef.current?.addItem()}
+        >
+          <ActionsInput
+            ref={timerActionsRef}
+            items={timerActionRefs}
+            onDelete={deleteTimerActionRef}
+            onReorder={saveTimerActionRefs}
+          />
+        </PanelInput>
+      </PanelSection>
+    </>
   );
 }

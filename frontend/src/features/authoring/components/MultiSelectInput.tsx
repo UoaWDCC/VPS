@@ -28,7 +28,7 @@ function MultiSelectInput<T>({
         <span className="truncate">{selected?.join(", ") || "All"}</span>
         <ChevronDown className="shrink-0" size={16} />
       </div>
-      {!disabled &&
+      {!disabled && (
         <ul
           tabIndex={0}
           className="dropdown-content menu bg-base-300 rounded-box z-1 w-full p-2 shadow-sm"
@@ -48,8 +48,8 @@ function MultiSelectInput<T>({
             );
           })}
         </ul>
-      }
-    </div >
+      )}
+    </div>
   );
 }
 

@@ -39,8 +39,9 @@ export default function SidePanel({ label, open, onClose, children }) {
       id="canvas-side-panel"
       role="region"
       aria-label={renderedLabel}
-      className={`font-dm h-full w-[24rem] min-w-[20rem] shrink-0 overflow-y-auto rounded-sm bg-base-200 p-5 transition-opacity duration-150 ease-out motion-reduce:transition-none ${open ? "opacity-100" : "opacity-0"
-        }`}
+      className={`font-dm h-full w-[24rem] min-w-[20rem] shrink-0 overflow-y-auto rounded-sm bg-base-200 p-5 transition-opacity duration-150 ease-out motion-reduce:transition-none ${
+        open ? "opacity-100" : "opacity-0"
+      }`}
       inert={!open}
       onTransitionEnd={(e) => {
         if (e.target === e.currentTarget && !open) setRendered(false);
