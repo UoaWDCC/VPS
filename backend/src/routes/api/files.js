@@ -2,7 +2,11 @@ import { Router } from "express";
 import multer from "multer";
 import auth from "../../middleware/firebaseAuth.js";
 import { HttpStatusCode } from "axios";
-import { deleteFile, uploadFile } from "../../firebase/storage.js";
+import {
+  deleteFile,
+  overwriteFile,
+  uploadFile,
+} from "../../firebase/storage.js";
 import UploadedFile from "../../db/models/uploadedFile.js";
 import { handle, HttpError } from "../../util/error.js";
 import { retrieveFile, retrieveFiles } from "../../db/daos/fileDao.js";
@@ -133,6 +137,47 @@ router.get(
     if (!uploadedFile)
       throw new HttpError("file not found", HttpStatusCode.NotFound);
     return res.json(uploadedFile);
+  })
+);
+
+const EDITABLE_CONTENT_TYPES = new Set(["text/plain", "text/markdown"]);
+
+// PUT /files/:scenarioId/:fileId — overwrite text/markdown file contents
+router.put(
+  "/:scenarioId/:fileId",
+  handle(async (req, res) => {
+    const { scenarioId, fileId } = req.params;
+    if (!fileId || !isValidObjectId(fileId))
+      throw new HttpError(
+        "invalid or missing file id",
+        HttpStatusCode.BadRequest
+      );
+
+    const content = req.body?.content;
+    if (typeof content !== "string")
+      throw new HttpError("content is required", HttpStatusCode.BadRequest);
+
+    const uploadedFile = await retrieveFile(scenarioId, fileId);
+    if (!uploadedFile)
+      throw new HttpError("file not found", HttpStatusCode.NotFound);
+
+    if (!EDITABLE_CONTENT_TYPES.has(uploadedFile.contentType))
+      throw new HttpError(
+        "file type is not editable",
+        HttpStatusCode.UnsupportedMediaType
+      );
+
+    const buffer = Buffer.from(content, "utf8");
+    if (buffer.length > MAX_FILE_SIZE_BYTES)
+      throw new HttpError("file too large", HttpStatusCode.PayloadTooLarge);
+
+    await overwriteFile(uploadedFile.path, buffer, uploadedFile.contentType);
+    const updated = await UploadedFile.findByIdAndUpdate(
+      uploadedFile._id,
+      { size: buffer.length },
+      { new: true }
+    );
+    return res.json(updated);
   })
 );
 

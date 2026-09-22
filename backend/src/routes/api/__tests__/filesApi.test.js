@@ -16,7 +16,11 @@ import UploadedFile from "../../../db/models/uploadedFile.js";
 import auth from "../../../middleware/firebaseAuth.js";
 import scenarioAuth from "../../../middleware/scenarioAuth.js";
 import errorHandler from "../../../middleware/errorHandler.js";
-import { uploadFile, deleteFile } from "../../../firebase/storage.js";
+import {
+  uploadFile,
+  deleteFile,
+  overwriteFile,
+} from "../../../firebase/storage.js";
 
 import { authHeaders } from "./testHelpers.js";
 import {
@@ -44,6 +48,7 @@ uploadFile.mockImplementation(async (buffer, mimetype) => ({
   path: `files/fake-path-${mimetype.replace("/", "-")}`,
   url: "https://firebasestorage.googleapis.com/fake-url",
 }));
+overwriteFile.mockResolvedValue();
 
 describe("Files API tests", () => {
   useMongoMemoryServer();
@@ -294,5 +299,72 @@ describe("Files API tests", () => {
         authHeaders("user1")
       )
     ).rejects.toMatchObject({ response: { status: 404 } });
+  });
+
+  // --- Overwrite text/markdown ---
+
+  it("PUT /files/:scenarioId/:fileId overwrites markdown content", async () => {
+    const markdownFile = await UploadedFile.create({
+      scenarioId,
+      name: "notes.md",
+      type: "document",
+      path: "files/notes.md",
+      url: "https://firebasestorage.googleapis.com/notes",
+      contentType: "text/markdown",
+      size: 12,
+      uploaderUid: "user1",
+      refCount: 1,
+    });
+
+    const response = await axios.put(
+      `http://localhost:${ctx.port}/api/files/${scenarioId}/${markdownFile._id}`,
+      { content: "# Updated" },
+      authHeaders("user1")
+    );
+
+    expect(response.status).toBe(200);
+    expect(overwriteFile).toHaveBeenCalledTimes(1);
+    expect(overwriteFile).toHaveBeenCalledWith(
+      "files/notes.md",
+      Buffer.from("# Updated", "utf8"),
+      "text/markdown"
+    );
+
+    const dbFile = await UploadedFile.findById(markdownFile._id);
+    expect(dbFile.size).toBe(Buffer.byteLength("# Updated", "utf8"));
+  });
+
+  it("PUT /files/:scenarioId/:fileId returns 415 for non-text files", async () => {
+    await expect(
+      axios.put(
+        `http://localhost:${ctx.port}/api/files/${scenarioId}/${documentFile._id}`,
+        { content: "nope" },
+        authHeaders("user1")
+      )
+    ).rejects.toMatchObject({ response: { status: 415 } });
+
+    expect(overwriteFile).not.toHaveBeenCalled();
+  });
+
+  it("PUT /files/:scenarioId/:fileId returns 400 when content is missing", async () => {
+    const markdownFile = await UploadedFile.create({
+      scenarioId,
+      name: "notes.md",
+      type: "document",
+      path: "files/notes.md",
+      url: "https://firebasestorage.googleapis.com/notes",
+      contentType: "text/markdown",
+      size: 12,
+      uploaderUid: "user1",
+      refCount: 1,
+    });
+
+    await expect(
+      axios.put(
+        `http://localhost:${ctx.port}/api/files/${scenarioId}/${markdownFile._id}`,
+        {},
+        authHeaders("user1")
+      )
+    ).rejects.toMatchObject({ response: { status: 400 } });
   });
 });

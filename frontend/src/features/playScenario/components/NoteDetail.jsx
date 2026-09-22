@@ -3,6 +3,7 @@ import { getAuth } from "firebase/auth";
 import axios from "axios";
 import toast from "react-hot-toast";
 import MDTextViewer from "./MDTextViewer";
+import { MDEditor } from "./MDEditor";
 
 export default function NoteDetail({
   note,
@@ -128,11 +129,7 @@ export default function NoteDetail({
 
       <div className="min-h-0 overflow-auto">
         {editing ? (
-          <textarea
-            className="w-full bg-base-200 rounded p-2 outline-none border border-primary resize-none text-sm"
-            value={text}
-            onChange={(e) => setText(e.target.value)}
-          />
+          <MDEditor value={text} onChange={setText} height="40vh" />
         ) : (
           <MDTextViewer
             file={{ type: "text/markdown", name: "note.md" }}

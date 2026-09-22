@@ -27,6 +27,24 @@ export async function uploadFile(buffer, contentType) {
   return { path: file.name, url: publicUrl };
 }
 
+export async function overwriteFile(path, buffer, contentType) {
+  if (!path) throw new Error("path is required");
+  if (!contentType) throw new Error("contentType is required");
+
+  const file = getBucket().file(path);
+  try {
+    const [metadata] = await file.getMetadata();
+    await file.save(buffer, {
+      metadata: {
+        contentType,
+        metadata: metadata.metadata,
+      },
+    });
+  } catch (err) {
+    throw new Error(`overwrite failed: ${err.message}`);
+  }
+}
+
 // delete
 export async function deleteFile(path) {
   if (!path) throw new Error("path is required");
