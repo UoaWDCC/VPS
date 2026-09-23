@@ -64,7 +64,6 @@ const SceneNavigator = () => {
   );
 
   const sceneIds = scenes.map((s) => s._id);
-  const activeScene = scenes.find((scene) => scene._id === activeId);
   const activeIndexDragging = activeIdDragging
     ? sceneIds.indexOf(activeIdDragging)
     : -1;
@@ -113,14 +112,6 @@ const SceneNavigator = () => {
                 </button>
               </div>
             </ul>
-          </div>
-          <div className="flex-1 p-4 bg-base-100">
-            {activeScene && (
-              <Thumbnail
-                components={activeScene.components}
-                background={activeScene.background}
-              />
-            )}
           </div>
         </div>
       </SortableContext>

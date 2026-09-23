@@ -6,19 +6,43 @@ import { applyReferenceDeltas } from "./fileDao.js";
 import { HttpStatusCode } from "axios";
 import { directLinkKeysFor } from "../../util/keyBindings.js";
 
+/**
+ * Adds a reference-count delta to a file ID entry in a map.
+ *
+ * @param {Map<string, number>} fileRefDeltas - Map of file IDs to delta amounts.
+ * @param {string} fileId - The file ID to update.
+ * @param {number} delta - The amount to add to the stored delta.
+ * @returns {void}
+ */
 export function addDelta(fileRefDeltas, fileId, delta) {
   fileRefDeltas.set(fileId, (fileRefDeltas.get(fileId) ?? 0) + delta);
 }
 
+/**
+ * Determines whether a scene component is linked to a file reference.
+ *
+ * @param {object|undefined} component - The scene component to inspect.
+ * @returns {boolean} True when the component references an audio or image file.
+ */
 export function hasFileRef(component) {
   if (!component) return false;
-  return ["audio", "image"].includes(component.type) && component.fileId;
+  return (
+    ["audio", "image"].includes(component.type) && Boolean(component.fileId)
+  );
 }
 
 function backgroundFileId(background) {
   return background?.kind === "image" ? (background.fileId ?? null) : null;
 }
 
+/**
+ * Calculates the file reference deltas created by a scene's components and
+ * its background image, if any.
+ *
+ * @param {Array<object>} [components=[]] - The scene components to inspect.
+ * @param {object|null} [background] - The scene's background configuration.
+ * @returns {Map<string, number>} The resulting reference delta map.
+ */
 function computeCreateFileRefDeltas(components, background) {
   const fileRefDeltas = new Map();
   (components ?? []).forEach((component) => {
@@ -31,6 +55,14 @@ function computeCreateFileRefDeltas(components, background) {
   return fileRefDeltas;
 }
 
+/**
+ * Calculates the file reference deltas removed by deleting scene components
+ * and its background image, if any.
+ *
+ * @param {Array<object>} [components=[]] - The scene components being removed.
+ * @param {object|null} [background] - The scene's background configuration.
+ * @returns {Map<string, number>} The resulting reference delta map.
+ */
 function computeDeleteFileRefDeltas(components, background) {
   const fileRefDeltas = new Map();
   (components ?? []).forEach((component) => {
@@ -43,6 +75,14 @@ function computeDeleteFileRefDeltas(components, background) {
   return fileRefDeltas;
 }
 
+/**
+ * Calculates the file reference deltas resulting from a component patch.
+ *
+ * @param {Array<object>} [existingComponents=[]] - The scene's previous components.
+ * @param {Array<object>} modifiedComponents - The updated component list.
+ * @param {Array<string>} deletedComponentIds - IDs removed in the patch.
+ * @returns {Map<string, number>} The resulting reference delta map.
+ */
 function computePatchFileRefDeltas(
   existingComponents,
   modifiedComponents,
@@ -142,14 +182,23 @@ const assertUniqueKeyBindings = (components, directLink, directLinkKey) => {
  * @param {{name: String, components: Object[]}, time: Number} scene scene object
  * @returns the created database scene object
  */
-const createScene = async (scenarioId, scene) => {
+export const createScene = async (scenarioId, scene) => {
+  if (scene.directLink == null) {
+    const scenarioExists = await Scenario.exists({ _id: scenarioId });
+    if (!scenarioExists) {
+      throw new HttpError("scenario not found", status.NOT_FOUND);
+    }
+  }
+
   await assertDirectLinkInScenario(scenarioId, scene.directLink);
   assertUniqueKeyBindings(
     scene.components,
     scene.directLink,
     scene.directLinkKey
   );
+
   const dbScene = new Scene(scene);
+
   await dbScene.save();
 
   await Scenario.updateOne(
@@ -171,7 +220,7 @@ const createScene = async (scenarioId, scene) => {
  * @param {String} scenarioId MongoDB ID of scenario
  * @returns list of database scene objects
  */
-const retrieveSceneList = async (scenarioId) => {
+export const retrieveSceneList = async (scenarioId) => {
   const dbScenario = await Scenario.findById(scenarioId);
   const dbScenes = await Scene.find({ _id: { $in: dbScenario.scenes } }, [
     "name",
@@ -192,52 +241,9 @@ const retrieveSceneList = async (scenarioId) => {
  * @param {String} sceneId MongoDB ID of scene
  * @returns database scene object
  */
-const retrieveScene = async (sceneId) => {
+export const retrieveScene = async (sceneId) => {
   const dbScene = await Scene.findById(sceneId);
 
-  return dbScene;
-};
-
-/**
- * Updates a scene in the database
- * @param {String} sceneId MongoDB ID of scene
- * @param {{name: String, components: Object[]}, time: Number} updatedScene updated scene object
- * @returns updated database scene object
- */
-const updateScene = async (sceneId, updatedScene) => {
-  // WARNING: this function does not handle resource ref counting, the
-  // patch function is what should be used instead
-
-  // makes sure when we update components is not null
-  if (updatedScene.components) {
-    const prevDbScene = await Scene.findById(sceneId);
-    if (!prevDbScene) return null;
-
-    const dbScene = await Scene.findOneAndUpdate(
-      { _id: sceneId },
-      updatedScene,
-      { new: true }
-    );
-
-    return dbScene;
-  }
-
-  // if we are updating name only, components will be null
-  let dbScene = await Scene.findById(sceneId);
-  if (!dbScene) return null;
-
-  // store temp variable incase new name is invalid
-  const previousName = dbScene.name;
-
-  // is new name empty or null?
-  if (dbScene.name === "" || dbScene.name === null) {
-    updatedScene.name = previousName;
-  }
-
-  dbScene = await Scene.updateOne({ _id: sceneId }, updatedScene, {
-    new: true,
-  });
-  console.log(dbScene);
   return dbScene;
 };
 
@@ -247,7 +253,7 @@ const updateScene = async (sceneId, updatedScene) => {
  * @param {String} sceneId MongoDB ID of scene
  * @returns {Promise<{deleted: Boolean, reason?: String}>} deletion result
  */
-const deleteScene = async (scenarioId, sceneId) => {
+export const deleteScene = async (scenarioId, sceneId) => {
   const scenarioRes = await Scenario.findOneAndUpdate(
     {
       _id: scenarioId,
@@ -337,7 +343,7 @@ const deleteScene = async (scenarioId, sceneId) => {
  * @param {String} sceneId MongoDB ID of scene
  * @returns duplicated database scene object
  */
-const duplicateScene = async (scenarioId, sceneId) => {
+export const duplicateScene = async (scenarioId, sceneId) => {
   const sceneToCopy = await Scene.findById(sceneId);
   const newScene = {
     name: `${sceneToCopy.name} Copy`,
@@ -376,10 +382,8 @@ const duplicateScene = async (scenarioId, sceneId) => {
  * @param {String} sceneId MongoDB ID of scenario
  * @returns nothing
  */
-const incrementVisisted = async (sceneId) => {
-  const prevDbScene = await Scene.findById(sceneId);
-  const countVisited = prevDbScene.visited;
-  await Scene.updateOne({ _id: sceneId }, { visited: countVisited + 1 });
+export const incrementVisisted = async (sceneId) => {
+  await Scene.updateOne({ _id: sceneId }, { $inc: { visited: 1 } });
 };
 
 /**
@@ -388,7 +392,7 @@ const incrementVisisted = async (sceneId) => {
  * @param {String} componentId
  * @returns component
  */
-const getComponent = async (sceneId, componentId) => {
+export const getComponent = async (sceneId, componentId) => {
   const dbScene = await Scene.findById(sceneId);
   const component = dbScene.components.find((c) => c.id === componentId);
 
@@ -405,17 +409,33 @@ const getComponent = async (sceneId, componentId) => {
  * @param {String[]} sceneIds Array of scene IDs in the new order
  * @returns {Promise<Object>} updated scenario object
  */
-const updateSceneOrder = async (scenarioId, sceneIds) => {
+export const updateSceneOrder = async (scenarioId, sceneIds) => {
+  const scenario = await Scenario.findById(scenarioId, { scenes: 1 }).lean();
+  if (!scenario) return null;
+
+  const currentSceneIds = scenario.scenes.map((id) => id.toString());
+  if (sceneIds.length !== currentSceneIds.length) return null;
+
+  const seen = new Set();
+  const invalid = sceneIds.some((id) => {
+    const idString = id.toString();
+    if (seen.has(idString)) return true;
+    seen.add(idString);
+    return !currentSceneIds.includes(idString);
+  });
+
+  if (invalid) return null;
+
   const updatedScenario = await Scenario.findOneAndUpdate(
     {
       _id: scenarioId,
-      $expr: { $eq: [{ $size: "$scenes" }, sceneIds.length] },
+      scenes: scenario.scenes,
     },
     { scenes: sceneIds },
     { new: true }
   );
 
-  return updatedScenario;
+  return updatedScenario ?? null;
 };
 
 async function validateBackground(background) {
@@ -444,7 +464,7 @@ async function validateBackground(background) {
   }
 }
 
-const patchScene = async (sceneId, patch, scenarioId) => {
+export const patchScene = async (sceneId, patch, scenarioId) => {
   const { fields = {}, components = [], deletedComponentIds = [] } = patch;
 
   // Duplicate ids in the same patch are rejected outright rather than
@@ -625,17 +645,4 @@ const patchScene = async (sceneId, patch, scenarioId) => {
   await applyReferenceDeltas(fileRefDeltas);
 
   return Scene.findById(sceneId);
-};
-
-export {
-  createScene,
-  retrieveSceneList,
-  retrieveScene,
-  patchScene,
-  deleteScene,
-  updateScene,
-  duplicateScene,
-  incrementVisisted,
-  getComponent,
-  updateSceneOrder,
 };

@@ -2,6 +2,7 @@ import React, { useContext } from "react";
 import { useHistory, useLocation } from "react-router-dom";
 import AuthenticationContext from "../../context/AuthenticationContext";
 import { LogOutIcon } from "lucide-react";
+import FabMenu from "../../components/FabMenu";
 
 export default function TopNavBar() {
   const { signOut } = useContext(AuthenticationContext);
@@ -20,8 +21,8 @@ export default function TopNavBar() {
 
   return (
     <div className="fixed top-0 left-0 right-0 bg-base-100 pl-xl pr-[calc(var(--spacing-xl)+7.5rem)] flex border-b-1 font-dm border-gradient z-1">
-      <div className="py-m w-30 -mb-[1px]">
-        <button onClick={handleLogout} className="btn btn-phantom text-m">
+      <div className="pt-l w-30 -mb-[1px]">
+        <button onClick={handleLogout} className="btn btn-phantom text-m px-0">
           <LogOutIcon size={20} />
           <span>Logout</span>
         </button>
@@ -46,6 +47,7 @@ export default function TopNavBar() {
           Create & Edit
         </button>
       </div>
+      <FabMenu className="right-xl top-l" />
     </div>
   );
 }

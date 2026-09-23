@@ -1,5 +1,7 @@
 import { createComponentFromBounds } from "../../scene/operations/component";
+import { getComponent } from "../../scene/scene";
 import useEditorStore from "../../stores/editor";
+import { syncModelSelection } from "../../text/cursor";
 import type { Vec2 } from "../../types";
 import { add, mutate, scale, subtract } from "../../util";
 
@@ -32,9 +34,31 @@ export function handleCreateDrag(_: React.MouseEvent, position: Vec2) {
 }
 
 export function handleCreateEnd() {
-  const { mutationBounds, setMode, setSelected, createType } =
-    useEditorStore.getState();
+  const {
+    mutationBounds,
+    setMode,
+    setSelected,
+    setMutationBounds,
+    setVisualSelection,
+    setDesiredColumn,
+    createType,
+  } = useEditorStore.getState();
   const id = createComponentFromBounds(createType, mutationBounds);
   setSelected([id]);
-  setMode(["normal"]);
+
+  if (createType !== "textbox") {
+    setMode(["normal"]);
+    return;
+  }
+
+  // drop straight into text mode with the cursor at the start of the empty
+  // document, so a new textbox can be typed into without clicking into it
+  setMode(["text"]);
+  setMutationBounds({ ...getComponent(id).bounds });
+  setDesiredColumn(null);
+  setVisualSelection({
+    start: { blockI: 0, lineI: 0, spanI: 0, charI: 0 },
+    end: null,
+  });
+  syncModelSelection();
 }

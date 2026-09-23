@@ -3,8 +3,8 @@ import { useHistory } from "react-router-dom";
 import ScenarioContext from "../../context/ScenarioContext";
 import Thumbnail from "../authoring/components/Thumbnail";
 import TopNavBar from "../../features/TopNavBar/TopNavBar";
-import FabMenu from "../../components/FabMenu";
 import { SearchIcon } from "lucide-react";
+import { dedupById } from "../../util/dedup";
 
 export default function PlayLandingPage() {
   const { allScenarios } = useContext(ScenarioContext);
@@ -13,15 +13,11 @@ export default function PlayLandingPage() {
 
   const [search, setSearch] = useState("");
 
-  const scenarios = Array.from(
-    new Map(
-      [
-        ...allScenarios.owned,
-        ...allScenarios.assigned,
-        ...allScenarios.accessible,
-      ].map((scenario) => [scenario._id, scenario])
-    ).values()
-  );
+  const scenarios = dedupById([
+    ...allScenarios.owned,
+    ...allScenarios.assigned,
+    ...allScenarios.accessible,
+  ]);
 
   const filteredScenarios = scenarios.filter((scenario) =>
     scenario.name.toLowerCase().includes(search.toLowerCase())
@@ -59,7 +55,10 @@ export default function PlayLandingPage() {
             onClick={() => handleScenarioPlay(scenario)}
           >
             <div className="aspect-16/9 rounded overflow-hidden mb-s border-primary/10 border-1">
-              <Thumbnail components={scenario.thumbnail?.components || []} />
+              <Thumbnail
+                components={scenario.thumbnail?.components || []}
+                background={scenario.thumbnail?.background}
+              />
             </div>
             <p className="font-ibm text-l text-nowrap truncate">
               {scenario.name}
@@ -67,8 +66,6 @@ export default function PlayLandingPage() {
           </div>
         ))}
       </div>
-
-      <FabMenu />
     </div>
   );
 }
