@@ -1,5 +1,4 @@
 import type { GenericComponent } from "./types";
-import { directLinkKeysFor } from "./keyBindingDefaults";
 
 // Single, unmodified keys an author may bind a button (or a scene's direct
 // link) to during playback. Excludes anything still reserved: Enter/Tab/
@@ -48,13 +47,27 @@ export function normalizeEventKey(e: KeyboardEvent): string | null {
   return key && KEY_BINDING_OPTIONS.includes(key) ? key : null;
 }
 
-// Also imported directly by the backend (backend/src/db/daos/sceneDao.js)
-// via a relative path, so it lives in a plain .js file rather than here -
-// see keyBindingDefaults.js for why.
-export {
-  DEFAULT_DIRECT_LINK_KEYS,
-  directLinkKeysFor,
-} from "./keyBindingDefaults";
+// Mirrored in backend/src/util/keyBindings.js, which validates key bindings
+// on save. The backend is deployed separately and can't import this file -
+// keep the two in sync.
+
+// A scene's direct-link key defaults to responding to either Space or
+// ArrowRight when the author hasn't chosen a specific key.
+export const DEFAULT_DIRECT_LINK_KEYS = ["SPACE", "ARROWRIGHT"];
+
+// `null`/`undefined` means the field was never configured (includes every
+// scene saved before directLinkKey existed), so it falls back to responding
+// to Space or ArrowRight. An empty string is a distinct, explicit "Custom
+// mode chosen, but no key picked yet" state - it claims nothing at all
+// until the author picks one, rather than silently keeping the defaults
+// reserved. Anything else is the one specific key it responds to.
+export function directLinkKeysFor(
+  directLinkKey: string | null | undefined
+): string[] {
+  if (directLinkKey == null) return DEFAULT_DIRECT_LINK_KEYS;
+  if (!directLinkKey) return [];
+  return [directLinkKey];
+}
 
 type KeyBoundComponent = Pick<
   GenericComponent,

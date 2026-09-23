@@ -9,6 +9,7 @@ import { usePost } from "hooks/crudHooks";
 import LoadingPage from "../status/LoadingPage";
 import PlayScenarioCanvas from "./PlayScenarioCanvas";
 import { applyPropertyOperations } from "../../components/Properties/propertyOperations";
+import { resolveSceneBindings } from "../../components/Properties/componentBindings";
 import NotesPanel from "./components/NotesPanel";
 import ResourcesPanel from "./components/ResourcesPanel";
 import SceneTimer from "./components/SceneTimer";
@@ -226,9 +227,11 @@ export default function PlayScenarioPage({ group }) {
       const boundKey = normalizeEventKey(e);
       if (!boundKey) return;
 
-      const component = currScene?.components?.find(
-        (c) => c.keyBinding === boundKey && hasClickAction(c)
-      );
+      // Resolve property bindings first, same as PlayScenarioCanvas, so a
+      // component whose Clickable is bound off can't be triggered by key.
+      const component = Object.values(
+        resolveSceneBindings(currScene, properties)?.components ?? {}
+      ).find((c) => c.keyBinding === boundKey && hasClickAction(c));
       if (component) {
         e.preventDefault();
         buttonPressed(component);

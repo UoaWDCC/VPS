@@ -4,12 +4,7 @@ import { HttpError } from "../../util/error.js";
 import status from "../../util/status.js";
 import { applyReferenceDeltas } from "./fileDao.js";
 import { HttpStatusCode } from "axios";
-// Single source of truth for direct-link key defaults lives in the
-// frontend, since it started there and the frontend has richer consumers
-// (key pickers, display strings) of the same concept. This is a plain .js
-// file specifically so this backend, which has no TypeScript loader, can
-// import it directly.
-import { directLinkKeysFor } from "../../../../frontend/src/features/authoring/keyBindingDefaults.js";
+import { directLinkKeysFor } from "../../util/keyBindings.js";
 
 export function addDelta(fileRefDeltas, fileId, delta) {
   fileRefDeltas.set(fileId, (fileRefDeltas.get(fileId) ?? 0) + delta);

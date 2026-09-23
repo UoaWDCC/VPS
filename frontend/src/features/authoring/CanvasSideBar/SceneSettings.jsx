@@ -64,14 +64,14 @@ export default function SceneSettings() {
   // Direct Link's default mode claims Space/ArrowRight; clear those keys off
   // any button so they're not silently unreachable or colliding.
   function clearDefaultDirectLinkCollisions() {
-    Object.values(getScene().components)
+    const collidingIds = Object.values(getScene().components)
       .filter(
         (c) => c.clickable && DEFAULT_DIRECT_LINK_KEYS.includes(c.keyBinding)
       )
-      .forEach((c) => {
-        modifyComponentProp(c.id, "keyBinding", null);
-        modifyComponentProp(c.id, "showKeyHint", false);
-      });
+      .map((c) => c.id);
+    if (!collidingIds.length) return;
+    modifyComponentProp(collidingIds, "keyBinding", null);
+    modifyComponentProp(collidingIds, "showKeyHint", false);
   }
 
   function changeKeyMode(nextMode) {

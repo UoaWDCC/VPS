@@ -91,7 +91,7 @@ const sceneSchema = new Schema({
     default: null,
   },
   // The key that triggers directLink; null means the default of Space or
-  // ArrowRight (see frontend/src/features/authoring/keyBindings.ts).
+  // ArrowRight (see directLinkKeysFor in src/util/keyBindings.js).
   directLinkKey: {
     type: String,
     default: null,

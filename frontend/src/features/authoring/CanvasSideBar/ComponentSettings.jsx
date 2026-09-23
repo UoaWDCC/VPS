@@ -69,21 +69,21 @@ export default function ComponentSettings({ component }) {
 
   function saveKey(v) {
     setKeyValue(v);
-    modifyComponentProp(component.id, "keyBinding", v);
+    modifyComponentProp([component.id], "keyBinding", v);
     if (!v && hintValue) {
       setHintValue(false);
-      modifyComponentProp(component.id, "showKeyHint", false);
+      modifyComponentProp([component.id], "showKeyHint", false);
     }
   }
 
   function saveHint(checked) {
     setHintValue(checked);
-    modifyComponentProp(component.id, "showKeyHint", checked);
+    modifyComponentProp([component.id], "showKeyHint", checked);
   }
 
   function savePosition(v) {
     setPositionValue(v);
-    modifyComponentProp(component.id, "keyHintPosition", v);
+    modifyComponentProp([component.id], "keyHintPosition", v);
   }
 
   const availableKeys = useMemo(
@@ -113,7 +113,7 @@ export default function ComponentSettings({ component }) {
       !scenes?.some((s) => s._id === component.nextScene);
 
     if (linksToMissingScene) {
-      modifyComponentProp(component.id, "nextScene", null);
+      modifyComponentProp([component.id], "nextScene", null);
     }
 
     const stillActionable = hasClickAction({
@@ -123,10 +123,10 @@ export default function ComponentSettings({ component }) {
 
     if (!stillActionable) {
       if (component.keyBinding) {
-        modifyComponentProp(component.id, "keyBinding", null);
+        modifyComponentProp([component.id], "keyBinding", null);
       }
       if (component.showKeyHint) {
-        modifyComponentProp(component.id, "showKeyHint", false);
+        modifyComponentProp([component.id], "showKeyHint", false);
       }
     }
   }, [component, scenes]);
