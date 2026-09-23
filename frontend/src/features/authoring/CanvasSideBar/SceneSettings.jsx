@@ -150,7 +150,7 @@ export default function SceneSettings() {
   }
 
   return (
-    <fieldset className="fieldset w-full min-w-0 pt-2 [&_.input]:w-full [&_.input]:min-w-0 [&_.select]:w-full [&_.dropdown]:w-full [&_.dropdown]:min-w-0 [&_.dropdown-content]:w-full [&_.truncate]:min-w-0 [&_.truncate]:flex-1">
+    <fieldset className="fieldset w-full min-w-0 pt-2 [&_.input]:w-full [&_.input]:min-w-0 [&_.select]:w-full [&_.dropdown]:w-full [&_.dropdown]:min-w-0 [&_.truncate]:min-w-0 [&_.truncate]:flex-1">
       <label className="label">Name</label>
       <input
         type="text"
