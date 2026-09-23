@@ -278,7 +278,7 @@ export const deleteScene = async (scenarioId, sceneId) => {
 
   await Scene.updateMany(
     { directLink: sceneId },
-    { $set: { directLink: null } }
+    { $set: { directLink: null, directLinkKey: null } }
   );
 
   // Components elsewhere that linked to the scene being deleted would

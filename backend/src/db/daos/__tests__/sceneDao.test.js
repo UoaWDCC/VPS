@@ -786,4 +786,17 @@ describe("Scene DAO deleteScene tests", () => {
     expect(component.nextScene).toBe(sceneCId.toString());
     expect(component.keyBinding).toBe("E");
   });
+
+  it("clears the direct link and its key on scenes that direct-linked to the deleted scene", async () => {
+    await Scene.updateOne(
+      { _id: sceneCId },
+      { $set: { directLink: sceneBId, directLinkKey: "R" } }
+    );
+
+    await deleteScene(scenarioId, sceneBId);
+
+    const sceneC = await Scene.findById(sceneCId);
+    expect(sceneC.directLink).toBeNull();
+    expect(sceneC.directLinkKey).toBeNull();
+  });
 });
