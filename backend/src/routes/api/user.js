@@ -2,7 +2,6 @@ import { Router } from "express";
 import {
   retrieveUserByEmail,
   createUser,
-  retrievePlayedUsers,
   assignScenarioToUsers,
 } from "../../db/daos/userDao.js";
 import User from "../../db/models/user.js";
@@ -66,12 +65,6 @@ router.get(
 );
 
 // NOTE: not currently used, but associated ui functionality will be added
-
-// get users that played scenario
-router.get("/played/:scenarioId", scenarioAuth, async (req, res) => {
-  const users = await retrievePlayedUsers(req.params.scenarioId);
-  return res.json(users);
-});
 
 // assign scenario to users
 router.patch("/assigned/:scenarioId", scenarioAuth, async (req, res) => {

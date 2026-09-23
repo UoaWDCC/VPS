@@ -5,6 +5,8 @@ import Rectangle from "../canvas/Rectangle";
 import { buildStyle, scriptShift, LIST_MARKER_GAP } from "./build";
 import useEditorStore from "../stores/editor";
 import TextHighlight from "./TextHighlight.tsx";
+import { CHIP_FONT_SCALE } from "./property.ts";
+import PropertyChips from "./PropertyChips";
 
 const CHECKBOX_SCALE = 0.8;
 const CHECKBOX_HIT_PADDING = 4;
@@ -210,35 +212,53 @@ function buildGroups(
           i >= markerSelection.start &&
           i <= markerSelection.end
       )}
-      {block.lines.map((line, j) => {
-        // dy is relative to the previous tspan's position, so a super/sub
-        // shift has to be undone by the following span's delta -- otherwise
-        // the whole rest of the line stays shifted
-        let prevShift = 0;
-        return (
-          <text
-            key={j}
-            x={line.x}
-            y={block.y + line.y + line.baseline}
-            style={{ whiteSpace: "pre" }}
-          >
-            {line.spans.map((span, k) => {
-              const shift = scriptShift(span.style);
-              const dy = shift - prevShift;
-              prevShift = shift;
-              return (
-                <tspan
-                  key={k}
-                  dy={dy || undefined}
-                  style={buildStyle(span.style)}
-                >
-                  {span.text}
-                </tspan>
-              );
-            })}
-          </text>
-        );
-      })}
+      {block.lines.map((line, j) => (
+        <text
+          key={j}
+          x={line.x}
+          y={block.y + line.y + line.baseline}
+          style={{ whiteSpace: "pre" }}
+        >
+          {line.spans.map((span, k) => {
+            const { property } = span;
+            const style = buildStyle(
+              property
+                ? {
+                    ...span.style,
+                    fontSize: span.style.fontSize * CHIP_FONT_SCALE,
+                  }
+                : span.style
+            );
+            if (property?.missing)
+              style.fill = "var(--color-chip-missing-text)";
+
+            //center text within chip
+            return property ? (
+              <tspan
+                key={k}
+                x={line.x + span.x + span.width / 2}
+                y={block.y + line.y + line.height / 2}
+                textAnchor="middle"
+                dominantBaseline="central"
+                style={style}
+              >
+                {property.displayName}
+              </tspan>
+            ) : (
+              <tspan
+                key={k}
+                x={line.x + span.x}
+                // tspans are absolutely positioned, so a super/subscript
+                // shift only moves its own span
+                y={block.y + line.y + line.baseline + scriptShift(span.style)}
+                style={style}
+              >
+                {span.text}
+              </tspan>
+            );
+          })}
+        </text>
+      ))}
     </g>
   ));
 }
@@ -278,6 +298,7 @@ function Text({ doc, editable }: { doc: VisualDocument; editable?: boolean }) {
   return (
     <g className="select-none text">
       <TextHighlight doc={doc} />
+      <PropertyChips doc={doc} />
       {isSelected && (
         <Highlight color="var(--color-selection)" bounds={bounds} />
       )}

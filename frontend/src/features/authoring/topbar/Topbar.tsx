@@ -15,9 +15,22 @@ import { useState } from "react";
 import PropertyMenu from "../../../components/Properties/PropertyMenu";
 import ImageCreateMenu from "../ImageCreateMenu";
 import ShapeCreateMenu from "./ShapeCreateMenu";
+import type { Component } from "../types";
 import BackgroundMenu from "./BackgroundMenu";
 
 import "./topbar.css";
+
+function hasDocument(component: Component): boolean {
+  if (!component) return false;
+  if (!("document" in component)) return false;
+  const doc = component.document as {
+    blocks: { spans: { text: string }[] }[];
+  } | null;
+  const documentLength = doc?.blocks?.[0]?.spans?.[0]?.text?.length;
+  return (
+    "document" in component && Boolean(component.document) && documentLength > 0
+  );
+}
 
 function Topbar({ saving, save }: { saving: boolean; save: () => void }) {
   const selected = useEditorStore((state) => state.selected);
@@ -48,6 +61,8 @@ function Topbar({ saving, save }: { saving: boolean; save: () => void }) {
     (c) => c?.type === "textbox"
   );
 
+  const component = selected ? getComponent(selected) : null;
+
   return (
     <>
       <PropertyMenu show={showPropertyMenu} setShow={setShowPropertyMenu} />
@@ -56,21 +71,11 @@ function Topbar({ saving, save }: { saving: boolean; save: () => void }) {
         setShow={setShowBackgroundMenu}
       />
       <ul className="topbar gap-0.5 menu menu-horizontal w-full bg-base-300 rounded-box p-1">
-        <li className="text-xs">
+        <li className="ml-1.5 text-xs">
           <button type="button" onClick={togglePropertyMenu}>
             Properties
           </button>
         </li>
-        <li className="text-xs">
-          <button
-            type="button"
-            className="p-1.5"
-            onClick={() => setShowBackgroundMenu(true)}
-          >
-            Background
-          </button>
-        </li>
-
         <div className="divider divider-horizontal" />
 
         <li className="tooltip tooltip-bottom" data-tip="Undo">
@@ -94,6 +99,14 @@ function Topbar({ saving, save }: { saving: boolean; save: () => void }) {
           </a>
         </li>
         <ShapeCreateMenu />
+
+        <div className="divider divider-horizontal" />
+
+        <li className="text-xs">
+          <button type="button" onClick={() => setShowBackgroundMenu(true)}>
+            Background
+          </button>
+        </li>
 
         {/* element properties */}
         {hasSelection && (
@@ -119,7 +132,7 @@ function Topbar({ saving, save }: { saving: boolean; save: () => void }) {
             )}
 
             {/* text content styles */}
-            {hasTextboxComponent && (
+            {(hasTextboxComponent || hasDocument(component)) && (
               <>
                 <div className="divider divider-horizontal" />
                 <TextSection />

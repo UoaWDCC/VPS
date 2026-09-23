@@ -26,7 +26,9 @@ function pad(verts: Vec2[], amount: number) {
   const center = getBoxCenter(verts);
   return verts.map((vert) => {
     const relative = subtract(center, vert);
-    const dir = mutate(relative, (val) => val / Math.abs(val));
+    const dir = mutate(relative, (val) =>
+      val === 0 ? 0 : val / Math.abs(val)
+    );
     return add(vert, scale(dir, amount));
   });
 }
@@ -34,8 +36,15 @@ function pad(verts: Vec2[], amount: number) {
 export function buildVisualComponent(component: Component): Component {
   switch (component.type) {
     case "textbox":
+    case "box":
+    case "ellipse":
+    case "speech":
+      if (!component.document) return { ...component };
       const relative = getRelativeBounds(
-        pad(component.bounds.verts, component.padding)
+        pad(
+          component.bounds.verts,
+          "padding" in component ? component.padding : 0
+        )
       ) as RelativeBounds;
       relative.rotation = component.bounds.rotation;
       const doc = { ...component.document, bounds: relative, id: component.id };

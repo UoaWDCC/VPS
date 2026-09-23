@@ -1,8 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { CheckIcon, PencilIcon } from "lucide-react";
+import { RESOURCE_NAME_MAX_LENGTH } from "../constants";
 import { isTemp } from "../util";
-
-const RESOURCE_NAME_MAX_LENGTH = 255;
 
 export default function ResourceNameField({
   resource,
@@ -22,6 +21,7 @@ export default function ResourceNameField({
   }, [editing]);
 
   function startEditing(e) {
+    e.preventDefault();
     e.stopPropagation();
     if (disabled) return;
     setValue(resource.name);
@@ -38,31 +38,21 @@ export default function ResourceNameField({
   function handleKeyDown(e) {
     if (e.key === "Enter") {
       e.preventDefault();
-      inputRef.current?.blur();
+      commitEdit();
     } else if (e.key === "Escape") {
       setValue(resource.name);
       setEditing(false);
     }
   }
 
-  const rowStyle = editing
-    ? {
-        gridTemplateColumns: "minmax(0, 1fr) auto",
-        backgroundColor: "transparent",
-        boxShadow: "none",
-        color: "var(--color-base-content)",
-        cursor: "auto",
-      }
-    : { gridTemplateColumns: "minmax(0, 1fr) auto auto" };
-
   return (
-    <div className="grid items-center gap-1 overflow-hidden" style={rowStyle}>
+    <div className="items-center overflow-hidden p-0 gap-0 flex flex-1">
       {editing ? (
         <input
           ref={inputRef}
           type="text"
           aria-label={`Rename ${resource.name}`}
-          className="input input-xs input-bordered min-w-0"
+          className="input input-bordered min-w-0 h-9 flex-1"
           style={{
             "--input-color":
               "color-mix(in oklab, var(--color-base-content) 20%, transparent)",
@@ -78,7 +68,6 @@ export default function ResourceNameField({
           value={value}
           maxLength={RESOURCE_NAME_MAX_LENGTH}
           onChange={(e) => setValue(e.target.value)}
-          onBlur={commitEdit}
           onKeyDown={handleKeyDown}
           onClick={(e) => e.stopPropagation()}
         />
@@ -86,16 +75,20 @@ export default function ResourceNameField({
         <>
           <button
             type="button"
-            className={`min-w-0 truncate bg-transparent px-0 text-left text--1 border-none cursor-pointer disabled:cursor-not-allowed focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary ${isTemp(resource) ? "text-primary" : ""}`}
+            className={`min-w-0 truncate bg-transparent text-left text--1 border-none cursor-pointer disabled:cursor-not-allowed focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary px-3 py-1.5 h-9 flex-1 ${isTemp(resource) ? "text-primary" : ""}`}
             title={resource.name}
-            onClick={onSelect}
+            onClick={(e) => {
+              e.stopPropagation();
+              e.preventDefault();
+              onSelect();
+            }}
             disabled={disabled}
           >
             {resource.name}
           </button>
           <button
             type="button"
-            className="btn btn-phantom btn-xs px-0"
+            className="btn btn-phantom btn-xs px-1.5 h-9"
             onClick={startEditing}
             title="Rename"
             disabled={disabled}
@@ -107,8 +100,8 @@ export default function ResourceNameField({
       {editing ? (
         <button
           type="button"
-          className="btn btn-phantom btn-xs px-0"
-          onClick={() => inputRef.current?.blur()}
+          className="btn btn-phantom btn-xs px-1.5 h-9"
+          onClick={commitEdit}
           title="Confirm rename"
         >
           <CheckIcon size={14} />

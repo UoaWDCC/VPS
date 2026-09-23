@@ -7,12 +7,14 @@ import {
   sendToBack,
 } from "../../scene/operations/component";
 import { remove } from "../../scene/operations/modifiers";
+import { getComponent, getScene } from "../../scene/scene";
 import useEditorStore from "../../stores/editor";
-import { handleSelectAll } from "./text";
+import { handleSelectAll as handleSelectAllText } from "./text";
 import { matchesShortcut } from "./utils";
 import { setTextStyle } from "../../text/style";
 import { toggleBulletShortcut } from "../../text/list";
 import { syncVisualCursor } from "../../text/cursor";
+import { getStyleForSelection } from "../../scene/operations/text";
 
 type Shortcut = {
   combos: string[];
@@ -30,6 +32,42 @@ function toggleTextStyle(
   const nextValue =
     current?.[prop] === enabledValue ? disabledValue : enabledValue;
   setTextStyle(selected, prop, nextValue);
+}
+
+function adjustSelectedTextFontSize(delta: number) {
+  const { activeStyle, mode, selected, selection } = useEditorStore.getState();
+  if (!selected.length) return;
+
+  if (mode.includes("text") && selection.end) {
+    if (!activeStyle) return;
+
+    const currentFontSize = Number(activeStyle.fontSize);
+    if (!Number.isFinite(currentFontSize)) return;
+
+    setTextStyle(selected[0], "fontSize", currentFontSize + delta);
+    return;
+  }
+
+  const updates = selected
+    .filter((id) => getComponent(id)?.type === "textbox")
+    .map((id) => ({
+      id,
+      fontSize: Number(
+        getStyleForSelection(id, { start: null, end: null }).fontSize
+      ),
+    }));
+
+  updates.forEach(({ id, fontSize }) => {
+    if (Number.isFinite(fontSize)) {
+      setTextStyle(id, "fontSize", fontSize + delta);
+    }
+  });
+}
+
+function canAdjustSelectedTextFontSize() {
+  const { selected } = useEditorStore.getState();
+
+  return selected.some((id) => getComponent(id)?.type === "textbox");
 }
 
 const shortcuts: Shortcut[] = [
@@ -119,7 +157,17 @@ const shortcuts: Shortcut[] = [
     run: () => {
       const { selected } = useEditorStore.getState();
       if (!selected.length) return;
-      handleSelectAll(selected[0]);
+      handleSelectAllText(selected[0]);
+    },
+  },
+  {
+    combos: ["mod+a"],
+    when: () => !useEditorStore.getState().mode.includes("text"),
+    run: () => {
+      const componentIds = Object.values(getScene().components ?? {})
+        .filter((component) => component.type !== "audio")
+        .map((component) => component.id);
+      useEditorStore.getState().setSelected(componentIds);
     },
   },
   {
@@ -177,6 +225,49 @@ const shortcuts: Shortcut[] = [
       if (!selected.length) return;
       toggleBulletShortcut(selected[0]);
       syncVisualCursor();
+    },
+  },
+  {
+    combos: ["mod+shift+>"],
+    when: canAdjustSelectedTextFontSize,
+    run: () => adjustSelectedTextFontSize(1),
+  },
+  {
+    combos: ["mod+shift+<"],
+    when: canAdjustSelectedTextFontSize,
+    run: () => adjustSelectedTextFontSize(-1),
+  },
+  {
+    combos: ["escape"],
+    when: () => {
+      const { mode, selected } = useEditorStore.getState();
+      return mode.some((m) => m !== "normal") || selected.length > 0;
+    },
+    run: () => {
+      const {
+        mode,
+        setMode,
+        setSelected,
+        setActiveGuides,
+        setMouseDown,
+        markerSelection,
+        setMarkerSelection,
+      } = useEditorStore.getState();
+      // a marker selection is cleared on its own first, leaving the
+      // textbox itself selected
+      if (markerSelection) {
+        setMarkerSelection(null);
+        return;
+      }
+      if (mode.some((m) => m !== "normal")) {
+        // cancel the active drag/resize/marquee/create/text-edit
+        setMode(["normal"]);
+        setActiveGuides([]);
+        setMouseDown(false);
+        if (!mode.includes("text")) setSelected([]);
+        return;
+      }
+      setSelected([]);
     },
   },
 ];

@@ -20,6 +20,7 @@ import {
   divide,
   expandBoxVerts,
   getBoxCenter,
+  getRotatedCorners,
   rotate,
   rotateMany,
   scale,
@@ -27,6 +28,11 @@ import {
   translate,
 } from "../../util";
 import { handleCreateDrag, handleCreateEnd, handleCreateStart } from "./create";
+import {
+  handleMarqueeDrag,
+  handleMarqueeEnd,
+  handleMarqueeStart,
+} from "./marquee";
 import {
   getCoordsVec,
   getHandleType,
@@ -58,7 +64,7 @@ export function handleMouseDownGlobal(e: React.MouseEvent, position: Vec2) {
   } else if (target.dataset.id) {
     handleComponentClick(e, position);
   } else {
-    handleCanvasClick();
+    handleCanvasClick(e, position);
   }
 
   // a marker click sets its own markerSelection (see handleMarkerClick);
@@ -88,6 +94,8 @@ export function handleMouseMoveGlobal(e: React.MouseEvent, position: Vec2) {
     handleTextSelection(e, position);
   } else if (mode.includes("create")) {
     handleCreateDrag(e, position);
+  } else if (mode.includes("marquee")) {
+    handleMarqueeDrag(e, position);
   } else {
     handleComponentDrag(e, position);
   }
@@ -102,15 +110,15 @@ export function handleMouseUpGlobal() {
     handleCreateEnd();
   } else if (mode.includes("mutation")) {
     handleMutationEnd();
+  } else if (mode.includes("marquee")) {
+    handleMarqueeEnd();
   }
 
   setMouseDown(false);
 }
 
-function handleCanvasClick() {
-  const { setSelected, setMode } = useEditorStore.getState();
-  setSelected([]);
-  setMode(["normal"]);
+function handleCanvasClick(e: React.MouseEvent, position: Vec2) {
+  handleMarqueeStart(e, position);
 }
 
 // component handlers
@@ -202,7 +210,7 @@ function handleMarkerClick(e: React.MouseEvent, position: Vec2) {
   setMarkerSelection({ id, start, end });
 }
 
-function handleComponentDrag(_: React.MouseEvent, position: Vec2) {
+function handleComponentDrag(e: React.MouseEvent, position: Vec2) {
   const { selected, setMutationBounds, offset, setMode, setActiveGuides } =
     useEditorStore.getState();
   if (!selected?.length) return;
@@ -210,15 +218,24 @@ function handleComponentDrag(_: React.MouseEvent, position: Vec2) {
   const bounds = getSelectedComponentBounds()!;
   let verts = translate(bounds.verts, subtract(position, offset));
 
-  const { components } = useVisualScene.getState();
-  const others = Object.values(components).filter(
-    (c) => !selected.includes(c.id)
-  );
-  const { delta, guides } = snapTranslation(verts, bounds.rotation, others, "");
-  verts = translate(verts, delta);
+  if (e.altKey) {
+    setActiveGuides([]);
+  } else {
+    const { components } = useVisualScene.getState();
+    const others = Object.values(components).filter(
+      (c) => c.type !== "audio" && !selected.includes(c.id)
+    );
+    const { delta, guides } = snapTranslation(
+      verts,
+      bounds.rotation,
+      others,
+      ""
+    );
+    verts = translate(verts, delta);
+    setActiveGuides(guides);
+  }
 
   setMutationBounds((prev) => ({ ...prev, verts }));
-  setActiveGuides(guides);
   setMode(["mutation"]);
 }
 
@@ -329,13 +346,7 @@ function computeBounds(components: Component[]) {
   const max = { x: -Infinity, y: -Infinity };
 
   components.forEach((component) => {
-    const { verts, rotation } = component.bounds;
-
-    const rotated = rotateMany(
-      expandBoxVerts(verts),
-      getBoxCenter(verts),
-      rotation
-    );
+    const rotated = getRotatedCorners(component.bounds);
 
     rotated.forEach((pos: Vec2) => {
       min.x = Math.min(min.x, pos.x);

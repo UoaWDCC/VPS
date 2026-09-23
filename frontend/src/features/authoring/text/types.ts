@@ -1,4 +1,9 @@
-import type { BaseTextStyle, ModelListMeta, RelativeBounds } from "../types";
+import type {
+  BaseTextStyle,
+  ModelListMeta,
+  RelativeBounds,
+  PropertyRef,
+} from "../types";
 
 export interface VisualSpan {
   text: string;
@@ -8,6 +13,7 @@ export interface VisualSpan {
   charOffsets: number[];
   parentId: number;
   startIndex: number;
+  property?: PropertyRef;
 }
 
 export interface VisualLine {

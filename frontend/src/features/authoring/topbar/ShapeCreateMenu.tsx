@@ -26,7 +26,7 @@ function ShapeCreateMenu() {
         </li>
         <ul
           tabIndex={0}
-          className="dropdown-content menu menu-horizontal bg-base-300 rounded-box z-1 p-2 shadow-sm top-[38px] w-max"
+          className="dropdown-content menu menu-horizontal bg-base-300 rounded-box z-1 p-2 shadow-sm top-[38px] left-0 w-max"
         >
           <li className="tooltip tooltip-bottom" data-tip="Box">
             <a onClick={() => switchCreate("box")}>

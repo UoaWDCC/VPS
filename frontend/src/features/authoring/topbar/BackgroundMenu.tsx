@@ -19,6 +19,7 @@ import ModalDialog from "../../../components/ModalDialogue";
 import Thumbnail from "../components/Thumbnail";
 import useVisualScene from "../stores/visual";
 import useEditorStore from "../stores/editor";
+import ChromePicker from "../wrapper/ChromePicker";
 import { getScene } from "../scene/scene";
 import { modifySceneProp } from "../scene/operations/modifiers";
 import { getImages, uploadImage } from "../images";
@@ -83,7 +84,7 @@ function BackgroundMenu({
       setFit("cover");
     } else if (background.kind === "color") {
       setSource("color");
-      setColor(background.color.slice(0, 7));
+      setColor(background.color);
     } else {
       setSource("image");
       setFit(background.fit ?? "cover");
@@ -155,7 +156,7 @@ function BackgroundMenu({
   }
 
   return (
-    <ModalDialog wide title="Background" open={show} onClose={close}>
+    <ModalDialog wide title="Scene Background" open={show} onClose={close}>
       <div className="grid grid-cols-[minmax(20rem,1fr)_minmax(22rem,1.25fr)] gap-6 items-start">
         <div className="flex min-h-0 flex-col gap-4">
           <fieldset
@@ -163,31 +164,29 @@ function BackgroundMenu({
               source === "color" ? "border-accent" : "border-base-300"
             }`}
           >
-            <label className="flex cursor-pointer items-center gap-3">
-              <input
-                type="radio"
-                name="background-source"
-                className="radio radio-sm"
-                checked={source === "color"}
-                onChange={() => setSource("color")}
-              />
-              <span className="font-medium">Solid colour</span>
-            </label>
-            <div className="mt-3 flex items-center gap-3 pl-7">
-              <input
-                id="background-color"
-                type="color"
-                className="size-11 cursor-pointer rounded-sm bg-transparent"
-                value={color}
-                onFocus={() => setSource("color")}
-                onChange={(event) => {
-                  setColor(event.target.value);
-                  setSource("color");
-                }}
-              />
-              <label htmlFor="background-color" className="font-mono uppercase">
-                {color}
+            <div className="flex items-center justify-between gap-3">
+              <label className="flex cursor-pointer items-center gap-3">
+                <input
+                  type="radio"
+                  name="background-source"
+                  className="radio radio-sm"
+                  checked={source === "color"}
+                  onChange={() => setSource("color")}
+                />
+                <span className="text-sm font-medium">Solid colour</span>
               </label>
+              <div>
+                <ChromePicker
+                  compact
+                  value={color}
+                  tooltip="Choose background colour"
+                  onOpen={() => setSource("color")}
+                  onChange={(value) => {
+                    setColor(value);
+                    setSource("color");
+                  }}
+                />
+              </div>
             </div>
           </fieldset>
 
@@ -196,41 +195,20 @@ function BackgroundMenu({
               source === "image" ? "border-accent" : "border-base-300"
             }`}
           >
-            <label className="flex cursor-pointer items-center gap-3">
-              <input
-                type="radio"
-                name="background-source"
-                className="radio radio-sm"
-                checked={source === "image"}
-                onChange={() => setSource("image")}
-              />
-              <span className="font-medium">Image</span>
-            </label>
-
-            <div className="mt-3 flex items-end gap-3 pl-7">
-              <fieldset className="fieldset flex-1">
-                <label className="label" htmlFor="background-fit">
-                  Image fit
-                </label>
-                <select
-                  id="background-fit"
-                  className="select w-full"
-                  value={fit}
-                  onChange={(event) => {
-                    setFit(event.target.value as BackgroundFit);
-                    setSource("image");
-                  }}
-                >
-                  {fitOptions.map((option) => (
-                    <option key={option.value} value={option.value}>
-                      {option.label}
-                    </option>
-                  ))}
-                </select>
-              </fieldset>
+            <div className="flex items-center justify-between gap-3">
+              <label className="flex cursor-pointer items-center gap-3">
+                <input
+                  type="radio"
+                  name="background-source"
+                  className="radio radio-sm"
+                  checked={source === "image"}
+                  onChange={() => setSource("image")}
+                />
+                <span className="text-sm font-medium">Image</span>
+              </label>
               <button
                 type="button"
-                className="btn"
+                className="btn btn-sm"
                 onClick={() => fileInputRef.current?.click()}
               >
                 <UploadIcon size={16} />
@@ -246,13 +224,14 @@ function BackgroundMenu({
               onChange={(event) => void handleFileChange(event)}
             />
 
-            <div className="mt-4 min-h-0 pl-7">
-              <p className="label mb-2">Uploaded images</p>
+            <div className="mt-4 min-h-0">
+              <p className="mb-2 text-sm">Uploaded images</p>
               {imagesQuery.isLoading ? (
-                <p>Loading images...</p>
+                <p className="text-sm">Loading images...</p>
               ) : imagesQuery.data?.length ? (
-                <div className="max-h-[28vh] overflow-y-auto pr-1">
+                <div className="min-w-0">
                   <ImageListContainer
+                    horizontal
                     data={imagesQuery.data}
                     selectedId={selectedImage?._id}
                     onItemSelected={(image: UploadedFile) => {
@@ -262,37 +241,36 @@ function BackgroundMenu({
                   />
                 </div>
               ) : (
-                <div className="rounded-sm bg-base-200 p-5 text-center">
+                <div className="rounded-sm bg-base-200 p-5 text-center text-sm">
                   No uploaded images yet.
                 </div>
               )}
             </div>
-          </fieldset>
 
-          <div className="flex items-center justify-between gap-3">
-            {background ? (
-              <button
-                type="button"
-                className="btn btn-ghost text-error"
-                onClick={removeBackground}
+            <fieldset className="fieldset mt-3">
+              <label className="label text-sm" htmlFor="background-fit">
+                Image fit
+              </label>
+              <select
+                id="background-fit"
+                className="select w-full"
+                value={fit}
+                onChange={(event) => {
+                  setFit(event.target.value as BackgroundFit);
+                  setSource("image");
+                }}
               >
-                Remove background
-              </button>
-            ) : (
-              <span />
-            )}
-            <button
-              type="button"
-              className="btn btn-primary"
-              disabled={!previewBackground}
-              onClick={applyBackground}
-            >
-              Apply background
-            </button>
-          </div>
+                {fitOptions.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+            </fieldset>
+          </fieldset>
         </div>
 
-        <div className="sticky top-0">
+        <div className="sticky top-0 flex flex-col">
           <p className="label mb-2">Current scene preview</p>
           <div className="aspect-video w-full overflow-hidden rounded-sm border border-base-300 bg-base-200">
             <Thumbnail
@@ -306,6 +284,32 @@ function BackgroundMenu({
               Select or upload an image to preview it.
             </p>
           )}
+          <div className="mt-4 flex items-center justify-between gap-3">
+            {background ? (
+              <button
+                type="button"
+                className="btn btn-ghost text-error"
+                onClick={removeBackground}
+              >
+                Remove background
+              </button>
+            ) : (
+              <span />
+            )}
+            <div className="ml-auto flex items-center gap-3">
+              <button type="button" className="btn" onClick={close}>
+                Cancel
+              </button>
+              <button
+                type="button"
+                className="btn btn-primary"
+                disabled={!previewBackground}
+                onClick={applyBackground}
+              >
+                Apply
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     </ModalDialog>

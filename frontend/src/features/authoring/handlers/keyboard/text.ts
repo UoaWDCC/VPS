@@ -3,6 +3,7 @@ import {
   canAutoBullet,
   createBlock,
   createSoftBreak,
+  convertToChip,
   deleteChar,
   deleteSelection,
   indentBlocks,
@@ -103,9 +104,11 @@ function handleEditing(e: KeyboardEvent, selected: string) {
     setSelection({ start: newCursor, end: null });
   } else if (e.key.length === 1 && !e.ctrlKey && !e.metaKey && !e.altKey) {
     // insert character at cursor
-    const newCursor = end
+    // convert to chip if "$" completes $$property_name$$ syntax
+    let newCursor = end
       ? insertSelection(selected, selection, e.key)
       : insertChar([selected], start, e.key);
+    if (e.key === "$") newCursor = convertToChip([selected], newCursor);
     setSelection({ start: newCursor, end: null });
   } else if (
     e.key === "Backspace" &&

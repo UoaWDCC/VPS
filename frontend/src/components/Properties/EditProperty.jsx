@@ -8,6 +8,12 @@ import SelectInput from "../../features/authoring/components/Select";
 import { isBooleanPropertyType, propertyTypes } from "./propertyTypes";
 import { arrayToObject } from "../../features/authoring/scene/util";
 
+const TYPE_LABELS = {
+  string: "Text",
+  number: "Number",
+  boolean: "True/False",
+};
+
 const EditProperty = ({ property, scenarioId }) => {
   const { user } = useContext(AuthenticationContext);
   const { setProperties } = useContext(ScenarioContext);
@@ -148,6 +154,7 @@ const EditProperty = ({ property, scenarioId }) => {
             <SelectInput
               value={newType}
               values={["string", "number", "boolean"]}
+              display={(value) => TYPE_LABELS[value] ?? value}
               onChange={setNewType}
             />
           </div>

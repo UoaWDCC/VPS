@@ -1,4 +1,4 @@
-import type { Bounds, Component } from "../../types";
+import type { Bounds, Component, Vec2 } from "../../types";
 import { getComponent, getScene } from "../scene";
 import { mutate, subtract, translate } from "../../util";
 import { getObject, merge } from "../util";
@@ -18,7 +18,50 @@ export const defaults = {
     bounds: {
       verts: [
         { x: 0, y: 0 },
+        { x: 600, y: 100 },
+      ],
+      rotation: 0,
+    },
+    document: {
+      style: {},
+      blocks: [
+        {
+          style: { alignment: "left" },
+          spans: [
+            {
+              style: {},
+              text: "",
+            },
+          ],
+        },
+      ],
+    },
+    zIndex: 0,
+  },
+  line: {
+    type: "line",
+    stroke: "#b7b7b7ff",
+    strokeWidth: 5,
+    clickable: true,
+    bounds: {
+      verts: [
+        { x: 0, y: 0 },
+        { x: 100, y: 100 },
+      ],
+    },
+    zIndex: 0,
+  },
+  speech: {
+    type: "speech",
+    fill: "#b7b7b7ff",
+    stroke: "#00000000",
+    strokewidth: 3,
+    clickable: true,
+    bounds: {
+      verts: [
+        { x: 0, y: 0 },
         { x: 400, y: 100 },
+        { x: 400, y: 120 },
       ],
       rotation: 0,
     },
@@ -35,33 +78,6 @@ export const defaults = {
           ],
         },
       ],
-    },
-    zIndex: 0,
-  },
-  line: {
-    type: "line",
-    stroke: "#b7b7b7ff",
-    strokeWidth: 5,
-    bounds: {
-      verts: [
-        { x: 0, y: 0 },
-        { x: 100, y: 100 },
-      ],
-    },
-    zIndex: 0,
-  },
-  speech: {
-    type: "speech",
-    fill: "#b7b7b7ff",
-    stroke: "#00000000",
-    strokewidth: 3,
-    bounds: {
-      verts: [
-        { x: 0, y: 0 },
-        { x: 400, y: 100 },
-        { x: 400, y: 120 },
-      ],
-      rotation: 0,
     },
     zIndex: 0,
   },
@@ -116,16 +132,19 @@ export function stringifyComponent(id: string) {
   return JSON.stringify(component);
 }
 
-export function parseComponent(component: Component, zIndex?: number) {
-  const offset = { x: 10, y: 10 };
+export function parseComponent(
+  component: Component,
+  zIndex?: number,
+  offset: Vec2 = { x: 10, y: 10 }
+) {
   component.bounds.verts = translate(component.bounds.verts, offset);
   component.zIndex = zIndex ?? component.zIndex + 1;
   delete (component as Record<string, unknown>).id;
   return add(component);
 }
 
-export function getNextZIndex() {
-  const zIndices = Object.values(getScene().components).map((c) => c.zIndex);
+export function getNextZIndex(components = getScene().components) {
+  const zIndices = Object.values(components).map((c) => c.zIndex ?? 0);
   return zIndices.length ? Math.max(...zIndices) + 1 : 0;
 }
 
@@ -215,9 +234,20 @@ function shiftComponentLayers(
   const components = Object.values(getScene().components);
   const selectedIds = new Set(ids);
 
-  // Sort components by zIndex (ascending) and capture the original zIndex scale
-  const sortedComponents = [...components].sort((a, b) => a.zIndex - b.zIndex);
-  const zIndexScale = sortedComponents.map((c) => c.zIndex);
+  // Sort by zIndex (ascending) — this is the order the canvas renders
+  const sortedComponents = [...components].sort(
+    (a, b) => (a.zIndex ?? 0) - (b.zIndex ?? 0)
+  );
+  const rawZIndexScale = sortedComponents.map((c) => c.zIndex ?? 0);
+
+  // Components tied on one zIndex have no order to swap, so reordering them
+  // against the original scale writes back the values they already had.
+  // Renumber onto a strictly increasing scale first; the sort is stable, so
+  // this preserves the order currently on screen.
+  const hasDuplicates = new Set(rawZIndexScale).size !== rawZIndexScale.length;
+  const zIndexScale = hasDuplicates
+    ? sortedComponents.map((_, index) => index)
+    : rawZIndexScale;
 
   let newSortedComponents: Component[] = [];
 
@@ -262,6 +292,13 @@ function shiftComponentLayers(
       }
     }
   }
+
+  // Renumbering rewrites every tied component, so a reorder that moves nothing
+  // must bail out before it costs an undo step and a full-scene save.
+  const orderUnchanged = newSortedComponents.every(
+    (comp, index) => comp.id === sortedComponents[index].id
+  );
+  if (orderUnchanged) return;
 
   // Apply target zIndices back to modified components
   const changed = newSortedComponents

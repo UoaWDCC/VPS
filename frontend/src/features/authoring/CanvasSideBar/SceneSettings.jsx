@@ -14,7 +14,7 @@ import TimerPropertyOperationMenu from "../../../components/Properties/TimerProp
 import SelectInput from "../components/Select";
 
 /**
- * This component displays the settings of a scene, such as the scene name
+ * The content of the "Scene Details" panel, such as the scene name.
  * @component
  */
 export default function SceneSettings() {
@@ -99,124 +99,119 @@ export default function SceneSettings() {
   }
 
   return (
-    <>
-      <div className="collapse overflow-visible collapse-arrow bg-base-300 rounded-sm text-s">
-        <input type="checkbox" />
-        <div className="collapse-title">Scene Details</div>
-        <div className="collapse-content text--1 bg-base-200">
-          <fieldset className="fieldset pt-2">
-            <label className="label">Name</label>
-            <input
-              type="text"
-              value={sceneName}
-              onChange={changeSceneName}
-              onBlur={saveSceneName}
-              className="input"
-              placeholder="Awesome Scene"
-            />
-            <label className="label">Timer Duration (seconds)</label>
-            <input
-              type="number"
-              min="1"
-              value={timerDuration}
-              onChange={(e) => setTimerDuration(e.target.value)}
-              onBlur={saveTimerDuration}
-              className="input"
-              placeholder="No timer"
-            />
-            <label className="label">Roles</label>
-            <div className="dropdown" onBlur={saveSceneRoles}>
-              <div
-                tabIndex={0}
-                role="button"
-                className="justify-between input mb-1 font-normal w-full"
-              >
-                <span className="truncate">
-                  {selectedRoles?.join(", ") || "All"}
-                </span>
-                <ChevronDown className="shrink-0" size={16} />
-              </div>
-              <ul
-                tabIndex={0}
-                className="dropdown-content menu bg-base-300 rounded-box z-1 w-full p-2 shadow-sm"
-              >
-                {roleList?.map((role, i) => {
-                  const active = selectedRoles.includes(role);
-                  return (
-                    <li
-                      className={active ? "text-secondary" : "text-primary"}
-                      key={i}
-                    >
-                      <a onClick={() => changeRole(role, !active)}>
-                        {role}
-                        {active && <Check className="ml-auto" size={14} />}
-                      </a>
-                    </li>
-                  );
-                })}
-              </ul>
-            </div>
-            <label className="label cursor-pointer justify-start gap-3 mt-2 mb-2">
-              <input
-                type="checkbox"
-                className="toggle"
-                checked={!!directLink && !directLinkDisabled}
-                disabled={directLinkDisabled}
-                onChange={(e) => {
-                  const checked = e.target.checked;
-                  if (!checked) {
-                    modifySceneProp("directLink", null);
-                    return;
-                  }
-                  const selfId = useVisualScene.getState().id;
-                  const target =
-                    directLink ??
-                    defaultDirectLinkScene ??
-                    scenes?.find((s) => s._id !== selfId)?._id ??
-                    null;
-                  modifySceneProp("directLink", target);
-                }}
-              />
-
-              <span className="label-text">Direct Link</span>
-              {directLinkDisabled && (
-                <span
-                  className="tooltip tooltip-warning tooltip-top cursor-help text-warning text-xs before:!whitespace-normal before:!max-w-[150px] before:!text-[0.75rem]"
-                  data-tip={
-                    "Disabled: scene has buttons leading to multiple different scenes"
-                  }
-                >
-                  ⚠
-                </span>
-              )}
-              <span
-                className="label-text tooltip tooltip-top cursor-help before:!whitespace-normal before:!max-w-[130px] before:!text-[0.75rem]"
-                data-tip="The player will be sent to this scene when they press either the 'space' or 'right arrow' keyboard button, instead of having to click an on screen element."
-              >
-                ⓘ
-              </span>
-            </label>
-            <SelectInput
-              nullable
-              disabled={!directLink || directLinkDisabled}
-              value={directLink}
-              values={
-                scenes
-                  ?.filter((scene) => scene._id !== sceneId)
-                  .map((scene) => scene._id) ?? []
-              }
-              display={(targetId) =>
-                scenes?.find((scene) => scene._id === targetId)?.name ??
-                "Unknown scene"
-              }
-              onChange={(targetId) =>
-                modifySceneProp("directLink", targetId || null)
-              }
-            />
-          </fieldset>
-        </div>
-      </div>
+    <fieldset className="fieldset w-full min-w-0 pt-2 [&_.input]:w-full [&_.input]:min-w-0 [&_.select]:w-full [&_.dropdown]:w-full [&_.dropdown]:min-w-0 [&_.dropdown-content]:w-full [&_.truncate]:min-w-0 [&_.truncate]:flex-1">
+      <label className="label">Name</label>
+      <input
+        type="text"
+        value={sceneName}
+        onChange={changeSceneName}
+        onBlur={saveSceneName}
+        className="input"
+        placeholder="Awesome Scene"
+      />
+      <label className="label">Timer Duration (seconds)</label>
+      <input
+        type="number"
+        min="1"
+        value={timerDuration}
+        onChange={(e) => setTimerDuration(e.target.value)}
+        onBlur={saveTimerDuration}
+        className="input"
+        placeholder="No timer"
+      />
       {time > 0 && <TimerPropertyOperationMenu />}
-    </>
+      <label className="label">Roles</label>
+      <div className="dropdown" onBlur={saveSceneRoles}>
+        <div
+          tabIndex={0}
+          role="button"
+          className="justify-between input mb-1 font-normal w-full"
+        >
+          <span className="truncate" title={selectedRoles?.join(", ") || "All"}>
+            {selectedRoles?.join(", ") || "All"}
+          </span>
+          <ChevronDown className="shrink-0" size={16} />
+        </div>
+        <ul
+          tabIndex={0}
+          className="dropdown-content menu bg-base-300 rounded-box z-1 w-full p-2 shadow-sm"
+        >
+          {roleList?.map((role, i) => {
+            const active = selectedRoles.includes(role);
+            return (
+              <li
+                className={active ? "text-secondary" : "text-primary"}
+                key={i}
+              >
+                <a
+                  className="min-w-0"
+                  onClick={() => changeRole(role, !active)}
+                >
+                  <span className="truncate" title={role}>
+                    {role}
+                  </span>
+                  {active && <Check className="ml-auto shrink-0" size={14} />}
+                </a>
+              </li>
+            );
+          })}
+        </ul>
+      </div>
+      <label className="label cursor-pointer justify-start gap-3 mt-2 mb-2">
+        <input
+          type="checkbox"
+          className="toggle"
+          checked={!!directLink && !directLinkDisabled}
+          disabled={directLinkDisabled}
+          onChange={(e) => {
+            const checked = e.target.checked;
+            if (!checked) {
+              modifySceneProp("directLink", null);
+              return;
+            }
+            const selfId = useVisualScene.getState().id;
+            const target =
+              directLink ??
+              defaultDirectLinkScene ??
+              scenes?.find((s) => s._id !== selfId)?._id ??
+              null;
+            modifySceneProp("directLink", target);
+          }}
+        />
+
+        <span className="label-text">Direct Link</span>
+        {directLinkDisabled && (
+          <span
+            className="tooltip tooltip-warning tooltip-top cursor-help text-warning text-xs before:!whitespace-normal before:!max-w-[150px] before:!text-[0.75rem]"
+            data-tip={
+              "Disabled: scene has buttons leading to multiple different scenes"
+            }
+          >
+            ⚠
+          </span>
+        )}
+        <span
+          className="label-text tooltip tooltip-top cursor-help before:!whitespace-normal before:!max-w-[130px] before:!text-[0.75rem]"
+          data-tip="The player will be sent to this scene when they press either the 'space' or 'right arrow' keyboard button, instead of having to click an on screen element."
+        >
+          ⓘ
+        </span>
+      </label>
+      <SelectInput
+        nullable
+        disabled={!directLink || directLinkDisabled}
+        value={directLink}
+        values={
+          scenes
+            ?.filter((scene) => scene._id !== sceneId)
+            .map((scene) => scene._id) ?? []
+        }
+        display={(targetId) =>
+          scenes?.find((scene) => scene._id === targetId)?.name ??
+          "Unknown scene"
+        }
+        onChange={(targetId) => modifySceneProp("directLink", targetId || null)}
+      />
+    </fieldset>
   );
 }
