@@ -1,4 +1,4 @@
-import { XIcon } from "lucide-react";
+import { GripVerticalIcon, XIcon } from "lucide-react";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import type { Action, ActionRef } from "../types";
@@ -23,7 +23,7 @@ function ActionRow({
 }: ActionRowProps) {
   const isDraft = actionRef.id === "";
 
-  const { attributes, listeners, setNodeRef, transform, transition } =
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } =
     useSortable({ id: actionRef.id || "draft", disabled: isDraft });
 
   const style = {
@@ -32,10 +32,24 @@ function ActionRow({
   };
 
   return (
-    <li style={style} {...attributes} {...listeners} ref={setNodeRef}>
-      <div className="flex gap-2 items-center">
-        <div className="w-6 h-6 flex items-center justify-center">
-          <span className="text-xs">{index + 1}</span>
+    <li
+      className={`group -mx-5 ${isDragging ? "bg-base-300" : ""}`}
+      style={style}
+      ref={setNodeRef}
+    >
+      <div className="flex gap-2 items-center px-5">
+        <div
+          className={`w-6 h-6 flex items-center justify-center ${isDraft ? "" : isDragging ? "cursor-grabbing touch-none" : "cursor-grab touch-none"}`}
+          {...attributes}
+          {...listeners}
+        >
+          <span className={`text-xs ${isDragging ? "hidden" : "group-hover:hidden"}`}>
+            {index + 1}
+          </span>
+          <GripVerticalIcon
+            size={14}
+            className={isDragging ? "block" : "hidden group-hover:block"}
+          />
         </div>
         <SelectInput
           values={actions}

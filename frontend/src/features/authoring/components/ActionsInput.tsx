@@ -2,23 +2,22 @@ import { forwardRef, useImperativeHandle, useState } from "react";
 import type { Action, ActionRef } from "../types";
 import useVisualScene from "../stores/visual";
 import ActionRow from "./ActionRow";
-
+import {
+  SortableContext,
+  arrayMove,
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
 import {
   DndContext,
+  DragOverlay,
   KeyboardSensor,
   PointerSensor,
   useSensor,
   useSensors,
   closestCenter,
-  DragOverlay,
   type DragStartEvent,
   type DragEndEvent,
 } from "@dnd-kit/core";
-import {
-  SortableContext,
-  verticalListSortingStrategy,
-} from "@dnd-kit/sortable";
-
 
 interface ActionsInputProps {
   items: ActionRef[];
@@ -38,8 +37,12 @@ const ActionsInput = forwardRef<ActionsInputHandle, ActionsInputProps>(
   function ActionsInput({ items, onDelete, onReorder }, ref) {
     const actions = useVisualScene((s) => s.actions);
     const [hasDraft, setHasDraft] = useState(false);
-
     const [activeIdDragging, setActiveIdDragging] = useState<string | null>(null);
+
+    const sorted = [...items].sort((a, b) => a.index - b.index);
+    const rows = hasDraft
+      ? [...sorted, { id: "", index: nextIndex(items) }]
+      : sorted;
 
     const sensors = useSensors(
       useSensor(PointerSensor, {
@@ -61,22 +64,23 @@ const ActionsInput = forwardRef<ActionsInputHandle, ActionsInputProps>(
     }
 
     function handleDragEnd(e: DragEndEvent) {
-      if (!e.over) return;
-
-      // const oldIndex = sceneIds.indexOf(active.id);
-      // const newIndex = sceneIds.indexOf(over.id);
-      //
-      // if (oldIndex !== newIndex) {
-      //   reorderScenes(arrayMove(sceneIds, oldIndex, newIndex));
-      // }
-
       setActiveIdDragging(null);
-    }
 
-    const sorted = [...items].sort((a, b) => a.index - b.index);
-    const rows = hasDraft
-      ? [...sorted, { id: "", index: nextIndex(items) }]
-      : sorted;
+      const { active, over } = e;
+      if (!over || active.id === over.id) return;
+
+      const oldIndex = sorted.findIndex((actionRef) => actionRef.id === active.id);
+      const newIndex = sorted.findIndex((actionRef) => actionRef.id === over.id);
+
+      if (oldIndex === -1 || newIndex === -1) return;
+
+      onReorder(
+        arrayMove(sorted, oldIndex, newIndex).map((actionRef, index) => ({
+          ...actionRef,
+          index,
+        }))
+      );
+    }
 
     function handleChange(id: string, action: Action | null) {
       if (id === "") {
@@ -110,8 +114,8 @@ const ActionsInput = forwardRef<ActionsInputHandle, ActionsInputProps>(
 
     return (
       <DndContext
-        onDragEnd={handleDragEnd}
         onDragStart={handleDragStart}
+        onDragEnd={handleDragEnd}
         sensors={sensors}
         collisionDetection={closestCenter}
       >
@@ -132,10 +136,9 @@ const ActionsInput = forwardRef<ActionsInputHandle, ActionsInputProps>(
             </ul>
           </div>
         </SortableContext>
+        {/* NOTE: this is empty on purpose, since it acheives a no free-form drag overlay completely */}
         <DragOverlay dropAnimation={null}>
-          {activeIdDragging
-            ? <div></div>
-            : null}
+          {activeIdDragging ? <div></div> : null}
         </DragOverlay>
       </DndContext>
     );
