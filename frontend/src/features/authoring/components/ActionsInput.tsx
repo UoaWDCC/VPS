@@ -1,8 +1,24 @@
-import { XIcon } from "lucide-react";
 import { forwardRef, useImperativeHandle, useState } from "react";
 import type { Action, ActionRef } from "../types";
-import SelectInput from "./Select";
 import useVisualScene from "../stores/visual";
+import ActionRow from "./ActionRow";
+
+import {
+  DndContext,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  closestCenter,
+  DragOverlay,
+  type DragStartEvent,
+  type DragEndEvent,
+} from "@dnd-kit/core";
+import {
+  SortableContext,
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
+
 
 interface ActionsInputProps {
   items: ActionRef[];
@@ -23,11 +39,39 @@ const ActionsInput = forwardRef<ActionsInputHandle, ActionsInputProps>(
     const actions = useVisualScene((s) => s.actions);
     const [hasDraft, setHasDraft] = useState(false);
 
+    const [activeIdDragging, setActiveIdDragging] = useState<string | null>(null);
+
+    const sensors = useSensors(
+      useSensor(PointerSensor, {
+        activationConstraint: {
+          distance: 8,
+        },
+      }),
+      useSensor(KeyboardSensor)
+    );
+
     useImperativeHandle(ref, () => ({
       addItem() {
         setHasDraft(true);
       },
     }));
+
+    function handleDragStart(e: DragStartEvent) {
+      setActiveIdDragging(e.active.id as string);
+    }
+
+    function handleDragEnd(e: DragEndEvent) {
+      if (!e.over) return;
+
+      // const oldIndex = sceneIds.indexOf(active.id);
+      // const newIndex = sceneIds.indexOf(over.id);
+      //
+      // if (oldIndex !== newIndex) {
+      //   reorderScenes(arrayMove(sceneIds, oldIndex, newIndex));
+      // }
+
+      setActiveIdDragging(null);
+    }
 
     const sorted = [...items].sort((a, b) => a.index - b.index);
     const rows = hasDraft
@@ -65,33 +109,35 @@ const ActionsInput = forwardRef<ActionsInputHandle, ActionsInputProps>(
     }
 
     return (
-      <div className="dropdown flex-1">
-        <ul>
-          {rows.map((actionRef, i) => (
-            <li key={actionRef.id || "draft"}>
-              <div className="flex gap-2 items-center">
-                <div className="w-6 h-6 flex items-center justify-center">
-                  <span className="text-xs">{i + 1}</span>
-                </div>
-                <SelectInput
-                  values={actions}
-                  display={(a) => a.name}
-                  value={actions.find((a) => a.id === actionRef.id) ?? null}
+      <DndContext
+        onDragEnd={handleDragEnd}
+        onDragStart={handleDragStart}
+        sensors={sensors}
+        collisionDetection={closestCenter}
+      >
+        <SortableContext items={rows} strategy={verticalListSortingStrategy}>
+          <div className="dropdown flex-1">
+            <ul>
+              {rows.map((actionRef) => (
+                <ActionRow
+                  key={actionRef.id || "draft"}
+                  actionRef={actionRef}
+                  index={actionRef.index}
+                  actions={actions}
                   onChange={(action) => handleChange(actionRef.id, action)}
                   onBlur={() => handleBlur(actionRef.id)}
-                  autoFocus={actionRef.id === ""}
+                  onDelete={() => handleDelete(actionRef.id)}
                 />
-                <button
-                  className="btn btn-phantom btn-square btn-xs"
-                  onClick={() => handleDelete(actionRef.id)}
-                >
-                  <XIcon size={20} />
-                </button>
-              </div>
-            </li>
-          ))}
-        </ul>
-      </div>
+              ))}
+            </ul>
+          </div>
+        </SortableContext>
+        <DragOverlay dropAnimation={null}>
+          {activeIdDragging
+            ? <div></div>
+            : null}
+        </DragOverlay>
+      </DndContext>
     );
   }
 );
