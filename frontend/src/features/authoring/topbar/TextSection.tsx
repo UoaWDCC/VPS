@@ -103,22 +103,22 @@ function TextSection() {
 
   if (!style) return null;
 
+  // every selected component that has text -- textboxes and shapes with
+  // text in them. a mixed selection can include components without a
+  // `document` to write text props onto
+  function textTargets() {
+    return selected.filter((id) => {
+      const component = getComponent(id);
+      return component && "document" in component && !!component.document;
+    });
+  }
+
   function modifyStyle(prop: keyof BaseTextStyle, value: string | number) {
-    // apply to every selected textbox
-    // a mixed selection can include non-textbox components (e.g. a shape),
-    // which don't have a `document` to write text style props onto
-    selected
-      .filter((id) => {
-        const component = getComponent(id);
-        return component && "document" in component && !!component.document;
-      })
-      .forEach((id) => setTextStyle(id, prop, value));
+    textTargets().forEach((id) => setTextStyle(id, prop, value));
   }
 
   function modifyListStyle(value: ListMarkerStyle | "none") {
-    selected
-      .filter((id) => getComponent(id)?.type === "textbox")
-      .forEach((id) => setListStyle(id, value));
+    textTargets().forEach((id) => setListStyle(id, value));
   }
 
   const blockI = selection.start?.blockI;

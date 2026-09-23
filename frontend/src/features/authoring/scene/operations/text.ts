@@ -944,6 +944,14 @@ export const mergeDocs = modify(
       block.spans = [...lhs, ...spans];
 
       const intermediates = doc.blocks.slice(1, doc.blocks.length - 1);
+      // the first pasted block's own list item (if any) was merged into the
+      // block at the cursor, so a soft-break line copied along with it can
+      // only stay a continuation if that block matches its list-ness --
+      // otherwise it would be indented with no marker of its own
+      const first = intermediates[0];
+      if (first?.softBreak && !!first.list !== !!block.list) {
+        intermediates[0] = { ...first, softBreak: undefined };
+      }
       original.blocks.splice(cursor.blockI + 1, 0, ...intermediates);
 
       const finalBlock = doc.blocks[doc.blocks.length - 1];
