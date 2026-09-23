@@ -10,7 +10,9 @@ import {
   insertChar,
   insertSelection,
   isEmptyListBlock,
+  isSoftBreakBlock,
   isStartOfListBlock,
+  promoteSoftBreak,
   setBlockListStyle,
 } from "../../scene/operations/text";
 import { getBlockRange } from "../../text/list";
@@ -137,12 +139,18 @@ function handleEditing(e: KeyboardEvent, selected: string) {
     setSelection({ start: newCursor, end: null });
   } else if (e.key === "Enter" && isEmptyListBlock(selected, start)) {
     // enter on an empty bullet line (i.e. a second enter right after the
-    // previous one created it) ends the list instead of adding another line
-    setBlockListStyle(
-      [selected],
-      { start: start.blockI, end: start.blockI },
-      "none"
-    );
+    // previous one created it) ends the list instead of adding another line.
+    // an empty soft-break line becomes its own item first instead, since
+    // stripping it would strip the item it belongs to as well
+    if (isSoftBreakBlock(selected, start.blockI)) {
+      promoteSoftBreak([selected], start.blockI);
+    } else {
+      setBlockListStyle(
+        [selected],
+        { start: start.blockI, end: start.blockI },
+        "none"
+      );
+    }
     syncVisualCursor();
   } else if (e.key === "Enter") {
     // create a new block at cursor

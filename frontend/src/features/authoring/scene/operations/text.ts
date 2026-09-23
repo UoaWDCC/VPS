@@ -284,6 +284,9 @@ export const applyAutoBullet = modify((id: string[], cursor: ModelCursor) => {
   }
 
   block.list = { markerStyle: AUTO_BULLET_TRIGGERS[trigger], level: 0 };
+  // a "- " typed on a soft-break line starts an item of its own -- left as
+  // a continuation it would be indented but never get a marker drawn
+  block.softBreak = undefined;
   return { blockI: cursor.blockI, spanI: 0, charI: 0 };
 });
 
@@ -316,12 +319,42 @@ export function isStartOfListBlock(id: string, cursor: ModelCursor) {
   return cursor.spanI === 0 && cursor.charI === 0;
 }
 
-export const toggleChecked = modify((id: string[], blockI: number) => {
+export function isSoftBreakBlock(id: string, blockI: number) {
+  const doc = getComponentProp(id, "document") as ModelDocument;
+  return !!doc.blocks[blockI]?.softBreak;
+}
+
+// Enter on an empty soft-break line turns it into a list item of its own
+// (with its own marker) -- a second Enter then ends the list as usual
+export const promoteSoftBreak = modify((id: string[], blockI: number) => {
   const doc = getComponentProp(id[0], "document") as ModelDocument;
   const block = doc.blocks[blockI];
-  if (!block.list) return;
+  block.softBreak = undefined;
+  if (block.list) block.list = { ...block.list, checked: false };
+});
+
+export const toggleChecked = modify((id: string[], blockI: number) => {
+  const doc = getComponentProp(id[0], "document") as ModelDocument | undefined;
+  const block = doc?.blocks[blockI];
+  if (!block?.list) return;
   block.list.checked = !block.list.checked;
 });
+
+// widens a block range to whole list items -- a soft-break continuation
+// belongs to the item above it, so it must be indented/restyled/stripped
+// together with that item rather than left behind without a marker. also
+// clamps to the document, since a marker selection can outlive an undo
+// that removed some of its blocks
+function wholeItemRange(
+  blocks: ModelBlock[],
+  range: { start: number; end: number }
+) {
+  let start = Math.max(0, range.start);
+  let end = Math.min(blocks.length - 1, range.end);
+  while (start > 0 && blocks[start]?.softBreak) start--;
+  while (end + 1 < blocks.length && blocks[end + 1].softBreak) end++;
+  return { start, end };
+}
 
 // 9 nesting levels, 0-indexed: 0-8
 export const MAX_LIST_LEVEL = 8;
@@ -331,9 +364,13 @@ export const MAX_LIST_LEVEL = 8;
 // behaviour on non-list lines
 export const indentBlocks = modify(
   (id: string[], range: { start: number; end: number }, direction: 1 | -1) => {
-    const doc = getComponentProp(id[0], "document") as ModelDocument;
+    const doc = getComponentProp(id[0], "document") as
+      | ModelDocument
+      | undefined;
+    if (!doc) return;
+    const { start, end } = wholeItemRange(doc.blocks, range);
 
-    for (let i = range.start; i <= range.end; i++) {
+    for (let i = start; i <= end; i++) {
       const block = doc.blocks[i];
       if (!block.list) continue;
 
@@ -357,9 +394,13 @@ export const setBlockListStyle = modify(
     range: { start: number; end: number },
     markerStyle: ListMarkerStyle | "none"
   ) => {
-    const doc = getComponentProp(id[0], "document") as ModelDocument;
+    const doc = getComponentProp(id[0], "document") as
+      | ModelDocument
+      | undefined;
+    if (!doc) return;
+    const { start, end } = wholeItemRange(doc.blocks, range);
 
-    for (let i = range.start; i <= range.end; i++) {
+    for (let i = start; i <= end; i++) {
       const block = doc.blocks[i];
       if (markerStyle === "none") {
         block.list = undefined;

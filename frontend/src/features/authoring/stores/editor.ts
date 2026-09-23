@@ -101,12 +101,20 @@ const useEditorStore = create<EditorState>((set) => ({
 
   setLoading: (value: boolean) => set({ loading: value }),
   setSelected: (ids) =>
-    set(() => {
-      if (!ids.length || ids.length > 1) return { selected: ids };
+    set(({ markerSelection }) => {
+      // a marker selection only makes sense while its own textbox is the
+      // sole selection -- otherwise it would go stale and turn a later
+      // Backspace/Delete into "strip bullets" on a box that isn't selected
+      const keepMarkers = ids.length === 1 && markerSelection?.id === ids[0];
+      const clearMarkers = keepMarkers ? {} : { markerSelection: null };
+
+      if (!ids.length || ids.length > 1)
+        return { selected: ids, ...clearMarkers };
       const component = getComponent(ids[0]);
       const hasDoc = component && "document" in component && component.document;
       return {
         selected: ids,
+        ...clearMarkers,
         ...(hasDoc && {
           activeStyle: getStyleForSelection(ids[0], { start: null, end: null }),
         }),
