@@ -9,6 +9,8 @@ import { getProperties } from "../../../db/daos/scenarioDao.js";
 import { setGroupProperties } from "../../../db/daos/groupDao.js";
 import { applyPropertyOperations } from "../../../util/properties/propertyOperations.js";
 import { getComponent } from "../../../db/daos/sceneDao.js";
+import { sendEmail } from "../../../util/resend.js";
+import { EmailTemplate } from "../../../util/emailTemplates.js";
 import {
   freshRemainingTime,
   resumedRemainingTime,
@@ -208,6 +210,78 @@ const syncProperties = async (group) => {
   return [properties, group.stateVersion];
 };
 
+// Emails the group member(s) whose role the new scene is for, letting them
+// know it's their turn. Fire-and-forget (see call site in groupNavigate) —
+// never awaited on the navigation request, and never throws, so a slow or
+// failed notification can't delay or block navigation. Each send is bounded
+// so a stalled Resend request can't hang in the background indefinitely.
+const EMAIL_NOTIFICATION_TIMEOUT_MS = 10_000;
+
+const withTimeout = (fn, ms) => {
+  const controller = new AbortController();
+  let timer;
+  const timeout = new Promise((_, reject) => {
+    timer = setTimeout(() => {
+      controller.abort();
+      reject(new Error(`timed out after ${ms}ms`));
+    }, ms);
+  });
+  return Promise.race([fn(controller.signal), timeout]).finally(() =>
+    clearTimeout(timer)
+  );
+};
+
+const notifyNextRole = async (group, nextSceneId, currentRole) => {
+  try {
+    const nextScene = await Scene.findById(nextSceneId, { roles: 1 }).lean();
+    if (!nextScene?.roles?.length) return;
+
+    const [fullGroup, scenario] = await Promise.all([
+      Group.findById(group._id, { users: 1 }).lean(),
+      Scenario.findById(group.scenarioId, { name: 1 }).lean(),
+    ]);
+
+    const roleRecipients = fullGroup.users.filter(
+      (user) =>
+        roleMatches(nextScene.roles, user.role) &&
+        normaliseString(user.role) !== normaliseString(currentRole)
+    );
+    if (!roleRecipients.length) return;
+
+    const optedOutEmails = new Set(
+      (
+        await User.find(
+          {
+            email: { $in: roleRecipients.map((user) => user.email) },
+            [`emailNotifications.${group.scenarioId}`]: false,
+          },
+          { email: 1 }
+        ).lean()
+      ).map((user) => user.email)
+    );
+    const recipients = roleRecipients.filter(
+      (user) => !optedOutEmails.has(user.email)
+    );
+
+    await Promise.all(
+      recipients.map((user) =>
+        withTimeout(
+          (signal) =>
+            sendEmail({
+              to: user.email,
+              template: EmailTemplate.YOUR_TURN,
+              data: { name: user.name, scenarioName: scenario?.name },
+              signal,
+            }),
+          EMAIL_NOTIFICATION_TIMEOUT_MS
+        )
+      )
+    );
+  } catch (err) {
+    console.error("Failed to send turn notification email:", err.message);
+  }
+};
+
 // Updates properties for a group
 const updateProperties = async (group, component) => {
   if (!component || !component.stateOperations) {
@@ -297,12 +371,19 @@ export const groupNavigate = async (req) => {
   const nextScene = component?.nextScene ?? bodyNextScene;
 
   if (nextScene && nextScene !== currentScene) {
-    [, , , scenes] = await Promise.all([
+    await Promise.all([
       addSceneToPath(group._id, currentScene, nextScene),
       addFlagsToGroup(group._id, addFlags),
       removeFlagsFromGroup(group._id, removeFlags),
-      getConnectedScenes(nextScene, role, true),
     ]);
+
+    // Fire-and-forget: kicked off before getConnectedScenes below (which
+    // throws FORBIDDEN when nextScene isn't for this user's role — the
+    // expected signal that they just handed off to a teammate), but not
+    // awaited, so notification latency/failures never delay this response.
+    notifyNextRole(group, nextScene, role);
+
+    scenes = await getConnectedScenes(nextScene, role, true);
   }
 
   const [properties, propertyVersion] = await updateProperties(

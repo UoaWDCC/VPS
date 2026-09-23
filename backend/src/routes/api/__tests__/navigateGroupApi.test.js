@@ -9,6 +9,8 @@ import Group from "../../../db/models/group.js";
 import User from "../../../db/models/user.js";
 import Note from "../../../db/models/note.js";
 import auth from "../../../middleware/firebaseAuth.js";
+import { sendEmail } from "../../../util/resend.js";
+import { EmailTemplate } from "../../../util/emailTemplates.js";
 import { authHeaders } from "./testHelpers.js";
 import {
   useMongoMemoryServer,
@@ -17,11 +19,24 @@ import {
 
 jest.mock("../../../middleware/firebaseAuth");
 jest.mock("firebase-admin");
+jest.mock("../../../util/resend.js", () => ({
+  sendEmail: jest.fn().mockResolvedValue({ id: "mock-email-id" }),
+}));
 
 auth.mockImplementation(async (req, res, next) => {
   req.body.uid = req.headers.authorization?.split(" ")[1];
   next();
 });
+
+// notifyNextRole is fire-and-forget (not awaited by the request handler), so
+// the response can arrive before the mocked sendEmail call is recorded.
+const waitForMockCall = async (mockFn, timeoutMs = 1000) => {
+  const start = Date.now();
+  while (mockFn.mock.calls.length === 0) {
+    if (Date.now() - start > timeoutMs) return;
+    await new Promise((resolve) => setTimeout(resolve, 10));
+  }
+};
 
 describe("Navigate Group API tests", () => {
   useMongoMemoryServer();
@@ -39,6 +54,8 @@ describe("Navigate Group API tests", () => {
   let group;
 
   beforeEach(async () => {
+    sendEmail.mockClear();
+
     // scene1 links to scene2 via a clickable button component
     scene1 = await Scene.create({
       name: "Scene 1",
@@ -256,6 +273,120 @@ describe("Navigate Group API tests", () => {
 
     const dbNote = await Note.findById(note._id);
     expect(dbNote).toBeNull();
+  });
+
+  // --- turn notification emails ---
+
+  it("emails the teammate whose role the next scene belongs to on handoff", async () => {
+    const componentId = "btn-finish";
+    const nurseScene = await Scene.create({
+      name: "Nurse Scene",
+      components: [],
+      roles: ["nurse"],
+    });
+    const doctorScene = await Scene.create({
+      name: "Doctor Scene",
+      components: [
+        { id: componentId, clickable: true, nextScene: nurseScene._id },
+      ],
+      roles: ["doctor"],
+    });
+
+    await Group.findByIdAndUpdate(group._id, {
+      users: [
+        { email: user.email, name: user.name, role: "doctor" },
+        {
+          email: "nurse@auckland.ac.nz",
+          name: "Nurse Nightingale",
+          role: "nurse",
+        },
+      ],
+      path: [doctorScene._id.toString()],
+    });
+
+    await expect(
+      axios.post(
+        `http://localhost:${ctx.port}/api/navigate/group/${group._id}`,
+        {
+          uid: "uid-player",
+          currentScene: doctorScene._id.toString(),
+          componentId,
+          addFlags: [],
+          removeFlags: [],
+        },
+        authHeaders("uid-player")
+      )
+      // FORBIDDEN is expected here — it's the existing signal that tells the
+      // finishing player's client to redirect to the "your teammate's turn" page.
+    ).rejects.toMatchObject({ response: { status: 403 } });
+
+    // The handoff still committed even though this user got a 403.
+    const dbGroup = await Group.findById(group._id);
+    expect(dbGroup.path[0]).toBe(nurseScene._id.toString());
+
+    // Notification is fire-and-forget, so wait for the background call.
+    await waitForMockCall(sendEmail);
+    expect(sendEmail).toHaveBeenCalledWith({
+      to: "nurse@auckland.ac.nz",
+      template: EmailTemplate.YOUR_TURN,
+      data: { name: "Nurse Nightingale", scenarioName: "Nav Scenario" },
+      signal: expect.any(AbortSignal),
+    });
+  });
+
+  it("does not email anyone when the next scene has no role restriction", async () => {
+    const componentId = "btn-continue";
+    await Group.findByIdAndUpdate(group._id, {
+      path: [scene1._id.toString()],
+    });
+    await Scene.findByIdAndUpdate(scene1._id, {
+      components: [{ id: componentId, clickable: true, nextScene: scene2._id }],
+    });
+
+    // notifyNextRole()'s only async step on this code path is
+    // Scene.findById(nextSceneId).lean() — since scene2 has no roles, it
+    // returns as soon as that resolves. Piggyback on that specific lookup's
+    // settlement (not the earlier Scene.findById the route handler itself
+    // makes to resolve the clicked component) so we can await the
+    // fire-and-forget task's actual completion, rather than only its
+    // (never-happening) sendEmail call, before asserting nothing was sent.
+    const originalFindById = Scene.findById.bind(Scene);
+    let resolveNotifyLookup;
+    const notifyLookupSettled = new Promise((resolve) => {
+      resolveNotifyLookup = resolve;
+    });
+    const findByIdSpy = jest
+      .spyOn(Scene, "findById")
+      .mockImplementation((...args) => {
+        const query = originalFindById(...args);
+        if (args[0]?.toString() === scene2._id.toString()) {
+          const originalThen = query.then.bind(query);
+          query.then = (onFulfilled, onRejected) =>
+            originalThen((value) => {
+              resolveNotifyLookup();
+              return onFulfilled ? onFulfilled(value) : value;
+            }, onRejected);
+        }
+        return query;
+      });
+
+    const response = await axios.post(
+      `http://localhost:${ctx.port}/api/navigate/group/${group._id}`,
+      {
+        uid: "uid-player",
+        currentScene: scene1._id.toString(),
+        componentId,
+        addFlags: [],
+        removeFlags: [],
+      },
+      authHeaders("uid-player")
+    );
+    expect(response.status).toBe(200);
+
+    await notifyLookupSettled;
+
+    expect(sendEmail).not.toHaveBeenCalled();
+    findByIdSpy.mockRestore();
   });
 
   // --- Server-authoritative scene timer ---

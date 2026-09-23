@@ -48,6 +48,12 @@ const userSchema = new Schema({
     of: { type: Number, default: 0 },
     default: {},
   },
+  // Map of scenarioId to whether "your turn" emails are on for that scenario
+  emailNotifications: {
+    type: Map,
+    of: Boolean,
+    default: {},
+  },
 });
 
 const User = mongoose.model("model", userSchema, "users");
