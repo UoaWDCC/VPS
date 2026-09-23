@@ -1,4 +1,9 @@
-import type { BaseTextStyle, RelativeBounds, PropertyRef } from "../types";
+import type {
+  BaseTextStyle,
+  ModelListMeta,
+  RelativeBounds,
+  PropertyRef,
+} from "../types";
 
 export interface VisualSpan {
   text: string;
@@ -25,6 +30,8 @@ export interface VisualLine {
 export interface VisualBlock {
   lines: VisualLine[];
   style: BaseTextStyle;
+  list?: ModelListMeta;
+  softBreak?: boolean;
   y: number;
   height: number;
 }
@@ -57,6 +64,15 @@ export interface ModelSelection {
 export interface VisualSelection {
   start: VisualCursor | null;
   end: VisualCursor | null;
+}
+
+// a selection of bullet markers themselves (not their text) -- lets the
+// user delete just the list formatting of a run of blocks without
+// touching their content
+export interface MarkerSelection {
+  id: string;
+  start: number;
+  end: number;
 }
 
 export type Definite<T> = {

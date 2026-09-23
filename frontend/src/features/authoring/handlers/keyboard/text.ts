@@ -1,11 +1,21 @@
 import {
+  applyAutoBullet,
+  canAutoBullet,
   createBlock,
+  createSoftBreak,
   convertToChip,
   deleteChar,
   deleteSelection,
+  indentBlocks,
   insertChar,
   insertSelection,
+  isEmptyListBlock,
+  isSoftBreakBlock,
+  isStartOfListBlock,
+  promoteSoftBreak,
+  setBlockListStyle,
 } from "../../scene/operations/text";
+import { getBlockRange } from "../../text/list";
 import useEditorStore from "../../stores/editor";
 import useVisualScene from "../../stores/visual";
 import {
@@ -31,11 +41,23 @@ export function handleTextMode(e: KeyboardEvent) {
   if ((e.metaKey || e.ctrlKey) && e.key == "a") {
     e.preventDefault();
     handleSelectAll(selected[0]);
+  } else if (e.key === "Tab") {
+    handleIndent(e, selected[0]);
   } else if (e.key.startsWith("Arrow") || ["Home", "End"].includes(e.key)) {
     handleNavigation(e, selected[0]);
   } else {
     handleEditing(e, selected[0]);
   }
+}
+
+function handleIndent(e: KeyboardEvent, selected: string) {
+  const range = getBlockRange(selected);
+  if (!range) return;
+
+  e.preventDefault();
+
+  indentBlocks([selected], range, e.shiftKey ? -1 : 1);
+  syncVisualCursor();
 }
 
 export function handleSelectAll(selected: string) {
@@ -77,7 +99,12 @@ function handleEditing(e: KeyboardEvent, selected: string) {
   const { start, end } = selection;
   if (!start) return;
 
-  if (e.key.length === 1 && !e.ctrlKey && !e.metaKey && !e.altKey) {
+  if (e.key === " " && !end && canAutoBullet(selected, start)) {
+    // markdown-style shorthand: a lone leading "-"/"*" followed by a space
+    // becomes a bullet, consuming the trigger char instead of inserting the space
+    const newCursor = applyAutoBullet([selected], start);
+    setSelection({ start: newCursor, end: null });
+  } else if (e.key.length === 1 && !e.ctrlKey && !e.metaKey && !e.altKey) {
     // insert character at cursor
     // convert to chip if "$" completes $$property_name$$ syntax
     let newCursor = end
@@ -85,12 +112,46 @@ function handleEditing(e: KeyboardEvent, selected: string) {
       : insertChar([selected], start, e.key);
     if (e.key === "$") newCursor = convertToChip([selected], newCursor);
     setSelection({ start: newCursor, end: null });
+  } else if (
+    e.key === "Backspace" &&
+    !end &&
+    isStartOfListBlock(selected, start)
+  ) {
+    // backspace at the start of a bulleted line strips the bullet first
+    // (whether or not the line has content) instead of deleting into the
+    // previous block
+    setBlockListStyle(
+      [selected],
+      { start: start.blockI, end: start.blockI },
+      "none"
+    );
+    syncVisualCursor();
   } else if (e.key === "Backspace") {
     // delete character before cursor
     const newCursor = !end
       ? deleteChar([selected], start)
       : deleteSelection([selected], selection);
     setSelection({ start: newCursor, end: null });
+  } else if (e.key === "Enter" && e.shiftKey) {
+    // soft line break: a new line within the same list item, no new marker
+    const cursor = end ? deleteSelection([selected], selection) : start;
+    const newCursor = createSoftBreak([selected], cursor);
+    setSelection({ start: newCursor, end: null });
+  } else if (e.key === "Enter" && isEmptyListBlock(selected, start)) {
+    // enter on an empty bullet line (i.e. a second enter right after the
+    // previous one created it) ends the list instead of adding another line.
+    // an empty soft-break line becomes its own item first instead, since
+    // stripping it would strip the item it belongs to as well
+    if (isSoftBreakBlock(selected, start.blockI)) {
+      promoteSoftBreak([selected], start.blockI);
+    } else {
+      setBlockListStyle(
+        [selected],
+        { start: start.blockI, end: start.blockI },
+        "none"
+      );
+    }
+    syncVisualCursor();
   } else if (e.key === "Enter") {
     // create a new block at cursor
     const newCursor = createBlock([selected], start);

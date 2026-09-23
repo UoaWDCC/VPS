@@ -1,5 +1,9 @@
 import create from "zustand";
-import type { ModelSelection, VisualSelection } from "../text/types";
+import type {
+  MarkerSelection,
+  ModelSelection,
+  VisualSelection,
+} from "../text/types";
 import type { BaseTextStyle, Bounds, Guide, Vec2 } from "../types";
 import { getComponent } from "../scene/scene";
 import { getStyleForSelection } from "../scene/operations/text";
@@ -45,6 +49,7 @@ interface EditorState {
   visualSelection: VisualSelection;
   desiredColumn: number | null;
   activeStyle: BaseTextStyle | null;
+  markerSelection: MarkerSelection | null;
   properties: Property[];
 
   setLoading: (loading: boolean) => void;
@@ -55,6 +60,7 @@ interface EditorState {
   setVisualSelection: Dynamic<VisualSelection>;
   setDesiredColumn: (column: number | null) => void;
   setActiveStyle: (style: BaseTextStyle) => void;
+  setMarkerSelection: Dynamic<MarkerSelection | null>;
   setProperties: (properties?: Property[]) => void;
 
   // modes
@@ -95,12 +101,20 @@ const useEditorStore = create<EditorState>((set) => ({
 
   setLoading: (value: boolean) => set({ loading: value }),
   setSelected: (ids) =>
-    set(() => {
-      if (!ids.length || ids.length > 1) return { selected: ids };
+    set(({ markerSelection }) => {
+      // a marker selection only makes sense while its own textbox is the
+      // sole selection -- otherwise it would go stale and turn a later
+      // Backspace/Delete into "strip bullets" on a box that isn't selected
+      const keepMarkers = ids.length === 1 && markerSelection?.id === ids[0];
+      const clearMarkers = keepMarkers ? {} : { markerSelection: null };
+
+      if (!ids.length || ids.length > 1)
+        return { selected: ids, ...clearMarkers };
       const component = getComponent(ids[0]);
       const hasDoc = component && "document" in component && component.document;
       return {
         selected: ids,
+        ...clearMarkers,
         ...(hasDoc && {
           activeStyle: getStyleForSelection(ids[0], { start: null, end: null }),
         }),
@@ -130,6 +144,7 @@ const useEditorStore = create<EditorState>((set) => ({
   activeStyle: null,
   properties: [],
   desiredColumn: null,
+  markerSelection: null,
 
   setSelection: (selection) =>
     set(({ selected }) => {
@@ -146,6 +161,7 @@ const useEditorStore = create<EditorState>((set) => ({
   setVisualSelection: setter(set, "visualSelection"),
   setActiveStyle: (style: BaseTextStyle) => set({ activeStyle: style }),
   setDesiredColumn: (column) => set({ desiredColumn: column }),
+  setMarkerSelection: setter(set, "markerSelection"),
   setProperties: (properties) => set({ properties: properties ?? [] }),
 
   mode: ["normal"],
@@ -159,6 +175,7 @@ const useEditorStore = create<EditorState>((set) => ({
       selected: [],
       selection: { start: null, end: null },
       visualSelection: { start: null, end: null },
+      markerSelection: null,
       mode: ["normal"],
       activeGuides: [],
     }),
