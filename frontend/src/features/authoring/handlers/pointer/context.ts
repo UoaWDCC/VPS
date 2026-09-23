@@ -9,7 +9,9 @@ import MarkerMenu from "./MarkerContext";
 export function handleContextGlobal(e: React.MouseEvent) {
   const target = e.target as HTMLElement;
 
-  if (target.dataset.type === "marker") {
+  // checkboxes are markers too -- they just get their own left-click
+  // (toggle) behaviour, so right-click must mass-select them the same way
+  if (target.dataset.type === "marker" || target.dataset.type === "checkbox") {
     handleMarkerContext(e);
   } else if (target.dataset.id) {
     handleComponentContext(e);
