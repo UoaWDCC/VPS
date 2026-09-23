@@ -77,7 +77,11 @@ export function handleMouseDownGlobal(e: React.MouseEvent, position: Vec2) {
     setSelection({ start: null, end: null });
   }
 
-  useEditorStore.getState().setMouseDown(true);
+  // a checkbox press is a one-shot toggle -- don't enter the drag path, or
+  // moving afterwards would drag whatever components are already selected
+  if (target.dataset.type !== "checkbox") {
+    useEditorStore.getState().setMouseDown(true);
+  }
 }
 
 export function handleMouseMoveGlobal(e: React.MouseEvent, position: Vec2) {

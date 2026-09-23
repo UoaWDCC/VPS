@@ -144,7 +144,12 @@ function buildMarker(block: VisualBlock, isMarkerSelected: boolean) {
         x={markerX}
         y={baseline}
         textAnchor="end"
-        style={{ whiteSpace: "pre", ...buildStyle(style) }}
+        // the marker takes its size from the first span, but not its
+        // sub/superscript -- that would shrink the glyph
+        style={{
+          whiteSpace: "pre",
+          ...buildStyle({ ...style, verticalAlign: "normal" }),
+        }}
       >
         {glyph}
       </text>
