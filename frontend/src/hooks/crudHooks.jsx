@@ -454,7 +454,10 @@ export function usePatch(url, requestBody = null, getUserIdToken = null) {
         errorData = hasError && err.response?.data;
       });
 
-    return hasError ? errorData : response?.data;
+    return {
+      success: !hasError,
+      data: hasError ? errorData : response?.data,
+    };
   }
 
   return patchData();

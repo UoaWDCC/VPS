@@ -79,24 +79,37 @@ router.patch("/assigned/:scenarioId", scenarioAuth, async (req, res) => {
 });
 
 // get the current user's email notification preference for one scenario
-router.get("/:uid/:scenarioId/settings", async (req, res) => {
-  const { uid, scenarioId } = req.params;
-  const user = await User.findOne({ uid }, { emailNotifications: 1 }).lean();
-  if (!user) return res.sendStatus(STATUS.NOT_FOUND);
-  res.json({
-    emailNotifications: user.emailNotifications?.[scenarioId] !== false,
-  });
-});
+router.get(
+  "/:uid/:scenarioId/settings",
+  handle(async (req, res) => {
+    const { scenarioId } = req.params;
+    const { uid } = req.body;
+    const user = await User.findOne({ uid }, { emailNotifications: 1 }).lean();
+    if (!user) return res.sendStatus(STATUS.NOT_FOUND);
+    res.json({
+      emailNotifications: user.emailNotifications?.[scenarioId] !== false,
+    });
+  })
+);
 
 // update the current user's email notification preference for one scenario
-router.patch("/:uid/:scenarioId/settings", async (req, res) => {
-  const { uid, scenarioId } = req.params;
-  const { emailNotifications } = req.body;
-  await User.findOneAndUpdate(
-    { uid },
-    { [`emailNotifications.${scenarioId}`]: !!emailNotifications }
-  );
-  res.sendStatus(STATUS.OK);
-});
+router.patch(
+  "/:uid/:scenarioId/settings",
+  handle(async (req, res) => {
+    const { scenarioId } = req.params;
+    const { uid, emailNotifications } = req.body;
+    if (typeof emailNotifications !== "boolean") {
+      throw new HttpError(
+        "emailNotifications must be a boolean",
+        STATUS.BAD_REQUEST
+      );
+    }
+    await User.findOneAndUpdate(
+      { uid },
+      { [`emailNotifications.${scenarioId}`]: emailNotifications }
+    );
+    res.sendStatus(STATUS.OK);
+  })
+);
 
 export default router;

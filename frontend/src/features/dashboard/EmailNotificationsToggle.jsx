@@ -29,7 +29,7 @@ export default function EmailNotificationsToggle({ scenarioId }) {
       getUserIdToken
     );
     setSaving(false);
-    if (res?.status) {
+    if (!res.success) {
       setEmailNotifications(!checked);
       toast.error("Failed to update notification settings.");
     }

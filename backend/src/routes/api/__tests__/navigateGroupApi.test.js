@@ -343,6 +343,33 @@ describe("Navigate Group API tests", () => {
       components: [{ id: componentId, clickable: true, nextScene: scene2._id }],
     });
 
+    // notifyNextRole()'s only async step on this code path is
+    // Scene.findById(nextSceneId).lean() — since scene2 has no roles, it
+    // returns as soon as that resolves. Piggyback on that specific lookup's
+    // settlement (not the earlier Scene.findById the route handler itself
+    // makes to resolve the clicked component) so we can await the
+    // fire-and-forget task's actual completion, rather than only its
+    // (never-happening) sendEmail call, before asserting nothing was sent.
+    const originalFindById = Scene.findById.bind(Scene);
+    let resolveNotifyLookup;
+    const notifyLookupSettled = new Promise((resolve) => {
+      resolveNotifyLookup = resolve;
+    });
+    const findByIdSpy = jest
+      .spyOn(Scene, "findById")
+      .mockImplementation((...args) => {
+        const query = originalFindById(...args);
+        if (args[0]?.toString() === scene2._id.toString()) {
+          const originalThen = query.then.bind(query);
+          query.then = (onFulfilled, onRejected) =>
+            originalThen((value) => {
+              resolveNotifyLookup();
+              return onFulfilled ? onFulfilled(value) : value;
+            }, onRejected);
+        }
+        return query;
+      });
+
     const response = await axios.post(
       `http://localhost:${ctx.port}/api/navigate/group/${group._id}`,
       {
@@ -355,7 +382,11 @@ describe("Navigate Group API tests", () => {
       authHeaders("uid-player")
     );
     expect(response.status).toBe(200);
+
+    await notifyLookupSettled;
+
     expect(sendEmail).not.toHaveBeenCalled();
+    findByIdSpy.mockRestore();
   });
 
   // --- Server-authoritative scene timer ---
