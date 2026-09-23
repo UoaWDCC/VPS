@@ -59,11 +59,15 @@ function generatePatch(modified, saved) {
     if (!currentComponents[c.id]) deletedComponentIds.push(c.id);
   });
 
+  // Keep this list in sync with the allowedFields list in patchScene,
+  // backend/src/db/daos/sceneDao.js - a field missing from either side
+  // either never gets sent from here or gets silently dropped there.
   [
     "name",
     "roles",
     "time",
     "directLink",
+    "directLinkKey",
     "timerStateOperations",
     "background",
   ].forEach((field) => {

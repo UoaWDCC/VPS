@@ -44,7 +44,7 @@ const PropertyOperationMenu = ({ component }) => {
           values={scenes?.map((s) => s._id) ?? []}
           value={value}
           onChange={saveLink}
-          display={(v) => scenes.find((s) => s._id === v)?.name}
+          display={(v) => scenes.find((s) => s._id === v)?.name ?? "None"}
         />
       </fieldset>
       <div className="mb-3">

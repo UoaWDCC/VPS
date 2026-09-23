@@ -1,3 +1,5 @@
+import type { KeyHintPosition } from "./keyHintPosition";
+
 export type Component =
   | BoxComponent
   | TextBoxComponent
@@ -14,6 +16,7 @@ export interface Scene {
   roles: string[];
   time: number | null;
   directLink: string | null;
+  directLinkKey: string | null;
   timerStateOperations: Record<string, unknown>[] | null;
   background: SceneBackground | null;
 }
@@ -58,12 +61,17 @@ export interface Guide {
   isCanvasCenter?: boolean;
 }
 
-interface GenericComponent {
+export interface GenericComponent {
   id: string;
   bounds: Bounds;
   zIndex: number;
   clickable?: boolean;
+  nextScene?: string | null;
+  stateOperations?: Record<string, unknown>[] | null;
   stateBindings?: PropertyBinding[];
+  keyBinding?: string | null;
+  showKeyHint?: boolean;
+  keyHintPosition?: KeyHintPosition;
 }
 
 export interface PropertyBinding {

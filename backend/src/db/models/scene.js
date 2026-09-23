@@ -90,6 +90,12 @@ const sceneSchema = new Schema({
     ref: "Scene",
     default: null,
   },
+  // The key that triggers directLink; null means the default of Space or
+  // ArrowRight (see directLinkKeysFor in src/util/keyBindings.js).
+  directLinkKey: {
+    type: String,
+    default: null,
+  },
   background: {
     type: backgroundSchema,
     default: null,

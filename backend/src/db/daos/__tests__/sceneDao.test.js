@@ -22,6 +22,8 @@ describe("Scene DAO patchScene tests", () => {
   useMongoMemoryServer();
 
   const sceneId = new mongoose.Types.ObjectId("000000000000000000000001");
+  const otherSceneId = new mongoose.Types.ObjectId("0000000000000000000000a2");
+  const scenarioId = new mongoose.Types.ObjectId("000000000000000000000099");
 
   const baseScene = {
     _id: sceneId,
@@ -49,6 +51,17 @@ describe("Scene DAO patchScene tests", () => {
 
   beforeEach(async () => {
     await Scene.create(baseScene);
+    await Scene.create({
+      _id: otherSceneId,
+      name: "Other Scene",
+      components: [],
+    });
+    await Scenario.create({
+      _id: scenarioId,
+      name: "Test Scenario",
+      uid: "test-uid",
+      scenes: [sceneId, otherSceneId],
+    });
   });
 
   it("updates multiple changed components in one patch", async () => {
@@ -165,6 +178,7 @@ describe("Scene DAO patchScene tests", () => {
         name: "Updated Scene Name",
         roles: ["patient"],
         time: 120,
+        directLinkKey: "W",
       },
       components: [],
       deletedComponentIds: [],
@@ -175,7 +189,133 @@ describe("Scene DAO patchScene tests", () => {
     expect(updatedScene.name).toBe("Updated Scene Name");
     expect(updatedScene.roles).toEqual(["patient"]);
     expect(updatedScene.time).toBe(120);
+    expect(updatedScene.directLinkKey).toBe("W");
     expect(updatedScene.components).toHaveLength(3);
+  });
+
+  it("rejects a patch where the same component id appears twice", async () => {
+    await expect(
+      patchScene(sceneId, {
+        fields: {},
+        components: [
+          {
+            id: "component-a",
+            type: "box",
+            bounds: { verts: [{ x: 1, y: 1 }] },
+          },
+          {
+            id: "component-a",
+            type: "box",
+            bounds: { verts: [{ x: 2, y: 2 }] },
+          },
+        ],
+        deletedComponentIds: [],
+      })
+    ).rejects.toThrow(/appear more than once/);
+
+    const scene = await Scene.findById(sceneId);
+    expect(
+      scene.components.find((c) => c.id === "component-a").bounds.verts[0]
+    ).toEqual({ x: 0, y: 0 });
+  });
+
+  it("rejects a patch where two clickable components claim the same key", async () => {
+    await expect(
+      patchScene(sceneId, {
+        fields: {},
+        components: [
+          { id: "component-a", type: "box", clickable: true, keyBinding: "Q" },
+          { id: "component-b", type: "box", clickable: true, keyBinding: "Q" },
+        ],
+        deletedComponentIds: [],
+      })
+    ).rejects.toThrow(/claimed by more than one component/);
+
+    const scene = await Scene.findById(sceneId);
+    expect(
+      scene.components.find((c) => c.id === "component-a").keyBinding
+    ).toBeUndefined();
+  });
+
+  it("rejects a component key binding that collides with the direct link's default keys", async () => {
+    await expect(
+      patchScene(
+        sceneId,
+        {
+          fields: { directLink: otherSceneId },
+          components: [
+            {
+              id: "component-a",
+              type: "box",
+              clickable: true,
+              keyBinding: "SPACE",
+            },
+          ],
+          deletedComponentIds: [],
+        },
+        scenarioId
+      )
+    ).rejects.toThrow(/direct link/);
+  });
+
+  it("rejects a colliding key binding against a direct link already saved on the scene", async () => {
+    await patchScene(
+      sceneId,
+      {
+        fields: { directLink: otherSceneId },
+        components: [],
+        deletedComponentIds: [],
+      },
+      scenarioId
+    );
+
+    await expect(
+      patchScene(
+        sceneId,
+        {
+          fields: {},
+          components: [
+            {
+              id: "component-a",
+              type: "box",
+              clickable: true,
+              keyBinding: "ARROWRIGHT",
+            },
+          ],
+          deletedComponentIds: [],
+        },
+        scenarioId
+      )
+    ).rejects.toThrow(/direct link/);
+  });
+
+  it("allows a component to keep its own key binding across an unrelated patch", async () => {
+    await patchScene(sceneId, {
+      fields: {},
+      components: [
+        { id: "component-a", type: "box", clickable: true, keyBinding: "Q" },
+      ],
+      deletedComponentIds: [],
+    });
+
+    await patchScene(sceneId, {
+      fields: {},
+      components: [
+        {
+          id: "component-a",
+          type: "box",
+          clickable: true,
+          keyBinding: "Q",
+          bounds: { verts: [{ x: 1, y: 1 }] },
+        },
+      ],
+      deletedComponentIds: [],
+    });
+
+    const updatedScene = await Scene.findById(sceneId);
+    expect(
+      updatedScene.components.find((c) => c.id === "component-a").keyBinding
+    ).toBe("Q");
   });
 
   it("rejects direct links that reference a scene outside the current scenario", async () => {
@@ -499,8 +639,8 @@ describe("Scene DAO patchScene tests", () => {
       },
     });
 
-    let updatedScene = await Scene.findById(sceneId).lean();
-    expect(updatedScene.background).toMatchObject({
+    let updatedBackgroundScene = await Scene.findById(sceneId).lean();
+    expect(updatedBackgroundScene.background).toMatchObject({
       kind: "image",
       fileId: firstFile._id,
       href: firstFile.url,
@@ -526,8 +666,8 @@ describe("Scene DAO patchScene tests", () => {
       fields: { background: { kind: "color", color: "#1769aaff" } },
     });
 
-    updatedScene = await Scene.findById(sceneId).lean();
-    expect(updatedScene.background).toMatchObject({
+    updatedBackgroundScene = await Scene.findById(sceneId).lean();
+    expect(updatedBackgroundScene.background).toMatchObject({
       kind: "color",
       color: "#1769aaff",
     });
@@ -565,5 +705,98 @@ describe("Scene DAO patchScene tests", () => {
     }
 
     expect((await Scene.findById(sceneId).lean()).background).toBeNull();
+  });
+});
+
+describe("Scene DAO deleteScene tests", () => {
+  useMongoMemoryServer();
+
+  const sceneAId = new mongoose.Types.ObjectId("000000000000000000000011");
+  const sceneBId = new mongoose.Types.ObjectId("000000000000000000000012");
+  const sceneCId = new mongoose.Types.ObjectId("000000000000000000000013");
+  const scenarioId = new mongoose.Types.ObjectId("000000000000000000000098");
+
+  beforeEach(async () => {
+    await Scene.create({
+      _id: sceneAId,
+      name: "Scene A",
+      components: [
+        {
+          id: "link-only",
+          type: "box",
+          clickable: true,
+          nextScene: sceneBId.toString(),
+          keyBinding: "Q",
+          showKeyHint: true,
+        },
+        {
+          id: "link-and-state",
+          type: "box",
+          clickable: true,
+          nextScene: sceneBId.toString(),
+          keyBinding: "W",
+          stateOperations: [{ type: "SET_FLAG", flag: "visited" }],
+        },
+        {
+          id: "unrelated",
+          type: "box",
+          clickable: true,
+          nextScene: sceneCId.toString(),
+          keyBinding: "E",
+        },
+      ],
+    });
+    await Scene.create({ _id: sceneBId, name: "Scene B", components: [] });
+    await Scene.create({ _id: sceneCId, name: "Scene C", components: [] });
+    await Scenario.create({
+      _id: scenarioId,
+      name: "Test Scenario",
+      uid: "test-uid",
+      scenes: [sceneAId, sceneBId, sceneCId],
+    });
+  });
+
+  it("clears nextScene and the key binding for a component with no other action, when the linked scene is deleted", async () => {
+    await deleteScene(scenarioId, sceneBId);
+
+    const sceneA = await Scene.findById(sceneAId);
+    const component = sceneA.components.find((c) => c.id === "link-only");
+
+    expect(component.nextScene).toBeNull();
+    expect(component.keyBinding).toBeNull();
+    expect(component.showKeyHint).toBe(false);
+  });
+
+  it("clears nextScene but keeps the key binding for a component that still has state operations", async () => {
+    await deleteScene(scenarioId, sceneBId);
+
+    const sceneA = await Scene.findById(sceneAId);
+    const component = sceneA.components.find((c) => c.id === "link-and-state");
+
+    expect(component.nextScene).toBeNull();
+    expect(component.keyBinding).toBe("W");
+  });
+
+  it("leaves components linked to a different, still-existing scene untouched", async () => {
+    await deleteScene(scenarioId, sceneBId);
+
+    const sceneA = await Scene.findById(sceneAId);
+    const component = sceneA.components.find((c) => c.id === "unrelated");
+
+    expect(component.nextScene).toBe(sceneCId.toString());
+    expect(component.keyBinding).toBe("E");
+  });
+
+  it("clears the direct link and its key on scenes that direct-linked to the deleted scene", async () => {
+    await Scene.updateOne(
+      { _id: sceneCId },
+      { $set: { directLink: sceneBId, directLinkKey: "R" } }
+    );
+
+    await deleteScene(scenarioId, sceneBId);
+
+    const sceneC = await Scene.findById(sceneCId);
+    expect(sceneC.directLink).toBeNull();
+    expect(sceneC.directLinkKey).toBeNull();
   });
 });

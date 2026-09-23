@@ -27,6 +27,7 @@ const getConnectedScenes = async (sceneID, active = true) => {
     {
       components: 1,
       directLink: 1,
+      directLinkKey: 1,
       roles: 1,
       time: 1,
       timerStateOperations: 1,

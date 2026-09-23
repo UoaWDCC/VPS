@@ -9,6 +9,7 @@ import { usePost } from "hooks/crudHooks";
 import LoadingPage from "../status/LoadingPage";
 import PlayScenarioCanvas from "./PlayScenarioCanvas";
 import { applyPropertyOperations } from "../../components/Properties/propertyOperations";
+import { resolveSceneBindings } from "../../components/Properties/componentBindings";
 import NotesPanel from "./components/NotesPanel";
 import SceneTimer from "./components/SceneTimer";
 import StartAudioPanel from "./components/StartAudioPanel";
@@ -19,6 +20,11 @@ import {
   VolumeOffIcon,
 } from "lucide-react";
 import ResourcesPanel from "../resources/ResourcesOverlay";
+import {
+  normalizeEventKey,
+  directLinkKeysFor,
+  hasClickAction,
+} from "../authoring/keyBindings";
 
 const sceneCache = new Map();
 
@@ -275,7 +281,7 @@ export default function PlayScenarioPage({ group }) {
 
   useEffect(() => {
     const onKeyDown = async (e) => {
-      if (e.repeat || !sceneId || !currScene?.directLink) return;
+      if (e.repeat || !sceneId) return;
 
       const tag = document.activeElement?.tagName;
       const isTyping =
@@ -285,7 +291,25 @@ export default function PlayScenarioPage({ group }) {
 
       if (isTyping) return;
 
-      if (e.code === "Space" || e.key === "ArrowRight") {
+      const boundKey = normalizeEventKey(e);
+      if (!boundKey) return;
+
+      // Resolve property bindings first, same as PlayScenarioCanvas, so a
+      // component whose Clickable is bound off can't be triggered by key.
+      const component = Object.values(
+        resolveSceneBindings(currScene, properties)?.components ?? {}
+      ).find((c) => c.keyBinding === boundKey && hasClickAction(c));
+      if (component) {
+        e.preventDefault();
+        buttonPressed(component);
+        return;
+      }
+
+      const isDirectLinkMatch =
+        currScene?.directLink &&
+        directLinkKeysFor(currScene.directLinkKey).includes(boundKey);
+
+      if (isDirectLinkMatch) {
         e.preventDefault();
         const currentRequestId = ++requestIdRef.current; // Track keydown navigation request ID
         try {
