@@ -23,8 +23,14 @@ function ActionRow({
 }: ActionRowProps) {
   const isDraft = actionRef.id === "";
 
-  const { attributes, listeners, setNodeRef, transform, transition, isDragging } =
-    useSortable({ id: actionRef.id || "draft", disabled: isDraft });
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: actionRef.id || "draft", disabled: isDraft });
 
   const style = {
     transform: CSS.Transform.toString(transform),
@@ -43,7 +49,9 @@ function ActionRow({
           {...attributes}
           {...listeners}
         >
-          <span className={`text-xs ${isDragging ? "hidden" : "group-hover:hidden"}`}>
+          <span
+            className={`text-xs ${isDragging ? "hidden" : "group-hover:hidden"}`}
+          >
             {index + 1}
           </span>
           <GripVerticalIcon
