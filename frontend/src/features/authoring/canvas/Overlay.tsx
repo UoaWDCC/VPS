@@ -55,7 +55,10 @@ function Overlay() {
 
   const isMarqueeing =
     mode.includes("marquee") && hasMarqueeMoved(mutationBounds);
-  const hasSelection = selected.length > 0 && !isMarqueeing;
+  const hasSelection =
+    selected.length > 0 &&
+    selected.every((id) => components[id]) &&
+    !isMarqueeing;
   const type = hasSelection
     ? selected.length > 1
       ? "box"
