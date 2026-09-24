@@ -3,6 +3,8 @@ import { after, test } from "node:test";
 import { createServer } from "vite";
 import React from "react";
 import { renderToString } from "react-dom/server.js";
+// Initialize React's scheduler in Node before installing the scene's window stub.
+import "react-dom";
 
 // The scene model exposes a debug window reference; text layout creates a canvas.
 globalThis.window = {};
@@ -23,9 +25,8 @@ const { default: RotationHandle } = await load(
   "canvas/handles/RotationHandle.tsx"
 );
 const { setScene, getScene } = await load("scene/scene.ts");
-const { remove, replaceComponent } = await load(
-  "scene/operations/modifiers.ts"
-);
+const { remove } = await load("scene/operations/modifiers.ts");
+const { createHistoryListener } = await load("scene/historyListener.js");
 const { clearHistory, historyEvents, undo, redo } =
   await load("scene/history.ts");
 
@@ -87,17 +88,16 @@ test("multi-object deletion survives repeated undo/redo with intact snapshots", 
   remove(selected);
   assert.deepEqual(Object.keys(getScene().components), ["line"]);
 
-  const apply = ({ operation, record }) => {
-    if (operation === "do") return;
-    editor.getState().setSelected([]);
-    const restored = [];
-    for (const item of record) {
-      const state = operation === "undo" ? item.before : item.after;
-      replaceComponent(item.id, state);
-      if (state) restored.push(item.id);
-    }
-    editor.getState().setSelected(restored);
-  };
+  let savesScheduled = 0;
+  const savingStates = [];
+  const apply = createHistoryListener({
+    sceneId: "scene",
+    switchScene: () =>
+      assert.fail("Undo within the active scene must not switch scenes"),
+    properties: [],
+    setSaving: (saving) => savingStates.push(saving),
+    debounced: () => savesScheduled++,
+  });
   historyEvents.addEventListener("update", apply);
   try {
     for (let cycle = 0; cycle < 3; cycle++) {
@@ -110,6 +110,8 @@ test("multi-object deletion survives repeated undo/redo with intact snapshots", 
       assert.deepEqual(Object.keys(getScene().components), ["line"]);
       assert.deepEqual(editor.getState().selected, []);
     }
+    assert.equal(savesScheduled, 6);
+    assert.deepEqual(savingStates, Array(6).fill(true));
   } finally {
     historyEvents.removeEventListener("update", apply);
   }
