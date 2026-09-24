@@ -37,7 +37,9 @@ const ActionsInput = forwardRef<ActionsInputHandle, ActionsInputProps>(
   function ActionsInput({ items, onDelete, onReorder }, ref) {
     const actions = useVisualScene((s) => s.actions);
     const [hasDraft, setHasDraft] = useState(false);
-    const [activeIdDragging, setActiveIdDragging] = useState<string | null>(null);
+    const [activeIdDragging, setActiveIdDragging] = useState<string | null>(
+      null
+    );
 
     const sorted = [...items].sort((a, b) => a.index - b.index);
     const rows = hasDraft
@@ -69,8 +71,12 @@ const ActionsInput = forwardRef<ActionsInputHandle, ActionsInputProps>(
       const { active, over } = e;
       if (!over || active.id === over.id) return;
 
-      const oldIndex = sorted.findIndex((actionRef) => actionRef.id === active.id);
-      const newIndex = sorted.findIndex((actionRef) => actionRef.id === over.id);
+      const oldIndex = sorted.findIndex(
+        (actionRef) => actionRef.id === active.id
+      );
+      const newIndex = sorted.findIndex(
+        (actionRef) => actionRef.id === over.id
+      );
 
       if (oldIndex === -1 || newIndex === -1) return;
 

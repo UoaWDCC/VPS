@@ -1,83 +1,111 @@
 import SceneContext from "../../context/SceneContext";
-import SelectInput from "../../features/authoring/components/Select";
-import { modifyComponentProp } from "../../features/authoring/scene/operations/component";
-import CreatePropertyOperation from "./CreatePropertyOperation";
-import EditPropertyOperation from "./EditPropertyOperation";
-import { PlusIcon } from "lucide-react";
-import { useContext, useEffect, useState } from "react";
+import PanelInput from "../../features/authoring/CanvasSideBar/PanelInput";
+import SceneSelectInput from "../../features/authoring/components/SceneSelectInput";
+import {
+  ChevronDownIcon,
+  ChevronUpIcon,
+  GripVerticalIcon,
+  PlusIcon,
+  XIcon,
+} from "lucide-react";
+import { useContext, useState } from "react";
 
 /*
  * The content of the "Property Operations" panel (methods for creating and editing)
  *
  * @component
  */
-const PropertyOperationMenu = ({ component }) => {
-  const [createOpen, setCreateOpen] = useState(false);
-
-  const propertyOperations = component?.stateOperations ?? [];
-  const hasPropertyOperations = propertyOperations.length > 0;
-
+function PropertyOperationMenu() {
+  // const actions = useVisualScene((s) => s.actions);
   const { scenes } = useContext(SceneContext);
 
-  const [value, setValue] = useState(component?.nextScene);
+  const actions = [{ name: "yolatunde", id: "1232" }];
 
-  useEffect(() => {
-    if (component?.nextScene !== value) setValue(component?.nextScene);
-  }, [component]);
+  const [expandedActions, setExpandedActions] = useState([]);
 
-  function saveLink(v) {
-    if (!component) return;
-    setValue(v);
-    modifyComponentProp([component.id], "nextScene", v);
+  function toggleExpansion(id) {
+    setExpandedActions((prev) =>
+      prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id]
+    );
   }
 
-  function createNew() {
-    setCreateOpen(true);
+  function isExpanded(id) {
+    return expandedActions.includes(id);
   }
 
   return (
     <>
-      <fieldset className="fieldset pt-2">
-        <label className="label">Linked Scene</label>
-        <SelectInput
-          nullable
-          values={scenes?.map((s) => s._id) ?? []}
-          value={value}
-          onChange={saveLink}
-          display={(v) => scenes.find((s) => s._id === v)?.name}
-        />
-      </fieldset>
-      <div className="mb-3">
-        <button
-          type="button"
-          className="flex w-full items-center gap-2 rounded-sm border-0 bg-base-300 px-3 py-2 text-left text-sm shadow-none transition-colors hover:bg-base-100"
-          onClick={createNew}
-        >
-          <PlusIcon size={16} />
-          Add Operation
-        </button>
-      </div>
-      {hasPropertyOperations ? (
-        <div className="text--1">
-          {propertyOperations.map((operation, i) => (
-            <EditPropertyOperation
-              component={component}
-              operationIndex={i}
-              propertyOperation={operation}
-              key={i}
-            />
-          ))}
-        </div>
-      ) : (
-        <p className="text-xs opacity-70">No property operations yet.</p>
-      )}
-      <CreatePropertyOperation
-        component={component}
-        open={createOpen}
-        setOpen={setCreateOpen}
-      />
+      <button
+        type="button"
+        className="btn px-1.5 py-1/2 bg-base-300 hover:bg-base-100 border-0 shadow-none text-xs h-7 w-full justify-start"
+      >
+        <PlusIcon size={18} />
+        Create New Action
+      </button>
+      <ul className="mt-3">
+        {actions.map((action) => (
+          <li key={action.id} className="-mx-5 group flex flex-col gap-2">
+            <div className="flex gap-2 items-center px-5">
+              <div className="w-6 h-6 flex items-center justify-center">
+                <GripVerticalIcon size={14} />
+              </div>
+              <input
+                type="text"
+                value={action.name}
+                onChange={console.log}
+                onBlur={console.log}
+                className="input"
+                placeholder="Awesome Action"
+              />
+              <button
+                className="btn btn-phantom btn-square btn-xs"
+                onClick={console.log}
+              >
+                <XIcon size={20} />
+              </button>
+              <button
+                className="btn btn-phantom btn-square btn-xs"
+                onClick={() => toggleExpansion(action.id)}
+              >
+                {isExpanded(action.id) ? (
+                  <ChevronDownIcon size={20} />
+                ) : (
+                  <ChevronUpIcon size={20} />
+                )}
+              </button>
+            </div>
+            {isExpanded(action.id) ? (
+              <div className="px-5 pl-11">
+                <div className="h-100">
+                  <PanelInput label="Linked Scene">
+                    <SceneSelectInput
+                      scenes={scenes}
+                      value={null}
+                      onChange={console.log}
+                    />
+                  </PanelInput>
+                  <PanelInput label="Conditions">
+                    <SceneSelectInput
+                      scenes={scenes}
+                      value={null}
+                      onChange={console.log}
+                    />
+                  </PanelInput>
+                  <PanelInput label="Operations">
+                    <SceneSelectInput
+                      scenes={scenes}
+                      value={null}
+                      onChange={console.log}
+                    />
+                  </PanelInput>
+                </div>
+              </div>
+            ) : null}
+          </li>
+        ))}
+      </ul>
     </>
   );
-};
+}
 
 export default PropertyOperationMenu;
