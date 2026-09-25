@@ -1,8 +1,11 @@
 import { useState } from "react";
+import { useHistory, useParams } from "react-router-dom";
 import {
   BringToFront,
+  FilesIcon,
   Redo2Icon,
   SendToBack,
+  SlidersHorizontalIcon,
   Type,
   Undo2Icon,
 } from "lucide-react";
@@ -16,6 +19,7 @@ import ImageCreateMenu from "../ImageCreateMenu";
 import ShapeCreateMenu from "./ShapeCreateMenu";
 import type { Component } from "../types";
 import BackgroundMenu from "../CanvasSideBar/BackgroundMenu";
+import PropertyMenu from "../../../components/Properties/PropertyMenu";
 
 import "./topbar.css";
 
@@ -37,6 +41,9 @@ function Topbar({ saving, save }: { saving: boolean; save: () => void }) {
   const setCreateType = useEditorStore((state) => state.setCreateType);
 
   const [showBackgroundMenu, setShowBackgroundMenu] = useState(false);
+  const [showPropertyMenu, setShowPropertyMenu] = useState(false);
+  const { scenarioId } = useParams<{ scenarioId: string }>();
+  const history = useHistory();
 
   const switchCreate = (type: string) => {
     setMode(["create"]);
@@ -63,6 +70,7 @@ function Topbar({ saving, save }: { saving: boolean; save: () => void }) {
         show={showBackgroundMenu}
         setShow={setShowBackgroundMenu}
       />
+      <PropertyMenu show={showPropertyMenu} setShow={setShowPropertyMenu} />
       <ul className="topbar gap-0.5 menu menu-horizontal w-full bg-base-300 rounded-box p-1">
         <li className="tooltip tooltip-bottom" data-tip="Undo">
           <button type="button" aria-label="Undo" onClick={() => undo()}>
@@ -133,7 +141,26 @@ function Topbar({ saving, save }: { saving: boolean; save: () => void }) {
             </li>
           </>
         )}
-        <li className={`ml-auto text-xs ${saving && "menu-disabled"}`}>
+        {/* scenario-wide controls, anchored right so they don't shift with the selection */}
+        <li className="ml-auto text-xs">
+          <button type="button" onClick={() => setShowPropertyMenu(true)}>
+            <SlidersHorizontalIcon size={16} />
+            Properties
+          </button>
+        </li>
+        <li className="text-xs">
+          <button
+            type="button"
+            onClick={() =>
+              history.push(`/scenario/${scenarioId}/manage-resources`)
+            }
+          >
+            <FilesIcon size={16} />
+            Player Documents
+          </button>
+        </li>
+        <div className="divider divider-horizontal" />
+        <li className={`text-xs ${saving && "menu-disabled"}`}>
           <a onClick={save}>{saving ? "Saving" : "Save"}</a>
         </li>
       </ul>
