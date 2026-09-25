@@ -61,7 +61,7 @@ function ListInput<T extends ListItem>(
 
   return (
     <div className="dropdown flex-1">
-      <ul>
+      <ul className="flex flex-col gap-1">
         {rows.map((item) => (
           <Row
             key={item.id || "draft"}

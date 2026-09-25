@@ -10,10 +10,11 @@ import {
   XIcon,
 } from "lucide-react";
 import { useContext, useRef, useState } from "react";
-import useEditorStore from "../../features/authoring/stores/editor";
 import ListInput from "../../features/authoring/components/ListInput";
 import OperationRow from "../../features/authoring/components/OperationRow";
 import { v4 } from "uuid";
+import { modifySceneProp } from "../../features/authoring/scene/operations/modifiers";
+import useVisualScene from "../../features/authoring/stores/visual";
 
 /*
  * The content of the "Property Operations" panel (methods for creating and editing)
@@ -21,19 +22,11 @@ import { v4 } from "uuid";
  * @component
  */
 function PropertyOperationMenu() {
-  // const actions = useVisualScene((s) => s.actions);
+  const actions = useVisualScene((s) => s.actions);
   const { scenes } = useContext(SceneContext);
-  const properties = useEditorStore(s => s.properties);
 
   const conditionsInputRef = useRef(null);
   const operationsInputRef = useRef(null);
-
-  console.log(properties);
-
-  const [actions, setActions] = useState([{ name: "yolatunde", id: "1232" }])
-
-  const [conditions, setConditions] = useState([{ comparator: "!=", value: 5, stateVariableId: "6e708c29-d808-462d-a702-2e8abb485630", id: "1232" }]);
-  const [operations, setOperations] = useState([{ operation: "add", value: 5, stateVariableId: "6e708c29-d808-462d-a702-2e8abb485630", id: "1232" }]);
 
   const [expandedActions, setExpandedActions] = useState([]);
 
@@ -48,7 +41,17 @@ function PropertyOperationMenu() {
   }
 
   function handleCreate() {
-    setActions(prev => [...prev, { id: v4(), name: "New Action" }])
+    modifySceneProp("actions", [...actions, { id: v4(), name: "New Action" }])
+  }
+
+  function handleDelete(id) {
+    modifySceneProp("actions", actions.filter(a => a.id !== id))
+  }
+
+  function handleChange(id, field) {
+    return function(value) {
+      modifySceneProp("actions", actions.map(a => a.id === id ? { ...a, [field]: value } : a))
+    }
   }
 
   return (
@@ -71,13 +74,13 @@ function PropertyOperationMenu() {
               <input
                 type="text"
                 value={action.name}
-                onChange={console.log}
+                onChange={(e) => handleChange(action.id, "name")(e.target.value)}
                 className="input"
                 placeholder="Awesome Action"
               />
               <button
                 className="btn btn-phantom btn-square btn-xs"
-                onClick={console.log}
+                onClick={() => handleDelete(action.id)}
               >
                 <XIcon size={20} />
               </button>
@@ -94,19 +97,19 @@ function PropertyOperationMenu() {
             </div>
             {isExpanded(action.id) ? (
               <div className="px-5 pl-11">
-                <div className="flex flex-col gap-2">
+                <div className="flex flex-col gap-2"  >
                   <PanelInput label="Linked Scene">
                     <SceneSelectInput
                       scenes={scenes}
-                      value={null}
-                      onChange={console.log}
+                      value={action.linkedScene}
+                      onChange={handleChange(action.id, "linkedScene")}
                     />
                   </PanelInput>
                   <PanelInput label="Conditions" onAdd={() => conditionsInputRef.current?.addItem()}>
                     <ListInput
                       ref={conditionsInputRef}
-                      items={conditions}
-                      onChange={setConditions}
+                      items={action.conditions ?? []}
+                      onChange={handleChange(action.id, "conditions")}
                       Row={ConditionRow}
                       requiredField="stateVariableId"
                     />
@@ -114,8 +117,8 @@ function PropertyOperationMenu() {
                   <PanelInput label="Operations" onAdd={() => operationsInputRef.current?.addItem()}>
                     <ListInput
                       ref={operationsInputRef}
-                      items={operations}
-                      onChange={setOperations}
+                      items={action.operations ?? []}
+                      onChange={handleChange(action.id, "operations")}
                       Row={OperationRow}
                       requiredField="stateVariableId"
                     />
