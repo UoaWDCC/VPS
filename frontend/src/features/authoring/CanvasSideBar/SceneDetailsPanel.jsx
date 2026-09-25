@@ -91,8 +91,11 @@ function SceneDetailsPanel() {
   }
 
   function changeRole(role, value) {
-    if (value) setSelectedRoles((prev) => [...prev, role]);
-    else setSelectedRoles((prev) => prev.filter((r) => r !== role));
+    const next = value
+      ? [...selectedRoles, role]
+      : selectedRoles.filter((r) => r !== role);
+    setSelectedRoles(next);
+    modifySceneProp("roles", next);
   }
 
   function saveDefaultActionRefs(updated) {
