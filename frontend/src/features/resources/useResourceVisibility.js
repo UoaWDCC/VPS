@@ -9,7 +9,7 @@ import { collectVisibleFileIds, getUnseenIds } from "./seen";
 export function useResourceVisibility(properties, enabled) {
   const { resourcesQuery } = useResources();
   const { seenIds, isLoaded, markSeen } = useSeenResources();
-  const lastVisibleKey = useRef(null);
+  const prevVisibleIds = useRef(new Set());
   const ready = enabled && isLoaded && resourcesQuery.isSuccess;
 
   const filteredTree = useMemo(
@@ -28,20 +28,20 @@ export function useResourceVisibility(properties, enabled) {
     () => (ready ? getUnseenIds(visibleIds, seenIds) : []),
     [ready, visibleIds, seenIds]
   );
-  const visibleKey = [...visibleIds].sort().join(",");
 
-  // only toast when visible resources set changes
+  // toast for unseen resources not visible last run
   useEffect(() => {
-    if (!ready || lastVisibleKey.current === visibleKey) return;
-    lastVisibleKey.current = visibleKey;
+    if (!ready) return;
+    const prevVisible = prevVisibleIds.current;
+    prevVisibleIds.current = new Set(visibleIds);
 
-    const count = unseenIds.length;
+    const count = unseenIds.filter((id) => !prevVisible.has(id)).length;
     if (count > 0) {
       toast(
         `You have ${count} new resource${count === 1 ? "" : "s"} available`
       );
     }
-  }, [ready, visibleKey]);
+  }, [ready, visibleIds, unseenIds]);
 
   return { filteredTree, unseenIds, markSeen, resourcesQuery };
 }
