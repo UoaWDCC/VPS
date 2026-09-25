@@ -31,7 +31,22 @@ export function useSeenResources() {
 
   const { mutate } = useMutation({
     mutationFn: (operation) => updateSeenResources(user, scenarioId, operation),
-    onError: handleGeneric,
+    onMutate: async ({ add, remove }) => {
+      await queryClient.cancelQueries(queryKey);
+      const previous = queryClient.getQueryData(queryKey);
+      queryClient.setQueryData(queryKey, (prev = []) =>
+        add
+          ? [...new Set([...prev, ...add])]
+          : prev.filter((id) => !remove.includes(id))
+      );
+      return { previous };
+    },
+    onError: (e, _, context) => {
+      if (context?.previous) {
+        queryClient.setQueryData(queryKey, context.previous);
+      }
+      handleGeneric(e);
+    },
     onSettled: () => queryClient.invalidateQueries(queryKey),
   });
 
