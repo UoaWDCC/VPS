@@ -210,8 +210,7 @@ describe("Scene API tests", () => {
       fields: {
         name: "Test Scene 1 updated name",
       },
-      components: [],
-      deletedComponentIds: [],
+      components: { upserted: [], deleted: [] },
     };
 
     const response = await axios.patch(

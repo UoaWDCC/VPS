@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import { actionSchema } from "./actionSchema.js";
 
 const { Schema } = mongoose;
 
@@ -59,11 +60,7 @@ const sceneSchema = new Schema({
     type: String,
     required: true,
   },
-  components: [
-    {
-      type: Object,
-    },
-  ],
+  components: [{ type: Object }],
   // Seconds for the scene timer; absent/null means no timer. The authoring
   // tool never stores 0 (it normalises non-positive input to null), so this
   // enforces the same invariant the rest of the app already assumes.
@@ -71,25 +68,27 @@ const sceneSchema = new Schema({
     type: Number,
     min: 1,
   },
-  timerStateOperations: [
-    {
-      type: Object,
-    },
-  ],
   visited: {
     type: Number,
     default: 0,
   },
-  roles: [
+  roles: [{ type: String }],
+  actions: {
+    type: [actionSchema],
+    default: [],
+  },
+  defaultActionRefs: [
     {
-      type: String,
+      index: Number,
+      id: String,
     },
   ],
-  directLink: {
-    type: Schema.Types.ObjectId,
-    ref: "Scene",
-    default: null,
-  },
+  timerActionRefs: [
+    {
+      index: Number,
+      id: String,
+    },
+  ],
   background: {
     type: backgroundSchema,
     default: null,

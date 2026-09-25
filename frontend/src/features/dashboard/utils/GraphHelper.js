@@ -42,14 +42,43 @@ const CreateGraphData = (scenes, groupInfo) => {
       });
     });
 
-    // Loop through each component of a scene and check for the "nextScene" property and add it to edge graph
-    scenes.forEach((scene) =>
-      scene.components.forEach((obj) => {
-        if (obj.nextScene) {
+    // Loop through every path a scene can navigate from — clickable
+    // components' actions, plus its default (keyboard-advance) and timer
+    // actions — and add an edge to each resolved action's linkedScene.
+    // Mirrors the backend's getLinkedSceneIds (backend/src/util/actions/actionRunner.js).
+    const seenEdgeIds = new Set();
+    scenes.forEach((scene) => {
+      const actionsById = new Map(
+        (scene.actions ?? []).map((action) => [action.id, action])
+      );
+      const resolveActions = (actionIds) =>
+        (actionIds ?? []).map((id) => actionsById.get(id)).filter(Boolean);
+      const orderedActionIds = (refs) => (refs ?? []).map((ref) => ref.id);
+
+      const actionLists = [
+        ...scene.components
+          .filter((c) => c.clickable)
+          .map((c) => orderedActionIds(c.actionRefs)),
+        orderedActionIds(scene.defaultActionRefs),
+        orderedActionIds(scene.timerActionRefs),
+      ];
+
+      actionLists
+        .flatMap((actionIds) => resolveActions(actionIds))
+        .forEach((action) => {
+          if (!action.linkedScene) return;
+          // multiple actions in the same scene (different clickable
+          // components, default, timer) can resolve to the same
+          // linkedScene — collapse those into a single edge so react-flow
+          // doesn't receive duplicate edge ids
+          const edgeId = scene.name + "-" + sceneMap[action.linkedScene].name;
+          if (seenEdgeIds.has(edgeId)) return;
+          seenEdgeIds.add(edgeId);
+
           edges.push({
-            id: scene.name + "-" + sceneMap[obj.nextScene].name,
+            id: edgeId,
             source: scene._id,
-            target: obj.nextScene,
+            target: action.linkedScene,
             type: "simpleFloating",
             markerEnd: {
               ...markerEnd,
@@ -61,9 +90,8 @@ const CreateGraphData = (scenes, groupInfo) => {
             },
             animated: true,
           });
-        }
-      })
-    );
+        });
+    });
 
     /**
      * Loop through group path to create the links of the students path
