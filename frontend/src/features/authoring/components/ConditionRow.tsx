@@ -2,7 +2,11 @@ import { XIcon } from "lucide-react";
 import useEditorStore from "../stores/editor";
 import type { Comparator, Condition } from "../types";
 import SelectInput from "./Select";
-import { getDefaultValue, propertyTypes, validComparators } from "../../../components/Properties/propertyTypes";
+import {
+  getDefaultValue,
+  propertyTypes,
+  validComparators,
+} from "../../../components/Properties/propertyTypes";
 
 interface ConditionRowType {
   item: Condition;
@@ -11,23 +15,37 @@ interface ConditionRowType {
   onDelete: () => void;
 }
 
-function ConditionRow({ item: condition, onChange, onDelete, onBlur }: ConditionRowType) {
+function ConditionRow({
+  item: condition,
+  onChange,
+  onDelete,
+  onBlur,
+}: ConditionRowType) {
   const isDraft = condition.id === "";
 
-  const properties = useEditorStore(s => s.properties);
+  const properties = useEditorStore((s) => s.properties);
 
-  const activeProperty = isDraft ? null : properties.find(p => p.id === condition.stateVariableId)!;
-  const comparators = activeProperty ? validComparators[activeProperty.type] as Comparator[] : [];
+  const activeProperty = isDraft
+    ? null
+    : properties.find((p) => p.id === condition.stateVariableId)!;
+  const comparators = activeProperty
+    ? (validComparators[activeProperty.type] as Comparator[])
+    : [];
 
   function onFieldChange<T extends keyof Condition>(field: T) {
-    return function(value: Condition[T]) {
+    return function (value: Condition[T]) {
       if (isDraft) {
-        const property = properties.find(p => p.id === value)!;
-        onChange({ ...condition, stateVariableId: value as string, comparator: "=", value: getDefaultValue(property.type) });
+        const property = properties.find((p) => p.id === value)!;
+        onChange({
+          ...condition,
+          stateVariableId: value as string,
+          comparator: "=",
+          value: getDefaultValue(property.type),
+        });
         return;
       }
       onChange({ ...condition, [field]: value });
-    }
+    };
   }
 
   return (
@@ -48,21 +66,22 @@ function ConditionRow({ item: condition, onChange, onDelete, onBlur }: Condition
             value={condition.comparator ?? null}
             onChange={onFieldChange("comparator")}
           />
-          {activeProperty?.type === propertyTypes.BOOLEAN
-            ? <SelectInput
+          {activeProperty?.type === propertyTypes.BOOLEAN ? (
+            <SelectInput
               disabled={!activeProperty}
               values={["true", "false"]}
               value={condition.value}
               onChange={onFieldChange("value")}
             />
-            : <input
+          ) : (
+            <input
               disabled={!activeProperty}
               type={activeProperty?.type ?? "string"}
               value={condition.value as string | number}
               onChange={(e) => onFieldChange("value")(e.target.value)}
               className="input join-item disabled:opacity-50 disabled:bg-base-100 disabled:border-base-content/20"
             />
-          }
+          )}
         </div>
         <button
           className="btn btn-phantom btn-square btn-xs"
@@ -72,7 +91,7 @@ function ConditionRow({ item: condition, onChange, onDelete, onBlur }: Condition
         </button>
       </div>
     </li>
-  )
+  );
 }
 
 export default ConditionRow;
