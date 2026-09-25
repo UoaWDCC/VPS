@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import ResourceTree from "./ResourceTree";
 import { FileTextIcon, SearchIcon, XIcon } from "lucide-react";
-import { filterTreeBySearch } from "./util";
+import { filterTreeBySearch, flattenFiles } from "./util";
 import SkeletonBody from "./ResourcesSkeleton";
 import ResourcePreview from "./ResourcePreview";
 import PanelOverlay from "../../components/PanelOverlay";
@@ -31,11 +31,9 @@ export default function ResourcesPanel({
     return () => window.removeEventListener("keydown", onKey);
   }, [open, onClose]);
 
-  const selectedResource = tree
-    .flatMap((resource) =>
-      resource.type === "collection" ? resource.children : [resource]
-    )
-    .find((resource) => resource._id === selectedResourceId);
+  const selectedResource = flattenFiles(tree).find(
+    (resource) => resource._id === selectedResourceId
+  );
   const filteredTree = filterTreeBySearch(tree, search);
 
   const selectResource = (resourceId) => {

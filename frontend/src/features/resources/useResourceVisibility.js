@@ -1,10 +1,9 @@
 import { useEffect, useMemo, useRef } from "react";
 import toast from "react-hot-toast";
 import { filterTreeByConditions } from "../../utils/propertyConditionalEvaluator";
-import { buildResourceTree } from "./util";
+import { buildResourceTree, flattenFiles } from "./util";
 import { useResources } from "./useResources";
 import { useSeenResources } from "./useSeenResources";
-import { collectVisibleFileIds, getUnseenIds } from "./seen";
 
 export function useResourceVisibility(properties, enabled) {
   const { resourcesQuery } = useResources();
@@ -21,13 +20,14 @@ export function useResourceVisibility(properties, enabled) {
     [resourcesQuery.data, properties]
   );
   const visibleIds = useMemo(
-    () => collectVisibleFileIds(filteredTree),
+    () => flattenFiles(filteredTree).map((resource) => resource._id),
     [filteredTree]
   );
-  const unseenIds = useMemo(
-    () => (ready ? getUnseenIds(visibleIds, seenIds) : []),
-    [ready, visibleIds, seenIds]
-  );
+  const unseenIds = useMemo(() => {
+    if (!ready) return [];
+    const seen = new Set(seenIds);
+    return visibleIds.filter((id) => !seen.has(id));
+  }, [ready, visibleIds, seenIds]);
 
   // toast for unseen resources not visible last run
   useEffect(() => {
