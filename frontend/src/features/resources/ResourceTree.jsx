@@ -1,5 +1,9 @@
 import React from "react";
 
+function NewBadge() {
+  return <span className="badge badge-xs badge-neutral shrink-0">New</span>;
+}
+
 export default function ResourceTree({
   tree,
   unseenIds,
@@ -19,9 +23,7 @@ export default function ResourceTree({
                   {resource.name}
                 </span>
                 {resource.children.some((child) => unseen.has(child._id)) && (
-                  <span className="badge badge-xs badge-neutral shrink-0">
-                    New
-                  </span>
+                  <NewBadge />
                 )}
               </summary>
 
@@ -41,11 +43,7 @@ export default function ResourceTree({
                         onClick={() => onSelect(child._id)}
                       >
                         <span className="truncate flex-1">{child.name}</span>
-                        {unseen.has(child._id) && (
-                          <span className="badge badge-xs badge-neutral shrink-0">
-                            New
-                          </span>
-                        )}
+                        {unseen.has(child._id) && <NewBadge />}
                       </button>
                     </div>
                   </li>
@@ -63,11 +61,7 @@ export default function ResourceTree({
                 onClick={() => onSelect(resource._id)}
               >
                 <span className="truncate flex-1">{resource.name}</span>
-                {unseen.has(resource._id) && (
-                  <span className="badge badge-xs badge-neutral shrink-0">
-                    New
-                  </span>
-                )}
+                {unseen.has(resource._id) && <NewBadge />}
               </button>
             </div>
           )}
