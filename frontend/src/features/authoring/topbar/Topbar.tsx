@@ -71,7 +71,7 @@ function Topbar({ saving, save }: { saving: boolean; save: () => void }) {
         setShow={setShowBackgroundMenu}
       />
       <PropertyMenu show={showPropertyMenu} setShow={setShowPropertyMenu} />
-      <ul className="topbar gap-0.5 menu menu-horizontal w-full bg-base-300 rounded-box p-1">
+      <ul className="topbar gap-0.5 menu menu-horizontal w-full bg-base-300 rounded-box py-1 px-3">
         <li className="tooltip tooltip-bottom" data-tip="Undo">
           <button type="button" aria-label="Undo" onClick={() => undo()}>
             <Undo2Icon size={16} />
