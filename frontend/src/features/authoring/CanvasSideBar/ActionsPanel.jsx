@@ -19,8 +19,8 @@ function ActionsPanel() {
   const actions = useVisualScene((s) => s.actions);
   const { scenes } = useContext(SceneContext);
 
-  const conditionsInputRef = useRef(null);
-  const operationsInputRef = useRef(null);
+  const conditionsInputRef = useRef({});
+  const operationsInputRef = useRef({});
 
   const [expandedActions, setExpandedActions] = useState([]);
 
@@ -35,7 +35,7 @@ function ActionsPanel() {
   }
 
   function handleCreate() {
-    modifySceneProp("actions", [...actions, { id: v4(), name: "New Action" }]);
+    modifySceneProp("actions", [...actions, { id: v4(), name: "New Action", index: actions.length }]);
   }
 
   function handleDelete(id) {
@@ -105,10 +105,10 @@ function ActionsPanel() {
                   </PanelInput>
                   <PanelInput
                     label="Conditions"
-                    onAdd={() => conditionsInputRef.current?.addItem()}
+                    onAdd={() => conditionsInputRef.current[action.id]?.addItem()}
                   >
                     <ListInput
-                      ref={conditionsInputRef}
+                      ref={e => conditionsInputRef.current[action.id] = e}
                       items={action.conditions ?? []}
                       onChange={handleChange(action.id, "conditions")}
                       Row={ConditionRow}
@@ -117,10 +117,10 @@ function ActionsPanel() {
                   </PanelInput>
                   <PanelInput
                     label="Operations"
-                    onAdd={() => operationsInputRef.current?.addItem()}
+                    onAdd={() => operationsInputRef.current[action.id]?.addItem()}
                   >
                     <ListInput
-                      ref={operationsInputRef}
+                      ref={e => operationsInputRef.current[action.id] = e}
                       items={action.operations ?? []}
                       onChange={handleChange(action.id, "operations")}
                       Row={OperationRow}

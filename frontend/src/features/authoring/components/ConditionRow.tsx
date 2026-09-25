@@ -32,8 +32,9 @@ function ConditionRow({
     ? (validComparators[activeProperty.type] as Comparator[])
     : [];
 
+  // TODO: extract this out into a form / input handling module
   function onFieldChange<T extends keyof Condition>(field: T) {
-    return function (value: Condition[T]) {
+    return function(value: Condition[T]) {
       if (isDraft) {
         const property = properties.find((p) => p.id === value)!;
         onChange({
@@ -42,6 +43,28 @@ function ConditionRow({
           comparator: "=",
           value: getDefaultValue(property.type),
         });
+        return;
+      }
+      if (field === "stateVariableId") {
+        const property = properties.find((p) => p.id === value)!;
+        if (property.type !== activeProperty!.type) {
+          onChange({
+            ...condition,
+            stateVariableId: value as string,
+            comparator: "=",
+            value: getDefaultValue(property.type),
+          });
+          return;
+        }
+      }
+      if (field === "value") {
+        let casted = value as Condition["value"];
+        if (activeProperty!.type === propertyTypes.BOOLEAN) {
+          casted = value === "true";
+        } else if (activeProperty!.type === propertyTypes.NUMBER) {
+          casted = Number(value);
+        }
+        onChange({ ...condition, value: casted });
         return;
       }
       onChange({ ...condition, [field]: value });
