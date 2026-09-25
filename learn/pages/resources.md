@@ -12,7 +12,7 @@ Player documents are persistent media that the player can access from any scene 
 
 ## Adding Player Documents
 
-To upload a document, press the **Player Documents** button above the scene list on the left of the editor, which will take you to the player documents page. From here, you can upload, delete and group documents into collections.
+To upload a document, press the **Player Documents** button on the right of the toolbar above the canvas, which will take you to the player documents page. From here, you can upload, delete and group documents into collections.
 
 To get started, you need to first create a collection by pressing the **Create** button next to the collections header. Once you've created the collection, you can press the plus button on the collection to upload the media for that document. The player can now access this document as they progress through the scenario.
 

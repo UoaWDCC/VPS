@@ -19,7 +19,7 @@ Properties are any values that you want to keep track of as the player progresse
 - A character's health
 - Some player input
 
-To create a property, press the **Properties** button above the scene list on the left of the editor. On the modal, enter a name that describes what this property is tracking, the type of the value, and what the value should be initially (when the player first begins the scenario). Finally, press **Create** on the bottom right of the input section.
+To create a property, press the **Properties** button on the right of the toolbar above the canvas. On the modal, enter a name that describes what this property is tracking, the type of the value, and what the value should be initially (when the player first begins the scenario). Finally, press **Create** on the bottom right of the input section.
 
 This table explains the different types:
 
