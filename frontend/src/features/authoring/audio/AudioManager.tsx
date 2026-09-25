@@ -45,7 +45,6 @@ function AudioManager() {
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   const audios = Object.values(components).filter((c) => c.type === "audio");
-  const hasAudios = audios.length > 0;
 
   function handleFileChange(event: React.ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0];
@@ -66,62 +65,45 @@ function AudioManager() {
       });
   }
 
-  const showFilePicker = () => {
+  function showFilePicker() {
     fileInputRef.current?.click();
-  };
-
-  function showModal() {
-    setModalOpen(true);
   }
 
   return (
     <>
-      <div
-        className={`collapse overflow-visible ${
-          hasAudios ? "collapse-arrow" : ""
-        } bg-base-300 rounded-sm text-s`}
-      >
-        {hasAudios && <input type="checkbox" />}
-        <div
-          className={`collapse-title flex items-center justify-between ${
-            hasAudios ? "" : "pe-4"
-          }`}
+      <div className="mb-3 flex flex-col gap-2">
+        <button
+          type="button"
+          className="flex w-full items-center gap-2 rounded-sm border-0 bg-base-300 px-3 py-2 text-left text-sm shadow-none transition-colors hover:bg-base-100"
+          onClick={showFilePicker}
         >
-          Audio Elements
-          <div className="dropdown dropdown-end z-1">
-            <div tabIndex={0} role="button">
-              <PlusIcon size={18} />
-            </div>
-            <ul
-              tabIndex={-1}
-              className="dropdown-content menu bg-base-300 rounded-box z-1 w-52 p-2 shadow-sm top-[38px]"
-            >
-              <li>
-                <button onClick={showFilePicker}>Upload New Audio</button>
-              </li>
-              <li>
-                <button onClick={showModal}>Select Existing Audio</button>
-              </li>
-            </ul>
-          </div>
-        </div>
-
-        <input
-          ref={fileInputRef}
-          type="file"
-          className="hidden"
-          onChange={handleFileChange}
-          accept="audio/*"
-        />
-
-        {hasAudios && (
-          <div className="collapse-content text--1 bg-base-200 px-0">
-            {audios.map((audio) => (
-              <EditAudioComponent component={audio} key={audio.id} />
-            ))}
-          </div>
-        )}
+          <PlusIcon size={16} />
+          Upload New Audio
+        </button>
+        <button
+          type="button"
+          className="flex w-full items-center rounded-sm border-0 bg-base-300 px-3 py-2 text-left text-sm shadow-none transition-colors hover:bg-base-100"
+          onClick={() => setModalOpen(true)}
+        >
+          Select Existing Audio
+        </button>
       </div>
+
+      {audios.length > 0 ? (
+        audios.map((audio) => (
+          <EditAudioComponent component={audio} key={audio.id} />
+        ))
+      ) : (
+        <p className="text-xs opacity-70">No audio elements yet.</p>
+      )}
+
+      <input
+        ref={fileInputRef}
+        type="file"
+        className="hidden"
+        onChange={handleFileChange}
+        accept="audio/*"
+      />
 
       <AudioSelectModal open={modalOpen} setOpen={setModalOpen} />
     </>

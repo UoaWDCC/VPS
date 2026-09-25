@@ -129,8 +129,12 @@ export function paste(e: ClipboardEvent) {
 
       items.forEach((obj) => {
         if (obj.type) {
+          // paste-in-place
           newSelection.push(
-            parseComponent(obj as unknown as Component, nextZIndex++)
+            parseComponent(obj as unknown as Component, nextZIndex++, {
+              x: 0,
+              y: 0,
+            })
           );
         } else {
           const component = structuredClone(defaults["textbox"]);
@@ -145,6 +149,7 @@ export function paste(e: ClipboardEvent) {
       const doc = plainToDoc(textData);
       const component = structuredClone(defaults["textbox"]);
       component.document = structuredClone(doc);
+      component.zIndex = getNextZIndex();
       setSelected([add(component)]);
     }
   }

@@ -14,9 +14,22 @@ import { undo, redo } from "../scene/history";
 import { bringToFront, sendToBack } from "../scene/operations/component";
 import ImageCreateMenu from "../ImageCreateMenu";
 import ShapeCreateMenu from "./ShapeCreateMenu";
+import type { Component } from "../types";
 import BackgroundMenu from "../CanvasSideBar/BackgroundMenu";
 
 import "./topbar.css";
+
+function hasDocument(component: Component): boolean {
+  if (!component) return false;
+  if (!("document" in component)) return false;
+  const doc = component.document as {
+    blocks: { spans: { text: string }[] }[];
+  } | null;
+  const documentLength = doc?.blocks?.[0]?.spans?.[0]?.text?.length;
+  return (
+    "document" in component && Boolean(component.document) && documentLength > 0
+  );
+}
 
 function Topbar({ saving, save }: { saving: boolean; save: () => void }) {
   const selected = useEditorStore((state) => state.selected);
@@ -41,6 +54,8 @@ function Topbar({ saving, save }: { saving: boolean; save: () => void }) {
   const hasTextboxComponent = selectedComponents.some(
     (c) => c?.type === "textbox"
   );
+
+  const component = selected ? getComponent(selected) : null;
 
   return (
     <>
@@ -95,7 +110,7 @@ function Topbar({ saving, save }: { saving: boolean; save: () => void }) {
             )}
 
             {/* text content styles */}
-            {hasTextboxComponent && (
+            {(hasTextboxComponent || hasDocument(component)) && (
               <>
                 <div className="divider divider-horizontal" />
                 <TextSection />

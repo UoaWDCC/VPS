@@ -15,16 +15,24 @@ import {
   handleMouseUpGlobal,
 } from "../handlers/pointer/pointer";
 import { handleContextGlobal } from "../handlers/pointer/context";
+import { hasMarqueeMoved } from "../handlers/pointer/marquee";
 import LoadingOverlay from "./LoadingOverlay.tsx";
+import ImagePlaceholder from "../elements/ImagePlaceholder";
 import useEditorStore from "../stores/editor.ts";
+import { addText } from "../components/AddText.tsx";
 import { CANVAS_HEIGHT, CANVAS_WIDTH } from "../../../util/canvas";
 import Background from "../elements/Background";
+import useImageDrop from "../useImageDrop";
+
+const TextableBox = addText(Box);
+const TextableEllipse = addText(Ellipse);
+const TextableSpeech = addText(Speech);
 
 const componentMap: Record<string, React.FC<Record<string, unknown>>> = {
   textbox: (props) => <TextBox {...props} editable={true} />,
-  speech: Speech,
-  ellipse: Ellipse,
-  box: Box,
+  box: (props) => <TextableBox {...props} />,
+  ellipse: (props) => <TextableEllipse {...props} />,
+  speech: (props) => <TextableSpeech {...props} />,
   image: Image,
   line: Line,
 };
@@ -38,13 +46,18 @@ function resolve(component: Component) {
 function Canvas() {
   const scene = useVisualScene((state) => state.components);
   const background = useVisualScene((state) => state.background);
+  const sceneId = useVisualScene((state) => state.id);
+  const pendingImages = useEditorStore((state) => state.pendingImages);
+  const loading = useEditorStore((state) => state.loading);
 
   const mode = useEditorStore((state) => state.mode);
   const createType = useEditorStore((state) => state.createType);
+  const mutationBounds = useEditorStore((state) => state.mutationBounds);
+
+  const isDraggingMarquee =
+    mode.includes("marquee") && hasMarqueeMoved(mutationBounds);
 
   const canvasRef = useRef<SVGSVGElement | null>(null);
-
-  if (!scene) return <></>;
 
   function toSVGSpace(cx: number, cy: number) {
     const boundingRect = canvasRef.current?.children[0];
@@ -54,6 +67,10 @@ function Canvas() {
     const y = ((cy - top) / height) * CANVAS_HEIGHT;
     return { x, y };
   }
+
+  const { isDraggingOver, dropHandlers } = useImageDrop(toSVGSpace);
+
+  if (!scene) return <></>;
 
   function handleMouseMove(e: React.MouseEvent) {
     handleMouseMoveGlobal(e, toSVGSpace(e.clientX, e.clientY));
@@ -77,18 +94,43 @@ function Canvas() {
     .sort((a, b) => a.zIndex - b.zIndex)
     .map(resolve);
 
-  const loading = useEditorStore((state) => state.loading);
+  const placeholders = pendingImages
+    .filter((image) => image.sceneId === sceneId)
+    .map((image) => <ImagePlaceholder key={image.id} {...image} />);
+
   return (
     <CanvasContext.Provider value={{ toSVGSpace, canvasRef }}>
       <div
         className={`flex-grow relative ${loading ? "pointer-events-none" : ""} ${
-          mode.includes("create") ? "cursor-crosshair" : ""
+          mode.includes("create") || isDraggingMarquee ? "cursor-crosshair" : ""
         }`}
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
         onMouseDown={handleMouseDown}
         onContextMenu={handleContextMenu}
+        {...dropHandlers}
       >
+        {isDraggingOver && (
+          <div
+            className="
+              absolute
+              inset-0
+              z-[9998]
+              flex
+              items-center
+              justify-center
+              border-2
+              border-dashed
+              border-primary
+              bg-primary/10
+              pointer-events-none
+            "
+          >
+            <span className="bg-primary/70 text-secondary text-sm font-medium px-4 py-2 rounded-full backdrop-blur-sm">
+              Drop image to add it to this scene
+            </span>
+          </div>
+        )}
         {mode.includes("create") && (
           <div
             className="
@@ -147,6 +189,7 @@ function Canvas() {
           />
           <Background background={background} />
           {components}
+          {placeholders}
         </svg>
       </div>
     </CanvasContext.Provider>

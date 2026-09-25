@@ -1,4 +1,4 @@
-import type { RelativeBounds, Vec2 } from "./types";
+import type { Bounds, RelativeBounds, Vec2 } from "./types";
 
 type Degree = number;
 type Radian = number;
@@ -92,6 +92,44 @@ export function getBoxCenter(verts: Vec2[]) {
     x: verts[0].x + (verts[1].x - verts[0].x) / 2,
     y: verts[0].y + (verts[1].y - verts[0].y) / 2,
   };
+}
+
+export function getRotatedCorners(bounds: Bounds) {
+  return rotateMany(
+    expandBoxVerts(bounds.verts),
+    getBoxCenter(bounds.verts),
+    bounds.rotation
+  );
+}
+
+function normalize(v: Vec2): Vec2 {
+  const len = Math.hypot(v.x, v.y);
+  return len === 0 ? v : { x: v.x / len, y: v.y / len };
+}
+
+// outward normal of each edge of a convex polygon, in vertex order
+function getEdgeNormals(verts: Vec2[]) {
+  return verts.map((v, i) => {
+    const next = verts[(i + 1) % verts.length];
+    const edge = subtract(next, v);
+    return normalize({ x: -edge.y, y: edge.x });
+  });
+}
+
+function project(verts: Vec2[], axis: Vec2) {
+  const dots = verts.map((v) => v.x * axis.x + v.y * axis.y);
+  return [Math.min(...dots), Math.max(...dots)];
+}
+
+// separating axis theorem: two convex polygons intersect iff their
+// projections overlap on every candidate axis (each polygon's edge normals)
+export function polygonsIntersect(vertsA: Vec2[], vertsB: Vec2[]) {
+  const axes = [...getEdgeNormals(vertsA), ...getEdgeNormals(vertsB)];
+  return axes.every((axis) => {
+    const [minA, maxA] = project(vertsA, axis);
+    const [minB, maxB] = project(vertsB, axis);
+    return minA <= maxB && minB <= maxA;
+  });
 }
 
 export function getRelativeBounds(

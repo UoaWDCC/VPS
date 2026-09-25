@@ -1,98 +1,23 @@
 import { useContext, useRef, useState, type Context } from "react";
-import {
-  useQuery,
-  useQueryClient,
-  type QueryClient,
-} from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import ImageListContainer from "../../components/ListContainer/ImageListContainer";
 import { type User } from "firebase/auth";
 import { useParams } from "react-router-dom";
 import { ImageIcon } from "lucide-react";
-import { add } from "./scene/operations/modifiers";
-import { defaults } from "./scene/operations/component";
-import type { ImageComponent, UploadedFile, Scene } from "./types";
+import type { UploadedFile } from "./types";
 import { handleGeneric } from "../../util/api";
 import ModalDialog from "../../components/ModalDialogue";
-import useEditorStore from "./stores/editor.ts";
 import toast from "react-hot-toast";
 import AuthenticationContext from "../../context/AuthenticationContext.jsx";
 import SceneContext from "../../context/SceneContext.jsx";
-import { getScene, getSceneId } from "./scene/scene";
-import { v4 } from "uuid";
-import { getImages, uploadImage } from "./images";
-
-type ModifyScene = (scene: Scene) => Promise<unknown> | undefined;
-
-const ACCEPTED_IMAGE_MIME_TYPES = [
-  "image/png",
-  "image/jpeg",
-  "image/webp",
-  "image/gif",
-];
-
-async function addImageToScene(
-  image: UploadedFile,
-  originScene: Scene,
-  modifyScene: ModifyScene
-) {
-  const newImage = structuredClone(defaults.image) as Partial<ImageComponent>;
-
-  const imageId = v4();
-
-  newImage.id = imageId;
-  newImage.fileId = image._id;
-  newImage.href = image.url;
-  newImage.bounds!.verts = await getImageDimensions(image.url);
-
-  // Still on the slide where the operation began:
-  // add normally so visual state/history are updated.
-  if (getSceneId() === originScene._id) {
-    add(newImage);
-    return;
-  }
-
-  // User moved to another slide while the image was loading.
-  // Add it to the original slide instead of the currently active one.
-  originScene.components[imageId] = newImage as ImageComponent;
-
-  await modifyScene(originScene);
-}
-
-async function addNewImage(
-  file: File,
-  scenarioId: string,
-  user: User,
-  originScene: Scene,
-  modifyScene: ModifyScene,
-  queryClient: QueryClient
-) {
-  const { setLoading } = useEditorStore.getState();
-  setLoading(true);
-
-  try {
-    const image = await uploadImage(user, scenarioId, file);
-    await queryClient.invalidateQueries({
-      queryKey: ["images", scenarioId],
-    });
-    await addImageToScene(image, originScene, modifyScene);
-  } catch (e) {
-    console.error(e);
-    toast.error("Image upload failed");
-  } finally {
-    setLoading(false);
-  }
-}
-
-async function getImageDimensions(url: string, defaultHeight = 300) {
-  const img = new Image();
-  img.src = url;
-  await img.decode();
-  const scaledWidth = img.naturalWidth * (defaultHeight / img.naturalHeight);
-  return [
-    { x: 0, y: 0 },
-    { x: scaledWidth, y: defaultHeight },
-  ];
-}
+import { getScene } from "./scene/scene";
+import {
+  ACCEPTED_IMAGE_MIME_TYPES,
+  addImageToScene,
+  addNewImage,
+  getImages,
+  type ModifyScene,
+} from "./images";
 
 function ImageCreateMenu() {
   const { scenarioId } = useParams<{ scenarioId: string }>();

@@ -22,31 +22,36 @@ function EditableResourceListItem({
   const { renameResourceMutation, deleteResourceMutation } = useResources();
 
   return (
-    <ResourceNameField
-      resource={resource}
-      disabled={isTemp(resource) as boolean}
-      onSelect={() => setSelectedResourceId(resource._id)}
-      isSelected={selectedResourceId === resource._id}
-      onRename={(name: string) =>
-        (renameResourceMutation as UseMutationResult).mutate({
-          resourceId: resource._id,
-          name,
-        })
-      }
-      actions={
-        <button
-          className="btn btn-phantom btn-xs px-1.5 h-full"
-          onClick={(e) => {
-            e.stopPropagation();
-            (deleteResourceMutation as UseMutationResult).mutate(resource._id);
-          }}
-          title="Delete file"
-          disabled={isTemp(resource) as boolean}
-        >
-          <XIcon size={16} />
-        </button>
-      }
-    />
+    <div
+      className={`p-0 flex ${selectedResourceId === resource._id ? "bg-base-200" : ""}`}
+    >
+      <ResourceNameField
+        resource={resource}
+        disabled={isTemp(resource) as boolean}
+        onSelect={() => setSelectedResourceId(resource._id)}
+        onRename={(name: string) =>
+          (renameResourceMutation as UseMutationResult).mutate({
+            resourceId: resource._id,
+            name,
+          })
+        }
+        actions={
+          <button
+            className="btn btn-phantom btn-xs px-1.5 h-9"
+            onClick={(e) => {
+              e.stopPropagation();
+              (deleteResourceMutation as UseMutationResult).mutate(
+                resource._id
+              );
+            }}
+            title="Delete file"
+            disabled={isTemp(resource) as boolean}
+          >
+            <XIcon size={16} />
+          </button>
+        }
+      />
+    </div>
   );
 }
 

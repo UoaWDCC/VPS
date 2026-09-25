@@ -93,7 +93,6 @@ import {
   retrieveScenarioList,
   updateScenario,
   deleteScenario,
-  updateDurations,
 } from "../../db/daos/scenarioDao";
 import { retrieveAssignedScenarioList } from "../../db/daos/userDao";
 ```
