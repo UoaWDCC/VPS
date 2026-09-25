@@ -24,7 +24,7 @@ const ALWAYS_PANELS = [
 
 const CONTEXTUAL_PANELS = [
   { key: "bindings", label: "Property Bindings", Icon: BracesIcon },
-  { key: "object-properties", label: "Object Properties", Icon: BoxIcon },
+  { key: "object-properties", label: "Element Properties", Icon: BoxIcon },
 ];
 
 const PANEL_LABELS = Object.fromEntries(
