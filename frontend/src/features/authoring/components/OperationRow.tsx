@@ -32,8 +32,9 @@ function OperationRow({
     ? (validOperations[activeProperty.type] as PropertyOperationType[])
     : [];
 
+  // TODO: extract this out into a form / input handling module
   function onFieldChange<T extends keyof Operation>(field: T) {
-    return function (value: Operation[T]) {
+    return function(value: Operation[T]) {
       if (isDraft) {
         const property = properties.find((p) => p.id === value)!;
         onChange({
@@ -42,6 +43,28 @@ function OperationRow({
           operation: "set",
           value: getDefaultValue(property.type),
         });
+        return;
+      }
+      if (field === "stateVariableId") {
+        const property = properties.find((p) => p.id === value)!;
+        if (property.type !== activeProperty!.type) {
+          onChange({
+            ...operation,
+            stateVariableId: value as string,
+            operation: "set",
+            value: getDefaultValue(property.type),
+          });
+          return;
+        }
+      }
+      if (field === "value") {
+        let casted = value as Operation["value"];
+        if (activeProperty!.type === propertyTypes.BOOLEAN) {
+          casted = value === "true";
+        } else if (activeProperty!.type === propertyTypes.NUMBER) {
+          casted = Number(value);
+        }
+        onChange({ ...operation, value: casted });
         return;
       }
       onChange({ ...operation, [field]: value });
