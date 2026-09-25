@@ -3,16 +3,10 @@ import React from "react";
 export default function ResourceTree({
   tree,
   unseenIds,
-  markSeen,
   selectedResourceId,
-  setSelectedResourceId,
+  onSelect,
 }) {
   const unseen = new Set(unseenIds);
-
-  const selectResource = (id) => {
-    setSelectedResourceId(id);
-    markSeen(id);
-  };
 
   return (
     <>
@@ -44,7 +38,7 @@ export default function ResourceTree({
                         type="button"
                         className="flex items-center gap-2 min-w-0 text-left text--1 border-none cursor-pointer flex-1 px-3 py-1.5 h-9"
                         title={child.name}
-                        onClick={() => selectResource(child._id)}
+                        onClick={() => onSelect(child._id)}
                       >
                         <span className="truncate flex-1">{child.name}</span>
                         {unseen.has(child._id) && (
@@ -66,7 +60,7 @@ export default function ResourceTree({
                 type="button"
                 className="flex items-center gap-2 min-w-0 text-left text--1 border-none cursor-pointer flex-1 px-3 py-1.5 h-9"
                 title={resource.name}
-                onClick={() => selectResource(resource._id)}
+                onClick={() => onSelect(resource._id)}
               >
                 <span className="truncate flex-1">{resource.name}</span>
                 {unseen.has(resource._id) && (

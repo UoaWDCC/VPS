@@ -38,6 +38,11 @@ export default function ResourcesPanel({
     .find((resource) => resource._id === selectedResourceId);
   const filteredTree = filterTreeBySearch(tree, search);
 
+  const selectResource = (resourceId) => {
+    setSelectedResourceId(resourceId);
+    markSeen(resourceId);
+  };
+
   return (
     <>
       <PanelOverlay open={open} onClose={() => {}} />
@@ -112,9 +117,8 @@ export default function ResourcesPanel({
                       <ResourceTree
                         tree={filteredTree}
                         unseenIds={unseenIds}
-                        markSeen={markSeen}
                         selectedResourceId={selectedResourceId}
-                        setSelectedResourceId={setSelectedResourceId}
+                        onSelect={selectResource}
                       />
                     </ul>
                   </div>
