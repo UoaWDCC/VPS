@@ -8,7 +8,7 @@ import { useSeenResources } from "./useSeenResources";
 export function usePlayerResources(properties, enabled) {
   const { resourcesQuery } = useResources();
   const { seenIds, isLoaded, markSeen } = useSeenResources();
-  const prevVisibleIds = useRef(new Set());
+  const announcedIds = useRef(new Set());
   const ready = enabled && isLoaded && resourcesQuery.isSuccess;
 
   // NOTE: the filtering by properties should ideally be done on the
@@ -31,19 +31,18 @@ export function usePlayerResources(properties, enabled) {
     return visibleIds.filter((id) => !seen.has(id));
   }, [ready, visibleIds, seenIds]);
 
-  // toast for unseen resources not visible last run
+  // toast unseen resources once a session
   useEffect(() => {
-    if (!ready) return;
-    const prevVisible = prevVisibleIds.current;
-    prevVisibleIds.current = new Set(visibleIds);
+    const fresh = unseenIds.filter((id) => !announcedIds.current.has(id));
+    fresh.forEach((id) => announcedIds.current.add(id));
 
-    const count = unseenIds.filter((id) => !prevVisible.has(id)).length;
+    const count = fresh.length;
     if (count > 0) {
       toast(
         `You have ${count} new resource${count === 1 ? "" : "s"} available`
       );
     }
-  }, [ready, visibleIds, unseenIds]);
+  }, [unseenIds]);
 
   const { isLoading, isError, error } = resourcesQuery;
 
