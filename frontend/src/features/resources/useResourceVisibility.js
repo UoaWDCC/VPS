@@ -4,11 +4,11 @@ import { filterTreeByConditions } from "../../utils/propertyConditionalEvaluator
 import { buildResourceTree } from "./util";
 import { useResources } from "./useResources";
 import { useSeenResources } from "./useSeenResources";
-import { collectVisibleFileIds, getStaleSeenIds, getUnseenIds } from "./seen";
+import { collectVisibleFileIds, getUnseenIds } from "./seen";
 
 export function useResourceVisibility(properties, enabled) {
   const { resourcesQuery } = useResources();
-  const { seenIds, isLoaded, markSeen, unmarkSeen } = useSeenResources();
+  const { seenIds, isLoaded, markSeen } = useSeenResources();
   const lastVisibleKey = useRef(null);
   const ready = enabled && isLoaded && resourcesQuery.isSuccess;
 
@@ -30,11 +30,10 @@ export function useResourceVisibility(properties, enabled) {
   );
   const visibleKey = [...visibleIds].sort().join(",");
 
-  //only toast + prune when visible resources set changes
+  // only toast when visible resources set changes
   useEffect(() => {
     if (!ready || lastVisibleKey.current === visibleKey) return;
     lastVisibleKey.current = visibleKey;
-    unmarkSeen(getStaleSeenIds(visibleIds, seenIds));
 
     const count = unseenIds.length;
     if (count > 0) {

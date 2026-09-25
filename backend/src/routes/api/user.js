@@ -4,7 +4,7 @@ import {
   createUser,
   assignScenarioToUsers,
   getSeenResources,
-  updateSeenResources,
+  addSeenResources,
 } from "../../db/daos/userDao.js";
 import User from "../../db/models/user.js";
 import Group from "../../db/models/group.js";
@@ -67,7 +67,7 @@ router.get(
   })
 );
 
-//get resource ids that user has seen
+// get resource ids that user has seen
 router.get(
   "/seen-resources/:scenarioId",
   handle(async (req, res) => {
@@ -84,28 +84,16 @@ router.get(
   })
 );
 
-//add or remove resource ids the user has seen
+// mark resource ids as seen by the user
 router.patch(
   "/seen-resources/:scenarioId",
   handle(async (req, res) => {
     const { scenarioId } = req.params;
-    const { uid, add, remove } = req.body;
+    const { uid, resourceIds } = req.body;
 
     if (!isValidObjectId(scenarioId)) {
       throw new HttpError("Invalid scenario ID", STATUS.BAD_REQUEST);
     }
-
-    const hasAdd = add !== undefined;
-    const hasRemove = remove !== undefined;
-
-    if (hasAdd === hasRemove) {
-      throw new HttpError(
-        "Provide just one (add or remove)",
-        STATUS.BAD_REQUEST
-      );
-    }
-
-    const resourceIds = hasAdd ? add : remove;
 
     if (
       !Array.isArray(resourceIds) ||
@@ -117,8 +105,7 @@ router.patch(
       );
     }
 
-    const op = hasAdd ? { add: resourceIds } : { remove: resourceIds };
-    const seenResources = await updateSeenResources(uid, scenarioId, op);
+    const seenResources = await addSeenResources(uid, scenarioId, resourceIds);
 
     return res.status(STATUS.OK).json({ seenResources });
   })

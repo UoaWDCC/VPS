@@ -9,12 +9,10 @@ async function getSeenResources(user, scenarioId) {
   return res.data.seenResources;
 }
 
-async function updateSeenResources(user, scenarioId, operation) {
-  const res = await api.patch(
-    user,
-    `/api/user/seen-resources/${scenarioId}`,
-    operation
-  );
+async function addSeenResources(user, scenarioId, resourceIds) {
+  const res = await api.patch(user, `/api/user/seen-resources/${scenarioId}`, {
+    resourceIds,
+  });
   return res.data.seenResources;
 }
 
@@ -30,15 +28,12 @@ export function useSeenResources() {
   });
 
   const { mutate } = useMutation({
-    mutationFn: (operation) => updateSeenResources(user, scenarioId, operation),
-    onMutate: async ({ add, remove }) => {
+    mutationFn: (resourceId) =>
+      addSeenResources(user, scenarioId, [resourceId]),
+    onMutate: async (resourceId) => {
       await queryClient.cancelQueries(queryKey);
       const previous = queryClient.getQueryData(queryKey);
-      queryClient.setQueryData(queryKey, (prev = []) =>
-        add
-          ? [...new Set([...prev, ...add])]
-          : prev.filter((id) => !remove.includes(id))
-      );
+      queryClient.setQueryData(queryKey, (prev = []) => [...prev, resourceId]);
       return { previous };
     },
     onError: (e, _, context) => {
@@ -54,18 +49,12 @@ export function useSeenResources() {
 
   const markSeen = (resourceId) => {
     if (seenIds.includes(resourceId)) return;
-    mutate({ add: [resourceId] });
-  };
-
-  const unmarkSeen = (resourceIds) => {
-    if (resourceIds.length === 0) return;
-    mutate({ remove: resourceIds });
+    mutate(resourceId);
   };
 
   return {
     seenIds,
     isLoaded: seenQuery.isSuccess,
     markSeen,
-    unmarkSeen,
   };
 }
