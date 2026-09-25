@@ -14,7 +14,12 @@ const ZERO_VERTS = [
   { x: 0, y: 0 },
 ];
 
-export function ObjectPropertyEditor({ component }) {
+/*
+ * The content of the "Element Properties" panel.
+ *
+ * @component
+ */
+function ElementPropertiesPanel({ component }) {
   const verts = component?.bounds?.verts ?? ZERO_VERTS;
   const { scenes } = useContext(SceneContext);
   const sceneId = useVisualScene((scene) => scene.id);
@@ -196,10 +201,7 @@ export function ObjectPropertyEditor({ component }) {
             onChange={console.log}
           />
         </PanelInput>
-        <PanelInput
-          label="Actions"
-          onAdd={() => actionsRef.current?.addItem()}
-        >
+        <PanelInput label="Actions" onAdd={() => actionsRef.current?.addItem()}>
           <ActionsInput
             ref={actionsRef}
             items={component.actionRefs ?? []}
@@ -223,7 +225,9 @@ export function ObjectPropertyEditor({ component }) {
               type="number"
               className="input"
               value={inputHeight}
-              onChange={(e) => saveProp(e.target.value, "height", setInputHeight)}
+              onChange={(e) =>
+                saveProp(e.target.value, "height", setInputHeight)
+              }
             />
           </PanelInput>
         </div>
@@ -251,7 +255,9 @@ export function ObjectPropertyEditor({ component }) {
               type="number"
               className="input"
               value={inputAngle}
-              onChange={(e) => saveProp(e.target.value, "rotation", setInputAngle)}
+              onChange={(e) =>
+                saveProp(e.target.value, "rotation", setInputAngle)
+              }
             />
           </PanelInput>
           <PanelInput>
@@ -281,3 +287,5 @@ export function ObjectPropertyEditor({ component }) {
     </>
   );
 }
+
+export default ElementPropertiesPanel;

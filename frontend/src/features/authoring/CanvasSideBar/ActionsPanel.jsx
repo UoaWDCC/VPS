@@ -1,21 +1,21 @@
-import SceneContext from "../../context/SceneContext";
-import PanelInput from "../../features/authoring/CanvasSideBar/PanelInput";
-import ConditionRow from "../../features/authoring/components/ConditionRow";
-import SceneSelectInput from "../../features/authoring/components/SceneSelectInput";
 import { ChevronDownIcon, ChevronUpIcon, PlusIcon, XIcon } from "lucide-react";
 import { useContext, useRef, useState } from "react";
-import ListInput from "../../features/authoring/components/ListInput";
-import OperationRow from "../../features/authoring/components/OperationRow";
 import { v4 } from "uuid";
-import { modifySceneProp } from "../../features/authoring/scene/operations/modifiers";
-import useVisualScene from "../../features/authoring/stores/visual";
+import useVisualScene from "../stores/visual";
+import SceneContext from "../../../context/SceneContext";
+import { modifySceneProp } from "../scene/operations/modifiers";
+import PanelInput from "./PanelInput";
+import SceneSelectInput from "../components/SceneSelectInput";
+import ListInput from "../components/ListInput";
+import ConditionRow from "../components/ConditionRow";
+import OperationRow from "../components/OperationRow";
 
 /*
- * The content of the "Property Operations" panel (methods for creating and editing)
+ * The content of the "Actions" panel.
  *
  * @component
  */
-function PropertyOperationMenu() {
+function ActionsPanel() {
   const actions = useVisualScene((s) => s.actions);
   const { scenes } = useContext(SceneContext);
 
@@ -35,37 +35,44 @@ function PropertyOperationMenu() {
   }
 
   function handleCreate() {
-    modifySceneProp("actions", [...actions, { id: v4(), name: "New Action" }])
+    modifySceneProp("actions", [...actions, { id: v4(), name: "New Action" }]);
   }
 
   function handleDelete(id) {
-    modifySceneProp("actions", actions.filter(a => a.id !== id))
+    modifySceneProp(
+      "actions",
+      actions.filter((a) => a.id !== id)
+    );
   }
 
   function handleChange(id, field) {
     return function(value) {
-      modifySceneProp("actions", actions.map(a => a.id === id ? { ...a, [field]: value } : a))
-    }
+      modifySceneProp(
+        "actions",
+        actions.map((a) => (a.id === id ? { ...a, [field]: value } : a))
+      );
+    };
   }
 
   return (
     <>
-      <button
-        type="button"
-        className="btn btn-panel"
-        onClick={handleCreate}
-      >
+      <button type="button" className="btn btn-panel" onClick={handleCreate}>
         <PlusIcon size={18} />
         Create New Action
       </button>
       <ul className="mt-3">
         {actions.map((action) => (
-          <li key={action.id} className="-mx-5 group flex flex-col gap-2 py-1.5">
+          <li
+            key={action.id}
+            className="-mx-5 group flex flex-col gap-2 py-1.5"
+          >
             <div className="flex gap-2 items-center px-5">
               <input
                 type="text"
                 value={action.name}
-                onChange={(e) => handleChange(action.id, "name")(e.target.value)}
+                onChange={(e) =>
+                  handleChange(action.id, "name")(e.target.value)
+                }
                 className="input"
                 placeholder="Awesome Action"
               />
@@ -88,7 +95,7 @@ function PropertyOperationMenu() {
             </div>
             {isExpanded(action.id) ? (
               <div className="px-5 pl-11">
-                <div className="flex flex-col gap-2"  >
+                <div className="flex flex-col gap-2">
                   <PanelInput label="Linked Scene">
                     <SceneSelectInput
                       scenes={scenes}
@@ -96,7 +103,10 @@ function PropertyOperationMenu() {
                       onChange={handleChange(action.id, "linkedScene")}
                     />
                   </PanelInput>
-                  <PanelInput label="Conditions" onAdd={() => conditionsInputRef.current?.addItem()}>
+                  <PanelInput
+                    label="Conditions"
+                    onAdd={() => conditionsInputRef.current?.addItem()}
+                  >
                     <ListInput
                       ref={conditionsInputRef}
                       items={action.conditions ?? []}
@@ -105,7 +115,10 @@ function PropertyOperationMenu() {
                       requiredField="stateVariableId"
                     />
                   </PanelInput>
-                  <PanelInput label="Operations" onAdd={() => operationsInputRef.current?.addItem()}>
+                  <PanelInput
+                    label="Operations"
+                    onAdd={() => operationsInputRef.current?.addItem()}
+                  >
                     <ListInput
                       ref={operationsInputRef}
                       items={action.operations ?? []}
@@ -124,4 +137,4 @@ function PropertyOperationMenu() {
   );
 }
 
-export default PropertyOperationMenu;
+export default ActionsPanel;

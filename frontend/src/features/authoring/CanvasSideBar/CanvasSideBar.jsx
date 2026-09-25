@@ -11,10 +11,10 @@ import useVisualScene from "../stores/visual";
 import AudioManager from "../audio/AudioManager";
 import PanelIcon from "./PanelIcon";
 import SidePanel from "./SidePanel";
-import SceneSettings from "./SceneSettings";
 import PropertyBindingMenu from "../../../components/Properties/PropertyBindingMenu";
-import { ObjectPropertyEditor } from "./ObjectPropertyEditor";
-import PropertyOperationMenu from "../../../components/Properties/PropertyOperationMenu";
+import SceneDetailsPanel from "./SceneDetailsPanel";
+import ActionsPanel from "./ActionsPanel";
+import ElementPropertiesPanel from "./ElementPropertiesPanel";
 
 const ALWAYS_PANELS = [
   { key: "scene", label: "Scene Details", Icon: MonitorCog },
@@ -109,16 +109,14 @@ export default function CanvasSideBar() {
         open={Boolean(activePanel)}
         onClose={() => setActivePanel(null)}
       >
-        {activePanel === "scene" && <SceneSettings />}
+        {activePanel === "scene" && <SceneDetailsPanel />}
         {activePanel === "audio" && <AudioManager />}
+        {activePanel === "actions" && (<ActionsPanel />)}
         {activePanel === "bindings" && (
           <PropertyBindingMenu component={component} />
         )}
         {activePanel === "object-properties" && (
-          <ObjectPropertyEditor component={component} />
-        )}
-        {activePanel === "actions" && (
-          <PropertyOperationMenu component={component} />
+          <ElementPropertiesPanel component={component} />
         )}
       </SidePanel>
       <div ref={iconStackRef} className="flex shrink-0 flex-col gap-3">
