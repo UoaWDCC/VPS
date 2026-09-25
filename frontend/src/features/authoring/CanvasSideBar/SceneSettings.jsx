@@ -53,10 +53,6 @@ export default function SceneSettings() {
     if (!shallow(selected, selectedRoles)) setSelectedRoles(selected);
   }, [roleList, roles]);
 
-  // function saveSceneRoles() {
-  //   modifySceneProp("roles", selectedRoles);
-  // }
-
   function saveTimerDuration() {
     const parsed = parseInt(timerDuration, 10);
     modifySceneProp("time", !isNaN(parsed) && parsed > 0 ? parsed : null);

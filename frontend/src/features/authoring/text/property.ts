@@ -9,6 +9,7 @@ export const CHIP_FONT_SCALE = 0.9;
 export interface Property {
   id: string;
   name: string;
+  type: "string" | "number" | "boolean";
 }
 
 export function isProperty(
