@@ -1,4 +1,10 @@
-import { forwardRef, useImperativeHandle, useState, type ForwardedRef, type ReactElement } from "react";
+import {
+  forwardRef,
+  useImperativeHandle,
+  useState,
+  type ForwardedRef,
+  type ReactElement,
+} from "react";
 import { v4 } from "uuid";
 
 interface ListItem {
@@ -27,7 +33,6 @@ function ListInput<T extends ListItem>(
   { items, onChange, requiredField, Row }: ListInputProps<T>,
   ref: ForwardedRef<ListInputHandle>
 ) {
-
   const [hasDraft, setHasDraft] = useState<boolean>(false);
 
   const rows = hasDraft ? [...items, { id: "" } as T] : items;
@@ -51,12 +56,13 @@ function ListInput<T extends ListItem>(
   }
 
   function handleChange(item: T) {
-    if (item.id === "") { // is draft
+    if (item.id === "") {
+      // is draft
       if (item[requiredField]) onChange([...items, { ...item, id: v4() }]);
       setHasDraft(false);
       return;
     }
-    onChange(items.map((i) => i.id === item.id ? item : i));
+    onChange(items.map((i) => (i.id === item.id ? item : i)));
   }
 
   return (

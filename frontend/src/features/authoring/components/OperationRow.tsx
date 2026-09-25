@@ -2,7 +2,11 @@ import { XIcon } from "lucide-react";
 import useEditorStore from "../stores/editor";
 import type { Operation, PropertyOperationType } from "../types";
 import SelectInput from "./Select";
-import { getDefaultValue, propertyTypes, validOperations } from "../../../components/Properties/propertyTypes";
+import {
+  getDefaultValue,
+  propertyTypes,
+  validOperations,
+} from "../../../components/Properties/propertyTypes";
 
 interface OperationRowType {
   item: Operation;
@@ -11,23 +15,37 @@ interface OperationRowType {
   onDelete: () => void;
 }
 
-function OperationRow({ item: operation, onChange, onDelete, onBlur }: OperationRowType) {
+function OperationRow({
+  item: operation,
+  onChange,
+  onDelete,
+  onBlur,
+}: OperationRowType) {
   const isDraft = operation.id === "";
 
-  const properties = useEditorStore(s => s.properties);
+  const properties = useEditorStore((s) => s.properties);
 
-  const activeProperty = isDraft ? null : properties.find(p => p.id === operation.stateVariableId)!;
-  const operations = activeProperty ? validOperations[activeProperty.type] as PropertyOperationType[] : [];
+  const activeProperty = isDraft
+    ? null
+    : properties.find((p) => p.id === operation.stateVariableId)!;
+  const operations = activeProperty
+    ? (validOperations[activeProperty.type] as PropertyOperationType[])
+    : [];
 
   function onFieldChange<T extends keyof Operation>(field: T) {
-    return function(value: Operation[T]) {
+    return function (value: Operation[T]) {
       if (isDraft) {
-        const property = properties.find(p => p.id === value)!;
-        onChange({ ...operation, stateVariableId: value as string, operation: "set", value: getDefaultValue(property.type) });
+        const property = properties.find((p) => p.id === value)!;
+        onChange({
+          ...operation,
+          stateVariableId: value as string,
+          operation: "set",
+          value: getDefaultValue(property.type),
+        });
         return;
       }
       onChange({ ...operation, [field]: value });
-    }
+    };
   }
 
   return (
@@ -48,21 +66,22 @@ function OperationRow({ item: operation, onChange, onDelete, onBlur }: Operation
             value={operation.operation ?? null}
             onChange={onFieldChange("operation")}
           />
-          {activeProperty?.type === propertyTypes.BOOLEAN
-            ? <SelectInput
+          {activeProperty?.type === propertyTypes.BOOLEAN ? (
+            <SelectInput
               disabled={!activeProperty}
               values={["true", "false"]}
               value={operation.value}
               onChange={onFieldChange("value")}
             />
-            : <input
+          ) : (
+            <input
               disabled={!activeProperty}
               type={activeProperty?.type ?? "string"}
               value={operation.value as string | number}
               onChange={(e) => onFieldChange("value")(e.target.value)}
               className="input join-item disabled:opacity-50 disabled:bg-base-100 disabled:border-base-content/20"
             />
-          }
+          )}
         </div>
         <button
           className="btn btn-phantom btn-square btn-xs"
@@ -72,7 +91,7 @@ function OperationRow({ item: operation, onChange, onDelete, onBlur }: Operation
         </button>
       </div>
     </li>
-  )
+  );
 }
 
 export default OperationRow;
