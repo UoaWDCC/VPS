@@ -18,7 +18,7 @@ import { bringToFront, sendToBack } from "../scene/operations/component";
 import ImageCreateMenu from "../ImageCreateMenu";
 import ShapeCreateMenu from "./ShapeCreateMenu";
 import type { Component } from "../types";
-import BackgroundMenu from "../CanvasSideBar/BackgroundMenu";
+import BackgroundMenu from "./BackgroundMenu";
 import PropertyMenu from "../../../components/Properties/PropertyMenu";
 
 import "./topbar.css";
