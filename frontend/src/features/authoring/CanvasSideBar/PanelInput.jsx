@@ -11,7 +11,7 @@ function PanelInput({ label, AddModal, onAdd, children }) {
 
   return (
     <>
-      <div className="flex flex-col">
+      <div className="flex flex-col w-full">
         <div className="flex justify-between mb-1 h-6">
           <label className="label text-xs">{label}</label>
           {(AddModal || onAdd) && (

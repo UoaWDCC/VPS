@@ -1,7 +1,13 @@
 import { getBoxCenter, translate, correct } from "../../authoring/util";
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useContext } from "react";
 import { modifyComponentProp } from "../scene/operations/component";
 import { FlipHorizontal2, FlipVertical2 } from "lucide-react";
+import PanelSection from "./PanelSection";
+import PanelInput from "./PanelInput";
+import SceneSelectInput from "../components/SceneSelectInput";
+import SceneContext from "../../../context/SceneContext";
+import useVisualScene from "../stores/visual";
+import ActionsInput from "../components/ActionsInput";
 
 const ZERO_VERTS = [
   { x: 0, y: 0 },
@@ -10,6 +16,10 @@ const ZERO_VERTS = [
 
 export function ObjectPropertyEditor({ component }) {
   const verts = component?.bounds?.verts ?? ZERO_VERTS;
+  const { scenes } = useContext(SceneContext);
+  const sceneId = useVisualScene((scene) => scene.id);
+
+  const actionsRef = useRef(null);
 
   // x and y vals used for setting and current
   const [inputX, setInputX] = useState(Math.round(verts[0].x * 100) / 100);
@@ -167,88 +177,107 @@ export function ObjectPropertyEditor({ component }) {
     }
   }
 
-  return (
-    <fieldset className="fieldset pt-2">
-      {/* Width and Height num inputs*/}
-      <span className="flex gap-2 justify-between">
-        <label className="label flex-1">Object Width</label>
-        <label className="label flex-1">Object Height</label>
-      </span>
-      <div className="flex gap-2 justify-between">
-        <input
-          className="input flex-1 min-w-0"
-          value={inputWidth}
-          onChange={(e) => {
-            saveProp(e.target.value, "width", setInputWidth);
-          }}
-        />
-        <input
-          className="input flex-1 min-w-0"
-          value={inputHeight}
-          onChange={(e) => {
-            saveProp(e.target.value, "height", setInputHeight);
-          }}
-        />
-      </div>
+  function saveActionRefs(updated) {
+    modifyComponentProp([component.id], "actionRefs", updated);
+  }
 
-      {/* positoin x and y num inputs*/}
-      <span className=" flex gap-2 justify-between">
-        <label className="label flex-1">Position X</label>
-        <label className="label flex-1">Position Y</label>
-      </span>
-      <div className="flex justify-between gap-2 w-full">
-        <input
-          className="input flex-1 min-w-0"
-          value={inputX}
-          onChange={(e) => {
-            saveProp(e.target.value, "x", setInputX);
-          }}
-          // onBlur={(e) => {
-          //   noFields(e.target.value, "x", setInputX);
-          // }}
-        />
-        <input
-          className="input flex-1 min-w-0"
-          value={inputY}
-          onChange={(e) => {
-            saveProp(e.target.value, "y", setInputY);
-          }}
-          // onBlur={(e) => {
-          //   noFields(e.target.value, "y", setInputY);
-          // }}
-        />
-      </div>
-      <label className="label">Angle (Degrees)</label>
-      <div className="flex justify-between">
-        <input
-          className="input flex-1 min-w-0"
-          value={inputAngle}
-          onChange={(e) => saveProp(e.target.value, "rotation", setInputAngle)}
-          // onBlur={(e) => {
-          //   noFields(e.target.value, "rotation", setInputAngle);
-          // }}
-        />
-        <div className="ml-6 flex-1">
-          <button
-            type="button"
-            title="Flip Horizontally"
-            aria-label="Flip horizontally"
-            className="hover:bg-stone-800 cursor-pointer rounded-sm"
-            onClick={() => flipComponent("x")}
-          >
-            <FlipHorizontal2 className="m-2" />
-          </button>
-          <button
-            type="button"
-            title="Flip Vertically"
-            aria-label="Flip vertically"
-            className="hover:bg-stone-800 cursor-pointer rounded-sm"
-            onClick={() => flipComponent("y")}
-          >
-            <FlipVertical2 className="m-2" />
-          </button>
+  function deleteActionRef(id) {
+    saveActionRefs(component.actionRefs.filter((ref) => ref.id !== id));
+  }
+
+  return (
+    <>
+      <PanelSection name="Button Link" id="button-link">
+        <PanelInput label="Default Linked Scene">
+          <SceneSelectInput
+            scenes={scenes}
+            value={null}
+            exclusionId={sceneId}
+            onChange={console.log}
+          />
+        </PanelInput>
+        <PanelInput
+          label="Actions"
+          onAdd={() => actionsRef.current?.addItem()}
+        >
+          <ActionsInput
+            ref={actionsRef}
+            items={component.actionRefs ?? []}
+            onDelete={deleteActionRef}
+            onReorder={saveActionRefs}
+          />
+        </PanelInput>
+      </PanelSection>
+      <PanelSection name="Positioning" id="positioning">
+        <div className="flex gap-2">
+          <PanelInput label="Width">
+            <input
+              type="number"
+              className="input"
+              value={inputWidth}
+              onChange={(e) => saveProp(e.target.value, "width", setInputWidth)}
+            />
+          </PanelInput>
+          <PanelInput label="Height">
+            <input
+              type="number"
+              className="input"
+              value={inputHeight}
+              onChange={(e) => saveProp(e.target.value, "height", setInputHeight)}
+            />
+          </PanelInput>
         </div>
-      </div>
-    </fieldset>
+        <div className="flex gap-2">
+          <PanelInput label="X Position">
+            <input
+              type="number"
+              className="input"
+              value={inputX}
+              onChange={(e) => saveProp(e.target.value, "x", setInputX)}
+            />
+          </PanelInput>
+          <PanelInput label="Y Position">
+            <input
+              type="number"
+              className="input"
+              value={inputY}
+              onChange={(e) => saveProp(e.target.value, "y", setInputY)}
+            />
+          </PanelInput>
+        </div>
+        <div className="flex gap-2">
+          <PanelInput label="Angle (Degrees)">
+            <input
+              type="number"
+              className="input"
+              value={inputAngle}
+              onChange={(e) => saveProp(e.target.value, "rotation", setInputAngle)}
+            />
+          </PanelInput>
+          <PanelInput>
+            <div className="flex gap-1">
+              <button
+                type="button"
+                title="Flip Horizontally"
+                aria-label="flip horizontally"
+                className="btn btn-panel !justify-center"
+                onClick={() => flipComponent("x")}
+              >
+                <FlipHorizontal2 size={18} />
+              </button>
+              <button
+                type="button"
+                title="Flip Vertically"
+                aria-label="flip vertically"
+                className="btn btn-panel !justify-center"
+                onClick={() => flipComponent("y")}
+              >
+                <FlipVertical2 size={18} />
+              </button>
+            </div>
+          </PanelInput>
+        </div>
+      </PanelSection>
+    </>
   );
 }
