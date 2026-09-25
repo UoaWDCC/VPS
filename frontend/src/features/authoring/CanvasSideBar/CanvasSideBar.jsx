@@ -4,7 +4,7 @@ import {
   BracesIcon,
   HeadphonesIcon,
   MonitorCog,
-  ZapIcon,
+  SplitIcon,
 } from "lucide-react";
 import useEditorStore from "../stores/editor";
 import useVisualScene from "../stores/visual";
@@ -19,12 +19,12 @@ import PropertyOperationMenu from "../../../components/Properties/PropertyOperat
 const ALWAYS_PANELS = [
   { key: "scene", label: "Scene Details", Icon: MonitorCog },
   { key: "audio", label: "Audio Elements", Icon: HeadphonesIcon },
+  { key: "actions", label: "Actions", Icon: SplitIcon },
 ];
 
 const CONTEXTUAL_PANELS = [
   { key: "bindings", label: "Property Bindings", Icon: BracesIcon },
   { key: "object-properties", label: "Object Properties", Icon: BoxIcon },
-  { key: "actions", label: "Button Actions", Icon: ZapIcon },
 ];
 
 const PANEL_LABELS = Object.fromEntries(
@@ -101,9 +101,8 @@ export default function CanvasSideBar() {
 
   return (
     <div
-      className={`flex shrink-0 items-center justify-end gap-3 overflow-hidden pb-m transition-[width] duration-150 ease-out motion-reduce:transition-none ${
-        activePanel ? "w-[calc(24rem_+_4.25rem)]" : "w-14"
-      }`}
+      className={`flex shrink-0 items-center justify-end gap-3 overflow-hidden pb-m transition-[width] duration-150 ease-out motion-reduce:transition-none ${activePanel ? "w-[calc(24rem_+_4.25rem)]" : "w-14"
+        }`}
     >
       <SidePanel
         label={PANEL_LABELS[activePanel]}
