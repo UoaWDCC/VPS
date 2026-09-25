@@ -47,8 +47,9 @@ function SelectInput<T>(props: SelectInputProps<T>) {
 
   return (
     <div
-      className={`dropdown flex-1 ${disabled ? "pointer-events-none opacity-50" : ""
-        }`}
+      className={`dropdown flex-1 ${
+        disabled ? "pointer-events-none opacity-50" : ""
+      }`}
     >
       <div
         ref={triggerRef}

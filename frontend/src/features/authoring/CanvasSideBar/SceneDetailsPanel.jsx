@@ -15,10 +15,10 @@ import SceneSelectInput from "../components/SceneSelectInput";
 import ActionsInput from "../components/ActionsInput";
 
 /**
- * The content of the "Scene Details" panel, such as the scene name.
+ * The content of the "Scene Details" panel.
  * @component
  */
-export default function SceneSettings() {
+function SceneDetailsPanel() {
   const { scenes, modifyScene } = useContext(SceneContext);
   const { roleList } = useContext(ScenarioContext);
 
@@ -188,3 +188,5 @@ export default function SceneSettings() {
     </>
   );
 }
+
+export default SceneDetailsPanel;
