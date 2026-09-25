@@ -1,27 +1,31 @@
 import { ChevronDown } from "lucide-react";
 import { useEffect, useRef } from "react";
 
-interface SelectInputProps<T> {
+interface BaseSelectInputProps<T> {
   values: T[];
   value: T | null;
   display?: (v: T) => string;
-  onChange: (v: T | null) => void;
-  nullable?: boolean;
   disabled?: boolean;
   autoFocus?: boolean;
   onBlur?: () => void;
 }
 
-function SelectInput<T>({
-  values,
-  value,
-  display,
-  nullable = false,
-  disabled = false,
-  onChange,
-  autoFocus = false,
-  onBlur,
-}: SelectInputProps<T>) {
+// onChange only receives null when the "None" option is offered
+type SelectInputProps<T> = BaseSelectInputProps<T> &
+  (
+    | { nullable: true; onChange: (v: T | null) => void }
+    | { nullable?: false; onChange: (v: T) => void }
+  );
+
+function SelectInput<T>(props: SelectInputProps<T>) {
+  const {
+    values,
+    value,
+    display,
+    disabled = false,
+    autoFocus = false,
+    onBlur,
+  } = props;
   const render = display ?? ((v: T) => String(v));
   const triggerRef = useRef<HTMLDivElement>(null);
 
@@ -30,23 +34,28 @@ function SelectInput<T>({
     if (autoFocus) triggerRef.current?.focus();
   }, []);
 
-  function handleClick(v: T | null) {
+  function handleClick(v: T) {
     (document.activeElement as HTMLDivElement).blur();
-    onChange(v);
+    props.onChange(v);
+  }
+
+  function handleClear() {
+    if (!props.nullable) return;
+    (document.activeElement as HTMLDivElement).blur();
+    props.onChange(null);
   }
 
   return (
     <div
-      className={`dropdown flex-1 ${
-        disabled ? "pointer-events-none opacity-50" : ""
-      }`}
+      className={`dropdown flex-1 ${disabled ? "pointer-events-none opacity-50" : ""
+        }`}
     >
       <div
         ref={triggerRef}
         tabIndex={0}
         role="button"
         onBlur={onBlur}
-        className="justify-between input mb-1 font-normal join-item w-full"
+        className="justify-between input font-normal join-item w-full"
       >
         <span className="truncate">
           {value != null ? render(value) : "None"}
@@ -69,9 +78,9 @@ function SelectInput<T>({
               </a>
             </li>
           ))}
-          {nullable ? (
+          {props.nullable ? (
             <li>
-              <a onClick={() => handleClick(null)}>None</a>
+              <a onClick={handleClear}>None</a>
             </li>
           ) : null}
         </ul>
