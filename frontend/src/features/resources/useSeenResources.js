@@ -1,5 +1,5 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useContext } from "react";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { useContext, useMemo, useState } from "react";
 import { useParams } from "react-router-dom";
 import AuthenticationContext from "../../context/AuthenticationContext";
 import { api, handleGeneric } from "../../util/api";
@@ -19,36 +19,33 @@ async function addSeenResources(user, scenarioId, resourceIds) {
 export function useSeenResources() {
   const { scenarioId } = useParams();
   const { user } = useContext(AuthenticationContext);
-  const queryClient = useQueryClient();
-  const queryKey = ["seenResources", user.uid, scenarioId];
+
+  //ids seen this session separate from fetched history, merged on read
+  //this way a fetch that started before a save cannot drop it
+  const [markedIds, setMarkedIds] = useState([]);
 
   const seenQuery = useQuery({
-    queryKey,
+    queryKey: ["seenResources", user.uid, scenarioId],
     queryFn: () => getSeenResources(user, scenarioId),
   });
 
   const { mutate } = useMutation({
     mutationFn: (resourceId) =>
       addSeenResources(user, scenarioId, [resourceId]),
-    onMutate: async (resourceId) => {
-      await queryClient.cancelQueries(queryKey);
-      const previous = queryClient.getQueryData(queryKey);
-      queryClient.setQueryData(queryKey, (prev = []) => [...prev, resourceId]);
-      return { previous };
-    },
-    onError: (e, _, context) => {
-      if (context?.previous) {
-        queryClient.setQueryData(queryKey, context.previous);
-      }
+    onError: (e, resourceId) => {
+      setMarkedIds((prev) => prev.filter((id) => id !== resourceId));
       handleGeneric(e);
     },
-    onSettled: () => queryClient.invalidateQueries(queryKey),
   });
 
-  const seenIds = seenQuery.data ?? [];
+  const seenIds = useMemo(
+    () => [...new Set([...(seenQuery.data ?? []), ...markedIds])],
+    [seenQuery.data, markedIds]
+  );
 
   const markSeen = (resourceId) => {
     if (seenIds.includes(resourceId)) return;
+    setMarkedIds((prev) => [...prev, resourceId]);
     mutate(resourceId);
   };
 
