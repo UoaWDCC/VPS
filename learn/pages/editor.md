@@ -22,6 +22,10 @@ A scene can contain images, text and a few different shapes. To add any of these
 | Ctrl             | Resize from center  |
 | Shift (Rotating) | Increment by 15 deg |
 
+### Scene Background
+
+To set a background for a scene, open the **Scene Details** section on the right and press the **Background** row. From the dialog you can pick a solid colour, or upload/select an image and choose how it should fit the canvas. The background applies to the current scene only.
+
 ### Audio Content
 
 You can also add audio to a scene by expanding the **Audio Elements** section and pressing the plus button. The app only supports `.mp3` audio files. All audio content in a scene will begin playing as soon as the player navigates to the scene. The **Loop Audio** toggle controls whether the audio continues to play as long as the user is on the scene, or ends after it plays once. Regardless of this option, the audio playback will end as soon as the player navigates away from the scene.
@@ -39,4 +43,4 @@ Since the multiplayer playthrough of scenarios is intended to be role-based and 
 ## Next Steps
 
 - Track player choices and scores using [Properties & Logic](/properties/).
-- Add images and PDFs for players to reference from [Resources](/resources/).
+- Add images and PDFs for players to reference from [Player Documents](/resources/).

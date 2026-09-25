@@ -82,7 +82,7 @@ export default function ManageResourcesPage() {
               {/* LEFT: Groups and files */}
               <div className="min-h-[35dvh] min-w-0 overflow-hidden lg:h-full lg:min-h-0">
                 <div className="card-body flex min-h-0 flex-col gap-4 px-0">
-                  <h1 className="flex-none text-xl">Uploaded Resources</h1>
+                  <h1 className="flex-none text-xl">Player Documents</h1>
 
                   <div className="flex items-center gap-4">
                     <label className="input search search-xs flex-grow">
@@ -111,7 +111,7 @@ export default function ManageResourcesPage() {
                     {/* file upload button */}
                     <button
                       className="btn btn-phantom btn-xs p-0 tooltip tooltip-bottom"
-                      data-tip="Upload Resource"
+                      data-tip="Upload Document"
                       onClick={() => {
                         pendingParentIdRef.current = null;
                         inputRef.current?.click();
@@ -125,7 +125,7 @@ export default function ManageResourcesPage() {
                     <div className="flex flex-1 flex-col items-center justify-center gap-4 p-6 text-center">
                       <FolderPlusIcon size={32} className="text-primary" />
                       <span className="text--1 text-primary">
-                        No resources yet. Upload a file or create a collection
+                        No documents yet. Upload a file or create a collection
                         to get started.
                       </span>
                       <div className="flex flex-col items-stretch gap-2">
@@ -148,7 +148,7 @@ export default function ManageResourcesPage() {
                           }}
                         >
                           <FilePlusIcon size={16} />
-                          Upload Resource
+                          Upload Document
                         </button>
                       </div>
                     </div>
@@ -156,7 +156,7 @@ export default function ManageResourcesPage() {
                     <ul className="menu min-h-0 w-full flex-1 overflow-auto p-0">
                       {search.trim() && filteredTree.length === 0 && (
                         <li className="p-2 opacity-60">
-                          No matching resources found.
+                          No matching documents found.
                         </li>
                       )}
                       <EditableResourceTree
@@ -191,7 +191,7 @@ export default function ManageResourcesPage() {
                     <div className="min-h-[50dvh] flex flex-1 flex-col gap-4 lg:min-h-0 justify-center items-center border border-primary rounded-xl">
                       <FileTextIcon size={32} />
                       <span className="text--1">
-                        Select a resource to show the preview
+                        Select a document to show the preview
                       </span>
                     </div>
                   )}
