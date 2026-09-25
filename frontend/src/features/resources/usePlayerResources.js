@@ -11,6 +11,8 @@ export function usePlayerResources(properties, enabled) {
   const prevVisibleIds = useRef(new Set());
   const ready = enabled && isLoaded && resourcesQuery.isSuccess;
 
+  // NOTE: the filtering by properties should ideally be done on the
+  // server to prevent cheating, but here we filter before rendering
   const tree = useMemo(
     () =>
       filterTreeByConditions(
