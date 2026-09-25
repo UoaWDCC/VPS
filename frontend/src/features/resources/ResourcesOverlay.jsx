@@ -13,11 +13,12 @@ export default function ResourcesPanel({
   tree,
   unseenIds,
   markSeen,
-  resourcesQuery,
+  isLoading,
+  isError,
+  error,
   open,
   onClose,
 }) {
-  const { isLoading, isError, error } = resourcesQuery;
   const [selectedResourceId, setSelectedResourceId] = useState(null);
   const [search, setSearch] = useState("");
 

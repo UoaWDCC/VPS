@@ -5,13 +5,13 @@ import { buildResourceTree, flattenFiles } from "./util";
 import { useResources } from "./useResources";
 import { useSeenResources } from "./useSeenResources";
 
-export function useResourceVisibility(properties, enabled) {
+export function usePlayerResources(properties, enabled) {
   const { resourcesQuery } = useResources();
   const { seenIds, isLoaded, markSeen } = useSeenResources();
   const prevVisibleIds = useRef(new Set());
   const ready = enabled && isLoaded && resourcesQuery.isSuccess;
 
-  const filteredTree = useMemo(
+  const tree = useMemo(
     () =>
       filterTreeByConditions(
         buildResourceTree(resourcesQuery.data ?? []),
@@ -20,8 +20,8 @@ export function useResourceVisibility(properties, enabled) {
     [resourcesQuery.data, properties]
   );
   const visibleIds = useMemo(
-    () => flattenFiles(filteredTree).map((resource) => resource._id),
-    [filteredTree]
+    () => flattenFiles(tree).map((resource) => resource._id),
+    [tree]
   );
   const unseenIds = useMemo(() => {
     if (!ready) return [];
@@ -43,5 +43,7 @@ export function useResourceVisibility(properties, enabled) {
     }
   }, [ready, visibleIds, unseenIds]);
 
-  return { filteredTree, unseenIds, markSeen, resourcesQuery };
+  const { isLoading, isError, error } = resourcesQuery;
+
+  return { tree, unseenIds, markSeen, isLoading, isError, error };
 }
