@@ -312,6 +312,10 @@ body,
   @apply btn-ghost font-normal text-primary hover:text-secondary border-none shadow-none bg-transparent;
 }
 
+.btn.btn-panel {
+  @apply px-1.5 py-0.5 bg-base-300 hover:bg-base-100 border-0 shadow-none text-xs font-normal h-7 w-full justify-start
+}
+
 .border-gradient {
   border-image: linear-gradient(
       to right,

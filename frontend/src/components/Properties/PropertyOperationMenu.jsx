@@ -2,13 +2,7 @@ import SceneContext from "../../context/SceneContext";
 import PanelInput from "../../features/authoring/CanvasSideBar/PanelInput";
 import ConditionRow from "../../features/authoring/components/ConditionRow";
 import SceneSelectInput from "../../features/authoring/components/SceneSelectInput";
-import {
-  ChevronDownIcon,
-  ChevronUpIcon,
-  GripVerticalIcon,
-  PlusIcon,
-  XIcon,
-} from "lucide-react";
+import { ChevronDownIcon, ChevronUpIcon, PlusIcon, XIcon } from "lucide-react";
 import { useContext, useRef, useState } from "react";
 import ListInput from "../../features/authoring/components/ListInput";
 import OperationRow from "../../features/authoring/components/OperationRow";
@@ -58,7 +52,7 @@ function PropertyOperationMenu() {
     <>
       <button
         type="button"
-        className="btn px-1.5 py-1/2 bg-base-300 hover:bg-base-100 border-0 shadow-none text-xs font-normal h-7 w-full justify-start"
+        className="btn btn-panel"
         onClick={handleCreate}
       >
         <PlusIcon size={18} />
@@ -68,9 +62,6 @@ function PropertyOperationMenu() {
         {actions.map((action) => (
           <li key={action.id} className="-mx-5 group flex flex-col gap-2 py-1.5">
             <div className="flex gap-2 items-center px-5">
-              <div className="w-6 h-6 flex items-center justify-center">
-                <GripVerticalIcon size={14} />
-              </div>
               <input
                 type="text"
                 value={action.name}

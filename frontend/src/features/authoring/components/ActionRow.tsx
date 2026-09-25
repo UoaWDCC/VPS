@@ -43,7 +43,7 @@ function ActionRow({
       style={style}
       ref={setNodeRef}
     >
-      <div className="flex gap-2 items-center px-5">
+      <div className="flex gap-2 items-center px-5 py-0.5">
         <div
           className={`w-6 h-6 flex items-center justify-center ${isDraft ? "" : isDragging ? "cursor-grabbing touch-none" : "cursor-grab touch-none"}`}
           {...attributes}
