@@ -1,6 +1,7 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useContext, useMemo, useState } from "react";
 import { useParams } from "react-router-dom";
+import toast from "react-hot-toast";
 import AuthenticationContext from "../../context/AuthenticationContext";
 import { api, handleGeneric } from "../../util/api";
 
@@ -27,6 +28,10 @@ export function useSeenResources() {
   const seenQuery = useQuery({
     queryKey: ["seenResources", user.uid, scenarioId],
     queryFn: () => getSeenResources(user, scenarioId),
+    onError: (e) => {
+      console.error(e);
+      toast.error("Couldn't load new resource notifications");
+    },
   });
 
   const { mutate } = useMutation({
@@ -51,7 +56,8 @@ export function useSeenResources() {
 
   return {
     seenIds,
-    isLoaded: seenQuery.isSuccess,
+    //a failed refetch keeps the last history, so don't hide indicators
+    isLoaded: seenQuery.data !== undefined,
     markSeen,
   };
 }
