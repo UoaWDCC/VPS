@@ -48,6 +48,7 @@ interface UseFieldOptions<T> {
 function useField<T>(path: string, { commit = "onBlur", coerce, empty = "" }: UseFieldOptions<T> = {}) {
   const committed = useVisualScene(s => getField(path, s)) as T;
   const [draft, setDraft] = useState<Raw<T>>(committed);
+  const [error, setError] = useState(false);
 
   useEffect(() => setDraft(committed), [committed])
 
@@ -67,11 +68,16 @@ function useField<T>(path: string, { commit = "onBlur", coerce, empty = "" }: Us
 
   function write(raw: Raw<T>) {
     const coerced = coerce ? coerce(raw) : raw;
-    if (coerced === INVALID || fastIsEqual(coerced, committed)) setDraft(committed);
+    if (coerced === INVALID) {
+      setError(true);
+      return;
+    }
+    setError(false);
+    if (fastIsEqual(coerced, committed)) return;
     else setField(path, coerced);
   }
 
-  return { value: draft ?? empty, onChange, onBlur, onKeyDown }
+  return { props: { value: draft ?? empty, onChange, onBlur, onKeyDown }, error }
 }
 
 export default useField;
