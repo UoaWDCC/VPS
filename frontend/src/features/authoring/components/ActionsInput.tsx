@@ -20,9 +20,8 @@ import {
 } from "@dnd-kit/core";
 
 interface ActionsInputProps {
-  items: ActionRef[];
-  onDelete: (id: string) => void;
-  onReorder: (updated: ActionRef[]) => void;
+  value: ActionRef[];
+  onChange: (value: ActionRef[]) => void;
 }
 
 export interface ActionsInputHandle {
@@ -34,13 +33,14 @@ function nextIndex(items: ActionRef[]) {
 }
 
 const ActionsInput = forwardRef<ActionsInputHandle, ActionsInputProps>(
-  function ActionsInput({ items, onDelete, onReorder }, ref) {
+  function ActionsInput({ value, onChange }, ref) {
     const actions = useVisualScene((s) => s.actions);
     const [hasDraft, setHasDraft] = useState(false);
     const [activeIdDragging, setActiveIdDragging] = useState<string | null>(
       null
     );
 
+    const items = value;
     const sorted = [...items].sort((a, b) => a.index - b.index);
     const rows = hasDraft
       ? [...sorted, { id: "", index: nextIndex(items) }]
@@ -80,7 +80,7 @@ const ActionsInput = forwardRef<ActionsInputHandle, ActionsInputProps>(
 
       if (oldIndex === -1 || newIndex === -1) return;
 
-      onReorder(
+      onChange(
         arrayMove(sorted, oldIndex, newIndex).map((actionRef, index) => ({
           ...actionRef,
           index,
@@ -91,13 +91,13 @@ const ActionsInput = forwardRef<ActionsInputHandle, ActionsInputProps>(
     function handleChange(id: string, action: Action | null) {
       if (id === "") {
         if (action) {
-          onReorder([...items, { id: action.id, index: nextIndex(items) }]);
+          onChange([...items, { id: action.id, index: nextIndex(items) }]);
         }
         setHasDraft(false);
         return;
       }
 
-      onReorder(
+      onChange(
         items.map((actionRef) =>
           actionRef.id === id
             ? { ...actionRef, id: action?.id ?? actionRef.id }
@@ -115,7 +115,7 @@ const ActionsInput = forwardRef<ActionsInputHandle, ActionsInputProps>(
         setHasDraft(false);
         return;
       }
-      onDelete(id);
+      onChange(items.filter(ref => ref.id !== id));
     }
 
     return (
