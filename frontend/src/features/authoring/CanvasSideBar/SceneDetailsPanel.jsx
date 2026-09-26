@@ -11,6 +11,7 @@ import SceneSelectInput from "../components/SceneSelectInput";
 import ActionsInput from "../components/ActionsInput";
 import useField from "../inputs/useField";
 import { coerceNumber, coerceRange, INVALID } from "../inputs/coerce";
+import { cn } from "../../../util/classnames";
 
 /**
  * The content of the "Scene Details" panel.
@@ -46,15 +47,15 @@ function SceneDetailsPanel() {
       <PanelSection name="Details" id="scene-details">
         <PanelInput label="Name">
           <input
-            {...nameField}
+            {...nameField.props}
             type="text"
-            className="input"
+            className={cn("input", nameField.error && "input-error")}
             placeholder="Awesome Scene"
           />
         </PanelInput>
         <PanelInput label="Allowed Roles">
           <MultiSelectInput
-            {...rolesField}
+            {...rolesField.props}
             options={roleList}
           />
         </PanelInput>
@@ -73,7 +74,7 @@ function SceneDetailsPanel() {
           onAdd={() => defaultActionsRef.current?.addItem()}
         >
           <ActionsInput
-            {...defaultActionRefsField}
+            {...defaultActionRefsField.props}
             ref={defaultActionsRef}
           />
         </PanelInput>
@@ -81,9 +82,9 @@ function SceneDetailsPanel() {
       <PanelSection name="Timer" id="scene-timer">
         <PanelInput label="Timer Duration (Seconds)">
           <input
-            {...timeField}
+            {...timeField.props}
             min="1"
-            className="input"
+            className={cn("input", timeField.error && "input-error")}
             placeholder="No timer"
           />
         </PanelInput>
@@ -100,7 +101,7 @@ function SceneDetailsPanel() {
           onAdd={() => timerActionsRef.current?.addItem()}
         >
           <ActionsInput
-            {...timerActionRefsField}
+            {...timerActionRefsField.props}
             ref={timerActionsRef}
           />
         </PanelInput>
