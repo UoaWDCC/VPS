@@ -10,7 +10,7 @@ import MultiSelectInput from "../components/MultiSelectInput";
 import SceneSelectInput from "../components/SceneSelectInput";
 import ActionsInput from "../components/ActionsInput";
 import useField from "../inputs/useField";
-import { coerceNumber, coerceRange, INVALID } from "../inputs/coerce";
+import { coerceInt, coerceRange, INVALID } from "../inputs/coerce";
 import { cn } from "../../../util/classnames";
 
 /**
@@ -35,7 +35,7 @@ function SceneDetailsPanel() {
 
   const nameField = useField("name", { coerce: coerceName });
   const rolesField = useField("roles", { empty: null });
-  const timeField = useField("time", { coerce: (v) => coerceRange(coerceNumber(v), 0, null) });
+  const timeField = useField("time", { coerce: [coerceInt, coerceRange(0, null)] });
   const timerActionRefsField = useField("timerActionRefs", { commit: "onChange" });
   const defaultActionRefsField = useField("defaultActionRefs", { commit: "onChange" });
 
