@@ -18,6 +18,18 @@ import {
 } from "../sceneDao.js";
 import { useMongoMemoryServer } from "../../../test/testSetup.js";
 
+// createScene only takes a name, so scene content is added through patchScene
+const createPatchedScene = async (scenarioId, { name, ...content }) => {
+  const scene = await createScene(scenarioId, { name });
+  const patch = Object.fromEntries(
+    Object.entries(content).map(([field, items]) => [
+      field,
+      { upserted: items, deleted: [] },
+    ])
+  );
+  return patchScene(scene._id, patch, scenarioId);
+};
+
 describe("Scene DAO patchScene tests", () => {
   useMongoMemoryServer();
 
@@ -208,7 +220,7 @@ describe("Scene DAO patchScene tests", () => {
     });
 
     await expect(
-      createScene(scenario._id.toString(), {
+      createPatchedScene(scenario._id.toString(), {
         name: "Linked scene",
         components: [],
         actions: [
@@ -225,50 +237,35 @@ describe("Scene DAO patchScene tests", () => {
     ).rejects.toMatchObject({ status: 400 });
   });
 
-  it("rejects createScene for an unknown scenario parent and increments file refs for created scenes", async () => {
+  it("rejects createScene for an unknown scenario parent and creates a name-only scene", async () => {
     const missingScenarioId = new mongoose.Types.ObjectId().toString();
     await expect(
-      createScene(missingScenarioId, {
-        name: "Missing parent",
-        components: [],
-      })
+      createScene(missingScenarioId, { name: "Missing parent" })
     ).rejects.toMatchObject({
       status: 404,
       message: "scenario not found",
     });
 
     const scenario = await Scenario.create({
-      name: "File scenario",
+      name: "Name-only scenario",
       uid: "author-3",
       scenes: [],
     });
 
-    const uploadedFile = await UploadedFile.create({
-      name: "clip.png",
-      type: "image",
-      path: "images/clip.png",
-      url: "https://example.com/clip.png",
-      contentType: "image/png",
-      size: 128,
-      uploaderUid: "uploader-3",
-      scenarioId: scenario._id,
-      refCount: 0,
-    });
-
     const created = await createScene(scenario._id.toString(), {
-      name: "File scene",
-      components: [
-        { id: "img-1", type: "image", fileId: uploadedFile._id.toString() },
-      ],
+      name: "Fresh scene",
+      components: [{ id: "ignored", type: "box" }],
     });
 
-    expect(created).toMatchObject({ name: "File scene" });
+    expect(created).toMatchObject({
+      name: "Fresh scene",
+      components: [],
+      actions: [],
+      background: null,
+    });
     expect(await Scenario.findById(scenario._id)).toMatchObject({
       scenes: expect.arrayContaining([created._id]),
     });
-
-    const refreshedFile = await UploadedFile.findById(uploadedFile._id);
-    expect(refreshedFile.refCount).toBe(1);
   });
 
   it("deletes a scene and decrements the file reference count for linked media", async () => {
@@ -437,7 +434,6 @@ describe("Scene DAO patchScene tests", () => {
 
     const newScene = await createScene(linkScenario._id.toString(), {
       name: "Fresh scene",
-      components: [],
     });
 
     expect(await retrieveScene(newScene._id.toString())).toMatchObject({
@@ -445,7 +441,7 @@ describe("Scene DAO patchScene tests", () => {
     });
 
     await expect(
-      createScene(linkScenario._id.toString(), {
+      createPatchedScene(linkScenario._id.toString(), {
         name: "Bad link",
         components: [],
         actions: [
@@ -653,7 +649,7 @@ describe("Scene DAO patchScene tests", () => {
       stateVariables: [{ id: "hp", name: "hp", type: "number", value: 10 }],
     });
 
-    const created = await createScene(scenario._id.toString(), {
+    const created = await createPatchedScene(scenario._id.toString(), {
       name: "Scene with action",
       components: [
         {
@@ -705,7 +701,7 @@ describe("Scene DAO patchScene tests", () => {
     });
 
     await expect(
-      createScene(scenario._id.toString(), {
+      createPatchedScene(scenario._id.toString(), {
         name: "Scene",
         components: [],
         actions: [
@@ -736,7 +732,7 @@ describe("Scene DAO patchScene tests", () => {
     });
 
     await expect(
-      createScene(scenario._id.toString(), {
+      createPatchedScene(scenario._id.toString(), {
         name: "Scene",
         components: [],
         actions: [
@@ -768,7 +764,7 @@ describe("Scene DAO patchScene tests", () => {
     });
 
     await expect(
-      createScene(scenario._id.toString(), {
+      createPatchedScene(scenario._id.toString(), {
         name: "Scene",
         components: [],
         actions: [
@@ -802,7 +798,7 @@ describe("Scene DAO patchScene tests", () => {
     });
 
     await expect(
-      createScene(scenario._id.toString(), {
+      createPatchedScene(scenario._id.toString(), {
         name: "Scene",
         components: [],
         actions: [
@@ -834,7 +830,7 @@ describe("Scene DAO patchScene tests", () => {
     });
 
     await expect(
-      createScene(scenario._id.toString(), {
+      createPatchedScene(scenario._id.toString(), {
         name: "Scene",
         components: [],
         actions: [
@@ -859,7 +855,7 @@ describe("Scene DAO patchScene tests", () => {
     });
 
     await expect(
-      createScene(scenario._id.toString(), {
+      createPatchedScene(scenario._id.toString(), {
         name: "Scene",
         components: [],
         actions: [
@@ -884,7 +880,7 @@ describe("Scene DAO patchScene tests", () => {
     });
 
     await expect(
-      createScene(scenario._id.toString(), {
+      createPatchedScene(scenario._id.toString(), {
         name: "Scene",
         components: [
           {
@@ -1340,5 +1336,129 @@ describe("Scene DAO patchScene tests", () => {
     ]);
     expect(refreshedA.actions[0].linkedScene).toBeNull();
     expect(refreshedB.actions[0].linkedScene).toBeNull();
+  });
+
+  describe("defaultLinkedScene/timerLinkedScene", () => {
+    const setupScenario = async () => {
+      const targetScene = await Scene.create({
+        name: "Target scene",
+        components: [],
+      });
+      const scenario = await Scenario.create({
+        name: "Linked scene scenario",
+        uid: "author-17",
+        scenes: [sceneId, targetScene._id],
+      });
+      return { scenarioId: scenario._id.toString(), targetScene };
+    };
+
+    it.each(["defaultLinkedScene", "timerLinkedScene"])(
+      "persists %s when it targets a scene in the same scenario",
+      async (field) => {
+        const { scenarioId, targetScene } = await setupScenario();
+
+        const updated = await patchScene(
+          sceneId,
+          { fields: { [field]: targetScene._id.toString() } },
+          scenarioId
+        );
+
+        expect(updated[field].toString()).toBe(targetScene._id.toString());
+      }
+    );
+
+    it.each(["defaultLinkedScene", "timerLinkedScene"])(
+      "clears %s when patched to null",
+      async (field) => {
+        const { scenarioId, targetScene } = await setupScenario();
+        await Scene.updateOne(
+          { _id: sceneId },
+          { $set: { [field]: targetScene._id } }
+        );
+
+        const updated = await patchScene(
+          sceneId,
+          { fields: { [field]: null } },
+          scenarioId
+        );
+
+        expect(updated[field]).toBeNull();
+      }
+    );
+
+    it.each(["defaultLinkedScene", "timerLinkedScene"])(
+      "rejects a malformed %s with HTTP 400",
+      async (field) => {
+        const { scenarioId } = await setupScenario();
+
+        for (const value of ["abc", 123, {}]) {
+          await expect(
+            patchScene(sceneId, { fields: { [field]: value } }, scenarioId)
+          ).rejects.toMatchObject({ status: 400 });
+        }
+      }
+    );
+
+    it.each(["defaultLinkedScene", "timerLinkedScene"])(
+      "rejects a %s outside the current scenario",
+      async (field) => {
+        const { scenarioId } = await setupScenario();
+        const foreignScene = await Scene.create({
+          name: "Foreign scene",
+          components: [],
+        });
+
+        await expect(
+          patchScene(
+            sceneId,
+            { fields: { [field]: foreignScene._id.toString() } },
+            scenarioId
+          )
+        ).rejects.toMatchObject({ status: 400 });
+
+        const unchanged = await Scene.findById(sceneId).lean();
+        expect(unchanged[field]).toBeUndefined();
+      }
+    );
+
+    it("nulls both links on other scenes when the target scene is deleted", async () => {
+      const { scenarioId, targetScene } = await setupScenario();
+      await Scene.updateOne(
+        { _id: sceneId },
+        {
+          $set: {
+            defaultLinkedScene: targetScene._id,
+            timerLinkedScene: targetScene._id,
+          },
+        }
+      );
+
+      const result = await deleteScene(scenarioId, targetScene._id.toString());
+      expect(result.deleted).toBe(true);
+
+      const refreshed = await Scene.findById(sceneId).lean();
+      expect(refreshed.defaultLinkedScene).toBeNull();
+      expect(refreshed.timerLinkedScene).toBeNull();
+    });
+
+    it("copies both links when duplicating a scene", async () => {
+      const { scenarioId, targetScene } = await setupScenario();
+      await Scene.updateOne(
+        { _id: sceneId },
+        {
+          $set: {
+            defaultLinkedScene: targetScene._id,
+            timerLinkedScene: targetScene._id,
+          },
+        }
+      );
+
+      const copy = await duplicateScene(scenarioId, sceneId);
+
+      expect(copy.defaultLinkedScene.toString()).toBe(
+        targetScene._id.toString()
+      );
+      expect(copy.timerLinkedScene.toString()).toBe(targetScene._id.toString());
+    });
   });
 });

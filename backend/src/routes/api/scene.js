@@ -56,25 +56,9 @@ router.get("/all", async (req, res) => {
 router.post(
   "/",
   handle(async (req, res) => {
-    const {
-      name,
-      components,
-      time,
-      actions,
-      defaultActionRefs,
-      timerActionRefs,
-      background,
-    } = req.body;
+    const { name } = req.body;
 
-    const scene = await createScene(req.params.scenarioId, {
-      name,
-      components,
-      time,
-      actions,
-      defaultActionRefs,
-      timerActionRefs,
-      background,
-    });
+    const scene = await createScene(req.params.scenarioId, { name });
 
     res.status(HTTP_OK).json(scene);
   })
