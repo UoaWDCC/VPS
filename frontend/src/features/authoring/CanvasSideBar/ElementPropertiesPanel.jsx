@@ -1,6 +1,6 @@
 import { getBoxCenter, translate, correct } from "../../authoring/util";
-import { useEffect, useState, useRef, useContext } from "react";
-import { modifyComponentProp } from "../scene/operations/component";
+import { useRef, useContext } from "react";
+import { modifyComponentBounds } from "../scene/operations/component";
 import { FlipHorizontal2, FlipVertical2 } from "lucide-react";
 import PanelSection from "./PanelSection";
 import PanelInput from "./PanelInput";
@@ -8,11 +8,34 @@ import SceneSelectInput from "../components/SceneSelectInput";
 import SceneContext from "../../../context/SceneContext";
 import useVisualScene from "../stores/visual";
 import ActionsInput from "../components/ActionsInput";
+import useField from "../inputs/useField";
+import { cn } from "../../../util/classnames";
+import { coerceFloat, coerceRequired, INVALID } from "../inputs/coerce";
 
-const ZERO_VERTS = [
-  { x: 0, y: 0 },
-  { x: 0, y: 0 },
-];
+function coerceAngle(raw) { return raw % 360; }
+
+function coercePosition(bounds, axis) {
+  const other = axis === "x" ? "y" : "x";
+  return (value) => {
+    const diff = value - bounds.verts[0][axis];
+    return translate(bounds.verts, { [axis]: diff, [other]: 0 });
+  };
+}
+
+function coerceExtent(bounds, axis) {
+  const other = axis === "x" ? "y" : "x";
+  return (value) => {
+    if (value === 0) return INVALID;
+    const { verts } = bounds;
+    const newVert = { [axis]: verts[0][axis] + value, [other]: verts[1][other] };
+    const newVerts = [verts[0], newVert, verts[2]].filter(Boolean);
+    return correct(newVerts, getBoxCenter(verts), bounds.rotation ?? 0);
+  };
+}
+
+function round2dp(value) {
+  return Math.round(value * 100) / 100;
+}
 
 /*
  * The content of the "Element Properties" panel.
@@ -20,174 +43,51 @@ const ZERO_VERTS = [
  * @component
  */
 function ElementPropertiesPanel({ component }) {
-  const verts = component?.bounds?.verts ?? ZERO_VERTS;
   const { scenes } = useContext(SceneContext);
   const sceneId = useVisualScene((scene) => scene.id);
 
   const actionsRef = useRef(null);
+  const actionRefsField = useField("actionRefs", { commit: "onChange", component: component?.id ?? null })
 
-  // x and y vals used for setting and current
-  const [inputX, setInputX] = useState(Math.round(verts[0].x * 100) / 100);
-  const [inputY, setInputY] = useState(Math.round(verts[0].y * 100) / 100);
-  // Width and height vals
-  const [inputWidth, setInputWidth] = useState(
-    Math.round((verts[1].x - verts[0].x) * 100) / 100
-  );
-  const [inputHeight, setInputHeight] = useState(
-    Math.round((verts[1].y - verts[0].y) * 100) / 100
-  );
-  const [inputAngle, setInputAngle] = useState(
-    (Math.round((component?.bounds?.rotation ?? 0) * 100) / 100) % 360
-  );
-
-  useEffect(() => {
-    const verts = component?.bounds?.verts ?? ZERO_VERTS;
-    const width = Math.round((verts[1].x - verts[0].x) * 100) / 100;
-    const height = Math.round((verts[1].y - verts[0].y) * 100) / 100;
-    const x = Math.round(verts[0].x * 100) / 100;
-    const y = Math.round(verts[0].y * 100) / 100;
-    const rotation = Math.round((component?.bounds?.rotation ?? 0) * 100) / 100;
-
-    setInputWidth(width);
-    setInputHeight(height);
-    setInputX(x);
-    setInputY(y);
-    setInputAngle(rotation);
-  }, [component?.bounds?.verts, component?.bounds?.rotation]);
-
-  const latestValues = useRef({});
-  latestValues.current = {
-    inputX,
-    inputY,
-    inputWidth,
-    inputHeight,
-    inputAngle,
-  };
-
-  useEffect(() => {
-    return () => {
-      const { inputX, inputY, inputWidth, inputHeight, inputAngle } =
-        latestValues.current;
-      noFields([
-        [inputX, "x", setInputX],
-        [inputY, "y", setInputY],
-        [inputHeight, "height", setInputHeight],
-        [inputWidth, "width", setInputWidth],
-        [inputAngle, "rotation", setInputAngle],
-      ]);
-    };
-  }, [component?.id]);
+  const xPositionField = useField("bounds.verts", {
+    component: component?.id ?? null,
+    derive: (v) => round2dp(v[0].x),
+    coerce: [coerceFloat, coercePosition(component?.bounds, "x")],
+  });
+  const yPositionField = useField("bounds.verts", {
+    component: component?.id ?? null,
+    derive: (v) => round2dp(v[0].y),
+    coerce: [coerceFloat, coercePosition(component?.bounds, "y")],
+  });
+  const widthField = useField("bounds.verts", {
+    component: component?.id ?? null,
+    derive: (v) => round2dp(v[1].x - v[0].x),
+    coerce: [coerceFloat, coerceRequired, coerceExtent(component?.bounds, "x")],
+  });
+  const heightField = useField("bounds.verts", {
+    component: component?.id ?? null,
+    derive: (v) => round2dp(v[1].y - v[0].y),
+    coerce: [coerceFloat, coerceRequired, coerceExtent(component?.bounds, "y")],
+  });
+  const rotationField = useField("bounds.rotation", {
+    derive: round2dp,
+    coerce: [coerceFloat, coerceAngle], component: component?.id ?? null
+  });
 
   if (!component) return null;
 
   function flipComponent(axis) {
-    modifyComponentProp([component.id], "bounds.verts", (prev) => {
-      const center = getBoxCenter(prev);
-      return prev.map((v) => ({
-        x: axis === "x" ? 2 * center.x - v.x : v.x,
-        y: axis === "y" ? 2 * center.y - v.y : v.y,
-      }));
+    modifyComponentBounds([component.id], (prev) => {
+      const center = getBoxCenter(prev.verts);
+      return {
+        ...prev,
+        verts: prev.verts.map((v) => ({
+          x: axis === "x" ? 2 * center.x - v.x : v.x,
+          y: axis === "y" ? 2 * center.y - v.y : v.y,
+        })),
+        rotation: 360 - (prev.rotation ?? 0),
+      };
     });
-    modifyComponentProp(
-      [component.id],
-      "bounds.rotation",
-      (prev) => 360 - (prev ?? 0)
-    );
-  }
-
-  function noFields(values) {
-    values.forEach((value) => {
-      const v = value[0];
-      const type = value[1];
-      const set = value[2];
-      if (v === "") {
-        saveProp("0", type, set);
-      }
-    });
-  }
-
-  function inputValidation(type, v, set, prevValue) {
-    if (v === "" || v === "-" || v.at(-1) === "." || v.slice(-2) === ".0") {
-      set(v);
-      return null;
-    }
-
-    const value = parseFloat(String(v).trim());
-    if (isNaN(value)) return null;
-
-    if (value === 0 && prevValue !== null) {
-      set(1);
-      return 1;
-    }
-    set(value);
-
-    if (Math.sign(value) !== Math.sign(prevValue) && prevValue !== null) {
-      flipComponent(type === "width" ? "x" : "y");
-    }
-
-    return value;
-  }
-
-  // uses the same function as the drag box feat w modifyComponentProp
-  function saveProp(v, type, set) {
-    if (!component) return;
-    const value = inputValidation(
-      type,
-      v,
-      set,
-      type === "width" || type === "height"
-        ? type === "width"
-          ? inputWidth
-          : inputHeight
-        : null
-    );
-    if (value === null) return;
-    const verts = component.bounds.verts;
-
-    if (type === "x") {
-      const diff = value - verts[0].x;
-      modifyComponentProp([component.id], "bounds.verts", (prev) =>
-        translate(prev, { x: diff, y: 0 })
-      );
-    } else if (type === "y") {
-      const diff = value - verts[0].y;
-      modifyComponentProp([component.id], "bounds.verts", (prev) =>
-        translate(prev, { x: 0, y: diff })
-      );
-      // increase bottom y to expand height and same idea with x
-    } else if (type === "width") {
-      const rotation = component.bounds.rotation ?? 0;
-      modifyComponentProp([component.id], "bounds.verts", (prev) => {
-        const center = getBoxCenter(prev);
-        const newVerts = [
-          prev[0],
-          { x: prev[0].x + value, y: prev[1].y },
-          prev[2],
-        ].filter(Boolean);
-        return correct(newVerts, center, rotation);
-      });
-    } else if (type === "height") {
-      const rotation = component.bounds.rotation ?? 0;
-      modifyComponentProp([component.id], "bounds.verts", (prev) => {
-        const center = getBoxCenter(prev);
-        const newVerts = [
-          prev[0],
-          { x: prev[1].x, y: prev[0].y + value },
-          prev[2],
-        ].filter(Boolean);
-        return correct(newVerts, center, rotation);
-      });
-    } else if (type === "rotation") {
-      modifyComponentProp([component.id], "bounds.rotation", value % 360);
-    }
-  }
-
-  function saveActionRefs(updated) {
-    modifyComponentProp([component.id], "actionRefs", updated);
-  }
-
-  function deleteActionRef(id) {
-    saveActionRefs(component.actionRefs.filter((ref) => ref.id !== id));
   }
 
   return (
@@ -204,9 +104,7 @@ function ElementPropertiesPanel({ component }) {
         <PanelInput label="Actions" onAdd={() => actionsRef.current?.addItem()}>
           <ActionsInput
             ref={actionsRef}
-            items={component.actionRefs ?? []}
-            onDelete={deleteActionRef}
-            onReorder={saveActionRefs}
+            {...actionRefsField.props}
           />
         </PanelInput>
       </PanelSection>
@@ -214,50 +112,46 @@ function ElementPropertiesPanel({ component }) {
         <div className="flex gap-2">
           <PanelInput label="Width">
             <input
+              {...widthField.props}
               type="number"
-              className="input"
-              value={inputWidth}
-              onChange={(e) => saveProp(e.target.value, "width", setInputWidth)}
+              inputMode="decimal"
+              className={cn("input", widthField.error && "input-error")}
             />
           </PanelInput>
           <PanelInput label="Height">
             <input
+              {...heightField.props}
               type="number"
-              className="input"
-              value={inputHeight}
-              onChange={(e) =>
-                saveProp(e.target.value, "height", setInputHeight)
-              }
+              inputMode="decimal"
+              className={cn("input", heightField.error && "input-error")}
             />
           </PanelInput>
         </div>
         <div className="flex gap-2">
           <PanelInput label="X Position">
             <input
-              type="number"
-              className="input"
-              value={inputX}
-              onChange={(e) => saveProp(e.target.value, "x", setInputX)}
+              {...xPositionField.props}
+              type="text"
+              inputMode="decimal"
+              className={cn("input", xPositionField.error && "input-error")}
             />
           </PanelInput>
           <PanelInput label="Y Position">
             <input
-              type="number"
-              className="input"
-              value={inputY}
-              onChange={(e) => saveProp(e.target.value, "y", setInputY)}
+              {...yPositionField.props}
+              type="text"
+              inputMode="decimal"
+              className={cn("input", yPositionField.error && "input-error")}
             />
           </PanelInput>
         </div>
         <div className="flex gap-2">
           <PanelInput label="Angle (Degrees)">
             <input
+              {...rotationField.props}
               type="number"
-              className="input"
-              value={inputAngle}
-              onChange={(e) =>
-                saveProp(e.target.value, "rotation", setInputAngle)
-              }
+              inputMode="decimal"
+              className={cn("input", rotationField.error && "input-error")}
             />
           </PanelInput>
           <PanelInput>

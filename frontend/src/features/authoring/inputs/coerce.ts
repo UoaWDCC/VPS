@@ -1,18 +1,28 @@
 export const INVALID = Symbol("invalid");
 
 export type Coerced<T> = T | typeof INVALID;
-export type Raw<T> = string | T;
+export type Raw<T> = string | null | T;
 
-export function coerceNumber(raw: Raw<number | null> | typeof INVALID): Coerced<null | number> {
-  if (raw === INVALID) return INVALID;
+export function coerceInt(raw: Raw<number | null>): Coerced<null | number> {
   if (raw === null || (typeof raw === "string" && raw.trim() === "")) return null;
-  const parsed = typeof raw === "string" ? parseInt(raw, 10) : raw;
-  return !isNaN(parsed) ? parsed : INVALID;
+  const parsed = typeof raw === "string" ? Number(raw) : raw;
+  return Number.isInteger(parsed) ? parsed : INVALID;
 }
 
-export function coerceRange(raw: number | null | typeof INVALID, min: number, max: number): Coerced<null | number> {
-  if (raw === INVALID) return INVALID;
-  if (raw === null) return null;
-  if ((min !== null && raw < min) || (max !== null && raw > max)) return INVALID;
-  return raw;
+export function coerceFloat(raw: Raw<number | null>): Coerced<null | number> {
+  if (raw === null || (typeof raw === "string" && raw.trim() === "")) return null;
+  const parsed = typeof raw === "string" ? Number(raw) : raw;
+  return Number.isFinite(parsed) ? parsed : INVALID;
+}
+
+export function coerceRequired<T>(raw: T | null): Coerced<T> {
+  return raw === null ? INVALID : raw;
+}
+
+export function coerceRange(min: number, max: number) {
+  return (raw: number | null): Coerced<number | null> => {
+    if (raw === null) return null;
+    if ((min !== null && raw < min) || (max !== null && raw > max)) return INVALID;
+    return raw;
+  }
 }
