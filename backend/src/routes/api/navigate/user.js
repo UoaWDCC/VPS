@@ -30,6 +30,8 @@ const getConnectedScenes = async (sceneID, active = true) => {
       actions: 1,
       defaultActionRefs: 1,
       timerActionRefs: 1,
+      timerLinkedScene: 1,
+      defaultLinkedScene: 1,
       roles: 1,
       time: 1,
       background: 1,
@@ -58,19 +60,19 @@ const addSceneToPath = async (
   const filter = replace
     ? { _id: userId }
     : {
-        _id: userId,
-        $or: [
-          { [`${pathField}.0`]: currentSceneId },
-          { [pathField]: { $exists: false } },
-        ],
-      };
+      _id: userId,
+      $or: [
+        { [`${pathField}.0`]: currentSceneId },
+        { [pathField]: { $exists: false } },
+      ],
+    };
 
   const update = replace
     ? { $set: { [pathField]: [sceneId], [enteredField]: new Date() } }
     : {
-        $push: { [pathField]: { $each: [sceneId], $position: 0 } },
-        $set: { [enteredField]: new Date() },
-      };
+      $push: { [pathField]: { $each: [sceneId], $position: 0 } },
+      $set: { [enteredField]: new Date() },
+    };
 
   const res = await User.findOneAndUpdate(filter, update);
   if (!res) throw new HttpError("Scene mismatch has occured", STATUS.CONFLICT);
@@ -163,8 +165,8 @@ export const userNavigate = async (req) => {
     // fresh entry; a plain re-fetch/refresh does neither.
     const updatePromise = isJump
       ? addSceneToPath(user._id, scenarioId, null, startScene, {
-          replace: true,
-        })
+        replace: true,
+      })
       : Promise.resolve();
 
     const [, scenes] = await Promise.all([

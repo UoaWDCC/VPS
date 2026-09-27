@@ -97,34 +97,34 @@ const refreshFromServer = async (user, scenarioId, groupId, isMultiplayer) => {
   const token = await user.getIdToken();
   const config = isMultiplayer
     ? {
-        method: "post",
-        url: `/api/navigate/group/${groupId}`,
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        data: {
-          currentScene: null,
-          addFlags: [],
-          removeFlags: [],
-          componentId: null,
-        },
-      }
+      method: "post",
+      url: `/api/navigate/group/${groupId}`,
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      data: {
+        currentScene: null,
+        addFlags: [],
+        removeFlags: [],
+        componentId: null,
+      },
+    }
     : {
-        method: "post",
-        url: `/api/navigate/user/${scenarioId}`,
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        data: {
-          currentScene: null,
-          addFlags: [],
-          removeFlags: [],
-          componentId: null,
-          startScene: null,
-        },
-      };
+      method: "post",
+      url: `/api/navigate/user/${scenarioId}`,
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      data: {
+        currentScene: null,
+        addFlags: [],
+        removeFlags: [],
+        componentId: null,
+        startScene: null,
+      },
+    };
   const res = await axios.request(config);
   if (res.data.scenes) {
     res.data.scenes.forEach((scene) => sceneCache.set(scene._id, scene));
@@ -158,6 +158,9 @@ export default function PlayScenarioPage({ group }) {
   // guards against a double-click (or double keypress) dispatching the same
   // trigger twice before the first request's response comes back
   const pendingRef = useRef(false);
+  // timer expiry that arrived while another request was in flight, keyed by
+  // the scene it expired on so it's only replayed if we're still there
+  const deferredTimerSceneRef = useRef(null);
 
   const [sceneId, setSceneId] = useState(null);
   const [properties, setProperties] = useState([]);
@@ -218,8 +221,13 @@ export default function PlayScenarioPage({ group }) {
     componentId,
     currentSceneOverride = sceneId
   ) => {
-    if (pendingRef.current) return;
+    if (pendingRef.current) {
+      if (trigger === "timer")
+        deferredTimerSceneRef.current = currentSceneOverride;
+      return;
+    }
     pendingRef.current = true;
+    let stayedOnScene = false;
 
     const currentRequestId = ++requestIdRef.current; // track navigation request ID
 
@@ -229,24 +237,24 @@ export default function PlayScenarioPage({ group }) {
     try {
       const { newSceneId, properties, newPropertyVersion } = isMultiplayer
         ? await navigateMultiplayer(
-            user,
-            group._id,
-            currentSceneOverride,
-            addFlags,
-            removeFlags,
-            trigger,
-            componentId
-          )
+          user,
+          group._id,
+          currentSceneOverride,
+          addFlags,
+          removeFlags,
+          trigger,
+          componentId
+        )
         : await navigateSingleplayer(
-            user,
-            scenarioId,
-            currentSceneOverride,
-            addFlags,
-            removeFlags,
-            trigger,
-            componentId,
-            startScene
-          );
+          user,
+          scenarioId,
+          currentSceneOverride,
+          addFlags,
+          removeFlags,
+          trigger,
+          componentId,
+          startScene
+        );
 
       // discard stale response if a newer request was dispatched while this request was pending
       if (currentRequestId !== requestIdRef.current) return;
@@ -262,10 +270,16 @@ export default function PlayScenarioPage({ group }) {
         }
         setSceneId(newSceneId);
       }
+      stayedOnScene = !newSceneId || newSceneId === currentSceneOverride;
     } catch (e) {
       handleError(e?.response?.data);
     } finally {
       pendingRef.current = false;
+      const deferred = deferredTimerSceneRef.current;
+      deferredTimerSceneRef.current = null;
+      if (stayedOnScene && deferred === currentSceneOverride) {
+        triggerAction("timer", null, deferred);
+      }
     }
   };
 
@@ -299,13 +313,11 @@ export default function PlayScenarioPage({ group }) {
     return () => window.removeEventListener("keydown", onKeyDown);
   }, [currScene, sceneId, properties, propertyVersion, addFlags, removeFlags]);
 
-  // Timer timeout can now navigate (a genuine new capability): it's a real
-  // server round-trip via triggerAction rather than a client-local operation
-  // apply, since the outcome depends on server-evaluated conditions.
-  const handleTimerTimeout = () => {
-    if (!currScene?.timerActionRefs?.length) return;
+  function handleTimerTimeout() {
+    if (!(currScene?.timerActionRefs?.length || currScene?.timerLinkedScene))
+      return;
     triggerAction("timer", null);
-  };
+  }
 
   const buttonPressed = (component) => triggerAction("click", component.id);
 
@@ -381,7 +393,7 @@ export default function PlayScenarioPage({ group }) {
       {currScene?.time > 0 && (
         <div className="absolute top-4 left-1/2 -translate-x-1/2 z-30">
           <SceneTimer
-            key={sceneId}
+            key={`${sceneId}-${currScene.remainingTime}`}
             duration={currScene.time}
             initialSeconds={currScene.remainingTime ?? currScene.time}
             onTimeout={handleTimerTimeout}
