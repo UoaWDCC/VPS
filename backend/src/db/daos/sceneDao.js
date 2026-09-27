@@ -9,6 +9,7 @@ import {
   isValidComparator,
 } from "../../util/properties/propertyTypes.js";
 import { HttpStatusCode } from "axios";
+import mongoose from "mongoose";
 
 /**
  * Adds a reference-count delta to a file ID entry in a map.
@@ -254,42 +255,17 @@ const assertActionsContentValid = async (scenarioId, actions) => {
 };
 
 /**
- * Creates a scene in the database, and updates its parent scenario to contain the scene
+ * Creates a scene in the database from a name alone, and updates its parent scenario to contain the scene
  * @param {String} scenarioId MongoDB ID of parent scenario
- * @param {{name: String, components: Object[]}, time: Number} scene scene object
+ * @param {{name: String}} scene scene object
  * @returns the created database scene object
  */
-export const createScene = async (scenarioId, scene) => {
+export async function createScene(scenarioId, { name }) {
   const scenarioExists = await Scenario.exists({ _id: scenarioId });
-  if (!scenarioExists) {
+  if (!scenarioExists)
     throw new HttpError("scenario not found", status.NOT_FOUND);
-  }
 
-  const actions = scene.actions ?? [];
-  assertActionsUnique(actions);
-  await assertActionsContentValid(scenarioId, actions);
-
-  const validActionIds = actions.map((action) => action.id);
-  assertActionIdsResolve(
-    scene.defaultActionRefs,
-    validActionIds,
-    "defaultActionRefs"
-  );
-  assertActionIdsResolve(
-    scene.timerActionRefs,
-    validActionIds,
-    "timerActionRefs"
-  );
-  (scene.components ?? []).forEach((component) =>
-    assertActionIdsResolve(
-      component.actionRefs,
-      validActionIds,
-      `component "${component.id}" actions`
-    )
-  );
-
-  const dbScene = new Scene(scene);
-
+  const dbScene = new Scene({ name });
   await dbScene.save();
 
   await Scenario.updateOne(
@@ -297,14 +273,8 @@ export const createScene = async (scenarioId, scene) => {
     { $push: { scenes: dbScene._id } }
   );
 
-  const fileRefDeltas = computeCreateFileRefDeltas(
-    dbScene.components,
-    dbScene.background
-  );
-  await applyReferenceDeltas(fileRefDeltas);
-
   return dbScene;
-};
+}
 
 /**
  * Retrieves all scenes of a scenario
@@ -372,6 +342,16 @@ export const deleteScene = async (scenarioId, sceneId) => {
     { $set: { "actions.$[elem].linkedScene": null } },
     { arrayFilters: [{ "elem.linkedScene": sceneId }] }
   );
+
+  await Scene.updateMany(
+    { defaultLinkedScene: sceneId },
+    { $set: { defaultLinkedScene: null } }
+  );
+  await Scene.updateMany(
+    { timerLinkedScene: sceneId },
+    { $set: { timerLinkedScene: null } }
+  );
+
   const res = await Scene.findOneAndDelete({ _id: sceneId });
 
   if (res) {
@@ -401,6 +381,8 @@ export const duplicateScene = async (scenarioId, sceneId) => {
     components: sceneToCopy.components,
     time: sceneToCopy.time,
     actions: sceneToCopy.actions ?? [],
+    defaultLinkedScene: sceneToCopy.defaultLinkedScene ?? null,
+    timerLinkedScene: sceneToCopy.timerLinkedScene ?? null,
     defaultActionRefs: sceneToCopy.defaultActionRefs ?? [],
     timerActionRefs: sceneToCopy.timerActionRefs ?? [],
     background: sceneToCopy.background ?? null,
@@ -558,6 +540,15 @@ function getEffectiveArray({ upserted = [], deleted = [] }, existing) {
   ];
 }
 
+const SIMPLE_FIELDS = [
+  "name",
+  "roles",
+  "time",
+  "background",
+  "defaultLinkedScene",
+  "timerLinkedScene",
+];
+
 /**
  * Patches a scene object using a structured diff.
  *
@@ -576,11 +567,19 @@ export async function patchScene(sceneId, patch, scenarioId) {
   } = patch;
 
   const allowedFields = {};
-  ["name", "roles", "time", "background"].forEach((field) => {
+  SIMPLE_FIELDS.forEach((field) => {
     if (Object.prototype.hasOwnProperty.call(fields, field)) {
       allowedFields[field] = fields[field];
     }
   });
+
+  for (const field of ["defaultLinkedScene", "timerLinkedScene"]) {
+    const value = allowedFields[field];
+    if (value == null) continue;
+    if (!mongoose.isObjectIdOrHexString(value))
+      throw new HttpError(`invalid ${field}`, HttpStatusCode.BadRequest);
+    await assertScenesInScenario(scenarioId, [value]);
+  }
 
   if (Object.prototype.hasOwnProperty.call(allowedFields, "background"))
     allowedFields.background = await validateBackground(
