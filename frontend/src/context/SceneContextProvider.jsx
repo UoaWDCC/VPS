@@ -10,6 +10,7 @@ import toast from "react-hot-toast";
 import { parseMedia } from "../firebase/storage";
 import useEditorStore from "../features/authoring/stores/editor";
 import { replace } from "../features/authoring/scene/operations/modifiers";
+import { fastIsEqual } from "fast-is-equal";
 
 async function getAllScenes(user, id) {
   const res = await api.get(user, `api/scenario/${id}/scene/all`);
@@ -25,78 +26,82 @@ function deleteScene(user, scenarioId, sceneId) {
 }
 
 async function modifyScene(user, scenarioId, patch) {
-  const parsedComponents = await parseMedia(
-    patch.components,
+  patch.components.upserted = await parseMedia(
+    patch.components.upserted,
     scenarioId,
     patch._id
   );
 
   await api.patch(user, `/api/scenario/${scenarioId}/scene/${patch._id}`, {
     fields: patch.fields,
-    components: parsedComponents,
-    deletedComponentIds: patch.deletedComponentIds,
+    components: patch.components,
+    actions: patch.actions,
+    defaultActionRefs: patch.defaultActionRefs,
+    timerActionRefs: patch.timerActionRefs,
   });
 }
 
+function diffItems(current, saved) {
+  const diff = { upserted: [], deleted: [] };
+  const currentIds = new Set(current.map((i) => i.id));
+
+  current.forEach((item) => {
+    const savedItem = saved.find((i) => i.id === item.id);
+    if (!fastIsEqual(item, savedItem))
+      diff.upserted.push(structuredClone(item));
+  });
+  saved.forEach((item) => {
+    if (!currentIds.has(item.id)) diff.deleted.push(item.id);
+  });
+
+  return diff;
+}
+
 function generatePatch(modified, saved) {
-  const components = [];
-  const deletedComponentIds = [];
+  function generateDiff(field, isMap = false) {
+    const currentItems = isMap
+      ? Object.values(modified[field] ?? {})
+      : (modified[field] ?? []);
+    const savedItems = saved[field] ?? [];
+    return diffItems(currentItems, savedItems);
+  }
+
   const fields = {};
-
-  const currentComponents = modified.components ?? {};
-  const savedComponents = saved.components ?? [];
-
-  Object.entries(currentComponents).forEach(([id, component]) => {
-    if (
-      JSON.stringify(component) !==
-      JSON.stringify(savedComponents.find((c) => c.id === id))
-    ) {
-      components.push(structuredClone(component));
-    }
-  });
-
-  savedComponents.forEach((c) => {
-    if (!currentComponents[c.id]) deletedComponentIds.push(c.id);
-  });
-
-  [
-    "name",
-    "roles",
-    "time",
-    "directLink",
-    "timerStateOperations",
-    "background",
-  ].forEach((field) => {
-    if (JSON.stringify(modified[field]) !== JSON.stringify(saved[field])) {
+  ["name", "roles", "time", "background"].forEach((field) => {
+    if (!fastIsEqual(modified[field], saved[field]))
       fields[field] = structuredClone(modified[field]);
-    }
   });
 
   return {
     _id: modified._id,
     fields,
-    components,
-    deletedComponentIds,
+    components: generateDiff("components", true),
+    actions: generateDiff("actions"),
+    defaultActionRefs: generateDiff("defaultActionRefs"),
+    timerActionRefs: generateDiff("timerActionRefs"),
   };
 }
 
+function applyDiff(items, diff) {
+  if (!diff) return items;
+  const byId = new Map((items ?? []).map((i) => [i.id, i]));
+  diff.upserted?.forEach((i) => byId.set(i.id, i));
+  diff.deleted?.forEach((id) => byId.delete(id));
+  return [...byId.values()];
+}
+
 function applyPatch(scene, patch) {
-  const { fields = {}, components = [], deletedComponentIds = [] } = patch;
-
-  const updated = [];
-  const seen = new Set();
-
-  for (const c of scene.components) {
-    if (deletedComponentIds.includes(c.id)) continue;
-    updated.push(components.find((uc) => uc.id === c.id) ?? c);
-    seen.add(c.id);
-  }
-
-  for (const c of components) {
-    if (!seen.has(c.id)) updated.push(c);
-  }
-
-  return { ...scene, ...fields, components: updated };
+  return {
+    ...scene,
+    ...(patch.fields ?? {}),
+    components: applyDiff(scene.components, patch.components),
+    actions: applyDiff(scene.actions, patch.actions),
+    defaultActionRefs: applyDiff(
+      scene.defaultActionRefs,
+      patch.defaultActionRefs
+    ),
+    timerActionRefs: applyDiff(scene.timerActionRefs, patch.timerActionRefs),
+  };
 }
 
 /**
