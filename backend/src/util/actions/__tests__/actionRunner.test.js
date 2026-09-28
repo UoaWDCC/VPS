@@ -222,4 +222,53 @@ describe("getLinkedSceneIds", () => {
     };
     expect(getLinkedSceneIds(dupeScene)).toEqual(["scene-click"]);
   });
+
+  it("includes the default and timer direct links", () => {
+    const linkOnlyScene = {
+      actions: [],
+      components: [],
+      defaultActionRefs: [],
+      timerActionRefs: [],
+      defaultLinkedScene: "scene-default-direct",
+      timerLinkedScene: "scene-timer-direct",
+    };
+    expect(new Set(getLinkedSceneIds(linkOnlyScene))).toEqual(
+      new Set(["scene-default-direct", "scene-timer-direct"])
+    );
+  });
+
+  it("includes clickable components' direct links but not non-clickable ones", () => {
+    const componentLinkScene = {
+      actions: [],
+      components: [
+        {
+          id: "btn",
+          clickable: true,
+          actionRefs: [],
+          linkedScene: "scene-btn-direct",
+        },
+        {
+          id: "label",
+          clickable: false,
+          actionRefs: [],
+          linkedScene: "scene-label-direct",
+        },
+      ],
+      defaultActionRefs: [],
+      timerActionRefs: [],
+    };
+    expect(getLinkedSceneIds(componentLinkScene)).toEqual(["scene-btn-direct"]);
+  });
+
+  it("stringifies ObjectId direct links and dedupes them against action links", () => {
+    const objectIdLike = { toString: () => "scene-default" };
+    const mixedScene = {
+      ...scene,
+      defaultLinkedScene: objectIdLike,
+      timerLinkedScene: null,
+    };
+    const linked = getLinkedSceneIds(mixedScene);
+    expect(linked.filter((id) => id === "scene-default")).toHaveLength(1);
+    expect(linked).not.toContain(null);
+  });
 });

@@ -36,6 +36,16 @@ export const getLinkedSceneIds = (scene) => {
     .filter(Boolean)
     .map((id) => id.toString());
 
+  const fallbackIds = [
+    ...scene.components.filter((c) => c.clickable).map((c) => c.linkedScene),
+    scene.defaultLinkedScene,
+    scene.timerLinkedScene,
+  ]
+    .filter(Boolean)
+    .map((id) => id.toString());
+
+  linkedIds.push(...fallbackIds);
+
   return [...new Set(linkedIds)];
 };
 

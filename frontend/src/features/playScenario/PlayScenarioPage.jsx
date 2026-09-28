@@ -97,34 +97,34 @@ const refreshFromServer = async (user, scenarioId, groupId, isMultiplayer) => {
   const token = await user.getIdToken();
   const config = isMultiplayer
     ? {
-      method: "post",
-      url: `/api/navigate/group/${groupId}`,
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      data: {
-        currentScene: null,
-        addFlags: [],
-        removeFlags: [],
-        componentId: null,
-      },
-    }
+        method: "post",
+        url: `/api/navigate/group/${groupId}`,
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        data: {
+          currentScene: null,
+          addFlags: [],
+          removeFlags: [],
+          componentId: null,
+        },
+      }
     : {
-      method: "post",
-      url: `/api/navigate/user/${scenarioId}`,
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      data: {
-        currentScene: null,
-        addFlags: [],
-        removeFlags: [],
-        componentId: null,
-        startScene: null,
-      },
-    };
+        method: "post",
+        url: `/api/navigate/user/${scenarioId}`,
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        data: {
+          currentScene: null,
+          addFlags: [],
+          removeFlags: [],
+          componentId: null,
+          startScene: null,
+        },
+      };
   const res = await axios.request(config);
   if (res.data.scenes) {
     res.data.scenes.forEach((scene) => sceneCache.set(scene._id, scene));
@@ -237,24 +237,24 @@ export default function PlayScenarioPage({ group }) {
     try {
       const { newSceneId, properties, newPropertyVersion } = isMultiplayer
         ? await navigateMultiplayer(
-          user,
-          group._id,
-          currentSceneOverride,
-          addFlags,
-          removeFlags,
-          trigger,
-          componentId
-        )
+            user,
+            group._id,
+            currentSceneOverride,
+            addFlags,
+            removeFlags,
+            trigger,
+            componentId
+          )
         : await navigateSingleplayer(
-          user,
-          scenarioId,
-          currentSceneOverride,
-          addFlags,
-          removeFlags,
-          trigger,
-          componentId,
-          startScene
-        );
+            user,
+            scenarioId,
+            currentSceneOverride,
+            addFlags,
+            removeFlags,
+            trigger,
+            componentId,
+            startScene
+          );
 
       // discard stale response if a newer request was dispatched while this request was pending
       if (currentRequestId !== requestIdRef.current) return;
@@ -293,7 +293,12 @@ export default function PlayScenarioPage({ group }) {
 
   useEffect(() => {
     const onKeyDown = (e) => {
-      if (e.repeat || !sceneId || !currScene?.defaultActionRefs?.length) return;
+      if (
+        e.repeat ||
+        !sceneId ||
+        !(currScene?.defaultActionRefs?.length || currScene?.defaultLinkedScene)
+      )
+        return;
 
       const tag = document.activeElement?.tagName;
       const isTyping =
