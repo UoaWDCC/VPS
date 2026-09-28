@@ -6,7 +6,6 @@ import User from "../../../db/models/user.js";
 
 import { HttpError } from "../../../util/error.js";
 import {
-  resolveActions,
   runActions,
   getLinkedSceneIds,
 } from "../../../util/actions/actionRunner.js";
@@ -18,7 +17,7 @@ import {
   resumedRemainingTime,
   movedRemainingTimeField,
 } from "./timer.js";
-import { resolveTriggerActionIds } from "./trigger.js";
+import { resolveTrigger } from "./trigger.js";
 
 const getConnectedScenes = async (sceneID, active = true) => {
   const scene = await getSimpleScene(sceneID);
@@ -60,19 +59,19 @@ const addSceneToPath = async (
   const filter = replace
     ? { _id: userId }
     : {
-      _id: userId,
-      $or: [
-        { [`${pathField}.0`]: currentSceneId },
-        { [pathField]: { $exists: false } },
-      ],
-    };
+        _id: userId,
+        $or: [
+          { [`${pathField}.0`]: currentSceneId },
+          { [pathField]: { $exists: false } },
+        ],
+      };
 
   const update = replace
     ? { $set: { [pathField]: [sceneId], [enteredField]: new Date() } }
     : {
-      $push: { [pathField]: { $each: [sceneId], $position: 0 } },
-      $set: { [enteredField]: new Date() },
-    };
+        $push: { [pathField]: { $each: [sceneId], $position: 0 } },
+        $set: { [enteredField]: new Date() },
+      };
 
   const res = await User.findOneAndUpdate(filter, update);
   if (!res) throw new HttpError("Scene mismatch has occured", STATUS.CONFLICT);
@@ -165,8 +164,8 @@ export const userNavigate = async (req) => {
     // fresh entry; a plain re-fetch/refresh does neither.
     const updatePromise = isJump
       ? addSceneToPath(user._id, scenarioId, null, startScene, {
-        replace: true,
-      })
+          replace: true,
+        })
       : Promise.resolve();
 
     const [, scenes] = await Promise.all([
@@ -200,15 +199,13 @@ export const userNavigate = async (req) => {
 
   const scene = await getSimpleScene(currentScene);
 
-  const actionIds = resolveTriggerActionIds(scene, trigger, componentId);
-
-  const actions = resolveActions(scene.actions, actionIds);
+  const resolved = resolveTrigger(scene, trigger, componentId);
   const {
     properties: resolvedProperties,
     linkedScene,
     changed,
-  } = runActions(actions, user.stateVariables[scenarioId]);
-  const nextScene = linkedScene?.toString();
+  } = runActions(resolved.actions, user.stateVariables[scenarioId]);
+  const nextScene = linkedScene?.toString() ?? resolved.fallback?.toString();
 
   let scenes = null;
 

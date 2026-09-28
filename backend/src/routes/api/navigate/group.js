@@ -8,7 +8,6 @@ import STATUS from "../../../util/status.js";
 import { getProperties } from "../../../db/daos/scenarioDao.js";
 import { setGroupProperties } from "../../../db/daos/groupDao.js";
 import {
-  resolveActions,
   runActions,
   getLinkedSceneIds,
 } from "../../../util/actions/actionRunner.js";
@@ -17,7 +16,7 @@ import {
   resumedRemainingTime,
   movedRemainingTimeField,
 } from "./timer.js";
-import { resolveTriggerActionIds } from "./trigger.js";
+import { resolveTrigger } from "./trigger.js";
 import { normaliseString } from "../../../util/normalise.js";
 
 const createInvalidError = (roles) =>
@@ -301,15 +300,13 @@ export const groupNavigate = async (req) => {
   // validate that the user is allowed to move to this scene
   const scene = await getSceneConsideringRole(currentScene, role);
 
-  const actionIds = resolveTriggerActionIds(scene, trigger, componentId);
-
-  const actions = resolveActions(scene.actions, actionIds);
+  const resolved = resolveTrigger(scene, trigger, componentId);
   const {
     properties: resolvedProperties,
     linkedScene,
     changed,
-  } = runActions(actions, group.stateVariables);
-  const nextScene = linkedScene?.toString();
+  } = runActions(resolved.actions, group.stateVariables);
+  const nextScene = linkedScene?.toString() ?? resolved.fallback?.toString();
 
   let scenes = null;
   let committedGroup = null;

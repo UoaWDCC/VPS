@@ -737,4 +737,237 @@ describe("Navigate Group API tests", () => {
       expect(dbGroup.path[0]).toBe(mutatingScene._id.toString());
     });
   });
+
+  // --- Direct scene links (defaultLinkedScene / timerLinkedScene) ---
+
+  describe("direct scene links", () => {
+    const startAt = (scene, stateVariables = []) =>
+      Group.findByIdAndUpdate(group._id, {
+        path: [scene._id.toString()],
+        stateVariables,
+        stateVersion: 0,
+      });
+
+    const navigate = (currentScene, body) =>
+      axios.post(
+        `http://localhost:${ctx.port}/api/navigate/group/${group._id}`,
+        {
+          uid: "uid-player",
+          currentScene: currentScene._id.toString(),
+          addFlags: [],
+          removeFlags: [],
+          ...body,
+        },
+        authHeaders("uid-player")
+      );
+
+    const pathHead = async () => (await Group.findById(group._id)).path[0];
+
+    it("follows defaultLinkedScene on a default trigger with no actions", async () => {
+      const linkScene = await Scene.create({
+        name: "Default Link",
+        components: [],
+        roles: [],
+        defaultLinkedScene: scene2._id,
+      });
+      await startAt(linkScene);
+
+      const response = await navigate(linkScene, { trigger: "default" });
+      expect(response.status).toBe(200);
+      expect(response.data.active).toBe(scene2._id.toString());
+      expect(await pathHead()).toBe(scene2._id.toString());
+    });
+
+    it("follows timerLinkedScene on a timer trigger with no actions", async () => {
+      const linkScene = await Scene.create({
+        name: "Timer Link",
+        components: [],
+        roles: [],
+        time: 30,
+        timerLinkedScene: scene2._id,
+      });
+      await startAt(linkScene);
+
+      const response = await navigate(linkScene, { trigger: "timer" });
+      expect(response.status).toBe(200);
+      expect(response.data.active).toBe(scene2._id.toString());
+      expect(await pathHead()).toBe(scene2._id.toString());
+    });
+
+    it("does not cross triggers (timer trigger ignores defaultLinkedScene)", async () => {
+      const linkScene = await Scene.create({
+        name: "Default Only",
+        components: [],
+        roles: [],
+        defaultLinkedScene: scene2._id,
+      });
+      await startAt(linkScene);
+
+      const response = await navigate(linkScene, { trigger: "timer" });
+      expect(response.status).toBe(200);
+      expect(response.data.active).toBeUndefined();
+      expect(await pathHead()).toBe(linkScene._id.toString());
+    });
+
+    it("follows the component's linkedScene on a click with no linking action", async () => {
+      const linkScene = await Scene.create({
+        name: "Click Link",
+        components: [
+          {
+            id: "btn",
+            clickable: true,
+            actionRefs: [],
+            linkedScene: scene2._id.toString(),
+            type: "BUTTON",
+          },
+        ],
+        roles: [],
+        defaultLinkedScene: scene1._id,
+      });
+      await startAt(linkScene);
+
+      const response = await navigate(linkScene, {
+        trigger: "click",
+        componentId: "btn",
+      });
+      expect(response.status).toBe(200);
+      expect(response.data.active).toBe(scene2._id.toString());
+      expect(await pathHead()).toBe(scene2._id.toString());
+    });
+
+    it("does not follow defaultLinkedScene on a click trigger", async () => {
+      const linkScene = await Scene.create({
+        name: "Click Without Link",
+        components: [
+          { id: "btn", clickable: true, actionRefs: [], type: "BUTTON" },
+        ],
+        roles: [],
+        defaultLinkedScene: scene2._id,
+      });
+      await startAt(linkScene);
+
+      const response = await navigate(linkScene, {
+        trigger: "click",
+        componentId: "btn",
+      });
+      expect(response.status).toBe(200);
+      expect(response.data.active).toBeUndefined();
+      expect(await pathHead()).toBe(linkScene._id.toString());
+    });
+
+    it("prefers an action's linkedScene over the direct link", async () => {
+      const linkScene = await Scene.create({
+        name: "Action Wins",
+        components: [],
+        roles: [],
+        actions: [
+          {
+            id: "action-go",
+            name: "Go",
+            linkedScene: scene1._id,
+            conditions: [],
+            operations: [],
+            index: 0,
+          },
+        ],
+        defaultActionRefs: [{ index: 0, id: "action-go" }],
+        defaultLinkedScene: scene2._id,
+      });
+      await startAt(linkScene);
+
+      const response = await navigate(linkScene, { trigger: "default" });
+      expect(response.data.active).toBe(scene1._id.toString());
+      expect(await pathHead()).toBe(scene1._id.toString());
+    });
+
+    it("falls through to the direct link when no action links, keeping staged operations", async () => {
+      const linkScene = await Scene.create({
+        name: "Fallthrough",
+        components: [],
+        roles: [],
+        actions: [
+          {
+            id: "action-gated",
+            name: "Gated",
+            linkedScene: scene1._id,
+            conditions: [
+              { id: "c1", stateVariableId: "hp", comparator: ">", value: 100 },
+            ],
+            operations: [],
+            index: 0,
+          },
+          {
+            id: "action-heal",
+            name: "Heal",
+            linkedScene: null,
+            conditions: [],
+            operations: [
+              { id: "op1", stateVariableId: "hp", operation: "add", value: 5 },
+            ],
+            index: 1,
+          },
+        ],
+        defaultActionRefs: [
+          { index: 0, id: "action-gated" },
+          { index: 1, id: "action-heal" },
+        ],
+        defaultLinkedScene: scene2._id,
+      });
+      await startAt(linkScene, [{ id: "hp", type: "number", value: 5 }]);
+
+      const response = await navigate(linkScene, { trigger: "default" });
+      expect(response.data.active).toBe(scene2._id.toString());
+      expect(response.data.properties.find((p) => p.id === "hp").value).toBe(
+        10
+      );
+      expect(response.data.propertyVersion).toBe(1);
+      expect(await pathHead()).toBe(scene2._id.toString());
+    });
+
+    it("does not push a path entry when the direct link points at the current scene", async () => {
+      const selfScene = await Scene.create({
+        name: "Self Link",
+        components: [],
+        roles: [],
+      });
+      await Scene.findByIdAndUpdate(selfScene._id, {
+        defaultLinkedScene: selfScene._id,
+      });
+      await startAt(selfScene);
+
+      const response = await navigate(selfScene, { trigger: "default" });
+      expect(response.status).toBe(200);
+      expect(response.data.active).toBeUndefined();
+
+      const dbGroup = await Group.findById(group._id);
+      expect(dbGroup.path).toEqual([selfScene._id.toString()]);
+    });
+
+    it("preloads direct-link targets as connected scenes", async () => {
+      const linkScene = await Scene.create({
+        name: "Preload",
+        components: [],
+        roles: [],
+        defaultLinkedScene: scene1._id,
+        timerLinkedScene: scene2._id,
+      });
+      await Scenario.findByIdAndUpdate(scenario._id, {
+        scenes: [linkScene._id, scene1._id, scene2._id],
+      });
+
+      const response = await axios.post(
+        `http://localhost:${ctx.port}/api/navigate/group/${group._id}`,
+        { uid: "uid-player", addFlags: [], removeFlags: [] },
+        authHeaders("uid-player")
+      );
+      expect(response.data.active).toBe(linkScene._id.toString());
+      expect(response.data.scenes.map((s) => s._id)).toEqual(
+        expect.arrayContaining([
+          linkScene._id.toString(),
+          scene1._id.toString(),
+          scene2._id.toString(),
+        ])
+      );
+    });
+  });
 });
