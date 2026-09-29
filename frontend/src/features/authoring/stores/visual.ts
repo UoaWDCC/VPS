@@ -11,7 +11,9 @@ export interface VisualSceneState {
   name: string | null;
   roles: string[] | null;
   actions: Action[];
+  defaultLinkedScene: string | null;
   defaultActionRefs: ActionRef[];
+  timerLinkedScene: string | null;
   timerActionRefs: ActionRef[];
   time: number | null;
   background: SceneBackground | null;
@@ -28,7 +30,9 @@ const useVisualScene = create<VisualSceneState>((set) => ({
   name: null,
   roles: null,
   actions: [],
+  defaultLinkedScene: null,
   defaultActionRefs: [],
+  timerLinkedScene: null,
   timerActionRefs: [],
   time: null,
   background: null,
@@ -41,6 +45,8 @@ const useVisualScene = create<VisualSceneState>((set) => ({
           actions: [],
           defaultActionRefs: [],
           timerActionRefs: [],
+          defaultLinkedScene: null,
+          timerLinkedScene: null,
           time: null,
           background: null,
           ...scene,

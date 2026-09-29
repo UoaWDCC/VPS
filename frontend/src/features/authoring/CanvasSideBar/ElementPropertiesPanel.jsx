@@ -74,6 +74,12 @@ function ElementPropertiesPanel({ component }) {
     coerce: [coerceFloat, coerceAngle], component: component?.id ?? null
   });
 
+  const linkedSceneField = useField("linkedScene", {
+    empty: null,
+    commit: "onChange",
+    component: component?.id ?? null
+  });
+
   if (!component) return null;
 
   function flipComponent(axis) {
@@ -95,10 +101,9 @@ function ElementPropertiesPanel({ component }) {
       <PanelSection name="Button Link" id="button-link">
         <PanelInput label="Default Linked Scene">
           <SceneSelectInput
+            {...linkedSceneField.props}
             scenes={scenes}
-            value={null}
             exclusionId={sceneId}
-            onChange={console.log}
           />
         </PanelInput>
         <PanelInput label="Actions" onAdd={() => actionsRef.current?.addItem()}>
