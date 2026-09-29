@@ -476,12 +476,12 @@ export default function PlayScenarioPage({ group }) {
             </button>
           </div>
         )}
-        <div className="tooltip tooltip-left" data-tip="Open resources">
+        <div className="tooltip tooltip-left" data-tip="Open documents">
           <button
             className="btn"
             onClick={() => setResourcesOpen(true)}
             type="button"
-            aria-label="Open resources"
+            aria-label="Open documents"
           >
             <BookMarkedIcon size={16} />
           </button>
