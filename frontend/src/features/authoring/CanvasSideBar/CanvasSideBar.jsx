@@ -15,6 +15,7 @@ import SceneSettings from "./SceneSettings";
 import PropertyBindingMenu from "../../../components/Properties/PropertyBindingMenu";
 import { ObjectPropertyEditor } from "./ObjectPropertyEditor";
 import PropertyOperationMenu from "../../../components/Properties/PropertyOperationMenu";
+import KeyBindingSettings from "./KeyBindingSettings";
 
 const ALWAYS_PANELS = [
   { key: "scene", label: "Scene Details", Icon: MonitorCog },
@@ -119,7 +120,10 @@ export default function CanvasSideBar() {
           <ObjectPropertyEditor component={component} />
         )}
         {activePanel === "actions" && (
-          <PropertyOperationMenu component={component} />
+          <>
+            <PropertyOperationMenu component={component} />
+            <KeyBindingSettings component={component} />
+          </>
         )}
       </SidePanel>
       <div ref={iconStackRef} className="flex shrink-0 flex-col gap-3">
