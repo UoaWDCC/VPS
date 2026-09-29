@@ -46,7 +46,9 @@ export interface Scene {
   roles: string[];
   time: number | null;
   actions: Action[];
+  defaultLinkedScene: string | null;
   defaultActionRefs: ActionRef[];
+  timerLinkedScene: string | null;
   timerActionRefs: ActionRef[];
   background: SceneBackground | null;
 }
@@ -179,7 +181,7 @@ export interface ModelSpan {
   property?: PropertyRef;
 }
 
-export interface BaseTextStyle extends BlockTextStyle, SpanTextStyle {}
+export interface BaseTextStyle extends BlockTextStyle, SpanTextStyle { }
 
 export interface BlockTextStyle {
   alignment: "left" | "center" | "right";
