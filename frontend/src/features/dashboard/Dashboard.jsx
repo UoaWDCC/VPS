@@ -224,7 +224,7 @@ export default function Dashboard() {
           <div className="h-full px-10 py-7 overflow-y-scroll ">
             <h1 className="text-3xl font-ibm font-bold">
               {heading ? (
-                heading
+                <div className="pb-2">{heading}</div>
               ) : (
                 <span className="invisible">placeholder</span>
               )}
