@@ -45,7 +45,9 @@ export interface Scene {
   roles: string[];
   time: number | null;
   actions: Action[];
+  defaultLinkedScene: string | null;
   defaultActionRefs: ActionRef[];
+  timerLinkedScene: string | null;
   timerActionRefs: ActionRef[];
   background: SceneBackground | null;
 }

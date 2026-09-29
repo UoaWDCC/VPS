@@ -38,6 +38,8 @@ function SceneDetailsPanel() {
   const timeField = useField("time", { coerce: [coerceInt, coerceRange(0, null)] });
   const timerActionRefsField = useField("timerActionRefs", { commit: "onChange" });
   const defaultActionRefsField = useField("defaultActionRefs", { commit: "onChange" });
+  const defaultLinkedSceneField = useField("defaultLinkedScene", { empty: null, commit: "onChange" });
+  const timerLinkedSceneField = useField("timerLinkedScene", { empty: null, commit: "onChange" });
 
   const defaultActionsRef = useRef(null);
   const timerActionsRef = useRef(null);
@@ -63,10 +65,9 @@ function SceneDetailsPanel() {
       <PanelSection name="Scene Link" id="scene-link">
         <PanelInput label="Default Linked Scene">
           <SceneSelectInput
+            {...defaultLinkedSceneField.props}
             scenes={scenes}
-            value={null}
             exclusionId={sceneId}
-            onChange={console.log}
           />
         </PanelInput>
         <PanelInput
@@ -90,10 +91,9 @@ function SceneDetailsPanel() {
         </PanelInput>
         <PanelInput label="Timeout Default Linked Scene">
           <SceneSelectInput
+            {...timerLinkedSceneField.props}
             scenes={scenes}
-            value={null}
             exclusionId={sceneId}
-            onChange={console.log}
           />
         </PanelInput>
         <PanelInput
