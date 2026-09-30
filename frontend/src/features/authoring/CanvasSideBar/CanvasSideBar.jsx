@@ -8,13 +8,13 @@ import {
 } from "lucide-react";
 import useEditorStore from "../stores/editor";
 import useVisualScene from "../stores/visual";
-import AudioManager from "../audio/AudioManager";
 import PanelIcon from "./PanelIcon";
 import SidePanel from "./SidePanel";
 import PropertyBindingMenu from "../../../components/Properties/PropertyBindingMenu";
 import SceneDetailsPanel from "./SceneDetailsPanel";
 import ActionsPanel from "./ActionsPanel";
 import ElementPropertiesPanel from "./ElementPropertiesPanel";
+import AudioPanel from "./AudioPanel";
 
 const ALWAYS_PANELS = [
   { key: "scene", label: "Scene Details", Icon: MonitorCog },
@@ -110,7 +110,7 @@ export default function CanvasSideBar() {
         onClose={() => setActivePanel(null)}
       >
         {activePanel === "scene" && <SceneDetailsPanel />}
-        {activePanel === "audio" && <AudioManager />}
+        {activePanel === "audio" && <AudioPanel />}
         {activePanel === "actions" && (<ActionsPanel />)}
         {activePanel === "bindings" && (
           <PropertyBindingMenu component={component} />

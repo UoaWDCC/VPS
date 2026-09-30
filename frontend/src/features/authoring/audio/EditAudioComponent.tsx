@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import { remove } from "../scene/operations/modifiers";
 import { modifyComponentProp } from "../scene/operations/component";
 import type { AudioComponent } from "../types";
+import { PauseIcon, PlayIcon, RepeatIcon, XIcon } from "lucide-react";
+import { cn } from "../../../util/classnames";
 
 function EditAudioComponent({ component }: { component: AudioComponent }) {
   const [loop, setLoop] = useState<boolean>(component.loop);
@@ -45,39 +47,45 @@ function EditAudioComponent({ component }: { component: AudioComponent }) {
   }
 
   return (
-    <div className="bg-base-300 mt-xs px-[1rem] py-[0.5rem] relative">
-      <div className="absolute top-2 right-2">
-        <button className="btn btn-xs btn-phantom" onClick={togglePlayback}>
-          {playing ? "Pause" : "Play"}
-        </button>
+    <li>
+      <div className="flex items-center">
         <button
-          className="btn btn-xs btn-phantom"
-          onClick={deleteAudioComponent}
+          className="btn btn-phantom btn-square btn-xs"
+          onClick={togglePlayback}
+          title="Toggle Audio Playback"
+          aria-label="toggle audio playback"
         >
-          Delete
+          {playing ? <PauseIcon size={20} /> : <PlayIcon size={20} />}
+        </button>
+        <div className="flex items-center join flex-1">
+          <input
+            type="text"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            placeholder="Value"
+            onBlur={() => saveName(name)}
+            className="input join-item"
+          />
+          <button
+            type="button"
+            className={cn("btn btn-sm border-0 h-7 join-item bg-base-300", loop && "bg-base-content text-base-200")}
+            onClick={() => saveLoop(!loop)}
+            title="Loop Audio"
+            aria-label="loop audio"
+          >
+            <RepeatIcon size={16} />
+          </button>
+        </div>
+        <button
+          className="btn btn-phantom btn-square btn-xs"
+          onClick={deleteAudioComponent}
+          title="Delete Audio"
+          aria-label="delete audio"
+        >
+          <XIcon size={20} />
         </button>
       </div>
-      <fieldset className="fieldset w-full mt-[0.5rem]">
-        <label className="label">File Name</label>
-        <input
-          type={"text"}
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          placeholder="Value"
-          onBlur={() => saveName(name)}
-          className="input"
-        />
-        <label className="label">
-          <input
-            type="checkbox"
-            checked={loop}
-            onChange={(e) => saveLoop(e.target.checked)}
-            className="toggle"
-          />
-          Loop Audio
-        </label>
-      </fieldset>
-    </div>
+    </li>
   );
 }
 
