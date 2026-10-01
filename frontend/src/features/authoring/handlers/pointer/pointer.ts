@@ -149,7 +149,7 @@ function handleComponentClick(e: React.MouseEvent, position: Vec2) {
   setMode(["normal"]);
 }
 
-function handleComponentDrag(_: React.MouseEvent, position: Vec2) {
+function handleComponentDrag(e: React.MouseEvent, position: Vec2) {
   const { selected, setMutationBounds, offset, setMode, setActiveGuides } =
     useEditorStore.getState();
   if (!selected?.length) return;
@@ -157,15 +157,24 @@ function handleComponentDrag(_: React.MouseEvent, position: Vec2) {
   const bounds = getSelectedComponentBounds()!;
   let verts = translate(bounds.verts, subtract(position, offset));
 
-  const { components } = useVisualScene.getState();
-  const others = Object.values(components).filter(
-    (c) => c.type !== "audio" && !selected.includes(c.id)
-  );
-  const { delta, guides } = snapTranslation(verts, bounds.rotation, others, "");
-  verts = translate(verts, delta);
+  if (e.altKey) {
+    setActiveGuides([]);
+  } else {
+    const { components } = useVisualScene.getState();
+    const others = Object.values(components).filter(
+      (c) => c.type !== "audio" && !selected.includes(c.id)
+    );
+    const { delta, guides } = snapTranslation(
+      verts,
+      bounds.rotation,
+      others,
+      ""
+    );
+    verts = translate(verts, delta);
+    setActiveGuides(guides);
+  }
 
   setMutationBounds((prev) => ({ ...prev, verts }));
-  setActiveGuides(guides);
   setMode(["mutation"]);
 }
 

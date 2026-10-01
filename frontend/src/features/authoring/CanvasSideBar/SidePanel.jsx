@@ -1,54 +1,64 @@
+import { useEffect, useRef, useState } from "react";
 import { XIcon } from "lucide-react";
 
-export default function SidePanel({ label, Icon, open, onToggle, children }) {
-  const safe = label
-    ? label
-        .replace(/\s+/g, "-")
-        .replace(/[^a-zA-Z0-9-_]/g, "")
-        .toLowerCase()
-    : "panel";
-  const panelId = `panel-${safe}`;
-  const titleId = `panel-title-${safe}`;
+/**
+ * The single right-hand editing panel. It knows nothing about icons —
+ * it just displays whatever `children` it's given whenever `open` is true.
+ *
+ * On close, the parent's width transition keeps running after `open`
+ * flips to false, so this keeps rendering its last content and fades
+ * out over that same transition instead of vanishing immediately.
+ * @component
+ */
+export default function SidePanel({ label, open, onClose, children }) {
+  const [rendered, setRendered] = useState(open);
+  const lastContentRef = useRef({ label, children });
+
+  if (open) {
+    lastContentRef.current = { label, children };
+  }
+
+  useEffect(() => {
+    if (open) {
+      setRendered(true);
+      return;
+    }
+    const reduceMotion = window.matchMedia(
+      "(prefers-reduced-motion: reduce)"
+    ).matches;
+    if (reduceMotion) setRendered(false);
+  }, [open]);
+
+  if (!rendered) return null;
+
+  const { label: renderedLabel, children: renderedChildren } =
+    lastContentRef.current;
 
   return (
-    <div className="flex w-full justify-end">
-      <button
-        type="button"
-        className={`relative z-30 cursor-pointer hover:-translate-y-1 duration-100 ease w-19 h-19 p-2 flex flex-col items-center justify-center gap-1 rounded-sm text-s ${
-          open ? "bg-base-100" : "bg-base-300"
-        }`}
-        onClick={onToggle}
-        aria-expanded={open}
-        aria-controls={panelId}
-        aria-label={label}
-      >
-        <Icon size={20} />
-        <span className="text-xs text-center">{label}</span>
-      </button>
-
-      {open && (
-        <section
-          id={panelId}
-          role="region"
-          aria-labelledby={titleId}
-          className="absolute top-0 bottom-4 left-0 right-[6.5rem] z-20 overflow-y-auto rounded-sm bg-base-200 p-3 shadow-lg animate-[side-panel-slide-in_300ms_ease-out] motion-reduce:animate-none"
+    <section
+      id="canvas-side-panel"
+      role="region"
+      aria-label={renderedLabel}
+      className={`h-full w-[24rem] min-w-[20rem] shrink-0 overflow-y-auto rounded-sm bg-base-200 p-5 transition-opacity duration-150 ease-out motion-reduce:transition-none ${
+        open ? "opacity-100" : "opacity-0"
+      }`}
+      inert={!open}
+      onTransitionEnd={(e) => {
+        if (e.target === e.currentTarget && !open) setRendered(false);
+      }}
+    >
+      <div className="mb-3 flex items-center justify-between">
+        <h2 className="font-semibold">{renderedLabel}</h2>
+        <button
+          type="button"
+          className="btn btn-ghost btn-xs btn-square"
+          onClick={onClose}
+          aria-label={`Close ${renderedLabel} panel`}
         >
-          <div className="mb-3 flex items-center justify-between">
-            <h2 id={titleId} className="font-semibold">
-              {label}
-            </h2>
-            <button
-              type="button"
-              className="btn btn-ghost btn-xs btn-square"
-              onClick={onToggle}
-              aria-label={`Close ${label} panel`}
-            >
-              <XIcon size={14} />
-            </button>
-          </div>
-          {children}
-        </section>
-      )}
-    </div>
+          <XIcon size={14} />
+        </button>
+      </div>
+      {renderedChildren}
+    </section>
   );
 }
