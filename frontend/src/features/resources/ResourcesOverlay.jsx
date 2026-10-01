@@ -1,10 +1,7 @@
 import React, { useEffect, useState } from "react";
 import ResourceTree from "./ResourceTree";
 import { FileTextIcon, SearchIcon, XIcon } from "lucide-react";
-import { useResources } from "./useResources";
-import { findById } from "../../util/search";
-import { buildResourceTree, filterTreeBySearch, normaliseFile } from "./util";
-import { filterTreeByConditions } from "../../utils/propertyConditionalEvaluator";
+import { filterTreeBySearch, flattenFiles } from "./util";
 import SkeletonBody from "./ResourcesSkeleton";
 import ResourcePreview from "./ResourcePreview";
 import PanelOverlay from "../../components/PanelOverlay";
@@ -13,9 +10,16 @@ import ResourceTitle from "./components/ResourceTitle";
 // NOTE: property filters can't change while the resources panel is
 // open, so deselecting on resource hiding isn't a concern
 
-export default function ResourcesPanel({ properties, open, onClose }) {
-  const { resourcesQuery } = useResources();
-
+export default function ResourcesPanel({
+  tree,
+  unseenIds,
+  markSeen,
+  isLoading,
+  isError,
+  error,
+  open,
+  onClose,
+}) {
   const [selectedResourceId, setSelectedResourceId] = useState(null);
   const [search, setSearch] = useState("");
 
@@ -29,20 +33,15 @@ export default function ResourcesPanel({ properties, open, onClose }) {
     return () => window.removeEventListener("keydown", onKey);
   }, [open, onClose]);
 
-  const { data, isLoading, isError, error } = resourcesQuery;
-
-  const foundResource = findById(data, selectedResourceId);
-  const selectedResource = foundResource ? normaliseFile(foundResource) : null;
-
-  // NOTE: the filtering by properties should ideally be done on the
-  // server to prevent cheating, but here we filter before rendering
-
-  const resourceTree = buildResourceTree(data ?? []);
-  const conditionFilteredTree = filterTreeByConditions(
-    resourceTree,
-    properties
+  const selectedResource = flattenFiles(tree).find(
+    (resource) => resource._id === selectedResourceId
   );
-  const filteredTree = filterTreeBySearch(conditionFilteredTree, search);
+  const filteredTree = filterTreeBySearch(tree, search);
+
+  const selectResource = (resourceId) => {
+    setSelectedResourceId(resourceId);
+    markSeen(resourceId);
+  };
 
   return (
     <>
@@ -81,7 +80,7 @@ export default function ResourcesPanel({ properties, open, onClose }) {
                   <span>{error.message}</span>
                 </div>
               </div>
-            ) : !conditionFilteredTree?.length ? (
+            ) : !tree.length ? (
               <div className="flex h-full items-center justify-center">
                 <div className="text-center">
                   <p>
@@ -117,8 +116,9 @@ export default function ResourcesPanel({ properties, open, onClose }) {
                       )}
                       <ResourceTree
                         tree={filteredTree}
+                        unseenIds={unseenIds}
                         selectedResourceId={selectedResourceId}
-                        setSelectedResourceId={setSelectedResourceId}
+                        onSelect={selectResource}
                       />
                     </ul>
                   </div>

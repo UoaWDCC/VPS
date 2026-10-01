@@ -1,10 +1,17 @@
 import React from "react";
 
+function NewBadge() {
+  return <span className="badge badge-xs badge-neutral shrink-0">New</span>;
+}
+
 export default function ResourceTree({
   tree,
+  unseenIds,
   selectedResourceId,
-  setSelectedResourceId,
+  onSelect,
 }) {
+  const unseen = new Set(unseenIds);
+
   return (
     <>
       {tree.map((resource) => (
@@ -15,6 +22,9 @@ export default function ResourceTree({
                 <span className="text--1 truncate flex-1" title={resource.name}>
                   {resource.name}
                 </span>
+                {resource.children.some((child) => unseen.has(child._id)) && (
+                  <NewBadge />
+                )}
               </summary>
 
               <ul className="overflow-hidden">
@@ -28,11 +38,12 @@ export default function ResourceTree({
                     >
                       <button
                         type="button"
-                        className="min-w-0 truncate text-left text--1 border-none cursor-pointer flex-1 px-3 py-1.5 h-9"
+                        className="flex items-center gap-2 min-w-0 text-left text--1 border-none cursor-pointer flex-1 px-3 py-1.5 h-9"
                         title={child.name}
-                        onClick={() => setSelectedResourceId(child._id)}
+                        onClick={() => onSelect(child._id)}
                       >
-                        {child.name}
+                        <span className="truncate flex-1">{child.name}</span>
+                        {unseen.has(child._id) && <NewBadge />}
                       </button>
                     </div>
                   </li>
@@ -45,11 +56,12 @@ export default function ResourceTree({
             >
               <button
                 type="button"
-                className="min-w-0 truncate text-left text--1 border-none cursor-pointer flex-1 px-3 py-1.5 h-9"
+                className="flex items-center gap-2 min-w-0 text-left text--1 border-none cursor-pointer flex-1 px-3 py-1.5 h-9"
                 title={resource.name}
-                onClick={() => setSelectedResourceId(resource._id)}
+                onClick={() => onSelect(resource._id)}
               >
-                {resource.name}
+                <span className="truncate flex-1">{resource.name}</span>
+                {unseen.has(resource._id) && <NewBadge />}
               </button>
             </div>
           )}
