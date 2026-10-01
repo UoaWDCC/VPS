@@ -1,4 +1,4 @@
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useContext, useMemo, useState } from "react";
 import { useParams } from "react-router-dom";
 import toast from "react-hot-toast";
@@ -20,13 +20,15 @@ async function addSeenResources(user, scenarioId, resourceIds) {
 export function useSeenResources() {
   const { scenarioId } = useParams();
   const { user } = useContext(AuthenticationContext);
+  const queryClient = useQueryClient();
+  const seenKey = ["seenResources", user.uid, scenarioId];
 
   //ids seen this session separate from fetched history, merged on read
   //this way a fetch that started before a save cannot drop it
   const [markedIds, setMarkedIds] = useState([]);
 
   const seenQuery = useQuery({
-    queryKey: ["seenResources", user.uid, scenarioId],
+    queryKey: seenKey,
     queryFn: () => getSeenResources(user, scenarioId),
     onError: (e) => {
       console.error(e);
@@ -37,6 +39,12 @@ export function useSeenResources() {
   const { mutate } = useMutation({
     mutationFn: (resourceId) =>
       addSeenResources(user, scenarioId, [resourceId]),
+    onSuccess: async (serverSeen) => {
+      await queryClient.cancelQueries({ queryKey: seenKey });
+      queryClient.setQueryData(seenKey, (old) => [
+        ...new Set([...(old ?? []), ...serverSeen]),
+      ]);
+    },
     onError: (e, resourceId) => {
       setMarkedIds((prev) => prev.filter((id) => id !== resourceId));
       handleGeneric(e);
