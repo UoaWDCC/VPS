@@ -1,12 +1,14 @@
 import { XIcon } from "lucide-react";
 import useEditorStore from "../../stores/editor";
-import type { Comparator } from "../../types";
+import type { Comparator, PropertyValue } from "../../types";
 import {
   propertyTypes,
   validComparators,
 } from "../../../../components/Properties/propertyTypes";
 import SelectInput from "../../components/Select";
 import useField from "../../inputs/useField";
+import { coercePropertyValue } from "../../inputs/coerce";
+import { cn } from "../../../../util/classnames";
 
 interface ConditionRowType {
   locator: string;
@@ -17,20 +19,25 @@ interface ConditionRowType {
 function ConditionRow({ locator, id, onDelete }: ConditionRowType) {
   const properties = useEditorStore((s) => s.properties);
 
-  const stateVariableField = useField(`${locator}.stateVariableId`, {
+  const stateVariableField = useField<string>(`${locator}.stateVariableId`, {
     commit: "onChange",
   });
-  const comparatorField = useField(`${locator}.comparator`, {
+  const comparatorField = useField<Comparator>(`${locator}.comparator`, {
     commit: "onChange",
+    empty: "=",
   });
-  const valueField = useField(`${locator}.value`);
 
   const activeProperty = properties.find(
     (p) => p.id === stateVariableField.props.value
-  )!;
+  );
   const comparators = activeProperty
     ? (validComparators[activeProperty.type] as Comparator[])
     : [];
+
+  const valueField = useField<PropertyValue, string>(`${locator}.value`, {
+    derive: String,
+    coerce: coercePropertyValue(activeProperty?.type),
+  });
 
   return (
     <li>
@@ -57,7 +64,10 @@ function ConditionRow({ locator, id, onDelete }: ConditionRowType) {
               {...valueField.props}
               disabled={!activeProperty}
               type={activeProperty?.type ?? "string"}
-              className="input join-item disabled:opacity-50 disabled:bg-base-100 disabled:border-base-content/20"
+              className={cn(
+                "input join-item disabled:opacity-50 disabled:bg-base-100 disabled:border-base-content/20",
+                valueField.error && "input-error"
+              )}
             />
           )}
         </div>

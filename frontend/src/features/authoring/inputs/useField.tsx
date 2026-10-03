@@ -1,14 +1,19 @@
-import { useEffect, useState, type ChangeEvent } from "react";
+import {
+  useEffect,
+  useState,
+  type ChangeEvent,
+  type KeyboardEvent,
+} from "react";
 import { fastIsEqual } from "fast-is-equal";
 import useVisualScene, { type VisualSceneState } from "../stores/visual";
 import { getObject } from "../scene/util";
 import { getScene } from "../scene/scene";
 import type { Component, Scene } from "../types";
 import { dispatchModification } from "../scene/history";
-import { INVALID, type Coerced, type Raw } from "./coerce";
+import { INVALID, type Coercer } from "./coerce";
 import { modifyComponentProp } from "../scene/operations/component";
 
-function getField<T>(
+function getField(
   path: string,
   store: VisualSceneState,
   component?: string | null
@@ -20,7 +25,7 @@ function getField<T>(
       ? (store["components"][component] as Record<keyof Component, unknown>)
       : (store as Record<keyof VisualSceneState, unknown>)
   );
-  return object[key] as T;
+  return object[key];
 }
 
 // NOTE: this is temp because the zustand store is immutable, but an immer change may require a restructure
@@ -60,71 +65,68 @@ function setComponentField<T>(path: string, id: string | null, value: T) {
   modifyComponentProp([id], path, value);
 }
 
-function isChangeEvent(v: unknown) {
+function isChangeEvent(v: unknown): v is ChangeEvent<HTMLInputElement> {
   return typeof v === "object" && v !== null && "nativeEvent" in v;
 }
 
-function handleDerivation<T>(
-  value: T | undefined,
-  derive: UseFieldOptions<T>["derive"]
-) {
-  if (value === undefined) return null;
-  else return derive ? derive(value) : value;
-}
-
-function handleCoercion<T>(
-  value: Raw<T>,
-  coerce: UseFieldOptions<T>["coerce"]
-): Coerced<Raw<T>> {
-  if (!coerce) return value;
-  if (!Array.isArray(coerce)) return coerce(value);
-
-  const steps = coerce.slice(0, -1) as CoerceStep<T>[];
-  const final = coerce[coerce.length - 1] as Coercer<T>;
-  let current = value;
-  for (const step of steps) {
-    const next = step(current);
-    if (next === INVALID) return INVALID;
-    current = next;
-  }
-  return final(current);
-}
-
-// intermediate steps may return raw values; only the final coercer must produce a Coerced<T>
-type CoerceStep<T> = (raw: Raw<T>) => Coerced<Raw<T>>;
-type Coercer<T> = (raw: Raw<T>) => Coerced<T>;
-
-interface UseFieldOptions<T> {
+interface BaseOptions {
   commit?: "onBlur" | "onChange";
   component?: string | null;
-  derive?: (base: T) => Raw<T>;
-  coerce?: Coercer<T> | [...CoerceStep<T>[], Coercer<T>];
-  empty?: Raw<T> | null;
 }
 
-function useField<T>(
-  path: string,
-  {
-    commit = "onBlur",
-    coerce,
-    derive,
-    empty = "",
-    component,
-  }: UseFieldOptions<T> = {}
-) {
-  const committed = useVisualScene((s) => getField<T>(path, s, component));
+type EmptyOption<D> = "" extends D ? { empty?: D } : { empty: D };
 
-  const [draft, setDraft] = useState<Raw<T>>(
-    handleDerivation(committed, derive)
-  );
+type IdentityOptions<T> = BaseOptions & {
+  coerce?: Coercer<T, T>;
+} & EmptyOption<T>;
+
+type DerivedOptions<T, D> = BaseOptions & {
+  derive: (committed: T) => D;
+  coerce: Coercer<D, T>;
+} & EmptyOption<D>;
+
+interface Field<D> {
+  props: {
+    value: D;
+    onChange: (
+      v: D | (string extends D ? ChangeEvent<HTMLInputElement> : never)
+    ) => void;
+    onBlur: () => void;
+    onKeyDown: (e: KeyboardEvent) => void;
+  };
+  error: boolean;
+}
+
+function useField<T>(path: string, options?: IdentityOptions<T>): Field<T>;
+function useField<T, D>(path: string, options: DerivedOptions<T, D>): Field<D>;
+function useField(
+  path: string,
+  options: {
+    commit?: "onBlur" | "onChange";
+    component?: string | null;
+    derive?: (committed: unknown) => unknown;
+    coerce?: Coercer<unknown, unknown>;
+    empty?: unknown;
+  } = {}
+): Field<unknown> {
+  const { commit = "onBlur", coerce, derive, empty = "", component } = options;
+
+  const committed = useVisualScene((s) => getField(path, s, component));
+
+  function toDraft(value: unknown) {
+    if (value === undefined) return empty;
+    return derive ? derive(value) : value;
+  }
+
+  const [draft, setDraft] = useState(() => toDraft(committed));
   const [error, setError] = useState(false);
 
-  useEffect(() => setDraft(handleDerivation(committed, derive)), [committed]);
+  useEffect(() => setDraft(toDraft(committed)), [committed]);
 
-  function onChange(e: ChangeEvent<HTMLInputElement> | Raw<T>) {
-    const raw = isChangeEvent(e) ? e.target.value : e;
-    setDraft(raw);
-    if (commit === "onChange") write(raw);
+  function onChange(e: unknown) {
+    const value = isChangeEvent(e) ? e.target.value : e;
+    setDraft(value);
+    if (commit === "onChange") write(value);
   }
 
   function onBlur() {
@@ -135,8 +137,8 @@ function useField<T>(
     if (e.key === "Enter") write(draft);
   }
 
-  function write(raw: Raw<T>) {
-    const coerced = handleCoercion(raw, coerce);
+  function write(value: unknown) {
+    const coerced = coerce ? coerce(value) : value;
     if (coerced === INVALID) {
       setError(true);
       return;
@@ -149,7 +151,7 @@ function useField<T>(
   }
 
   return {
-    props: { value: draft ?? empty, onChange, onBlur, onKeyDown },
+    props: { value: draft, onChange, onBlur, onKeyDown },
     error,
   };
 }
