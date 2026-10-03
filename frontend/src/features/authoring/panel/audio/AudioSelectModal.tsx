@@ -1,5 +1,4 @@
 import { useParams } from "react-router-dom";
-import ModalDialog from "../../../components/ModalDialogue";
 import {
   useContext,
   useState,
@@ -8,13 +7,14 @@ import {
   type SetStateAction,
 } from "react";
 import type { User } from "firebase/auth";
-import { add } from "../scene/operations/modifiers";
-import { api } from "../../../util/api";
 import type { AxiosResponse } from "axios";
-import AuthenticationContext from "../../../context/AuthenticationContext";
 import { useQuery } from "@tanstack/react-query";
-import AudioListContainer from "./AudioListContainer";
-import type { UploadedFile } from "../types";
+import type { UploadedFile } from "../../types";
+import { add } from "../../scene/operations/modifiers";
+import { api } from "../../../../util/api";
+import AuthenticationContext from "../../../../context/AuthenticationContext";
+import ModalDialog from "../../../../components/ModalDialogue";
+import AudioSelectList from "./AudioSelectList";
 
 function addExistingAudio(audio: UploadedFile) {
   const newAudio = {
@@ -35,13 +35,12 @@ async function getAudios(user: User, scenarioId: string) {
   return res.data;
 }
 
-function AudioSelectModal({
-  open,
-  setOpen,
-}: {
+interface AudioSelectModalProps {
   open: boolean;
   setOpen: Dispatch<SetStateAction<boolean>>;
-}) {
+}
+
+function AudioSelectModal({ open, setOpen }: AudioSelectModalProps) {
   const { scenarioId } = useParams<{ scenarioId: string }>();
   const [selectedAudio, setSelectedAudio] = useState<UploadedFile | null>(null);
 
@@ -69,7 +68,7 @@ function AudioSelectModal({
         setSelectedAudio(null);
       }}
     >
-      <AudioListContainer
+      <AudioSelectList
         data={audiosQuery.data}
         selectedId={selectedAudio?._id}
         onItemSelected={(audio: UploadedFile) => setSelectedAudio(audio)}

@@ -1,14 +1,15 @@
 import { useEffect, useState } from "react";
-import { remove } from "../scene/operations/modifiers";
-import { modifyComponentProp } from "../scene/operations/component";
-import type { AudioComponent } from "../types";
 import { PauseIcon, PlayIcon, RepeatIcon, XIcon } from "lucide-react";
-import { cn } from "../../../util/classnames";
+import type { AudioComponent } from "../../types";
+import { cn } from "../../../../util/classnames";
+import useField from "../../inputs/useField";
 
-function EditAudioComponent({ component }: { component: AudioComponent }) {
-  const [loop, setLoop] = useState<boolean>(component.loop);
-  const [name, setName] = useState<string>(component.name);
+interface AudioRowProps {
+  component: AudioComponent;
+  onDelete: (id: string) => void;
+}
 
+function AudioRow({ component, onDelete }: AudioRowProps) {
   const [audio] = useState(new Audio(component.url));
   const [playing, setPlaying] = useState(false);
 
@@ -33,18 +34,8 @@ function EditAudioComponent({ component }: { component: AudioComponent }) {
     setPlaying((prev) => !prev);
   }
 
-  function deleteAudioComponent() {
-    remove([component.id]);
-  }
-
-  function saveName(v: string) {
-    modifyComponentProp([component.id], "name", v);
-  }
-
-  function saveLoop(v: boolean) {
-    setLoop(v);
-    modifyComponentProp([component.id], "loop", v);
-  }
+  const nameField = useField("name", { component: component.id });
+  const loopField = useField("loop", { component: component.id });
 
   return (
     <li>
@@ -59,20 +50,18 @@ function EditAudioComponent({ component }: { component: AudioComponent }) {
         </button>
         <div className="flex items-center join flex-1">
           <input
+            {...nameField.props}
             type="text"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            placeholder="Value"
-            onBlur={() => saveName(name)}
+            placeholder="De La Soul"
             className="input join-item"
           />
           <button
             type="button"
             className={cn(
               "btn btn-sm border-0 h-7 join-item bg-base-300",
-              loop && "bg-base-content text-base-200"
+              loopField.props.value && "bg-base-content text-base-200"
             )}
-            onClick={() => saveLoop(!loop)}
+            onClick={() => loopField.props.onChange(!loopField.props.value)}
             title="Loop Audio"
             aria-label="loop audio"
           >
@@ -81,7 +70,7 @@ function EditAudioComponent({ component }: { component: AudioComponent }) {
         </div>
         <button
           className="btn btn-phantom btn-square btn-xs"
-          onClick={deleteAudioComponent}
+          onClick={() => onDelete(component.id)}
           title="Delete Audio"
           aria-label="delete audio"
         >
@@ -92,4 +81,4 @@ function EditAudioComponent({ component }: { component: AudioComponent }) {
   );
 }
 
-export default EditAudioComponent;
+export default AudioRow;

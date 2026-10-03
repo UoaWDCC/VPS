@@ -1,12 +1,12 @@
 import { useEffect, useRef, useState } from "react";
-import type { UploadedFile } from "../types";
 import { PauseIcon, PlayIcon } from "lucide-react";
-import { cn } from "../../../util/classnames";
+import type { UploadedFile } from "../../types";
+import { cn } from "../../../../util/classnames";
 
 /**
  * Component used to display audio in a list format.
  */
-function AudioListContainer({
+function AudioSelectList({
   data,
   onItemSelected,
   selectedId,
@@ -80,4 +80,4 @@ function AudioListContainer({
   );
 }
 
-export default AudioListContainer;
+export default AudioSelectList;
