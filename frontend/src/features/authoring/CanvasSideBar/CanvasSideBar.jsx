@@ -10,11 +10,11 @@ import useEditorStore from "../stores/editor";
 import useVisualScene from "../stores/visual";
 import PanelIcon from "./PanelIcon";
 import SidePanel from "./SidePanel";
-import PropertyBindingMenu from "../../../components/Properties/PropertyBindingMenu";
 import SceneDetailsPanel from "./SceneDetailsPanel";
 import ActionsPanel from "./ActionsPanel";
 import ElementPropertiesPanel from "./ElementPropertiesPanel";
 import AudioPanel from "./AudioPanel";
+import PropertyBindingsPanel from "./PropertyBindingsPanel";
 
 const ALWAYS_PANELS = [
   { key: "scene", label: "Scene Details", Icon: MonitorCog },
@@ -114,7 +114,7 @@ export default function CanvasSideBar() {
         {activePanel === "audio" && <AudioPanel />}
         {activePanel === "actions" && <ActionsPanel />}
         {activePanel === "bindings" && (
-          <PropertyBindingMenu component={component} />
+          <PropertyBindingsPanel component={component} />
         )}
         {activePanel === "object-properties" && (
           <ElementPropertiesPanel component={component} />
