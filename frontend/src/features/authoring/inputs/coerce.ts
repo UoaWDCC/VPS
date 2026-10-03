@@ -1,19 +1,47 @@
+import type { Property } from "../text/property";
+import type { PropertyValue } from "../types";
+
 export const INVALID = Symbol("invalid");
 
 export type Coerced<T> = T | typeof INVALID;
-export type Raw<T> = string | null | T;
+export type Coercer<D, T> = (draft: D) => Coerced<T>;
 
-export function coerceInt(raw: Raw<number | null>): Coerced<null | number> {
-  if (raw === null || (typeof raw === "string" && raw.trim() === ""))
-    return null;
-  const parsed = typeof raw === "string" ? Number(raw) : raw;
+export function pipe<A, B, C>(
+  f: Coercer<A, B>,
+  g: Coercer<B, C>
+): Coercer<A, C>;
+export function pipe<A, B, C, E>(
+  f: Coercer<A, B>,
+  g: Coercer<B, C>,
+  h: Coercer<C, E>
+): Coercer<A, E>;
+export function pipe<A, B, C, E, F>(
+  f: Coercer<A, B>,
+  g: Coercer<B, C>,
+  h: Coercer<C, E>,
+  i: Coercer<E, F>
+): Coercer<A, F>;
+export function pipe(...steps: Coercer<unknown, unknown>[]) {
+  return (draft: unknown) => {
+    let current = draft;
+    for (const step of steps) {
+      const next = step(current);
+      if (next === INVALID) return INVALID;
+      current = next;
+    }
+    return current;
+  };
+}
+
+export function coerceInt(raw: string): Coerced<null | number> {
+  if (raw.trim() === "") return null;
+  const parsed = Number(raw);
   return Number.isInteger(parsed) ? parsed : INVALID;
 }
 
-export function coerceFloat(raw: Raw<number | null>): Coerced<null | number> {
-  if (raw === null || (typeof raw === "string" && raw.trim() === ""))
-    return null;
-  const parsed = typeof raw === "string" ? Number(raw) : raw;
+export function coerceFloat(raw: string): Coerced<null | number> {
+  if (raw.trim() === "") return null;
+  const parsed = Number(raw);
   return Number.isFinite(parsed) ? parsed : INVALID;
 }
 
@@ -21,7 +49,7 @@ export function coerceRequired<T>(raw: T | null): Coerced<T> {
   return raw === null ? INVALID : raw;
 }
 
-export function coerceRange(min: number, max: number) {
+export function coerceRange(min: number | null, max: number | null) {
   return (raw: number | null): Coerced<number | null> => {
     if (raw === null) return null;
     if ((min !== null && raw < min) || (max !== null && raw > max))
@@ -31,11 +59,30 @@ export function coerceRange(min: number, max: number) {
 }
 
 export function coerceUniqueName(existing: string[]) {
-  return (raw: string | null) => {
-    if (raw === null) return INVALID;
+  return (raw: string): Coerced<string> => {
     const name = raw.trim();
-    if (!name?.length) return INVALID;
+    if (!name.length) return INVALID;
     if (existing.includes(name)) return INVALID;
     return name;
+  };
+}
+
+export function coercePropertyValue(type: Property["type"] | undefined) {
+  return (raw: string): Coerced<PropertyValue> => {
+    switch (type) {
+      case "string":
+        return raw;
+      case "number": {
+        if (raw.trim() === "") return INVALID;
+        const parsed = Number(raw);
+        return Number.isFinite(parsed) ? parsed : INVALID;
+      }
+      case "boolean":
+        if (raw === "true") return true;
+        if (raw === "false") return false;
+        return INVALID;
+      default:
+        return INVALID;
+    }
   };
 }

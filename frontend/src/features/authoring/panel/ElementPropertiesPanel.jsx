@@ -10,7 +10,7 @@ import useVisualScene from "../stores/visual";
 import ActionsInput from "../components/ActionsInput";
 import useField from "../inputs/useField";
 import { cn } from "../../../util/classnames";
-import { coerceFloat, coerceRequired, INVALID } from "../inputs/coerce";
+import { coerceFloat, coerceRequired, INVALID, pipe } from "../inputs/coerce";
 
 function coerceAngle(raw) {
   return raw % 360;
@@ -59,27 +59,35 @@ function ElementPropertiesPanel({ component }) {
 
   const xPositionField = useField("bounds.verts", {
     component: component?.id ?? null,
-    derive: (v) => round2dp(v[0].x),
-    coerce: [coerceFloat, coercePosition(component?.bounds, "x")],
+    derive: (v) => String(round2dp(v[0].x)),
+    coerce: pipe(coerceFloat, coercePosition(component?.bounds, "x")),
   });
   const yPositionField = useField("bounds.verts", {
     component: component?.id ?? null,
-    derive: (v) => round2dp(v[0].y),
-    coerce: [coerceFloat, coercePosition(component?.bounds, "y")],
+    derive: (v) => String(round2dp(v[0].y)),
+    coerce: pipe(coerceFloat, coercePosition(component?.bounds, "y")),
   });
   const widthField = useField("bounds.verts", {
     component: component?.id ?? null,
-    derive: (v) => round2dp(v[1].x - v[0].x),
-    coerce: [coerceFloat, coerceRequired, coerceExtent(component?.bounds, "x")],
+    derive: (v) => String(round2dp(v[1].x - v[0].x)),
+    coerce: pipe(
+      coerceFloat,
+      coerceRequired,
+      coerceExtent(component?.bounds, "x")
+    ),
   });
   const heightField = useField("bounds.verts", {
     component: component?.id ?? null,
-    derive: (v) => round2dp(v[1].y - v[0].y),
-    coerce: [coerceFloat, coerceRequired, coerceExtent(component?.bounds, "y")],
+    derive: (v) => String(round2dp(v[1].y - v[0].y)),
+    coerce: pipe(
+      coerceFloat,
+      coerceRequired,
+      coerceExtent(component?.bounds, "y")
+    ),
   });
   const rotationField = useField("bounds.rotation", {
-    derive: round2dp,
-    coerce: [coerceFloat, coerceAngle],
+    derive: (v) => String(round2dp(v)),
+    coerce: pipe(coerceFloat, coerceAngle),
     component: component?.id ?? null,
   });
 

@@ -1,12 +1,14 @@
 import { XIcon } from "lucide-react";
 import useEditorStore from "../../stores/editor";
-import type { PropertyOperationType } from "../../types";
+import type { PropertyOperationType, PropertyValue } from "../../types";
 import {
   propertyTypes,
   validOperations,
 } from "../../../../components/Properties/propertyTypes";
 import SelectInput from "../../components/Select";
 import useField from "../../inputs/useField";
+import { coercePropertyValue } from "../../inputs/coerce";
+import { cn } from "../../../../util/classnames";
 
 interface OperationRowType {
   locator: string;
@@ -17,20 +19,25 @@ interface OperationRowType {
 function OperationRow({ locator, id, onDelete }: OperationRowType) {
   const properties = useEditorStore((s) => s.properties);
 
-  const stateVariableField = useField(`${locator}.stateVariableId`, {
+  const stateVariableField = useField<string>(`${locator}.stateVariableId`, {
     commit: "onChange",
   });
-  const operationField = useField(`${locator}.operation`, {
-    commit: "onChange",
-  });
-  const valueField = useField(`${locator}.value`);
+  const operationField = useField<PropertyOperationType>(
+    `${locator}.operation`,
+    { commit: "onChange", empty: "set" }
+  );
 
   const activeProperty = properties.find(
     (p) => p.id === stateVariableField.props.value
-  )!;
+  );
   const operations = activeProperty
     ? (validOperations[activeProperty.type] as PropertyOperationType[])
     : [];
+
+  const valueField = useField<PropertyValue, string>(`${locator}.value`, {
+    derive: String,
+    coerce: coercePropertyValue(activeProperty?.type),
+  });
 
   return (
     <li>
@@ -57,7 +64,10 @@ function OperationRow({ locator, id, onDelete }: OperationRowType) {
               {...valueField.props}
               disabled={!activeProperty}
               type={activeProperty?.type ?? "string"}
-              className="input join-item disabled:opacity-50 disabled:bg-base-100 disabled:border-base-content/20"
+              className={cn(
+                "input join-item disabled:opacity-50 disabled:bg-base-100 disabled:border-base-content/20",
+                valueField.error && "input-error"
+              )}
             />
           )}
         </div>
