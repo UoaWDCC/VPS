@@ -35,7 +35,10 @@ function AudioRow({ component, onDelete }: AudioRowProps) {
   }
 
   const nameField = useField("name", { component: component.id });
-  const loopField = useField("loop", { component: component.id });
+  const loopField = useField("loop", {
+    component: component.id,
+    commit: "onChange",
+  });
 
   return (
     <li>
