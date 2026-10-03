@@ -29,3 +29,13 @@ export function coerceRange(min: number, max: number) {
     return raw;
   };
 }
+
+export function coerceUniqueName(existing: string[]) {
+  return (raw: string | null) => {
+    if (raw === null) return INVALID;
+    const name = raw.trim();
+    if (!name?.length) return INVALID;
+    if (existing.includes(name)) return INVALID;
+    return name;
+  };
+}
