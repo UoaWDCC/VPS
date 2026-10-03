@@ -3,13 +3,15 @@ import { PauseIcon, PlayIcon, RepeatIcon, XIcon } from "lucide-react";
 import type { AudioComponent } from "../../types";
 import { cn } from "../../../../util/classnames";
 import useField from "../../inputs/useField";
+import { coerceUniqueName } from "../../inputs/coerce";
 
 interface AudioRowProps {
   component: AudioComponent;
+  audioNames: string[];
   onDelete: (id: string) => void;
 }
 
-function AudioRow({ component, onDelete }: AudioRowProps) {
+function AudioRow({ component, audioNames, onDelete }: AudioRowProps) {
   const [audio] = useState(new Audio(component.url));
   const [playing, setPlaying] = useState(false);
 
@@ -34,7 +36,10 @@ function AudioRow({ component, onDelete }: AudioRowProps) {
     setPlaying((prev) => !prev);
   }
 
-  const nameField = useField("name", { component: component.id });
+  const nameField = useField("name", {
+    component: component.id,
+    coerce: coerceUniqueName(audioNames),
+  });
   const loopField = useField("loop", {
     component: component.id,
     commit: "onChange",
@@ -56,7 +61,7 @@ function AudioRow({ component, onDelete }: AudioRowProps) {
             {...nameField.props}
             type="text"
             placeholder="De La Soul"
-            className="input join-item"
+            className={cn("input join-item", nameField.error && "input-error")}
           />
           <button
             type="button"

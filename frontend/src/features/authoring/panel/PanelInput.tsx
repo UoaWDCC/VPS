@@ -1,7 +1,18 @@
-import { useState } from "react";
+import { useState, type PropsWithChildren } from "react";
 import { PlusIcon } from "lucide-react";
 
-function PanelInput({ label, AddModal, onAdd, children }) {
+interface PanelInputProps {
+  label: string;
+  AddModal?: (props: { open: boolean; onClose: () => void }) => JSX.Element;
+  onAdd?: () => void;
+}
+
+function PanelInput({
+  label,
+  AddModal,
+  onAdd,
+  children,
+}: PropsWithChildren<PanelInputProps>) {
   const [open, setOpen] = useState(false);
 
   function handleAddClick() {
