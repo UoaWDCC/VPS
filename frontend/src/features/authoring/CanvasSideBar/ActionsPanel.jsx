@@ -9,7 +9,6 @@ import SceneSelectInput from "../components/SceneSelectInput";
 import ListInput from "../components/ListInput";
 import ConditionRow from "../components/ConditionRow";
 import OperationRow from "../components/OperationRow";
-import useField from "../inputs/useField";
 
 /*
  * The content of the "Actions" panel.
@@ -36,7 +35,10 @@ function ActionsPanel() {
   }
 
   function handleCreate() {
-    modifySceneProp("actions", [...actions, { id: v4(), name: "New Action", index: actions.length }]);
+    modifySceneProp("actions", [
+      ...actions,
+      { id: v4(), name: "New Action", index: actions.length },
+    ]);
   }
 
   function handleDelete(id) {
@@ -47,7 +49,7 @@ function ActionsPanel() {
   }
 
   function handleChange(id, field) {
-    return function(value) {
+    return function (value) {
       modifySceneProp(
         "actions",
         actions.map((a) => (a.id === id ? { ...a, [field]: value } : a))
@@ -95,7 +97,7 @@ function ActionsPanel() {
               </button>
             </div>
             {isExpanded(action.id) ? (
-              <div className="px-5 pl-11">
+              <div className="px-5 ml-5 border-l-1 border-base-content/20">
                 <div className="flex flex-col gap-2">
                   <PanelInput label="Linked Scene">
                     <SceneSelectInput
@@ -106,10 +108,12 @@ function ActionsPanel() {
                   </PanelInput>
                   <PanelInput
                     label="Conditions"
-                    onAdd={() => conditionsInputRef.current[action.id]?.addItem()}
+                    onAdd={() =>
+                      conditionsInputRef.current[action.id]?.addItem()
+                    }
                   >
                     <ListInput
-                      ref={e => conditionsInputRef.current[action.id] = e}
+                      ref={(e) => (conditionsInputRef.current[action.id] = e)}
                       items={action.conditions ?? []}
                       onChange={handleChange(action.id, "conditions")}
                       Row={ConditionRow}
@@ -118,10 +122,12 @@ function ActionsPanel() {
                   </PanelInput>
                   <PanelInput
                     label="Operations"
-                    onAdd={() => operationsInputRef.current[action.id]?.addItem()}
+                    onAdd={() =>
+                      operationsInputRef.current[action.id]?.addItem()
+                    }
                   >
                     <ListInput
-                      ref={e => operationsInputRef.current[action.id] = e}
+                      ref={(e) => (operationsInputRef.current[action.id] = e)}
                       items={action.operations ?? []}
                       onChange={handleChange(action.id, "operations")}
                       Row={OperationRow}

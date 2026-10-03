@@ -68,7 +68,10 @@ function EditAudioComponent({ component }: { component: AudioComponent }) {
           />
           <button
             type="button"
-            className={cn("btn btn-sm border-0 h-7 join-item bg-base-300", loop && "bg-base-content text-base-200")}
+            className={cn(
+              "btn btn-sm border-0 h-7 join-item bg-base-300",
+              loop && "bg-base-content text-base-200"
+            )}
             onClick={() => saveLoop(!loop)}
             title="Loop Audio"
             aria-label="loop audio"

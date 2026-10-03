@@ -62,30 +62,26 @@ function AudioSelectModal({
 
   return (
     <ModalDialog
-      title="Select Audio"
+      title="Select Audio Track"
       open={open}
       onClose={() => {
         setOpen(false);
         setSelectedAudio(null);
       }}
     >
-      {
-        <AudioListContainer
-          data={audiosQuery.data}
-          selectedId={selectedAudio?._id}
-          onItemSelected={(audio: UploadedFile) => setSelectedAudio(audio)}
-        />
-      }
+      <AudioListContainer
+        data={audiosQuery.data}
+        selectedId={selectedAudio?._id}
+        onItemSelected={(audio: UploadedFile) => setSelectedAudio(audio)}
+      />
       <div className="modal-action">
-        <button className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">
-          ✕
-        </button>
         <button
           className="btn"
+          role="button"
           disabled={!selectedAudio}
           onClick={handleSubmit}
         >
-          Add
+          Add To Scene
         </button>
       </div>
     </ModalDialog>

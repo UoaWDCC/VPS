@@ -34,7 +34,7 @@ function ConditionRow({
 
   // TODO: extract this out into a form / input handling module
   function onFieldChange<T extends keyof Condition>(field: T) {
-    return function(value: Condition[T]) {
+    return function (value: Condition[T]) {
       if (isDraft) {
         const property = properties.find((p) => p.id === value)!;
         onChange({

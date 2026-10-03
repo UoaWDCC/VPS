@@ -16,10 +16,9 @@ function MultiSelectInput<T>({
   onChange,
   onBlur,
 }: MultiSelectInputProps<T>) {
-
   function handleClick(option: T, state: boolean) {
     if (state) onChange([...(value ?? []), option]);
-    else onChange(value?.filter(v => v !== option) ?? null);
+    else onChange(value?.filter((v) => v !== option) ?? null);
   }
 
   function handleBlur(e: FocusEvent<HTMLDivElement>) {
@@ -28,7 +27,7 @@ function MultiSelectInput<T>({
   }
 
   return (
-    <div className="dropdown" onBlur={handleBlur} >
+    <div className="dropdown" onBlur={handleBlur}>
       <div
         tabIndex={0}
         role="button"

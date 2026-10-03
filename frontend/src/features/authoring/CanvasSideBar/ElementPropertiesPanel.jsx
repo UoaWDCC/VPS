@@ -12,7 +12,9 @@ import useField from "../inputs/useField";
 import { cn } from "../../../util/classnames";
 import { coerceFloat, coerceRequired, INVALID } from "../inputs/coerce";
 
-function coerceAngle(raw) { return raw % 360; }
+function coerceAngle(raw) {
+  return raw % 360;
+}
 
 function coercePosition(bounds, axis) {
   const other = axis === "x" ? "y" : "x";
@@ -27,7 +29,10 @@ function coerceExtent(bounds, axis) {
   return (value) => {
     if (value === 0) return INVALID;
     const { verts } = bounds;
-    const newVert = { [axis]: verts[0][axis] + value, [other]: verts[1][other] };
+    const newVert = {
+      [axis]: verts[0][axis] + value,
+      [other]: verts[1][other],
+    };
     const newVerts = [verts[0], newVert, verts[2]].filter(Boolean);
     return correct(newVerts, getBoxCenter(verts), bounds.rotation ?? 0);
   };
@@ -47,7 +52,10 @@ function ElementPropertiesPanel({ component }) {
   const sceneId = useVisualScene((scene) => scene.id);
 
   const actionsRef = useRef(null);
-  const actionRefsField = useField("actionRefs", { commit: "onChange", component: component?.id ?? null })
+  const actionRefsField = useField("actionRefs", {
+    commit: "onChange",
+    component: component?.id ?? null,
+  });
 
   const xPositionField = useField("bounds.verts", {
     component: component?.id ?? null,
@@ -71,13 +79,14 @@ function ElementPropertiesPanel({ component }) {
   });
   const rotationField = useField("bounds.rotation", {
     derive: round2dp,
-    coerce: [coerceFloat, coerceAngle], component: component?.id ?? null
+    coerce: [coerceFloat, coerceAngle],
+    component: component?.id ?? null,
   });
 
   const linkedSceneField = useField("linkedScene", {
     empty: null,
     commit: "onChange",
-    component: component?.id ?? null
+    component: component?.id ?? null,
   });
 
   if (!component) return null;
@@ -107,10 +116,7 @@ function ElementPropertiesPanel({ component }) {
           />
         </PanelInput>
         <PanelInput label="Actions" onAdd={() => actionsRef.current?.addItem()}>
-          <ActionsInput
-            ref={actionsRef}
-            {...actionRefsField.props}
-          />
+          <ActionsInput ref={actionsRef} {...actionRefsField.props} />
         </PanelInput>
       </PanelSection>
       <PanelSection name="Positioning" id="positioning">

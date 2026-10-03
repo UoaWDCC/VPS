@@ -34,7 +34,7 @@ function OperationRow({
 
   // TODO: extract this out into a form / input handling module
   function onFieldChange<T extends keyof Operation>(field: T) {
-    return function(value: Operation[T]) {
+    return function (value: Operation[T]) {
       if (isDraft) {
         const property = properties.find((p) => p.id === value)!;
         onChange({

@@ -1,3 +1,4 @@
+import { XIcon } from "lucide-react";
 import { useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 
@@ -35,8 +36,8 @@ function ModalDialog({ title, children, open, onClose, wide = false }) {
         className={`modal-box flex flex-col text-m max-h-8/10 ${wide ? "max-w-[64rem]" : "overflow-y-visible"}`}
         tabIndex={0}
       >
-        <button className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">
-          ✕
+        <button className="btn btn-sm btn-phantom absolute right-2 top-2">
+          <XIcon size={18} />
         </button>
         <h3 className="text-l">{title}</h3>
         <div className="mt-[0.5rem] min-h-0 flex-1 no-scrollbar">
