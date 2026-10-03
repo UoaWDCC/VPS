@@ -10,11 +10,11 @@ import useEditorStore from "../stores/editor";
 import useVisualScene from "../stores/visual";
 import PanelIcon from "./PanelIcon";
 import SceneDetailsPanel from "./SceneDetailsPanel";
-import ActionsPanel from "./ActionsPanel";
 import ElementPropertiesPanel from "./ElementPropertiesPanel";
 import AudioPanel from "./audio/AudioPanel";
 import PropertyBindingsPanel from "./PropertyBindingsPanel";
 import PanelFrame from "./PanelFrame";
+import ActionsPanel from "./actions/ActionsPanel";
 
 const ALWAYS_PANELS = [
   { key: "scene", label: "Scene Details", Icon: MonitorCog },

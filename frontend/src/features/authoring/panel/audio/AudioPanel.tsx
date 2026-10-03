@@ -49,6 +49,7 @@ function AudioPanel() {
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   const audios = Object.values(components).filter((c) => c.type === "audio");
+  const audioNames = audios.map((a) => a.name); // for uniqueness enforcement
 
   function handleFileChange(event: React.ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0];
@@ -99,6 +100,7 @@ function AudioPanel() {
           audios.map((audio) => (
             <AudioRow
               component={audio}
+              audioNames={audioNames}
               key={audio.id}
               onDelete={deleteAudioComponent}
             />

@@ -4,7 +4,7 @@ import SelectInput from "./Select";
 interface SceneSelectInputProps {
   scenes: Scene[];
   value: string | null;
-  exclusionId: string | null;
+  exclusionId?: string | null;
   onChange: (v: string | null) => void;
   disabled?: boolean;
 }

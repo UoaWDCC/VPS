@@ -5,13 +5,13 @@ import { generateUniqueSceneName } from "../../../utils/sceneUtils";
 
 import useVisualScene from "../stores/visual";
 import PanelSection from "./PanelSection";
-import PanelInput from "./PanelInput";
 import MultiSelectInput from "../components/MultiSelectInput";
 import SceneSelectInput from "../components/SceneSelectInput";
 import ActionsInput from "../components/ActionsInput";
 import useField from "../inputs/useField";
 import { coerceInt, coerceRange, INVALID } from "../inputs/coerce";
 import { cn } from "../../../util/classnames";
+import PanelInput from "./PanelInput";
 
 /**
  * The content of the "Scene Details" panel.
