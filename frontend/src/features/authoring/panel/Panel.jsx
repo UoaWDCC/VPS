@@ -9,12 +9,12 @@ import {
 import useEditorStore from "../stores/editor";
 import useVisualScene from "../stores/visual";
 import PanelIcon from "./PanelIcon";
-import SidePanel from "./SidePanel";
 import SceneDetailsPanel from "./SceneDetailsPanel";
 import ActionsPanel from "./ActionsPanel";
 import ElementPropertiesPanel from "./ElementPropertiesPanel";
-import AudioPanel from "./AudioPanel";
+import AudioPanel from "./audio/AudioPanel";
 import PropertyBindingsPanel from "./PropertyBindingsPanel";
+import PanelFrame from "./PanelFrame";
 
 const ALWAYS_PANELS = [
   { key: "scene", label: "Scene Details", Icon: MonitorCog },
@@ -37,7 +37,7 @@ const CONTEXTUAL_PANEL_KEYS = new Set(CONTEXTUAL_PANELS.map((p) => p.key));
  * This component displays the properties of scene components in a sidebar
  * @component
  */
-export default function CanvasSideBar() {
+export default function Panel() {
   const [activePanel, setActivePanel] = useState(null);
   const iconStackRef = useRef(null);
   const contextualIconsRef = useRef(null);
@@ -105,7 +105,7 @@ export default function CanvasSideBar() {
         activePanel ? "w-[calc(24rem_+_4.25rem)]" : "w-14"
       }`}
     >
-      <SidePanel
+      <PanelFrame
         label={PANEL_LABELS[activePanel]}
         open={Boolean(activePanel)}
         onClose={() => setActivePanel(null)}
@@ -119,7 +119,7 @@ export default function CanvasSideBar() {
         {activePanel === "object-properties" && (
           <ElementPropertiesPanel component={component} />
         )}
-      </SidePanel>
+      </PanelFrame>
       <div ref={iconStackRef} className="flex shrink-0 flex-col gap-3">
         {ALWAYS_PANELS.map(({ key, label, Icon }) => (
           <PanelIcon

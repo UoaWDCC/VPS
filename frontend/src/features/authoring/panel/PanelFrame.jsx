@@ -9,7 +9,7 @@ import { XIcon } from "lucide-react";
  * out instead of vanishing immediately.
  * @component
  */
-export default function SidePanel({ label, open, onClose, children }) {
+export default function PanelFrame({ label, open, onClose, children }) {
   const [rendered, setRendered] = useState(open);
   const lastContentRef = useRef({ label, children });
 

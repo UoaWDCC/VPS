@@ -1,17 +1,17 @@
 import { useContext, useRef, useState, type Context } from "react";
-import useVisualScene from "../stores/visual";
-import type { UploadedFile } from "../types";
+import useVisualScene from "../../stores/visual";
+import type { UploadedFile } from "../../types";
 import type { AxiosResponse } from "axios";
 import type { User } from "firebase/auth";
-import { api } from "../../../util/api";
-import { add } from "../scene/operations/modifiers";
+import { api } from "../../../../util/api";
+import { add, remove } from "../../scene/operations/modifiers";
 import { useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
-import AuthenticationContext from "../../../context/AuthenticationContext";
+import AuthenticationContext from "../../../../context/AuthenticationContext";
 import { useParams } from "react-router-dom";
 import { ListMusicIcon, PlusIcon } from "lucide-react";
-import EditAudioComponent from "../audio/EditAudioComponent";
-import AudioSelectModal from "../audio/AudioSelectModal";
+import AudioSelectModal from "./AudioSelectModal";
+import AudioRow from "./AudioRow";
 
 // before calling validation of file should already be done
 async function addNewAudio(file: File, scenarioId: string, user: User) {
@@ -33,6 +33,10 @@ async function addNewAudio(file: File, scenarioId: string, user: User) {
   };
 
   add(newAudio);
+}
+
+function deleteAudioComponent(id: string) {
+  remove([id]);
 }
 
 function AudioPanel() {
@@ -93,10 +97,14 @@ function AudioPanel() {
       <ul className="mt-3 gap-1 flex flex-col">
         {audios.length > 0 ? (
           audios.map((audio) => (
-            <EditAudioComponent component={audio} key={audio.id} />
+            <AudioRow
+              component={audio}
+              key={audio.id}
+              onDelete={deleteAudioComponent}
+            />
           ))
         ) : (
-          <p className="text-xs opacity-70">No audio elements yet.</p>
+          <p className="text-xs opacity-70">No audio elements yet</p>
         )}
       </ul>
 

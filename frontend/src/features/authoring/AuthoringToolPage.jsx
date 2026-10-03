@@ -1,7 +1,7 @@
 import { useContext, useEffect, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
 import SceneContext from "context/SceneContext";
-import CanvasSideBar from "./CanvasSideBar/CanvasSideBar";
+import Panel from "./panel/Panel";
 import SceneNavigator from "./SceneNavigator/SceneNavigator";
 
 import Canvas from "./canvas/Canvas";
@@ -273,7 +273,7 @@ export default function AuthoringToolPage() {
           <div className="flex gap-m flex-1 min-h-0">
             <SceneNavigator />
             <Canvas />
-            <CanvasSideBar />
+            <Panel />
           </div>
         </div>
       </div>
