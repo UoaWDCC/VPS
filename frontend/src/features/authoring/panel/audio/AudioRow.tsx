@@ -36,13 +36,14 @@ function AudioRow({ component, audioNames, onDelete }: AudioRowProps) {
     setPlaying((prev) => !prev);
   }
 
-  const nameField = useField("name", {
+  const nameField = useField<string>("name", {
     component: component.id,
     coerce: coerceUniqueName(audioNames),
   });
-  const loopField = useField("loop", {
+  const loopField = useField<boolean>("loop", {
     component: component.id,
     commit: "onChange",
+    empty: false,
   });
 
   return (

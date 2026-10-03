@@ -40,7 +40,7 @@ function ListInput<T extends ListItem>(
 
   const {
     props: { value, onChange },
-  } = useField<T[]>(locator, { commit: "onChange" });
+  } = useField<T[]>(locator, { commit: "onChange", empty: [] });
 
   useImperativeHandle(ref, () => ({
     addItem() {
