@@ -115,7 +115,7 @@ const ActionsInput = forwardRef<ActionsInputHandle, ActionsInputProps>(
         setHasDraft(false);
         return;
       }
-      onChange(items.filter(ref => ref.id !== id));
+      onChange(items.filter((ref) => ref.id !== id));
     }
 
     return (

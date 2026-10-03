@@ -91,12 +91,13 @@ function AudioPanel() {
       </div>
 
       <ul className="mt-3 gap-1 flex flex-col">
-        {audios.length > 0
-          ? (audios.map((audio) => (
+        {audios.length > 0 ? (
+          audios.map((audio) => (
             <EditAudioComponent component={audio} key={audio.id} />
-          )))
-          : <p className="text-xs opacity-70">No audio elements yet.</p>
-        }
+          ))
+        ) : (
+          <p className="text-xs opacity-70">No audio elements yet.</p>
+        )}
       </ul>
 
       <input
