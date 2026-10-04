@@ -42,6 +42,8 @@ function ConditionRow({ locator, id, onDelete }: ConditionRowType) {
   });
 
   const valueField = useField<PropertyValue, string>(`${locator}.value`, {
+    commit:
+      activeProperty?.type === propertyTypes.BOOLEAN ? "onChange" : "onBlur",
     derive: String,
     coerce: coercePropertyValue(activeProperty?.type),
   });
