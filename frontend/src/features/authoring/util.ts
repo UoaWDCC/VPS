@@ -210,3 +210,13 @@ export function filterComponent(component: Record<string, unknown>) {
   };
   return filtered;
 }
+
+export function nextNumberedName(base: string, existing: string[]) {
+  const escaped = base.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const pattern = new RegExp(`^${escaped} (\\d+)$`);
+  const highest = existing.reduce((max, name) => {
+    const match = pattern.exec(name.trim());
+    return match ? Math.max(max, Number(match[1])) : max;
+  }, 0);
+  return `${base} ${highest + 1}`;
+}
