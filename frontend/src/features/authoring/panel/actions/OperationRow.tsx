@@ -7,7 +7,11 @@ import {
 } from "../../../../components/Properties/propertyTypes";
 import SelectInput from "../../components/Select";
 import useField from "../../inputs/useField";
-import { coercePropertyExists, coercePropertyValue } from "../../inputs/coerce";
+import {
+  coerceOneOf,
+  coercePropertyExists,
+  coercePropertyValue,
+} from "../../inputs/coerce";
 import { cn } from "../../../../util/classnames";
 
 interface OperationRowType {
@@ -23,10 +27,6 @@ function OperationRow({ locator, id, onDelete }: OperationRowType) {
     commit: "onChange",
     coerce: coercePropertyExists(properties),
   });
-  const operationField = useField<PropertyOperationType>(
-    `${locator}.operation`,
-    { commit: "onChange", empty: "set" }
-  );
 
   const activeProperty = properties.find(
     (p) => p.id === stateVariableField.props.value
@@ -34,6 +34,11 @@ function OperationRow({ locator, id, onDelete }: OperationRowType) {
   const operations = activeProperty
     ? (validOperations[activeProperty.type] as PropertyOperationType[])
     : [];
+
+  const operationField = useField<PropertyOperationType>(
+    `${locator}.operation`,
+    { commit: "onChange", empty: "set", coerce: coerceOneOf(operations) }
+  );
 
   const valueField = useField<PropertyValue, string>(`${locator}.value`, {
     derive: String,
@@ -56,12 +61,14 @@ function OperationRow({ locator, id, onDelete }: OperationRowType) {
             {...operationField.props}
             values={operations}
             disabled={!activeProperty}
+            error={operationField.error}
           />
           {activeProperty?.type === propertyTypes.BOOLEAN ? (
             <SelectInput
               disabled={!activeProperty}
               values={["true", "false"]}
               {...valueField.props}
+              error={valueField.error}
             />
           ) : (
             <input
