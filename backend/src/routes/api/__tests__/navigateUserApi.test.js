@@ -518,6 +518,64 @@ describe("Navigate User API tests", () => {
         mutatingScene._id.toString()
       );
     });
+
+    it("ignores stale conditions and operations instead of failing the trigger", async () => {
+      const staleScene = await Scene.create({
+        name: "Stale Scene",
+        components: [],
+        roles: [],
+        actions: [
+          {
+            id: "action-stale",
+            name: "Stale",
+            linkedScene: scene2._id,
+            // "hp" changed from number to boolean after these were authored
+            conditions: [
+              { id: "c1", stateVariableId: "hp", comparator: ">", value: 5 },
+              {
+                id: "c2",
+                stateVariableId: "deleted-prop",
+                comparator: "=",
+                value: 1,
+              },
+            ],
+            operations: [
+              { id: "op1", stateVariableId: "hp", operation: "add", value: 5 },
+              { id: "op2", stateVariableId: "hp", operation: "set", value: 5 },
+            ],
+            index: 0,
+          },
+        ],
+        defaultActionRefs: [{ index: 0, id: "action-stale" }],
+      });
+      await User.findOneAndUpdate(
+        { uid: "uid-player" },
+        {
+          $set: {
+            [`paths.${scenarioId()}`]: [staleScene._id.toString()],
+            [`stateVariables.${scenarioId()}`]: [
+              { id: "hp", type: "boolean", value: false },
+            ],
+            [`stateVersions.${scenarioId()}`]: 0,
+          },
+        }
+      );
+
+      const response = await axios.post(
+        `http://localhost:${ctx.port}/api/navigate/user/${scenario._id}`,
+        {
+          uid: "uid-player",
+          currentScene: staleScene._id.toString(),
+          trigger: "default",
+        },
+        authHeaders("uid-player")
+      );
+      expect(response.status).toBe(200);
+      expect(response.data.active).toBe(scene2._id.toString());
+      expect(response.data.properties.find((p) => p.id === "hp").value).toBe(
+        false
+      );
+    });
   });
 
   // --- Direct scene links (defaultLinkedScene / timerLinkedScene) ---

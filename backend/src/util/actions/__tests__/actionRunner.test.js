@@ -147,6 +147,28 @@ describe("runActions", () => {
     expect(result.linkedScene).toBeNull();
     expect(result.properties.find((p) => p.id === "num").value).toBe(6);
   });
+  it("skips stale operations and still applies the rest of the action", () => {
+    const properties = [
+      ...numProperty(),
+      { id: "flag", type: "boolean", value: false },
+    ];
+    const mixed = action({
+      id: "a1",
+      operations: [
+        // "add" isn't valid for a boolean property
+        { id: "op1", stateVariableId: "flag", operation: "add", value: 1 },
+        // wrong-type value for a boolean property
+        { id: "op2", stateVariableId: "flag", operation: "set", value: 5 },
+        { id: "op3", stateVariableId: "num", operation: "add", value: 1 },
+      ],
+      linkedScene: "scene-a",
+    });
+
+    const result = runActions([mixed], properties);
+    expect(result.properties.find((p) => p.id === "flag").value).toBe(false);
+    expect(result.properties.find((p) => p.id === "num").value).toBe(6);
+    expect(result.linkedScene).toBe("scene-a");
+  });
 });
 
 describe("getLinkedSceneIds", () => {

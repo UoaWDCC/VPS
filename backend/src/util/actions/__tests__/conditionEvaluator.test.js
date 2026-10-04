@@ -125,4 +125,37 @@ describe("evaluateConditions", () => {
     ];
     expect(evaluateConditions(onePasses, properties)).toBe(false);
   });
+
+  it("ignores conditions on a missing property, an invalid comparator, or a wrong-type value", () => {
+    const failing = condition({ id: "c1", comparator: "=", value: 999 });
+    const passing = condition({ id: "c1", comparator: "=", value: 5 });
+    const stale = [
+      condition({ id: "c2", stateVariableId: "does-not-exist" }),
+      // "<" is only valid for number properties
+      condition({
+        id: "c3",
+        stateVariableId: "bool",
+        comparator: "<",
+        value: false,
+      }),
+      // "!=" would otherwise always pass against a mismatched type
+      condition({
+        id: "c4",
+        stateVariableId: "bool",
+        comparator: "!=",
+        value: 5,
+      }),
+    ];
+
+    expect(evaluateConditions([passing, ...stale], properties)).toBe(true);
+    expect(evaluateConditions([failing, ...stale], properties)).toBe(false);
+  });
+
+  it("returns true when every condition is stale", () => {
+    const stale = [
+      condition({ id: "c1", stateVariableId: "does-not-exist" }),
+      condition({ id: "c2", stateVariableId: "str", value: 5 }),
+    ];
+    expect(evaluateConditions(stale, properties)).toBe(true);
+  });
 });
