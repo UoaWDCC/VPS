@@ -1,5 +1,5 @@
 import { HttpError } from "../error.js";
-import { operations, isValidOperation } from "./propertyTypes.js";
+import { operations, isValidOperation, isValidValue } from "./propertyTypes.js";
 import STATUS from "../status.js";
 
 export const applyPropertyOperations = (properties, propertyOperations) => {
@@ -10,13 +10,12 @@ export const applyPropertyOperations = (properties, propertyOperations) => {
     );
 
     if (property) {
-      // Verify if the operation is valid for the property type
-      if (!isValidOperation(property.type, propertyOperation.operation)) {
-        throw new HttpError(
-          `Invalid operation ${propertyOperation.operation} for property type ${property.type}`,
-          STATUS.BAD_REQUEST
-        );
-      }
+      // skip operations left stale by the property changing type
+      if (
+        !isValidOperation(property.type, propertyOperation.operation) ||
+        !isValidValue(property.type, propertyOperation.value)
+      )
+        continue;
 
       // Apply the operation to the property
       switch (propertyOperation.operation) {
