@@ -41,6 +41,8 @@ function OperationRow({ locator, id, onDelete }: OperationRowType) {
   );
 
   const valueField = useField<PropertyValue, string>(`${locator}.value`, {
+    commit:
+      activeProperty?.type === propertyTypes.BOOLEAN ? "onChange" : "onBlur",
     derive: String,
     coerce: coercePropertyValue(activeProperty?.type),
   });
