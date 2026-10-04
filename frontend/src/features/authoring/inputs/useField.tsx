@@ -138,7 +138,7 @@ function useField(
   }
 
   function write(value: unknown) {
-    const coerced = coerce ? coerce(value) : value;
+    const coerced = coerce ? coerce(value, committed) : value;
     if (coerced === INVALID) {
       setError(true);
       return;

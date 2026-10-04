@@ -4,7 +4,7 @@ import type { PropertyValue } from "../types";
 export const INVALID = Symbol("invalid");
 
 export type Coerced<T> = T | typeof INVALID;
-export type Coercer<D, T> = (draft: D) => Coerced<T>;
+export type Coercer<D, T> = (draft: D, committed: T) => Coerced<T>;
 
 export function pipe<A, B, C>(
   f: Coercer<A, B>,
@@ -22,10 +22,10 @@ export function pipe<A, B, C, E, F>(
   i: Coercer<E, F>
 ): Coercer<A, F>;
 export function pipe(...steps: Coercer<unknown, unknown>[]) {
-  return (draft: unknown) => {
+  return (draft: unknown, committed: unknown) => {
     let current = draft;
     for (const step of steps) {
-      const next = step(current);
+      const next = step(current, committed);
       if (next === INVALID) return INVALID;
       current = next;
     }
@@ -59,10 +59,10 @@ export function coerceRange(min: number | null, max: number | null) {
 }
 
 export function coerceUniqueName(existing: string[]) {
-  return (raw: string): Coerced<string> => {
+  return (raw: string, committed: string): Coerced<string> => {
     const name = raw.trim();
     if (!name.length) return INVALID;
-    if (existing.includes(name)) return INVALID;
+    if (existing.filter((n) => n !== committed).includes(name)) return INVALID;
     return name;
   };
 }
