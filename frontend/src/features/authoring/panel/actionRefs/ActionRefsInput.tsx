@@ -1,9 +1,6 @@
 import { forwardRef, useImperativeHandle, useState } from "react";
 import { generateKeyBetween } from "fractional-indexing";
 import { v4 as uuid } from "uuid";
-import type { Action, ActionRef } from "../types";
-import useVisualScene from "../stores/visual";
-import ActionRow from "./ActionRow";
 import {
   SortableContext,
   verticalListSortingStrategy,
@@ -19,17 +16,19 @@ import {
   type DragStartEvent,
   type DragEndEvent,
 } from "@dnd-kit/core";
+import type { ActionRef } from "../../types";
+import useField from "../../inputs/useField";
+import ActionRefRow from "./ActionRefRow";
+import ActionRefRowDraft from "./ActionRefRowDraft";
 
 interface ActionsInputProps {
-  value: ActionRef[];
-  onChange: (value: ActionRef[]) => void;
+  locator: string;
+  component?: string | null;
 }
 
 export interface ActionsInputHandle {
   addItem: () => void;
 }
-
-const DRAFT: ActionRef = { id: "", actionId: "", index: "" };
 
 // fractional index keys must be compared by code unit
 function compareKeys(a: string, b: string) {
@@ -53,17 +52,22 @@ function keyAt(others: ActionRef[], at: number) {
   return generateKeyBetween(prev, next);
 }
 
-const ActionsInput = forwardRef<ActionsInputHandle, ActionsInputProps>(
-  function ActionsInput({ value, onChange }, ref) {
-    const actions = useVisualScene((s) => s.actions);
+const ActionRefsInput = forwardRef<ActionsInputHandle, ActionsInputProps>(
+  function ActionsInput({ locator, component }, ref) {
     const [hasDraft, setHasDraft] = useState(false);
     const [activeIdDragging, setActiveIdDragging] = useState<string | null>(
       null
     );
 
-    const items = value;
-    const sorted = orderRefs(items);
-    const rows = hasDraft ? [...sorted, DRAFT] : sorted;
+    const {
+      props: { value, onChange },
+    } = useField<ActionRef[]>(locator, {
+      commit: "onChange",
+      component: component,
+      empty: [],
+    });
+
+    const sorted = orderRefs(value);
 
     const sensors = useSensors(
       useSensor(PointerSensor, {
@@ -104,47 +108,29 @@ const ActionsInput = forwardRef<ActionsInputHandle, ActionsInputProps>(
       const index = keyAt(others, newIndex);
 
       onChange(
-        items.map((actionRef) =>
+        value.map((actionRef) =>
           actionRef.id === moved.id ? { ...actionRef, index } : actionRef
         )
       );
     }
 
-    function handleChange(id: string, action: Action | null) {
-      if (id === "") {
-        if (action) {
-          onChange([
-            ...items,
-            {
-              id: uuid(),
-              actionId: action.id,
-              index: keyAt(sorted, sorted.length),
-            },
-          ]);
-        }
-        setHasDraft(false);
-        return;
-      }
-
-      onChange(
-        items.map((actionRef) =>
-          actionRef.id === id
-            ? { ...actionRef, actionId: action?.id ?? actionRef.actionId }
-            : actionRef
-        )
-      );
+    function handlePublish(actionId: string) {
+      onChange([
+        ...value,
+        {
+          id: uuid(),
+          actionId,
+          index: keyAt(sorted, sorted.length),
+        },
+      ]);
     }
 
-    function handleBlur(id: string) {
-      if (id === "") setHasDraft(false);
+    function handleScrap() {
+      setHasDraft(false);
     }
 
     function handleDelete(id: string) {
-      if (id === "") {
-        setHasDraft(false);
-        return;
-      }
-      onChange(items.filter((ref) => ref.id !== id));
+      onChange(value.filter((ref) => ref.id !== id));
     }
 
     return (
@@ -154,20 +140,25 @@ const ActionsInput = forwardRef<ActionsInputHandle, ActionsInputProps>(
         sensors={sensors}
         collisionDetection={closestCenter}
       >
-        <SortableContext items={rows} strategy={verticalListSortingStrategy}>
+        <SortableContext items={sorted} strategy={verticalListSortingStrategy}>
           <div className="dropdown flex-1">
             <ul>
-              {rows.map((actionRef, i) => (
-                <ActionRow
-                  key={actionRef.id || "draft"}
-                  actionRef={actionRef}
-                  index={i}
-                  actions={actions}
-                  onChange={(action) => handleChange(actionRef.id, action)}
-                  onBlur={() => handleBlur(actionRef.id)}
-                  onDelete={() => handleDelete(actionRef.id)}
+              {sorted.map((actionRef, i) => (
+                <ActionRefRow
+                  key={actionRef.id}
+                  id={actionRef.id}
+                  position={i}
+                  locator={`${locator}.${value.findIndex((r) => r.id === actionRef.id)}`}
+                  component={component}
+                  onDelete={handleDelete}
                 />
               ))}
+              {hasDraft && (
+                <ActionRefRowDraft
+                  onPublish={handlePublish}
+                  onScrap={handleScrap}
+                />
+              )}
             </ul>
           </div>
         </SortableContext>
@@ -180,4 +171,4 @@ const ActionsInput = forwardRef<ActionsInputHandle, ActionsInputProps>(
   }
 );
 
-export default ActionsInput;
+export default ActionRefsInput;
