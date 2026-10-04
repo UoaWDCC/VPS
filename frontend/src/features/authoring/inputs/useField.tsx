@@ -1,14 +1,9 @@
-import {
-  useEffect,
-  useState,
-  type ChangeEvent,
-  type KeyboardEvent,
-} from "react";
+import { useState, type ChangeEvent, type KeyboardEvent } from "react";
 import { fastIsEqual } from "fast-is-equal";
 import useVisualScene, { type VisualSceneState } from "../stores/visual";
 import { getObject } from "../scene/util";
 import { getScene } from "../scene/scene";
-import type { Component, Scene } from "../types";
+import type { Scene } from "../types";
 import { dispatchModification } from "../scene/history";
 import { INVALID, type Coercer } from "./coerce";
 import { modifyComponentProp } from "../scene/operations/component";
@@ -19,13 +14,14 @@ function getField(
   component?: string | null
 ) {
   if (component === null) return;
-  const [object, key] = getObject(
-    path,
-    component
-      ? (store["components"][component] as Record<keyof Component, unknown>)
-      : (store as Record<keyof VisualSceneState, unknown>)
-  );
-  return object[key];
+  const root: unknown = component ? store.components[component] : store;
+  // a missing segment resolves to undefined rather than throwing
+  return path
+    .split(".")
+    .reduce(
+      (object, key) => (object as Record<string, unknown> | undefined)?.[key],
+      root
+    );
 }
 
 // NOTE: this is temp because the zustand store is immutable, but an immer change may require a restructure
@@ -120,14 +116,18 @@ function useField(
 
   const [draft, setDraft] = useState(() => toDraft(committed));
   const [writeError, setWriteError] = useState(false);
+  const [prevCommitted, setPrevCommitted] = useState(committed);
 
-  useEffect(() => {
+  if (committed !== prevCommitted) {
+    setPrevCommitted(committed);
     setDraft(toDraft(committed));
     setWriteError(false);
-  }, [committed]);
+  }
 
   const committedInvalid =
-    coerce !== undefined && coerce(toDraft(committed), committed) === INVALID;
+    component !== null &&
+    coerce !== undefined &&
+    coerce(toDraft(committed), committed) === INVALID;
   const error = writeError || committedInvalid;
 
   function onChange(e: unknown) {
