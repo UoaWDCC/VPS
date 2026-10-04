@@ -1,11 +1,24 @@
+import type { LucideIcon } from "lucide-react";
 import { cn } from "../../../util/classnames";
+
+interface PanelIconProps {
+  label: string;
+  Icon: LucideIcon;
+  active: boolean;
+  onClick: () => void;
+}
 
 /**
  * A single icon button in the side panel icon stack, purely presentational
  *
  * @component
  */
-export default function PanelIcon({ label, Icon, active, onClick }) {
+export default function PanelIcon({
+  label,
+  Icon,
+  active,
+  onClick,
+}: PanelIconProps) {
   return (
     <button
       type="button"

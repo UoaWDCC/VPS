@@ -21,41 +21,47 @@ const ALWAYS_PANELS = [
   { key: "scene", label: "Scene Details", Icon: MonitorCog },
   { key: "audio", label: "Audio Elements", Icon: HeadphonesIcon },
   { key: "actions", label: "Actions", Icon: SplitIcon },
-];
+] as const;
 
 const CONTEXTUAL_PANELS = [
   { key: "bindings", label: "Property Bindings", Icon: BracesIcon },
   { key: "object-properties", label: "Element Properties", Icon: BoxIcon },
-];
+] as const;
+
+type PanelKey =
+  | (typeof ALWAYS_PANELS)[number]["key"]
+  | (typeof CONTEXTUAL_PANELS)[number]["key"];
 
 const PANEL_LABELS = Object.fromEntries(
   [...ALWAYS_PANELS, ...CONTEXTUAL_PANELS].map(({ key, label }) => [key, label])
-);
+) as Record<PanelKey, string>;
 
-const CONTEXTUAL_PANEL_KEYS = new Set(CONTEXTUAL_PANELS.map((p) => p.key));
+const CONTEXTUAL_PANEL_KEYS = new Set<PanelKey>(
+  CONTEXTUAL_PANELS.map((p) => p.key)
+);
 
 /**
  * This component displays the properties of scene components in a sidebar
  * @component
  */
 export default function Panel() {
-  const [activePanel, setActivePanel] = useState(null);
-  const iconStackRef = useRef(null);
-  const contextualIconsRef = useRef(null);
-  const previousStackTopRef = useRef(null);
-  const previousSelectionPresenceRef = useRef(null);
+  const [activePanel, setActivePanel] = useState<PanelKey | null>(null);
+  const iconStackRef = useRef<HTMLDivElement>(null);
+  const contextualIconsRef = useRef<HTMLDivElement>(null);
+  const previousStackTopRef = useRef<number | null>(null);
+  const previousSelectionPresenceRef = useRef<boolean | null>(null);
   const selected = useEditorStore((state) => state.selected);
   const component = useVisualScene((state) =>
-    selected ? state.components[selected] : null
+    selected.length === 1 ? (state.components[selected[0]] ?? null) : null
   );
 
-  function togglePanel(panel) {
+  function togglePanel(panel: PanelKey) {
     setActivePanel((current) => (current === panel ? null : panel));
   }
 
   // fall back to the scene details panel
   useLayoutEffect(() => {
-    if (!component && CONTEXTUAL_PANEL_KEYS.has(activePanel)) {
+    if (!component && activePanel && CONTEXTUAL_PANEL_KEYS.has(activePanel)) {
       setActivePanel("scene");
     }
   }, [component, activePanel]);
@@ -79,7 +85,13 @@ export default function Panel() {
     const reduceMotion = window.matchMedia(
       "(prefers-reduced-motion: reduce)"
     ).matches;
-    if (reduceMotion || !presenceChanged || previousTop === currentTop) return;
+    if (
+      reduceMotion ||
+      !presenceChanged ||
+      previousTop === null ||
+      previousTop === currentTop
+    )
+      return;
 
     iconStack.animate(
       [
@@ -108,7 +120,7 @@ export default function Panel() {
       )}
     >
       <PanelFrame
-        label={PANEL_LABELS[activePanel]}
+        label={activePanel ? PANEL_LABELS[activePanel] : undefined}
         open={Boolean(activePanel)}
         onClose={() => setActivePanel(null)}
       >

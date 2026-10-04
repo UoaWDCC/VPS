@@ -2,8 +2,15 @@ import { useState } from "react";
 import PanelSection from "./PanelSection";
 import PropertyBinding from "../../../components/Properties/PropertyBinding";
 import CreatePropertyBinding from "../../../components/Properties/CreatePropertyBinding";
+import type { Component } from "../types";
 
-export default function PropertyBindingsPanel({ component }) {
+interface PropertyBindingsPanelProps {
+  component: Component | null;
+}
+
+export default function PropertyBindingsPanel({
+  component,
+}: PropertyBindingsPanelProps) {
   const [createOpen, setCreateOpen] = useState(false);
   const bindings = component?.stateBindings ?? [];
 

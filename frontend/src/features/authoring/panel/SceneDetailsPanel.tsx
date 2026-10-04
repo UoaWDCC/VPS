@@ -1,6 +1,6 @@
-import { useContext, useRef } from "react";
-import ScenarioContext from "context/ScenarioContext";
-import SceneContext from "context/SceneContext";
+import { useContext, useRef, type Context } from "react";
+import ScenarioContext from "../../../context/ScenarioContext";
+import SceneContext from "../../../context/SceneContext";
 import { generateUniqueSceneName } from "../../../utils/sceneUtils";
 import useVisualScene from "../stores/visual";
 import PanelSection from "./PanelSection";
@@ -10,18 +10,23 @@ import useField from "../inputs/useField";
 import { coerceInt, coerceRange, INVALID, pipe } from "../inputs/coerce";
 import { cn } from "../../../util/classnames";
 import PanelInput from "./PanelInput";
-import ActionRefsInput from "./actionRefs/ActionRefsInput";
+import ActionRefsInput, {
+  type ActionRefsInputHandle,
+} from "./actionRefs/ActionRefsInput";
+import type { Scene } from "../types";
 
 /**
  * The content of the "Scene Details" panel.
  * @component
  */
 function SceneDetailsPanel() {
-  const { scenes } = useContext(SceneContext);
-  const { roleList } = useContext(ScenarioContext);
+  const { scenes } = useContext(SceneContext as Context<{ scenes: Scene[] }>);
+  const { roleList } = useContext(
+    ScenarioContext as Context<{ roleList: string[] }>
+  );
   const sceneId = useVisualScene((scene) => scene.id);
 
-  function coerceName(raw) {
+  function coerceName(raw: string) {
     const name = raw.trim();
     if (!name?.length) return INVALID;
 
@@ -32,23 +37,26 @@ function SceneDetailsPanel() {
     return name;
   }
 
-  const nameField = useField("name", { coerce: coerceName });
-  const rolesField = useField("roles", { empty: null });
-  const timeField = useField("time", {
+  const nameField = useField<string>("name", { coerce: coerceName });
+  const rolesField = useField<string[] | null>("roles", { empty: null });
+  const timeField = useField<number | null, string>("time", {
     derive: (v) => (v === null ? "" : String(v)),
     coerce: pipe(coerceInt, coerceRange(1, null)),
   });
-  const defaultLinkedSceneField = useField("defaultLinkedScene", {
-    empty: null,
-    commit: "onChange",
-  });
-  const timerLinkedSceneField = useField("timerLinkedScene", {
+  const defaultLinkedSceneField = useField<string | null>(
+    "defaultLinkedScene",
+    {
+      empty: null,
+      commit: "onChange",
+    }
+  );
+  const timerLinkedSceneField = useField<string | null>("timerLinkedScene", {
     empty: null,
     commit: "onChange",
   });
 
-  const defaultActionsRef = useRef(null);
-  const timerActionsRef = useRef(null);
+  const defaultActionsRef = useRef<ActionRefsInputHandle | null>(null);
+  const timerActionsRef = useRef<ActionRefsInputHandle | null>(null);
 
   return (
     <>
