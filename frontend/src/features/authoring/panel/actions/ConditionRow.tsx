@@ -14,13 +14,13 @@ import {
 } from "../../inputs/coerce";
 import { cn } from "../../../../util/classnames";
 
-interface ConditionRowType {
+interface ConditionRowProps {
   locator: string;
   id: string;
   onDelete: (id: string) => void;
 }
 
-function ConditionRow({ locator, id, onDelete }: ConditionRowType) {
+function ConditionRow({ locator, id, onDelete }: ConditionRowProps) {
   const properties = useEditorStore((s) => s.properties);
 
   const stateVariableField = useField<string>(`${locator}.stateVariableId`, {
@@ -50,7 +50,7 @@ function ConditionRow({ locator, id, onDelete }: ConditionRowType) {
 
   return (
     <li>
-      <div className="flex items-center">
+      <div className="flex gap-1 items-center">
         <div className="flex items-center join flex-1">
           <SelectInput
             {...stateVariableField.props}
@@ -77,15 +77,18 @@ function ConditionRow({ locator, id, onDelete }: ConditionRowType) {
             <input
               {...valueField.props}
               disabled={!activeProperty}
-              type={activeProperty?.type ?? "string"}
+              type="text"
               className={cn(
-                "input join-item disabled:opacity-50 disabled:bg-base-100 disabled:border-base-content/20",
+                "input join-item",
                 valueField.error && "input-error"
               )}
             />
           )}
         </div>
         <button
+          type="button"
+          title="Delete Condition"
+          aria-label="delete condition"
           className="btn btn-phantom btn-square btn-xs"
           onClick={() => onDelete(id)}
         >

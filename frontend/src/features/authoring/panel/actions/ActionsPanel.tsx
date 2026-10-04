@@ -1,5 +1,5 @@
 import { PlusIcon } from "lucide-react";
-import { v4 } from "uuid";
+import { v4 as uuid } from "uuid";
 import useVisualScene from "../../stores/visual";
 import { modifySceneProp } from "../../scene/operations/modifiers";
 import ActionRow from "./ActionRow";
@@ -17,7 +17,7 @@ function ActionsPanel() {
     modifySceneProp("actions", [
       ...actions,
       {
-        id: v4(),
+        id: uuid(),
         name: "New Action",
         linkedScene: null,
         conditions: [],
@@ -39,16 +39,22 @@ function ActionsPanel() {
         <PlusIcon size={18} />
         Create New Action
       </button>
-      <ul className="mt-3">
-        {actions.map((action, i) => (
-          <ActionRow
-            key={action.id}
-            id={action.id}
-            index={i}
-            onDelete={handleDelete}
-          />
-        ))}
-      </ul>
+      {actions.length > 0 ? (
+        <ul className="mt-3 flex flex-col gap-3">
+          {actions.map((action, i) => (
+            <ActionRow
+              key={action.id}
+              id={action.id}
+              index={i}
+              onDelete={handleDelete}
+            />
+          ))}
+        </ul>
+      ) : (
+        <p className="mt-6 text-xs text-center text-primary">
+          No actions yet for this scene
+        </p>
+      )}
     </>
   );
 }

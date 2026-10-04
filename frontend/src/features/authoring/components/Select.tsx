@@ -49,16 +49,13 @@ function SelectInput<T>(props: SelectInputProps<T>) {
   }
 
   return (
-    <div
-      className={`dropdown flex-1 ${
-        disabled ? "pointer-events-none opacity-50" : ""
-      }`}
-    >
+    <div className="dropdown flex-1">
       <div
         ref={triggerRef}
-        tabIndex={0}
+        tabIndex={disabled ? -1 : 0}
         role="button"
         onBlur={onBlur}
+        aria-disabled={disabled}
         className={cn(
           "justify-between input font-normal join-item w-full",
           error && "input-error"

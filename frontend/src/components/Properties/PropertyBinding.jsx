@@ -24,7 +24,7 @@ export default function PropertyBinding({ component, binding }) {
 
   return (
     <li>
-      <div className="flex items-center">
+      <div className="flex gap-1 items-center">
         <div className="flex items-center join flex-1">
           <SelectInput
             values={properties}

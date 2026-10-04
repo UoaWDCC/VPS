@@ -41,8 +41,8 @@ function ActionRow({ id, index, onDelete }: ActionRowProps) {
   const operationsInputRef = useRef<ListInputHandle | null>(null);
 
   return (
-    <li key={id} className="-mx-5 group flex flex-col gap-2 py-1.5">
-      <div className="flex gap-2 items-center px-5">
+    <li className="group flex flex-col gap-2">
+      <div className="flex gap-2 items-center">
         <input
           {...nameField.props}
           type="text"
@@ -50,12 +50,18 @@ function ActionRow({ id, index, onDelete }: ActionRowProps) {
           placeholder="Awesome Action"
         />
         <button
+          type="button"
+          title="Delete Action"
+          aria-label="delete action"
           className="btn btn-phantom btn-square btn-xs"
           onClick={() => onDelete(id)}
         >
           <XIcon size={20} />
         </button>
         <button
+          type="button"
+          title="Expand Action"
+          aria-label="expand action"
           className="btn btn-phantom btn-square btn-xs"
           onClick={toggleExpansion}
         >
@@ -67,7 +73,7 @@ function ActionRow({ id, index, onDelete }: ActionRowProps) {
         </button>
       </div>
       {expanded && (
-        <div className="px-5 ml-5 border-l-1 border-base-content/20">
+        <div className="pl-5 border-l-1 border-base-content/20">
           <div className="flex flex-col gap-2">
             <PanelInput label="Linked Scene">
               <SceneSelectInput scenes={scenes} {...linkedSceneField.props} />
@@ -77,7 +83,7 @@ function ActionRow({ id, index, onDelete }: ActionRowProps) {
               onAdd={() => conditionsInputRef.current?.addItem()}
             >
               <ListInput
-                ref={(e) => (conditionsInputRef.current = e)}
+                ref={conditionsInputRef}
                 locator={`actions.${index}.conditions`}
                 Row={ConditionRow}
                 DraftRow={ConditionRowDraft}
@@ -88,7 +94,7 @@ function ActionRow({ id, index, onDelete }: ActionRowProps) {
               onAdd={() => operationsInputRef.current?.addItem()}
             >
               <ListInput
-                ref={(e) => (operationsInputRef.current = e)}
+                ref={operationsInputRef}
                 locator={`actions.${index}.operations`}
                 Row={OperationRow}
                 DraftRow={OperationRowDraft}

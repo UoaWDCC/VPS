@@ -54,11 +54,11 @@ function ActionRefRow({
 
   return (
     <li
-      className={`group -mx-5 ${isDragging ? "bg-base-300" : ""}`}
+      className={cn("group -mx-5", isDragging && "bg-base-300")}
       style={style}
       ref={setNodeRef}
     >
-      <div className="flex gap-2 items-center px-5 py-0.5">
+      <div className="flex gap-1 items-center px-5 py-0.5">
         <div
           className={cn(
             "w-6 h-6 flex items-center justify-center touch-none",
@@ -89,6 +89,9 @@ function ActionRefRow({
           error={actionIdField.error}
         />
         <button
+          title="Delete Action Ref"
+          aria-label="delete action ref"
+          type="button"
           className="btn btn-phantom btn-square btn-xs"
           onClick={() => onDelete(id)}
         >

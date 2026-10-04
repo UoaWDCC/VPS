@@ -68,7 +68,7 @@ function ListInput<T extends ListItem>(
             key={item.id}
             id={item.id}
             locator={`${locator}.${i}`}
-            onDelete={() => handleDelete(item.id)}
+            onDelete={handleDelete}
           />
         ))}
         {hasDraft && (

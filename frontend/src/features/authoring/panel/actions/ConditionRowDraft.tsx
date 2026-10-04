@@ -5,12 +5,12 @@ import SelectInput from "../../components/Select";
 import type { Condition } from "../../types";
 import { v4 as uuid } from "uuid";
 
-interface ConditionRowType {
+interface ConditionRowDraftProps {
   onPublish: (condition: Condition) => void;
   onScrap: () => void;
 }
 
-function ConditionRowDraft({ onPublish, onScrap }: ConditionRowType) {
+function ConditionRowDraft({ onPublish, onScrap }: ConditionRowDraftProps) {
   const properties = useEditorStore((s) => s.properties);
 
   function publish(value: string) {
@@ -36,17 +36,12 @@ function ConditionRowDraft({ onPublish, onScrap }: ConditionRowType) {
             onBlur={onScrap}
           />
           <SelectInput
-            onChange={console.log}
+            onChange={() => {}}
             value={null}
             values={[]}
             disabled={true}
           />
-          <input
-            value={""}
-            type={"string"}
-            className="input join-item disabled:opacity-50 disabled:bg-base-100 disabled:border-base-content/20"
-            disabled={true}
-          />
+          <input value="" className="input join-item" disabled={true} />
         </div>
         <button className="btn btn-phantom btn-square btn-xs">
           <XIcon size={20} />

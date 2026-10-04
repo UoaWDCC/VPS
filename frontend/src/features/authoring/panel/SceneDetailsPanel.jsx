@@ -36,7 +36,7 @@ function SceneDetailsPanel() {
   const rolesField = useField("roles", { empty: null });
   const timeField = useField("time", {
     derive: (v) => (v === null ? "" : String(v)),
-    coerce: pipe(coerceInt, coerceRange(0, null)),
+    coerce: pipe(coerceInt, coerceRange(1, null)),
   });
   const defaultLinkedSceneField = useField("defaultLinkedScene", {
     empty: null,
@@ -66,7 +66,7 @@ function SceneDetailsPanel() {
         </PanelInput>
       </PanelSection>
       <PanelSection name="Scene Link" id="scene-link">
-        <PanelInput label="Default Linked Scene">
+        <PanelInput label="Linked Scene">
           <SceneSelectInput
             {...defaultLinkedSceneField.props}
             scenes={scenes}
@@ -87,12 +87,12 @@ function SceneDetailsPanel() {
         <PanelInput label="Timer Duration (Seconds)">
           <input
             {...timeField.props}
-            min="1"
+            type="text"
             className={cn("input", timeField.error && "input-error")}
             placeholder="No timer"
           />
         </PanelInput>
-        <PanelInput label="Timeout Default Linked Scene">
+        <PanelInput label="Timeout Linked Scene">
           <SceneSelectInput
             {...timerLinkedSceneField.props}
             scenes={scenes}

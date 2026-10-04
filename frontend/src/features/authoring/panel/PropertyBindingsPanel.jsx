@@ -14,24 +14,31 @@ export default function PropertyBindingsPanel({ component }) {
         id="direct-bindings"
         onAdd={() => setCreateOpen(true)}
       >
-        {bindings.length === 0 && (
-          <p className="text-xs opacity-70">No direct bindings yet</p>
+        {bindings.length > 0 ? (
+          <ul className="flex flex-col gap-1">
+            {bindings.map((binding, index) => (
+              <PropertyBinding
+                component={component}
+                binding={binding}
+                key={`${binding.target}-${binding.stateVariableId}-${index}`}
+              />
+            ))}
+          </ul>
+        ) : (
+          <p className="text-xs text-primary">
+            No direct bindings yet for this scene
+          </p>
         )}
-        <ul className="flex flex-col gap-1">
-          {bindings.map((binding, index) => (
-            <PropertyBinding
-              component={component}
-              binding={binding}
-              key={`${binding.target}-${binding.stateVariableId}-${index}`}
-            />
-          ))}
-        </ul>
       </PanelSection>
       <PanelSection
         name="Conditional Bindings"
         id="conditional-bindings"
         onAdd={console.log}
-      ></PanelSection>
+      >
+        <p className="text-xs text-primary">
+          No conditional bindings yet for this scene
+        </p>
+      </PanelSection>
       <CreatePropertyBinding
         component={component}
         open={createOpen}
