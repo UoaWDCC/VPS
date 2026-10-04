@@ -7,7 +7,7 @@ import {
 } from "../../../../components/Properties/propertyTypes";
 import SelectInput from "../../components/Select";
 import useField from "../../inputs/useField";
-import { coercePropertyValue } from "../../inputs/coerce";
+import { coercePropertyExists, coercePropertyValue } from "../../inputs/coerce";
 import { cn } from "../../../../util/classnames";
 
 interface OperationRowType {
@@ -21,6 +21,7 @@ function OperationRow({ locator, id, onDelete }: OperationRowType) {
 
   const stateVariableField = useField<string>(`${locator}.stateVariableId`, {
     commit: "onChange",
+    coerce: coercePropertyExists(properties),
   });
   const operationField = useField<PropertyOperationType>(
     `${locator}.operation`,
@@ -46,7 +47,10 @@ function OperationRow({ locator, id, onDelete }: OperationRowType) {
           <SelectInput
             {...stateVariableField.props}
             values={properties.map((p) => p.id)}
-            display={(id) => properties.find((p) => p.id === id)!.name}
+            display={(id) =>
+              properties.find((p) => p.id === id)?.name ?? "Deleted Prop"
+            }
+            error={stateVariableField.error}
           />
           <SelectInput
             {...operationField.props}

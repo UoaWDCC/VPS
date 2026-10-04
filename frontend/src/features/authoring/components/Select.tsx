@@ -1,5 +1,6 @@
 import { ChevronDown } from "lucide-react";
 import { useEffect, useRef } from "react";
+import { cn } from "../../../util/classnames";
 
 interface BaseSelectInputProps<T> {
   values: T[];
@@ -8,6 +9,7 @@ interface BaseSelectInputProps<T> {
   disabled?: boolean;
   autoFocus?: boolean;
   onBlur?: () => void;
+  error?: boolean;
 }
 
 // onChange only receives null when the "None" option is offered
@@ -25,6 +27,7 @@ function SelectInput<T>(props: SelectInputProps<T>) {
     disabled = false,
     autoFocus = false,
     onBlur,
+    error,
   } = props;
   const render = display ?? ((v: T) => String(v));
   const triggerRef = useRef<HTMLDivElement>(null);
@@ -56,7 +59,10 @@ function SelectInput<T>(props: SelectInputProps<T>) {
         tabIndex={0}
         role="button"
         onBlur={onBlur}
-        className="justify-between input font-normal join-item w-full"
+        className={cn(
+          "justify-between input font-normal join-item w-full",
+          error && "input-error"
+        )}
       >
         <span className="truncate">
           {value != null ? render(value) : "None"}

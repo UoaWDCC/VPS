@@ -86,3 +86,10 @@ export function coercePropertyValue(type: Property["type"] | undefined) {
     }
   };
 }
+
+export function coercePropertyExists(properties: Property[]) {
+  return (raw: string): Coerced<string> => {
+    if (properties.find((p) => p.id === raw)) return raw;
+    else return INVALID;
+  };
+}
