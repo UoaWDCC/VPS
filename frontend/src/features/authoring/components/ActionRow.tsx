@@ -62,7 +62,7 @@ function ActionRow({
         <SelectInput
           values={actions}
           display={(a) => a.name}
-          value={actions.find((a) => a.id === actionRef.id) ?? null}
+          value={actions.find((a) => a.id === actionRef.actionId) ?? null}
           onChange={onChange}
           onBlur={onBlur}
           autoFocus={isDraft}
