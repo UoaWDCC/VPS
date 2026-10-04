@@ -93,3 +93,7 @@ export function coercePropertyExists(properties: Property[]) {
     else return INVALID;
   };
 }
+
+export function coerceOneOf<T>(allowed: T[]) {
+  return (raw: T): Coerced<T> => (allowed.includes(raw) ? raw : INVALID);
+}

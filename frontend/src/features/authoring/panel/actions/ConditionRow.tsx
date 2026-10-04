@@ -7,7 +7,11 @@ import {
 } from "../../../../components/Properties/propertyTypes";
 import SelectInput from "../../components/Select";
 import useField from "../../inputs/useField";
-import { coercePropertyExists, coercePropertyValue } from "../../inputs/coerce";
+import {
+  coerceOneOf,
+  coercePropertyExists,
+  coercePropertyValue,
+} from "../../inputs/coerce";
 import { cn } from "../../../../util/classnames";
 
 interface ConditionRowType {
@@ -23,10 +27,6 @@ function ConditionRow({ locator, id, onDelete }: ConditionRowType) {
     commit: "onChange",
     coerce: coercePropertyExists(properties),
   });
-  const comparatorField = useField<Comparator>(`${locator}.comparator`, {
-    commit: "onChange",
-    empty: "=",
-  });
 
   const activeProperty = properties.find(
     (p) => p.id === stateVariableField.props.value
@@ -34,6 +34,12 @@ function ConditionRow({ locator, id, onDelete }: ConditionRowType) {
   const comparators = activeProperty
     ? (validComparators[activeProperty.type] as Comparator[])
     : [];
+
+  const comparatorField = useField<Comparator>(`${locator}.comparator`, {
+    commit: "onChange",
+    empty: "=",
+    coerce: coerceOneOf(comparators),
+  });
 
   const valueField = useField<PropertyValue, string>(`${locator}.value`, {
     derive: String,
@@ -56,12 +62,14 @@ function ConditionRow({ locator, id, onDelete }: ConditionRowType) {
             {...comparatorField.props}
             values={comparators}
             disabled={!activeProperty}
+            error={comparatorField.error}
           />
           {activeProperty?.type === propertyTypes.BOOLEAN ? (
             <SelectInput
               disabled={!activeProperty}
               values={["true", "false"]}
               {...valueField.props}
+              error={valueField.error}
             />
           ) : (
             <input
