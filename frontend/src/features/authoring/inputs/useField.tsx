@@ -119,9 +119,16 @@ function useField(
   }
 
   const [draft, setDraft] = useState(() => toDraft(committed));
-  const [error, setError] = useState(false);
+  const [writeError, setWriteError] = useState(false);
 
-  useEffect(() => setDraft(toDraft(committed)), [committed]);
+  useEffect(() => {
+    setDraft(toDraft(committed));
+    setWriteError(false);
+  }, [committed]);
+
+  const committedInvalid =
+    coerce !== undefined && coerce(toDraft(committed), committed) === INVALID;
+  const error = writeError || committedInvalid;
 
   function onChange(e: unknown) {
     const value = isChangeEvent(e) ? e.target.value : e;
@@ -140,10 +147,10 @@ function useField(
   function write(value: unknown) {
     const coerced = coerce ? coerce(value, committed) : value;
     if (coerced === INVALID) {
-      setError(true);
+      setWriteError(true);
       return;
     }
-    setError(false);
+    setWriteError(false);
     if (fastIsEqual(coerced, committed)) return;
     else if (component !== undefined)
       setComponentField(path, component, coerced);
