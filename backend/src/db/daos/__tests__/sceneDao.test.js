@@ -787,7 +787,7 @@ describe("Scene DAO patchScene tests", () => {
     ).rejects.toMatchObject({ status: 400 });
   });
 
-  it("rejects an action operation that isn't valid for its property's type", async () => {
+  it("accepts an action operation that isn't valid for its property's type", async () => {
     const scenario = await Scenario.create({
       name: "Invalid operation scenario",
       uid: "author-11",
@@ -797,29 +797,33 @@ describe("Scene DAO patchScene tests", () => {
       ],
     });
 
-    await expect(
-      createPatchedScene(scenario._id.toString(), {
-        name: "Scene",
-        components: [],
-        actions: [
-          {
-            id: "action-1",
-            name: "Advance",
-            conditions: [],
-            // "add" is only valid for number properties, not boolean ones
-            operations: [
-              {
-                id: "op1",
-                stateVariableId: "flag",
-                operation: "add",
-                value: 1,
-              },
-            ],
-            index: 0,
-          },
-        ],
-      })
-    ).rejects.toMatchObject({ status: 400 });
+    const created = await createPatchedScene(scenario._id.toString(), {
+      name: "Scene",
+      components: [],
+      actions: [
+        {
+          id: "action-1",
+          name: "Advance",
+          conditions: [],
+          // "add" is only valid for number properties, but type mismatches
+          // are left for the editor to flag and playback to ignore
+          operations: [
+            {
+              id: "op1",
+              stateVariableId: "flag",
+              operation: "add",
+              value: 1,
+            },
+          ],
+          index: 0,
+        },
+      ],
+    });
+
+    expect(created.actions[0].operations[0]).toMatchObject({
+      stateVariableId: "flag",
+      operation: "add",
+    });
   });
 
   it("rejects a defaultActionRefs entry that doesn't resolve to a scene action", async () => {
@@ -1052,6 +1056,149 @@ describe("Scene DAO patchScene tests", () => {
     expect(updated.actions.find((a) => a.id === "action-stale").name).toBe(
       "Stale"
     );
+  });
+
+  describe("preexisting property references on an upserted action", () => {
+    const staleCondition = {
+      id: "c-stale",
+      stateVariableId: "deleted-prop",
+      comparator: "=",
+      value: 1,
+    };
+    const staleOperation = {
+      id: "op-stale",
+      stateVariableId: "flag",
+      // valid when "flag" was a number, but "flag" is now a boolean
+      operation: "add",
+      value: 1,
+    };
+    const baseAction = {
+      id: "action-1",
+      name: "Advance",
+      linkedScene: null,
+      conditions: [staleCondition],
+      operations: [staleOperation],
+      index: 0,
+    };
+
+    let scenarioId;
+
+    beforeEach(async () => {
+      const scenario = await Scenario.create({
+        name: "Stale reference scenario",
+        uid: "author-stale",
+        scenes: [sceneId],
+        stateVariables: [
+          { id: "hp", name: "hp", type: "number", value: 10 },
+          { id: "flag", name: "flag", type: "boolean", value: false },
+        ],
+      });
+      scenarioId = scenario._id.toString();
+
+      await Scene.updateOne(
+        { _id: sceneId },
+        { $set: { actions: [baseAction] } }
+      );
+    });
+
+    const upsertAction = (action) =>
+      patchScene(
+        sceneId,
+        { actions: { upserted: [action], deleted: [] } },
+        scenarioId
+      );
+
+    it("allows untouched stale references when a new valid condition is added", async () => {
+      const newCondition = {
+        id: "c-new",
+        stateVariableId: "hp",
+        comparator: "<",
+        value: 5,
+      };
+
+      const updated = await upsertAction({
+        ...baseAction,
+        conditions: [staleCondition, newCondition],
+      });
+
+      const action = updated.actions.find((a) => a.id === "action-1");
+      expect(action.conditions.map((c) => c.id)).toEqual(["c-stale", "c-new"]);
+      expect(action.operations.map((o) => o.id)).toEqual(["op-stale"]);
+    });
+
+    it("rejects a new condition referencing an unknown property", async () => {
+      await expect(
+        upsertAction({
+          ...baseAction,
+          conditions: [
+            staleCondition,
+            {
+              id: "c-new",
+              stateVariableId: "also-deleted",
+              comparator: "=",
+              value: 1,
+            },
+          ],
+        })
+      ).rejects.toMatchObject({ status: 400 });
+    });
+
+    it("rejects a stale condition repointed at a different unknown property", async () => {
+      await expect(
+        upsertAction({
+          ...baseAction,
+          conditions: [{ ...staleCondition, stateVariableId: "also-deleted" }],
+        })
+      ).rejects.toMatchObject({ status: 400 });
+    });
+
+    it("rejects a stale condition whose value alone was edited", async () => {
+      await expect(
+        upsertAction({
+          ...baseAction,
+          conditions: [{ ...staleCondition, value: 2 }],
+        })
+      ).rejects.toMatchObject({ status: 400 });
+    });
+
+    it("accepts an edited operation whose property changed type, since the property still exists", async () => {
+      const updated = await upsertAction({
+        ...baseAction,
+        operations: [{ ...staleOperation, value: 2 }],
+      });
+
+      const action = updated.actions.find((a) => a.id === "action-1");
+      expect(action.operations[0].value).toBe(2);
+    });
+
+    it("rejects a stale operation on a deleted property whose value alone was edited", async () => {
+      await Scene.updateOne(
+        { _id: sceneId },
+        {
+          $set: {
+            "actions.0.operations.0.stateVariableId": "deleted-prop",
+          },
+        }
+      );
+
+      await expect(
+        upsertAction({
+          ...baseAction,
+          operations: [
+            { ...staleOperation, stateVariableId: "deleted-prop", value: 2 },
+          ],
+        })
+      ).rejects.toMatchObject({ status: 400 });
+    });
+
+    it("rejects a stale condition moved to a new id", async () => {
+      await expect(
+        upsertAction({
+          ...baseAction,
+          conditions: [{ ...staleCondition, id: "c-moved" }],
+        })
+      ).rejects.toMatchObject({ status: 400 });
+    });
   });
 
   it("deletes an action while leaving stale defaultActionRefs/component references untouched", async () => {

@@ -4,10 +4,6 @@ import { HttpError } from "../../util/error.js";
 import status from "../../util/status.js";
 import { applyReferenceDeltas } from "./fileDao.js";
 import { getProperties } from "./scenarioDao.js";
-import {
-  isValidOperation,
-  isValidComparator,
-} from "../../util/properties/propertyTypes.js";
 import { HttpStatusCode } from "axios";
 import mongoose from "mongoose";
 
@@ -181,43 +177,61 @@ const assertUniqueActionIds = (actions) => {
   }
 };
 
-// validate that each action's conditions/operations reference a real
-// property, using a comparator/operation that's legal for its type
-const assertActionsMatchPropertyTypes = (actions, properties) => {
-  const propertiesById = new Map(properties.map((p) => [p.id, p]));
+// a condition/operation that hasn't changed is allowed through even if its
+// property has since been deleted
+const isUnchangedRef = (item, existingItems, typeField) => {
+  const existing = existingItems?.find((e) => e.id === item.id);
+  return (
+    existing !== undefined &&
+    existing.stateVariableId === item.stateVariableId &&
+    existing[typeField] === item[typeField] &&
+    existing.value === item.value
+  );
+};
+
+// collect the conditions/operations that need validating
+const getChangedPropertyRefs = (actions, existingActions) => {
+  const existingActionsById = new Map(existingActions.map((a) => [a.id, a]));
+  const conditions = [];
+  const operations = [];
 
   for (const action of actions) {
-    for (const condition of action.conditions ?? []) {
-      const property = propertiesById.get(condition.stateVariableId);
-      if (!property) {
-        throw new HttpError(
-          `Condition references unknown property "${condition.stateVariableId}"`,
-          status.BAD_REQUEST
-        );
-      }
-      if (!isValidComparator(property.type, condition.comparator)) {
-        throw new HttpError(
-          `Invalid comparator ${condition.comparator} for property type ${property.type}`,
-          status.BAD_REQUEST
-        );
-      }
-    }
+    const existingAction = existingActionsById.get(action.id);
+    conditions.push(
+      ...(action.conditions ?? []).filter(
+        (c) => !isUnchangedRef(c, existingAction?.conditions, "comparator")
+      )
+    );
+    operations.push(
+      ...(action.operations ?? []).filter(
+        (o) => !isUnchangedRef(o, existingAction?.operations, "operation")
+      )
+    );
+  }
 
-    for (const operation of action.operations ?? []) {
-      const property = propertiesById.get(operation.stateVariableId);
-      if (!property) {
-        throw new HttpError(
-          `Operation references unknown property "${operation.stateVariableId}"`,
-          status.BAD_REQUEST
-        );
-      }
-      if (!isValidOperation(property.type, operation.operation)) {
-        throw new HttpError(
-          `Invalid operation ${operation.operation} for property type ${property.type}`,
-          status.BAD_REQUEST
-        );
-      }
-    }
+  return { conditions, operations };
+};
+
+// validate that each condition/operation references a real property. type
+// mismatches are allowed through, since a property can change type after the
+// fact; the editor surfaces them and playback ignores them
+const assertRefsResolve = ({ conditions, operations }, properties) => {
+  const propertyIds = new Set(properties.map((p) => p.id));
+
+  const condition = conditions.find((c) => !propertyIds.has(c.stateVariableId));
+  if (condition) {
+    throw new HttpError(
+      `Condition references unknown property "${condition.stateVariableId}"`,
+      status.BAD_REQUEST
+    );
+  }
+
+  const operation = operations.find((o) => !propertyIds.has(o.stateVariableId));
+  if (operation) {
+    throw new HttpError(
+      `Operation references unknown property "${operation.stateVariableId}"`,
+      status.BAD_REQUEST
+    );
   }
 };
 
@@ -241,16 +255,21 @@ const assertActionsUnique = (effectiveActions) => {
   assertUniqueActionNames(effectiveActions);
 };
 
-// validates an actions[] list
-const assertActionsContentValid = async (scenarioId, actions) => {
+// validates an actions[] list, against the scene's currently stored actions
+const assertActionsContentValid = async (
+  scenarioId,
+  actions,
+  existingActions = []
+) => {
   const linkedSceneIds = actions
     .map((action) => action.linkedScene)
     .filter(Boolean);
   await assertScenesInScenario(scenarioId, linkedSceneIds);
 
-  if (actions.length) {
+  const changedRefs = getChangedPropertyRefs(actions, existingActions);
+  if (changedRefs.conditions.length || changedRefs.operations.length) {
     const properties = await getProperties(scenarioId);
-    assertActionsMatchPropertyTypes(actions, properties);
+    assertRefsResolve(changedRefs, properties);
   }
 };
 
@@ -598,7 +617,11 @@ export async function patchScene(sceneId, patch, scenarioId) {
 
   const effectiveActions = getEffectiveArray(actions, existingScene.actions);
   if (actions.upserted.length) {
-    await assertActionsContentValid(scenarioId, actions.upserted);
+    await assertActionsContentValid(
+      scenarioId,
+      actions.upserted,
+      existingScene.toObject().actions
+    );
     assertActionsUnique(effectiveActions);
   }
 
