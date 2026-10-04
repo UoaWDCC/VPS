@@ -2,7 +2,7 @@ import { useState, type PropsWithChildren } from "react";
 import { PlusIcon } from "lucide-react";
 
 interface PanelInputProps {
-  label: string;
+  label?: string;
   AddModal?: (props: { open: boolean; onClose: () => void }) => JSX.Element;
   onAdd?: () => void;
 }

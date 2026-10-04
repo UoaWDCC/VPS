@@ -1,4 +1,10 @@
-import { forwardRef, useImperativeHandle, useState } from "react";
+import {
+  forwardRef,
+  useImperativeHandle,
+  useState,
+  type ForwardedRef,
+  type ReactElement,
+} from "react";
 import { generateKeyBetween } from "fractional-indexing";
 import { v4 as uuid } from "uuid";
 import {
@@ -21,12 +27,12 @@ import useField from "../../inputs/useField";
 import ActionRefRow from "./ActionRefRow";
 import ActionRefRowDraft from "./ActionRefRowDraft";
 
-interface ActionsInputProps {
+interface ActionRefsInputProps {
   locator: string;
   component?: string | null;
 }
 
-export interface ActionsInputHandle {
+export interface ActionRefsInputHandle {
   addItem: () => void;
 }
 
@@ -52,123 +58,122 @@ function keyAt(others: ActionRef[], at: number) {
   return generateKeyBetween(prev, next);
 }
 
-const ActionRefsInput = forwardRef<ActionsInputHandle, ActionsInputProps>(
-  function ActionsInput({ locator, component }, ref) {
-    const [hasDraft, setHasDraft] = useState(false);
-    const [activeIdDragging, setActiveIdDragging] = useState<string | null>(
-      null
-    );
+function ActionRefsInput(
+  { locator, component }: ActionRefsInputProps,
+  ref: ForwardedRef<ActionRefsInputHandle>
+) {
+  const [hasDraft, setHasDraft] = useState(false);
+  const [activeIdDragging, setActiveIdDragging] = useState<string | null>(null);
 
-    const {
-      props: { value, onChange },
-    } = useField<ActionRef[]>(locator, {
-      commit: "onChange",
-      component: component,
-      empty: [],
-    });
+  const {
+    props: { value, onChange },
+  } = useField<ActionRef[]>(locator, {
+    commit: "onChange",
+    component: component,
+    empty: [],
+  });
 
-    const sorted = orderRefs(value);
+  const sorted = orderRefs(value);
 
-    const sensors = useSensors(
-      useSensor(PointerSensor, {
-        activationConstraint: {
-          distance: 8,
-        },
-      }),
-      useSensor(KeyboardSensor)
-    );
-
-    useImperativeHandle(ref, () => ({
-      addItem() {
-        setHasDraft(true);
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 8,
       },
-    }));
+    }),
+    useSensor(KeyboardSensor)
+  );
 
-    function handleDragStart(e: DragStartEvent) {
-      setActiveIdDragging(e.active.id as string);
-    }
+  useImperativeHandle(ref, () => ({
+    addItem() {
+      setHasDraft(true);
+    },
+  }));
 
-    function handleDragEnd(e: DragEndEvent) {
-      setActiveIdDragging(null);
+  function handleDragStart(e: DragStartEvent) {
+    setActiveIdDragging(e.active.id as string);
+  }
 
-      const { active, over } = e;
-      if (!over || active.id === over.id) return;
+  function handleDragEnd(e: DragEndEvent) {
+    setActiveIdDragging(null);
 
-      const oldIndex = sorted.findIndex(
-        (actionRef) => actionRef.id === active.id
-      );
-      const newIndex = sorted.findIndex(
-        (actionRef) => actionRef.id === over.id
-      );
+    const { active, over } = e;
+    if (!over || active.id === over.id) return;
 
-      if (oldIndex === -1 || newIndex === -1) return;
+    const oldIndex = sorted.findIndex(
+      (actionRef) => actionRef.id === active.id
+    );
+    const newIndex = sorted.findIndex((actionRef) => actionRef.id === over.id);
 
-      const moved = sorted[oldIndex];
-      const others = sorted.filter((ref) => ref.id !== moved.id);
-      const index = keyAt(others, newIndex);
+    if (oldIndex === -1 || newIndex === -1) return;
 
-      onChange(
-        value.map((actionRef) =>
-          actionRef.id === moved.id ? { ...actionRef, index } : actionRef
-        )
-      );
-    }
+    const moved = sorted[oldIndex];
+    const others = sorted.filter((ref) => ref.id !== moved.id);
+    const index = keyAt(others, newIndex);
 
-    function handlePublish(actionId: string) {
-      onChange([
-        ...value,
-        {
-          id: uuid(),
-          actionId,
-          index: keyAt(sorted, sorted.length),
-        },
-      ]);
-    }
-
-    function handleScrap() {
-      setHasDraft(false);
-    }
-
-    function handleDelete(id: string) {
-      onChange(value.filter((ref) => ref.id !== id));
-    }
-
-    return (
-      <DndContext
-        onDragStart={handleDragStart}
-        onDragEnd={handleDragEnd}
-        sensors={sensors}
-        collisionDetection={closestCenter}
-      >
-        <SortableContext items={sorted} strategy={verticalListSortingStrategy}>
-          <div className="dropdown flex-1">
-            <ul>
-              {sorted.map((actionRef, i) => (
-                <ActionRefRow
-                  key={actionRef.id}
-                  id={actionRef.id}
-                  position={i}
-                  locator={`${locator}.${value.findIndex((r) => r.id === actionRef.id)}`}
-                  component={component}
-                  onDelete={handleDelete}
-                />
-              ))}
-              {hasDraft && (
-                <ActionRefRowDraft
-                  onPublish={handlePublish}
-                  onScrap={handleScrap}
-                />
-              )}
-            </ul>
-          </div>
-        </SortableContext>
-        {/* NOTE: this is empty on purpose, since it acheives a no free-form drag overlay completely */}
-        <DragOverlay dropAnimation={null}>
-          {activeIdDragging ? <div></div> : null}
-        </DragOverlay>
-      </DndContext>
+    onChange(
+      value.map((actionRef) =>
+        actionRef.id === moved.id ? { ...actionRef, index } : actionRef
+      )
     );
   }
-);
 
-export default ActionRefsInput;
+  function handlePublish(actionId: string) {
+    onChange([
+      ...value,
+      {
+        id: uuid(),
+        actionId,
+        index: keyAt(sorted, sorted.length),
+      },
+    ]);
+  }
+
+  function handleScrap() {
+    setHasDraft(false);
+  }
+
+  function handleDelete(id: string) {
+    onChange(value.filter((ref) => ref.id !== id));
+  }
+
+  return (
+    <DndContext
+      onDragStart={handleDragStart}
+      onDragEnd={handleDragEnd}
+      sensors={sensors}
+      collisionDetection={closestCenter}
+    >
+      <SortableContext items={sorted} strategy={verticalListSortingStrategy}>
+        <div className="dropdown flex-1">
+          <ul>
+            {sorted.map((actionRef, i) => (
+              <ActionRefRow
+                key={actionRef.id}
+                id={actionRef.id}
+                position={i}
+                locator={`${locator}.${value.findIndex((r) => r.id === actionRef.id)}`}
+                component={component}
+                onDelete={handleDelete}
+              />
+            ))}
+            {hasDraft && (
+              <ActionRefRowDraft
+                onPublish={handlePublish}
+                onScrap={handleScrap}
+              />
+            )}
+          </ul>
+        </div>
+      </SortableContext>
+      {/* NOTE: this is empty on purpose, since it acheives a no free-form drag overlay completely */}
+      <DragOverlay dropAnimation={null}>
+        {activeIdDragging ? <div></div> : null}
+      </DragOverlay>
+    </DndContext>
+  );
+}
+
+export default forwardRef(ActionRefsInput) as (
+  props: ActionRefsInputProps & { ref?: ForwardedRef<ActionRefsInputHandle> }
+) => ReactElement | null;

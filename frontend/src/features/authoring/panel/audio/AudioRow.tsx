@@ -48,8 +48,9 @@ function AudioRow({ component, audioNames, onDelete }: AudioRowProps) {
 
   return (
     <li>
-      <div className="flex items-center">
+      <div className="flex gap-1 items-center">
         <button
+          type="button"
           className="btn btn-phantom btn-square btn-xs"
           onClick={togglePlayback}
           title="Toggle Audio Playback"
@@ -78,6 +79,7 @@ function AudioRow({ component, audioNames, onDelete }: AudioRowProps) {
           </button>
         </div>
         <button
+          type="button"
           className="btn btn-phantom btn-square btn-xs"
           onClick={() => onDelete(component.id)}
           title="Delete Audio"

@@ -95,20 +95,22 @@ function AudioPanel() {
         </button>
       </div>
 
-      <ul className="mt-3 gap-1 flex flex-col">
-        {audios.length > 0 ? (
-          audios.map((audio) => (
+      {audios.length > 0 ? (
+        <ul className="mt-3 gap-1 flex flex-col">
+          {audios.map((audio) => (
             <AudioRow
               component={audio}
               audioNames={audioNames}
               key={audio.id}
               onDelete={deleteAudioComponent}
             />
-          ))
-        ) : (
-          <p className="text-xs opacity-70">No audio elements yet</p>
-        )}
-      </ul>
+          ))}
+        </ul>
+      ) : (
+        <p className="mt-6 text-xs text-center text-primary">
+          No audio elements yet for this scene
+        </p>
+      )}
 
       <input
         ref={fileInputRef}

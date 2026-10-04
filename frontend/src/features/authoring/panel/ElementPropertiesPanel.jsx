@@ -112,7 +112,7 @@ function ElementPropertiesPanel({ component }) {
   return (
     <>
       <PanelSection name="Button Link" id="button-link">
-        <PanelInput label="Default Linked Scene">
+        <PanelInput label="Linked Scene">
           <SceneSelectInput
             {...linkedSceneField.props}
             scenes={scenes}
@@ -133,7 +133,7 @@ function ElementPropertiesPanel({ component }) {
           <PanelInput label="Width">
             <input
               {...widthField.props}
-              type="number"
+              type="text"
               inputMode="decimal"
               className={cn("input", widthField.error && "input-error")}
             />
@@ -141,7 +141,7 @@ function ElementPropertiesPanel({ component }) {
           <PanelInput label="Height">
             <input
               {...heightField.props}
-              type="number"
+              type="text"
               inputMode="decimal"
               className={cn("input", heightField.error && "input-error")}
             />
@@ -169,7 +169,7 @@ function ElementPropertiesPanel({ component }) {
           <PanelInput label="Angle (Degrees)">
             <input
               {...rotationField.props}
-              type="number"
+              type="text"
               inputMode="decimal"
               className={cn("input", rotationField.error && "input-error")}
             />
