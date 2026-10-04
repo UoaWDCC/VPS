@@ -15,6 +15,7 @@ import AudioPanel from "./audio/AudioPanel";
 import PropertyBindingsPanel from "./PropertyBindingsPanel";
 import PanelFrame from "./PanelFrame";
 import ActionsPanel from "./actions/ActionsPanel";
+import { cn } from "../../../util/classnames";
 
 const ALWAYS_PANELS = [
   { key: "scene", label: "Scene Details", Icon: MonitorCog },
@@ -101,9 +102,10 @@ export default function Panel() {
 
   return (
     <div
-      className={`flex shrink-0 items-center justify-end gap-3 overflow-hidden pb-m transition-[width] duration-150 ease-out motion-reduce:transition-none ${
+      className={cn(
+        "flex shrink-0 items-center justify-end gap-3 overflow-hidden pb-m transition-[width] duration-150 ease-out motion-reduce:transition-none",
         activePanel ? "w-[calc(24rem_+_4.25rem)]" : "w-14"
-      }`}
+      )}
     >
       <PanelFrame
         label={PANEL_LABELS[activePanel]}
