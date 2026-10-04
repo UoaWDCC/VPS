@@ -3,6 +3,7 @@ import { v4 as uuid } from "uuid";
 import useVisualScene from "../../stores/visual";
 import { modifySceneProp } from "../../scene/operations/modifiers";
 import ActionRow from "./ActionRow";
+import { nextNumberedName } from "../../util";
 
 /*
  * The content of the "Actions" panel.
@@ -12,13 +13,15 @@ import ActionRow from "./ActionRow";
 function ActionsPanel() {
   const actions = useVisualScene((s) => s.actions);
 
-  // TODO: generate new name based on previous name (e.g. New Action 1..2..3)
   function handleCreate() {
     modifySceneProp("actions", [
       ...actions,
       {
         id: uuid(),
-        name: "New Action",
+        name: nextNumberedName(
+          "New Action",
+          actions.map((a) => a.name)
+        ),
         linkedScene: null,
         conditions: [],
         operations: [],
