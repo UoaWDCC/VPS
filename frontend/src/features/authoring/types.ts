@@ -32,11 +32,10 @@ export interface Action {
   operations: Operation[];
 }
 
-// a reference to an Action by id, with an index controlling evaluation order
-// among sibling refs (e.g. a component's clickable actions)
 export interface ActionRef {
-  index: number;
   id: string;
+  actionId: string;
+  index: string; // fractional for concurrent editing
 }
 
 export interface Scene {

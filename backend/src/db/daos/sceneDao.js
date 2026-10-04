@@ -235,15 +235,47 @@ const assertRefsResolve = ({ conditions, operations }, properties) => {
   }
 };
 
-// reject an action-id reference that doesn't resolve against the scene's
-// actions[]
-const assertActionIdsResolve = (actionRefs, validIds, label) => {
-  if (!actionRefs?.length) return;
+// reject malformed action refs, or refs sharing an id within one list
+const assertActionRefsShape = (actionRefs, label) => {
+  if (!Array.isArray(actionRefs)) {
+    throw new HttpError(`${label} must be an array`, status.BAD_REQUEST);
+  }
+  const seen = new Set();
+  for (const ref of actionRefs) {
+    if (
+      typeof ref?.id !== "string" ||
+      typeof ref.actionId !== "string" ||
+      typeof ref.index !== "string"
+    ) {
+      throw new HttpError(
+        `${label} contains a malformed action ref`,
+        status.BAD_REQUEST
+      );
+    }
+    if (seen.has(ref.id)) {
+      throw new HttpError(
+        `Duplicate action ref id "${ref.id}" in ${label}`,
+        status.BAD_REQUEST
+      );
+    }
+    seen.add(ref.id);
+  }
+};
+
+// reject an action ref that doesn't resolve against the scene's actions[]. a
+// ref already stored with the same id and actionId is a preexisting reference,
+// and is allowed through even if its action has since been deleted
+const assertActionRefsResolve = (actionRefs, existingRefs, validIds, label) => {
+  const existingById = new Map((existingRefs ?? []).map((r) => [r.id, r]));
   const validIdSet = new Set(validIds);
-  const dangling = actionRefs.find((ref) => !validIdSet.has(ref.id));
+  const dangling = actionRefs.find(
+    (ref) =>
+      existingById.get(ref.id)?.actionId !== ref.actionId &&
+      !validIdSet.has(ref.actionId)
+  );
   if (dangling) {
     throw new HttpError(
-      `${label} references unknown action id "${dangling.id}"`,
+      `${label} references unknown action id "${dangling.actionId}"`,
       status.BAD_REQUEST
     );
   }
@@ -609,9 +641,12 @@ export async function patchScene(sceneId, patch, scenarioId) {
     components: 1,
     background: 1,
     actions: 1,
+    defaultActionRefs: 1,
+    timerActionRefs: 1,
   });
   if (!existingScene)
     throw new HttpError("scene not found", HttpStatusCode.NotFound);
+  const existing = existingScene.toObject();
 
   // patch action validation
 
@@ -620,33 +655,36 @@ export async function patchScene(sceneId, patch, scenarioId) {
     await assertActionsContentValid(
       scenarioId,
       actions.upserted,
-      existingScene.toObject().actions
+      existing.actions
     );
     assertActionsUnique(effectiveActions);
   }
 
   const validActionIds = effectiveActions.map((action) => action.id);
 
-  if (defaultActionRefs.upserted.length)
-    assertActionIdsResolve(
+  const existingComponentsById = new Map(
+    (existing.components ?? []).map((c) => [c.id, c])
+  );
+
+  const refLists = [
+    [
+      "defaultActionRefs",
       defaultActionRefs.upserted,
-      validActionIds,
-      "defaultActionRefs"
-    );
-  if (timerActionRefs.upserted.length)
-    assertActionIdsResolve(
-      timerActionRefs.upserted,
-      validActionIds,
-      "timerActionRefs"
-    );
-  components.upserted.forEach((c) => {
-    if (c.actionRefs !== undefined)
-      assertActionIdsResolve(
+      existing.defaultActionRefs,
+    ],
+    ["timerActionRefs", timerActionRefs.upserted, existing.timerActionRefs],
+    ...components.upserted
+      .filter((c) => c.actionRefs !== undefined)
+      .map((c) => [
+        `component "${c.id}" actions`,
         c.actionRefs,
-        validActionIds,
-        `component "${c.id}" actions`
-      );
-  });
+        existingComponentsById.get(c.id)?.actionRefs,
+      ]),
+  ];
+  for (const [label, refs, existingRefs] of refLists) {
+    assertActionRefsShape(refs, label);
+    assertActionRefsResolve(refs, existingRefs, validActionIds, label);
+  }
 
   // file ref computation
   const fileRefDeltas = computePatchFileRefDeltas(

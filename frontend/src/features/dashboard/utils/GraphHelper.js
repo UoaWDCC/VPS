@@ -53,7 +53,8 @@ const CreateGraphData = (scenes, groupInfo) => {
       );
       const resolveActions = (actionIds) =>
         (actionIds ?? []).map((id) => actionsById.get(id)).filter(Boolean);
-      const orderedActionIds = (refs) => (refs ?? []).map((ref) => ref.id);
+      const orderedActionIds = (refs) =>
+        (refs ?? []).map((ref) => ref.actionId);
 
       const actionLists = [
         ...scene.components
@@ -67,10 +68,8 @@ const CreateGraphData = (scenes, groupInfo) => {
         .flatMap((actionIds) => resolveActions(actionIds))
         .forEach((action) => {
           if (!action.linkedScene) return;
-          // multiple actions in the same scene (different clickable
-          // components, default, timer) can resolve to the same
-          // linkedScene — collapse those into a single edge so react-flow
-          // doesn't receive duplicate edge ids
+          // multiple actions in the same scene can resolve to the same
+          // linkedScene, so we ignore dups
           const edgeId = scene.name + "-" + sceneMap[action.linkedScene].name;
           if (seenEdgeIds.has(edgeId)) return;
           seenEdgeIds.add(edgeId);

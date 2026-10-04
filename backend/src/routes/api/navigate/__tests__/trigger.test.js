@@ -24,19 +24,23 @@ const scene = {
       clickable: true,
       linkedScene: "scene-click",
       actionRefs: [
-        { index: 1, id: "action-3" },
-        { index: 0, id: "action-1" },
+        { id: "ref-action-3", actionId: "action-3", index: "a1" },
+        { id: "ref-action-1", actionId: "action-1", index: "a0" },
       ],
     },
     {
       id: "label",
       clickable: false,
-      actionRefs: [{ index: 0, id: "action-2" }],
+      actionRefs: [{ id: "ref-action-2", actionId: "action-2", index: "a0" }],
     },
   ],
-  defaultActionRefs: [{ index: 0, id: "action-default" }],
+  defaultActionRefs: [
+    { id: "ref-action-default", actionId: "action-default", index: "a0" },
+  ],
   defaultLinkedScene: "scene-default",
-  timerActionRefs: [{ index: 0, id: "action-timer" }],
+  timerActionRefs: [
+    { id: "ref-action-timer", actionId: "action-timer", index: "a0" },
+  ],
   timerLinkedScene: "scene-timer",
 };
 
@@ -106,8 +110,8 @@ describe("resolveTrigger", () => {
     const dangling = {
       ...scene,
       defaultActionRefs: [
-        { index: 0, id: "deleted-action" },
-        { index: 1, id: "action-default" },
+        { id: "ref-deleted-action", actionId: "deleted-action", index: "a0" },
+        { id: "ref-action-default", actionId: "action-default", index: "a1" },
       ],
     };
     expect(ids(resolveTrigger(dangling, "default", null))).toEqual([

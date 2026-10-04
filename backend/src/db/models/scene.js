@@ -55,6 +55,15 @@ backgroundSchema.pre("validate", function () {
   }
 });
 
+const actionRefSchema = new Schema(
+  {
+    id: { type: String, required: true },
+    actionId: { type: String, required: true },
+    index: { type: String, required: true },
+  },
+  { _id: false }
+);
+
 const sceneSchema = new Schema({
   name: {
     type: String,
@@ -79,22 +88,18 @@ const sceneSchema = new Schema({
     type: Schema.Types.ObjectId,
     ref: "Scene",
   },
-  defaultActionRefs: [
-    {
-      index: Number,
-      id: String,
-    },
-  ],
+  defaultActionRefs: {
+    type: [actionRefSchema],
+    default: [],
+  },
   timerLinkedScene: {
     type: Schema.Types.ObjectId,
     ref: "Scene",
   },
-  timerActionRefs: [
-    {
-      index: Number,
-      id: String,
-    },
-  ],
+  timerActionRefs: {
+    type: [actionRefSchema],
+    default: [],
+  },
   background: {
     type: backgroundSchema,
     default: null,

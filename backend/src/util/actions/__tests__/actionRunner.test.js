@@ -1,6 +1,7 @@
 import { describe, it, expect } from "@jest/globals";
 
 import {
+  orderedActionIds,
   resolveActions,
   runActions,
   getLinkedSceneIds,
@@ -15,6 +16,36 @@ const action = (overrides) => ({
   conditions: [],
   operations: [],
   ...overrides,
+});
+
+describe("orderedActionIds", () => {
+  const ref = (id, actionId, index) => ({ id, actionId, index });
+
+  it("orders by fractional index key, comparing by code unit", () => {
+    const refs = [
+      ref("r1", "third", "a1"),
+      ref("r2", "second", "a0V"),
+      ref("r3", "first", "Zz"),
+      ref("r4", "zeroth", "A0"),
+    ];
+    // localeCompare would put "Zz" after "a1"
+    expect(orderedActionIds(refs)).toEqual([
+      "zeroth",
+      "first",
+      "second",
+      "third",
+    ]);
+  });
+
+  it("breaks index ties by ref id", () => {
+    const refs = [ref("r2", "second", "a0"), ref("r1", "first", "a0")];
+    expect(orderedActionIds(refs)).toEqual(["first", "second"]);
+  });
+
+  it("keeps duplicate references to the same action", () => {
+    const refs = [ref("r1", "heal", "a0"), ref("r2", "heal", "a1")];
+    expect(orderedActionIds(refs)).toEqual(["heal", "heal"]);
+  });
 });
 
 describe("resolveActions", () => {
@@ -147,6 +178,19 @@ describe("runActions", () => {
     expect(result.linkedScene).toBeNull();
     expect(result.properties.find((p) => p.id === "num").value).toBe(6);
   });
+  it("runs an action once per reference when it's referenced more than once", () => {
+    const heal = action({
+      id: "heal",
+      operations: [
+        { id: "op1", stateVariableId: "num", operation: "add", value: 1 },
+      ],
+    });
+    const actions = resolveActions([heal], ["heal", "heal"]);
+
+    const result = runActions(actions, numProperty());
+    expect(result.properties.find((p) => p.id === "num").value).toBe(7);
+  });
+
   it("skips stale operations and still applies the rest of the action", () => {
     const properties = [
       ...numProperty(),
@@ -186,16 +230,28 @@ describe("getLinkedSceneIds", () => {
       {
         id: "btn",
         clickable: true,
-        actionRefs: [{ index: 0, id: "click-action" }],
+        actionRefs: [
+          { id: "ref-click-action", actionId: "click-action", index: "a0" },
+        ],
       },
       {
         id: "label",
         clickable: false,
-        actionRefs: [{ index: 0, id: "non-clickable-action" }],
+        actionRefs: [
+          {
+            id: "ref-non-clickable-action",
+            actionId: "non-clickable-action",
+            index: "a0",
+          },
+        ],
       },
     ],
-    defaultActionRefs: [{ index: 0, id: "default-action" }],
-    timerActionRefs: [{ index: 0, id: "timer-action" }],
+    defaultActionRefs: [
+      { id: "ref-default-action", actionId: "default-action", index: "a0" },
+    ],
+    timerActionRefs: [
+      { id: "ref-timer-action", actionId: "timer-action", index: "a0" },
+    ],
   };
 
   it("unions linkedScene targets across clickable components, defaults, and timer actions", () => {
@@ -215,7 +271,9 @@ describe("getLinkedSceneIds", () => {
         {
           id: "btn",
           clickable: true,
-          actionRefs: [{ index: 0, id: "no-op-action" }],
+          actionRefs: [
+            { id: "ref-no-op-action", actionId: "no-op-action", index: "a0" },
+          ],
         },
       ],
       defaultActionRefs: [],
@@ -231,12 +289,16 @@ describe("getLinkedSceneIds", () => {
         {
           id: "btn1",
           clickable: true,
-          actionRefs: [{ index: 0, id: "click-action" }],
+          actionRefs: [
+            { id: "ref-click-action", actionId: "click-action", index: "a0" },
+          ],
         },
         {
           id: "btn2",
           clickable: true,
-          actionRefs: [{ index: 0, id: "click-action" }],
+          actionRefs: [
+            { id: "ref-click-action", actionId: "click-action", index: "a0" },
+          ],
         },
       ],
       defaultActionRefs: [],
