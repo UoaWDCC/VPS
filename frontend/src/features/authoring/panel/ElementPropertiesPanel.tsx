@@ -1,5 +1,5 @@
 import { getBoxCenter, translate, correct } from "../../authoring/util";
-import { useRef, useContext } from "react";
+import { useRef, useContext, type Context } from "react";
 import { modifyComponentBounds } from "../scene/operations/component";
 import { FlipHorizontal2, FlipVertical2 } from "lucide-react";
 import PanelSection from "./PanelSection";
@@ -9,37 +9,55 @@ import SceneContext from "../../../context/SceneContext";
 import useVisualScene from "../stores/visual";
 import useField from "../inputs/useField";
 import { cn } from "../../../util/classnames";
-import { coerceFloat, coerceRequired, INVALID, pipe } from "../inputs/coerce";
-import ActionRefsInput from "./actionRefs/ActionRefsInput";
+import {
+  coerceFloat,
+  coerceRequired,
+  INVALID,
+  pipe,
+  type Coerced,
+} from "../inputs/coerce";
+import ActionRefsInput, {
+  type ActionRefsInputHandle,
+} from "./actionRefs/ActionRefsInput";
+import type { Bounds, Component, Scene, Vec2 } from "../types";
 
-function coerceAngle(raw) {
-  return raw % 360;
+type Axis = "x" | "y";
+
+// an empty input is treated as 0
+function coerceAngle(raw: number | null) {
+  return (raw ?? 0) % 360;
 }
 
-function coercePosition(bounds, axis) {
-  const other = axis === "x" ? "y" : "x";
-  return (value) => {
-    const diff = value - bounds.verts[0][axis];
-    return translate(bounds.verts, { [axis]: diff, [other]: 0 });
+function coercePosition(bounds: Bounds | undefined, axis: Axis) {
+  return (value: number | null): Coerced<Vec2[]> => {
+    if (!bounds) return INVALID;
+    const diff = (value ?? 0) - bounds.verts[0][axis];
+    return translate(
+      bounds.verts,
+      axis === "x" ? { x: diff, y: 0 } : { x: 0, y: diff }
+    );
   };
 }
 
-function coerceExtent(bounds, axis) {
-  const other = axis === "x" ? "y" : "x";
-  return (value) => {
-    if (value === 0) return INVALID;
+function coerceExtent(bounds: Bounds | undefined, axis: Axis) {
+  return (value: number): Coerced<Vec2[]> => {
+    if (!bounds || value === 0) return INVALID;
     const { verts } = bounds;
-    const newVert = {
-      [axis]: verts[0][axis] + value,
-      [other]: verts[1][other],
-    };
+    const newVert =
+      axis === "x"
+        ? { x: verts[0].x + value, y: verts[1].y }
+        : { x: verts[1].x, y: verts[0].y + value };
     const newVerts = [verts[0], newVert, verts[2]].filter(Boolean);
     return correct(newVerts, getBoxCenter(verts), bounds.rotation ?? 0);
   };
 }
 
-function round2dp(value) {
+function round2dp(value: number) {
   return Math.round(value * 100) / 100;
+}
+
+interface ElementPropertiesPanelProps {
+  component: Component | null;
 }
 
 /*
@@ -47,47 +65,47 @@ function round2dp(value) {
  *
  * @component
  */
-function ElementPropertiesPanel({ component }) {
-  const { scenes } = useContext(SceneContext);
+function ElementPropertiesPanel({ component }: ElementPropertiesPanelProps) {
+  const { scenes } = useContext(SceneContext as Context<{ scenes: Scene[] }>);
   const sceneId = useVisualScene((scene) => scene.id);
 
-  const actionsRef = useRef(null);
+  const actionsRef = useRef<ActionRefsInputHandle | null>(null);
 
-  const xPositionField = useField("bounds.verts", {
+  const xPositionField = useField<Vec2[], string>("bounds.verts", {
     component: component?.id ?? null,
     derive: (v) => String(round2dp(v[0].x)),
     coerce: pipe(coerceFloat, coercePosition(component?.bounds, "x")),
   });
-  const yPositionField = useField("bounds.verts", {
+  const yPositionField = useField<Vec2[], string>("bounds.verts", {
     component: component?.id ?? null,
     derive: (v) => String(round2dp(v[0].y)),
     coerce: pipe(coerceFloat, coercePosition(component?.bounds, "y")),
   });
-  const widthField = useField("bounds.verts", {
+  const widthField = useField<Vec2[], string>("bounds.verts", {
     component: component?.id ?? null,
     derive: (v) => String(round2dp(v[1].x - v[0].x)),
     coerce: pipe(
       coerceFloat,
-      coerceRequired,
+      coerceRequired<number>,
       coerceExtent(component?.bounds, "x")
     ),
   });
-  const heightField = useField("bounds.verts", {
+  const heightField = useField<Vec2[], string>("bounds.verts", {
     component: component?.id ?? null,
     derive: (v) => String(round2dp(v[1].y - v[0].y)),
     coerce: pipe(
       coerceFloat,
-      coerceRequired,
+      coerceRequired<number>,
       coerceExtent(component?.bounds, "y")
     ),
   });
-  const rotationField = useField("bounds.rotation", {
+  const rotationField = useField<number, string>("bounds.rotation", {
     derive: (v) => String(round2dp(v)),
     coerce: pipe(coerceFloat, coerceAngle),
     component: component?.id ?? null,
   });
 
-  const linkedSceneField = useField("linkedScene", {
+  const linkedSceneField = useField<string | null>("linkedScene", {
     empty: null,
     commit: "onChange",
     component: component?.id ?? null,
@@ -95,8 +113,10 @@ function ElementPropertiesPanel({ component }) {
 
   if (!component) return null;
 
-  function flipComponent(axis) {
-    modifyComponentBounds([component.id], (prev) => {
+  const { id } = component;
+
+  function flipComponent(axis: Axis) {
+    modifyComponentBounds([id], (prev) => {
       const center = getBoxCenter(prev.verts);
       return {
         ...prev,

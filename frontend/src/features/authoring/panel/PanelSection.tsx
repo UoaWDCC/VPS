@@ -1,6 +1,18 @@
+import type { PropsWithChildren } from "react";
 import { PlusIcon } from "lucide-react";
 
-function PanelSection({ name, id, onAdd, children }) {
+interface PanelSectionProps {
+  name: string;
+  id: string;
+  onAdd?: () => void;
+}
+
+function PanelSection({
+  name,
+  id,
+  onAdd,
+  children,
+}: PropsWithChildren<PanelSectionProps>) {
   function handleAddClick() {
     if (onAdd) onAdd();
   }

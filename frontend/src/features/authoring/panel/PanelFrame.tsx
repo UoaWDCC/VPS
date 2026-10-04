@@ -1,6 +1,13 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { XIcon } from "lucide-react";
 import { cn } from "../../../util/classnames";
+
+interface PanelFrameProps {
+  label?: string;
+  open: boolean;
+  onClose: () => void;
+  children: ReactNode;
+}
 
 /**
  * The right-hand editing panel.
@@ -10,7 +17,12 @@ import { cn } from "../../../util/classnames";
  * out instead of vanishing immediately.
  * @component
  */
-export default function PanelFrame({ label, open, onClose, children }) {
+export default function PanelFrame({
+  label,
+  open,
+  onClose,
+  children,
+}: PanelFrameProps) {
   const [rendered, setRendered] = useState(open);
   const lastContentRef = useRef({ label, children });
 
@@ -34,6 +46,9 @@ export default function PanelFrame({ label, open, onClose, children }) {
   const { label: renderedLabel, children: renderedChildren } =
     lastContentRef.current;
 
+  // @types/react 17 doesn't know the inert attribute, so it's spread in
+  const inertProps = { inert: open ? undefined : "true" };
+
   return (
     <section
       id="canvas-side-panel"
@@ -43,7 +58,7 @@ export default function PanelFrame({ label, open, onClose, children }) {
         "font-dm h-full w-[24rem] min-w-[20rem] shrink-0 overflow-y-auto rounded-sm bg-base-200 p-5 transition-opacity duration-150 ease-out motion-reduce:transition-none",
         !open && "opacity-0"
       )}
-      inert={!open ? "true" : undefined}
+      {...inertProps}
       onTransitionEnd={(e) => {
         if (e.target === e.currentTarget && !open) setRendered(false);
       }}
