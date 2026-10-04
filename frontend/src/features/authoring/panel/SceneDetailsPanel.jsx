@@ -2,16 +2,15 @@ import { useContext, useRef } from "react";
 import ScenarioContext from "context/ScenarioContext";
 import SceneContext from "context/SceneContext";
 import { generateUniqueSceneName } from "../../../utils/sceneUtils";
-
 import useVisualScene from "../stores/visual";
 import PanelSection from "./PanelSection";
 import MultiSelectInput from "../components/MultiSelectInput";
 import SceneSelectInput from "../components/SceneSelectInput";
-import ActionsInput from "../components/ActionsInput";
 import useField from "../inputs/useField";
 import { coerceInt, coerceRange, INVALID, pipe } from "../inputs/coerce";
 import { cn } from "../../../util/classnames";
 import PanelInput from "./PanelInput";
+import ActionRefsInput from "./actionRefs/ActionRefsInput";
 
 /**
  * The content of the "Scene Details" panel.
@@ -38,12 +37,6 @@ function SceneDetailsPanel() {
   const timeField = useField("time", {
     derive: (v) => (v === null ? "" : String(v)),
     coerce: pipe(coerceInt, coerceRange(0, null)),
-  });
-  const timerActionRefsField = useField("timerActionRefs", {
-    commit: "onChange",
-  });
-  const defaultActionRefsField = useField("defaultActionRefs", {
-    commit: "onChange",
   });
   const defaultLinkedSceneField = useField("defaultLinkedScene", {
     empty: null,
@@ -84,9 +77,9 @@ function SceneDetailsPanel() {
           label="Actions"
           onAdd={() => defaultActionsRef.current?.addItem()}
         >
-          <ActionsInput
-            {...defaultActionRefsField.props}
+          <ActionRefsInput
             ref={defaultActionsRef}
+            locator="defaultActionRefs"
           />
         </PanelInput>
       </PanelSection>
@@ -110,7 +103,7 @@ function SceneDetailsPanel() {
           label="Timeout Actions"
           onAdd={() => timerActionsRef.current?.addItem()}
         >
-          <ActionsInput {...timerActionRefsField.props} ref={timerActionsRef} />
+          <ActionRefsInput ref={timerActionsRef} locator="timerActionRefs" />
         </PanelInput>
       </PanelSection>
     </>

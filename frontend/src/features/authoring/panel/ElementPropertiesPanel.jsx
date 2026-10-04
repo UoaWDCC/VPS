@@ -7,10 +7,10 @@ import PanelInput from "./PanelInput";
 import SceneSelectInput from "../components/SceneSelectInput";
 import SceneContext from "../../../context/SceneContext";
 import useVisualScene from "../stores/visual";
-import ActionsInput from "../components/ActionsInput";
 import useField from "../inputs/useField";
 import { cn } from "../../../util/classnames";
 import { coerceFloat, coerceRequired, INVALID, pipe } from "../inputs/coerce";
+import ActionRefsInput from "./actionRefs/ActionRefsInput";
 
 function coerceAngle(raw) {
   return raw % 360;
@@ -52,10 +52,6 @@ function ElementPropertiesPanel({ component }) {
   const sceneId = useVisualScene((scene) => scene.id);
 
   const actionsRef = useRef(null);
-  const actionRefsField = useField("actionRefs", {
-    commit: "onChange",
-    component: component?.id ?? null,
-  });
 
   const xPositionField = useField("bounds.verts", {
     component: component?.id ?? null,
@@ -124,7 +120,12 @@ function ElementPropertiesPanel({ component }) {
           />
         </PanelInput>
         <PanelInput label="Actions" onAdd={() => actionsRef.current?.addItem()}>
-          <ActionsInput ref={actionsRef} {...actionRefsField.props} />
+          {/* need to explicitly pass null here to differ vs non-component fields */}
+          <ActionRefsInput
+            ref={actionsRef}
+            locator="actionRefs"
+            component={component?.id ?? null}
+          />
         </PanelInput>
       </PanelSection>
       <PanelSection name="Positioning" id="positioning">
