@@ -1,12 +1,16 @@
 import { evaluateConditions } from "./conditionEvaluator.js";
 import { applyPropertyOperations } from "../properties/propertyOperations.js";
 
-// extracts action ids from a {index, id} ref list, ordered by index
+// fractional index keys must be compared by code unit
+const compareKeys = (a, b) => (a < b ? -1 : a > b ? 1 : 0);
+
+// extracts action ids from a ref list, ordered by index
+// with ties from concurrent edits broken by ref id
 export const orderedActionIds = (refs) =>
   (refs ?? [])
     .slice()
-    .sort((a, b) => a.index - b.index)
-    .map((ref) => ref.id);
+    .sort((a, b) => compareKeys(a.index, b.index) || compareKeys(a.id, b.id))
+    .map((ref) => ref.actionId);
 
 export const resolveActions = (sceneActions, actionIds) => {
   if (!actionIds || actionIds.length === 0) return [];

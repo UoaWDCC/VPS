@@ -127,7 +127,9 @@ describe("Navigate User API tests", () => {
         {
           id: componentId,
           clickable: true,
-          actionRefs: [{ index: 0, id: "action-go" }],
+          actionRefs: [
+            { id: "ref-action-go", actionId: "action-go", index: "a0" },
+          ],
           type: "BUTTON",
         },
       ],
@@ -309,7 +311,9 @@ describe("Navigate User API tests", () => {
           {
             id: componentId,
             clickable: true,
-            actionRefs: [{ index: 0, id: "action-go" }],
+            actionRefs: [
+              { id: "ref-action-go", actionId: "action-go", index: "a0" },
+            ],
             type: "BUTTON",
           },
         ],
@@ -446,7 +450,9 @@ describe("Navigate User API tests", () => {
             index: 0,
           },
         ],
-        defaultActionRefs: [{ index: 0, id: "action-default" }],
+        defaultActionRefs: [
+          { id: "ref-action-default", actionId: "action-default", index: "a0" },
+        ],
       });
       await User.findOneAndUpdate(
         { uid: "uid-player" },
@@ -483,7 +489,9 @@ describe("Navigate User API tests", () => {
             index: 0,
           },
         ],
-        defaultActionRefs: [{ index: 0, id: "action-heal" }],
+        defaultActionRefs: [
+          { id: "ref-action-heal", actionId: "action-heal", index: "a0" },
+        ],
       });
       await User.findOneAndUpdate(
         { uid: "uid-player" },
@@ -546,7 +554,9 @@ describe("Navigate User API tests", () => {
             index: 0,
           },
         ],
-        defaultActionRefs: [{ index: 0, id: "action-stale" }],
+        defaultActionRefs: [
+          { id: "ref-action-stale", actionId: "action-stale", index: "a0" },
+        ],
       });
       await User.findOneAndUpdate(
         { uid: "uid-player" },
@@ -718,7 +728,9 @@ describe("Navigate User API tests", () => {
             index: 0,
           },
         ],
-        defaultActionRefs: [{ index: 0, id: "action-go" }],
+        defaultActionRefs: [
+          { id: "ref-action-go", actionId: "action-go", index: "a0" },
+        ],
         defaultLinkedScene: scene2._id,
       });
       await startAt(linkScene);
@@ -756,8 +768,8 @@ describe("Navigate User API tests", () => {
           },
         ],
         defaultActionRefs: [
-          { index: 0, id: "action-gated" },
-          { index: 1, id: "action-heal" },
+          { id: "ref-action-gated", actionId: "action-gated", index: "a0" },
+          { id: "ref-action-heal", actionId: "action-heal", index: "a1" },
         ],
         defaultLinkedScene: scene2._id,
       });

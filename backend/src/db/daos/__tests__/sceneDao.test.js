@@ -656,7 +656,9 @@ describe("Scene DAO patchScene tests", () => {
           id: "btn",
           type: "box",
           clickable: true,
-          actionRefs: [{ index: 0, id: "action-1" }],
+          actionRefs: [
+            { id: "ref-action-1", actionId: "action-1", index: "a0" },
+          ],
         },
       ],
       actions: [
@@ -673,8 +675,12 @@ describe("Scene DAO patchScene tests", () => {
           index: 0,
         },
       ],
-      defaultActionRefs: [{ index: 0, id: "action-1" }],
-      timerActionRefs: [{ index: 0, id: "action-1" }],
+      defaultActionRefs: [
+        { id: "ref-action-1", actionId: "action-1", index: "a0" },
+      ],
+      timerActionRefs: [
+        { id: "ref-action-1", actionId: "action-1", index: "a0" },
+      ],
     });
 
     expect(created.actions).toHaveLength(1);
@@ -686,11 +692,19 @@ describe("Scene DAO patchScene tests", () => {
       targetScene._id.toString()
     );
     expect(
-      created.defaultActionRefs.map((r) => ({ index: r.index, id: r.id }))
-    ).toEqual([{ index: 0, id: "action-1" }]);
+      created.defaultActionRefs.map((r) => ({
+        id: r.id,
+        actionId: r.actionId,
+        index: r.index,
+      }))
+    ).toEqual([{ id: "ref-action-1", actionId: "action-1", index: "a0" }]);
     expect(
-      created.timerActionRefs.map((r) => ({ index: r.index, id: r.id }))
-    ).toEqual([{ index: 0, id: "action-1" }]);
+      created.timerActionRefs.map((r) => ({
+        id: r.id,
+        actionId: r.actionId,
+        index: r.index,
+      }))
+    ).toEqual([{ id: "ref-action-1", actionId: "action-1", index: "a0" }]);
   });
 
   it("rejects duplicate action ids within a scene", async () => {
@@ -846,7 +860,9 @@ describe("Scene DAO patchScene tests", () => {
             index: 0,
           },
         ],
-        defaultActionRefs: [{ index: 0, id: "missing-action" }],
+        defaultActionRefs: [
+          { id: "ref-missing-action", actionId: "missing-action", index: "a0" },
+        ],
       })
     ).rejects.toMatchObject({ status: 400 });
   });
@@ -871,7 +887,9 @@ describe("Scene DAO patchScene tests", () => {
             index: 0,
           },
         ],
-        timerActionRefs: [{ index: 0, id: "missing-action" }],
+        timerActionRefs: [
+          { id: "ref-missing-action", actionId: "missing-action", index: "a0" },
+        ],
       })
     ).rejects.toMatchObject({ status: 400 });
   });
@@ -891,7 +909,13 @@ describe("Scene DAO patchScene tests", () => {
             id: "btn",
             type: "box",
             clickable: true,
-            actionRefs: [{ index: 0, id: "missing-action" }],
+            actionRefs: [
+              {
+                id: "ref-missing-action",
+                actionId: "missing-action",
+                index: "a0",
+              },
+            ],
           },
         ],
         actions: [
@@ -931,7 +955,7 @@ describe("Scene DAO patchScene tests", () => {
       sceneId,
       {
         defaultActionRefs: {
-          upserted: [{ index: 0, id: "action-1" }],
+          upserted: [{ id: "ref-action-1", actionId: "action-1", index: "a0" }],
           deleted: [],
         },
       },
@@ -939,10 +963,11 @@ describe("Scene DAO patchScene tests", () => {
     );
     expect(
       (await Scene.findById(sceneId).lean()).defaultActionRefs.map((r) => ({
-        index: r.index,
         id: r.id,
+        actionId: r.actionId,
+        index: r.index,
       }))
-    ).toEqual([{ index: 0, id: "action-1" }]);
+    ).toEqual([{ id: "ref-action-1", actionId: "action-1", index: "a0" }]);
 
     // Rejects: "missing-action" doesn't exist on the persisted scene, and
     // this patch doesn't touch `actions` to add it either
@@ -951,7 +976,13 @@ describe("Scene DAO patchScene tests", () => {
         sceneId,
         {
           timerActionRefs: {
-            upserted: [{ index: 0, id: "missing-action" }],
+            upserted: [
+              {
+                id: "ref-missing-action",
+                actionId: "missing-action",
+                index: "a0",
+              },
+            ],
             deleted: [],
           },
         },
@@ -965,8 +996,12 @@ describe("Scene DAO patchScene tests", () => {
       { _id: sceneId },
       {
         $set: {
-          defaultActionRefs: [{ index: 0, id: "action-1" }],
-          timerActionRefs: [{ index: 0, id: "action-1" }],
+          defaultActionRefs: [
+            { id: "ref-action-1", actionId: "action-1", index: "a0" },
+          ],
+          timerActionRefs: [
+            { id: "ref-action-1", actionId: "action-1", index: "a0" },
+          ],
         },
       }
     );
@@ -974,7 +1009,7 @@ describe("Scene DAO patchScene tests", () => {
     await patchScene(
       sceneId,
       {
-        defaultActionRefs: { upserted: [], deleted: ["action-1"] },
+        defaultActionRefs: { upserted: [], deleted: ["ref-action-1"] },
         // never present in the first place — removal must still be a safe no-op
         timerActionRefs: { upserted: [], deleted: ["does-not-exist"] },
       },
@@ -984,8 +1019,12 @@ describe("Scene DAO patchScene tests", () => {
     const updated = await Scene.findById(sceneId).lean();
     expect(updated.defaultActionRefs).toEqual([]);
     expect(
-      updated.timerActionRefs.map((r) => ({ index: r.index, id: r.id }))
-    ).toEqual([{ index: 0, id: "action-1" }]);
+      updated.timerActionRefs.map((r) => ({
+        id: r.id,
+        actionId: r.actionId,
+        index: r.index,
+      }))
+    ).toEqual([{ id: "ref-action-1", actionId: "action-1", index: "a0" }]);
   });
 
   it("updates one action via patchScene without re-validating other untouched actions, even if they're now stale", async () => {
@@ -1216,13 +1255,17 @@ describe("Scene DAO patchScene tests", () => {
               index: 0,
             },
           ],
-          defaultActionRefs: [{ index: 0, id: "action-1" }],
+          defaultActionRefs: [
+            { id: "ref-action-1", actionId: "action-1", index: "a0" },
+          ],
           components: [
             {
               id: "btn",
               type: "box",
               clickable: true,
-              actionRefs: [{ index: 0, id: "action-1" }],
+              actionRefs: [
+                { id: "ref-action-1", actionId: "action-1", index: "a0" },
+              ],
             },
           ],
         },
@@ -1239,11 +1282,152 @@ describe("Scene DAO patchScene tests", () => {
     // no cascade — the author's UI is responsible for surfacing these as
     // stale, not the DAO for rejecting the delete or auto-cleaning them
     expect(
-      updated.defaultActionRefs.map((r) => ({ index: r.index, id: r.id }))
-    ).toEqual([{ index: 0, id: "action-1" }]);
+      updated.defaultActionRefs.map((r) => ({
+        id: r.id,
+        actionId: r.actionId,
+        index: r.index,
+      }))
+    ).toEqual([{ id: "ref-action-1", actionId: "action-1", index: "a0" }]);
     expect(updated.components.find((c) => c.id === "btn").actionRefs).toEqual([
-      { index: 0, id: "action-1" },
+      { id: "ref-action-1", actionId: "action-1", index: "a0" },
     ]);
+  });
+
+  describe("action refs", () => {
+    const ref = (id, actionId, index = "a0") => ({ id, actionId, index });
+    const liveAction = {
+      id: "action-live",
+      name: "Live",
+      linkedScene: null,
+      conditions: [],
+      operations: [],
+      index: 0,
+    };
+
+    beforeEach(async () => {
+      // "action-deleted" was referenced before it was deleted
+      await Scene.updateOne(
+        { _id: sceneId },
+        {
+          $set: {
+            actions: [liveAction],
+            defaultActionRefs: [ref("ref-stale", "action-deleted")],
+            components: [
+              {
+                id: "btn",
+                type: "box",
+                clickable: true,
+                actionRefs: [ref("ref-stale", "action-deleted")],
+              },
+            ],
+          },
+        }
+      );
+    });
+
+    const patch = (body) =>
+      patchScene(sceneId, body, new mongoose.Types.ObjectId().toString());
+
+    it("stores duplicate references to the same action", async () => {
+      const updated = await patch({
+        timerActionRefs: {
+          upserted: [
+            ref("ref-1", "action-live", "a0"),
+            ref("ref-2", "action-live", "a1"),
+          ],
+          deleted: [],
+        },
+      });
+
+      expect(updated.timerActionRefs.map((r) => r.actionId)).toEqual([
+        "action-live",
+        "action-live",
+      ]);
+    });
+
+    it("allows a stale ref through when it's untouched or only reordered", async () => {
+      const updated = await patch({
+        defaultActionRefs: {
+          upserted: [ref("ref-stale", "action-deleted", "a1")],
+          deleted: [],
+        },
+      });
+
+      expect(updated.defaultActionRefs[0].index).toBe("a1");
+    });
+
+    it("rejects a ref repointed at a missing action", async () => {
+      await expect(
+        patch({
+          defaultActionRefs: {
+            upserted: [ref("ref-stale", "also-deleted")],
+            deleted: [],
+          },
+        })
+      ).rejects.toMatchObject({ status: 400 });
+    });
+
+    it("rejects a new ref to a missing action", async () => {
+      await expect(
+        patch({
+          defaultActionRefs: {
+            upserted: [ref("ref-new", "action-deleted")],
+            deleted: [],
+          },
+        })
+      ).rejects.toMatchObject({ status: 400 });
+    });
+
+    it("still saves a component carrying a stale ref", async () => {
+      const updated = await patch({
+        components: {
+          upserted: [
+            {
+              id: "btn",
+              type: "box",
+              clickable: true,
+              x: 10,
+              actionRefs: [
+                ref("ref-stale", "action-deleted"),
+                ref("ref-new", "action-live", "a1"),
+              ],
+            },
+          ],
+          deleted: [],
+        },
+      });
+
+      const btn = updated.components.find((c) => c.id === "btn");
+      expect(btn.actionRefs.map((r) => r.actionId)).toEqual([
+        "action-deleted",
+        "action-live",
+      ]);
+    });
+
+    it("rejects a malformed ref", async () => {
+      await expect(
+        patch({
+          timerActionRefs: {
+            upserted: [{ id: "ref-1", actionId: "action-live", index: 0 }],
+            deleted: [],
+          },
+        })
+      ).rejects.toMatchObject({ status: 400 });
+    });
+
+    it("rejects refs sharing an id within one list", async () => {
+      await expect(
+        patch({
+          timerActionRefs: {
+            upserted: [
+              ref("ref-1", "action-live", "a0"),
+              ref("ref-1", "action-live", "a1"),
+            ],
+            deleted: [],
+          },
+        })
+      ).rejects.toMatchObject({ status: 400 });
+    });
   });
 
   it("replaces a component's entire object on upsert, including its actionRefs and other fields together", async () => {
@@ -1274,7 +1458,9 @@ describe("Scene DAO patchScene tests", () => {
               id: "btn",
               type: "box",
               clickable: true,
-              actionRefs: [{ index: 0, id: "action-1" }],
+              actionRefs: [
+                { id: "ref-action-1", actionId: "action-1", index: "a0" },
+              ],
               bounds: { verts: [{ x: 1, y: 1 }] },
             },
           ],
@@ -1293,7 +1479,9 @@ describe("Scene DAO patchScene tests", () => {
               id: "btn",
               type: "box",
               clickable: true,
-              actionRefs: [{ index: 0, id: "action-2" }],
+              actionRefs: [
+                { id: "ref-action-2", actionId: "action-2", index: "a0" },
+              ],
               bounds: { verts: [{ x: 9, y: 9 }] },
             },
           ],
@@ -1306,7 +1494,9 @@ describe("Scene DAO patchScene tests", () => {
     const updated = await Scene.findById(sceneId).lean();
     const btn = updated.components.find((c) => c.id === "btn");
     expect(btn.bounds).toEqual({ verts: [{ x: 9, y: 9 }] });
-    expect(btn.actionRefs).toEqual([{ index: 0, id: "action-2" }]);
+    expect(btn.actionRefs).toEqual([
+      { id: "ref-action-2", actionId: "action-2", index: "a0" },
+    ]);
   });
 
   it("drops a component's fields that are omitted from a whole-object upsert", async () => {
@@ -1366,7 +1556,13 @@ describe("Scene DAO patchScene tests", () => {
                 id: "btn",
                 type: "box",
                 clickable: true,
-                actionRefs: [{ index: 0, id: "missing-action" }],
+                actionRefs: [
+                  {
+                    id: "ref-missing-action",
+                    actionId: "missing-action",
+                    index: "a0",
+                  },
+                ],
               },
             ],
             deleted: [],
@@ -1406,7 +1602,13 @@ describe("Scene DAO patchScene tests", () => {
                 id: "new-btn",
                 type: "box",
                 clickable: true,
-                actionRefs: [{ index: 0, id: "missing-action" }],
+                actionRefs: [
+                  {
+                    id: "ref-missing-action",
+                    actionId: "missing-action",
+                    index: "a0",
+                  },
+                ],
                 bounds: { verts: [{ x: 0, y: 0 }] },
               },
             ],
@@ -1426,7 +1628,9 @@ describe("Scene DAO patchScene tests", () => {
               id: "new-btn",
               type: "box",
               clickable: true,
-              actionRefs: [{ index: 0, id: "action-1" }],
+              actionRefs: [
+                { id: "ref-action-1", actionId: "action-1", index: "a0" },
+              ],
               bounds: { verts: [{ x: 0, y: 0 }] },
             },
           ],
@@ -1437,7 +1641,7 @@ describe("Scene DAO patchScene tests", () => {
     );
     expect(
       updated.components.find((c) => c.id === "new-btn").actionRefs
-    ).toEqual([{ index: 0, id: "action-1" }]);
+    ).toEqual([{ id: "ref-action-1", actionId: "action-1", index: "a0" }]);
   });
 
   it("nulls linkedScene across multiple scenes when the target scene is deleted", async () => {

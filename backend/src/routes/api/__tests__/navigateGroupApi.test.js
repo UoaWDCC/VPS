@@ -310,7 +310,9 @@ describe("Navigate Group API tests", () => {
           {
             id: componentId,
             clickable: true,
-            actionRefs: [{ index: 0, id: "action-go" }],
+            actionRefs: [
+              { id: "ref-action-go", actionId: "action-go", index: "a0" },
+            ],
             type: "BUTTON",
           },
         ],
@@ -371,7 +373,9 @@ describe("Navigate Group API tests", () => {
           {
             id: componentId,
             clickable: true,
-            actionRefs: [{ index: 0, id: "action-go" }],
+            actionRefs: [
+              { id: "ref-action-go", actionId: "action-go", index: "a0" },
+            ],
             type: "BUTTON",
           },
         ],
@@ -418,7 +422,9 @@ describe("Navigate Group API tests", () => {
           {
             id: componentId,
             clickable: true,
-            actionRefs: [{ index: 0, id: "action-retry" }],
+            actionRefs: [
+              { id: "ref-action-retry", actionId: "action-retry", index: "a0" },
+            ],
             type: "BUTTON",
           },
         ],
@@ -552,7 +558,9 @@ describe("Navigate Group API tests", () => {
             index: 0,
           },
         ],
-        defaultActionRefs: [{ index: 0, id: "action-default" }],
+        defaultActionRefs: [
+          { id: "ref-action-default", actionId: "action-default", index: "a0" },
+        ],
       });
       await Group.findByIdAndUpdate(group._id, {
         path: [defaultScene._id.toString()],
@@ -588,7 +596,9 @@ describe("Navigate Group API tests", () => {
             index: 0,
           },
         ],
-        timerActionRefs: [{ index: 0, id: "action-timer" }],
+        timerActionRefs: [
+          { id: "ref-action-timer", actionId: "action-timer", index: "a0" },
+        ],
       });
       await Group.findByIdAndUpdate(group._id, {
         path: [timerScene._id.toString()],
@@ -627,7 +637,9 @@ describe("Navigate Group API tests", () => {
             index: 0,
           },
         ],
-        defaultActionRefs: [{ index: 0, id: "action-gated" }],
+        defaultActionRefs: [
+          { id: "ref-action-gated", actionId: "action-gated", index: "a0" },
+        ],
       });
       await Group.findByIdAndUpdate(group._id, {
         path: [gatedScene._id.toString()],
@@ -671,7 +683,9 @@ describe("Navigate Group API tests", () => {
             index: 0,
           },
         ],
-        defaultActionRefs: [{ index: 0, id: "action-gated" }],
+        defaultActionRefs: [
+          { id: "ref-action-gated", actionId: "action-gated", index: "a0" },
+        ],
       });
       await Group.findByIdAndUpdate(group._id, {
         path: [gatedScene._id.toString()],
@@ -710,7 +724,9 @@ describe("Navigate Group API tests", () => {
             index: 0,
           },
         ],
-        defaultActionRefs: [{ index: 0, id: "action-heal" }],
+        defaultActionRefs: [
+          { id: "ref-action-heal", actionId: "action-heal", index: "a0" },
+        ],
       });
       await Group.findByIdAndUpdate(group._id, {
         path: [mutatingScene._id.toString()],
@@ -870,7 +886,9 @@ describe("Navigate Group API tests", () => {
             index: 0,
           },
         ],
-        defaultActionRefs: [{ index: 0, id: "action-go" }],
+        defaultActionRefs: [
+          { id: "ref-action-go", actionId: "action-go", index: "a0" },
+        ],
         defaultLinkedScene: scene2._id,
       });
       await startAt(linkScene);
@@ -908,8 +926,8 @@ describe("Navigate Group API tests", () => {
           },
         ],
         defaultActionRefs: [
-          { index: 0, id: "action-gated" },
-          { index: 1, id: "action-heal" },
+          { id: "ref-action-gated", actionId: "action-gated", index: "a0" },
+          { id: "ref-action-heal", actionId: "action-heal", index: "a1" },
         ],
         defaultLinkedScene: scene2._id,
       });
