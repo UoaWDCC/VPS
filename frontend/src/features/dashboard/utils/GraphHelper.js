@@ -45,7 +45,7 @@ const CreateGraphData = (scenes, groupInfo) => {
     // Loop through each component of a scene and check for the "nextScene" property and add it to edge graph
     scenes.forEach((scene) =>
       scene.components.forEach((obj) => {
-        if (obj.nextScene) {
+        if (obj.nextScene && sceneMap[obj.nextScene]) {
           edges.push({
             id: scene.name + "-" + sceneMap[obj.nextScene].name,
             source: scene._id,
