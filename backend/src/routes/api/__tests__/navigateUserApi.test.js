@@ -392,6 +392,104 @@ describe("Navigate User API tests", () => {
 
   // --- Trigger-based action resolution ---
 
+  describe("timer fires once per scene entry", () => {
+    let timedScene;
+
+    beforeEach(async () => {
+      timedScene = await Scene.create({
+        name: "Timed Heal",
+        components: [],
+        roles: [],
+        time: 30,
+        actions: [
+          {
+            id: "action-heal",
+            name: "Heal",
+            linkedScene: null,
+            conditions: [],
+            operations: [
+              { id: "op1", stateVariableId: "hp", operation: "add", value: 5 },
+            ],
+          },
+        ],
+        timerActionRefs: [
+          { id: "ref-action-heal", actionId: "action-heal", index: "a0" },
+        ],
+        defaultLinkedScene: scene2._id,
+      });
+      await Scenario.findByIdAndUpdate(scenario._id, {
+        scenes: [scene1._id, scene2._id, timedScene._id],
+      });
+      const scenarioId = scenario._id.toString();
+      await User.findOneAndUpdate(
+        { uid: "uid-player" },
+        {
+          $set: {
+            [`paths.${scenarioId}`]: [timedScene._id.toString()],
+            [`stateVariables.${scenarioId}`]: [
+              { id: "hp", type: "number", value: 5 },
+            ],
+            [`stateVersions.${scenarioId}`]: 0,
+          },
+        }
+      );
+    });
+
+    const navigate = (trigger) =>
+      axios.post(
+        `http://localhost:${ctx.port}/api/navigate/user/${scenario._id}`,
+        {
+          uid: "uid-player",
+          currentScene: timedScene._id.toString(),
+          trigger,
+        },
+        authHeaders("uid-player")
+      );
+
+    const dbUser = () => User.findOne({ uid: "uid-player" });
+
+    it("ignores a repeated timer trigger for the same scene entry", async () => {
+      await navigate("timer");
+
+      const second = await navigate("timer");
+      expect(second.status).toBe(200);
+      expect(second.data.active).toBeUndefined();
+      expect(second.data.propertyVersion).toBe(1);
+
+      const user = await dbUser();
+      const hp = user.stateVariables
+        .get(scenario._id.toString())
+        .find((p) => p.id === "hp");
+      expect(hp.value).toBe(10);
+    });
+
+    it("re-arms the timer on the next scene entry", async () => {
+      await navigate("timer");
+      await navigate("default");
+
+      const user = await dbUser();
+      const scenarioId = scenario._id.toString();
+      expect(user.paths.get(scenarioId)[0]).toBe(scene2._id.toString());
+      expect(user.sceneTimerFired.get(scenarioId)).toBe(false);
+    });
+
+    it("re-arms the timer on reset", async () => {
+      await Scene.findByIdAndUpdate(timedScene._id, {
+        components: [{ type: "RESET_BUTTON" }],
+      });
+      await navigate("timer");
+
+      await axios.post(
+        `http://localhost:${ctx.port}/api/navigate/user/reset/${scenario._id}`,
+        { uid: "uid-player", currentScene: timedScene._id.toString() },
+        authHeaders("uid-player")
+      );
+
+      const user = await dbUser();
+      expect(user.sceneTimerFired.get(scenario._id.toString())).toBeUndefined();
+    });
+  });
+
   describe("trigger-based action resolution", () => {
     const scenarioId = () => scenario._id.toString();
 
