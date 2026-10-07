@@ -17,7 +17,7 @@ import {
   resumedRemainingTime,
   movedRemainingTimeField,
 } from "./timer.js";
-import { resolveTrigger } from "./trigger.js";
+import { dropStaleLinks, resolveTrigger } from "./trigger.js";
 
 const getConnectedScenes = async (sceneID, active = true) => {
   const scene = await getSimpleScene(sceneID);
@@ -199,7 +199,10 @@ export const userNavigate = async (req) => {
 
   const scene = await getSimpleScene(currentScene);
 
-  const resolved = resolveTrigger(scene, trigger, componentId);
+  const resolved = await dropStaleLinks(
+    scenarioId,
+    resolveTrigger(scene, trigger, componentId)
+  );
   const {
     properties: resolvedProperties,
     linkedScene,

@@ -4,6 +4,7 @@ import {
   resolveActions,
 } from "../../../util/actions/actionRunner.js";
 import { HttpStatusCode } from "axios";
+import Scenario from "../../../db/models/scenario.js";
 
 function resolveRefs(actions, ids, fallback) {
   const resolved = resolveActions(actions, orderedActionIds(ids));
@@ -54,4 +55,21 @@ export function resolveTrigger(scene, trigger, componentId) {
         HttpStatusCode.BadRequest
       );
   }
+}
+
+// links to scenes that are no longer in the scenario (e.g. they were deleted)
+// are stale, and are ignored during playback like refs to deleted actions
+export async function dropStaleLinks(scenarioId, { actions, fallback }) {
+  const scenario = await Scenario.findById(scenarioId, { scenes: 1 }).lean();
+  const sceneIds = new Set((scenario?.scenes ?? []).map(String));
+  const isLive = (id) => id != null && sceneIds.has(String(id));
+
+  return {
+    actions: actions.map((action) =>
+      action.linkedScene && !isLive(action.linkedScene)
+        ? { ...action, linkedScene: null }
+        : action
+    ),
+    fallback: isLive(fallback) ? fallback : null,
+  };
 }

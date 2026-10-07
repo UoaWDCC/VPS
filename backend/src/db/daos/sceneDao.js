@@ -293,10 +293,16 @@ const assertActionsContentValid = async (
   actions,
   existingActions = []
 ) => {
-  const linkedSceneIds = actions
-    .map((action) => action.linkedScene)
-    .filter(Boolean);
-  await assertScenesInScenario(scenarioId, linkedSceneIds);
+  const existingById = new Map(existingActions.map((a) => [a.id, a]));
+  const changedLinkedSceneIds = actions
+    .filter(
+      (action) =>
+        action.linkedScene &&
+        String(action.linkedScene) !==
+          String(existingById.get(action.id)?.linkedScene)
+    )
+    .map((action) => action.linkedScene);
+  await assertScenesInScenario(scenarioId, changedLinkedSceneIds);
 
   const changedRefs = getChangedPropertyRefs(actions, existingActions);
   if (changedRefs.conditions.length || changedRefs.operations.length) {
@@ -388,20 +394,8 @@ export const deleteScene = async (scenarioId, sceneId) => {
     return { deleted: false, reason: "not_found" };
   }
 
-  await Scene.updateMany(
-    { "actions.linkedScene": sceneId },
-    { $set: { "actions.$[elem].linkedScene": null } },
-    { arrayFilters: [{ "elem.linkedScene": sceneId }] }
-  );
-
-  await Scene.updateMany(
-    { defaultLinkedScene: sceneId },
-    { $set: { defaultLinkedScene: null } }
-  );
-  await Scene.updateMany(
-    { timerLinkedScene: sceneId },
-    { $set: { timerLinkedScene: null } }
-  );
+  // links to the deleted scene are left in place, they show
+  // as errored in the editor and are ignored during playback
 
   const res = await Scene.findOneAndDelete({ _id: sceneId });
 
@@ -624,14 +618,6 @@ export async function patchScene(sceneId, patch, scenarioId) {
     }
   });
 
-  for (const field of ["defaultLinkedScene", "timerLinkedScene"]) {
-    const value = allowedFields[field];
-    if (value == null) continue;
-    if (!mongoose.isObjectIdOrHexString(value))
-      throw new HttpError(`invalid ${field}`, HttpStatusCode.BadRequest);
-    await assertScenesInScenario(scenarioId, [value]);
-  }
-
   if (Object.prototype.hasOwnProperty.call(allowedFields, "background"))
     allowedFields.background = await validateBackground(
       allowedFields.background
@@ -643,10 +629,24 @@ export async function patchScene(sceneId, patch, scenarioId) {
     actions: 1,
     defaultActionRefs: 1,
     timerActionRefs: 1,
+    defaultLinkedScene: 1,
+    timerLinkedScene: 1,
   });
   if (!existingScene)
     throw new HttpError("scene not found", HttpStatusCode.NotFound);
   const existing = existingScene.toObject();
+
+  // patch scene link validation. as with action refs, a link left unchanged
+  // from what's stored is allowed through even if its target scene has since
+  // been deleted
+
+  for (const field of ["defaultLinkedScene", "timerLinkedScene"]) {
+    const value = allowedFields[field];
+    if (value == null || String(value) === String(existing[field])) continue;
+    if (!mongoose.isObjectIdOrHexString(value))
+      throw new HttpError(`invalid ${field}`, HttpStatusCode.BadRequest);
+    await assertScenesInScenario(scenarioId, [value]);
+  }
 
   // patch action validation
 
@@ -665,6 +665,23 @@ export async function patchScene(sceneId, patch, scenarioId) {
   const existingComponentsById = new Map(
     (existing.components ?? []).map((c) => [c.id, c])
   );
+
+  const changedLinkedScenes = components.upserted
+    .filter(
+      (c) =>
+        c.linkedScene != null &&
+        String(c.linkedScene) !==
+          String(existingComponentsById.get(c.id)?.linkedScene)
+    )
+    .map((c) => c.linkedScene);
+  for (const id of changedLinkedScenes) {
+    if (!mongoose.isObjectIdOrHexString(id))
+      throw new HttpError(
+        "invalid component linkedScene",
+        HttpStatusCode.BadRequest
+      );
+  }
+  await assertScenesInScenario(scenarioId, changedLinkedScenes);
 
   const refLists = [
     [
