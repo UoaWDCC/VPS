@@ -12,7 +12,7 @@ interface AudioRowProps {
 }
 
 function AudioRow({ component, audioNames, onDelete }: AudioRowProps) {
-  const [audio] = useState(new Audio(component.url));
+  const [audio] = useState(() => new Audio(component.url));
   const [playing, setPlaying] = useState(false);
 
   useEffect(() => {
