@@ -16,7 +16,7 @@ import {
   resumedRemainingTime,
   movedRemainingTimeField,
 } from "./timer.js";
-import { resolveTrigger } from "./trigger.js";
+import { dropStaleLinks, resolveTrigger } from "./trigger.js";
 import { normaliseString } from "../../../util/normalise.js";
 
 const createInvalidError = (roles) =>
@@ -300,7 +300,10 @@ export const groupNavigate = async (req) => {
   // validate that the user is allowed to move to this scene
   const scene = await getSceneConsideringRole(currentScene, role);
 
-  const resolved = resolveTrigger(scene, trigger, componentId);
+  const resolved = await dropStaleLinks(
+    group.scenarioId,
+    resolveTrigger(scene, trigger, componentId)
+  );
   const {
     properties: resolvedProperties,
     linkedScene,

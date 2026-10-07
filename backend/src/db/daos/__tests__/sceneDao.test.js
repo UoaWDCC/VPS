@@ -1622,7 +1622,7 @@ describe("Scene DAO patchScene tests", () => {
     ).toEqual([{ id: "ref-action-1", actionId: "action-1", index: "a0" }]);
   });
 
-  it("nulls linkedScene across multiple scenes when the target scene is deleted", async () => {
+  it("keeps action linkedScenes across multiple scenes when the target scene is deleted", async () => {
     const targetScene = await Scene.create({
       name: "Target scene",
       components: [],
@@ -1662,8 +1662,28 @@ describe("Scene DAO patchScene tests", () => {
       Scene.findById(sceneA._id).lean(),
       Scene.findById(sceneB._id).lean(),
     ]);
-    expect(refreshedA.actions[0].linkedScene).toBeNull();
-    expect(refreshedB.actions[0].linkedScene).toBeNull();
+    expect(refreshedA.actions[0].linkedScene).toEqual(targetScene._id);
+    expect(refreshedB.actions[0].linkedScene).toEqual(targetScene._id);
+
+    // an unchanged link to the deleted scene is allowed through a patch
+    const updated = await patchScene(
+      sceneA._id,
+      {
+        actions: {
+          upserted: [
+            {
+              ...refreshedA.actions[0],
+              linkedScene: targetScene._id.toString(),
+              name: "Renamed",
+            },
+          ],
+          deleted: [],
+        },
+      },
+      scenario._id.toString()
+    );
+    expect(updated.actions[0].name).toBe("Renamed");
+    expect(updated.actions[0].linkedScene).toEqual(targetScene._id);
   });
 
   describe("defaultLinkedScene/timerLinkedScene", () => {
@@ -1749,7 +1769,7 @@ describe("Scene DAO patchScene tests", () => {
       }
     );
 
-    it("nulls both links on other scenes when the target scene is deleted", async () => {
+    it("keeps both links on other scenes when the target scene is deleted", async () => {
       const { scenarioId, targetScene } = await setupScenario();
       await Scene.updateOne(
         { _id: sceneId },
@@ -1765,8 +1785,124 @@ describe("Scene DAO patchScene tests", () => {
       expect(result.deleted).toBe(true);
 
       const refreshed = await Scene.findById(sceneId).lean();
-      expect(refreshed.defaultLinkedScene).toBeNull();
-      expect(refreshed.timerLinkedScene).toBeNull();
+      expect(refreshed.defaultLinkedScene).toEqual(targetScene._id);
+      expect(refreshed.timerLinkedScene).toEqual(targetScene._id);
+    });
+
+    it.each(["defaultLinkedScene", "timerLinkedScene"])(
+      "allows an unchanged %s to a deleted scene through a patch",
+      async (field) => {
+        const { scenarioId, targetScene } = await setupScenario();
+        await patchScene(
+          sceneId,
+          { fields: { [field]: targetScene._id.toString() } },
+          scenarioId
+        );
+        await deleteScene(scenarioId, targetScene._id.toString());
+
+        const updated = await patchScene(
+          sceneId,
+          {
+            fields: {
+              name: "Renamed",
+              [field]: targetScene._id.toString(),
+            },
+          },
+          scenarioId
+        );
+
+        expect(updated.name).toBe("Renamed");
+        expect(updated[field]).toEqual(targetScene._id);
+      }
+    );
+
+    const linkComponent = (linkedScene) => ({
+      components: {
+        upserted: [
+          {
+            id: "component-a",
+            type: "box",
+            bounds: { verts: [{ x: 0, y: 0 }] },
+            clickable: true,
+            linkedScene,
+          },
+        ],
+        deleted: [],
+      },
+    });
+
+    it("persists a component linkedScene in the same scenario", async () => {
+      const { scenarioId, targetScene } = await setupScenario();
+
+      const updated = await patchScene(
+        sceneId,
+        linkComponent(targetScene._id.toString()),
+        scenarioId
+      );
+
+      const component = updated.components.find((c) => c.id === "component-a");
+      expect(component.linkedScene).toBe(targetScene._id.toString());
+    });
+
+    it("rejects a malformed component linkedScene with HTTP 400", async () => {
+      const { scenarioId } = await setupScenario();
+
+      for (const value of ["abc", 123, {}]) {
+        await expect(
+          patchScene(sceneId, linkComponent(value), scenarioId)
+        ).rejects.toMatchObject({ status: 400 });
+      }
+    });
+
+    it("rejects a component linkedScene outside the current scenario", async () => {
+      const { scenarioId } = await setupScenario();
+      const foreignScene = await Scene.create({
+        name: "Foreign scene",
+        components: [],
+      });
+
+      await expect(
+        patchScene(
+          sceneId,
+          linkComponent(foreignScene._id.toString()),
+          scenarioId
+        )
+      ).rejects.toMatchObject({ status: 400 });
+    });
+
+    it("keeps a component linkedScene when the target scene is deleted", async () => {
+      const { scenarioId, targetScene } = await setupScenario();
+      await patchScene(
+        sceneId,
+        linkComponent(targetScene._id.toString()),
+        scenarioId
+      );
+
+      const result = await deleteScene(scenarioId, targetScene._id.toString());
+      expect(result.deleted).toBe(true);
+
+      const refreshed = await Scene.findById(sceneId).lean();
+      expect(refreshed.components[0].linkedScene).toBe(
+        targetScene._id.toString()
+      );
+    });
+
+    it("allows an unchanged component linkedScene to a deleted scene through", async () => {
+      const { scenarioId, targetScene } = await setupScenario();
+      await patchScene(
+        sceneId,
+        linkComponent(targetScene._id.toString()),
+        scenarioId
+      );
+      await deleteScene(scenarioId, targetScene._id.toString());
+
+      const patch = linkComponent(targetScene._id.toString());
+      patch.components.upserted[0].bounds = { verts: [{ x: 5, y: 5 }] };
+      const updated = await patchScene(sceneId, patch, scenarioId);
+
+      const component = updated.components.find((c) => c.id === "component-a");
+      expect(component.bounds.verts).toEqual([{ x: 5, y: 5 }]);
+      expect(component.linkedScene).toBe(targetScene._id.toString());
     });
 
     it("copies both links when duplicating a scene", async () => {

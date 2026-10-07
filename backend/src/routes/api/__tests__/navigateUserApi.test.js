@@ -688,6 +688,36 @@ describe("Navigate User API tests", () => {
       expect(await pathHead()).toBe(scene2._id.toString());
     });
 
+    it("ignores a component's linkedScene to a scene no longer in the scenario", async () => {
+      const deletedScene = await Scene.create({
+        name: "Deleted",
+        components: [],
+        roles: [],
+      });
+      const linkScene = await Scene.create({
+        name: "Stale Link",
+        components: [
+          {
+            id: "btn",
+            clickable: true,
+            actionRefs: [],
+            linkedScene: deletedScene._id.toString(),
+            type: "BUTTON",
+          },
+        ],
+        roles: [],
+      });
+      await startAt(linkScene);
+
+      const response = await navigate(linkScene, {
+        trigger: "click",
+        componentId: "btn",
+      });
+      expect(response.status).toBe(200);
+      expect(response.data.active).toBeUndefined();
+      expect(await pathHead()).toBe(linkScene._id.toString());
+    });
+
     it("does not follow defaultLinkedScene on a click trigger", async () => {
       const linkScene = await Scene.create({
         name: "Click Without Link",
@@ -773,6 +803,62 @@ describe("Navigate User API tests", () => {
         10
       );
       expect(await pathHead()).toBe(scene2._id.toString());
+    });
+
+    it("skips an action's link to a scene no longer in the scenario, keeping its operations", async () => {
+      const deletedScene = await Scene.create({
+        name: "Deleted",
+        components: [],
+        roles: [],
+      });
+      const linkScene = await Scene.create({
+        name: "Stale Action Link",
+        components: [],
+        roles: [],
+        actions: [
+          {
+            id: "action-stale",
+            name: "Stale",
+            linkedScene: deletedScene._id,
+            conditions: [],
+            operations: [
+              { id: "op1", stateVariableId: "hp", operation: "add", value: 5 },
+            ],
+          },
+        ],
+        defaultActionRefs: [
+          { id: "ref-action-stale", actionId: "action-stale", index: "a0" },
+        ],
+        defaultLinkedScene: scene2._id,
+      });
+      await startAt(linkScene, [{ id: "hp", type: "number", value: 5 }]);
+
+      const response = await navigate(linkScene, { trigger: "default" });
+      expect(response.data.active).toBe(scene2._id.toString());
+      expect(response.data.properties.find((p) => p.id === "hp").value).toBe(
+        10
+      );
+      expect(await pathHead()).toBe(scene2._id.toString());
+    });
+
+    it("ignores a defaultLinkedScene to a scene no longer in the scenario", async () => {
+      const deletedScene = await Scene.create({
+        name: "Deleted",
+        components: [],
+        roles: [],
+      });
+      const linkScene = await Scene.create({
+        name: "Stale Default Link",
+        components: [],
+        roles: [],
+        defaultLinkedScene: deletedScene._id,
+      });
+      await startAt(linkScene);
+
+      const response = await navigate(linkScene, { trigger: "default" });
+      expect(response.status).toBe(200);
+      expect(response.data.active).toBeUndefined();
+      expect(await pathHead()).toBe(linkScene._id.toString());
     });
 
     it("does not push a path entry when the direct link points at the current scene", async () => {
