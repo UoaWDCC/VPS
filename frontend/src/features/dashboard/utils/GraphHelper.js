@@ -42,10 +42,7 @@ const CreateGraphData = (scenes, groupInfo) => {
       });
     });
 
-    // Loop through every path a scene can navigate from — clickable
-    // components' actions, plus its default (keyboard-advance) and timer
-    // actions — and add an edge to each resolved action's linkedScene.
-    // Mirrors the backend's getLinkedSceneIds (backend/src/util/actions/actionRunner.js).
+    // loop through every path a scene can navigate from and add edges
     const seenEdgeIds = new Set();
     scenes.forEach((scene) => {
       const actionsById = new Map(
@@ -56,40 +53,46 @@ const CreateGraphData = (scenes, groupInfo) => {
       const orderedActionIds = (refs) =>
         (refs ?? []).map((ref) => ref.actionId);
 
+      const clickables = scene.components.filter((c) => c.clickable);
       const actionLists = [
-        ...scene.components
-          .filter((c) => c.clickable)
-          .map((c) => orderedActionIds(c.actionRefs)),
+        ...clickables.map((c) => orderedActionIds(c.actionRefs)),
         orderedActionIds(scene.defaultActionRefs),
         orderedActionIds(scene.timerActionRefs),
       ];
 
-      actionLists
-        .flatMap((actionIds) => resolveActions(actionIds))
-        .forEach((action) => {
-          if (!action.linkedScene) return;
-          // multiple actions in the same scene can resolve to the same
-          // linkedScene, so we ignore dups
-          const edgeId = scene.name + "-" + sceneMap[action.linkedScene].name;
-          if (seenEdgeIds.has(edgeId)) return;
-          seenEdgeIds.add(edgeId);
+      const linkedSceneIds = [
+        ...actionLists
+          .flatMap((actionIds) => resolveActions(actionIds))
+          .map((action) => action.linkedScene),
+        ...clickables.map((c) => c.linkedScene),
+        scene.defaultLinkedScene,
+        scene.timerLinkedScene,
+      ];
 
-          edges.push({
-            id: edgeId,
-            source: scene._id,
-            target: action.linkedScene,
-            type: "simpleFloating",
-            markerEnd: {
-              ...markerEnd,
-              color: "var(--color-primary)",
-            },
-            style: {
-              strokeWidth: 3,
-              stroke: "var(--color-primary)",
-            },
-            animated: true,
-          });
+      linkedSceneIds.forEach((linkedScene) => {
+        if (!linkedScene || !sceneMap[linkedScene]) return;
+        // multiple paths in the same scene can resolve to the same
+        // linkedScene, so we ignore dups
+        const edgeId = scene.name + "-" + sceneMap[linkedScene].name;
+        if (seenEdgeIds.has(edgeId)) return;
+        seenEdgeIds.add(edgeId);
+
+        edges.push({
+          id: edgeId,
+          source: scene._id,
+          target: linkedScene,
+          type: "simpleFloating",
+          markerEnd: {
+            ...markerEnd,
+            color: "var(--color-primary)",
+          },
+          style: {
+            strokeWidth: 3,
+            stroke: "var(--color-primary)",
+          },
+          animated: true,
         });
+      });
     });
 
     /**

@@ -67,7 +67,14 @@ function generatePatch(modified, saved) {
   }
 
   const fields = {};
-  ["name", "roles", "time", "background"].forEach((field) => {
+  [
+    "name",
+    "roles",
+    "time",
+    "background",
+    "defaultLinkedScene",
+    "timerLinkedScene",
+  ].forEach((field) => {
     if (!fastIsEqual(modified[field], saved[field]))
       fields[field] = structuredClone(modified[field]);
   });
