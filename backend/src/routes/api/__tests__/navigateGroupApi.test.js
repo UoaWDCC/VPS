@@ -746,6 +746,124 @@ describe("Navigate Group API tests", () => {
     });
   });
 
+  // --- Timer fires once per scene entry ---
+
+  describe("timer fires once per scene entry", () => {
+    let timedScene;
+
+    beforeEach(async () => {
+      // a timer that only changes state, so neither a scene move nor a
+      // stale client would stop it from running again
+      timedScene = await Scene.create({
+        name: "Timed Heal",
+        components: [],
+        roles: [],
+        time: 30,
+        actions: [
+          {
+            id: "action-heal",
+            name: "Heal",
+            linkedScene: null,
+            conditions: [],
+            operations: [
+              { id: "op1", stateVariableId: "hp", operation: "add", value: 5 },
+            ],
+          },
+        ],
+        timerActionRefs: [
+          { id: "ref-action-heal", actionId: "action-heal", index: "a0" },
+        ],
+        defaultLinkedScene: scene2._id,
+      });
+      await Scenario.findByIdAndUpdate(scenario._id, {
+        scenes: [scene1._id, scene2._id, timedScene._id],
+      });
+      await Group.findByIdAndUpdate(group._id, {
+        path: [timedScene._id.toString()],
+        stateVariables: [{ id: "hp", type: "number", value: 5 }],
+        stateVersion: 0,
+      });
+    });
+
+    const navigate = (trigger) =>
+      axios.post(
+        `http://localhost:${ctx.port}/api/navigate/group/${group._id}`,
+        {
+          uid: "uid-player",
+          currentScene: timedScene._id.toString(),
+          trigger,
+          addFlags: [],
+          removeFlags: [],
+        },
+        authHeaders("uid-player")
+      );
+
+    const hp = async () => {
+      const dbGroup = await Group.findById(group._id).lean();
+      return dbGroup.stateVariables.find((p) => p.id === "hp").value;
+    };
+
+    it("ignores a repeated timer trigger for the same scene entry", async () => {
+      const first = await navigate("timer");
+      expect(first.data.properties.find((p) => p.id === "hp").value).toBe(10);
+
+      const second = await navigate("timer");
+      expect(second.status).toBe(200);
+      expect(second.data.active).toBeUndefined();
+      expect(second.data.propertyVersion).toBe(1);
+      expect(await hp()).toBe(10);
+    });
+
+    it("runs the timer once when members' triggers arrive together", async () => {
+      const results = await Promise.allSettled([
+        navigate("timer"),
+        navigate("timer"),
+        navigate("timer"),
+      ]);
+
+      // a member that loses the race gets a 409, and its retry is ignored
+      for (const result of results) {
+        if (result.status === "rejected")
+          expect(result.reason.response.status).toBe(409);
+      }
+      expect(await hp()).toBe(10);
+      expect(await navigate("timer").then((r) => r.status)).toBe(200);
+      expect(await hp()).toBe(10);
+    });
+
+    it("does not block other triggers after the timer has fired", async () => {
+      await navigate("timer");
+
+      const response = await navigate("default");
+      expect(response.data.active).toBe(scene2._id.toString());
+    });
+
+    it("re-arms the timer on the next scene entry", async () => {
+      await navigate("timer");
+      await navigate("default");
+
+      const dbGroup = await Group.findById(group._id).lean();
+      expect(dbGroup.path[0]).toBe(scene2._id.toString());
+      expect(dbGroup.currentSceneTimerFired).toBe(false);
+    });
+
+    it("re-arms the timer on reset", async () => {
+      await Scene.findByIdAndUpdate(timedScene._id, {
+        components: [{ type: "RESET_BUTTON" }],
+      });
+      await navigate("timer");
+
+      await axios.post(
+        `http://localhost:${ctx.port}/api/navigate/group/reset/${group._id}`,
+        { uid: "uid-player", currentScene: timedScene._id.toString() },
+        authHeaders("uid-player")
+      );
+
+      const dbGroup = await Group.findById(group._id).lean();
+      expect(dbGroup.currentSceneTimerFired).toBe(false);
+    });
+  });
+
   // --- Direct scene links (defaultLinkedScene / timerLinkedScene) ---
 
   describe("direct scene links", () => {

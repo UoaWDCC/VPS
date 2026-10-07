@@ -95,6 +95,7 @@ const getGroupByIdAndUser = async (groupId, uid) => {
       stateVariables: 1,
       stateVersion: 1,
       currentSceneEnteredAt: 1,
+      currentSceneTimerFired: 1,
     }
   ).lean();
   if (!group)
@@ -142,7 +143,10 @@ const addSceneToPath = async (groupId, currentSceneId, sceneId) => {
     },
     {
       $push: { path: { $each: [sceneId], $position: 0 } },
-      $set: { currentSceneEnteredAt: new Date() },
+      $set: {
+        currentSceneEnteredAt: new Date(),
+        currentSceneTimerFired: false,
+      },
     }
   );
   if (!res) throw new HttpError("Scene mismatch has occured", STATUS.CONFLICT);
@@ -156,7 +160,8 @@ const commitGroupTransition = async (
   currentSceneId,
   nextSceneId,
   stateVersion,
-  properties
+  properties,
+  claimTimer = false
 ) => {
   const filter = {
     _id: groupId,
@@ -164,9 +169,16 @@ const commitGroupTransition = async (
   };
 
   const update = {};
+  if (claimTimer) {
+    filter.currentSceneTimerFired = { $ne: true };
+    update.$set = { currentSceneTimerFired: true };
+  }
   if (nextSceneId) {
     update.$push = { path: { $each: [nextSceneId], $position: 0 } };
-    update.$set = { currentSceneEnteredAt: new Date() };
+    update.$set = {
+      currentSceneEnteredAt: new Date(),
+      currentSceneTimerFired: false,
+    };
   }
   if (properties) {
     filter.stateVersion = stateVersion;
@@ -297,6 +309,18 @@ export const groupNavigate = async (req) => {
 
   if (!trigger) throw new HttpError("trigger is required", STATUS.BAD_REQUEST);
 
+  // the timer already fired for this scene entry
+  const claimTimer = trigger === "timer";
+  if (claimTimer && group.currentSceneTimerFired) {
+    return {
+      status: STATUS.OK,
+      json: {
+        properties: group.stateVariables,
+        propertyVersion: group.stateVersion,
+      },
+    };
+  }
+
   // validate that the user is allowed to move to this scene
   const scene = await getSceneConsideringRole(currentScene, role);
 
@@ -321,7 +345,8 @@ export const groupNavigate = async (req) => {
         currentScene,
         nextScene,
         group.stateVersion,
-        changed ? resolvedProperties : null
+        changed ? resolvedProperties : null,
+        claimTimer
       ),
       addFlagsToGroup(group._id, addFlags),
       removeFlagsFromGroup(group._id, removeFlags),
@@ -329,13 +354,14 @@ export const groupNavigate = async (req) => {
     ]);
     committedGroup = committed;
     scenes = connectedScenes;
-  } else if (changed) {
+  } else if (changed || claimTimer) {
     committedGroup = await commitGroupTransition(
       group._id,
       currentScene,
       null,
       group.stateVersion,
-      resolvedProperties
+      changed ? resolvedProperties : null,
+      claimTimer
     );
   }
 
@@ -379,7 +405,14 @@ export const groupReset = async (req) => {
 
   await Group.updateOne(
     { _id: req.params.groupId },
-    { $set: { path: [], currentFlags: [], currentSceneEnteredAt: null } }
+    {
+      $set: {
+        path: [],
+        currentFlags: [],
+        currentSceneEnteredAt: null,
+        currentSceneTimerFired: false,
+      },
+    }
   ).exec();
 
   return { status: STATUS.OK };

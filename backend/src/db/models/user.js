@@ -36,6 +36,12 @@ const userSchema = new Schema({
     of: Date,
     default: {},
   },
+  // map of scenarioId to whether the current (head) scene's timer has fired
+  sceneTimerFired: {
+    type: Map,
+    of: Boolean,
+    default: {},
+  },
   // Map of scenarioId to properties
   stateVariables: {
     type: Map,

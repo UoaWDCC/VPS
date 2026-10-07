@@ -55,6 +55,7 @@ const addSceneToPath = async (
 ) => {
   const pathField = `paths.${scenarioId}`;
   const enteredField = `sceneEnteredAt.${scenarioId}`;
+  const timerFiredField = `sceneTimerFired.${scenarioId}`;
 
   const filter = replace
     ? { _id: userId }
@@ -67,15 +68,31 @@ const addSceneToPath = async (
       };
 
   const update = replace
-    ? { $set: { [pathField]: [sceneId], [enteredField]: new Date() } }
+    ? {
+        $set: {
+          [pathField]: [sceneId],
+          [enteredField]: new Date(),
+          [timerFiredField]: false,
+        },
+      }
     : {
         $push: { [pathField]: { $each: [sceneId], $position: 0 } },
-        $set: { [enteredField]: new Date() },
+        $set: { [enteredField]: new Date(), [timerFiredField]: false },
       };
 
   const res = await User.findOneAndUpdate(filter, update);
   if (!res) throw new HttpError("Scene mismatch has occured", STATUS.CONFLICT);
   return STATUS.OK;
+};
+
+// marks the current scene's timer as fired
+const claimSceneTimer = async (userId, scenarioId) => {
+  const timerFiredField = `sceneTimerFired.${scenarioId}`;
+  const res = await User.findOneAndUpdate(
+    { _id: userId, [timerFiredField]: { $ne: true } },
+    { $set: { [timerFiredField]: true } }
+  );
+  return res != null;
 };
 
 // Initiates properties for a user
@@ -197,6 +214,16 @@ export const userNavigate = async (req) => {
 
   if (!trigger) throw new HttpError("trigger is required", STATUS.BAD_REQUEST);
 
+  if (trigger === "timer" && !(await claimSceneTimer(user._id, scenarioId))) {
+    return {
+      status: STATUS.OK,
+      json: {
+        properties: user.stateVariables[scenarioId],
+        propertyVersion: user.stateVersions[scenarioId],
+      },
+    };
+  }
+
   const scene = await getSimpleScene(currentScene);
 
   const resolved = await dropStaleLinks(
@@ -254,6 +281,7 @@ export const userReset = async (req) => {
       $unset: {
         [`paths.${scenarioId}`]: "",
         [`sceneEnteredAt.${scenarioId}`]: "",
+        [`sceneTimerFired.${scenarioId}`]: "",
       },
     }
   );
