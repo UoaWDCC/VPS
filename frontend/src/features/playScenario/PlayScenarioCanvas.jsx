@@ -213,7 +213,7 @@ export default function PlayScenarioCanvas({
     .sort((a, b) => a.zIndex - b.zIndex)
     .map((c) => {
       const resolved = resolve(c);
-      if (c.clickable && c.actionRefs?.length) {
+      if (c.clickable && (c.actionRefs?.length || c.linkedScene)) {
         return (
           <g
             key={c.id}
