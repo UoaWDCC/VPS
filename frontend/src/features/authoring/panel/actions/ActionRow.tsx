@@ -5,7 +5,7 @@ import useField from "../../inputs/useField";
 import { ChevronDownIcon, ChevronUpIcon, XIcon } from "lucide-react";
 import SceneSelectInput from "../../components/SceneSelectInput";
 import PanelInput from "../PanelInput";
-import { coerceUniqueName } from "../../inputs/coerce";
+import { coerceSceneExists, coerceUniqueName } from "../../inputs/coerce";
 import useVisualScene from "../../stores/visual";
 import { cn } from "../../../../util/classnames";
 import ListInput, { type ListInputHandle } from "./ListInput";
@@ -30,7 +30,7 @@ function ActionRow({ id, index, onDelete }: ActionRowProps) {
   });
   const linkedSceneField = useField<string | null>(
     `actions.${index}.linkedScene`,
-    { commit: "onChange", empty: null }
+    { commit: "onChange", empty: null, coerce: coerceSceneExists(scenes) }
   );
 
   function toggleExpansion() {
@@ -76,7 +76,11 @@ function ActionRow({ id, index, onDelete }: ActionRowProps) {
         <div className="pl-5 border-l-1 border-base-content/20">
           <div className="flex flex-col gap-2">
             <PanelInput label="Linked Scene">
-              <SceneSelectInput scenes={scenes} {...linkedSceneField.props} />
+              <SceneSelectInput
+                scenes={scenes}
+                {...linkedSceneField.props}
+                error={linkedSceneField.error}
+              />
             </PanelInput>
             <PanelInput
               label="Conditions"

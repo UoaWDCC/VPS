@@ -7,7 +7,13 @@ import PanelSection from "./PanelSection";
 import MultiSelectInput from "../components/MultiSelectInput";
 import SceneSelectInput from "../components/SceneSelectInput";
 import useField from "../inputs/useField";
-import { coerceInt, coerceRange, INVALID, pipe } from "../inputs/coerce";
+import {
+  coerceInt,
+  coerceRange,
+  coerceSceneExists,
+  INVALID,
+  pipe,
+} from "../inputs/coerce";
 import { cn } from "../../../util/classnames";
 import PanelInput from "./PanelInput";
 import ActionRefsInput, {
@@ -48,11 +54,13 @@ function SceneDetailsPanel() {
     {
       empty: null,
       commit: "onChange",
+      coerce: coerceSceneExists(scenes),
     }
   );
   const timerLinkedSceneField = useField<string | null>("timerLinkedScene", {
     empty: null,
     commit: "onChange",
+    coerce: coerceSceneExists(scenes),
   });
 
   const defaultActionsRef = useRef<ActionRefsInputHandle | null>(null);
@@ -79,6 +87,7 @@ function SceneDetailsPanel() {
             {...defaultLinkedSceneField.props}
             scenes={scenes}
             exclusionId={sceneId}
+            error={defaultLinkedSceneField.error}
           />
         </PanelInput>
         <PanelInput
@@ -105,6 +114,7 @@ function SceneDetailsPanel() {
             {...timerLinkedSceneField.props}
             scenes={scenes}
             exclusionId={sceneId}
+            error={timerLinkedSceneField.error}
           />
         </PanelInput>
         <PanelInput

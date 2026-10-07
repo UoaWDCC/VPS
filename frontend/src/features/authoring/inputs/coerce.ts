@@ -1,5 +1,5 @@
 import type { Property } from "../text/property";
-import type { PropertyValue } from "../types";
+import type { PropertyValue, Scene } from "../types";
 
 export const INVALID = Symbol("invalid");
 
@@ -91,6 +91,14 @@ export function coercePropertyExists(properties: Property[]) {
   return (raw: string): Coerced<string> => {
     if (properties.find((p) => p.id === raw)) return raw;
     else return INVALID;
+  };
+}
+
+// a link to a deleted scene is kept and shown as errored instead
+export function coerceSceneExists(scenes: Scene[] | undefined) {
+  return (raw: string | null): Coerced<string | null> => {
+    if (raw === null || !scenes) return raw;
+    return scenes.some((s) => s._id === raw) ? raw : INVALID;
   };
 }
 
