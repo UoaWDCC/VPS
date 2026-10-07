@@ -140,7 +140,6 @@ describe("Navigate User API tests", () => {
           linkedScene: scene2._id,
           conditions: [],
           operations: [],
-          index: 0,
         },
       ],
       roles: [],
@@ -324,7 +323,6 @@ describe("Navigate User API tests", () => {
             linkedScene: scene2._id,
             conditions: [],
             operations: [],
-            index: 0,
           },
         ],
         roles: [],
@@ -447,7 +445,6 @@ describe("Navigate User API tests", () => {
             linkedScene: scene2._id,
             conditions: [],
             operations: [],
-            index: 0,
           },
         ],
         defaultActionRefs: [
@@ -486,7 +483,6 @@ describe("Navigate User API tests", () => {
             operations: [
               { id: "op1", stateVariableId: "hp", operation: "add", value: 5 },
             ],
-            index: 0,
           },
         ],
         defaultActionRefs: [
@@ -551,7 +547,6 @@ describe("Navigate User API tests", () => {
               { id: "op1", stateVariableId: "hp", operation: "add", value: 5 },
               { id: "op2", stateVariableId: "hp", operation: "set", value: 5 },
             ],
-            index: 0,
           },
         ],
         defaultActionRefs: [
@@ -725,7 +720,6 @@ describe("Navigate User API tests", () => {
             linkedScene: scene1._id,
             conditions: [],
             operations: [],
-            index: 0,
           },
         ],
         defaultActionRefs: [
@@ -754,7 +748,6 @@ describe("Navigate User API tests", () => {
               { id: "c1", stateVariableId: "hp", comparator: ">", value: 100 },
             ],
             operations: [],
-            index: 0,
           },
           {
             id: "action-heal",
@@ -764,7 +757,6 @@ describe("Navigate User API tests", () => {
             operations: [
               { id: "op1", stateVariableId: "hp", operation: "add", value: 5 },
             ],
-            index: 1,
           },
         ],
         defaultActionRefs: [
