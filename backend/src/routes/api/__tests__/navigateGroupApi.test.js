@@ -323,7 +323,6 @@ describe("Navigate Group API tests", () => {
             linkedScene: scene2._id,
             conditions: [],
             operations: [],
-            index: 0,
           },
         ],
         roles: [],
@@ -386,7 +385,6 @@ describe("Navigate Group API tests", () => {
             linkedScene: timedTarget._id,
             conditions: [],
             operations: [],
-            index: 0,
           },
         ],
         roles: [],
@@ -435,7 +433,6 @@ describe("Navigate Group API tests", () => {
             linkedScene: selfLoopScene._id,
             conditions: [],
             operations: [],
-            index: 0,
           },
         ],
       });
@@ -555,7 +552,6 @@ describe("Navigate Group API tests", () => {
             linkedScene: scene2._id,
             conditions: [],
             operations: [],
-            index: 0,
           },
         ],
         defaultActionRefs: [
@@ -593,7 +589,6 @@ describe("Navigate Group API tests", () => {
             linkedScene: scene2._id,
             conditions: [],
             operations: [],
-            index: 0,
           },
         ],
         timerActionRefs: [
@@ -634,7 +629,6 @@ describe("Navigate Group API tests", () => {
               { id: "c1", stateVariableId: "hp", comparator: ">", value: 10 },
             ],
             operations: [],
-            index: 0,
           },
         ],
         defaultActionRefs: [
@@ -680,7 +674,6 @@ describe("Navigate Group API tests", () => {
               { id: "c1", stateVariableId: "hp", comparator: ">", value: 10 },
             ],
             operations: [],
-            index: 0,
           },
         ],
         defaultActionRefs: [
@@ -721,7 +714,6 @@ describe("Navigate Group API tests", () => {
             operations: [
               { id: "op1", stateVariableId: "hp", operation: "add", value: 5 },
             ],
-            index: 0,
           },
         ],
         defaultActionRefs: [
@@ -883,7 +875,6 @@ describe("Navigate Group API tests", () => {
             linkedScene: scene1._id,
             conditions: [],
             operations: [],
-            index: 0,
           },
         ],
         defaultActionRefs: [
@@ -912,7 +903,6 @@ describe("Navigate Group API tests", () => {
               { id: "c1", stateVariableId: "hp", comparator: ">", value: 100 },
             ],
             operations: [],
-            index: 0,
           },
           {
             id: "action-heal",
@@ -922,7 +912,6 @@ describe("Navigate Group API tests", () => {
             operations: [
               { id: "op1", stateVariableId: "hp", operation: "add", value: 5 },
             ],
-            index: 1,
           },
         ],
         defaultActionRefs: [

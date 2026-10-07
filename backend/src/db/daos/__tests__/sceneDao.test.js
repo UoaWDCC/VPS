@@ -230,7 +230,6 @@ describe("Scene DAO patchScene tests", () => {
             linkedScene: otherScene._id,
             conditions: [],
             operations: [],
-            index: 0,
           },
         ],
       })
@@ -451,7 +450,6 @@ describe("Scene DAO patchScene tests", () => {
             linkedScene: new mongoose.Types.ObjectId(),
             conditions: [],
             operations: [],
-            index: 0,
           },
         ],
       })
@@ -672,7 +670,6 @@ describe("Scene DAO patchScene tests", () => {
           operations: [
             { id: "op1", stateVariableId: "hp", operation: "add", value: 5 },
           ],
-          index: 0,
         },
       ],
       defaultActionRefs: [
@@ -724,14 +721,12 @@ describe("Scene DAO patchScene tests", () => {
             name: "Advance",
             conditions: [],
             operations: [],
-            index: 0,
           },
           {
             id: "action-1",
             name: "Retreat",
             conditions: [],
             operations: [],
-            index: 1,
           },
         ],
       })
@@ -755,14 +750,12 @@ describe("Scene DAO patchScene tests", () => {
             name: "Advance",
             conditions: [],
             operations: [],
-            index: 0,
           },
           {
             id: "action-2",
             name: "Advance",
             conditions: [],
             operations: [],
-            index: 1,
           },
         ],
       })
@@ -794,7 +787,6 @@ describe("Scene DAO patchScene tests", () => {
               },
             ],
             operations: [],
-            index: 0,
           },
         ],
       })
@@ -829,7 +821,6 @@ describe("Scene DAO patchScene tests", () => {
               value: 1,
             },
           ],
-          index: 0,
         },
       ],
     });
@@ -857,7 +848,6 @@ describe("Scene DAO patchScene tests", () => {
             name: "Advance",
             conditions: [],
             operations: [],
-            index: 0,
           },
         ],
         defaultActionRefs: [
@@ -884,7 +874,6 @@ describe("Scene DAO patchScene tests", () => {
             name: "Advance",
             conditions: [],
             operations: [],
-            index: 0,
           },
         ],
         timerActionRefs: [
@@ -924,7 +913,6 @@ describe("Scene DAO patchScene tests", () => {
             name: "Advance",
             conditions: [],
             operations: [],
-            index: 0,
           },
         ],
       })
@@ -943,7 +931,6 @@ describe("Scene DAO patchScene tests", () => {
               linkedScene: null,
               conditions: [],
               operations: [],
-              index: 0,
             },
           ],
         },
@@ -1054,7 +1041,6 @@ describe("Scene DAO patchScene tests", () => {
                 },
               ],
               operations: [],
-              index: 0,
             },
             {
               id: "action-live",
@@ -1062,7 +1048,6 @@ describe("Scene DAO patchScene tests", () => {
               linkedScene: null,
               conditions: [],
               operations: [],
-              index: 1,
             },
           ],
         },
@@ -1080,7 +1065,6 @@ describe("Scene DAO patchScene tests", () => {
               linkedScene: null,
               conditions: [],
               operations: [],
-              index: 1,
             },
           ],
           deleted: [],
@@ -1117,7 +1101,6 @@ describe("Scene DAO patchScene tests", () => {
       linkedScene: null,
       conditions: [staleCondition],
       operations: [staleOperation],
-      index: 0,
     };
 
     let scenarioId;
@@ -1252,7 +1235,6 @@ describe("Scene DAO patchScene tests", () => {
               linkedScene: null,
               conditions: [],
               operations: [],
-              index: 0,
             },
           ],
           defaultActionRefs: [
@@ -1301,7 +1283,6 @@ describe("Scene DAO patchScene tests", () => {
       linkedScene: null,
       conditions: [],
       operations: [],
-      index: 0,
     };
 
     beforeEach(async () => {
@@ -1442,7 +1423,6 @@ describe("Scene DAO patchScene tests", () => {
               linkedScene: null,
               conditions: [],
               operations: [],
-              index: 0,
             },
             {
               id: "action-2",
@@ -1450,7 +1430,6 @@ describe("Scene DAO patchScene tests", () => {
               linkedScene: null,
               conditions: [],
               operations: [],
-              index: 1,
             },
           ],
           components: [
@@ -1585,7 +1564,6 @@ describe("Scene DAO patchScene tests", () => {
               linkedScene: null,
               conditions: [],
               operations: [],
-              index: 0,
             },
           ],
         },
@@ -1661,7 +1639,6 @@ describe("Scene DAO patchScene tests", () => {
             linkedScene: targetScene._id,
             conditions: [],
             operations: [],
-            index: 0,
           },
         ],
       });
@@ -1810,6 +1787,41 @@ describe("Scene DAO patchScene tests", () => {
         targetScene._id.toString()
       );
       expect(copy.timerLinkedScene.toString()).toBe(targetScene._id.toString());
+    });
+  });
+
+  describe("duplicateScene", () => {
+    it("duplicates a scene whose actions were created through patchScene", async () => {
+      const scenario = await Scenario.create({
+        name: "Duplicate scenario",
+        uid: "author-18",
+        scenes: [sceneId],
+      });
+      const scenarioId = scenario._id.toString();
+
+      // shape the editor sends when creating an action
+      await patchScene(
+        sceneId,
+        {
+          actions: {
+            upserted: [
+              {
+                id: "action-new",
+                name: "New Action 1",
+                linkedScene: null,
+                conditions: [],
+                operations: [],
+              },
+            ],
+            deleted: [],
+          },
+        },
+        scenarioId
+      );
+
+      const copy = await duplicateScene(scenarioId, sceneId);
+
+      expect(copy.actions.map((a) => a.id)).toEqual(["action-new"]);
     });
   });
 });
