@@ -154,7 +154,8 @@ function handleComponentDrag(e: React.MouseEvent, position: Vec2) {
     useEditorStore.getState();
   if (!selected?.length) return;
 
-  const bounds = getSelectedComponentBounds()!;
+  const bounds = getSelectedComponentBounds();
+  if (!bounds) return;
   let verts = translate(bounds.verts, subtract(position, offset));
 
   if (e.altKey) {
