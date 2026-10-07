@@ -7,6 +7,7 @@ interface SceneSelectInputProps {
   exclusionId?: string | null;
   onChange: (v: string | null) => void;
   disabled?: boolean;
+  error?: boolean;
 }
 
 function SceneSelectInput({
@@ -14,6 +15,7 @@ function SceneSelectInput({
   exclusionId,
   value,
   onChange,
+  error,
 }: SceneSelectInputProps) {
   return (
     <SelectInput
@@ -25,9 +27,10 @@ function SceneSelectInput({
           .map((scene) => scene._id) ?? []
       }
       display={(targetId) =>
-        scenes?.find((scene) => scene._id === targetId)?.name ?? "Unknown scene"
+        scenes?.find((scene) => scene._id === targetId)?.name ?? "Deleted Scene"
       }
       onChange={onChange}
+      error={error}
     />
   );
 }

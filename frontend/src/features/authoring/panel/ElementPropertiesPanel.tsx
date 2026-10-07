@@ -12,6 +12,7 @@ import { cn } from "../../../util/classnames";
 import {
   coerceFloat,
   coerceRequired,
+  coerceSceneExists,
   INVALID,
   pipe,
   type Coerced,
@@ -109,6 +110,7 @@ function ElementPropertiesPanel({ component }: ElementPropertiesPanelProps) {
     empty: null,
     commit: "onChange",
     component: component?.id ?? null,
+    coerce: coerceSceneExists(scenes),
   });
 
   if (!component) return null;
@@ -137,6 +139,7 @@ function ElementPropertiesPanel({ component }: ElementPropertiesPanelProps) {
             {...linkedSceneField.props}
             scenes={scenes}
             exclusionId={sceneId}
+            error={linkedSceneField.error}
           />
         </PanelInput>
         <PanelInput label="Actions" onAdd={() => actionsRef.current?.addItem()}>
