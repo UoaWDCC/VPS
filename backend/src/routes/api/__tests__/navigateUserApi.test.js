@@ -72,7 +72,7 @@ describe("Navigate User API tests", () => {
     );
     expect(response.status).toBe(200);
     expect(response.data.active).toBe(scene1._id.toString());
-    expect(response.data.stateVariables).toBeDefined();
+    expect(response.data.properties).toBeDefined();
 
     // User path for this scenario should now start with scene1
     const dbUser = await User.findOne({ uid: "uid-player" });

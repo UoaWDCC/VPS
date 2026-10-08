@@ -32,16 +32,16 @@ function EditAudioComponent({ component }: { component: AudioComponent }) {
   }
 
   function deleteAudioComponent() {
-    remove(component.id);
+    remove([component.id]);
   }
 
   function saveName(v: string) {
-    modifyComponentProp(component.id, "name", v);
+    modifyComponentProp([component.id], "name", v);
   }
 
   function saveLoop(v: boolean) {
     setLoop(v);
-    modifyComponentProp(component.id, "loop", v);
+    modifyComponentProp([component.id], "loop", v);
   }
 
   return (

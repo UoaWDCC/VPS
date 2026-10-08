@@ -1,4 +1,4 @@
-import type { BaseTextStyle, RelativeBounds } from "../types";
+import type { BaseTextStyle, RelativeBounds, PropertyRef } from "../types";
 
 export interface VisualSpan {
   text: string;
@@ -8,6 +8,7 @@ export interface VisualSpan {
   charOffsets: number[];
   parentId: number;
   startIndex: number;
+  property?: PropertyRef;
 }
 
 export interface VisualLine {

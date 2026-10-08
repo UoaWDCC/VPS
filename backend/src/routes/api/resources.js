@@ -197,17 +197,17 @@ router.patch(
 
 /**
  * @route POST /api/resources/:scenarioId/:resourceId/conditionals
- * @desc Add a state conditional to a resource
+ * @desc Add a property conditional to a resource
  */
 router.post(
   "/:scenarioId/:resourceId/conditionals",
   handle(async (req, res) => {
     const { scenarioId, resourceId } = req.params;
-    const { stateConditional } = req.body;
+    const { propertyConditional } = req.body;
 
     const resource = await Resource.findOneAndUpdate(
       { _id: resourceId, scenarioId },
-      { $push: { stateConditionals: stateConditional } },
+      { $push: { stateConditionals: propertyConditional } },
       { new: true, runValidators: true }
     )
       .populate("fileId", "name url type contentType size")
@@ -222,21 +222,21 @@ router.post(
 
 /**
  * @route PUT /api/resources/:scenarioId/:resourceId/conditionals
- * @desc Update a state conditional on a resource
+ * @desc Update a property conditional on a resource
  */
 router.put(
   "/:scenarioId/:resourceId/conditionals",
   handle(async (req, res) => {
     const { scenarioId, resourceId } = req.params;
-    const { stateConditional } = req.body;
+    const { propertyConditional } = req.body;
 
     const resource = await Resource.findOneAndUpdate(
       {
         _id: resourceId,
         scenarioId,
-        "stateConditionals._id": stateConditional._id,
+        "stateConditionals._id": propertyConditional._id,
       },
-      { $set: { "stateConditionals.$": stateConditional } },
+      { $set: { "stateConditionals.$": propertyConditional } },
       { new: true, runValidators: true }
     )
       .populate("fileId", "name url type contentType size")
@@ -251,7 +251,7 @@ router.put(
 
 /**
  * @route DELETE /api/resources/:scenarioId/:resourceId/conditionals/:conditionalId
- * @desc Delete a state conditional from a resource
+ * @desc Delete a property conditional from a resource
  */
 router.delete(
   "/:scenarioId/:resourceId/conditionals/:conditionalId",

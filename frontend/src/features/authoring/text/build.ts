@@ -5,6 +5,7 @@ import type {
   ModelSpan,
 } from "../types";
 import type { VisualBlock, VisualDocument, VisualLine } from "./types";
+import { CHIP_X_PADDING } from "./property";
 
 const canvas = document.createElement("canvas");
 const ctx = canvas.getContext("2d") as CanvasRenderingContext2D;
@@ -13,7 +14,7 @@ const fallback: BaseTextStyle = {
   alignment: "center",
   lineHeight: 1.1,
   fontFamily: "Arial",
-  fontSize: 16,
+  fontSize: 24,
   fontWeight: "normal",
   fontStyle: "normal",
   textDecoration: "none",
@@ -109,13 +110,23 @@ function buildVisualLines(
     const measuredParts = wordBuffer.map((ref) => {
       const style = squash(blockStyle, ref.span.style);
       setFont(style);
-      const metrics = measure(ref.text);
-      return { ref, style, metrics };
+
+      //property chips measure width from name+padding instead of unicode char
+      //offsets have only two cursor positions (front and back)
+      if (ref.span.property) {
+        const width =
+          measure(ref.span.property.displayName).width + CHIP_X_PADDING * 2;
+        return { ref, style, width, offsets: [0, width] };
+      }
+
+      return {
+        ref,
+        style,
+        width: measure(ref.text).width,
+        offsets: generateOffsets(ref.text, style),
+      };
     });
-    const wordWidth = measuredParts.reduce(
-      (sum, p) => sum + p.metrics.width,
-      0
-    );
+    const wordWidth = measuredParts.reduce((sum, p) => sum + p.width, 0);
 
     if (currentLine.width + wordWidth > maxWidth && currentLine.width > 0) {
       currentLine.x = generateLineOffset(
@@ -131,18 +142,20 @@ function buildVisualLines(
     }
 
     for (const part of measuredParts) {
-      const { ref, style, metrics } = part;
+      const { ref, style, width, offsets } = part;
       currentLine.spans.push({
         text: ref.text,
-        charOffsets: generateOffsets(ref.text, style),
+        charOffsets: offsets,
         style,
-        width: metrics.width,
+        width,
         x: currentLine.width,
         parentId: ref.index,
         startIndex: ref.start,
+        property: ref.span.property,
       });
-      currentLine.width += metrics.width;
+      currentLine.width += width;
 
+      setFont(style);
       const descent = measure("Mg").actualBoundingBoxDescent;
       if (descent > currentLine.maxDescent) currentLine.maxDescent = descent;
       if (style.fontSize > currentLine.maxFontSize)
@@ -154,6 +167,12 @@ function buildVisualLines(
 
   for (let j = 0; j < spans.length; j++) {
     const span = spans[j];
+
+    //property chip cannot be split between lines
+    if (span.property) {
+      wordBuffer.push({ span, text: span.text, index: j, start: 0 });
+      continue;
+    }
     const tokens = span.text.split(/(\s+)/);
 
     let offset = 0;

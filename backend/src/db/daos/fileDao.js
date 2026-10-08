@@ -1,9 +1,10 @@
 import UploadedFile from "../models/uploadedFile.js";
 
 /**
- * Applies reference count deltas to multiple file objects in bulk
- * @param {Map<string, number>} fileRefDeltas Map of file ID to delta to increment by
- * @returns {Promise<void>}
+ * Applies a batch of reference-count deltas to uploaded files.
+ *
+ * @param {Map<string, number>} fileRefDeltas - Map of file IDs to the amount to adjust the reference count by.
+ * @returns {Promise<void>} Resolves once the bulk update completes.
  */
 export async function applyReferenceDeltas(fileRefDeltas) {
   if (fileRefDeltas.size === 0) return;
@@ -26,16 +27,23 @@ export async function applyReferenceDeltas(fileRefDeltas) {
       },
     }));
 
-  if (fileOperations.length > 0) {
-    await UploadedFile.bulkWrite(fileOperations, { ordered: false });
+  if (fileOperations.length === 0) return;
+
+  const result = await UploadedFile.bulkWrite(fileOperations, {
+    ordered: false,
+  });
+
+  if (result.matchedCount !== fileOperations.length) {
+    throw new Error("one or more file reference updates did not match");
   }
 }
 
 /**
- * Applies a delta to the reference count of a file object
- * @param {string} fileId MongoDB ID of file
- * @param {number} delta Amount to increment/decrement by
- * @returns {Promise<void>}
+ * Applies a single reference-count delta to a file.
+ *
+ * @param {string} fileId - MongoDB ID of the file.
+ * @param {number} delta - Amount to increment or decrement the file reference count by.
+ * @returns {Promise<void>} Resolves once the update completes.
  */
 export async function applyReferenceDelta(fileId, delta) {
   if (delta === 0) return;
@@ -52,20 +60,22 @@ export async function applyReferenceDelta(fileId, delta) {
 }
 
 /**
- * Retrieves all files of a given type for a scenario
- * @param {string} scenarioId MongoDB ID of scenario
- * @param {string} type File type to filter by (e.g. "image", "audio", "document")
- * @returns {Promise<Object[]>} Array of matching file documents
+ * Retrieves all files of a given type for a scenario.
+ *
+ * @param {string} scenarioId - MongoDB ID of the scenario.
+ * @param {string} type - File type to filter by, such as "image" or "audio".
+ * @returns {Promise<Array<object>>} Matching file documents.
  */
 export function retrieveFiles(scenarioId, type) {
   return UploadedFile.find({ scenarioId, type }).lean();
 }
 
 /**
- * Retrieves a file object by ID
- * @param {string} scenarioId MongoDB ID of scenario
- * @param {string} fileId MongoDB ID of file
- * @returns {Promise<Object|null>} The file document, or null if not found
+ * Retrieves a file object by ID within a scenario.
+ *
+ * @param {string} scenarioId - MongoDB ID of the scenario.
+ * @param {string} fileId - MongoDB ID of the file.
+ * @returns {Promise<object|null>} The matching file document, or null if not found.
  */
 export function retrieveFile(scenarioId, fileId) {
   return UploadedFile.findOne({ _id: fileId, scenarioId }).lean();

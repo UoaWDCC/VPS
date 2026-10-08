@@ -2,6 +2,13 @@ import Note from "../models/note.js";
 import Group from "../models/group.js";
 import { HttpError } from "../../util/error.js";
 
+/**
+ * Checks whether a note exists in the provided group.
+ *
+ * @param {object} group - Group document containing the note references.
+ * @param {string} noteId - The ID of the note to check.
+ * @returns {boolean} True when the note is present in the group, otherwise false.
+ */
 export const hasNoteInGroup = (group, noteId) => {
   if (!group?.notes) return false;
 
@@ -14,11 +21,13 @@ export const hasNoteInGroup = (group, noteId) => {
 };
 
 /**
- * Creates a empty note in the database
- * @param {String} groupId group ID the note belongs to
- * @param {String} title  title of the note
- * @param {String} role role of the note
- * @returns
+ * Creates an empty note and attaches it to the group.
+ *
+ * @param {string} groupId - The ID of the group that owns the note.
+ * @param {string} title - The title of the new note.
+ * @param {string} role - The membership role used to store the note reference.
+ * @param {string} [text=""] - Initial note text.
+ * @returns {Promise<object>} The saved note document.
  */
 const createNote = async (groupId, title, role, text = "") => {
   const dbNote = new Note({ title, role, text, date: new Date() });
@@ -30,11 +39,12 @@ const createNote = async (groupId, title, role, text = "") => {
 };
 
 /**
- * Deletes a note from the database
- *  @param {String} noteId note ID
- *  @param {String} groupId group ID
- * @param {String} email email of the user
- * @returns
+ * Deletes a note from the database and removes its reference from the group.
+ *
+ * @param {string} noteId - The note ID to delete.
+ * @param {string} groupId - The ID of the group containing the note.
+ * @param {string} role - The role required to authorize the deletion.
+ * @returns {Promise<null>} Resolves when the note has been removed.
  */
 const deleteNote = async (noteId, groupId, role) => {
   const note = await Note.findById(noteId, { role: 1 }).lean();
@@ -52,12 +62,12 @@ const deleteNote = async (noteId, groupId, role) => {
 };
 
 /**
- * updates a note in the database
- * @param {String} noteId note ID
- * @param {{title: String, text: String, role: String}} updatedNote updated note object
- * @param {String} groupId group ID
- * @param {String} email email of the user
- * @returns
+ * Updates a note in the database.
+ *
+ * @param {string} noteId - The note ID to update.
+ * @param {{ title: string, text: string, date: Date }} updatedNote - Updated note content.
+ * @param {string} role - The role required to authorize the update.
+ * @returns {Promise<void>} Resolves when the note has been saved.
  */
 const updateNote = async (noteId, updatedNote, role) => {
   const note = await Note.findById(noteId);
@@ -69,10 +79,10 @@ const updateNote = async (noteId, updatedNote, role) => {
 };
 
 /**
- * Retrieves all notes of a  group
- * @param {String} groupId group ID
- * @param {String} email email of the user
- * @returns list of database note objects
+ * Retrieves all notes belonging to a group.
+ *
+ * @param {string} groupId - The group ID to look up.
+ * @returns {Promise<Array<object>>} A list of note documents for the group.
  */
 const retrieveNoteList = async (groupId) => {
   const { notes } = await Group.findById(groupId, { notes: 1 }).lean();
@@ -82,9 +92,10 @@ const retrieveNoteList = async (groupId) => {
 };
 
 /**
- * Retreives a note from the database
- * @param {String} noteId note ID
- * @returns database note object
+ * Retrieves a single note by ID.
+ *
+ * @param {string} noteId - The note ID to look up.
+ * @returns {Promise<object|null>} The note document, if found.
  */
 const retrieveNote = async (noteId) => {
   const note = await Note.findOne({ _id: noteId });

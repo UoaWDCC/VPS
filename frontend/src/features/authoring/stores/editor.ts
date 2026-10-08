@@ -3,17 +3,40 @@ import type { ModelSelection, VisualSelection } from "../text/types";
 import type { BaseTextStyle, Bounds, Guide, Vec2 } from "../types";
 import { getComponent } from "../scene/scene";
 import { getStyleForSelection } from "../scene/operations/text";
+import type { Property } from "../text/property";
 
-type Mode = "normal" | "resize" | "create" | "text" | "mutation";
+type Mode = "normal" | "resize" | "create" | "text" | "mutation" | "marquee";
 
-const ZOOM_LEVELS = [0.5, 0.75, 1, 1.25, 1.5, 2];
-export const MIN_ZOOM = ZOOM_LEVELS[0];
-export const MAX_ZOOM = ZOOM_LEVELS[ZOOM_LEVELS.length - 1];
+// An image that is being uploaded, drawn on the canvas until the real
+// component takes its place.
+export interface PendingImage {
+  id: string;
+  sceneId: string;
+  bounds: Bounds;
+  // local object URL of the file being uploaded, used as a preview
+  previewUrl: string;
+  // upload progress, 0 to 1
+  progress: number;
+  // upload finished — the placeholder resolves before the real image takes over
+  settled: boolean;
+}
+
+// zoom is a scale factor, where 1 fits the whole scene in the canvas area
+export const MIN_ZOOM = 0.1;
+export const MAX_ZOOM = 5;
 const DEFAULT_ZOOM = 1;
+// each zoom in/out step multiplies/divides the zoom by this
+const ZOOM_STEP = 2;
+
+// keeps whole percentages, so the zoom shown in the controls is exact
+function clampZoom(zoom: number) {
+  return Math.min(Math.max(Math.round(zoom * 100) / 100, MIN_ZOOM), MAX_ZOOM);
+}
 
 interface EditorState {
   loading: boolean;
-  selected: string | null;
+  pendingImages: PendingImage[];
+  selected: string[];
   hovered: string | null;
   createType: string | null;
   mouseDown: boolean;
@@ -22,7 +45,7 @@ interface EditorState {
   activeGuides: Guide[];
   zoom: number;
 
-  setSelected: (id: string | null) => void;
+  setSelected: (id: string[]) => void;
   setHovered: (id: string | null) => void;
   setCreateType: (type: string) => void;
   setMouseDown: (mouseDown: boolean) => void;
@@ -39,12 +62,17 @@ interface EditorState {
   visualSelection: VisualSelection;
   desiredColumn: number | null;
   activeStyle: BaseTextStyle | null;
+  properties: Property[];
 
   setLoading: (loading: boolean) => void;
+  addPendingImage: (image: PendingImage) => void;
+  updatePendingImage: (id: string, patch: Partial<PendingImage>) => void;
+  removePendingImage: (id: string) => void;
   setSelection: (selection: ModelSelection) => void;
   setVisualSelection: Dynamic<VisualSelection>;
   setDesiredColumn: (column: number | null) => void;
   setActiveStyle: (style: BaseTextStyle) => void;
+  setProperties: (properties?: Property[]) => void;
 
   // modes
   mode: Mode[];
@@ -73,7 +101,8 @@ function setter<K extends keyof EditorState>(set: ZustandSet, prop: K) {
 
 const useEditorStore = create<EditorState>((set) => ({
   loading: false,
-  selected: null,
+  pendingImages: [],
+  selected: [],
   hovered: null,
   createType: null,
   mouseDown: false,
@@ -83,43 +112,65 @@ const useEditorStore = create<EditorState>((set) => ({
   zoom: DEFAULT_ZOOM,
 
   setLoading: (value: boolean) => set({ loading: value }),
-  setSelected: (id) => set({ selected: id }),
+  setSelected: (ids) =>
+    set(() => {
+      if (!ids.length || ids.length > 1) return { selected: ids };
+      const component = getComponent(ids[0]);
+      const hasDoc = component && "document" in component && component.document;
+      return {
+        selected: ids,
+        ...(hasDoc && {
+          activeStyle: getStyleForSelection(ids[0], { start: null, end: null }),
+        }),
+      };
+    }),
+  addPendingImage: (image) =>
+    set((state) => ({ pendingImages: [...state.pendingImages, image] })),
+  updatePendingImage: (id, patch) =>
+    set((state) => ({
+      pendingImages: state.pendingImages.map((image) =>
+        image.id === id ? { ...image, ...patch } : image
+      ),
+    })),
+  removePendingImage: (id) =>
+    set((state) => ({
+      pendingImages: state.pendingImages.filter((image) => image.id !== id),
+    })),
   setHovered: (id) => set({ hovered: id }),
   setCreateType: (type: string) => set({ createType: type }),
   setMouseDown: (mouseDown) => set({ mouseDown }),
   setMutationBounds: setter(set, "mutationBounds"),
   setOffset: (offset) => set({ offset }),
   setActiveGuides: (guides) => set({ activeGuides: guides }),
-  setZoom: (zoom) =>
-    set({ zoom: Math.min(Math.max(zoom, MIN_ZOOM), MAX_ZOOM) }),
-  zoomIn: () =>
-    set((state) => ({
-      zoom: ZOOM_LEVELS.find((level) => level > state.zoom) ?? MAX_ZOOM,
-    })),
-  zoomOut: () =>
-    set((state) => ({
-      zoom:
-        [...ZOOM_LEVELS].reverse().find((level) => level < state.zoom) ??
-        MIN_ZOOM,
-    })),
+  setZoom: (zoom) => {
+    if (Number.isFinite(zoom)) set({ zoom: clampZoom(zoom) });
+  },
+  zoomIn: () => set((state) => ({ zoom: clampZoom(state.zoom * ZOOM_STEP) })),
+  zoomOut: () => set((state) => ({ zoom: clampZoom(state.zoom / ZOOM_STEP) })),
   resetZoom: () => set({ zoom: DEFAULT_ZOOM }),
 
   selection: { start: null, end: null },
   visualSelection: { start: null, end: null },
   activeStyle: null,
+  properties: [],
   desiredColumn: null,
 
   setSelection: (selection) =>
     set(({ selected }) => {
-      if (selected && getComponent(selected)?.type === "textbox") {
-        const activeStyle = getStyleForSelection(selected, selection);
+      const mainTarget = selected[0];
+      const component = mainTarget ? getComponent(mainTarget) : null;
+      const hasDoc =
+        component && "document" in component && !!component.document;
+      if (hasDoc) {
+        const activeStyle = getStyleForSelection(mainTarget, selection);
         return { selection, activeStyle };
       }
-      return { selection };
+      return { selection, activeStyle: null };
     }),
   setVisualSelection: setter(set, "visualSelection"),
   setActiveStyle: (style: BaseTextStyle) => set({ activeStyle: style }),
   setDesiredColumn: (column) => set({ desiredColumn: column }),
+  setProperties: (properties) => set({ properties: properties ?? [] }),
 
   mode: ["normal"],
   setMode: (mode) => set({ mode }),
@@ -129,7 +180,7 @@ const useEditorStore = create<EditorState>((set) => ({
 
   clear: () =>
     set({
-      selected: null,
+      selected: [],
       selection: { start: null, end: null },
       visualSelection: { start: null, end: null },
       mode: ["normal"],

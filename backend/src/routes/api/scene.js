@@ -13,6 +13,7 @@ import {
 import auth from "../../middleware/firebaseAuth.js";
 import scenarioAuth from "../../middleware/scenarioAuth.js";
 import status from "../../util/status.js";
+import { handle } from "../../util/error.js";
 
 const router = Router({ mergeParams: true });
 
@@ -53,13 +54,14 @@ router.get("/all", async (req, res) => {
 
 // Create a scene for a scenario
 router.post("/", async (req, res) => {
-  const { name, components, time, directLink } = req.body;
+  const { name, components, time, directLink, background } = req.body;
 
   const scene = await createScene(req.params.scenarioId, {
     name,
     components,
     time,
     directLink,
+    background,
   });
 
   res.status(HTTP_OK).json(scene);
@@ -131,20 +133,23 @@ router.put("/visited/:sceneId", async (req, res) => {
   res.status(HTTP_OK).json(scene);
 });
 
-router.patch("/:sceneId", async (req, res) => {
-  const { fields = {}, components = [], deletedComponentIds = [] } = req.body;
+router.patch(
+  "/:sceneId",
+  handle(async (req, res) => {
+    const { fields = {}, components = [], deletedComponentIds = [] } = req.body;
 
-  const scene = await patchScene(
-    req.params.sceneId,
-    {
-      fields,
-      components,
-      deletedComponentIds,
-    },
-    req.params.scenarioId
-  );
+    const scene = await patchScene(
+      req.params.sceneId,
+      {
+        fields,
+        components,
+        deletedComponentIds,
+      },
+      req.params.scenarioId
+    );
 
-  res.status(HTTP_OK).json(scene);
-});
+    res.status(HTTP_OK).json(scene);
+  })
+);
 
 export default router;

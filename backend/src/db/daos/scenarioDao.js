@@ -3,17 +3,54 @@ import Scenario from "../models/scenario.js";
 import Scene from "../models/scene.js";
 import { v4 as uuidv4 } from "uuid";
 import User from "../models/user.js";
+import { HttpError } from "../../util/error.js";
 import { addDelta, hasFileRef } from "./sceneDao.js";
 import { applyReferenceDeltas } from "./fileDao.js";
 
 /**
- * Creates a scenario in the database with an initial scene
- * @param {String} name name of scenario
- * @param {String} uid ID of authoring user
- * @param {{description: String, estimatedTime: String}} [details] optional additional metadata
- * @returns database scenario object
+ * Augments scenario results with thumbnail and author metadata.
+ *
+ * @param {Array<object>} scenarios - Scenario records to enrich.
+ * @returns {Promise<Array<object>>} The enriched scenario objects.
  */
-const createScenario = async (name, uid, details = {}) => {
+const addThumbs = async (scenarios) => {
+  const scenarioData = await Promise.all(
+    scenarios.map(async (scenario) => {
+      if (!scenario.scenes || !scenario.scenes[0])
+        return {
+          _id: scenario._id,
+          name: scenario.name,
+          description: scenario.description,
+          estimatedTime: scenario.estimatedTime,
+          user: scenario.user ?? { uid: scenario.uid },
+        };
+      const thumbnail = await Scene.findById(scenario.scenes[0], {
+        components: 1,
+        background: 1,
+        _id: 0,
+      }).lean();
+      return {
+        _id: scenario._id,
+        name: scenario.name,
+        thumbnail,
+        description: scenario.description,
+        estimatedTime: scenario.estimatedTime,
+        user: scenario.user ?? { uid: scenario.uid },
+      };
+    })
+  );
+  return scenarioData;
+};
+
+/**
+ * Creates a scenario in the database with an initial scene.
+ *
+ * @param {string} name - Name of the scenario.
+ * @param {string} uid - ID of the authoring user.
+ * @param {{description?: string, estimatedTime?: string}} [details={}] - Optional scenario metadata.
+ * @returns {Promise<object>} The created scenario document.
+ */
+export const createScenario = async (name, uid, details = {}) => {
   const firstScene = new Scene({
     name: "Scene 1",
   });
@@ -38,35 +75,13 @@ const createScenario = async (name, uid, details = {}) => {
   return dbScenario;
 };
 
-const addThumbs = async (scenarios) => {
-  const scenarioData = await Promise.all(
-    scenarios.map(async (scenario) => {
-      if (!scenario.scenes || !scenario.scenes[0])
-        return {
-          _id: scenario._id,
-          name: scenario.name,
-          description: scenario.description,
-          estimatedTime: scenario.estimatedTime,
-          user: scenario.user ?? { uid: scenario.uid },
-        };
-      const thumbnail = await Scene.findById(scenario.scenes[0], {
-        components: 1,
-        _id: 0,
-      }).lean();
-      return {
-        _id: scenario._id,
-        name: scenario.name,
-        thumbnail,
-        description: scenario.description,
-        estimatedTime: scenario.estimatedTime,
-        user: scenario.user ?? { uid: scenario.uid },
-      };
-    })
-  );
-  return scenarioData;
-};
-
-const retrieveAccessibleScenarios = async (uid) => {
+/**
+ * Retrieves all scenarios a user can access through share permissions.
+ *
+ * @param {string|null} uid - The user ID to resolve access for.
+ * @returns {Promise<Array<object>>} The accessible scenario records.
+ */
+export const retrieveAccessibleScenarios = async (uid) => {
   if (!uid) return [];
 
   const user = await User.findOne({ uid }, { email: 1 }).lean();
@@ -88,7 +103,7 @@ const retrieveAccessibleScenarios = async (uid) => {
  * @param {String} uid ID of user
  * @returns list of database scenario objects
  */
-const retrieveScenarioList = async (uid) => {
+export const retrieveScenarioList = async (uid) => {
   const scenarios = await Scenario.find(
     { uid },
     { name: 1, scenes: { $slice: 1 }, description: 1, estimatedTime: 1, uid: 1 }
@@ -107,7 +122,7 @@ const retrieveScenarioList = async (uid) => {
  * @param {String} scenarioId MongoDB ID of scenario
  * @returns database scenario object
  */
-const retrieveScenario = async (scenarioId) => {
+export const retrieveScenario = async (scenarioId) => {
   const scenario = await Scenario.findById(scenarioId);
   return scenario;
 };
@@ -117,7 +132,7 @@ const retrieveScenario = async (scenarioId) => {
  * @param {String[]} scenarioIds MongoDB ID of scenarios
  * @returns database scenario objects
  */
-const retrieveScenarios = async (scenarioIds) => {
+export const retrieveScenarios = async (scenarioIds) => {
   const scenarios = await Scenario.find(
     { _id: { $in: scenarioIds } },
     { name: 1, scenes: { $slice: 1 }, description: 1, estimatedTime: 1, uid: 1 }
@@ -143,7 +158,7 @@ const retrieveScenarios = async (scenarioIds) => {
  * @param {String} scenarioId MongoDB ID of scenario
  * @returns an array of strings representing the roles in that scenario
  */
-const retrieveRoleList = async (scenarioId) => {
+export const retrieveRoleList = async (scenarioId) => {
   const scenario = await Scenario.findById(scenarioId);
   return scenario?.roleList ?? [];
 };
@@ -154,8 +169,8 @@ const retrieveRoleList = async (scenarioId) => {
  * @param {{name: String, description: String, estimatedTime: String}} updatedScenario updated scenario object
  * @returns updated database scenario object
  */
-const updateScenario = async (scenarioId, updatedScenario) => {
-  const scenario = await Scenario.findById(scenarioId);
+export const updateScenario = async (scenarioId, updatedScenario) => {
+  const scenario = await getScenarioOrThrow(scenarioId);
 
   if (updatedScenario.name?.trim()) {
     scenario.name = updatedScenario.name;
@@ -174,21 +189,17 @@ const updateScenario = async (scenarioId, updatedScenario) => {
 };
 
 /**
- * Updates scenario durations for users
- * @param {String} sceneId MongoDB ID of scene
- * @param {updatedDuration: Object} updatedDurations updated duration for a user
- * @returns updated database scene object
+ * Resolves a scenario or throws a consistent domain error.
+ *
+ * @param {string} scenarioId - MongoDB ID of the scenario.
+ * @returns {Promise<object>} The scenario document.
  */
-const updateDurations = async (scenarioId, updatedDurations) => {
-  // if we are updating name only, components will be null
+const getScenarioOrThrow = async (scenarioId) => {
   const scenario = await Scenario.findById(scenarioId);
-  try {
-    scenario.durations = scenario.durations.push(updatedDurations);
-    await scenario.save();
-    return scenario;
-  } catch {
-    return scenario;
+  if (!scenario) {
+    throw new HttpError("scenario not found", 404);
   }
+  return scenario;
 };
 
 /**
@@ -217,15 +228,11 @@ const mergeRoles = (existingRoles, newRoles) => {
  * @param {Array} updatedRoleList role names to merge into the scenario's role list
  * @returns updated database scenario object
  */
-const updateRoleList = async (scenarioId, updatedRoleList) => {
-  const scenario = await Scenario.findById(scenarioId);
-  try {
-    scenario.roleList = mergeRoles(scenario.roleList, updatedRoleList);
-    await scenario.save();
-    return scenario;
-  } catch {
-    return scenario;
-  }
+export const updateRoleList = async (scenarioId, updatedRoleList) => {
+  const scenario = await getScenarioOrThrow(scenarioId);
+  scenario.roleList = mergeRoles(scenario.roleList, updatedRoleList);
+  await scenario.save();
+  return scenario;
 };
 
 /**
@@ -234,8 +241,8 @@ const updateRoleList = async (scenarioId, updatedRoleList) => {
  * @param {String} role name of the role to add
  * @returns updated role list for the scenario
  */
-const createRole = async (scenarioId, role) => {
-  const scenario = await Scenario.findById(scenarioId);
+export const createRole = async (scenarioId, role) => {
+  const scenario = await getScenarioOrThrow(scenarioId);
   const merged = mergeRoles(scenario.roleList, [role.trim()]);
   if (merged.length !== scenario.roleList.length) {
     scenario.roleList = merged;
@@ -250,8 +257,8 @@ const createRole = async (scenarioId, role) => {
  * @param {String} role name of the role to remove
  * @returns updated role list for the scenario
  */
-const deleteRole = async (scenarioId, role) => {
-  const scenario = await Scenario.findById(scenarioId);
+export const deleteRole = async (scenarioId, role) => {
+  const scenario = await getScenarioOrThrow(scenarioId);
   scenario.roleList = scenario.roleList.filter((r) => r !== role);
   await scenario.save();
   await Scene.updateMany(
@@ -266,7 +273,7 @@ const deleteRole = async (scenarioId, role) => {
  * @param {String} scenarioId MongoDB ID of scenario
  * @returns {Promise<Boolean>} True if successfully deleted, False if error
  */
-const deleteScenario = async (scenarioId) => {
+export const deleteScenario = async (scenarioId) => {
   try {
     const res = await Scenario.findOneAndDelete({ _id: scenarioId });
     if (res === null) return false;
@@ -292,111 +299,75 @@ const deleteScenario = async (scenarioId) => {
 };
 
 /**
- * Gets the state variables for a scenario
+ * Gets the properties for a scenario
  * @param {String} sceneId MongoDB ID of scene
- * @returns state variables for the scenario
+ * @returns properties for the scenario
  */
-const getStateVariables = async (scenarioId) => {
-  const scenario = await Scenario.findById(scenarioId);
+export const getProperties = async (scenarioId) => {
+  const scenario = await getScenarioOrThrow(scenarioId);
   return scenario.stateVariables || [];
 };
 
 /**
- * Creates a new state variable for a scenario
+ * Creates a new property for a scenario
  * @param {String} sceneId MongoDB ID of scene
- * @param {Object} stateVariable new state variable to be added
- * @returns updated state variables for the scenario
+ * @param {Object} property new property to be added
+ * @returns updated properties for the scenario
  */
-const createStateVariable = async (scenarioId, stateVariable) => {
-  // TODO Add validation for state variable (e.g. name should be unique)
-  const scenario = await Scenario.findById(scenarioId);
-  try {
-    // Generate uuid on the backend
-    const stateVariableWithId = {
-      ...stateVariable,
-      id: uuidv4(),
-    };
-    scenario.stateVariables.push(stateVariableWithId);
-    await scenario.save();
-    return scenario.stateVariables;
-  } catch {
-    return scenario.stateVariables;
-  }
+export const createProperty = async (scenarioId, property) => {
+  // TODO Add validation for property (e.g. name should be unique)
+  const scenario = await getScenarioOrThrow(scenarioId);
+
+  // Generate uuid on the backend
+  const propertyWithId = {
+    ...property,
+    id: uuidv4(),
+  };
+  scenario.stateVariables.push(propertyWithId);
+  await scenario.save();
+  return scenario.stateVariables;
 };
 
 /**
- * Edits a state variable for a scenario
+ * Edits a property for a scenario
  * @param {String} scenarioId MongoDB ID of scenario
- * @param {String} originalName name of the original state variable (legacy support)
- * @param {Object} newStateVariable state variable to replace previous
- * @returns updated state variables for the scenario
+ * @param {String} originalName name of the original property (legacy support)
+ * @param {Object} newProperty property to replace previous
+ * @returns updated properties for the scenario
  */
-const editStateVariable = async (
-  scenarioId,
-  originalName,
-  newStateVariable
-) => {
-  // TODO Add validation for state variable
+export const editProperty = async (scenarioId, originalName, newProperty) => {
+  // TODO Add validation for property
   // (e.g. if name has changed, it should not conflict with existing names)
-  const scenario = await Scenario.findById(scenarioId);
-  try {
-    for (let i = 0; i < scenario.stateVariables.length; i++) {
-      // Try to match by ID first (new format), then by name (legacy format)
-      const match =
-        (newStateVariable.id &&
-          scenario.stateVariables[i].id === newStateVariable.id) ||
-        (!newStateVariable.id &&
-          originalName === scenario.stateVariables[i].name);
+  const scenario = await getScenarioOrThrow(scenarioId);
 
-      if (match) {
-        scenario.stateVariables[i] = newStateVariable;
-        break;
-      }
+  for (let i = 0; i < scenario.stateVariables.length; i++) {
+    // Try to match by ID first (new format), then by name (legacy format)
+    const match =
+      (newProperty.id && scenario.stateVariables[i].id === newProperty.id) ||
+      (!newProperty.id && originalName === scenario.stateVariables[i].name);
+
+    if (match) {
+      scenario.stateVariables[i] = newProperty;
+      break;
     }
-
-    await scenario.save();
-    return scenario.stateVariables;
-  } catch {
-    return scenario.stateVariables;
   }
+
+  await scenario.save();
+  return scenario.stateVariables;
 };
 
 /**
- * Deletes a state variable from a scenario
+ * Deletes a property from a scenario
  * @param {String} scenarioId MongoDB ID of scenario
- * @param {String} stateVariableIdentifier name or ID of the state variable to be deleted
- * @returns updated state variables for the scenario
+ * @param {String} propertyIdentifier name or ID of the property to be deleted
+ * @returns updated properties for the scenario
  */
-const deleteStateVariable = async (scenarioId, stateVariableIdentifier) => {
-  const scenario = await Scenario.findById(scenarioId);
-  try {
-    scenario.stateVariables = scenario.stateVariables.filter(
-      (state) =>
-        state.name !== stateVariableIdentifier &&
-        state.id !== stateVariableIdentifier
-    );
-    await scenario.save();
-    return scenario.stateVariables;
-  } catch {
-    return scenario.stateVariables;
-  }
-};
-
-export {
-  retrieveAccessibleScenarios,
-  createScenario,
-  deleteScenario,
-  retrieveRoleList,
-  retrieveScenario,
-  retrieveScenarioList,
-  retrieveScenarios,
-  updateDurations,
-  updateRoleList,
-  createRole,
-  deleteRole,
-  updateScenario,
-  getStateVariables,
-  createStateVariable,
-  editStateVariable,
-  deleteStateVariable,
+export const deleteProperty = async (scenarioId, propertyIdentifier) => {
+  const scenario = await getScenarioOrThrow(scenarioId);
+  scenario.stateVariables = scenario.stateVariables.filter(
+    (state) =>
+      state.name !== propertyIdentifier && state.id !== propertyIdentifier
+  );
+  await scenario.save();
+  return scenario.stateVariables;
 };

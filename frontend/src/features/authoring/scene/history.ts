@@ -3,7 +3,7 @@ import type { Component } from "../types";
 import { getComponent, getSceneId } from "./scene";
 import { TypedEventTarget } from "typescript-event-target";
 
-interface HistoryObject {
+interface HistoryRecord {
   sceneId: string;
   id: string;
   before: Component | null;
@@ -18,13 +18,15 @@ interface HistoryEventMap {
 
 class HistoryEvent<T extends HistoryOperation> extends Event {
   operation: T;
-  record: T extends "undo" | "redo" ? HistoryObject : HistoryObject | undefined;
+  record: T extends "undo" | "redo"
+    ? HistoryRecord[]
+    : HistoryRecord[] | undefined;
 
   constructor(
     operation: T,
     record: T extends "undo" | "redo"
-      ? HistoryObject
-      : HistoryObject | undefined
+      ? HistoryRecord[]
+      : HistoryRecord[] | undefined
   ) {
     super("update");
     this.operation = operation;
@@ -32,17 +34,22 @@ class HistoryEvent<T extends HistoryOperation> extends Event {
   }
 }
 
-function cloneHistoryRecord(record: HistoryObject): HistoryObject {
-  return {
+function cloneHistoryBatch(batch: HistoryRecord[]): HistoryRecord[] {
+  return batch.map((record) => ({
     sceneId: record.sceneId,
     id: record.id,
     before: structuredClone(record.before),
     after: structuredClone(record.after),
-  };
+  }));
 }
 
-let undoStack: HistoryObject[] = [];
-let redoStack: HistoryObject[] = [];
+export interface ChangeRecord {
+  id: string;
+  prevState: Component | null;
+}
+
+let undoStack: HistoryRecord[][] = [];
+let redoStack: HistoryRecord[][] = [];
 
 export const historyEvents = new TypedEventTarget<HistoryEventMap>();
 
@@ -56,48 +63,54 @@ export function dispatchModification() {
   historyEvents.dispatchTypedEvent("update", new HistoryEvent("do", undefined));
 }
 
-export function updateHistory(id: string, prevState: Component | null) {
-  const current = getComponent(id);
-  if (fastIsEqual(prevState, current)) return;
-
+export function updateHistory(incomingChanges: ChangeRecord[]) {
   const sceneId = getSceneId();
-  const record = {
-    sceneId,
-    id,
-    before: structuredClone(prevState),
-    after: structuredClone(current),
-  };
+  const batch: HistoryRecord[] = [];
 
-  undoStack.push(record);
+  incomingChanges.forEach(({ id, prevState }) => {
+    const current = getComponent(id);
+    if (fastIsEqual(prevState, current)) return;
+
+    batch.push({
+      sceneId,
+      id,
+      before: structuredClone(prevState),
+      after: structuredClone(current),
+    });
+  });
+
+  if (batch.length === 0) return;
+
+  undoStack.push(batch);
   if (undoStack.length > 100) undoStack.shift();
   redoStack = [];
 
   historyEvents.dispatchTypedEvent(
     "update",
-    new HistoryEvent("do", cloneHistoryRecord(record))
+    new HistoryEvent("do", cloneHistoryBatch(batch))
   );
 }
 
 export function undo() {
-  const record = undoStack.pop();
-  if (!record) return;
+  const batch = undoStack.pop();
+  if (!batch || batch.length === 0) return;
 
-  redoStack.push(record);
+  redoStack.push(batch);
 
   historyEvents.dispatchTypedEvent(
     "update",
-    new HistoryEvent("undo", cloneHistoryRecord(record))
+    new HistoryEvent("undo", cloneHistoryBatch(batch))
   );
 }
 
 export function redo() {
-  const record = redoStack.pop();
-  if (!record) return;
+  const batch = redoStack.pop();
+  if (!batch || batch.length === 0) return;
 
-  undoStack.push(record);
+  undoStack.push(batch);
 
   historyEvents.dispatchTypedEvent(
     "update",
-    new HistoryEvent("redo", cloneHistoryRecord(record))
+    new HistoryEvent("redo", cloneHistoryBatch(batch))
   );
 }

@@ -6,8 +6,9 @@ import Ellipse from "../authoring/elements/Ellipse";
 import Box from "../authoring/elements/Box";
 import Image from "../authoring/elements/Image";
 import Line from "../authoring/elements/Line";
-import { resolveSceneBindings } from "../../components/StateVariables/componentBindings";
+import { resolveSceneBindings } from "../../components/Properties/componentBindings";
 import { useMemo } from "react";
+import Background from "../authoring/elements/Background";
 
 const componentMap = {
   textbox: TextBox,
@@ -24,11 +25,23 @@ function resolve(component) {
   return null;
 }
 
-function injectStateVariables(scene, stateVariables) {
-  if (!stateVariables) return scene;
+function injectProperties(scene, properties) {
+  const props = properties ?? [];
 
-  const varMap = new Map(stateVariables.map((v) => [v.name, v.value]));
+  //legacy $$name$$ substitution resolves by name
+  //chips resolve by id
+  const varMap = new Map(props.map((v) => [v.name, v.value]));
+  const valById = new Map(props.map((v) => [v.id, v.value]));
   const regex = /\$\$(.*?)\$\$/g;
+
+  function resolveSpan(span) {
+    if (!span.property) return span;
+    const { property, ...rest } = span;
+    return {
+      ...rest,
+      text: String(valById.get(property.id) ?? property.displayName),
+    };
+  }
 
   return {
     ...scene,
@@ -37,30 +50,44 @@ function injectStateVariables(scene, stateVariables) {
         if (component.type !== "textbox") return [id, component];
 
         const newBlocks = component.document.blocks.map((block) => {
-          const spans = block.spans ?? [];
+          const spans = (block.spans ?? []).map(resolveSpan);
           if (spans.length === 0) return block;
 
           // join all span texts for full-block regex scanning
-          const blockText = spans.map((s) => s.text ?? "").join("");
+          const isChip = (i) => block.spans[i]?.property !== undefined;
+          let blockText = "";
+          const chipRanges = [];
+          //goes through each resolved span
+          //marks resolved property vals to prevent regex rescan
+          spans.forEach((s, i) => {
+            const text = s.text ?? "";
+            if (isChip(i))
+              chipRanges.push([
+                blockText.length,
+                blockText.length + text.length,
+              ]);
+            blockText += text;
+          });
+          const touchesChip = (start, end) =>
+            chipRanges.some(([cs, ce]) => start < ce && end > cs);
 
           // find matches across the whole block
           regex.lastIndex = 0;
           const matches = [];
           let m;
           while ((m = regex.exec(blockText)) !== null) {
+            const start = m.index;
+            const end = regex.lastIndex;
+            //do not convert regex if property value = '$$value$$'
+            if (touchesChip(start, end)) continue;
             const variableName = m[1];
             const replacement = varMap.has(variableName)
               ? String(varMap.get(variableName))
               : null;
-            matches.push({
-              start: m.index,
-              end: regex.lastIndex,
-              original: m[0],
-              replacement,
-            });
+            matches.push({ start, end, original: m[0], replacement });
           }
 
-          if (matches.length === 0) return block;
+          if (matches.length === 0) return { ...block, spans };
 
           // map spans to absolute offsets in blockText
           const offsets = [];
@@ -175,12 +202,12 @@ function injectStateVariables(scene, stateVariables) {
 export default function PlayScenarioCanvas({
   scene,
   buttonPressed,
-  stateVariables,
+  properties,
 }) {
   const sceneToRender = useMemo(() => {
-    const boundScene = resolveSceneBindings(scene, stateVariables);
-    return injectStateVariables(boundScene, stateVariables);
-  }, [scene, stateVariables]);
+    const boundScene = resolveSceneBindings(scene, properties);
+    return injectProperties(boundScene, properties);
+  }, [scene, properties]);
 
   const components = Object.values(buildVisualScene(sceneToRender).components)
     .sort((a, b) => a.zIndex - b.zIndex)
@@ -217,6 +244,7 @@ export default function PlayScenarioCanvas({
           height={CANVAS_HEIGHT}
           fill="var(--color-canvas)"
         />
+        <Background background={sceneToRender.background ?? null} />
         {components}
       </svg>
     </div>

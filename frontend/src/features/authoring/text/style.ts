@@ -15,7 +15,7 @@ export function setTextStyle(
     useEditorStore.getState();
 
   if (selection?.end) {
-    const newSelection = applySelectionStyle(selected, selection, {
+    const newSelection = applySelectionStyle([selected], selection, {
       [prop]: value,
     });
     setSelection(newSelection);
@@ -23,15 +23,15 @@ export function setTextStyle(
   } else if (selection?.start) {
     if (prop === "lineHeight" || prop === "alignment") {
       modifyComponentProp(
-        selected,
+        [selected],
         `document.blocks.${selection.start.blockI}.style.${prop}`,
         value
       );
     } else {
-      modifyComponentProp(selected, `document.style.${prop}`, value);
+      modifyComponentProp([selected], `document.style.${prop}`, value);
     }
   } else {
-    modifyComponentProp(selected, `document.style.${prop}`, value);
+    modifyComponentProp([selected], `document.style.${prop}`, value);
   }
 
   setActiveStyle({ ...(activeStyle ?? {}), [prop]: value } as BaseTextStyle);

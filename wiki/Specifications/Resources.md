@@ -1,6 +1,6 @@
 # Resources
 
-The feature that will allow authors to upload a range of different files that they can then show to the users at different points throughout the scenario depending on certain conditions. The dynamic nature of this feature will rely on [State Variables](./State%20Variables.md), which will allow fairly complex visibility management.
+The feature that will allow authors to upload a range of different files that they can then show to the users at different points throughout the scenario depending on certain conditions. The dynamic nature of this feature will rely on [Properties](./Properties.md), which will allow fairly complex visibility management.
 
 ## Spec
 
@@ -27,7 +27,7 @@ Folders are containers for our resources for organisational purposes, and can ac
 
 ### Conditionals
 
-The visibility conditionals operate on our [State Variables](./State%20Variables.md), and will likewise be limited in scope to make authoring as simple as possible for unfamiliar users. We'll use the same compositional approach we use to manage the state, where instead of an operation we have a comparison:
+The visibility conditionals operate on our [Properties](./Properties.md), and will likewise be limited in scope to make authoring as simple as possible for unfamiliar users. We'll use the same compositional approach we use to manage properties, where instead of an operation we have a comparison:
 
 - Equal to
 - Greater than

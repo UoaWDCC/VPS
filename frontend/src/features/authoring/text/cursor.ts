@@ -115,7 +115,9 @@ export function syncModelSelection() {
   const editorState = useEditorStore.getState();
   if (!editorState.selected || !editorState.visualSelection.start) return;
   const blocks = (
-    useVisualScene.getState().components[editorState.selected] as unknown as {
+    useVisualScene.getState().components[
+      editorState.selected[0]
+    ] as unknown as {
       document: VisualDocument;
     }
   ).document.blocks;
@@ -126,9 +128,11 @@ export function syncModelSelection() {
 
 export function syncVisualCursor() {
   const editorState = useEditorStore.getState();
-  if (!editorState.selected || !editorState.selection.start) return;
+  if (!editorState.selected) return;
   const blocks = (
-    useVisualScene.getState().components[editorState.selected] as unknown as {
+    useVisualScene.getState().components[
+      editorState.selected[0]
+    ] as unknown as {
       document: VisualDocument;
     }
   ).document.blocks;
