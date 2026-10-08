@@ -370,23 +370,26 @@ describe("Navigate Group API tests", () => {
         return query;
       });
 
-    const response = await axios.post(
-      `http://localhost:${ctx.port}/api/navigate/group/${group._id}`,
-      {
-        uid: "uid-player",
-        currentScene: scene1._id.toString(),
-        componentId,
-        addFlags: [],
-        removeFlags: [],
-      },
-      authHeaders("uid-player")
-    );
-    expect(response.status).toBe(200);
+    try {
+      const response = await axios.post(
+        `http://localhost:${ctx.port}/api/navigate/group/${group._id}`,
+        {
+          uid: "uid-player",
+          currentScene: scene1._id.toString(),
+          componentId,
+          addFlags: [],
+          removeFlags: [],
+        },
+        authHeaders("uid-player")
+      );
+      expect(response.status).toBe(200);
 
-    await notifyLookupSettled;
+      await notifyLookupSettled;
 
-    expect(sendEmail).not.toHaveBeenCalled();
-    findByIdSpy.mockRestore();
+      expect(sendEmail).not.toHaveBeenCalled();
+    } finally {
+      findByIdSpy.mockRestore();
+    }
   });
 
   // --- Server-authoritative scene timer ---

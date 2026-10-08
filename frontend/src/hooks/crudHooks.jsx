@@ -435,7 +435,7 @@ export function usePut(url, requestBody = null, getUserIdToken = null) {
 export function usePatch(url, requestBody = null, getUserIdToken = null) {
   async function patchData() {
     let errorData;
-    let hasError = false;
+    let rejected = false;
 
     let config = {};
     if (getUserIdToken) {
@@ -450,13 +450,13 @@ export function usePatch(url, requestBody = null, getUserIdToken = null) {
     const response = await axios
       .patch(url, requestBody, config)
       .catch((err) => {
-        hasError = isRealError(err);
-        errorData = hasError && err.response?.data;
+        rejected = true;
+        errorData = err.response?.data;
       });
 
     return {
-      success: !hasError,
-      data: hasError ? errorData : response?.data,
+      success: !rejected,
+      data: rejected ? errorData : response?.data,
     };
   }
 
