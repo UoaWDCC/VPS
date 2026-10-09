@@ -55,29 +55,35 @@ const CreateGraphData = (scenes, groupInfo) => {
         (actionIds ?? []).map((id) => actionsById.get(id)).filter(Boolean);
       const orderedActionIds = (refs) =>
         (refs ?? []).map((ref) => ref.actionId);
+      const extractLinks = (refs) => resolveActions(orderedActionIds(refs));
 
-      const actionLists = [
-        ...scene.components
-          .filter((c) => c.clickable)
-          .map((c) => orderedActionIds(c.actionRefs)),
-        orderedActionIds(scene.defaultActionRefs),
-        orderedActionIds(scene.timerActionRefs),
-      ];
+      const targets = [];
 
-      actionLists
-        .flatMap((actionIds) => resolveActions(actionIds))
-        .forEach((action) => {
-          if (!action.linkedScene) return;
+      for (const component of scene.components) {
+        if (component.clickable) {
+          if (component.actionRefs.length)
+            targets.push(...extractLinks(component.actionRefs));
+          if (component.linkedScene) targets.push(component.linkedScene);
+        }
+      }
+      targets.push(...extractLinks(scene.defaultActionRefs));
+      targets.push(scene.linkedScene);
+      targets.push(...extractLinks(scene.timerActionRefs));
+      targets.push(scene.timerLinkedScene);
+
+      targets
+        .filter((target) => target && sceneMap[target])
+        .forEach((target) => {
           // multiple actions in the same scene can resolve to the same
           // linkedScene, so we ignore dups
-          const edgeId = scene.name + "-" + sceneMap[action.linkedScene].name;
+          const edgeId = scene.name + "-" + sceneMap[target].name;
           if (seenEdgeIds.has(edgeId)) return;
           seenEdgeIds.add(edgeId);
 
           edges.push({
             id: edgeId,
             source: scene._id,
-            target: action.linkedScene,
+            target,
             type: "simpleFloating",
             markerEnd: {
               ...markerEnd,
