@@ -59,15 +59,14 @@ const CreateGraphData = (scenes, groupInfo) => {
 
       const targets = [];
 
-      for (const component of scene.components) {
+      for (const component of scene.components ?? []) {
         if (component.clickable) {
-          if (component.actionRefs.length)
-            targets.push(...extractLinks(component.actionRefs));
+          targets.push(...extractLinks(component.actionRefs));
           if (component.linkedScene) targets.push(component.linkedScene);
         }
       }
       targets.push(...extractLinks(scene.defaultActionRefs));
-      targets.push(scene.linkedScene);
+      targets.push(scene.defaultLinkedScene);
       targets.push(...extractLinks(scene.timerActionRefs));
       targets.push(scene.timerLinkedScene);
 
