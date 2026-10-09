@@ -77,8 +77,6 @@ export default function AuthoringToolPage() {
       }
     }, 2500);
 
-    // History events also originate from native keyboard listeners. React 17
-    // must finish restoring the scene and selection before rendering either.
     const listener = ({ operation, record }) =>
       unstable_batchedUpdates(() => {
         if (operation === "undo" || operation === "redo") {
