@@ -154,7 +154,8 @@ function handleComponentDrag(e: React.MouseEvent, position: Vec2) {
     useEditorStore.getState();
   if (!selected?.length) return;
 
-  const bounds = getSelectedComponentBounds()!;
+  const bounds = getSelectedComponentBounds();
+  if (!bounds) return;
   let verts = translate(bounds.verts, subtract(position, offset));
 
   if (e.altKey) {
@@ -304,9 +305,12 @@ export function getSelectedComponentBounds() {
 
   const scene = useVisualScene.getState();
 
-  if (selected.length === 1) return scene.components[selected[0]].bounds;
-
   const components = selected.map((id) => scene.components[id]);
+  // A store update can render a handle before its selection has caught up.
+  // Hide the handles until every selected component is available again.
+  if (components.some((component) => !component)) return null;
+  if (components.length === 1) return components[0].bounds;
+
   return { verts: computeBounds(components), rotation: 0 };
 }
 
