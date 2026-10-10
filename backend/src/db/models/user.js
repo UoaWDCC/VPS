@@ -48,6 +48,12 @@ const userSchema = new Schema({
     of: { type: Number, default: 0 },
     default: {},
   },
+  // Map of scenarioId to "seen" resource ids
+  seenResources: {
+    type: Map,
+    of: [String],
+    default: {},
+  },
 });
 
 const User = mongoose.model("model", userSchema, "users");

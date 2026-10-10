@@ -19,6 +19,7 @@ import {
   VolumeOffIcon,
 } from "lucide-react";
 import ResourcesPanel from "../resources/ResourcesOverlay";
+import { usePlayerResources } from "../resources/usePlayerResources";
 
 const sceneCache = new Map();
 
@@ -172,6 +173,8 @@ export default function PlayScenarioPage({ group }) {
   const audioRefs = useRef([]);
 
   const currScene = sceneCache.get(sceneId);
+  const playerResources = usePlayerResources(properties, Boolean(currScene));
+  const newResourceCount = playerResources.unseenIds.length;
 
   const handleError = async (error) => {
     if (!error) return;
@@ -478,12 +481,21 @@ export default function PlayScenarioPage({ group }) {
         )}
         <div className="tooltip tooltip-left" data-tip="Open resources">
           <button
-            className="btn"
+            className="btn relative"
             onClick={() => setResourcesOpen(true)}
             type="button"
-            aria-label="Open resources"
+            aria-label={
+              newResourceCount > 0
+                ? `Open resources (${newResourceCount} new)`
+                : "Open resources"
+            }
           >
             <BookMarkedIcon size={16} />
+            {newResourceCount > 0 && (
+              <span className="badge badge-sm badge-neutral px-1.5 absolute -top-1 -right-1">
+                {newResourceCount}
+              </span>
+            )}
           </button>
         </div>
       </div>
@@ -501,8 +513,7 @@ export default function PlayScenarioPage({ group }) {
         />
       )}
       <ResourcesPanel
-        scenarioId={scenarioId}
-        properties={properties}
+        {...playerResources}
         open={resourcesOpen}
         onClose={() => setResourcesOpen(false)}
       />

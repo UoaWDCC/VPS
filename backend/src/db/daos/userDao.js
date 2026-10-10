@@ -110,3 +110,36 @@ export const setUserProperties = async (userId, scenarioId, properties) => {
     user.stateVersions.get(scenarioId),
   ];
 };
+
+/**
+ * Retrieves the ids of resources a user has seen in a scenario.
+ *
+ * @param {string} uid - Firebase user ID.
+ * @param {string} scenarioId - Scenario ID the "seen" list belongs to.
+ * @returns {Promise<string[]>} "Seen" resource IDs (empty = none).
+ */
+export const getSeenResources = async (uid, scenarioId) => {
+  const user = await User.findOne({ uid }, { seenResources: 1 });
+  if (!user) throw new HttpError("user not found", 404);
+  return user.seenResources.get(scenarioId) ?? [];
+};
+
+/**
+ * Atomically add seen resource IDs in a scenario.
+ *
+ * @param {string} uid - Firebase user ID.
+ * @param {string} scenarioId - Scenario ID.
+ * @param {string[]} resourceIds - Resource IDs to mark as seen.
+ * @returns {Promise<string[]>} Persisted seen resource IDs.
+ */
+export const addSeenResources = async (uid, scenarioId, resourceIds) => {
+  const user = await User.findOneAndUpdate(
+    { uid },
+    { $addToSet: { [`seenResources.${scenarioId}`]: { $each: resourceIds } } },
+    { new: true, projection: { seenResources: 1 } }
+  );
+
+  if (!user) throw new HttpError("user not found", 404);
+
+  return user.seenResources.get(scenarioId) ?? [];
+};
