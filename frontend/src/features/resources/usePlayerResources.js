@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef } from "react";
+import { useEffect, useRef } from "react";
 import toast from "react-hot-toast";
 import { filterTreeByConditions } from "../../utils/propertyConditionalEvaluator";
 import { buildResourceTree, flattenFiles } from "./util";
@@ -13,23 +13,16 @@ export function usePlayerResources(properties, enabled) {
 
   // NOTE: the filtering by properties should ideally be done on the
   // server to prevent cheating, but here we filter before rendering
-  const tree = useMemo(
-    () =>
-      filterTreeByConditions(
-        buildResourceTree(resourcesQuery.data ?? []),
-        properties
-      ),
-    [resourcesQuery.data, properties]
+  const tree = filterTreeByConditions(
+    buildResourceTree(resourcesQuery.data ?? []),
+    properties
   );
-  const visibleIds = useMemo(
-    () => flattenFiles(tree).map((resource) => resource._id),
-    [tree]
-  );
-  const unseenIds = useMemo(() => {
-    if (!ready) return [];
-    const seen = new Set(seenIds);
-    return visibleIds.filter((id) => !seen.has(id));
-  }, [ready, visibleIds, seenIds]);
+  const seen = new Set(seenIds);
+  const unseenIds = ready
+    ? flattenFiles(tree)
+        .map((resource) => resource._id)
+        .filter((id) => !seen.has(id))
+    : [];
 
   // toast unseen resources once a session
   useEffect(() => {
