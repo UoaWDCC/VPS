@@ -228,10 +228,8 @@ export default function PlayScenarioCanvas({
     });
 
   return (
-    <div
-      className="bg-canvas-surround"
-      style={{ width: "100vw", height: "100vh" }}
-    >
+    // Fills whatever space the page gives it; the svg scales the scene to fit
+    <div className="bg-canvas-surround h-full w-full">
       <svg
         id="play-main"
         className="w-full h-full"
