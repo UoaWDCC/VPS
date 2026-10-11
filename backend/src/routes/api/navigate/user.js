@@ -25,6 +25,7 @@ const getConnectedScenes = async (sceneID, active = true) => {
   const connected = await Scene.find(
     { _id: { $in: connectedIds } },
     {
+      name: 1,
       components: 1,
       directLink: 1,
       roles: 1,
@@ -126,6 +127,10 @@ export const userNavigate = async (req) => {
   } = req.body;
   const { scenarioId } = req.params;
 
+  // Only hit the access list on a page load (no currentScene) or when
+  // startScene is present — avoids an extra DB query on every move a player makes.
+  const needsAuthorCheck = Boolean(startSceneParam) || !currentScene;
+
   const [user, authorised] = await Promise.all([
     User.findOne(
       { uid },
@@ -137,12 +142,11 @@ export const userNavigate = async (req) => {
         sceneEnteredAt: 1,
       }
     ).lean(),
-    // Only hit the access list when startScene is present — avoids an extra DB query on every normal player request.
-    startSceneParam ? await isAuthor(scenarioId, uid) : false,
+    needsAuthorCheck ? isAuthor(scenarioId, uid) : false,
   ]);
 
   // Non-authors cannot jump to an arbitrary scene even if they manually craft a URL with startScene.
-  const startScene = authorised ? startSceneParam : null;
+  const startScene = authorised ? startSceneParam || null : null;
   const path = user.paths[scenarioId];
 
   // the first time the user is navigating
@@ -161,6 +165,7 @@ export const userNavigate = async (req) => {
         properties,
         propertyVersion,
         remainingTime: freshRemainingTime(scenes),
+        isAuthor: authorised,
       },
     };
   }
@@ -197,7 +202,13 @@ export const userNavigate = async (req) => {
 
     return {
       status: STATUS.OK,
-      json: { ...scenes, properties, propertyVersion, remainingTime },
+      json: {
+        ...scenes,
+        properties,
+        propertyVersion,
+        remainingTime,
+        isAuthor: authorised,
+      },
     };
   }
 
@@ -240,6 +251,70 @@ export const userNavigate = async (req) => {
       properties,
       propertyVersion,
       ...movedRemainingTimeField(scenes),
+    },
+  };
+};
+
+const DEBUG_MODES = ["all", "properties", "timer"];
+
+/**
+ * Author debug tools for a playthrough of their own scenario. The route is
+ * behind scenarioAuth, so only the owner or someone given access gets here.
+ *
+ * - all: forget the path and properties, then start again from the first scene
+ *   (answers like a first visit, so the client can adopt it as is)
+ * - properties: put the properties back to the scenario defaults, stay put
+ * - timer: restart the current scene's timer
+ *
+ * Jumping to a scene needs no mode of its own: it's `startScene` on a normal
+ * navigate.
+ */
+export const userDebug = async (req) => {
+  const { uid, mode } = req.body;
+  const { scenarioId } = req.params;
+
+  if (!DEBUG_MODES.includes(mode))
+    throw new HttpError("Invalid debug mode", STATUS.BAD_REQUEST);
+
+  const user = await User.findOne({ uid }, { _id: 1, paths: 1 }).lean();
+
+  if (mode === "all") {
+    await User.updateOne(
+      { _id: user._id },
+      {
+        $unset: {
+          [`paths.${scenarioId}`]: "",
+          [`sceneEnteredAt.${scenarioId}`]: "",
+        },
+      }
+    );
+    return userNavigate({
+      body: { uid, currentScene: null },
+      params: { scenarioId },
+    });
+  }
+
+  if (mode === "properties") {
+    const [properties, propertyVersion] = await initiateProperties(
+      user._id,
+      scenarioId
+    );
+    return { status: STATUS.OK, json: { properties, propertyVersion } };
+  }
+
+  const path = user.paths?.[scenarioId];
+  if (!path?.length)
+    throw new HttpError("There is no scene to restart", STATUS.CONFLICT);
+
+  const scene = await getSimpleScene(path[0]);
+  await User.updateOne(
+    { _id: user._id },
+    { $set: { [`sceneEnteredAt.${scenarioId}`]: new Date() } }
+  );
+  return {
+    status: STATUS.OK,
+    json: {
+      remainingTime: freshRemainingTime({ active: scene._id, scenes: [scene] }),
     },
   };
 };
