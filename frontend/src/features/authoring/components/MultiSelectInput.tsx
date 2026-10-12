@@ -26,14 +26,18 @@ function MultiSelectInput<T>({
     onBlur();
   }
 
+  const label = value?.join(", ") || "All";
+
   return (
-    <div className="dropdown" onBlur={handleBlur}>
+    <div className="dropdown w-full min-w-0" onBlur={handleBlur}>
       <div
         tabIndex={0}
         role="button"
         className="justify-between input mb-1 font-normal w-full"
       >
-        <span className="truncate">{value?.join(", ") || "All"}</span>
+        <span className="truncate min-w-0 flex-1" title={label}>
+          {label}
+        </span>
         <ChevronDown className="shrink-0" size={16} />
       </div>
       {!disabled && (
@@ -48,9 +52,19 @@ function MultiSelectInput<T>({
                 className={active ? "text-secondary" : "text-primary"}
                 key={i}
               >
-                <a onClick={() => handleClick(option, !active)}>
-                  {option}
-                  {active && <CheckIcon className="ml-auto" size={14} />}
+                <a
+                  className="min-w-0"
+                  onClick={() => handleClick(option, !active)}
+                >
+                  <span
+                    className="truncate min-w-0 flex-1"
+                    title={String(option)}
+                  >
+                    {String(option)}
+                  </span>
+                  {active && (
+                    <CheckIcon className="ml-auto shrink-0" size={14} />
+                  )}
                 </a>
               </li>
             );
