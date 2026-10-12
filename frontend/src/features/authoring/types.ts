@@ -9,19 +9,20 @@ export type Component =
 
 export type Comparator = "=" | "!=" | "<" | ">";
 export type PropertyOperationType = "set" | "add" | "subtract";
+export type PropertyValue = string | number | boolean;
 
 export interface Condition {
   id: string;
   stateVariableId: string;
   comparator: Comparator;
-  value: unknown;
+  value: PropertyValue;
 }
 
 export interface Operation {
   id: string;
   stateVariableId: string;
   operation: PropertyOperationType;
-  value: unknown;
+  value: PropertyValue;
 }
 
 export interface Action {
@@ -45,7 +46,9 @@ export interface Scene {
   roles: string[];
   time: number | null;
   actions: Action[];
+  defaultLinkedScene: string | null;
   defaultActionRefs: ActionRef[];
+  timerLinkedScene: string | null;
   timerActionRefs: ActionRef[];
   background: SceneBackground | null;
 }

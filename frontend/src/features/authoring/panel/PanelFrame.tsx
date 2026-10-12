@@ -1,16 +1,28 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { XIcon } from "lucide-react";
+import { cn } from "../../../util/classnames";
+
+interface PanelFrameProps {
+  label?: string;
+  open: boolean;
+  onClose: () => void;
+  children: ReactNode;
+}
 
 /**
- * The single right-hand editing panel. It knows nothing about icons —
- * it just displays whatever `children` it's given whenever `open` is true.
+ * The right-hand editing panel.
  *
- * On close, the parent's width transition keeps running after `open`
+ * NOTE: On close, the parent's width transition keeps running after `open`
  * flips to false, so this keeps rendering its last content and fades
- * out over that same transition instead of vanishing immediately.
+ * out instead of vanishing immediately.
  * @component
  */
-export default function SidePanel({ label, open, onClose, children }) {
+export default function PanelFrame({
+  label,
+  open,
+  onClose,
+  children,
+}: PanelFrameProps) {
   const [rendered, setRendered] = useState(open);
   const lastContentRef = useRef({ label, children });
 
@@ -34,28 +46,32 @@ export default function SidePanel({ label, open, onClose, children }) {
   const { label: renderedLabel, children: renderedChildren } =
     lastContentRef.current;
 
+  // @types/react 17 doesn't know the inert attribute, so it's spread in
+  const inertProps = { inert: open ? undefined : "true" };
+
   return (
     <section
       id="canvas-side-panel"
       role="region"
       aria-label={renderedLabel}
-      className={`h-full w-[24rem] min-w-[20rem] shrink-0 overflow-y-auto rounded-sm bg-base-200 p-5 transition-opacity duration-150 ease-out motion-reduce:transition-none ${
-        open ? "opacity-100" : "opacity-0"
-      }`}
-      inert={!open}
+      className={cn(
+        "font-dm h-full w-[24rem] min-w-[20rem] shrink-0 overflow-y-auto rounded-sm bg-base-200 p-5 transition-opacity duration-150 ease-out motion-reduce:transition-none",
+        !open && "opacity-0"
+      )}
+      {...inertProps}
       onTransitionEnd={(e) => {
         if (e.target === e.currentTarget && !open) setRendered(false);
       }}
     >
       <div className="mb-3 flex items-center justify-between">
-        <h2 className="font-semibold">{renderedLabel}</h2>
+        <h2 className="text-m">{renderedLabel}</h2>
         <button
           type="button"
-          className="btn btn-ghost btn-xs btn-square"
+          className="btn btn-phantom btn-xs btn-square"
           onClick={onClose}
           aria-label={`Close ${renderedLabel} panel`}
         >
-          <XIcon size={14} />
+          <XIcon size={20} />
         </button>
       </div>
       {renderedChildren}

@@ -1,0 +1,131 @@
+import { useContext, useRef, type Context } from "react";
+import ScenarioContext from "../../../context/ScenarioContext";
+import SceneContext from "../../../context/SceneContext";
+import { generateUniqueSceneName } from "../../../utils/sceneUtils";
+import useVisualScene from "../stores/visual";
+import PanelSection from "./PanelSection";
+import MultiSelectInput from "../components/MultiSelectInput";
+import SceneSelectInput from "../components/SceneSelectInput";
+import useField from "../inputs/useField";
+import {
+  coerceInt,
+  coerceRange,
+  coerceSceneExists,
+  INVALID,
+  pipe,
+} from "../inputs/coerce";
+import { cn } from "../../../util/classnames";
+import PanelInput from "./PanelInput";
+import ActionRefsInput, {
+  type ActionRefsInputHandle,
+} from "./actionRefs/ActionRefsInput";
+import type { Scene } from "../types";
+
+/**
+ * The content of the "Scene Details" panel.
+ * @component
+ */
+function SceneDetailsPanel() {
+  const { scenes } = useContext(SceneContext as Context<{ scenes: Scene[] }>);
+  const { roleList } = useContext(
+    ScenarioContext as Context<{ roleList: string[] }>
+  );
+  const sceneId = useVisualScene((scene) => scene.id);
+
+  function coerceName(raw: string) {
+    const name = raw.trim();
+    if (!name?.length) return INVALID;
+
+    const { id: sceneId } = useVisualScene.getState();
+    const safeName = generateUniqueSceneName(scenes, name, sceneId);
+    if (safeName !== name) return INVALID; // name already exists
+
+    return name;
+  }
+
+  const nameField = useField<string>("name", { coerce: coerceName });
+  const rolesField = useField<string[] | null>("roles", { empty: null });
+  const timeField = useField<number | null, string>("time", {
+    derive: (v) => (v === null ? "" : String(v)),
+    coerce: pipe(coerceInt, coerceRange(1, null)),
+  });
+  const defaultLinkedSceneField = useField<string | null>(
+    "defaultLinkedScene",
+    {
+      empty: null,
+      commit: "onChange",
+      coerce: coerceSceneExists(scenes),
+    }
+  );
+  const timerLinkedSceneField = useField<string | null>("timerLinkedScene", {
+    empty: null,
+    commit: "onChange",
+    coerce: coerceSceneExists(scenes),
+  });
+
+  const defaultActionsRef = useRef<ActionRefsInputHandle | null>(null);
+  const timerActionsRef = useRef<ActionRefsInputHandle | null>(null);
+
+  return (
+    <>
+      <PanelSection name="Details" id="scene-details">
+        <PanelInput label="Name">
+          <input
+            {...nameField.props}
+            type="text"
+            className={cn("input", nameField.error && "input-error")}
+            placeholder="Awesome Scene"
+          />
+        </PanelInput>
+        <PanelInput label="Allowed Roles">
+          <MultiSelectInput {...rolesField.props} options={roleList} />
+        </PanelInput>
+      </PanelSection>
+      <PanelSection name="Scene Link" id="scene-link">
+        <PanelInput label="Linked Scene">
+          <SceneSelectInput
+            {...defaultLinkedSceneField.props}
+            scenes={scenes}
+            exclusionId={sceneId}
+            error={defaultLinkedSceneField.error}
+          />
+        </PanelInput>
+        <PanelInput
+          label="Actions"
+          onAdd={() => defaultActionsRef.current?.addItem()}
+        >
+          <ActionRefsInput
+            ref={defaultActionsRef}
+            locator="defaultActionRefs"
+          />
+        </PanelInput>
+      </PanelSection>
+      <PanelSection name="Timer" id="scene-timer">
+        <PanelInput label="Timer Duration (Seconds)">
+          <input
+            {...timeField.props}
+            type="text"
+            className={cn("input", timeField.error && "input-error")}
+            placeholder="No timer"
+          />
+        </PanelInput>
+        <PanelInput label="Timeout Linked Scene">
+          <SceneSelectInput
+            {...timerLinkedSceneField.props}
+            scenes={scenes}
+            exclusionId={sceneId}
+            error={timerLinkedSceneField.error}
+          />
+        </PanelInput>
+        <PanelInput
+          label="Timeout Actions"
+          onAdd={() => timerActionsRef.current?.addItem()}
+        >
+          <ActionRefsInput ref={timerActionsRef} locator="timerActionRefs" />
+        </PanelInput>
+      </PanelSection>
+    </>
+  );
+}
+
+export default SceneDetailsPanel;

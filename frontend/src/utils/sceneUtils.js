@@ -6,6 +6,7 @@
  * Generates a unique scene name by checking existing scene names
  * @param {Array} scenes - Array of existing scenes
  * @param {String} baseName - Base name to use (default: "Scene")
+ * @param {String|null} [excludeId] - ID of a scene whose name to ignore
  * @returns {String} - Unique scene name
  */
 export function generateUniqueSceneName(
