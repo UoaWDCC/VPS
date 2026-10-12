@@ -10,6 +10,7 @@ import navigate from "./navigate/index.js";
 import access from "./access.js";
 import dashboard from "./dashboard.js";
 import files from "./files.js";
+import assets from "./assets.js";
 
 const router = Router();
 
@@ -23,5 +24,6 @@ router.use("/resources", resource);
 router.use("/access", access);
 router.use("/dashboard", dashboard);
 router.use("/files", files);
+router.use("/assets", assets);
 
 export default router;
