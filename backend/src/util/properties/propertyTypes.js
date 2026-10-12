@@ -28,3 +28,28 @@ export const validOperations = {
   [propertyTypes.NUMBER]: [operations.SET, operations.ADD, operations.SUBTRACT],
   [propertyTypes.BOOLEAN]: [operations.SET],
 };
+
+export const validComparators = {
+  [propertyTypes.STRING]: ["=", "!="],
+  [propertyTypes.NUMBER]: ["=", "!=", ">", "<"],
+  [propertyTypes.BOOLEAN]: ["=", "!="],
+};
+
+export const isValidOperation = (type, operation) =>
+  Boolean(validOperations[type]?.includes(operation));
+
+export const isValidComparator = (type, comparator) =>
+  Boolean(validComparators[type]?.includes(comparator));
+
+export const isValidValue = (type, value) => {
+  switch (type) {
+    case propertyTypes.STRING:
+      return typeof value === "string";
+    case propertyTypes.NUMBER:
+      return typeof value === "number" && Number.isFinite(value);
+    case propertyTypes.BOOLEAN:
+      return typeof value === "boolean";
+    default:
+      return false;
+  }
+};

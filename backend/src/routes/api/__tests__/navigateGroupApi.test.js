@@ -310,8 +310,19 @@ describe("Navigate Group API tests", () => {
           {
             id: componentId,
             clickable: true,
-            nextScene: scene2._id,
+            actionRefs: [
+              { id: "ref-action-go", actionId: "action-go", index: "a0" },
+            ],
             type: "BUTTON",
+          },
+        ],
+        actions: [
+          {
+            id: "action-go",
+            name: "Go",
+            linkedScene: scene2._id,
+            conditions: [],
+            operations: [],
           },
         ],
         roles: [],
@@ -330,6 +341,7 @@ describe("Navigate Group API tests", () => {
         {
           uid: "uid-player",
           currentScene: clickScene._id.toString(),
+          trigger: "click",
           componentId,
           addFlags: [],
           removeFlags: [],
@@ -360,8 +372,19 @@ describe("Navigate Group API tests", () => {
           {
             id: componentId,
             clickable: true,
-            nextScene: timedTarget._id,
+            actionRefs: [
+              { id: "ref-action-go", actionId: "action-go", index: "a0" },
+            ],
             type: "BUTTON",
+          },
+        ],
+        actions: [
+          {
+            id: "action-go",
+            name: "Go",
+            linkedScene: timedTarget._id,
+            conditions: [],
+            operations: [],
           },
         ],
         roles: [],
@@ -397,8 +420,19 @@ describe("Navigate Group API tests", () => {
           {
             id: componentId,
             clickable: true,
-            nextScene: selfLoopScene._id,
+            actionRefs: [
+              { id: "ref-action-retry", actionId: "action-retry", index: "a0" },
+            ],
             type: "BUTTON",
+          },
+        ],
+        actions: [
+          {
+            id: "action-retry",
+            name: "Retry",
+            linkedScene: selfLoopScene._id,
+            conditions: [],
+            operations: [],
           },
         ],
       });
@@ -435,6 +469,630 @@ describe("Navigate Group API tests", () => {
 
       const dbGroup = await Group.findById(group._id);
       expect(dbGroup.currentSceneEnteredAt).toBeNull();
+    });
+  });
+
+  // --- Trigger-based action resolution ---
+
+  describe("trigger-based action resolution", () => {
+    const setHp = (value) =>
+      Group.findByIdAndUpdate(group._id, {
+        stateVariables: [{ id: "hp", type: "number", value }],
+        stateVersion: 0,
+      });
+
+    it("returns 400 when trigger is missing on a move-step request", async () => {
+      await Group.findByIdAndUpdate(group._id, {
+        path: [scene1._id.toString()],
+      });
+
+      await expect(
+        axios.post(
+          `http://localhost:${ctx.port}/api/navigate/group/${group._id}`,
+          {
+            uid: "uid-player",
+            currentScene: scene1._id.toString(),
+            addFlags: [],
+            removeFlags: [],
+          },
+          authHeaders("uid-player")
+        )
+      ).rejects.toMatchObject({ response: { status: 400 } });
+    });
+
+    it("returns 400 for an invalid trigger value", async () => {
+      await Group.findByIdAndUpdate(group._id, {
+        path: [scene1._id.toString()],
+      });
+
+      await expect(
+        axios.post(
+          `http://localhost:${ctx.port}/api/navigate/group/${group._id}`,
+          {
+            uid: "uid-player",
+            currentScene: scene1._id.toString(),
+            trigger: "bogus",
+            addFlags: [],
+            removeFlags: [],
+          },
+          authHeaders("uid-player")
+        )
+      ).rejects.toMatchObject({ response: { status: 400 } });
+    });
+
+    it("returns 400 when componentId is missing for a click trigger", async () => {
+      await Group.findByIdAndUpdate(group._id, {
+        path: [scene1._id.toString()],
+      });
+
+      await expect(
+        axios.post(
+          `http://localhost:${ctx.port}/api/navigate/group/${group._id}`,
+          {
+            uid: "uid-player",
+            currentScene: scene1._id.toString(),
+            trigger: "click",
+            addFlags: [],
+            removeFlags: [],
+          },
+          authHeaders("uid-player")
+        )
+      ).rejects.toMatchObject({ response: { status: 400 } });
+    });
+
+    it("resolves a default trigger via scene.defaultActionRefs and navigates", async () => {
+      const defaultScene = await Scene.create({
+        name: "Default Trigger Scene",
+        components: [],
+        roles: [],
+        actions: [
+          {
+            id: "action-default",
+            name: "Advance",
+            linkedScene: scene2._id,
+            conditions: [],
+            operations: [],
+          },
+        ],
+        defaultActionRefs: [
+          { id: "ref-action-default", actionId: "action-default", index: "a0" },
+        ],
+      });
+      await Group.findByIdAndUpdate(group._id, {
+        path: [defaultScene._id.toString()],
+      });
+
+      const response = await axios.post(
+        `http://localhost:${ctx.port}/api/navigate/group/${group._id}`,
+        {
+          uid: "uid-player",
+          currentScene: defaultScene._id.toString(),
+          trigger: "default",
+          addFlags: [],
+          removeFlags: [],
+        },
+        authHeaders("uid-player")
+      );
+      expect(response.status).toBe(200);
+      expect(response.data.active).toBe(scene2._id.toString());
+    });
+
+    it("resolves a timer trigger via scene.timerActionRefs and navigates", async () => {
+      const timerScene = await Scene.create({
+        name: "Timer Trigger Scene",
+        components: [],
+        roles: [],
+        actions: [
+          {
+            id: "action-timer",
+            name: "Timeout",
+            linkedScene: scene2._id,
+            conditions: [],
+            operations: [],
+          },
+        ],
+        timerActionRefs: [
+          { id: "ref-action-timer", actionId: "action-timer", index: "a0" },
+        ],
+      });
+      await Group.findByIdAndUpdate(group._id, {
+        path: [timerScene._id.toString()],
+      });
+
+      const response = await axios.post(
+        `http://localhost:${ctx.port}/api/navigate/group/${group._id}`,
+        {
+          uid: "uid-player",
+          currentScene: timerScene._id.toString(),
+          trigger: "timer",
+          addFlags: [],
+          removeFlags: [],
+        },
+        authHeaders("uid-player")
+      );
+      expect(response.status).toBe(200);
+      expect(response.data.active).toBe(scene2._id.toString());
+    });
+
+    it("does not navigate when the action's conditions fail", async () => {
+      await setHp(5);
+      const gatedScene = await Scene.create({
+        name: "Gated Scene",
+        components: [],
+        roles: [],
+        actions: [
+          {
+            id: "action-gated",
+            name: "Advance if healthy",
+            linkedScene: scene2._id,
+            conditions: [
+              { id: "c1", stateVariableId: "hp", comparator: ">", value: 10 },
+            ],
+            operations: [],
+          },
+        ],
+        defaultActionRefs: [
+          { id: "ref-action-gated", actionId: "action-gated", index: "a0" },
+        ],
+      });
+      await Group.findByIdAndUpdate(group._id, {
+        path: [gatedScene._id.toString()],
+      });
+
+      const response = await axios.post(
+        `http://localhost:${ctx.port}/api/navigate/group/${group._id}`,
+        {
+          uid: "uid-player",
+          currentScene: gatedScene._id.toString(),
+          trigger: "default",
+          addFlags: [],
+          removeFlags: [],
+        },
+        authHeaders("uid-player")
+      );
+      expect(response.status).toBe(200);
+      // Condition failed, so no move happened — `active`/`scenes` are only
+      // populated on an actual move.
+      expect(response.data.active).toBeUndefined();
+
+      const dbGroup = await Group.findById(group._id);
+      expect(dbGroup.path[0]).toBe(gatedScene._id.toString());
+    });
+
+    it("navigates when the action's conditions pass", async () => {
+      await setHp(20);
+      const gatedScene = await Scene.create({
+        name: "Gated Scene Pass",
+        components: [],
+        roles: [],
+        actions: [
+          {
+            id: "action-gated",
+            name: "Advance if healthy",
+            linkedScene: scene2._id,
+            conditions: [
+              { id: "c1", stateVariableId: "hp", comparator: ">", value: 10 },
+            ],
+            operations: [],
+          },
+        ],
+        defaultActionRefs: [
+          { id: "ref-action-gated", actionId: "action-gated", index: "a0" },
+        ],
+      });
+      await Group.findByIdAndUpdate(group._id, {
+        path: [gatedScene._id.toString()],
+      });
+
+      const response = await axios.post(
+        `http://localhost:${ctx.port}/api/navigate/group/${group._id}`,
+        {
+          uid: "uid-player",
+          currentScene: gatedScene._id.toString(),
+          trigger: "default",
+          addFlags: [],
+          removeFlags: [],
+        },
+        authHeaders("uid-player")
+      );
+      expect(response.status).toBe(200);
+      expect(response.data.active).toBe(scene2._id.toString());
+    });
+
+    it("persists staged property operations without navigating when the action has no linkedScene", async () => {
+      await setHp(5);
+      const mutatingScene = await Scene.create({
+        name: "Mutating Scene",
+        components: [],
+        roles: [],
+        actions: [
+          {
+            id: "action-heal",
+            name: "Heal",
+            linkedScene: null,
+            conditions: [],
+            operations: [
+              { id: "op1", stateVariableId: "hp", operation: "add", value: 5 },
+            ],
+          },
+        ],
+        defaultActionRefs: [
+          { id: "ref-action-heal", actionId: "action-heal", index: "a0" },
+        ],
+      });
+      await Group.findByIdAndUpdate(group._id, {
+        path: [mutatingScene._id.toString()],
+      });
+
+      const response = await axios.post(
+        `http://localhost:${ctx.port}/api/navigate/group/${group._id}`,
+        {
+          uid: "uid-player",
+          currentScene: mutatingScene._id.toString(),
+          trigger: "default",
+          addFlags: [],
+          removeFlags: [],
+        },
+        authHeaders("uid-player")
+      );
+      expect(response.status).toBe(200);
+      expect(response.data.properties.find((p) => p.id === "hp").value).toBe(
+        10
+      );
+      expect(response.data.propertyVersion).toBe(1);
+
+      const dbGroup = await Group.findById(group._id);
+      expect(dbGroup.path[0]).toBe(mutatingScene._id.toString());
+    });
+  });
+
+  // --- Timer fires once per scene entry ---
+
+  describe("timer fires once per scene entry", () => {
+    let timedScene;
+
+    beforeEach(async () => {
+      // a timer that only changes state, so neither a scene move nor a
+      // stale client would stop it from running again
+      timedScene = await Scene.create({
+        name: "Timed Heal",
+        components: [],
+        roles: [],
+        time: 30,
+        actions: [
+          {
+            id: "action-heal",
+            name: "Heal",
+            linkedScene: null,
+            conditions: [],
+            operations: [
+              { id: "op1", stateVariableId: "hp", operation: "add", value: 5 },
+            ],
+          },
+        ],
+        timerActionRefs: [
+          { id: "ref-action-heal", actionId: "action-heal", index: "a0" },
+        ],
+        defaultLinkedScene: scene2._id,
+      });
+      await Scenario.findByIdAndUpdate(scenario._id, {
+        scenes: [scene1._id, scene2._id, timedScene._id],
+      });
+      await Group.findByIdAndUpdate(group._id, {
+        path: [timedScene._id.toString()],
+        stateVariables: [{ id: "hp", type: "number", value: 5 }],
+        stateVersion: 0,
+      });
+    });
+
+    const navigate = (trigger) =>
+      axios.post(
+        `http://localhost:${ctx.port}/api/navigate/group/${group._id}`,
+        {
+          uid: "uid-player",
+          currentScene: timedScene._id.toString(),
+          trigger,
+          addFlags: [],
+          removeFlags: [],
+        },
+        authHeaders("uid-player")
+      );
+
+    const hp = async () => {
+      const dbGroup = await Group.findById(group._id).lean();
+      return dbGroup.stateVariables.find((p) => p.id === "hp").value;
+    };
+
+    it("ignores a repeated timer trigger for the same scene entry", async () => {
+      const first = await navigate("timer");
+      expect(first.data.properties.find((p) => p.id === "hp").value).toBe(10);
+
+      const second = await navigate("timer");
+      expect(second.status).toBe(200);
+      expect(second.data.active).toBeUndefined();
+      expect(second.data.propertyVersion).toBe(1);
+      expect(await hp()).toBe(10);
+    });
+
+    it("runs the timer once when members' triggers arrive together", async () => {
+      const results = await Promise.allSettled([
+        navigate("timer"),
+        navigate("timer"),
+        navigate("timer"),
+      ]);
+
+      // a member that loses the race gets a 409, and its retry is ignored
+      for (const result of results) {
+        if (result.status === "rejected")
+          expect(result.reason.response.status).toBe(409);
+      }
+      expect(await hp()).toBe(10);
+      expect(await navigate("timer").then((r) => r.status)).toBe(200);
+      expect(await hp()).toBe(10);
+    });
+
+    it("does not block other triggers after the timer has fired", async () => {
+      await navigate("timer");
+
+      const response = await navigate("default");
+      expect(response.data.active).toBe(scene2._id.toString());
+    });
+
+    it("re-arms the timer on the next scene entry", async () => {
+      await navigate("timer");
+      await navigate("default");
+
+      const dbGroup = await Group.findById(group._id).lean();
+      expect(dbGroup.path[0]).toBe(scene2._id.toString());
+      expect(dbGroup.currentSceneTimerFired).toBe(false);
+    });
+
+    it("re-arms the timer on reset", async () => {
+      await Scene.findByIdAndUpdate(timedScene._id, {
+        components: [{ type: "RESET_BUTTON" }],
+      });
+      await navigate("timer");
+
+      await axios.post(
+        `http://localhost:${ctx.port}/api/navigate/group/reset/${group._id}`,
+        { uid: "uid-player", currentScene: timedScene._id.toString() },
+        authHeaders("uid-player")
+      );
+
+      const dbGroup = await Group.findById(group._id).lean();
+      expect(dbGroup.currentSceneTimerFired).toBe(false);
+    });
+  });
+
+  // --- Direct scene links (defaultLinkedScene / timerLinkedScene) ---
+
+  describe("direct scene links", () => {
+    const startAt = (scene, stateVariables = []) =>
+      Group.findByIdAndUpdate(group._id, {
+        path: [scene._id.toString()],
+        stateVariables,
+        stateVersion: 0,
+      });
+
+    const navigate = (currentScene, body) =>
+      axios.post(
+        `http://localhost:${ctx.port}/api/navigate/group/${group._id}`,
+        {
+          uid: "uid-player",
+          currentScene: currentScene._id.toString(),
+          addFlags: [],
+          removeFlags: [],
+          ...body,
+        },
+        authHeaders("uid-player")
+      );
+
+    const pathHead = async () => (await Group.findById(group._id)).path[0];
+
+    it("follows defaultLinkedScene on a default trigger with no actions", async () => {
+      const linkScene = await Scene.create({
+        name: "Default Link",
+        components: [],
+        roles: [],
+        defaultLinkedScene: scene2._id,
+      });
+      await startAt(linkScene);
+
+      const response = await navigate(linkScene, { trigger: "default" });
+      expect(response.status).toBe(200);
+      expect(response.data.active).toBe(scene2._id.toString());
+      expect(await pathHead()).toBe(scene2._id.toString());
+    });
+
+    it("follows timerLinkedScene on a timer trigger with no actions", async () => {
+      const linkScene = await Scene.create({
+        name: "Timer Link",
+        components: [],
+        roles: [],
+        time: 30,
+        timerLinkedScene: scene2._id,
+      });
+      await startAt(linkScene);
+
+      const response = await navigate(linkScene, { trigger: "timer" });
+      expect(response.status).toBe(200);
+      expect(response.data.active).toBe(scene2._id.toString());
+      expect(await pathHead()).toBe(scene2._id.toString());
+    });
+
+    it("does not cross triggers (timer trigger ignores defaultLinkedScene)", async () => {
+      const linkScene = await Scene.create({
+        name: "Default Only",
+        components: [],
+        roles: [],
+        defaultLinkedScene: scene2._id,
+      });
+      await startAt(linkScene);
+
+      const response = await navigate(linkScene, { trigger: "timer" });
+      expect(response.status).toBe(200);
+      expect(response.data.active).toBeUndefined();
+      expect(await pathHead()).toBe(linkScene._id.toString());
+    });
+
+    it("follows the component's linkedScene on a click with no linking action", async () => {
+      const linkScene = await Scene.create({
+        name: "Click Link",
+        components: [
+          {
+            id: "btn",
+            clickable: true,
+            actionRefs: [],
+            linkedScene: scene2._id.toString(),
+            type: "BUTTON",
+          },
+        ],
+        roles: [],
+        defaultLinkedScene: scene1._id,
+      });
+      await startAt(linkScene);
+
+      const response = await navigate(linkScene, {
+        trigger: "click",
+        componentId: "btn",
+      });
+      expect(response.status).toBe(200);
+      expect(response.data.active).toBe(scene2._id.toString());
+      expect(await pathHead()).toBe(scene2._id.toString());
+    });
+
+    it("does not follow defaultLinkedScene on a click trigger", async () => {
+      const linkScene = await Scene.create({
+        name: "Click Without Link",
+        components: [
+          { id: "btn", clickable: true, actionRefs: [], type: "BUTTON" },
+        ],
+        roles: [],
+        defaultLinkedScene: scene2._id,
+      });
+      await startAt(linkScene);
+
+      const response = await navigate(linkScene, {
+        trigger: "click",
+        componentId: "btn",
+      });
+      expect(response.status).toBe(200);
+      expect(response.data.active).toBeUndefined();
+      expect(await pathHead()).toBe(linkScene._id.toString());
+    });
+
+    it("prefers an action's linkedScene over the direct link", async () => {
+      const linkScene = await Scene.create({
+        name: "Action Wins",
+        components: [],
+        roles: [],
+        actions: [
+          {
+            id: "action-go",
+            name: "Go",
+            linkedScene: scene1._id,
+            conditions: [],
+            operations: [],
+          },
+        ],
+        defaultActionRefs: [
+          { id: "ref-action-go", actionId: "action-go", index: "a0" },
+        ],
+        defaultLinkedScene: scene2._id,
+      });
+      await startAt(linkScene);
+
+      const response = await navigate(linkScene, { trigger: "default" });
+      expect(response.data.active).toBe(scene1._id.toString());
+      expect(await pathHead()).toBe(scene1._id.toString());
+    });
+
+    it("falls through to the direct link when no action links, keeping staged operations", async () => {
+      const linkScene = await Scene.create({
+        name: "Fallthrough",
+        components: [],
+        roles: [],
+        actions: [
+          {
+            id: "action-gated",
+            name: "Gated",
+            linkedScene: scene1._id,
+            conditions: [
+              { id: "c1", stateVariableId: "hp", comparator: ">", value: 100 },
+            ],
+            operations: [],
+          },
+          {
+            id: "action-heal",
+            name: "Heal",
+            linkedScene: null,
+            conditions: [],
+            operations: [
+              { id: "op1", stateVariableId: "hp", operation: "add", value: 5 },
+            ],
+          },
+        ],
+        defaultActionRefs: [
+          { id: "ref-action-gated", actionId: "action-gated", index: "a0" },
+          { id: "ref-action-heal", actionId: "action-heal", index: "a1" },
+        ],
+        defaultLinkedScene: scene2._id,
+      });
+      await startAt(linkScene, [{ id: "hp", type: "number", value: 5 }]);
+
+      const response = await navigate(linkScene, { trigger: "default" });
+      expect(response.data.active).toBe(scene2._id.toString());
+      expect(response.data.properties.find((p) => p.id === "hp").value).toBe(
+        10
+      );
+      expect(response.data.propertyVersion).toBe(1);
+      expect(await pathHead()).toBe(scene2._id.toString());
+    });
+
+    it("does not push a path entry when the direct link points at the current scene", async () => {
+      const selfScene = await Scene.create({
+        name: "Self Link",
+        components: [],
+        roles: [],
+      });
+      await Scene.findByIdAndUpdate(selfScene._id, {
+        defaultLinkedScene: selfScene._id,
+      });
+      await startAt(selfScene);
+
+      const response = await navigate(selfScene, { trigger: "default" });
+      expect(response.status).toBe(200);
+      expect(response.data.active).toBeUndefined();
+
+      const dbGroup = await Group.findById(group._id);
+      expect(dbGroup.path).toEqual([selfScene._id.toString()]);
+    });
+
+    it("preloads direct-link targets as connected scenes", async () => {
+      const linkScene = await Scene.create({
+        name: "Preload",
+        components: [],
+        roles: [],
+        defaultLinkedScene: scene1._id,
+        timerLinkedScene: scene2._id,
+      });
+      await Scenario.findByIdAndUpdate(scenario._id, {
+        scenes: [linkScene._id, scene1._id, scene2._id],
+      });
+
+      const response = await axios.post(
+        `http://localhost:${ctx.port}/api/navigate/group/${group._id}`,
+        { uid: "uid-player", addFlags: [], removeFlags: [] },
+        authHeaders("uid-player")
+      );
+      expect(response.data.active).toBe(linkScene._id.toString());
+      expect(response.data.scenes.map((s) => s._id)).toEqual(
+        expect.arrayContaining([
+          linkScene._id.toString(),
+          scene1._id.toString(),
+          scene2._id.toString(),
+        ])
+      );
     });
   });
 });

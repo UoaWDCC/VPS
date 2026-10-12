@@ -1,12 +1,14 @@
 import { getProperties } from "../../../db/daos/scenarioDao.js";
-import { getComponent } from "../../../db/daos/sceneDao.js";
 import { setUserProperties } from "../../../db/daos/userDao.js";
 import { isAuthor } from "../../../middleware/scenarioAuth.js";
 import Scene from "../../../db/models/scene.js";
 import User from "../../../db/models/user.js";
 
 import { HttpError } from "../../../util/error.js";
-import { applyPropertyOperations } from "../../../util/properties/propertyOperations.js";
+import {
+  runActions,
+  getLinkedSceneIds,
+} from "../../../util/actions/actionRunner.js";
 import STATUS from "../../../util/status.js";
 
 import { getScenarioFirstScene, getSimpleScene } from "./group.js";
@@ -15,21 +17,22 @@ import {
   resumedRemainingTime,
   movedRemainingTimeField,
 } from "./timer.js";
+import { dropStaleLinks, resolveTrigger } from "./trigger.js";
 
 const getConnectedScenes = async (sceneID, active = true) => {
   const scene = await getSimpleScene(sceneID);
-  const connectedIds = scene.components
-    .filter((c) => c.clickable)
-    .map((b) => b.nextScene)
-    .filter(Boolean);
+  const connectedIds = getLinkedSceneIds(scene);
   const connected = await Scene.find(
     { _id: { $in: connectedIds } },
     {
       components: 1,
-      directLink: 1,
+      actions: 1,
+      defaultActionRefs: 1,
+      timerActionRefs: 1,
+      timerLinkedScene: 1,
+      defaultLinkedScene: 1,
       roles: 1,
       time: 1,
-      timerStateOperations: 1,
       background: 1,
     }
   ).lean();
@@ -52,6 +55,7 @@ const addSceneToPath = async (
 ) => {
   const pathField = `paths.${scenarioId}`;
   const enteredField = `sceneEnteredAt.${scenarioId}`;
+  const timerFiredField = `sceneTimerFired.${scenarioId}`;
 
   const filter = replace
     ? { _id: userId }
@@ -64,15 +68,31 @@ const addSceneToPath = async (
       };
 
   const update = replace
-    ? { $set: { [pathField]: [sceneId], [enteredField]: new Date() } }
+    ? {
+        $set: {
+          [pathField]: [sceneId],
+          [enteredField]: new Date(),
+          [timerFiredField]: false,
+        },
+      }
     : {
         $push: { [pathField]: { $each: [sceneId], $position: 0 } },
-        $set: { [enteredField]: new Date() },
+        $set: { [enteredField]: new Date(), [timerFiredField]: false },
       };
 
   const res = await User.findOneAndUpdate(filter, update);
   if (!res) throw new HttpError("Scene mismatch has occured", STATUS.CONFLICT);
   return STATUS.OK;
+};
+
+// marks the current scene's timer as fired
+const claimSceneTimer = async (userId, scenarioId) => {
+  const timerFiredField = `sceneTimerFired.${scenarioId}`;
+  const res = await User.findOneAndUpdate(
+    { _id: userId, [timerFiredField]: { $ne: true } },
+    { $set: { [timerFiredField]: true } }
+  );
+  return res != null;
 };
 
 // Initiates properties for a user
@@ -102,26 +122,12 @@ const syncProperties = async (user, scenarioId) => {
   return [properties, user.stateVersions[scenarioId]];
 };
 
-// Update properties for a user
-const updateProperties = async (user, scenarioId, component) => {
-  if (!component || !component.stateOperations) {
-    return [user.stateVariables[scenarioId], user.stateVersions[scenarioId]];
-  }
-
-  const properties = applyPropertyOperations(
-    user.stateVariables[scenarioId],
-    component.stateOperations
-  );
-
-  return await setUserProperties(user._id, scenarioId, properties);
-};
-
 export const userNavigate = async (req) => {
   const {
     uid,
     currentScene,
+    trigger,
     componentId,
-    nextScene: bodyNextScene,
     startScene: startSceneParam,
   } = req.body;
   const { scenarioId } = req.params;
@@ -206,19 +212,32 @@ export const userNavigate = async (req) => {
   if (path[0] !== currentScene)
     throw new HttpError("Scene mismatch has occured", STATUS.CONFLICT);
 
-  if (bodyNextScene) {
-    const scene = await Scene.findById(currentScene, { directLink: 1 }).lean();
-    if (!scene?.directLink?.equals(bodyNextScene))
-      throw new HttpError("Invalid direct link target", STATUS.FORBIDDEN);
+  if (!trigger) throw new HttpError("trigger is required", STATUS.BAD_REQUEST);
+
+  if (trigger === "timer" && !(await claimSceneTimer(user._id, scenarioId))) {
+    return {
+      status: STATUS.OK,
+      json: {
+        properties: user.stateVariables[scenarioId],
+        propertyVersion: user.stateVersions[scenarioId],
+      },
+    };
   }
 
-  const component = componentId
-    ? await getComponent(currentScene, componentId)
-    : null;
+  const scene = await getSimpleScene(currentScene);
+
+  const resolved = await dropStaleLinks(
+    scenarioId,
+    resolveTrigger(scene, trigger, componentId)
+  );
+  const {
+    properties: resolvedProperties,
+    linkedScene,
+    changed,
+  } = runActions(resolved.actions, user.stateVariables[scenarioId]);
+  const nextScene = linkedScene?.toString() ?? resolved.fallback?.toString();
 
   let scenes = null;
-
-  const nextScene = component?.nextScene ?? bodyNextScene;
 
   if (nextScene && nextScene !== currentScene) {
     [, scenes] = await Promise.all([
@@ -227,11 +246,9 @@ export const userNavigate = async (req) => {
     ]);
   }
 
-  const [properties, propertyVersion] = await updateProperties(
-    user,
-    scenarioId,
-    component
-  );
+  const [properties, propertyVersion] = changed
+    ? await setUserProperties(user._id, scenarioId, resolvedProperties)
+    : [user.stateVariables[scenarioId], user.stateVersions[scenarioId]];
 
   return {
     status: STATUS.OK,
@@ -264,6 +281,7 @@ export const userReset = async (req) => {
       $unset: {
         [`paths.${scenarioId}`]: "",
         [`sceneEnteredAt.${scenarioId}`]: "",
+        [`sceneTimerFired.${scenarioId}`]: "",
       },
     }
   );

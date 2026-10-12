@@ -42,14 +42,47 @@ const CreateGraphData = (scenes, groupInfo) => {
       });
     });
 
-    // Loop through each component of a scene and check for the "nextScene" property and add it to edge graph
-    scenes.forEach((scene) =>
-      scene.components.forEach((obj) => {
-        if (obj.nextScene && sceneMap[obj.nextScene]) {
+    // Loop through every path a scene can navigate from — clickable
+    // components' actions, plus its default (keyboard-advance) and timer
+    // actions — and add an edge to each resolved action's linkedScene.
+    // Mirrors the backend's getLinkedSceneIds (backend/src/util/actions/actionRunner.js).
+    const seenEdgeIds = new Set();
+    scenes.forEach((scene) => {
+      const actionsById = new Map(
+        (scene.actions ?? []).map((action) => [action.id, action])
+      );
+      const resolveActions = (actionIds) =>
+        (actionIds ?? []).map((id) => actionsById.get(id)).filter(Boolean);
+      const orderedActionIds = (refs) =>
+        (refs ?? []).map((ref) => ref.actionId);
+      const extractLinks = (refs) => resolveActions(orderedActionIds(refs));
+
+      const targets = [];
+
+      for (const component of scene.components ?? []) {
+        if (component.clickable) {
+          targets.push(...extractLinks(component.actionRefs));
+          if (component.linkedScene) targets.push(component.linkedScene);
+        }
+      }
+      targets.push(...extractLinks(scene.defaultActionRefs));
+      targets.push(scene.defaultLinkedScene);
+      targets.push(...extractLinks(scene.timerActionRefs));
+      targets.push(scene.timerLinkedScene);
+
+      targets
+        .filter((target) => target && sceneMap[target])
+        .forEach((target) => {
+          // multiple actions in the same scene can resolve to the same
+          // linkedScene, so we ignore dups
+          const edgeId = scene.name + "-" + sceneMap[target].name;
+          if (seenEdgeIds.has(edgeId)) return;
+          seenEdgeIds.add(edgeId);
+
           edges.push({
-            id: scene.name + "-" + sceneMap[obj.nextScene].name,
+            id: edgeId,
             source: scene._id,
-            target: obj.nextScene,
+            target,
             type: "simpleFloating",
             markerEnd: {
               ...markerEnd,
@@ -61,9 +94,8 @@ const CreateGraphData = (scenes, groupInfo) => {
             },
             animated: true,
           });
-        }
-      })
-    );
+        });
+    });
 
     /**
      * Loop through group path to create the links of the students path

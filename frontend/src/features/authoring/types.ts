@@ -7,14 +7,46 @@ export type Component =
   | LineComponent
   | AudioComponent;
 
+export type Comparator = "=" | "!=" | "<" | ">";
+export type PropertyOperationType = "set" | "add" | "subtract";
+
+export interface Condition {
+  id: string;
+  stateVariableId: string;
+  comparator: Comparator;
+  value: unknown;
+}
+
+export interface Operation {
+  id: string;
+  stateVariableId: string;
+  operation: PropertyOperationType;
+  value: unknown;
+}
+
+export interface Action {
+  id: string;
+  name: string;
+  linkedScene: string | null;
+  conditions: Condition[];
+  operations: Operation[];
+}
+
+export interface ActionRef {
+  id: string;
+  actionId: string;
+  index: string; // fractional for concurrent editing
+}
+
 export interface Scene {
   _id: string;
   name: string;
   components: Record<string, Component>;
   roles: string[];
   time: number | null;
-  directLink: string | null;
-  timerStateOperations: Record<string, unknown>[] | null;
+  actions: Action[];
+  defaultActionRefs: ActionRef[];
+  timerActionRefs: ActionRef[];
   background: SceneBackground | null;
 }
 
@@ -64,6 +96,7 @@ interface GenericComponent {
   zIndex: number;
   clickable?: boolean;
   stateBindings?: PropertyBinding[];
+  actionRefs?: ActionRef[];
 }
 
 export interface PropertyBinding {

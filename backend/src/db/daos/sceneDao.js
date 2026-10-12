@@ -3,7 +3,9 @@ import Scenario from "../models/scenario.js";
 import { HttpError } from "../../util/error.js";
 import status from "../../util/status.js";
 import { applyReferenceDeltas } from "./fileDao.js";
+import { getProperties } from "./scenarioDao.js";
 import { HttpStatusCode } from "axios";
+import mongoose from "mongoose";
 
 /**
  * Adds a reference-count delta to a file ID entry in a map.
@@ -77,28 +79,25 @@ function computeDeleteFileRefDeltas(components, background) {
 /**
  * Calculates the file reference deltas resulting from a component patch.
  *
+ * @param {object} componentsDiff - Structured component diff.
+ * @param {Array<object>} componentsDiff.upserted - Components created/updated by the patch.
+ * @param {Array<string>} componentsDiff.deleted - Component IDs removed by the patch.
  * @param {Array<object>} [existingComponents=[]] - The scene's previous components.
- * @param {Array<object>} modifiedComponents - The updated component list.
- * @param {Array<string>} deletedComponentIds - IDs removed in the patch.
  * @returns {Map<string, number>} The resulting reference delta map.
  */
-function computePatchFileRefDeltas(
-  existingComponents,
-  modifiedComponents,
-  deletedComponentIds
-) {
+function computePatchFileRefDeltas({ upserted, deleted }, existingComponents) {
   const existingComponentsById = new Map(
     (existingComponents ?? []).map((c) => [c.id, c])
   );
 
   const fileRefDeltas = new Map();
 
-  deletedComponentIds.forEach((id) => {
+  deleted.forEach((id) => {
     const existing = existingComponentsById.get(id);
     if (hasFileRef(existing)) addDelta(fileRefDeltas, existing.fileId, -1);
   });
 
-  modifiedComponents.forEach((component) => {
+  upserted.forEach((component) => {
     const existing = existingComponentsById.get(component.id);
 
     // decrement the previously referenced file (if any) and increment the
@@ -129,39 +128,201 @@ function addBackgroundPatchFileRefDeltas(
   if (newFileId) addDelta(fileRefDeltas, newFileId, 1);
 }
 
-// enforce direct links between scenes to be in the same scenario
-const assertDirectLinkInScenario = async (scenarioId, directLinkId) => {
-  if (directLinkId == null) return;
+// enforce that a set of scenes (e.g. action linkedScene targets) all belong
+// to the given scenario
+const assertScenesInScenario = async (scenarioId, sceneIds) => {
+  const ids = [
+    ...new Set(sceneIds.filter((id) => id != null).map((id) => id.toString())),
+  ];
+  if (ids.length === 0) return;
+
   const inScenario = await Scenario.exists({
     _id: scenarioId,
-    scenes: directLinkId,
+    scenes: { $all: ids },
   });
   if (!inScenario) {
     throw new HttpError(
-      "directLink target must belong to the same scenario",
+      "linkedScene target must belong to the same scenario",
       status.BAD_REQUEST
     );
   }
 };
 
-/**
- * Creates a scene in the database, and updates its parent scenario to contain the scene
- * @param {String} scenarioId MongoDB ID of parent scenario
- * @param {{name: String, components: Object[]}, time: Number} scene scene object
- * @returns the created database scene object
- */
-export const createScene = async (scenarioId, scene) => {
-  if (scene.directLink == null) {
-    const scenarioExists = await Scenario.exists({ _id: scenarioId });
-    if (!scenarioExists) {
-      throw new HttpError("scenario not found", status.NOT_FOUND);
+// reject duplicate action names within a scene's actions[]
+const assertUniqueActionNames = (actions) => {
+  const seen = new Set();
+  for (const action of actions) {
+    const name = action.name?.trim();
+    if (seen.has(name)) {
+      throw new HttpError(
+        `Duplicate action name "${name}" in scene`,
+        status.BAD_REQUEST
+      );
     }
+    seen.add(name);
+  }
+};
+
+// reject duplicate action ids within a scene's actions[]
+const assertUniqueActionIds = (actions) => {
+  const seen = new Set();
+  for (const action of actions) {
+    if (seen.has(action.id)) {
+      throw new HttpError(
+        `Duplicate action id "${action.id}" in scene`,
+        status.BAD_REQUEST
+      );
+    }
+    seen.add(action.id);
+  }
+};
+
+// a condition/operation that hasn't changed is allowed through even if its
+// property has since been deleted
+const isUnchangedRef = (item, existingItems, typeField) => {
+  const existing = existingItems?.find((e) => e.id === item.id);
+  return (
+    existing !== undefined &&
+    existing.stateVariableId === item.stateVariableId &&
+    existing[typeField] === item[typeField] &&
+    existing.value === item.value
+  );
+};
+
+// collect the conditions/operations that need validating
+const getChangedPropertyRefs = (actions, existingActions) => {
+  const existingActionsById = new Map(existingActions.map((a) => [a.id, a]));
+  const conditions = [];
+  const operations = [];
+
+  for (const action of actions) {
+    const existingAction = existingActionsById.get(action.id);
+    conditions.push(
+      ...(action.conditions ?? []).filter(
+        (c) => !isUnchangedRef(c, existingAction?.conditions, "comparator")
+      )
+    );
+    operations.push(
+      ...(action.operations ?? []).filter(
+        (o) => !isUnchangedRef(o, existingAction?.operations, "operation")
+      )
+    );
   }
 
-  await assertDirectLinkInScenario(scenarioId, scene.directLink);
+  return { conditions, operations };
+};
 
-  const dbScene = new Scene(scene);
+// validate that each condition/operation references a real property. type
+// mismatches are allowed through, since a property can change type after the
+// fact; the editor surfaces them and playback ignores them
+const assertRefsResolve = ({ conditions, operations }, properties) => {
+  const propertyIds = new Set(properties.map((p) => p.id));
 
+  const condition = conditions.find((c) => !propertyIds.has(c.stateVariableId));
+  if (condition) {
+    throw new HttpError(
+      `Condition references unknown property "${condition.stateVariableId}"`,
+      status.BAD_REQUEST
+    );
+  }
+
+  const operation = operations.find((o) => !propertyIds.has(o.stateVariableId));
+  if (operation) {
+    throw new HttpError(
+      `Operation references unknown property "${operation.stateVariableId}"`,
+      status.BAD_REQUEST
+    );
+  }
+};
+
+// reject malformed action refs, or refs sharing an id within one list
+const assertActionRefsShape = (actionRefs, label) => {
+  if (!Array.isArray(actionRefs)) {
+    throw new HttpError(`${label} must be an array`, status.BAD_REQUEST);
+  }
+  const seen = new Set();
+  for (const ref of actionRefs) {
+    if (
+      typeof ref?.id !== "string" ||
+      typeof ref.actionId !== "string" ||
+      typeof ref.index !== "string"
+    ) {
+      throw new HttpError(
+        `${label} contains a malformed action ref`,
+        status.BAD_REQUEST
+      );
+    }
+    if (seen.has(ref.id)) {
+      throw new HttpError(
+        `Duplicate action ref id "${ref.id}" in ${label}`,
+        status.BAD_REQUEST
+      );
+    }
+    seen.add(ref.id);
+  }
+};
+
+// reject an action ref that doesn't resolve against the scene's actions[]. a
+// ref already stored with the same id and actionId is a preexisting reference,
+// and is allowed through even if its action has since been deleted
+const assertActionRefsResolve = (actionRefs, existingRefs, validIds, label) => {
+  const existingById = new Map((existingRefs ?? []).map((r) => [r.id, r]));
+  const validIdSet = new Set(validIds);
+  const dangling = actionRefs.find(
+    (ref) =>
+      existingById.get(ref.id)?.actionId !== ref.actionId &&
+      !validIdSet.has(ref.actionId)
+  );
+  if (dangling) {
+    throw new HttpError(
+      `${label} references unknown action id "${dangling.actionId}"`,
+      status.BAD_REQUEST
+    );
+  }
+};
+
+// uniqueness must hold across the full effective actions[]
+const assertActionsUnique = (effectiveActions) => {
+  assertUniqueActionIds(effectiveActions);
+  assertUniqueActionNames(effectiveActions);
+};
+
+// validates an actions[] list, against the scene's currently stored actions
+const assertActionsContentValid = async (
+  scenarioId,
+  actions,
+  existingActions = []
+) => {
+  const existingById = new Map(existingActions.map((a) => [a.id, a]));
+  const changedLinkedSceneIds = actions
+    .filter(
+      (action) =>
+        action.linkedScene &&
+        String(action.linkedScene) !==
+          String(existingById.get(action.id)?.linkedScene)
+    )
+    .map((action) => action.linkedScene);
+  await assertScenesInScenario(scenarioId, changedLinkedSceneIds);
+
+  const changedRefs = getChangedPropertyRefs(actions, existingActions);
+  if (changedRefs.conditions.length || changedRefs.operations.length) {
+    const properties = await getProperties(scenarioId);
+    assertRefsResolve(changedRefs, properties);
+  }
+};
+
+/**
+ * Creates a scene in the database from a name alone, and updates its parent scenario to contain the scene
+ * @param {String} scenarioId MongoDB ID of parent scenario
+ * @param {{name: String}} scene scene object
+ * @returns the created database scene object
+ */
+export async function createScene(scenarioId, { name }) {
+  const scenarioExists = await Scenario.exists({ _id: scenarioId });
+  if (!scenarioExists)
+    throw new HttpError("scenario not found", status.NOT_FOUND);
+
+  const dbScene = new Scene({ name });
   await dbScene.save();
 
   await Scenario.updateOne(
@@ -169,14 +330,8 @@ export const createScene = async (scenarioId, scene) => {
     { $push: { scenes: dbScene._id } }
   );
 
-  const fileRefDeltas = computeCreateFileRefDeltas(
-    dbScene.components,
-    dbScene.background
-  );
-  await applyReferenceDeltas(fileRefDeltas);
-
   return dbScene;
-};
+}
 
 /**
  * Retrieves all scenes of a scenario
@@ -239,10 +394,9 @@ export const deleteScene = async (scenarioId, sceneId) => {
     return { deleted: false, reason: "not_found" };
   }
 
-  await Scene.updateMany(
-    { directLink: sceneId },
-    { $set: { directLink: null } }
-  );
+  // links to the deleted scene are left in place, they show
+  // as errored in the editor and are ignored during playback
+
   const res = await Scene.findOneAndDelete({ _id: sceneId });
 
   if (res) {
@@ -271,7 +425,11 @@ export const duplicateScene = async (scenarioId, sceneId) => {
     name: `${sceneToCopy.name} Copy`,
     components: sceneToCopy.components,
     time: sceneToCopy.time,
-    directLink: sceneToCopy.directLink ?? null,
+    actions: sceneToCopy.actions ?? [],
+    defaultLinkedScene: sceneToCopy.defaultLinkedScene ?? null,
+    timerLinkedScene: sceneToCopy.timerLinkedScene ?? null,
+    defaultActionRefs: sceneToCopy.defaultActionRefs ?? [],
+    timerActionRefs: sceneToCopy.timerActionRefs ?? [],
     background: sceneToCopy.background ?? null,
   };
   const dbScene = new Scene(newScene);
@@ -385,45 +543,170 @@ async function validateBackground(background) {
   }
 }
 
-export const patchScene = async (sceneId, patch, scenarioId) => {
-  const { fields = {}, components = [], deletedComponentIds = [] } = patch;
+function buildDeleteOp(sceneId, field, items) {
+  return {
+    updateOne: {
+      filter: { _id: sceneId },
+      update: {
+        $pull: {
+          [field]: { id: { $in: items } },
+        },
+      },
+    },
+  };
+}
+
+// builds the update-if-present/push-if-not-present op pair for each item
+// against an id-keyed array field (e.g. actions[] or components[])
+const buildUpsertByIdOps = (sceneId, field, items) =>
+  items.flatMap((item) => [
+    {
+      updateOne: {
+        filter: { _id: sceneId, [`${field}.id`]: item.id },
+        update: { $set: { [`${field}.$`]: item } },
+      },
+    },
+    {
+      updateOne: {
+        filter: { _id: sceneId, [`${field}.id`]: { $ne: item.id } },
+        update: { $push: { [field]: item } },
+      },
+    },
+  ]);
+
+function getEffectiveArray({ upserted = [], deleted = [] }, existing) {
+  const deletedIdSet = new Set(deleted);
+  const upsertedIdSet = new Set(upserted.map((i) => i.id));
+  return [
+    ...(existing ?? []).filter(
+      (i) => !deletedIdSet.has(i.id) && !upsertedIdSet.has(i.id)
+    ),
+    ...upserted,
+  ];
+}
+
+const SIMPLE_FIELDS = [
+  "name",
+  "roles",
+  "time",
+  "background",
+  "defaultLinkedScene",
+  "timerLinkedScene",
+];
+
+/**
+ * Patches a scene object using a structured diff.
+ *
+ * @param {string} sceneId - The scene ID to patch.
+ * @param {object} patch - Structured diff to apply to the scene.
+ * @param {string} scenarioId - The scenario ID the scene belongs to.
+ * @returns {void}
+ */
+export async function patchScene(sceneId, patch, scenarioId) {
+  const {
+    fields = {},
+    components = { upserted: [], deleted: [] },
+    actions = { upserted: [], deleted: [] },
+    defaultActionRefs = { upserted: [], deleted: [] },
+    timerActionRefs = { upserted: [], deleted: [] },
+  } = patch;
 
   const allowedFields = {};
-  [
-    "name",
-    "roles",
-    "time",
-    "directLink",
-    "timerStateOperations",
-    "background",
-  ].forEach((field) => {
+  SIMPLE_FIELDS.forEach((field) => {
     if (Object.prototype.hasOwnProperty.call(fields, field)) {
       allowedFields[field] = fields[field];
     }
   });
 
-  if ("directLink" in allowedFields) {
-    await assertDirectLinkInScenario(scenarioId, allowedFields.directLink);
-  }
-
-  if (Object.prototype.hasOwnProperty.call(allowedFields, "background")) {
+  if (Object.prototype.hasOwnProperty.call(allowedFields, "background"))
     allowedFields.background = await validateBackground(
       allowedFields.background
     );
-  }
 
   const existingScene = await Scene.findById(sceneId, {
     components: 1,
     background: 1,
+    actions: 1,
+    defaultActionRefs: 1,
+    timerActionRefs: 1,
+    defaultLinkedScene: 1,
+    timerLinkedScene: 1,
   });
-  if (!existingScene) {
+  if (!existingScene)
     throw new HttpError("scene not found", HttpStatusCode.NotFound);
+  const existing = existingScene.toObject();
+
+  // patch scene link validation. as with action refs, a link left unchanged
+  // from what's stored is allowed through even if its target scene has since
+  // been deleted
+
+  for (const field of ["defaultLinkedScene", "timerLinkedScene"]) {
+    const value = allowedFields[field];
+    if (value == null || String(value) === String(existing[field])) continue;
+    if (!mongoose.isObjectIdOrHexString(value))
+      throw new HttpError(`invalid ${field}`, HttpStatusCode.BadRequest);
+    await assertScenesInScenario(scenarioId, [value]);
   }
 
+  // patch action validation
+
+  const effectiveActions = getEffectiveArray(actions, existingScene.actions);
+  if (actions.upserted.length) {
+    await assertActionsContentValid(
+      scenarioId,
+      actions.upserted,
+      existing.actions
+    );
+    assertActionsUnique(effectiveActions);
+  }
+
+  const validActionIds = effectiveActions.map((action) => action.id);
+
+  const existingComponentsById = new Map(
+    (existing.components ?? []).map((c) => [c.id, c])
+  );
+
+  const changedLinkedScenes = components.upserted
+    .filter(
+      (c) =>
+        c.linkedScene != null &&
+        String(c.linkedScene) !==
+          String(existingComponentsById.get(c.id)?.linkedScene)
+    )
+    .map((c) => c.linkedScene);
+  for (const id of changedLinkedScenes) {
+    if (!mongoose.isObjectIdOrHexString(id))
+      throw new HttpError(
+        "invalid component linkedScene",
+        HttpStatusCode.BadRequest
+      );
+  }
+  await assertScenesInScenario(scenarioId, changedLinkedScenes);
+
+  const refLists = [
+    [
+      "defaultActionRefs",
+      defaultActionRefs.upserted,
+      existing.defaultActionRefs,
+    ],
+    ["timerActionRefs", timerActionRefs.upserted, existing.timerActionRefs],
+    ...components.upserted
+      .filter((c) => c.actionRefs !== undefined)
+      .map((c) => [
+        `component "${c.id}" actions`,
+        c.actionRefs,
+        existingComponentsById.get(c.id)?.actionRefs,
+      ]),
+  ];
+  for (const [label, refs, existingRefs] of refLists) {
+    assertActionRefsShape(refs, label);
+    assertActionRefsResolve(refs, existingRefs, validActionIds, label);
+  }
+
+  // file ref computation
   const fileRefDeltas = computePatchFileRefDeltas(
-    existingScene.components,
     components,
-    deletedComponentIds
+    existingScene.components
   );
   if (Object.prototype.hasOwnProperty.call(allowedFields, "background")) {
     addBackgroundPatchFileRefDeltas(
@@ -432,6 +715,8 @@ export const patchScene = async (sceneId, patch, scenarioId) => {
       allowedFields.background
     );
   }
+
+  // bulk operations generation
 
   const operations = [];
 
@@ -444,54 +729,40 @@ export const patchScene = async (sceneId, patch, scenarioId) => {
     });
   }
 
-  if (deletedComponentIds.length > 0) {
-    operations.push({
-      updateOne: {
-        filter: { _id: sceneId },
-        update: {
-          $pull: {
-            components: { id: { $in: deletedComponentIds } },
-          },
-        },
-      },
-    });
-  }
+  operations.push(
+    ...buildUpsertByIdOps(sceneId, "components", components.upserted)
+  );
+  if (components.deleted.length > 0)
+    operations.push(buildDeleteOp(sceneId, "components", components.deleted));
 
-  for (const component of components) {
-    operations.push({
-      updateOne: {
-        filter: {
-          _id: sceneId,
-          "components.id": component.id,
-        },
-        update: {
-          $set: {
-            "components.$": component,
-          },
-        },
-      },
-    });
+  operations.push(...buildUpsertByIdOps(sceneId, "actions", actions.upserted));
+  if (actions.deleted.length > 0)
+    operations.push(buildDeleteOp(sceneId, "actions", actions.deleted));
 
-    operations.push({
-      updateOne: {
-        filter: {
-          _id: sceneId,
-          "components.id": { $ne: component.id },
-        },
-        update: {
-          $push: {
-            components: component,
-          },
-        },
-      },
-    });
-  }
+  operations.push(
+    ...buildUpsertByIdOps(
+      sceneId,
+      "defaultActionRefs",
+      defaultActionRefs.upserted
+    )
+  );
+  if (defaultActionRefs.deleted.length > 0)
+    operations.push(
+      buildDeleteOp(sceneId, "defaultActionRefs", defaultActionRefs.deleted)
+    );
 
-  if (operations.length > 0) {
+  operations.push(
+    ...buildUpsertByIdOps(sceneId, "timerActionRefs", timerActionRefs.upserted)
+  );
+  if (timerActionRefs.deleted.length > 0)
+    operations.push(
+      buildDeleteOp(sceneId, "timerActionRefs", timerActionRefs.deleted)
+    );
+
+  // bulk write
+  if (operations.length > 0)
     await Scene.bulkWrite(operations, { ordered: true });
-  }
-
   await applyReferenceDeltas(fileRefDeltas);
 
   return Scene.findById(sceneId);
-};
+}
