@@ -507,3 +507,62 @@ Body:
 ```
 
 The caller must be able to edit the scenario (`401` otherwise). Returns the scenario's `UploadedFile` for the asset: status `201` the first time, `200` with the same file after that.
+
+---
+
+### AI assistant
+
+The editor's AI assistant talks to the model through the server, so the provider key never reaches the browser. See [AI Assistant](./Specifications/AI%20Assistant.md) for the whole feature and [Setting Up a Local Build](./Onboarding/Setting%20Up%20a%20Local%20Build.md#the-ai-assistant-optional) for the settings it needs.
+
+**Chat:**
+
+`POST /api/ai/chat`
+
+Body (OpenAI-style, plus the scenario and the mode):
+
+```json
+{
+    "scenarioId": "000001",
+    "mode": "build",
+    "model": "main",
+    "messages": [{ "role": "user", "content": "Make the title bigger" }],
+    "tools": [{ "type": "function", "function": { "name": "get_scene", "description": "...", "parameters": {} } }],
+    "tool_choice": "auto",
+    "max_tokens": 1024,
+    "temperature": 0.2
+}
+```
+
+- `scenarioId`, `mode` and `messages` are required. `mode` is `ask`, `plan`, `build`, `test` or `review`.
+- `model` is `"main"` (the default) or `"fast"`, never a model name. The names are the server's settings. `"fast"` uses the main model if no fast one is set.
+- `tools` can only be tools the mode allows (`backend/src/util/ai/modes.js`): `403` for one the mode doesn't allow, `400` for one that doesn't exist. `tool_choice` can be `auto`, `none`, `required` or one of the tools offered.
+- `max_tokens` can only lower the server's limit. Fields not listed here are not passed on.
+
+The caller must be an author of the scenario (the owner, or someone it's shared with), else `403`.
+
+Returns the model's reply **streamed** as server-sent events (`text/event-stream`), in the OpenAI streaming format, passed through as it is written. The last events carry the token counts, then `data: [DONE]`. The reply headers say how much of today's allowance is used: `X-AI-Limit` and `X-AI-Used`.
+
+If something goes wrong **after** the stream has started, the status is already `200`, so the stream ends with an error event instead:
+
+```
+data: {"error": {"message": "The AI took too long, so it was stopped.", "code": "timeout"}}
+```
+
+`code` is `timeout` or `interrupted`.
+
+Errors before the stream starts are normal JSON errors:
+
+| Status | When |
+| --- | --- |
+| `400` | The request isn't valid: no messages, an unknown mode, an unknown tool, a bad `scenarioId` |
+| `401` | Not signed in |
+| `403` | Not an author of the scenario, or a tool the mode doesn't allow |
+| `413` | The request is bigger than `AI_MAX_INPUT_CHARS` |
+| `429` | The author's daily limit is used up (`meta.limit`, `meta.resetsAt`, and a `Retry-After` header), or the provider is busy (`meta.retryAfter`) |
+| `502` | The provider can't be reached, refused the server's key, or couldn't handle the request (`meta.upstreamStatus`, and `meta.message` when the provider said why) |
+| `503` | The assistant isn't set up (`meta.missing` lists the settings that are missing), or the provider account is out of credit |
+| `504` | The model didn't start replying in time |
+
+A request that fails before the model replies isn't counted against the daily limit. The limit is per author per UTC day and is kept in the database (`aiUsage`), so it holds across servers and restarts.
+
+Each request writes one log line (`"event": "ai.chat"`) with the author, scenario, mode, model, token counts, time taken and the names of the tools the model called. It does not contain what was typed or the scenario's text, unless `AI_LOG_CONTENT=true`.

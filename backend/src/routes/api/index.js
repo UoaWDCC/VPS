@@ -11,6 +11,7 @@ import access from "./access.js";
 import dashboard from "./dashboard.js";
 import files from "./files.js";
 import assets from "./assets.js";
+import ai from "./ai.js";
 
 const router = Router();
 
@@ -25,5 +26,6 @@ router.use("/access", access);
 router.use("/dashboard", dashboard);
 router.use("/files", files);
 router.use("/assets", assets);
+router.use("/ai", ai);
 
 export default router;

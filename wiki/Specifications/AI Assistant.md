@@ -10,8 +10,8 @@ This page is both the spec and the **progress tracker**. The work ships as **one
 | --- | --- | --- |
 | 0 | `docs: AI assistant plan` | ✅ Done |
 | 1 | `feat(ai): editor command API and scene snapshot` | ✅ Done |
-| 2 | `feat: conditional destinations` | 🟨 In progress |
-| 3 | `feat(ai): OpenRouter proxy` | ⬜ Not started |
+| 2 | `feat: conditional destinations` | ✅ Done |
+| 3 | `feat(ai): OpenRouter proxy` | 🟨 In progress |
 | 4 | `feat(ai): assistant panel with ask, plan and build modes` | ⬜ Not started |
 | 5 | `feat(ai): scene, property and logic tools` | ⬜ Not started |
 | 6 | `feat(ai): test mode playtesting` | ⬜ Not started |
@@ -195,21 +195,31 @@ Notes:
 
 Tasks:
 
-- [ ] `POST /api/ai/chat`: OpenAI-compatible request, streamed response
-- [ ] Config: `OPENROUTER_API_KEY`, `OPENROUTER_MODEL`, optional `OPENROUTER_FAST_MODEL`; a missing key gives a clear `503`
-- [ ] Firebase auth; caller must be an author of the scenario
-- [ ] The requested mode's tool list is enforced (shared list of tool names per mode)
-- [ ] Maximum tokens and timeouts
-- [ ] Per-user daily request limit stored in Mongo (`AiUsage`), not in memory
-- [ ] Logging: model, token counts, latency, tool names; no prompt content by default
-- [ ] Document the endpoint in `wiki/Backend API.md` and the variables in the setup docs
+- [x] `POST /api/ai/chat`: OpenAI-compatible request, streamed response
+- [x] Config: `OPENROUTER_API_KEY`, `OPENROUTER_MODEL`, optional `OPENROUTER_FAST_MODEL`; a missing key gives a clear `503`
+- [x] Firebase auth; caller must be an author of the scenario
+- [x] The requested mode's tool list is enforced (shared list of tool names per mode)
+- [x] Maximum tokens and timeouts
+- [x] Per-user daily request limit stored in Mongo (`AiUsage`), not in memory
+- [x] Logging: model, token counts, latency, tool names; no prompt content by default
+- [x] Document the endpoint in `wiki/Backend API.md` and the variables in the setup docs
 
 Verify:
 
-- [ ] Tests with a mocked upstream: streaming passthrough, auth, author check, mode enforcement, limits, missing key
-- [ ] Backend: `yarn prettier`, `yarn lint`, `yarn test` pass
+- [x] Tests with a mocked upstream: streaming passthrough, auth, author check, mode enforcement, limits, missing key
+- [x] Backend: `yarn prettier`, `yarn lint`, `yarn test` pass
 
 Notes:
+
+- `POST /api/ai/chat` is documented in `wiki/Backend API.md`, and the settings in the setup page (there is now a `backend/.env.example`; the setup page mentioned one that wasn't in the repo).
+- Code: `routes/api/ai.js` (the route), `util/ai/` (`config.js`, `modes.js`, `request.js`, `relay.js`, `stream.js`, `log.js`), `db/models/aiUsage.js` and `db/daos/aiUsageDao.js`.
+- **The caller picks `"main"` or `"fast"`, never a model name.** The names are the server's settings, so nobody can run up a bill on an expensive model. Only a known set of request fields is passed on.
+- **Tools per mode** live in `backend/src/util/ai/modes.js` as tool name → kind, plus which kinds each mode allows. The editor and backend share no code, so a frontend test (`commands/__tests__/modes.spec.ts`) fails if a command is missing from that list or listed with a different kind. A tool the mode doesn't allow is a `403`, one that doesn't exist a `400`.
+- **Daily limit:** 200 requests per author per UTC day by default (`AI_DAILY_LIMIT`), kept in Mongo. The document id is `uid:day`, so counting is one atomic update and twenty simultaneous requests still only get the limit's worth (tested). A request that fails before the model replies is given back. Token counts are recorded for the record.
+- **Errors:** before the stream starts they are normal JSON errors (`503` not set up, `429` limit or provider busy, `502` provider problem, `504` slow). After it starts the status is already `200`, so the stream ends with `data: {"error": {"message", "code"}}`, where `code` is `timeout` or `interrupted`. The provider's own messages about the key are never passed on.
+- The reply headers `X-AI-Limit` and `X-AI-Used` say how much of today's allowance is used (exposed to the browser, so the panel can show it).
+- **Not checked against the real OpenRouter:** there is no key in this environment, so everything was tested against a fake provider that speaks the same streaming format over real HTTP. The first real check is to set `OPENROUTER_API_KEY` and `OPENROUTER_MODEL` and send a request from the stage 4 panel. If a model refuses `stream_options`, drop it in `util/ai/request.js`. No model id is chosen here: it has to be one that supports tool use, which changes over time for the free ones.
+- Added `413`, `429`, `502`, `503` and `504` to `util/status.js`.
 
 ---
 
@@ -239,6 +249,10 @@ Verify:
 
 Notes:
 
+- From stage 3: send `scenarioId`, `mode`, `model` (`"main"` or `"fast"`) and `messages`, and only offer the tools for the mode: `toolDefinitions(MODE_KINDS[mode])`. The server refuses anything else.
+- From stage 3: the reply is server-sent events. Handle an `{"error": {"code": "timeout" | "interrupted"}}` event mid-stream, and plain JSON errors (`503` not set up, `429`, `502`, `504`) before it. Show them as the messages they are.
+- From stage 3: read `X-AI-Used` and `X-AI-Limit` from the reply to show what's left of today's allowance. A `429` has `meta.resetsAt`.
+
 ---
 
 ## Stage 5: Scene, property and logic tools
@@ -265,6 +279,7 @@ Notes:
 
 - From stage 2: `set_conditional_destination` already sets a plain link (no rules, only `otherwise`), so `set_destination` can be a thinner tool for the common case or dropped.
 - From stage 2: the scenario overview already lists conditional links (`when` on each link), so that task is mostly the scene-level graph.
+- From stage 3: every new command also goes in `backend/src/util/ai/modes.js` with its kind, or the proxy refuses it and `modes.spec.ts` fails.
 
 ---
 
@@ -293,6 +308,7 @@ Verify:
 Notes:
 
 - From stage 2: the destination rules are in `destination.js` (`resolveDestination`). The headless playtest should call that, with the properties after the button's operations, instead of re-implementing it.
+- From stage 3: the playtest tools need the kind `playtest` (widen `CommandKind` in `commands/types.ts`). Add them to `backend/src/util/ai/modes.js` as `playtest`; test mode already allows that kind.
 
 ---
 
@@ -316,6 +332,8 @@ Verify:
 - [ ] Backend and frontend checks pass
 
 Notes:
+
+- From stage 3: the review tools need the kind `review` (widen `CommandKind`), added to `backend/src/util/ai/modes.js`; review mode already allows it. The anonymised data should be built on the server, so the model never sees names or emails.
 
 ---
 
@@ -341,6 +359,8 @@ Verify:
 
 Notes:
 
+- From stage 3: the proxy only streams, and counts against the author's daily limit. Evals that go through it need to read the stream (or the proxy needs a non-streaming option), and a big eval run would need its own limit.
+
 ---
 
 ## Risks
@@ -360,3 +380,4 @@ Add one line per stage when it's done: date, stage, anything notable.
 
 - 2026-10-12, stage 1: command API with 22 commands, scene snapshot, spatial warnings, live editor adapter and dev console. 201 Vitest specs; verified in the real editor (one batch built a scene, one undo removed it).
 - 2026-10-12, stage 2: conditional destinations (`nextSceneRules`) end to end: shared evaluator, server and play page, editor UI, checks, debug panel, dashboard labels and `set_conditional_destination`. 76 node + 236 Vitest frontend tests, 301 backend tests; verified in a browser against the real API routes.
+- 2026-10-12, stage 3: `POST /api/ai/chat` OpenRouter proxy: streamed passthrough, server-held key, author check, tool lists enforced per mode, per-author daily limit in Mongo, timeouts, one log line per request. 112 new backend tests (413 in all); tested against a fake provider, not yet the real OpenRouter.
