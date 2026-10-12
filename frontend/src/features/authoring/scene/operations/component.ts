@@ -139,8 +139,6 @@ export function parseComponent(
 ) {
   component.bounds.verts = translate(component.bounds.verts, offset);
   component.zIndex = zIndex ?? component.zIndex + 1;
-  // Duplicates must not inherit the source's key binding - two components
-  // bound to the same key silently makes one of them unreachable.
   component.keyBinding = null;
   component.showKeyHint = false;
   const mutableComponent = component as unknown as Record<string, unknown>;

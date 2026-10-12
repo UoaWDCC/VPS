@@ -145,10 +145,7 @@ const assertDirectLinkInScenario = async (scenarioId, directLinkId) => {
   }
 };
 
-// Enforce that no two clickable components, and no component and the scene's
-// direct link, claim the same key. The authoring UI already filters pickers
-// to avoid this, but that only guards the flows that go through those
-// pickers - this is the backstop at the point scenes are actually saved.
+// enforce that no two components (or a component and the direct link) share a key
 const assertUniqueKeyBindings = (components, directLink, directLinkKey) => {
   const claimedBy = new Map();
 
@@ -281,17 +278,8 @@ export const deleteScene = async (scenarioId, sceneId) => {
     { $set: { directLink: null, directLinkKey: null } }
   );
 
-  // Components elsewhere that linked to the scene being deleted would
-  // otherwise keep pointing at a scene that no longer exists. Clear the
-  // link, and drop the key binding along with it for any component left
-  // with no other action (no Property Operations) - a binding with nothing
-  // left to trigger is a dead binding. Components that still have Property
-  // Operations keep their key binding, since it still does something.
-  //
-  // components is untyped (Schema.Types.Mixed), so nextScene is stored as
-  // whatever the frontend sent - always a plain string, never a cast
-  // ObjectId - unlike directLink above. Compare against the string form so
-  // this still matches regardless of what type the caller passed in.
+  // unlink components pointing at the deleted scene, dropping their key
+  // binding if they have no state operations left. nextScene is a string
   const sceneIdStr = sceneId.toString();
   await Scene.updateMany(
     { "components.nextScene": sceneIdStr },
@@ -467,11 +455,7 @@ async function validateBackground(background) {
 export const patchScene = async (sceneId, patch, scenarioId) => {
   const { fields = {}, components = [], deletedComponentIds = [] } = patch;
 
-  // Duplicate ids in the same patch are rejected outright rather than
-  // silently letting the last one win - effectiveComponents below only
-  // validates the first occurrence (Array.find), while bulkWrite applies
-  // updates in order, so a later duplicate could persist an unvalidated,
-  // actually-conflicting keyBinding.
+  // only the first occurrence of an id gets validated, so reject duplicates
   const duplicateComponentIds = [
     ...new Set(
       components
@@ -486,10 +470,7 @@ export const patchScene = async (sceneId, patch, scenarioId) => {
     );
   }
 
-  // A component can't be both deleted and updated in the same patch - the
-  // $pull/$push bulkWrite below would actually resurrect it (re-inserted by
-  // the "insert if it doesn't already exist" op after $pull removes it),
-  // silently diverging from what gets validated as "effective" below.
+  // the bulkWrite below would re-insert a component that's deleted and updated
   const deletedAndUpdated = components
     .map((c) => c.id)
     .filter((id) => deletedComponentIds.includes(id));
@@ -500,9 +481,6 @@ export const patchScene = async (sceneId, patch, scenarioId) => {
     );
   }
 
-  // Keep this list in sync with the field list in generatePatch,
-  // frontend/src/context/SceneContextProvider.jsx - a field missing from
-  // either side either gets silently dropped here or never sent from there.
   const allowedFields = {};
   [
     "name",
@@ -538,9 +516,6 @@ export const patchScene = async (sceneId, patch, scenarioId) => {
     throw new HttpError("scene not found", HttpStatusCode.NotFound);
   }
 
-  // Key bindings can only change via a component add/edit/delete or a
-  // directLink/directLinkKey field change - skip building the effective
-  // state and validating it when the patch touches neither.
   const keyBindingsMayHaveChanged =
     components.length > 0 ||
     deletedComponentIds.length > 0 ||

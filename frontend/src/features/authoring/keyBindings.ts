@@ -1,19 +1,13 @@
 import type { GenericComponent } from "./types";
 
-// Single, unmodified keys an author may bind a button (or a scene's direct
-// link) to during playback. Excludes anything still reserved: Enter/Tab/
-// Escape/Backspace/Delete/F-keys/modifiers, and "/" and "'" (both trigger
-// Firefox's Quick Find when pressed unmodified).
+// "/" and "'" are excluded since they open Firefox's Quick Find
 const LETTERS = Array.from({ length: 26 }, (_, i) =>
   String.fromCharCode(65 + i)
 );
 const DIGITS = Array.from({ length: 10 }, (_, i) => String(i));
 const PUNCTUATION = ["-", "=", "[", "]", ";", ",", ".", "`", "\\"];
 
-// Single source of truth for keys with no printable single-character glyph:
-// their internal id, how to recognize them off a KeyboardEvent, and how to
-// display them. SPACE is matched via e.code (see normalizeEventKey) rather
-// than a nativeKey here, since e.key for Space is a literal " ".
+// SPACE is matched on e.code in normalizeEventKey, since its e.key is " "
 const NAMED_KEYS: Record<string, { nativeKey?: string; display: string }> = {
   SPACE: { display: "Space" },
   ARROWUP: { nativeKey: "ArrowUp", display: "↑" },
@@ -47,20 +41,9 @@ export function normalizeEventKey(e: KeyboardEvent): string | null {
   return key && KEY_BINDING_OPTIONS.includes(key) ? key : null;
 }
 
-// Mirrored in backend/src/util/keyBindings.js, which validates key bindings
-// on save. The backend is deployed separately and can't import this file -
-// keep the two in sync.
-
-// A scene's direct-link key defaults to responding to either Space or
-// ArrowRight when the author hasn't chosen a specific key.
 export const DEFAULT_DIRECT_LINK_KEYS = ["SPACE", "ARROWRIGHT"];
 
-// `null`/`undefined` means the field was never configured (includes every
-// scene saved before directLinkKey existed), so it falls back to responding
-// to Space or ArrowRight. An empty string is a distinct, explicit "Custom
-// mode chosen, but no key picked yet" state - it claims nothing at all
-// until the author picks one, rather than silently keeping the defaults
-// reserved. Anything else is the one specific key it responds to.
+// null = default keys, "" = custom with no key picked yet
 export function directLinkKeysFor(
   directLinkKey: string | null | undefined
 ): string[] {
@@ -79,10 +62,6 @@ type ActionableComponent = Pick<
   "clickable" | "nextScene" | "stateOperations"
 >;
 
-// Whether a component actually does something when clicked/keyed, as opposed
-// to being clickable with nothing wired up yet. Shared so the editor canvas,
-// the play canvas, and the play keydown handler can't drift on what counts
-// as "actionable".
 export function hasClickAction(component: ActionableComponent): boolean {
   return !!(
     component.clickable &&
@@ -90,9 +69,6 @@ export function hasClickAction(component: ActionableComponent): boolean {
   );
 }
 
-// Keys already claimed by clickable components, so a new binding can't
-// collide with one of them. Pass excludeComponentId when checking a
-// component against its scene-mates (so it doesn't count its own key).
 export function usedComponentKeys(
   components: KeyBoundComponent[],
   excludeComponentId?: string
@@ -105,10 +81,6 @@ export function usedComponentKeys(
     .map((c) => c.keyBinding);
 }
 
-// The full set of keys still free to bind, after excluding whatever's
-// already claimed by other clickable components and (optionally) the
-// scene's direct link. Shared by the component and direct-link key pickers
-// so "what counts as used" can't drift between them.
 export function availableKeyBindings(
   components: KeyBoundComponent[],
   options: {

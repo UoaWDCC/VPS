@@ -17,9 +17,7 @@ const orNull = (v) => v ?? null;
 const toBoolean = (v) => !!v;
 const orDefaultPosition = (v) => v ?? DEFAULT_KEY_HINT_POSITION;
 
-// Mirrors a component prop field into local editable state so edits survive
-// re-renders, resyncing only when the field's value actually changes on the
-// incoming component (preserves in-flight local edits otherwise).
+// local copy of a component field, resynced only when the field changes
 function usePropMirror(component, field, normalize) {
   const [value, setValue] = useState(() => normalize(component?.[field]));
   useEffect(() => {
@@ -29,16 +27,12 @@ function usePropMirror(component, field, normalize) {
 }
 
 /**
- * The key binding section of the "Button Actions" panel: lets the player
- * trigger a clickable component by pressing a key.
+ * The key binding section of the "Button Actions" panel.
  * @component
  */
 export default function KeyBindingSettings({ component }) {
   const { scenes } = useContext(SceneContext);
 
-  // Subscribed (not read via a one-off getScene() call) so this panel
-  // re-renders - and its available-keys list stays current - when another
-  // component or the scene's direct link claims/frees a key elsewhere.
   const sceneComponents = useVisualScene((scene) => scene.components);
   const directLink = useVisualScene((scene) => scene.directLink);
   const directLinkKey = useVisualScene((scene) => scene.directLinkKey);
@@ -90,13 +84,7 @@ export default function KeyBindingSettings({ component }) {
     [component, sceneComponents, directLink, directLinkKey]
   );
 
-  // A Next Scene that no longer exists (its scene was deleted elsewhere)
-  // shouldn't linger as a dangling id - null it out the moment it's
-  // noticed, so Linked Scene reads "None" instead of a blank scene name.
-  // A key binding with nothing to trigger (no Next Scene and no Property
-  // Operations) is a dead binding - clear that too, whether it's this
-  // cleanup or an edit that removed its last action. Mirrors the cleanup
-  // pattern in useDirectLink.js.
+  // clear a deleted Next Scene, and the key binding once nothing uses it
   useEffect(() => {
     if (!component?.clickable) return;
 

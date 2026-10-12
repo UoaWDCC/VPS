@@ -2,9 +2,7 @@ import { useEffect, useState } from "react";
 import { normalizeEventKey, displayKeyBinding } from "../keyBindings";
 
 /**
- * A "press a key to bind" control: click Set key, then press the key you
- * want. Only accepts keys present in availableKeys (already excludes keys
- * taken elsewhere) - anything else shows an inline error and keeps listening.
+ * Click "Set key", then press a key from availableKeys to bind it.
  * @component
  */
 export default function KeyCapture({
@@ -23,10 +21,7 @@ export default function KeyCapture({
     function handleKeyDown(e) {
       e.preventDefault();
       e.stopPropagation();
-      // Only one KeyCapture may claim a given keypress - without this, two
-      // instances capturing at once (e.g. a component's and the scene's
-      // direct-link picker) would both see the key as available and both
-      // assign it from a single physical keystroke.
+      // stop another open KeyCapture from claiming the same keypress
       e.stopImmediatePropagation();
 
       if (e.key === "Escape") {

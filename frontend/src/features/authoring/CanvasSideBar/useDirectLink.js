@@ -16,8 +16,6 @@ export default function useDirectLink(scenes) {
     ),
   ];
 
-  // With no other scene in the scenario, there's nothing for Direct Link to
-  // send the player to - turning it on would leave it pointing at nothing.
   const hasOtherScenes = (scenes ?? []).some((s) => s._id !== sceneId);
 
   const disabled = uniqueLinkedScenes.length > 1 || !hasOtherScenes;
@@ -28,10 +26,6 @@ export default function useDirectLink(scenes) {
     if (!disabled) return;
     if (directLink) modifySceneProp("directLink", null);
     if (directLinkKey != null) modifySceneProp("directLinkKey", null);
-    // directLink/directLinkKey are deps (not just disabled) so switching
-    // straight from one already-disabled scene to another still re-checks
-    // and clears that scene's own stale values, rather than skipping the
-    // cleanup because `disabled` itself didn't change across the switch.
   }, [disabled, directLink, directLinkKey]);
 
   return { directLink, disabled, defaultTarget, hasOtherScenes };

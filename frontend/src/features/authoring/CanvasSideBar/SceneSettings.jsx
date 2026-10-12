@@ -47,8 +47,6 @@ export default function SceneSettings() {
       setKeyValue(directLinkKey ?? null);
   }, [directLinkKey]);
 
-  // null/undefined = Default mode; "" or a real key = Custom mode (see
-  // directLinkKeysFor in keyBindings.ts for what each value claims).
   const keyMode = keyValue != null ? "CUSTOM" : "DEFAULT";
 
   const availableDirectLinkKeys = useMemo(
@@ -61,8 +59,6 @@ export default function SceneSettings() {
     modifySceneProp("directLinkKey", v);
   }
 
-  // Direct Link's default mode claims Space/ArrowRight; clear those keys off
-  // any button so they're not silently unreachable or colliding.
   function clearDefaultDirectLinkCollisions() {
     const collidingIds = Object.values(getScene().components)
       .filter(
@@ -79,9 +75,7 @@ export default function SceneSettings() {
       saveDirectLinkKey(null);
       clearDefaultDirectLinkCollisions();
     } else {
-      // Explicitly mark "Custom, nothing picked yet" so direct link claims
-      // no key at all until the author sets one via KeyCapture below -
-      // distinct from null, which falls back to Space/ArrowRight.
+      // "" = custom with no key picked yet (null would mean the defaults)
       saveDirectLinkKey("");
     }
   }
@@ -270,9 +264,6 @@ export default function SceneSettings() {
             }
             onChange={(targetId) => {
               modifySceneProp("directLink", targetId || null);
-              // Clearing the target turns Direct Link off the same way the
-              // toggle does - keep directLinkKey in sync so it doesn't
-              // linger stale for a link that's no longer set.
               if (!targetId) modifySceneProp("directLinkKey", null);
             }}
           />

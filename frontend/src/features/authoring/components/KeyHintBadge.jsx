@@ -7,9 +7,6 @@ const PADDING_X = 10;
 const PADDING_Y = 6;
 const INSET = 10;
 
-// Small, subtle "[KEY]" badge so it stays legible over arbitrary video
-// backgrounds regardless of app theme. Anchored to one of six positions
-// around the component's (rotated) bounding box.
 function rectFor(position, corners, width, height) {
   const [tl, tr, br, bl] = corners;
   const topCenterX = (tl.x + tr.x) / 2;

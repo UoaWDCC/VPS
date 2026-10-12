@@ -294,8 +294,7 @@ export default function PlayScenarioPage({ group }) {
       const boundKey = normalizeEventKey(e);
       if (!boundKey) return;
 
-      // Resolve property bindings first, same as PlayScenarioCanvas, so a
-      // component whose Clickable is bound off can't be triggered by key.
+      // resolve property bindings so a component bound unclickable can't be keyed
       const component = Object.values(
         resolveSceneBindings(currScene, properties)?.components ?? {}
       ).find((c) => c.keyBinding === boundKey && hasClickAction(c));
