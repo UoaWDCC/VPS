@@ -1,4 +1,5 @@
 import { MarkerType } from "@xyflow/react";
+import { describeCondition } from "../../playScenario/debug/describe.js";
 
 const markerEnd = {
   type: MarkerType.ArrowClosed,
@@ -6,7 +7,7 @@ const markerEnd = {
   height: 15,
 };
 
-const CreateGraphData = (scenes, groupInfo) => {
+const CreateGraphData = (scenes, groupInfo, properties = []) => {
   var sceneMap = [];
   var groupPath = [];
   const nodes = [];
@@ -42,28 +43,58 @@ const CreateGraphData = (scenes, groupInfo) => {
       });
     });
 
-    // Loop through each component of a scene and check for the "nextScene" property and add it to edge graph
+    // Loop through each component of a scene and add an edge for each scene it
+    // can lead to: its "nextScene", and the scene of each of its destination
+    // rules. A button with rules labels each edge with the condition for it,
+    // so the graph shows what a branch depends on. Buttons leading the same
+    // way share one edge, and its labels are all of theirs, unless one of them
+    // always leads there, when no condition applies.
+    const authored = new Map();
+    const unconditional = new Set();
+    const addEdge = (scene, targetId, branch) => {
+      const target = sceneMap[targetId];
+      if (!target) return;
+
+      const id = scene.name + "-" + target.name;
+      if (!branch) unconditional.add(id);
+      const existing = authored.get(id);
+      if (existing) {
+        if (branch && !existing.data.branches.includes(branch))
+          existing.data.branches.push(branch);
+        return;
+      }
+
+      authored.set(id, {
+        id,
+        source: scene._id,
+        target: targetId,
+        type: "simpleFloating",
+        markerEnd: {
+          ...markerEnd,
+          color: "var(--color-primary)",
+        },
+        style: {
+          strokeWidth: 3,
+          stroke: "var(--color-primary)",
+        },
+        animated: true,
+        data: { branches: branch ? [branch] : [] },
+      });
+    };
+
     scenes.forEach((scene) =>
       scene.components.forEach((obj) => {
-        if (obj.nextScene && sceneMap[obj.nextScene]) {
-          edges.push({
-            id: scene.name + "-" + sceneMap[obj.nextScene].name,
-            source: scene._id,
-            target: obj.nextScene,
-            type: "simpleFloating",
-            markerEnd: {
-              ...markerEnd,
-              color: "var(--color-primary)",
-            },
-            style: {
-              strokeWidth: 3,
-              stroke: "var(--color-primary)",
-            },
-            animated: true,
-          });
-        }
+        const rules = obj.nextSceneRules ?? [];
+        rules.forEach((rule) =>
+          addEdge(scene, rule.sceneId, describeCondition(rule, properties))
+        );
+        addEdge(scene, obj.nextScene, rules.length ? "otherwise" : null);
       })
     );
+    unconditional.forEach((id) => {
+      authored.get(id).data.branches = [];
+    });
+    edges.push(...authored.values());
 
     /**
      * Loop through group path to create the links of the students path

@@ -158,9 +158,9 @@ We use a simple Map object (`sceneCache`) as a basic cache to store the scene da
 ### Scene Click Flow
 
 1. User clicks a clickable component.
-2. If `nextScene` is already cached, the UI switches immediately.
+2. The page works out where the button leads, using the button's destination rules on the properties as they'll be after the button's own operations (see [Conditional Destinations](Specifications/Conditional%20Destinations.md)). If that scene is already cached, the UI switches immediately.
 3. The app sends the navigate request using `component.id`.
-4. The backend confirms the move and returns the authoritative state.
+4. The backend works out the destination the same way, confirms the move and returns the authoritative state. If it chose a different scene, the page follows it.
 5. The page updates scene/state values and handles errors (`409`, `403`, fallback error route).
 
 In multiplayer, the page also refreshes resources from `GET /api/navigate/group/resources/:groupId` and filters them using current properties.

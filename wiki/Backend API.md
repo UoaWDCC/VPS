@@ -349,6 +349,8 @@ Returns:
 - `active`: the scene the user should now be on.
 - `scenes`: the current scene plus directly reachable next scenes, preloaded for the client cache.
 - `active` and `scenes` are omitted when the interacted component does not lead to a different scene.
+- Where a component leads is its `nextScene`, unless one of its `nextSceneRules` matches. The rules are checked in order on the properties **after** the component's own operations, and the first match wins. See [Conditional Destinations](Specifications/Conditional%20Destinations.md).
+- `scenes` includes every scene the active scene's components can lead to: each `nextScene` and each rule's scene.
 
 **Reset (singleplayer):\***
 

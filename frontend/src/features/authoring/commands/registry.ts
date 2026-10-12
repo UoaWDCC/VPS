@@ -1,5 +1,6 @@
 import { addCommands } from "./add";
 import { arrangeCommands } from "./arrange";
+import { logicCommands } from "./logic";
 import { readCommands } from "./read";
 import { removeCommands } from "./remove";
 import { styleCommands } from "./style";
@@ -11,6 +12,7 @@ export const commands: Command[] = [
   ...addCommands,
   ...styleCommands,
   ...arrangeCommands,
+  ...logicCommands,
   ...removeCommands,
 ];
 

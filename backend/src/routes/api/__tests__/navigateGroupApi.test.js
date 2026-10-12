@@ -437,4 +437,149 @@ describe("Navigate Group API tests", () => {
       expect(dbGroup.currentSceneEnteredAt).toBeNull();
     });
   });
+
+  describe("conditional destinations", () => {
+    const heartRate = (value) => [
+      { id: "hr", name: "heartRate", type: "number", value },
+    ];
+    const rule = (comparator, value, scene) => ({
+      stateVariableId: "hr",
+      comparator,
+      value,
+      sceneId: scene._id.toString(),
+    });
+
+    let worse;
+    let stable;
+    let triage;
+
+    // The group is on a scene whose button has the given settings, with the
+    // given heart rate
+    const startOn = async (button, hr = 130) => {
+      triage = await Scene.create({
+        name: "Triage",
+        components: [{ id: "go", clickable: true, type: "BUTTON", ...button }],
+        roles: [],
+      });
+      await Group.findByIdAndUpdate(group._id, {
+        path: [triage._id.toString()],
+        stateVariables: heartRate(hr),
+        stateVersion: 1,
+      });
+    };
+
+    const press = () =>
+      axios.post(
+        `http://localhost:${ctx.port}/api/navigate/group/${group._id}`,
+        {
+          uid: "uid-player",
+          currentScene: triage._id.toString(),
+          componentId: "go",
+          addFlags: [],
+          removeFlags: [],
+        },
+        authHeaders("uid-player")
+      );
+
+    beforeEach(async () => {
+      worse = await Scene.create({
+        name: "Deteriorates",
+        components: [],
+        roles: [],
+      });
+      stable = await Scene.create({
+        name: "Stable",
+        components: [],
+        roles: [],
+      });
+    });
+
+    it("sends the group to a rule's scene when it matches", async () => {
+      await startOn({
+        nextScene: stable._id.toString(),
+        nextSceneRules: [rule(">", 120, worse)],
+      });
+
+      const response = await press();
+      expect(response.data.active).toBe(worse._id.toString());
+
+      const dbGroup = await Group.findById(group._id);
+      expect(dbGroup.path[0]).toBe(worse._id.toString());
+    });
+
+    it("uses the button's own scene when no rule matches", async () => {
+      await startOn(
+        {
+          nextScene: stable._id.toString(),
+          nextSceneRules: [rule(">", 120, worse)],
+        },
+        100
+      );
+
+      const response = await press();
+      expect(response.data.active).toBe(stable._id.toString());
+    });
+
+    it("judges the rules after the button's own property changes", async () => {
+      await startOn(
+        {
+          nextScene: stable._id.toString(),
+          nextSceneRules: [rule(">", 120, worse)],
+          stateOperations: [
+            { stateVariableId: "hr", operation: "add", value: 20 },
+          ],
+        },
+        110
+      );
+
+      const response = await press();
+      expect(response.data.active).toBe(worse._id.toString());
+      expect(response.data.properties[0].value).toBe(130);
+
+      const dbGroup = await Group.findById(group._id);
+      expect(dbGroup.stateVariables[0].value).toBe(130);
+    });
+
+    it("takes the first rule that matches", async () => {
+      await startOn({
+        nextScene: stable._id.toString(),
+        nextSceneRules: [rule(">", 100, worse), rule(">", 100, stable)],
+      });
+
+      const response = await press();
+      expect(response.data.active).toBe(worse._id.toString());
+    });
+
+    it("loads every scene a button can lead to", async () => {
+      await startOn({
+        nextScene: stable._id.toString(),
+        nextSceneRules: [rule(">", 120, worse)],
+      });
+      await Group.findByIdAndUpdate(group._id, {
+        path: [triage._id.toString()],
+      });
+
+      const response = await axios.post(
+        `http://localhost:${ctx.port}/api/navigate/group/${group._id}`,
+        { uid: "uid-player", addFlags: [], removeFlags: [] },
+        authHeaders("uid-player")
+      );
+      expect(response.data.scenes.map((s) => s._id).sort()).toEqual(
+        [triage._id, worse._id, stable._id].map(String).sort()
+      );
+    });
+
+    it("keeps a rule's scene to the roles that can enter it", async () => {
+      await Scene.findByIdAndUpdate(worse._id, { roles: ["nurse"] });
+      await startOn({
+        nextScene: stable._id.toString(),
+        nextSceneRules: [rule(">", 120, worse)],
+      });
+
+      // the group's role (doctor) can't enter the scene the rule picks
+      await expect(press()).rejects.toMatchObject({
+        response: { status: 403 },
+      });
+    });
+  });
 });

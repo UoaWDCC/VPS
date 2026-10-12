@@ -122,8 +122,12 @@ export default function Dashboard() {
 
   // Create the graph data, also passes if the current group info if it's present
   const { nodes, edges, groupEdges, groupPath, sceneMap } = useMemo(() => {
-    return CreateGraphData(scenes, groupInfo ? groupInfo : []);
-  }, [scenes, groupInfo]);
+    return CreateGraphData(
+      scenes,
+      groupInfo ? groupInfo : [],
+      scenario.stateVariables
+    );
+  }, [scenes, groupInfo, scenario.stateVariables]);
 
   // Flattens every group's members into a single list for the Members tab
   const allMembers = useMemo(

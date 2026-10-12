@@ -1,4 +1,7 @@
-import { describeOperation } from "../../playScenario/debug/describe.js";
+import {
+  describeCondition,
+  describeOperation,
+} from "../../playScenario/debug/describe.js";
 import type { Component, Scene } from "../types";
 import { getFrame, getRotation, hasFrame, round } from "./geometry";
 import { shortId } from "./resolve";
@@ -26,8 +29,16 @@ export interface ComponentSnapshot {
   stroke?: string;
   strokeWidth?: number;
   clickable?: boolean;
-  /** Name of the scene a press leads to. */
+  /**
+   * Name of the scene a press leads to. For a button with rules, the scene
+   * for when none of them match.
+   */
   goesTo?: string;
+  /**
+   * Where a press leads depending on properties, checked in this order, after
+   * the button's own changes: "if heartRate > 120 → Deteriorates".
+   */
+  rules?: string[];
   /** What a press does to properties. */
   changes?: string[];
   /** Properties that drive this component's look or position. */
@@ -67,6 +78,22 @@ function sceneName(world: Pick<World, "scenes">, id: unknown) {
   return world.scenes.find((s) => s._id === id)?.name ?? `unknown scene ${id}`;
 }
 
+/** A button's destination rules in words, in the order they're checked. */
+function destinationRules(component: Component, world: World) {
+  const rules = field(component, "nextSceneRules");
+  if (!Array.isArray(rules)) return [];
+  return rules.map(
+    (rule: {
+      sceneId: string;
+      stateVariableId: string;
+      comparator: string;
+    }) => ({
+      condition: describeCondition(rule, world.properties),
+      to: sceneName(world, rule.sceneId) ?? "no scene",
+    })
+  );
+}
+
 function snapshotComponent(
   component: Component & { bounds: { verts: { x: number; y: number }[] } },
   z: number,
@@ -104,12 +131,19 @@ function snapshotComponent(
     snapshot.strokeWidth = strokeWidth;
 
   const goesTo = sceneName(world, field(component, "nextScene"));
+  const rules = destinationRules(component, world);
   const operations = field(component, "stateOperations");
   const bindings = field(component, "stateBindings");
   const acts =
-    Boolean(goesTo) || (Array.isArray(operations) && operations.length > 0);
+    Boolean(goesTo) ||
+    rules.length > 0 ||
+    (Array.isArray(operations) && operations.length > 0);
   if (field(component, "clickable") && acts) snapshot.clickable = true;
   if (goesTo) snapshot.goesTo = goesTo;
+  if (rules.length)
+    snapshot.rules = rules.map(
+      ({ condition, to }) => `if ${condition} → ${to}`
+    );
   if (Array.isArray(operations) && operations.length)
     snapshot.changes = operations.map((op) =>
       describeOperation(op, world.properties)
@@ -174,8 +208,11 @@ export interface ScenarioSnapshot {
     name: string;
     components: number;
     time: number | null;
-    /** Where the buttons in this scene lead. */
-    links: { from: string; to: string }[];
+    /**
+     * Where the buttons in this scene lead. `when` says what a button with
+     * rules needs for that link: a condition, or "otherwise".
+     */
+    links: { from: string; to: string; when?: string }[];
     directLink: string | null;
   }[];
   properties: { id: string; name: string; type: string; value: unknown }[];
@@ -189,10 +226,20 @@ export function snapshotScenario(world: World): ScenarioSnapshot {
     scenes: world.scenes.map((scene) => {
       const components = Object.values(scene.components);
       const links = components.flatMap((component) => {
-        const to = sceneName(world, field(component, "nextScene"));
-        if (!to) return [];
         const text = componentText(component).trim();
-        return [{ from: text || shortId(component.id), to }];
+        const from = text || shortId(component.id);
+        const rules = destinationRules(component, world);
+        const to = sceneName(world, field(component, "nextScene"));
+        return [
+          ...rules.map((rule) => ({
+            from,
+            to: rule.to,
+            when: rule.condition,
+          })),
+          ...(to
+            ? [{ from, to, ...(rules.length && { when: "otherwise" }) }]
+            : []),
+        ];
       });
       return {
         id: scene._id,

@@ -7,7 +7,12 @@ import {
   XIcon,
 } from "lucide-react";
 
-import { componentLabel, describeOperation, formatValue } from "./describe";
+import {
+  componentLabel,
+  describeCondition,
+  describeOperation,
+  formatValue,
+} from "./describe";
 
 const KINDS = {
   scene: { label: "scene", className: "badge-neutral" },
@@ -215,11 +220,25 @@ function EventLogSection({ entries, startedAt, onClear }) {
   );
 }
 
+// The name of a scene a button leads to. Until the scenes next to this one
+// have loaded, a missing scene proves nothing.
+function DestinationName({ id, getScene, neighborsLoaded }) {
+  const next = getScene(id);
+  if (next) return next.name ?? "next scene";
+  return neighborsLoaded ? (
+    <span className="text-error">missing scene</span>
+  ) : (
+    "loading…"
+  );
+}
+
 function SceneSection({ scene, properties, getScene, onRun }) {
   const actions = Object.values(scene.components ?? {}).filter(
     (component) =>
       component.clickable &&
-      (component.nextScene || component.stateOperations?.length)
+      (component.nextScene ||
+        component.nextSceneRules?.length ||
+        component.stateOperations?.length)
   );
   const timerOperations = scene.timerStateOperations ?? [];
   const directLink = scene.directLink
@@ -242,32 +261,43 @@ function SceneSection({ scene, properties, getScene, onRun }) {
       ) : (
         <ul className="flex flex-col gap-2">
           {actions.map((component) => {
-            const next = component.nextScene
-              ? getScene(component.nextScene)
-              : null;
+            const rules = component.nextSceneRules ?? [];
+            const destination = (id) => (
+              <DestinationName
+                id={id}
+                getScene={getScene}
+                neighborsLoaded={scene.neighborsLoaded}
+              />
+            );
             return (
               <li key={component.id} className="flex items-start gap-2 text-xs">
                 <div className="min-w-0 flex-1">
                   <div className="font-semibold">
                     {componentLabel(component)}
-                    {component.nextScene &&
-                      (next ? (
-                        <span className="font-normal text-base-content/60">
-                          {" "}
-                          → {next.name ?? "next scene"}
-                        </span>
-                      ) : scene.neighborsLoaded ? (
-                        <span className="font-normal text-error">
-                          {" "}
-                          → missing scene
-                        </span>
-                      ) : (
-                        <span className="font-normal text-base-content/60">
-                          {" "}
-                          → loading…
-                        </span>
-                      ))}
+                    {!rules.length && component.nextScene && (
+                      <span className="font-normal text-base-content/60">
+                        {" "}
+                        → {destination(component.nextScene)}
+                      </span>
+                    )}
                   </div>
+                  {rules.map((rule, index) => (
+                    <div
+                      key={index}
+                      className="break-words font-mono text-[11px] text-base-content/60"
+                    >
+                      if {describeCondition(rule, properties)} →{" "}
+                      {destination(rule.sceneId)}
+                    </div>
+                  ))}
+                  {rules.length > 0 && (
+                    <div className="break-words font-mono text-[11px] text-base-content/60">
+                      otherwise →{" "}
+                      {component.nextScene
+                        ? destination(component.nextScene)
+                        : "stay here"}
+                    </div>
+                  )}
                   {(component.stateOperations ?? []).map((operation, index) => (
                     <div
                       key={index}

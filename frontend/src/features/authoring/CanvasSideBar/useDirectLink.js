@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import useVisualScene from "../stores/visual";
 import { modifySceneProp } from "../scene/operations/modifiers";
+import { destinationSceneIds } from "../../../components/Properties/destination";
 
 export default function useDirectLink() {
   const directLink = useVisualScene((scene) => scene.directLink);
@@ -9,8 +10,8 @@ export default function useDirectLink() {
   const uniqueLinkedScenes = [
     ...new Set(
       Object.values(components ?? {})
-        .filter((c) => c.clickable && c.nextScene)
-        .map((c) => c.nextScene)
+        .filter((c) => c.clickable)
+        .flatMap(destinationSceneIds)
     ),
   ];
 

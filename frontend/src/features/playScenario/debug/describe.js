@@ -61,3 +61,45 @@ export function describeOperation(operation, properties) {
       return `${name} ${operation.operation} ${value}`;
   }
 }
+
+/**
+ * Describes a destination rule's condition, e.g. `heartRate > 120`. A rule
+ * pointing at a deleted property is marked as such.
+ */
+export function describeCondition(rule, properties) {
+  const property = properties?.find(
+    (candidate) => candidate.id === rule.stateVariableId
+  );
+  const name = property ? property.name : "a deleted property";
+  return `${name} ${rule.comparator} ${formatValue(rule.value)}`;
+}
+
+/**
+ * What decided where a button with destination rules led: the rule that
+ * matched, or the fallback. Nothing for a button without rules.
+ *
+ * @param {object} component the button
+ * @param {Array} properties the properties the rules were judged on
+ * @param {number} ruleIndex the rule that matched, or -1 for the fallback
+ * @param {(sceneId: string) => string} sceneName
+ */
+export function describeDecision(component, properties, ruleIndex, sceneName) {
+  const rules = component.nextSceneRules ?? [];
+  if (!rules.length) return [];
+
+  if (ruleIndex >= 0) {
+    const rule = rules[ruleIndex];
+    const property = properties.find((p) => p.id === rule.stateVariableId);
+    return [
+      `Rule ${ruleIndex + 1} matched: ${describeCondition(rule, properties)} (it is ${formatValue(property?.value)})`,
+      `So it goes to ${sceneName(rule.sceneId)}`,
+    ];
+  }
+
+  return [
+    "No rule matched",
+    component.nextScene
+      ? `So it goes to ${sceneName(component.nextScene)}, its own scene`
+      : "And it has no scene of its own, so the player stays here",
+  ];
+}

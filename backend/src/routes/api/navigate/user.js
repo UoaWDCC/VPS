@@ -6,8 +6,13 @@ import Scene from "../../../db/models/scene.js";
 import User from "../../../db/models/user.js";
 
 import { HttpError } from "../../../util/error.js";
+import {
+  destinationSceneIds,
+  resolveDestination,
+} from "../../../util/properties/destination.js";
 import { applyPropertyOperations } from "../../../util/properties/propertyOperations.js";
 import STATUS from "../../../util/status.js";
+import { isValidObjectId } from "../../../util/validation.js";
 
 import { getScenarioFirstScene, getSimpleScene } from "./group.js";
 import {
@@ -18,10 +23,11 @@ import {
 
 const getConnectedScenes = async (sceneID, active = true) => {
   const scene = await getSimpleScene(sceneID);
+  // Every scene a button can lead to, whichever rule or fallback picks it
   const connectedIds = scene.components
     .filter((c) => c.clickable)
-    .map((b) => b.nextScene)
-    .filter(Boolean);
+    .flatMap(destinationSceneIds)
+    .filter(isValidObjectId);
   const connected = await Scene.find(
     { _id: { $in: connectedIds } },
     {
@@ -103,16 +109,22 @@ const syncProperties = async (user, scenarioId) => {
   return [properties, user.stateVersions[scenarioId]];
 };
 
-// Update properties for a user
-const updateProperties = async (user, scenarioId, component) => {
+// The user's properties once a button's own operations have been applied.
+// Worked out before anything is saved, because where the button leads depends
+// on them.
+const propertiesAfterPress = (user, scenarioId, component) =>
+  component?.stateOperations
+    ? applyPropertyOperations(
+        user.stateVariables[scenarioId],
+        component.stateOperations
+      )
+    : user.stateVariables[scenarioId];
+
+// Saves the properties a button changed
+const updateProperties = async (user, scenarioId, component, properties) => {
   if (!component || !component.stateOperations) {
     return [user.stateVariables[scenarioId], user.stateVersions[scenarioId]];
   }
-
-  const properties = applyPropertyOperations(
-    user.stateVariables[scenarioId],
-    component.stateOperations
-  );
 
   return await setUserProperties(user._id, scenarioId, properties);
 };
@@ -229,7 +241,12 @@ export const userNavigate = async (req) => {
 
   let scenes = null;
 
-  const nextScene = component?.nextScene ?? bodyNextScene;
+  // A button's rules are judged on the properties after its own operations
+  const updatedProperties = propertiesAfterPress(user, scenarioId, component);
+  const destination = component
+    ? resolveDestination(component, updatedProperties).sceneId
+    : null;
+  const nextScene = destination ?? bodyNextScene;
 
   if (nextScene && nextScene !== currentScene) {
     [, scenes] = await Promise.all([
@@ -241,7 +258,8 @@ export const userNavigate = async (req) => {
   const [properties, propertyVersion] = await updateProperties(
     user,
     scenarioId,
-    component
+    component,
+    updatedProperties
   );
 
   return {

@@ -649,4 +649,236 @@ describe("Navigate User API tests", () => {
       expect(dbUser.sceneEnteredAt.get(scenarioId())).toBeUndefined();
     });
   });
+
+  describe("conditional destinations", () => {
+    const heartRate = (value) => [
+      { id: "hr", name: "heartRate", type: "number", value },
+    ];
+    const rule = (comparator, value, scene) => ({
+      stateVariableId: "hr",
+      comparator,
+      value,
+      sceneId: scene._id.toString(),
+    });
+
+    let worse;
+    let stable;
+    let triage;
+
+    // The player is on a scene whose button has the given settings, with the
+    // given heart rate
+    const startOn = async (button, hr = 130) => {
+      triage = await Scene.create({
+        name: "Triage",
+        components: [{ id: "go", clickable: true, type: "BUTTON", ...button }],
+        roles: [],
+      });
+      await User.findOneAndUpdate(
+        { uid: "uid-player" },
+        {
+          $set: {
+            [`paths.${scenario._id}`]: [triage._id.toString()],
+            [`stateVariables.${scenario._id}`]: heartRate(hr),
+            [`stateVersions.${scenario._id}`]: 1,
+          },
+        }
+      );
+    };
+
+    const press = (body = {}) =>
+      axios.post(
+        `http://localhost:${ctx.port}/api/navigate/user/${scenario._id}`,
+        {
+          uid: "uid-player",
+          currentScene: triage._id.toString(),
+          componentId: "go",
+          ...body,
+        },
+        authHeaders("uid-player")
+      );
+
+    const savedHeartRate = async () => {
+      const user = await User.findOne({ uid: "uid-player" });
+      return user.stateVariables.get(scenario._id.toString())[0].value;
+    };
+
+    const savedPath = async () => {
+      const user = await User.findOne({ uid: "uid-player" });
+      return user.paths.get(scenario._id.toString());
+    };
+
+    beforeEach(async () => {
+      worse = await Scene.create({
+        name: "Deteriorates",
+        components: [],
+        roles: [],
+      });
+      stable = await Scene.create({
+        name: "Stable",
+        components: [],
+        roles: [],
+      });
+    });
+
+    it("sends the player to a rule's scene when it matches", async () => {
+      await startOn({
+        nextScene: stable._id.toString(),
+        nextSceneRules: [rule(">", 120, worse)],
+      });
+
+      const response = await press();
+      expect(response.data.active).toBe(worse._id.toString());
+      expect((await savedPath())[0]).toBe(worse._id.toString());
+    });
+
+    it("uses the button's own scene when no rule matches", async () => {
+      await startOn(
+        {
+          nextScene: stable._id.toString(),
+          nextSceneRules: [rule(">", 120, worse)],
+        },
+        100
+      );
+
+      const response = await press();
+      expect(response.data.active).toBe(stable._id.toString());
+    });
+
+    it("checks the rules in order and takes the first that matches", async () => {
+      await startOn({
+        nextScene: stable._id.toString(),
+        nextSceneRules: [rule(">", 200, stable), rule(">", 100, worse)],
+      });
+
+      const response = await press();
+      expect(response.data.active).toBe(worse._id.toString());
+
+      // swapped round, the other one is first
+      await startOn({
+        nextScene: stable._id.toString(),
+        nextSceneRules: [rule(">", 100, stable), rule(">", 100, worse)],
+      });
+      const swapped = await press();
+      expect(swapped.data.active).toBe(stable._id.toString());
+    });
+
+    it("judges the rules after the button's own property changes", async () => {
+      // 110 is not over 120, but the button adds 20 first
+      await startOn(
+        {
+          nextScene: stable._id.toString(),
+          nextSceneRules: [rule(">", 120, worse)],
+          stateOperations: [
+            { stateVariableId: "hr", operation: "add", value: 20 },
+          ],
+        },
+        110
+      );
+
+      const response = await press();
+      expect(response.data.active).toBe(worse._id.toString());
+      expect(response.data.properties[0].value).toBe(130);
+      expect(await savedHeartRate()).toBe(130);
+    });
+
+    it("lets a button's changes take a player out of a rule's range", async () => {
+      // 130 is over 120, but the button takes 20 off first
+      await startOn(
+        {
+          nextScene: stable._id.toString(),
+          nextSceneRules: [rule(">", 120, worse)],
+          stateOperations: [
+            { stateVariableId: "hr", operation: "subtract", value: 20 },
+          ],
+        },
+        130
+      );
+
+      const response = await press();
+      expect(response.data.active).toBe(stable._id.toString());
+      expect(await savedHeartRate()).toBe(110);
+    });
+
+    it("stays put but still applies the changes when nothing matches and there is no fallback", async () => {
+      await startOn(
+        {
+          nextSceneRules: [rule(">", 120, worse)],
+          stateOperations: [
+            { stateVariableId: "hr", operation: "add", value: 5 },
+          ],
+        },
+        100
+      );
+
+      const response = await press();
+      expect(response.data.active).toBeUndefined();
+      expect(response.data.properties[0].value).toBe(105);
+      expect(await savedPath()).toEqual([triage._id.toString()]);
+    });
+
+    it("skips a rule for a property that no longer exists", async () => {
+      await startOn({
+        nextScene: stable._id.toString(),
+        nextSceneRules: [
+          { ...rule("=", 130, worse), stateVariableId: "deleted" },
+        ],
+      });
+
+      const response = await press();
+      expect(response.data.active).toBe(stable._id.toString());
+    });
+
+    it("loads every scene a button can lead to along with the one being entered", async () => {
+      const entry = await Scene.create({
+        name: "Entry",
+        components: [
+          {
+            id: "go",
+            clickable: true,
+            type: "BUTTON",
+            nextScene: stable._id.toString(),
+            nextSceneRules: [rule(">", 120, worse)],
+          },
+        ],
+        roles: [],
+      });
+      await Scenario.findByIdAndUpdate(scenario._id, {
+        scenes: [entry._id, worse._id, stable._id],
+      });
+
+      const response = await axios.post(
+        `http://localhost:${ctx.port}/api/navigate/user/${scenario._id}`,
+        { uid: "uid-player" },
+        authHeaders("uid-player")
+      );
+      expect(response.data.scenes.map((s) => s._id).sort()).toEqual(
+        [entry._id, worse._id, stable._id].map(String).sort()
+      );
+    });
+
+    it("isn't thrown by a rule whose scene isn't a real id", async () => {
+      await startOn({
+        nextScene: stable._id.toString(),
+        nextSceneRules: [
+          {
+            stateVariableId: "hr",
+            comparator: ">",
+            value: 500,
+            sceneId: "oops",
+          },
+        ],
+      });
+
+      const response = await press();
+      expect(response.status).toBe(200);
+      expect(response.data.active).toBe(stable._id.toString());
+    });
+
+    it("leaves buttons without rules working as before", async () => {
+      await startOn({ nextScene: stable._id.toString() });
+
+      const response = await press();
+      expect(response.data.active).toBe(stable._id.toString());
+    });
+  });
 });

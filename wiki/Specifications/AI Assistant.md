@@ -9,8 +9,8 @@ This page is both the spec and the **progress tracker**. The work ships as **one
 | Stage | Commit | Status |
 | --- | --- | --- |
 | 0 | `docs: AI assistant plan` | ✅ Done |
-| 1 | `feat(ai): editor command API and scene snapshot` | 🟨 In progress |
-| 2 | `feat: conditional destinations` | ⬜ Not started |
+| 1 | `feat(ai): editor command API and scene snapshot` | ✅ Done |
+| 2 | `feat: conditional destinations` | 🟨 In progress |
 | 3 | `feat(ai): OpenRouter proxy` | ⬜ Not started |
 | 4 | `feat(ai): assistant panel with ask, plan and build modes` | ⬜ Not started |
 | 5 | `feat(ai): scene, property and logic tools` | ⬜ Not started |
@@ -150,26 +150,40 @@ Notes:
 
 Tasks:
 
-- [ ] Data: `nextSceneRules: [{ stateVariableId, comparator, value, sceneId }]` on buttons, checked in order; `nextScene` is the fallback; comparators `=`, `!=`, `>`, `<`
-- [ ] Shared evaluator, used by both the server and the play page
-- [ ] Server: `navigate/user.js` and `navigate/group.js` evaluate the rules after the button's property changes; `getConnectedScenes` preloads every rule target
-- [ ] Play page: optimistic scene switch uses the same evaluator (the server still decides)
-- [ ] Editor: Destination section in the Button Actions panel (rules list and fallback)
-- [ ] Checks: rule pointing at a deleted property or scene; rule that can never match
-- [ ] Debug panel log says which rule fired
-- [ ] Dashboard graph draws labelled branch edges
-- [ ] Command: `set_conditional_destination`
+- [x] Data: `nextSceneRules: [{ stateVariableId, comparator, value, sceneId }]` on buttons, checked in order; `nextScene` is the fallback; comparators `=`, `!=`, `>`, `<`
+- [x] Shared evaluator, used by both the server and the play page
+- [x] Server: `navigate/user.js` and `navigate/group.js` evaluate the rules after the button's property changes; `getConnectedScenes` preloads every rule target
+- [x] Play page: optimistic scene switch uses the same evaluator (the server still decides)
+- [x] Editor: Destination section in the Button Actions panel (rules list and fallback)
+- [x] Checks: rule pointing at a deleted property or scene; rule that can never match
+- [x] Debug panel log says which rule fired
+- [x] Dashboard graph draws labelled branch edges
+- [x] Command: `set_conditional_destination`
 
 Verify:
 
-- [ ] Evaluator unit tests (every comparator and type, order, fallback)
-- [ ] Single-player and multiplayer navigation API tests
-- [ ] Checks tests
-- [ ] Browser check: the example above works in play, the debug panel and the dashboard
-- [ ] Backend: `yarn prettier`, `yarn lint`, `yarn test` pass
-- [ ] Frontend: `yarn prettier`, `yarn lint`, `yarn test`, `yarn build` pass
+- [x] Evaluator unit tests (every comparator and type, order, fallback)
+- [x] Single-player and multiplayer navigation API tests
+- [x] Checks tests
+- [x] Browser check: the example above works in play, the debug panel and the dashboard
+- [x] Backend: `yarn prettier`, `yarn lint`, `yarn test` pass
+- [x] Frontend: `yarn prettier`, `yarn lint`, `yarn test`, `yarn build` pass
 
 Notes:
+
+- Full write-up in [Conditional Destinations](Conditional%20Destinations.md). The rules are `nextSceneRules` on a button, checked in order, first match wins, `nextScene` is the fallback, and they are judged on the properties **after** the button's own operations.
+- **The evaluator is two identical files**, `backend/src/util/properties/destination.js` and `frontend/src/components/Properties/destination.js`, because the two packages share no code. A frontend test fails if they differ, so when one changes, copy it over the other. The full cases are in the backend test (25), the frontend one keeps the copies in step.
+- **Server order changed:** the new property values are worked out in memory first, then the destination is picked, then the path and properties are saved as before. Operations that are invalid for a property type now fail before the path is saved instead of after it.
+- Beyond the task list, because rules would otherwise be half-supported:
+  - Deleting a property now also removes the rules that use it (the cleanup moved to a tested function, `propertyReferences.js`).
+  - A scene's direct link counts rule scenes as places its buttons can lead, so a branching button disables the direct link like two buttons do.
+  - The preloaded scene ids are filtered to valid ids, so a bad rule scene id can't break loading the scene.
+  - A button with only rules is clickable in play.
+  - The debug panel's button list shows each button's rules, and the event log notes when the server picks a different scene than the page predicted.
+  - The dashboard graph merges buttons that lead the same way into one edge (it used to draw one edge per button with the same id).
+- `set_conditional_destination` is the 23rd command. It also sets a plain link (no rules, only `otherwise`). It takes property and scene **names**, reads the value as the property's own type, and refuses a comparator the type can't use.
+- Checked in a real browser against the **real API routes**: a temporary Express host (in-memory Mongo, only the login faked) plus a temporary page mounting the real play page, editor and dashboard. Both are deleted. In it: "Next" adds 20 to heartRate (110 → 130) and goes to Deteriorates, "Calm down" takes 40 off (→ 70) and goes to Stable, the debug panel shows the rules and which one matched, a rule was added through the editor's dialog and saved, `set_conditional_destination` ran in the editor and one undo reverted it, and the dashboard drew the labelled edges.
+- **Not exercised in a browser:** multiplayer play (covered by the group API tests), the "server chose a different scene" log (needs the page and server to disagree), and deleting a property from the editor (unit-tested).
 
 ---
 
@@ -249,6 +263,9 @@ Verify:
 
 Notes:
 
+- From stage 2: `set_conditional_destination` already sets a plain link (no rules, only `otherwise`), so `set_destination` can be a thinner tool for the common case or dropped.
+- From stage 2: the scenario overview already lists conditional links (`when` on each link), so that task is mostly the scene-level graph.
+
 ---
 
 ## Stage 6: Test mode (playtesting)
@@ -274,6 +291,8 @@ Verify:
 - [ ] Backend and frontend checks pass
 
 Notes:
+
+- From stage 2: the destination rules are in `destination.js` (`resolveDestination`). The headless playtest should call that, with the properties after the button's operations, instead of re-implementing it.
 
 ---
 
@@ -340,3 +359,4 @@ Notes:
 Add one line per stage when it's done: date, stage, anything notable.
 
 - 2026-10-12, stage 1: command API with 22 commands, scene snapshot, spatial warnings, live editor adapter and dev console. 201 Vitest specs; verified in the real editor (one batch built a scene, one undo removed it).
+- 2026-10-12, stage 2: conditional destinations (`nextSceneRules`) end to end: shared evaluator, server and play page, editor UI, checks, debug panel, dashboard labels and `set_conditional_destination`. 76 node + 236 Vitest frontend tests, 301 backend tests; verified in a browser against the real API routes.
