@@ -65,7 +65,7 @@ function ScenarioInfo() {
       <div className="min-w-[900px] max-w-[1500px] mx-auto flex gap-3xl px-xl">
         {/* Sidebar */}
         {/* the calc used in the padding top is to get the searchbar to align with the scenario metadata, by imitating the same sizing flow */}
-        <div className="w-1/5 min-w-[320px] flex-shrink-0 sticky top-0 h-screen overflow-hidden pt-[calc(var(--spacing-4xl)+var(--spacing-xl)+var(--spacing-l))]">
+        <div className="w-1/5 min-w-[320px] flex-shrink-0 sticky top-0 h-screen overflow-hidden pt-[calc(var(--spacing-xl)+var(--spacing-xl)+var(--spacing-l))]">
           <div className="h-full flex flex-col gap-m">
             {/* Search Section */}
             <label className="input search">
