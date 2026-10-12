@@ -31,6 +31,7 @@ import ShareModal from "./components/ShareModal";
 import ScenarioContext from "../../context/ScenarioContext";
 import ModalDialog from "../../components/ModalDialogue";
 import DetailEditModal from "../scenarioInfo/components/DetailEditModal";
+import { createLiveSession, installDevConsole } from "./commands";
 
 const listeners = [
   ["copy", copy],
@@ -62,6 +63,20 @@ export default function AuthoringToolPage() {
   const [showEditModal, setShowEditModal] = useState(false);
 
   const pendingSavesRef = useRef(0);
+
+  // development only: try the editor commands from the browser (window.vps)
+  const commandInputs = useRef({});
+  commandInputs.current = { scenes, properties, modifyScene };
+  useEffect(() => {
+    if (!import.meta.env.DEV) return;
+    return installDevConsole(
+      createLiveSession({
+        getScenes: () => commandInputs.current.scenes ?? [],
+        getProperties: () => commandInputs.current.properties ?? [],
+        modifyScene: (scene) => commandInputs.current.modifyScene(scene),
+      })
+    );
+  }, []);
 
   // NOTE: this is both the autosaver and the history actioner, which are distinct
   // operations, but are both here due to the limitations of the scene context

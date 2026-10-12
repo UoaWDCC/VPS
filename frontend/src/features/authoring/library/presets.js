@@ -123,6 +123,9 @@ const image = (id, name, tags) => ({
   url: `/library/images/${id}.png`,
 });
 
+/** Preset icons are square, this many pixels a side (see the generator). */
+export const IMAGE_PRESET_SIZE = 512;
+
 /** @type {ImagePreset[]} */
 export const IMAGE_PRESETS = [
   image("first-aid", "First aid", ["medical", "emergency", "cross", "health"]),

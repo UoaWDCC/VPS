@@ -304,9 +304,15 @@ export function getSelectedComponentBounds() {
 
   const scene = useVisualScene.getState();
 
-  if (selected.length === 1) return scene.components[selected[0]].bounds;
+  // Not everything that can be selected has a place on the canvas: a sound
+  // doesn't, and redoing the adding of one selects it
+  const components = selected
+    .map((id) => scene.components[id])
+    .filter((component) => component?.bounds?.verts);
+  if (!components.length) return null;
 
-  const components = selected.map((id) => scene.components[id]);
+  if (components.length === 1) return components[0].bounds;
+
   return { verts: computeBounds(components), rotation: 0 };
 }
 

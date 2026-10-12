@@ -95,6 +95,14 @@ export function add(props: Record<string, any>, history = true) {
   return id;
 }
 
+// Swaps in a whole new state for a component that exists, as one undoable edit.
+export function overwrite(id: string, state: Component) {
+  const prevState = structuredClone(getComponent(id));
+  getScene().components[id] = state;
+  updateHistory([{ id, prevState }]);
+  useVisualScene.getState().updateComponent(buildVisualComponent(state));
+}
+
 export function replaceComponent(
   id: string,
   state: Component | null,

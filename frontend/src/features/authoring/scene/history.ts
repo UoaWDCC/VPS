@@ -63,7 +63,33 @@ export function dispatchModification() {
   historyEvents.dispatchTypedEvent("update", new HistoryEvent("do", undefined));
 }
 
+// While a batch is open, changes are only noted (keeping each component's
+// state from before the batch began). Closing it records them all as one
+// undo step, so a run of several edits is undone with one Ctrl+Z.
+let batchDepth = 0;
+let batched: Map<string, ChangeRecord> | null = null;
+
+export function beginHistoryBatch() {
+  if (batchDepth++ === 0) batched = new Map();
+}
+
+export function endHistoryBatch() {
+  if (batchDepth === 0) return;
+  if (--batchDepth > 0) return;
+
+  const changes = [...(batched?.values() ?? [])];
+  batched = null;
+  if (changes.length) updateHistory(changes);
+}
+
 export function updateHistory(incomingChanges: ChangeRecord[]) {
+  if (batched) {
+    incomingChanges.forEach((change) => {
+      if (!batched!.has(change.id)) batched!.set(change.id, change);
+    });
+    return;
+  }
+
   const sceneId = getSceneId();
   const batch: HistoryRecord[] = [];
 

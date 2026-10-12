@@ -8,8 +8,8 @@ This page is both the spec and the **progress tracker**. The work ships as **one
 
 | Stage | Commit | Status |
 | --- | --- | --- |
-| 0 | `docs: AI assistant plan` | ⬜ Not started |
-| 1 | `feat(ai): editor command API and scene snapshot` | ⬜ Not started |
+| 0 | `docs: AI assistant plan` | ✅ Done |
+| 1 | `feat(ai): editor command API and scene snapshot` | 🟨 In progress |
 | 2 | `feat: conditional destinations` | ⬜ Not started |
 | 3 | `feat(ai): OpenRouter proxy` | ⬜ Not started |
 | 4 | `feat(ai): assistant panel with ask, plan and build modes` | ⬜ Not started |
@@ -92,8 +92,8 @@ Principles:
 
 **Commit:** `docs: AI assistant plan`
 
-- [ ] This plan is in `wiki/Specifications/AI Assistant.md`
-- [ ] Branch `vps-ai-assistant` created off `vps-136-asset-library` (after the asset library is committed)
+- [x] This plan is in `wiki/Specifications/AI Assistant.md`
+- [x] Branch `vps-ai-assistant` created off `vps-136-asset-library` (after the asset library is committed)
 
 ---
 
@@ -105,26 +105,40 @@ Principles:
 
 Tasks:
 
-- [ ] Add Vitest and Ajv as frontend dev dependencies; `yarn test` runs both the existing `node --test` files and Vitest
-- [ ] `features/authoring/commands/`: `defineCommand` (name, description for the model, JSON schema, kind `read` / `write` / `destructive`, pure `run`)
-- [ ] Registry and runner: validate with Ajv, resolve components by id or by name ("the Continue button"), apply, return `{ ok, changed, warnings }` or a readable error
-- [ ] Live editor adapter for the open scene; `modifyScene` adapter for other scenes
-- [ ] Batching: several commands become one undo step
-- [ ] Scene snapshot: each component's id, type, rounded bounds (1920×1080 canvas), rotation, layer, colours, plain text, clickable, destination, property operations, bindings; plus the selection
-- [ ] Scenario overview: scenes, links between them, properties
-- [ ] Spatial warnings on every write: overlaps, off-canvas, text too big for its box
-- [ ] Read commands: `get_scene`, `get_scenario`, `get_selection`, `find_components`, `run_checks` (reuses `playScenario/debug/checks.js`)
-- [ ] Write commands: `add_shape`, `add_text`, `add_button` (library presets), `add_library_item`, `set_style`, `set_text`, `set_text_style`, `move`, `resize`, `rotate`, `align`, `distribute`, `place_relative`, `layer`, `select`
-- [ ] Destructive command: `delete_components`
-- [ ] Dev console: `window.vps.run(name, args)` in dev builds only
+- [x] Add Vitest and Ajv as frontend dev dependencies; `yarn test` runs both the existing `node --test` files and Vitest
+- [x] `features/authoring/commands/`: `defineCommand` (name, description for the model, JSON schema, kind `read` / `write` / `destructive`, pure `run`)
+- [x] Registry and runner: validate with Ajv, resolve components by id or by name ("the Continue button"), apply, return `{ ok, changed, warnings }` or a readable error
+- [x] Live editor adapter for the open scene; `modifyScene` adapter for other scenes
+- [x] Batching: several commands become one undo step
+- [x] Scene snapshot: each component's id, type, rounded bounds (1920×1080 canvas), rotation, layer, colours, plain text, clickable, destination, property operations, bindings; plus the selection
+- [x] Scenario overview: scenes, links between them, properties
+- [x] Spatial warnings on every write: overlaps, off-canvas, text too big for its box
+- [x] Read commands: `get_scene`, `get_scenario`, `get_selection`, `find_components`, `run_checks` (reuses `playScenario/debug/checks.js`)
+- [x] Write commands: `add_shape`, `add_text`, `add_button` (library presets), `add_library_item`, `set_style`, `set_text`, `set_text_style`, `move`, `resize`, `rotate`, `align`, `distribute`, `place_relative`, `layer`, `select`
+- [x] Destructive command: `delete_components`
+- [x] Dev console: `window.vps.run(name, args)` in dev builds only
 
 Verify:
 
-- [ ] Vitest covers every command, validation errors, the snapshot, layout maths, overlap detection and batching
-- [ ] Browser check: a scene built entirely from the dev console, then undone in one step
-- [ ] Frontend: `yarn prettier`, `yarn lint`, `yarn test`, `yarn build` all pass
+- [x] Vitest covers every command, validation errors, the snapshot, layout maths, overlap detection and batching
+- [x] Browser check: a scene built entirely from the dev console, then undone in one step
+- [x] Frontend: `yarn prettier`, `yarn lint`, `yarn test`, `yarn build` all pass
 
 Notes:
+
+- 22 commands: 6 read (`get_scene`, `get_scenario`, `get_selection`, `find_components`, `list_library`, `run_checks`), 1 destructive (`delete_components`), the rest write. `select` is classed as `read` because it changes what the author sees, not the scenario, so it's safe in Ask mode.
+- Built to be driven without a model: `window.vps.run(name, args)` and `window.vps.batch([...])` in dev builds, `vps.commands()` and `vps.tools()` to see what a model will see.
+- Components can be referred to by id, the first few characters of an id, `"selected"`, or the text they show. Scenes by name or id.
+- `add_library_item` supports the **built-in** presets only. A user's uploads need an async step (creating the scenario's own file), so they come in stage 5.
+- A command on a scene that isn't open saves through `modifyScene` and **can't be undone with Ctrl+Z** (the editor's history only knows the open scene). Batches on the open scene are one undo step.
+- Text fit is an **estimate** from the font size (commands have no canvas to measure with); it only warns when text clearly won't fit.
+- `align` and `distribute` use components' unrotated boxes; off-canvas and overlap warnings use the rotated box.
+- Fixes found while testing in the real editor, both needed for this to be safe:
+  - Redoing the adding of a sound crashed the selection overlay (redo selects the sound, which has no canvas position). `getSelectedComponentBounds` now ignores components with no bounds.
+  - The live adapter clears the selection before removing selected components, as the editor's own delete does.
+- Small refactors of existing code, behaviour unchanged: `defaults` moved to `scene/defaults.ts` (re-exported from `component.ts`), layer shifting moved to the pure `scene/layers.ts`, `history.ts` gained `beginHistoryBatch` / `endHistoryBatch`, `modifiers.ts` gained `overwrite`.
+- Vitest 3 (not the latest) because it supports this repo's Vite 6. Specs are `*.spec.ts`; the older plain-JS tests stay `*.test.js` under `node --test`.
+- CI doesn't run `yarn test` for the frontend. Worth adding a test job to `frontend-ci.yml` (not done here).
 
 ---
 
@@ -324,3 +338,5 @@ Notes:
 ## Log
 
 Add one line per stage when it's done: date, stage, anything notable.
+
+- 2026-10-12, stage 1: command API with 22 commands, scene snapshot, spatial warnings, live editor adapter and dev console. 201 Vitest specs; verified in the real editor (one batch built a scene, one undo removed it).
