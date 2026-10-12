@@ -1,10 +1,8 @@
-import SceneContext from "../../context/SceneContext";
-import SelectInput from "../../features/authoring/components/Select";
-import { modifyComponentProp } from "../../features/authoring/scene/operations/component";
 import CreatePropertyOperation from "./CreatePropertyOperation";
+import DestinationSection from "./DestinationSection";
 import EditPropertyOperation from "./EditPropertyOperation";
 import { PlusIcon } from "lucide-react";
-import { useContext, useEffect, useState } from "react";
+import { useState } from "react";
 
 /*
  * The content of the "Property Operations" panel (methods for creating and editing)
@@ -17,36 +15,13 @@ const PropertyOperationMenu = ({ component }) => {
   const propertyOperations = component?.stateOperations ?? [];
   const hasPropertyOperations = propertyOperations.length > 0;
 
-  const { scenes } = useContext(SceneContext);
-
-  const [value, setValue] = useState(component?.nextScene);
-
-  useEffect(() => {
-    if (component?.nextScene !== value) setValue(component?.nextScene);
-  }, [component]);
-
-  function saveLink(v) {
-    if (!component) return;
-    setValue(v);
-    modifyComponentProp([component.id], "nextScene", v);
-  }
-
   function createNew() {
     setCreateOpen(true);
   }
 
   return (
     <>
-      <fieldset className="fieldset pt-2">
-        <label className="label">Linked Scene</label>
-        <SelectInput
-          nullable
-          values={scenes?.map((s) => s._id) ?? []}
-          value={value}
-          onChange={saveLink}
-          display={(v) => scenes.find((s) => s._id === v)?.name}
-        />
-      </fieldset>
+      <DestinationSection component={component} />
       <div className="mb-3">
         <button
           type="button"

@@ -2,129 +2,16 @@ import type { Bounds, Component, Vec2 } from "../../types";
 import { getComponent, getScene } from "../scene";
 import { mutate, subtract, translate } from "../../util";
 import { getObject, merge } from "../util";
+import { defaults } from "../defaults";
+import {
+  computeLayerChanges,
+  type LayerDirection,
+  type LayerMode,
+} from "../layers";
 import { add, modify } from "./modifiers";
 
-type LayerDirection = "forward" | "backward";
-type LayerMode = "step" | "extreme";
-
-export const defaults = {
-  textbox: {
-    type: "textbox",
-    padding: 20,
-    clickable: true,
-    fill: "#00000000", // default value is rgba 0
-    stroke: "#00000000",
-    strokeWidth: 3, // default stroke width 3
-    bounds: {
-      verts: [
-        { x: 0, y: 0 },
-        { x: 600, y: 100 },
-      ],
-      rotation: 0,
-    },
-    document: {
-      style: {},
-      blocks: [
-        {
-          style: { alignment: "left" },
-          spans: [
-            {
-              style: {},
-              text: "",
-            },
-          ],
-        },
-      ],
-    },
-    zIndex: 0,
-  },
-  line: {
-    type: "line",
-    stroke: "#b7b7b7ff",
-    strokeWidth: 5,
-    clickable: true,
-    bounds: {
-      verts: [
-        { x: 0, y: 0 },
-        { x: 100, y: 100 },
-      ],
-    },
-    zIndex: 0,
-  },
-  speech: {
-    type: "speech",
-    fill: "#b7b7b7ff",
-    stroke: "#00000000",
-    strokewidth: 3,
-    clickable: true,
-    bounds: {
-      verts: [
-        { x: 0, y: 0 },
-        { x: 400, y: 100 },
-        { x: 400, y: 120 },
-      ],
-      rotation: 0,
-    },
-    document: {
-      style: {},
-      blocks: [
-        {
-          style: {},
-          spans: [
-            {
-              style: {},
-              text: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla venenatis.",
-            },
-          ],
-        },
-      ],
-    },
-    zIndex: 0,
-  },
-  box: {
-    type: "box",
-    clickable: true,
-    fill: "#b7b7b7ff",
-    stroke: "#00000000",
-    strokewidth: 3,
-    bounds: {
-      verts: [
-        { x: 0, y: 0 },
-        { x: 100, y: 100 },
-      ],
-      rotation: 0,
-    },
-    zIndex: 0,
-  },
-  ellipse: {
-    type: "ellipse",
-    fill: "#b7b7b7ff",
-    clickable: true,
-    stroke: "#00000000",
-    strokewidth: 3,
-    bounds: {
-      verts: [
-        { x: 0, y: 0 },
-        { x: 100, y: 100 },
-      ],
-      rotation: 0,
-    },
-    zIndex: 0,
-  },
-  image: {
-    type: "image",
-    clickable: true,
-    preserveAspectRatio: "none",
-    bounds: {
-      verts: [
-        { x: 0, y: 0 },
-        { x: 300, y: 300 },
-      ],
-      rotation: 0,
-    },
-    zIndex: 0,
-  },
-};
+// still exported from here for the code that already imports it
+export { defaults };
 
 export function stringifyComponent(id: string) {
   const component = getComponent(id);
@@ -229,90 +116,17 @@ function shiftComponentLayers(
   direction: LayerDirection,
   mode: LayerMode
 ) {
-  if (!ids.length) return;
-
-  const components = Object.values(getScene().components);
-  const selectedIds = new Set(ids);
-
-  // Sort by zIndex (ascending) — this is the order the canvas renders
-  const sortedComponents = [...components].sort(
-    (a, b) => (a.zIndex ?? 0) - (b.zIndex ?? 0)
+  const changed = computeLayerChanges(
+    Object.values(getScene().components),
+    ids,
+    direction,
+    mode
   );
-  const rawZIndexScale = sortedComponents.map((c) => c.zIndex ?? 0);
-
-  // Components tied on one zIndex have no order to swap, so reordering them
-  // against the original scale writes back the values they already had.
-  // Renumber onto a strictly increasing scale first; the sort is stable, so
-  // this preserves the order currently on screen.
-  const hasDuplicates = new Set(rawZIndexScale).size !== rawZIndexScale.length;
-  const zIndexScale = hasDuplicates
-    ? sortedComponents.map((_, index) => index)
-    : rawZIndexScale;
-
-  let newSortedComponents: Component[] = [];
-
-  if (mode === "extreme") {
-    // Bring to Front / Send to Back
-    const selected = sortedComponents.filter((c) => selectedIds.has(c.id));
-    const unselected = sortedComponents.filter((c) => !selectedIds.has(c.id));
-
-    newSortedComponents =
-      direction === "forward"
-        ? [...unselected, ...selected] // Front: unselected first, then selected on top
-        : [...selected, ...unselected]; // Back: selected on bottom, then unselected
-  } else {
-    // Bring Forward / Send Backward (Single step)
-    newSortedComponents = [...sortedComponents];
-
-    if (direction === "forward") {
-      // Loop backward to move items up without overwriting consecutive selections
-      for (let i = newSortedComponents.length - 1; i >= 0; i--) {
-        if (
-          selectedIds.has(newSortedComponents[i].id) &&
-          i < newSortedComponents.length - 1 &&
-          !selectedIds.has(newSortedComponents[i + 1].id)
-        ) {
-          const temp = newSortedComponents[i];
-          newSortedComponents[i] = newSortedComponents[i + 1];
-          newSortedComponents[i + 1] = temp;
-        }
-      }
-    } else {
-      // Loop forward to move items down
-      for (let i = 0; i < newSortedComponents.length; i++) {
-        if (
-          selectedIds.has(newSortedComponents[i].id) &&
-          i > 0 &&
-          !selectedIds.has(newSortedComponents[i - 1].id)
-        ) {
-          const temp = newSortedComponents[i];
-          newSortedComponents[i] = newSortedComponents[i - 1];
-          newSortedComponents[i - 1] = temp;
-        }
-      }
-    }
-  }
-
-  // Renumbering rewrites every tied component, so a reorder that moves nothing
-  // must bail out before it costs an undo step and a full-scene save.
-  const orderUnchanged = newSortedComponents.every(
-    (comp, index) => comp.id === sortedComponents[index].id
-  );
-  if (orderUnchanged) return;
-
-  // Apply target zIndices back to modified components
-  const changed = newSortedComponents
-    .map((comp, index) => ({
-      id: comp.id,
-      targetZIndex: zIndexScale[index],
-      zIndex: comp.zIndex,
-    }))
-    .filter(({ zIndex, targetZIndex }) => zIndex !== targetZIndex);
 
   if (changed.length) {
     applyZIndices(
       changed.map((c) => c.id),
-      changed.map((c) => c.targetZIndex)
+      changed.map((c) => c.zIndex)
     );
   }
 }

@@ -42,6 +42,18 @@ function SimpleFloatingEdge({ id, source, data, target, markerEnd, style }) {
           className={`absolute -translate-1/2`}
           style={{ transform: `translate(${labelX}px, ${labelY}px)` }}
         >
+          {data?.branches?.length > 0 && (
+            <div className="flex flex-col items-center gap-0.5">
+              {data.branches.map((branch) => (
+                <span
+                  key={branch}
+                  className="rounded-sm border border-base-content/20 bg-base-100 px-1 text-xs whitespace-nowrap"
+                >
+                  {branch}
+                </span>
+              ))}
+            </div>
+          )}
           {data?.label != undefined ? (
             <span className="font-bold">x{data.label}</span>
           ) : (

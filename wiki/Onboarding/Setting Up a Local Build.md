@@ -86,6 +86,24 @@ In the frontend .env file, add `VITE_SERVER_URL = "http://localhost:[BACKEND_POR
 > [!WARNING]
 > DO NOT share the .env file with anyone or upload it to GitHub or anywhere else - the file basically gives access to our databases which contain all the website assets and user information
 
+#### The AI assistant (optional)
+
+The AI assistant in the editor needs a key for [OpenRouter](https://openrouter.ai/). Without one everything else works and the assistant says it isn't set up. Add these to the **backend** `.env` (see `backend/.env.example`):
+
+| Setting | What it is |
+| --- | --- |
+| `OPENROUTER_API_KEY` | Your OpenRouter API key. **Required.** |
+| `OPENROUTER_MODEL` | The main model's id, for example a free model from the OpenRouter list. Pick one that supports tool use. **Required.** Change it any time, no code change. |
+| `OPENROUTER_FAST_MODEL` | A smaller, quicker model for simple requests. Optional: the main model is used without it. |
+| `OPENROUTER_BASE_URL` | Where requests go. Optional: OpenRouter by default. |
+| `AI_DAILY_LIMIT` | Requests each author can make per UTC day. Optional: `200`. |
+| `AI_MAX_OUTPUT_TOKENS` | The longest reply the model may write. Optional: `4096`. |
+| `AI_MAX_INPUT_CHARS` | The biggest request accepted, in characters. Optional: `600000`. |
+| `AI_TIMEOUT_MS` | The longest one request may take. Optional: `120000`. |
+| `AI_LOG_CONTENT` | `true` also logs what is sent to the model. Optional, leave off: it logs what authors type and their scenario text. |
+
+On the live server set these as secrets (for Fly.io, `fly secrets set OPENROUTER_API_KEY=... OPENROUTER_MODEL=...`), not in a file. The key never goes in the frontend `.env`.
+
 ### Running a local build
 
 There are 2 methods you can use to run the local build for VPS, with both being fine to use. Method 1 is easier and quicker, while method 2 allows you to load the frontend and backend separately (if wanted).

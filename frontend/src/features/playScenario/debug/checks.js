@@ -1,4 +1,8 @@
-import { validOperations } from "../../../components/Properties/propertyTypes.js";
+import { destinationSceneIds } from "../../../components/Properties/destination.js";
+import {
+  validComparators,
+  validOperations,
+} from "../../../components/Properties/propertyTypes.js";
 import { componentLabel } from "./describe.js";
 
 // Matches the `$$name$$` substitution done in PlayScenarioCanvas. Chips are
@@ -111,6 +115,63 @@ function checkDestination(component, label, hasScene, add) {
   );
 }
 
+// A button's destination rules are checked in order, and a rule that can't be
+// judged never matches. These are the ways a rule ends up doing nothing.
+function checkRules(
+  component,
+  label,
+  properties,
+  hasScene,
+  neighborsLoaded,
+  add
+) {
+  const seen = new Set();
+
+  (component.nextSceneRules ?? []).forEach((rule, index) => {
+    const name = `${label}: rule ${index + 1}`;
+    const property = properties.find((p) => p.id === rule.stateVariableId);
+
+    if (!property) {
+      add(
+        "error",
+        `${name} uses a property that no longer exists, so it never matches`
+      );
+    } else if (!validComparators[property.type]?.includes(rule.comparator)) {
+      add(
+        "error",
+        `${name}: "${rule.comparator}" can't be used on the ${property.type} property ${property.name}, so it never matches`
+      );
+    } else if (typeof rule.value !== property.type) {
+      add(
+        "error",
+        `${name} compares ${property.name} (${property.type}) with a ${typeof rule.value}, so it never matches`
+      );
+    } else {
+      const condition = JSON.stringify([
+        rule.stateVariableId,
+        rule.comparator,
+        rule.value,
+      ]);
+      if (seen.has(condition)) {
+        add(
+          "warning",
+          `${name} has the same condition as an earlier rule, so it's never reached`
+        );
+      }
+      seen.add(condition);
+    }
+
+    if (!rule.sceneId) {
+      add("error", `${name} has no scene to go to, so it's skipped`);
+    } else if (neighborsLoaded && !hasScene(rule.sceneId)) {
+      add(
+        "error",
+        `${name} leads to a scene that no longer exists, so it does nothing`
+      );
+    }
+  });
+}
+
 /**
  * Static checks for the scene being played, looking for things that fail
  * silently at runtime. Pure so it can be unit tested.
@@ -141,6 +202,7 @@ export function checkScene({
     checkText(component, label, properties, add);
     checkBindings(component, label, properties, getBindingTargets, add);
     checkOperations(component.stateOperations, label, properties, add);
+    checkRules(component, label, properties, hasScene, neighborsLoaded, add);
     if (neighborsLoaded) checkDestination(component, label, hasScene, add);
   }
 
@@ -154,7 +216,8 @@ export function checkScene({
   const hasExit =
     Boolean(scene.directLink) ||
     components.some(
-      (c) => c.clickable && c.nextScene && c.nextScene !== scene._id
+      (c) =>
+        c.clickable && destinationSceneIds(c).some((id) => id !== scene._id)
     );
   if (!hasExit) {
     add(

@@ -62,7 +62,10 @@ export default function ScenarioGraph({
     if (!inGPathEdges) return;
     const newEdges = inEdges.map((edge) => {
       const path = inGPathEdges.find((gpath) => gpath.id == edge.id);
-      return path ? path : edge;
+      // the group's path takes the edge over, but keeps what the branch depends on
+      return path
+        ? { ...path, data: { ...path.data, branches: edge.data?.branches } }
+        : edge;
     });
     setNewEdges(newEdges);
   }, [inNodes, inEdges, inGPathEdges]);

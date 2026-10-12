@@ -8,6 +8,7 @@ import { usePost } from "hooks/crudHooks";
 
 import LoadingPage from "../status/LoadingPage";
 import PlayScenarioCanvas from "./PlayScenarioCanvas";
+import { resolveDestination } from "../../components/Properties/destination";
 import { applyPropertyOperations } from "../../components/Properties/propertyOperations";
 import NotesPanel from "./components/NotesPanel";
 import SceneTimer from "./components/SceneTimer";
@@ -24,7 +25,11 @@ import useLocalStorage from "hooks/useLocalStorage";
 import { api } from "../../util/api";
 import DebugPanel from "./debug/DebugPanel";
 import useDebugSession from "./debug/useDebugSession";
-import { componentLabel, describeOperation } from "./debug/describe";
+import {
+  componentLabel,
+  describeDecision,
+  describeOperation,
+} from "./debug/describe";
 
 const sceneCache = new Map();
 
@@ -261,7 +266,11 @@ export default function PlayScenarioPage({ group }) {
     }
   };
 
-  const onSceneChange = async (componentId, currentSceneOverride = sceneId) => {
+  const onSceneChange = async (
+    componentId,
+    currentSceneOverride = sceneId,
+    predictedSceneId
+  ) => {
     const currentRequestId = ++requestIdRef.current; // Track navigation request ID
 
     if (componentId) {
@@ -309,6 +318,19 @@ export default function PlayScenarioPage({ group }) {
 
       // Before the scene is set, so the debug session is on for the first scene
       if (author !== undefined) setIsAuthor(author);
+
+      // The page predicts where a button leads, the server decides. They use
+      // the same rules, so a difference means they saw different properties.
+      if (componentId && predictedSceneId !== undefined) {
+        const went = newSceneId ?? currentSceneOverride;
+        const predicted = predictedSceneId ?? currentSceneOverride;
+        if (went !== predicted) {
+          debug.log("sync", "The server chose a different scene", [
+            `The page expected ${sceneCache.get(predicted)?.name ?? "another scene"}, the server sent the player to ${sceneCache.get(went)?.name ?? "another scene"}`,
+            "The page and the server had different property values when the button was pressed",
+          ]);
+        }
+      }
 
       if (propertyVersion < newPropertyVersion) {
         setProperties(properties);
@@ -415,13 +437,35 @@ export default function PlayScenarioPage({ group }) {
 
   const buttonPressed = async (component) => {
     const currentSceneId = sceneId;
-    const nextSceneId = component.nextScene;
 
-    // The pressed component may be a rendered copy, so label the stored one
-    const label = componentLabel(
-      currScene?.components?.find((c) => c.id === component.id) ?? component
+    // The pressed component may be a rendered copy, so use the stored one
+    const stored =
+      currScene?.components?.find((c) => c.id === component.id) ?? component;
+    const label = componentLabel(stored);
+
+    // Where the button leads. The server decides; this is the same rules on
+    // the properties as they'll be once the button's own changes are made, so
+    // the page can switch scene straight away.
+    const afterPress = stored.stateOperations
+      ? applyPropertyOperations(
+          structuredClone(properties),
+          stored.stateOperations
+        )
+      : properties;
+    const { sceneId: nextSceneId, ruleIndex } = resolveDestination(
+      stored,
+      afterPress
     );
-    debug.log("press", `Pressed ${label}`);
+    debug.log(
+      "press",
+      `Pressed ${label}`,
+      describeDecision(
+        stored,
+        afterPress,
+        ruleIndex,
+        (id) => sceneCache.get(id)?.name ?? "a scene"
+      )
+    );
 
     if (nextSceneId) {
       if (!sceneCache.has(nextSceneId)) {
@@ -437,7 +481,7 @@ export default function PlayScenarioPage({ group }) {
       setSceneId(nextSceneId);
     }
 
-    onSceneChange(component.id, currentSceneId);
+    onSceneChange(component.id, currentSceneId, nextSceneId ?? null);
   };
 
   const reset = async () => {

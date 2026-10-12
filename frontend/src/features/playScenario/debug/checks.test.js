@@ -237,3 +237,103 @@ test("describes operations with property names", () => {
     'old (deleted) = "x"'
   );
 });
+
+// --- destination rules ---
+
+const rule = (stateVariableId, comparator, value, sceneId = "next") => ({
+  stateVariableId,
+  comparator,
+  value,
+  sceneId,
+});
+
+const branching = (...rules) => ({
+  id: "b",
+  type: "box",
+  clickable: true,
+  nextScene: "next",
+  nextSceneRules: rules,
+});
+
+const rulesProblems = (...rules) =>
+  run({ components: [branching(...rules)] }).map((p) => p.message);
+
+test("rules that can match are fine", () => {
+  assert.deepEqual(
+    rulesProblems(
+      rule("hr", ">", 120),
+      rule("fluids", "=", true),
+      rule("note", "!=", "x")
+    ),
+    []
+  );
+});
+
+test("flags a rule using a property that no longer exists", () => {
+  const [problem] = rulesProblems(rule("gone", "=", 1));
+  assert.match(problem, /rule 1 uses a property that no longer exists/);
+});
+
+test("flags a comparator the property's type can't use", () => {
+  const [problem] = rulesProblems(rule("fluids", ">", true));
+  assert.match(
+    problem,
+    /">" can't be used on the boolean property fluidsGiven/
+  );
+});
+
+test("flags a value of the wrong type", () => {
+  const [problem] = rulesProblems(rule("hr", ">", "120"));
+  assert.match(problem, /compares heartRate \(number\) with a string/);
+});
+
+test("flags a rule that repeats an earlier one, because it is never reached", () => {
+  const problems = run(
+    {
+      components: [
+        branching(rule("hr", ">", 120, "a"), rule("hr", ">", 120, "b")),
+      ],
+    },
+    { hasScene: () => true }
+  );
+  assert.equal(problems.length, 1);
+  assert.equal(problems[0].level, "warning");
+  assert.match(problems[0].message, /rule 2 has the same condition/);
+});
+
+test("does not call different conditions on one property the same", () => {
+  assert.deepEqual(
+    rulesProblems(rule("hr", ">", 120), rule("hr", ">", 100)),
+    []
+  );
+});
+
+test("flags a rule leading to a scene that no longer exists", () => {
+  const [problem] = rulesProblems(rule("hr", ">", 120, "deleted"));
+  assert.match(problem, /rule 1 leads to a scene that no longer exists/);
+});
+
+test("flags a rule with no scene", () => {
+  const [problem] = rulesProblems(rule("hr", ">", 120, ""));
+  assert.match(problem, /rule 1 has no scene to go to/);
+});
+
+test("leaves a rule's scene alone until the neighbouring scenes have loaded", () => {
+  assert.deepEqual(
+    run(
+      { components: [branching(rule("hr", ">", 120, "deleted"))] },
+      { neighborsLoaded: false }
+    ),
+    []
+  );
+});
+
+test("counts a rule's scene as a way out of the scene", () => {
+  const onlyRules = {
+    id: "b",
+    type: "box",
+    clickable: true,
+    nextSceneRules: [rule("hr", ">", 120, "next")],
+  };
+  assert.deepEqual(run({ components: [onlyRules] }), []);
+});

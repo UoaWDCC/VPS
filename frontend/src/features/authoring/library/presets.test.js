@@ -6,6 +6,7 @@ import { PALETTE, PALETTE_SOURCES } from "./palette.js";
 import {
   AUDIO_PRESETS,
   BUTTON_PRESETS,
+  IMAGE_PRESET_SIZE,
   IMAGE_PRESETS,
   PRESET_ITEMS,
 } from "./presets.js";
@@ -111,8 +112,12 @@ test("each preset image is a 512px transparent PNG", () => {
       [0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a],
       `${preset.id} isn't a PNG`
     );
-    assert.equal(png.readUInt32BE(16), 512, `${preset.id} width`);
-    assert.equal(png.readUInt32BE(20), 512, `${preset.id} height`);
+    assert.equal(png.readUInt32BE(16), IMAGE_PRESET_SIZE, `${preset.id} width`);
+    assert.equal(
+      png.readUInt32BE(20),
+      IMAGE_PRESET_SIZE,
+      `${preset.id} height`
+    );
     assert.equal(png[24], 8, `${preset.id} bit depth`);
     assert.equal(png[25], 6, `${preset.id} should have an alpha channel`);
     assert.ok(png.length < 50 * 1024, `${preset.id} is oddly large`);

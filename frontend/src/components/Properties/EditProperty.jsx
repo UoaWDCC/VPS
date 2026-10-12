@@ -7,6 +7,7 @@ import SceneContext from "../../context/SceneContext";
 import SelectInput from "../../features/authoring/components/Select";
 import { isBooleanPropertyType, propertyTypes } from "./propertyTypes";
 import { arrayToObject } from "../../features/authoring/scene/util";
+import { withoutProperty } from "./propertyReferences";
 
 const TYPE_LABELS = {
   string: "Text",
@@ -78,33 +79,9 @@ const EditProperty = ({ property, scenarioId }) => {
         const updatedScenes = scenes.map((scene) => ({
           ...scene,
           components: arrayToObject(
-            scene.components.map((component) => {
-              const filteredOperations = component.stateOperations?.filter(
-                (operation) => {
-                  const referencesDeletedProperty =
-                    (operation.stateVariableId &&
-                      operation.stateVariableId === property.id) ||
-                    (!operation.stateVariableId && operation.name === name);
-
-                  return !referencesDeletedProperty;
-                }
-              );
-              const filteredBindings = component.stateBindings?.filter(
-                (binding) => binding.stateVariableId !== property.id
-              );
-
-              if (!filteredOperations && !filteredBindings) return component;
-
-              return {
-                ...component,
-                ...(filteredOperations && {
-                  stateOperations: filteredOperations,
-                }),
-                ...(filteredBindings && {
-                  stateBindings: filteredBindings,
-                }),
-              };
-            })
+            scene.components.map((component) =>
+              withoutProperty(component, property)
+            )
           ),
         }));
 
