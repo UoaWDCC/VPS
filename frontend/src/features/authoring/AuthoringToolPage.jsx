@@ -1,6 +1,7 @@
-import { useContext, useEffect, useRef, useState } from "react";
+import { useContext, useEffect, useMemo, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
 import SceneContext from "context/SceneContext";
+import AuthenticationContext from "context/AuthenticationContext";
 import CanvasSideBar from "./CanvasSideBar/CanvasSideBar";
 import SceneNavigator from "./SceneNavigator/SceneNavigator";
 
@@ -32,6 +33,8 @@ import ScenarioContext from "../../context/ScenarioContext";
 import ModalDialog from "../../components/ModalDialogue";
 import DetailEditModal from "../scenarioInfo/components/DetailEditModal";
 import { createLiveSession, installDevConsole } from "./commands";
+import EditingBanner from "./assistant/EditingBanner";
+import useAssistantRuntime from "./assistant/useAssistantRuntime";
 
 const listeners = [
   ["copy", copy],
@@ -64,19 +67,28 @@ export default function AuthoringToolPage() {
 
   const pendingSavesRef = useRef(0);
 
-  // development only: try the editor commands from the browser (window.vps)
+  // the editor as the commands see it: for the assistant, and (in development
+  // only) to try the commands from the browser console as window.vps
   const commandInputs = useRef({});
   commandInputs.current = { scenes, properties, modifyScene };
-  useEffect(() => {
-    if (!import.meta.env.DEV) return;
-    return installDevConsole(
+  const liveSession = useMemo(
+    () =>
       createLiveSession({
         getScenes: () => commandInputs.current.scenes ?? [],
         getProperties: () => commandInputs.current.properties ?? [],
         modifyScene: (scene) => commandInputs.current.modifyScene(scene),
-      })
-    );
-  }, []);
+      }),
+    []
+  );
+  useEffect(() => {
+    if (!import.meta.env.DEV) return;
+    return installDevConsole(liveSession);
+  }, [liveSession]);
+
+  const { user } = useContext(AuthenticationContext);
+  useAssistantRuntime(scenarioId, liveSession, () => user.getIdToken());
+  // true while the assistant is changing the scene, so the author can't
+  const locked = useEditorStore((state) => state.locked);
 
   // NOTE: this is both the autosaver and the history actioner, which are distinct
   // operations, but are both here due to the limitations of the scene context
@@ -286,11 +298,17 @@ export default function AuthoringToolPage() {
           </button>
         </div>
         <div className="flex flex-col gap-m px-l flex-1 min-h-0">
-          <Topbar saving={saving} save={save} />
-          <div className="flex gap-m flex-1 min-h-0">
-            <SceneNavigator />
-            <Canvas />
+          {/* inert: nothing in it can be used while the assistant is editing */}
+          <div className="contents" inert={locked ? "" : undefined}>
+            <Topbar saving={saving} save={save} />
+          </div>
+          <div className="relative flex gap-m flex-1 min-h-0">
+            <div className="contents" inert={locked ? "" : undefined}>
+              <SceneNavigator />
+              <Canvas />
+            </div>
             <CanvasSideBar />
+            <EditingBanner />
           </div>
         </div>
       </div>

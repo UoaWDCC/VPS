@@ -23,6 +23,8 @@ export interface PendingImage {
 
 interface EditorState {
   loading: boolean;
+  /** Something else (the AI assistant) is editing, so the author can't. */
+  locked: boolean;
   pendingImages: PendingImage[];
   selected: string[];
   hovered: string | null;
@@ -48,6 +50,7 @@ interface EditorState {
   properties: Property[];
 
   setLoading: (loading: boolean) => void;
+  setLocked: (locked: boolean) => void;
   addPendingImage: (image: PendingImage) => void;
   updatePendingImage: (id: string, patch: Partial<PendingImage>) => void;
   removePendingImage: (id: string) => void;
@@ -84,6 +87,7 @@ function setter<K extends keyof EditorState>(set: ZustandSet, prop: K) {
 
 const useEditorStore = create<EditorState>((set) => ({
   loading: false,
+  locked: false,
   pendingImages: [],
   selected: [],
   hovered: null,
@@ -94,6 +98,7 @@ const useEditorStore = create<EditorState>((set) => ({
   activeGuides: [],
 
   setLoading: (value: boolean) => set({ loading: value }),
+  setLocked: (locked) => set({ locked }),
   setSelected: (ids) =>
     set(() => {
       if (!ids.length || ids.length > 1) return { selected: ids };

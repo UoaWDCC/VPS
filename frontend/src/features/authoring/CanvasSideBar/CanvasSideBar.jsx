@@ -5,12 +5,14 @@ import {
   HeadphonesIcon,
   LibraryIcon,
   MonitorCog,
+  SparklesIcon,
   ZapIcon,
 } from "lucide-react";
 import useEditorStore from "../stores/editor";
 import useVisualScene from "../stores/visual";
 import AudioManager from "../audio/AudioManager";
 import AssetLibrary from "../library/AssetLibrary";
+import AssistantPanel from "../assistant/AssistantPanel";
 import PanelIcon from "./PanelIcon";
 import SidePanel from "./SidePanel";
 import SceneSettings from "./SceneSettings";
@@ -22,6 +24,7 @@ const ALWAYS_PANELS = [
   { key: "scene", label: "Scene Details", Icon: MonitorCog },
   { key: "audio", label: "Audio Elements", Icon: HeadphonesIcon },
   { key: "library", label: "Asset Library", Icon: LibraryIcon },
+  { key: "assistant", label: "AI Assistant", Icon: SparklesIcon },
 ];
 
 const CONTEXTUAL_PANELS = [
@@ -112,10 +115,12 @@ export default function CanvasSideBar() {
         label={PANEL_LABELS[activePanel]}
         open={Boolean(activePanel)}
         onClose={() => setActivePanel(null)}
+        fill={activePanel === "assistant"}
       >
         {activePanel === "scene" && <SceneSettings />}
         {activePanel === "audio" && <AudioManager />}
         {activePanel === "library" && <AssetLibrary />}
+        {activePanel === "assistant" && <AssistantPanel />}
         {activePanel === "bindings" && (
           <PropertyBindingMenu component={component} />
         )}

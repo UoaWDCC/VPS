@@ -1,4 +1,3 @@
-import { v4 } from "uuid";
 import { buttonComponent } from "../library/buttonComponent.js";
 import {
   BUTTON_PRESETS,
@@ -8,6 +7,7 @@ import {
 } from "../library/presets.js";
 import { defaults } from "../scene/defaults";
 import type { Component, Scene, Vec2 } from "../types";
+import { newId } from "./ids";
 import { parseColor, readableTextColor } from "./colors";
 import { hasFrame, setFrame, type Frame } from "./geometry";
 import { buildDocument } from "./text";
@@ -66,7 +66,7 @@ export function createComponent(
 ): Component {
   const base = structuredClone(defaults[type]) as Loose;
   const bounds = base.bounds as { verts: Vec2[]; rotation?: number };
-  base.id = v4();
+  base.id = newId();
   base.zIndex = nextZIndex(scene);
   bounds.verts = vertsFor(type, frame);
   return base as unknown as Component;
@@ -125,7 +125,7 @@ export function createButton(
     BUTTON_PRESETS.find((p) => p.id === options.presetId) ?? BUTTON_PRESETS[0];
 
   const button = buttonComponent(preset, {
-    id: v4(),
+    id: newId(),
     zIndex: nextZIndex(scene),
     canvas,
   }) as unknown as Component & Loose;
@@ -180,7 +180,7 @@ export function createLibraryComponent(
 
   if (item.kind === "audio")
     return {
-      id: v4(),
+      id: newId(),
       type: "audio",
       name: item.name,
       url: item.url,
@@ -192,7 +192,7 @@ export function createLibraryComponent(
   const frame = placeFrame(canvas, { width: side, height: side }, at);
 
   const image = structuredClone(defaults.image) as unknown as Loose;
-  image.id = v4();
+  image.id = newId();
   image.zIndex = nextZIndex(scene);
   image.bounds = { verts: vertsFor("box", frame), rotation: 0 };
   image.href = item.url;

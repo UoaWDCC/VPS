@@ -9,7 +9,10 @@ import { isEditableShortcutTarget } from "./utils";
 
 export function handleGlobal(e: KeyboardEvent) {
   const mode = useEditorStore.getState().mode;
-  const { selected } = useEditorStore.getState();
+  const { selected, locked } = useEditorStore.getState();
+
+  // the AI is editing: nothing the author types changes the scene meanwhile
+  if (locked) return;
 
   // don't want to interfere with input elements
 

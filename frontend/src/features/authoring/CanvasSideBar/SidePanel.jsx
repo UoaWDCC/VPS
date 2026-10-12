@@ -10,12 +10,18 @@ import { XIcon } from "lucide-react";
  * out over that same transition instead of vanishing immediately.
  * @component
  */
-export default function SidePanel({ label, open, onClose, children }) {
+export default function SidePanel({
+  label,
+  open,
+  onClose,
+  children,
+  fill = false,
+}) {
   const [rendered, setRendered] = useState(open);
-  const lastContentRef = useRef({ label, children });
+  const lastContentRef = useRef({ label, children, fill });
 
   if (open) {
-    lastContentRef.current = { label, children };
+    lastContentRef.current = { label, children, fill };
   }
 
   useEffect(() => {
@@ -31,17 +37,20 @@ export default function SidePanel({ label, open, onClose, children }) {
 
   if (!rendered) return null;
 
-  const { label: renderedLabel, children: renderedChildren } =
-    lastContentRef.current;
+  const {
+    label: renderedLabel,
+    children: renderedChildren,
+    fill: renderedFill,
+  } = lastContentRef.current;
 
   return (
     <section
       id="canvas-side-panel"
       role="region"
       aria-label={renderedLabel}
-      className={`h-full w-[24rem] min-w-[20rem] shrink-0 overflow-y-auto rounded-sm bg-base-200 p-5 transition-opacity duration-150 ease-out motion-reduce:transition-none ${
-        open ? "opacity-100" : "opacity-0"
-      }`}
+      className={`h-full w-[24rem] min-w-[20rem] shrink-0 rounded-sm bg-base-200 p-5 transition-opacity duration-150 ease-out motion-reduce:transition-none ${
+        renderedFill ? "flex flex-col overflow-hidden" : "overflow-y-auto"
+      } ${open ? "opacity-100" : "opacity-0"}`}
       inert={!open}
       onTransitionEnd={(e) => {
         if (e.target === e.currentTarget && !open) setRendered(false);
@@ -58,7 +67,12 @@ export default function SidePanel({ label, open, onClose, children }) {
           <XIcon size={14} />
         </button>
       </div>
-      {renderedChildren}
+      {renderedFill ? (
+        // lets a panel use the whole height, and scroll parts of itself
+        <div className="min-h-0 flex-1">{renderedChildren}</div>
+      ) : (
+        renderedChildren
+      )}
     </section>
   );
 }

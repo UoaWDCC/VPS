@@ -50,7 +50,7 @@ export function copy(e: ClipboardEvent) {
 }
 
 export function cut(e: ClipboardEvent) {
-  if (isInputTarget(e)) return;
+  if (isInputTarget(e) || useEditorStore.getState().locked) return;
   const { selected, setSelected } = useEditorStore.getState();
   if (!selected.length) return;
 
@@ -62,7 +62,7 @@ export function cut(e: ClipboardEvent) {
 }
 
 export function paste(e: ClipboardEvent) {
-  if (isInputTarget(e)) return;
+  if (isInputTarget(e) || useEditorStore.getState().locked) return;
   e.preventDefault();
   const { mode, selected, selection, setSelected, setSelection } =
     useEditorStore.getState();

@@ -11,8 +11,8 @@ This page is both the spec and the **progress tracker**. The work ships as **one
 | 0 | `docs: AI assistant plan` | ✅ Done |
 | 1 | `feat(ai): editor command API and scene snapshot` | ✅ Done |
 | 2 | `feat: conditional destinations` | ✅ Done |
-| 3 | `feat(ai): OpenRouter proxy` | 🟨 In progress |
-| 4 | `feat(ai): assistant panel with ask, plan and build modes` | ⬜ Not started |
+| 3 | `feat(ai): OpenRouter proxy` | ✅ Done |
+| 4 | `feat(ai): assistant panel with ask, plan and build modes` | 🟨 In progress |
 | 5 | `feat(ai): scene, property and logic tools` | ⬜ Not started |
 | 6 | `feat(ai): test mode playtesting` | ⬜ Not started |
 | 7 | `feat(ai): review mode for the dashboard` | ⬜ Not started |
@@ -231,27 +231,38 @@ Notes:
 
 Tasks:
 
-- [ ] "AI Assistant" panel in the editor sidebar, using the same daisyUI tokens as the other panels: chat, mode switch, live activity log of tool calls (collapsible), Stop
-- [ ] Agent loop in the browser: build context (system rules, coordinate system, mode, scenario overview, current scene snapshot, selection), call the proxy, run tool calls, send results back, repeat; step cap (about 15 per turn)
-- [ ] Tool errors and malformed tool calls go back to the model as messages, not crashes
-- [ ] JSON-mode fallback for models with weak native tool calling
-- [ ] Ask mode: read tools only
-- [ ] Plan mode: write tools as a dry run with placeholder names for created things; checklist preview; apply all or some as one undo step
-- [ ] Build mode: writes apply directly, one undo step per turn; destructive tools pause for confirmation
-- [ ] Soft-lock canvas editing during a Build turn ("AI is editing"), released by Stop or the end of the turn
+- [x] "AI Assistant" panel in the editor sidebar, using the same daisyUI tokens as the other panels: chat, mode switch, live activity log of tool calls (collapsible), Stop
+- [x] Agent loop in the browser: build context (system rules, coordinate system, mode, scenario overview, current scene snapshot, selection), call the proxy, run tool calls, send results back, repeat; step cap (about 15 per turn)
+- [x] Tool errors and malformed tool calls go back to the model as messages, not crashes
+- [x] JSON-mode fallback for models with weak native tool calling
+- [x] Ask mode: read tools only
+- [x] Plan mode: write tools as a dry run with placeholder names for created things; checklist preview; apply all or some as one undo step
+- [x] Build mode: writes apply directly, one undo step per turn; destructive tools pause for confirmation
+- [x] Soft-lock canvas editing during a Build turn ("AI is editing"), released by Stop or the end of the turn
 
 Verify:
 
-- [ ] Loop tests with a scripted fake model: tool calls, errors, step cap, Stop
-- [ ] Plan mode tests: dry run, placeholders, partial apply, one undo step
-- [ ] Browser check end to end against a fake proxy, in both themes
-- [ ] Frontend: `yarn prettier`, `yarn lint`, `yarn test`, `yarn build` pass
+- [x] Loop tests with a scripted fake model: tool calls, errors, step cap, Stop
+- [x] Plan mode tests: dry run, placeholders, partial apply, one undo step
+- [x] Browser check end to end against a fake proxy, in both themes
+- [x] Frontend: `yarn prettier`, `yarn lint`, `yarn test`, `yarn build` pass
 
 Notes:
 
-- From stage 3: send `scenarioId`, `mode`, `model` (`"main"` or `"fast"`) and `messages`, and only offer the tools for the mode: `toolDefinitions(MODE_KINDS[mode])`. The server refuses anything else.
-- From stage 3: the reply is server-sent events. Handle an `{"error": {"code": "timeout" | "interrupted"}}` event mid-stream, and plain JSON errors (`503` not set up, `429`, `502`, `504`) before it. Show them as the messages they are.
-- From stage 3: read `X-AI-Used` and `X-AI-Limit` from the reply to show what's left of today's allowance. A `429` has `meta.resetsAt`.
+- Code is in `features/authoring/assistant/`. The panel is the sparkle icon in the sidebar, and a short guide for authors is in `wiki/Editor/Using the AI Assistant.md`.
+- **The loop is plain code with everything passed in** (`loop.ts`): the model (`chat`), the scenario (a `Session`), confirmations and Stop. So it runs the same in tests with a scripted fake model (`__tests__/fakeModel.ts`) as in the editor. `controller.ts` ties it to the panel's store, and runs outside React so a turn carries on if the panel is closed.
+- **Each model request is rebuilt from the scenario as it is then** (the system prompt includes the scenario overview and the open scene), so the model sees the effect of its own changes. Earlier turns are remembered in boiled-down form: what was asked, what it said, and a line of what it changed (last 16 messages).
+- **One undo per turn** comes from wrapping the whole Build turn in the stage 1 history batch. A side effect: the scene isn't autosaved until the turn ends (about 2.5s after), so closing the tab mid-turn loses that turn's edits.
+- **Plan mode runs on a private copy** (`plan.ts`). Each change is recorded as a step; applying replays the ticked steps on the real scenario as one undo step. *Deviation from the plan:* there are no placeholder names. A step that creates something keeps its real id, and the replay reuses it (`commands/ids.ts`), so a later step that mentions it still finds it. Steps that use another step's new components are linked, so ticking and unticking go together. The plan reflects the scene as it was when planning started; if the author edits meanwhile, a step that no longer fits is reported when applying, and the rest still apply.
+- **Soft lock:** `locked` in the editor store while Build runs or a plan applies. The toolbar, scene list and canvas are `inert`, keyboard shortcuts, cut and paste are ignored, and a banner has a Stop button. Stop (or the turn ending, or an error) releases it.
+- **Deleting in Build asks first.** Stop counts as "no".
+- **Models that can't call tools:** if the provider says so, the assistant switches to asking for calls as JSON text (the tools are described in the prompt) and tells the author. It also reads a call a model wrote into its text even when tools were offered.
+- **Models write markdown** whether asked not to or not, so replies go through a small safe reader (`markdownLite.ts`: bold, italic, code, lists, tables, code blocks; no HTML).
+- The panel shows Ask, Plan and Build. Test and Review are in the prompt and the server's lists but aren't offered until stages 6 and 7.
+- **Tried against the real model** (`nvidia/nemotron-3.5-lightning:free` through OpenRouter, with the real key, on a small test scene; about a dozen requests): Ask took about 8s and answered correctly from the scene. Build added a button where asked in about 17s, with one native tool call per step. Plan proposed a 3-step change in about 30s, sent one invalid argument, was told, and corrected it. Each Build turn and applied plan was one undo. It once added a destination nobody asked for, so the prompt now says to do only what was asked (not re-tested).
+- **Also checked in a browser with a scripted fake model** (so every path can be driven): Ask, Build, Plan with partial ticking, deleting with Skip and Delete, Stop, the editor lock, a failing server, the step cap, broken tool arguments, and the JSON fallback. Panel, plan card and banner were looked at in the dark and light themes; the confirm card and error message only in the dark one.
+- Once, after an undo, a button came back. It happened while I was editing source files with the page open (the hot reload re-read the saved scene inside the 2.5s autosave window). Two further runs, one with the real model, left it removed. Not seen without file edits, but not ruled out.
+- Not done here: the conversation isn't kept across page reloads, the fast model isn't used yet (stage 8), and changes to a scene that isn't open can't be undone (as in stage 1).
 
 ---
 
@@ -280,6 +291,7 @@ Notes:
 - From stage 2: `set_conditional_destination` already sets a plain link (no rules, only `otherwise`), so `set_destination` can be a thinner tool for the common case or dropped.
 - From stage 2: the scenario overview already lists conditional links (`when` on each link), so that task is mostly the scene-level graph.
 - From stage 3: every new command also goes in `backend/src/util/ai/modes.js` with its kind, or the proxy refuses it and `modes.spec.ts` fails.
+- From stage 4: update the "what you can't do yet" paragraph of the prompt in `assistant/prompt.ts` as tools are added (the prompt test pins it), and keep the plan step wording (`describeStep` in `plan.ts`) in step with new commands. A command that creates something outside the open scene (like `create_scene`) can't be replayed from a plan by id alone, so Plan mode will need its own handling for it.
 
 ---
 
@@ -309,6 +321,7 @@ Notes:
 
 - From stage 2: the destination rules are in `destination.js` (`resolveDestination`). The headless playtest should call that, with the properties after the button's operations, instead of re-implementing it.
 - From stage 3: the playtest tools need the kind `playtest` (widen `CommandKind` in `commands/types.ts`). Add them to `backend/src/util/ai/modes.js` as `playtest`; test mode already allows that kind.
+- From stage 4: add `test` to `PANEL_MODES` in `assistant/modes.ts` to offer the mode. The loop, tool runner and confirmations already take a `Session`, so playtests can plug in the same way. Only the editor's lock needs care: a playtest shouldn't lock the scene.
 
 ---
 
@@ -334,6 +347,7 @@ Verify:
 Notes:
 
 - From stage 3: the review tools need the kind `review` (widen `CommandKind`), added to `backend/src/util/ai/modes.js`; review mode already allows it. The anonymised data should be built on the server, so the model never sees names or emails.
+- From stage 4: add `review` to `PANEL_MODES` in `assistant/modes.ts`. Review data should reach the model as tool results (the loop already truncates long results).
 
 ---
 
@@ -360,6 +374,7 @@ Verify:
 Notes:
 
 - From stage 3: the proxy only streams, and counts against the author's daily limit. Evals that go through it need to read the stream (or the proxy needs a non-streaming option), and a big eval run would need its own limit.
+- From stage 4: the loop sends `model: "main"` only. The chat client already takes `model: "fast"`, so the fast path is a choice in `loop.ts` and a classifier in front of it.
 
 ---
 
@@ -381,3 +396,4 @@ Add one line per stage when it's done: date, stage, anything notable.
 - 2026-10-12, stage 1: command API with 22 commands, scene snapshot, spatial warnings, live editor adapter and dev console. 201 Vitest specs; verified in the real editor (one batch built a scene, one undo removed it).
 - 2026-10-12, stage 2: conditional destinations (`nextSceneRules`) end to end: shared evaluator, server and play page, editor UI, checks, debug panel, dashboard labels and `set_conditional_destination`. 76 node + 236 Vitest frontend tests, 301 backend tests; verified in a browser against the real API routes.
 - 2026-10-12, stage 3: `POST /api/ai/chat` OpenRouter proxy: streamed passthrough, server-held key, author check, tool lists enforced per mode, per-author daily limit in Mongo, timeouts, one log line per request. 112 new backend tests (413 in all); tested against a fake provider, not yet the real OpenRouter.
+- 2026-10-12, stage 4: AI assistant panel with Ask, Plan and Build: agent loop with Stop and a step cap, tool errors fed back to the model, JSON-text fallback, plans applied as one undo, deletions confirmed, the editor locked while it builds. 414 Vitest + 76 node frontend tests; run in a browser against a scripted model and against the real model.
