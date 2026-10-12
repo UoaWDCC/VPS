@@ -3,12 +3,14 @@ import {
   BoxIcon,
   BracesIcon,
   HeadphonesIcon,
+  LibraryIcon,
   MonitorCog,
   ZapIcon,
 } from "lucide-react";
 import useEditorStore from "../stores/editor";
 import useVisualScene from "../stores/visual";
 import AudioManager from "../audio/AudioManager";
+import AssetLibrary from "../library/AssetLibrary";
 import PanelIcon from "./PanelIcon";
 import SidePanel from "./SidePanel";
 import SceneSettings from "./SceneSettings";
@@ -19,6 +21,7 @@ import PropertyOperationMenu from "../../../components/Properties/PropertyOperat
 const ALWAYS_PANELS = [
   { key: "scene", label: "Scene Details", Icon: MonitorCog },
   { key: "audio", label: "Audio Elements", Icon: HeadphonesIcon },
+  { key: "library", label: "Asset Library", Icon: LibraryIcon },
 ];
 
 const CONTEXTUAL_PANELS = [
@@ -112,6 +115,7 @@ export default function CanvasSideBar() {
       >
         {activePanel === "scene" && <SceneSettings />}
         {activePanel === "audio" && <AudioManager />}
+        {activePanel === "library" && <AssetLibrary />}
         {activePanel === "bindings" && (
           <PropertyBindingMenu component={component} />
         )}

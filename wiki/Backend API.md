@@ -433,3 +433,75 @@ Returns:
     "message": "Scenes reordered successfully"
 }
 ```
+
+---
+
+### Asset library
+
+A user's library of reusable files. Every route needs a signed-in user and only ever touches that user's own assets. See [Asset Library](./Specifications/Asset%20Library.md).
+
+**List the library:**
+
+`GET /api/assets`
+
+Newest first. Optional query parameters: `type` (`image`, `audio` or `document`), `tag` (one exact tag), `q` (search words, each of which must match the name or a tag) and `limit` (default 200, at most 500).
+
+Returns:
+
+```json
+[
+    {
+        "_id": "000001",
+        "name": "heart.png",
+        "type": "image",
+        "tags": ["heart", "cardiac"],
+        "url": "https://firebasestorage.googleapis.com/...",
+        "contentType": "image/png",
+        "size": 4408,
+        "ownerUid": "uid"
+    }
+]
+```
+
+**Upload to the library:**
+
+`POST /api/assets`
+
+Multipart form: `file` (required), `tags` (optional, comma separated) and `name` (optional, defaults to the file name). Subject to the same size and type limits as scenario uploads (`415` for a type that isn't allowed, `413` if it's too large).
+
+Returns the new asset with status `201`.
+
+**Rename or re-tag:**
+
+`PATCH /api/assets/:assetId`
+
+Body (either or both):
+
+```json
+{
+    "name": "Red heart",
+    "tags": ["cardiac", "red"]
+}
+```
+
+Returns the updated asset. `404` if the asset isn't the caller's.
+
+**Remove from the library:**
+
+`DELETE /api/assets/:assetId`
+
+Returns `204`. The stored file is only deleted if no scenario is using it.
+
+**Use an asset in a scenario:**
+
+`POST /api/assets/:assetId/use`
+
+Body:
+
+```json
+{
+    "scenarioId": "000001"
+}
+```
+
+The caller must be able to edit the scenario (`401` otherwise). Returns the scenario's `UploadedFile` for the asset: status `201` the first time, `200` with the same file after that.

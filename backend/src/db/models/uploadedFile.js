@@ -19,6 +19,11 @@ const uploadedFileSchema = new Schema(
       required: true,
       index: true,
     },
+    // Set when the file is a scenario's use of a library asset. Several files
+    // (and the asset) then share one stored object at `path`, so whatever
+    // eventually cleans up orphaned files must not delete `path` while any of
+    // them still points at it.
+    assetId: { type: Schema.Types.ObjectId, ref: "Asset", default: null },
     refCount: { type: Number, default: 0, min: 0 },
     orphanedAt: { type: Date, default: null },
   },

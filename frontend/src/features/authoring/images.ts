@@ -57,18 +57,21 @@ const HANDOFF_MS = 250;
 
 export type ModifyScene = (scene: Scene) => Promise<unknown> | undefined;
 
+// Resolves to the new component's id. An image without an `_id` isn't one of
+// the scenario's uploads (the library's built-in images, say): it's shown from
+// its url and isn't reference counted.
 export async function addImageToScene(
-  image: UploadedFile,
+  image: Pick<UploadedFile, "url"> & Partial<Pick<UploadedFile, "_id">>,
   originScene: Scene,
   modifyScene: ModifyScene,
   verts?: Vec2[]
-) {
+): Promise<string> {
   const newImage = structuredClone(defaults.image) as Partial<ImageComponent>;
 
   const imageId = v4();
 
   newImage.id = imageId;
-  newImage.fileId = image._id;
+  if (image._id) newImage.fileId = image._id;
   newImage.href = image.url;
   newImage.bounds!.verts = verts ?? (await getImageVerts(image.url));
 
@@ -79,7 +82,7 @@ export async function addImageToScene(
     // every other component type gets on creation has to be assigned here.
     newImage.zIndex = getNextZIndex();
     add(newImage);
-    return;
+    return imageId;
   }
 
   // User moved to another slide while the image was loading.
@@ -88,6 +91,7 @@ export async function addImageToScene(
   originScene.components[imageId] = newImage as ImageComponent;
 
   await modifyScene(originScene);
+  return imageId;
 }
 
 export async function addNewImage(
