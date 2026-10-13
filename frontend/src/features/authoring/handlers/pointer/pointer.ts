@@ -186,7 +186,13 @@ function handleMutationEnd() {
   if (selected.length == 1) {
     modifyComponentBounds(selected, mutationBounds);
   } else {
-    const { verts: prevVerts } = getSelectedComponentBounds()!;
+    const bounds = getSelectedComponentBounds();
+    if (!bounds) {
+      setMode(["normal"]);
+      setActiveGuides([]);
+      return;
+    }
+    const { verts: prevVerts } = bounds;
     const { verts } = mutationBounds;
 
     if (mode.includes("resize") && getHandleType() === "rotation") {
