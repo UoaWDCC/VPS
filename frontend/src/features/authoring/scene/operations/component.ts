@@ -139,7 +139,11 @@ export function parseComponent(
 ) {
   component.bounds.verts = translate(component.bounds.verts, offset);
   component.zIndex = zIndex ?? component.zIndex + 1;
-  delete (component as Record<string, unknown>).id;
+  component.keyBinding = null;
+  component.showKeyHint = false;
+  const mutableComponent = component as unknown as Record<string, unknown>;
+  delete mutableComponent.id;
+  delete mutableComponent.keyHintPosition;
   return add(component);
 }
 

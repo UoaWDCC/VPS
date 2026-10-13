@@ -21,6 +21,8 @@ import ImagePlaceholder from "../elements/ImagePlaceholder";
 import useEditorStore from "../stores/editor.ts";
 import { addText } from "../components/AddText.tsx";
 import { CANVAS_HEIGHT, CANVAS_WIDTH } from "../../../util/canvas";
+import KeyHintBadge from "../components/KeyHintBadge";
+import { hasClickAction } from "../keyBindings";
 import Background from "../elements/Background";
 import useImageDrop from "../useImageDrop";
 
@@ -92,7 +94,22 @@ function Canvas() {
 
   const components = Object.values(scene)
     .sort((a, b) => a.zIndex - b.zIndex)
-    .map(resolve);
+    .flatMap((c) => {
+      const rendered = resolve(c);
+      if (!rendered) return [];
+      if (c.keyBinding && c.showKeyHint && hasClickAction(c)) {
+        return [
+          rendered,
+          <KeyHintBadge
+            key={`${c.id}-hint`}
+            bounds={c.bounds}
+            keyBinding={c.keyBinding}
+            position={c.keyHintPosition}
+          />,
+        ];
+      }
+      return [rendered];
+    });
 
   const placeholders = pendingImages
     .filter((image) => image.sceneId === sceneId)

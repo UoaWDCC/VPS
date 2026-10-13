@@ -88,6 +88,11 @@ const sceneSchema = new Schema({
     type: Schema.Types.ObjectId,
     ref: "Scene",
   },
+  // null means the default keys (Space/ArrowRight)
+  defaultKeyBinding: {
+    type: String,
+    default: null,
+  },
   defaultActionRefs: {
     type: [actionRefSchema],
     default: [],

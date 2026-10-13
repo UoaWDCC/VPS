@@ -20,6 +20,7 @@ import {
 import ActionRefsInput, {
   type ActionRefsInputHandle,
 } from "./actionRefs/ActionRefsInput";
+import KeyBindingInput from "./KeyBindingInput";
 import type { Bounds, Component, Scene, Vec2 } from "../types";
 
 type Axis = "x" | "y";
@@ -150,6 +151,7 @@ function ElementPropertiesPanel({ component }: ElementPropertiesPanelProps) {
             component={component?.id ?? null}
           />
         </PanelInput>
+        <KeyBindingInput component={component} />
       </PanelSection>
       <PanelSection name="Positioning" id="positioning">
         <div className="flex gap-2">

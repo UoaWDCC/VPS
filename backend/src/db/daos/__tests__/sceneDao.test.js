@@ -1961,3 +1961,233 @@ describe("Scene DAO patchScene tests", () => {
     });
   });
 });
+
+describe("Scene DAO key binding tests", () => {
+  useMongoMemoryServer();
+
+  const sceneId = new mongoose.Types.ObjectId("000000000000000000000001");
+  const otherSceneId = new mongoose.Types.ObjectId("0000000000000000000000a2");
+  const scenarioId = new mongoose.Types.ObjectId("000000000000000000000099");
+
+  const box = (id, extra = {}) => ({
+    id,
+    type: "box",
+    bounds: { verts: [{ x: 0, y: 0 }] },
+    ...extra,
+  });
+
+  const upsert = (...components) => ({
+    components: { upserted: components, deleted: [] },
+  });
+
+  beforeEach(async () => {
+    await Scene.create({
+      _id: sceneId,
+      name: "Test Scene",
+      components: [box("component-a"), box("component-b")],
+      actions: [
+        {
+          id: "action-1",
+          name: "Advance",
+          linkedScene: null,
+          conditions: [],
+          operations: [],
+        },
+      ],
+    });
+    await Scene.create({ _id: otherSceneId, name: "Other Scene" });
+    await Scenario.create({
+      _id: scenarioId,
+      name: "Test Scenario",
+      uid: "test-uid",
+      scenes: [sceneId, otherSceneId],
+    });
+  });
+
+  it("persists the scene link's key binding", async () => {
+    await patchScene(sceneId, { fields: { defaultKeyBinding: "W" } });
+
+    const scene = await Scene.findById(sceneId);
+    expect(scene.defaultKeyBinding).toBe("W");
+  });
+
+  it("rejects a patch where the same component id is upserted twice", async () => {
+    await expect(
+      patchScene(sceneId, {
+        components: {
+          upserted: [
+            box("component-a", { bounds: { verts: [{ x: 1, y: 1 }] } }),
+            box("component-a", { bounds: { verts: [{ x: 2, y: 2 }] } }),
+          ],
+          deleted: [],
+        },
+      })
+    ).rejects.toThrow(/appear more than once/);
+
+    const scene = await Scene.findById(sceneId);
+    expect(
+      scene.components.find((c) => c.id === "component-a").bounds.verts[0]
+    ).toEqual({ x: 0, y: 0 });
+  });
+
+  it("rejects a patch where the same component is deleted and upserted", async () => {
+    await expect(
+      patchScene(sceneId, {
+        components: {
+          upserted: [box("component-a", { clickable: true })],
+          deleted: ["component-a"],
+        },
+      })
+    ).rejects.toThrow(/both deleted and updated/);
+  });
+
+  it("rejects a patch where two clickable components claim the same key", async () => {
+    await expect(
+      patchScene(
+        sceneId,
+        upsert(
+          box("component-a", { clickable: true, keyBinding: "Q" }),
+          box("component-b", { clickable: true, keyBinding: "Q" })
+        )
+      )
+    ).rejects.toThrow(/claimed by more than one component/);
+
+    const scene = await Scene.findById(sceneId);
+    expect(
+      scene.components.find((c) => c.id === "component-a").keyBinding
+    ).toBeUndefined();
+  });
+
+  it("ignores key bindings on components that aren't clickable", async () => {
+    await patchScene(
+      sceneId,
+      upsert(
+        box("component-a", { clickable: true, keyBinding: "Q" }),
+        box("component-b", { clickable: false, keyBinding: "Q" })
+      )
+    );
+
+    const scene = await Scene.findById(sceneId);
+    expect(
+      scene.components.find((c) => c.id === "component-a").keyBinding
+    ).toBe("Q");
+  });
+
+  it("rejects a component key colliding with a scene link set in the same patch", async () => {
+    await expect(
+      patchScene(
+        sceneId,
+        {
+          fields: { defaultLinkedScene: otherSceneId.toString() },
+          ...upsert(
+            box("component-a", { clickable: true, keyBinding: "SPACE" })
+          ),
+        },
+        scenarioId
+      )
+    ).rejects.toThrow(/scene link/);
+  });
+
+  it("rejects a component key colliding with a scene link already saved on the scene", async () => {
+    await patchScene(
+      sceneId,
+      { fields: { defaultLinkedScene: otherSceneId.toString() } },
+      scenarioId
+    );
+
+    await expect(
+      patchScene(
+        sceneId,
+        upsert(
+          box("component-a", { clickable: true, keyBinding: "ARROWRIGHT" })
+        ),
+        scenarioId
+      )
+    ).rejects.toThrow(/scene link/);
+  });
+
+  it("treats a scene link with only actions as claiming its keys", async () => {
+    await patchScene(
+      sceneId,
+      {
+        defaultActionRefs: {
+          upserted: [{ id: "ref-1", actionId: "action-1", index: "a0" }],
+          deleted: [],
+        },
+      },
+      scenarioId
+    );
+
+    await expect(
+      patchScene(
+        sceneId,
+        upsert(box("component-a", { clickable: true, keyBinding: "SPACE" })),
+        scenarioId
+      )
+    ).rejects.toThrow(/scene link/);
+  });
+
+  it("frees the default keys once the scene link uses a custom key", async () => {
+    await patchScene(
+      sceneId,
+      {
+        fields: {
+          defaultLinkedScene: otherSceneId.toString(),
+          defaultKeyBinding: "W",
+        },
+        ...upsert(box("component-a", { clickable: true, keyBinding: "SPACE" })),
+      },
+      scenarioId
+    );
+
+    await expect(
+      patchScene(
+        sceneId,
+        upsert(box("component-b", { clickable: true, keyBinding: "W" })),
+        scenarioId
+      )
+    ).rejects.toThrow(/scene link/);
+  });
+
+  it("doesn't claim keys for a scene link with nothing to run", async () => {
+    await patchScene(
+      sceneId,
+      upsert(box("component-a", { clickable: true, keyBinding: "SPACE" }))
+    );
+
+    const scene = await Scene.findById(sceneId);
+    expect(
+      scene.components.find((c) => c.id === "component-a").keyBinding
+    ).toBe("SPACE");
+  });
+
+  it("allows a component to keep its own key binding across an unrelated patch", async () => {
+    await patchScene(
+      sceneId,
+      upsert(box("component-a", { clickable: true, keyBinding: "Q" }))
+    );
+    await patchScene(
+      sceneId,
+      upsert(
+        box("component-a", {
+          clickable: true,
+          keyBinding: "Q",
+          bounds: { verts: [{ x: 1, y: 1 }] },
+        })
+      )
+    );
+
+    const scene = await Scene.findById(sceneId);
+    expect(
+      scene.components.find((c) => c.id === "component-a").keyBinding
+    ).toBe("Q");
+  });
+
+  it("copies the scene link's key binding when duplicating a scene", async () => {
+    await patchScene(sceneId, { fields: { defaultKeyBinding: "W" } });
+
+    const copy = await duplicateScene(scenarioId, sceneId);
+
+    expect(copy.defaultKeyBinding).toBe("W");
+  });
+});

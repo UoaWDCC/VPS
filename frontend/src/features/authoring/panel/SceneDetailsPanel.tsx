@@ -19,6 +19,7 @@ import PanelInput from "./PanelInput";
 import ActionRefsInput, {
   type ActionRefsInputHandle,
 } from "./actionRefs/ActionRefsInput";
+import DefaultKeyBindingInput from "./DefaultKeyBindingInput";
 import type { Scene } from "../types";
 
 /**
@@ -99,6 +100,7 @@ function SceneDetailsPanel() {
             locator="defaultActionRefs"
           />
         </PanelInput>
+        <DefaultKeyBindingInput />
       </PanelSection>
       <PanelSection name="Timer" id="scene-timer">
         <PanelInput label="Timer Duration (Seconds)">

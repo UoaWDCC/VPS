@@ -8,6 +8,7 @@ import { usePost } from "hooks/crudHooks";
 
 import LoadingPage from "../status/LoadingPage";
 import PlayScenarioCanvas from "./PlayScenarioCanvas";
+import { resolveSceneBindings } from "../../components/Properties/componentBindings";
 import NotesPanel from "./components/NotesPanel";
 import SceneTimer from "./components/SceneTimer";
 import StartAudioPanel from "./components/StartAudioPanel";
@@ -18,6 +19,12 @@ import {
   VolumeOffIcon,
 } from "lucide-react";
 import ResourcesPanel from "../resources/ResourcesOverlay";
+import {
+  normalizeEventKey,
+  defaultTriggerKeysFor,
+  hasClickAction,
+  hasDefaultTrigger,
+} from "../authoring/keyBindings";
 
 const sceneCache = new Map();
 
@@ -293,12 +300,7 @@ export default function PlayScenarioPage({ group }) {
 
   useEffect(() => {
     const onKeyDown = (e) => {
-      if (
-        e.repeat ||
-        !sceneId ||
-        !(currScene?.defaultActionRefs?.length || currScene?.defaultLinkedScene)
-      )
-        return;
+      if (e.repeat || !sceneId || !currScene) return;
 
       const tag = document.activeElement?.tagName;
       const isTyping =
@@ -308,7 +310,24 @@ export default function PlayScenarioPage({ group }) {
 
       if (isTyping) return;
 
-      if (e.code === "Space" || e.key === "ArrowRight") {
+      const boundKey = normalizeEventKey(e);
+      if (!boundKey) return;
+
+      // resolve property bindings so a component bound unclickable can't be keyed
+      const component = Object.values(
+        resolveSceneBindings(currScene, properties)?.components ?? {}
+      ).find((c) => c.keyBinding === boundKey && hasClickAction(c));
+      if (component) {
+        e.preventDefault();
+        buttonPressed(component);
+        return;
+      }
+
+      const isDefaultTriggerMatch =
+        hasDefaultTrigger(currScene) &&
+        defaultTriggerKeysFor(currScene.defaultKeyBinding).includes(boundKey);
+
+      if (isDefaultTriggerMatch) {
         e.preventDefault();
         triggerAction("default", null);
       }

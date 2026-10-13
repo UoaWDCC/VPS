@@ -73,6 +73,7 @@ function generatePatch(modified, saved) {
     "time",
     "background",
     "defaultLinkedScene",
+    "defaultKeyBinding",
     "timerLinkedScene",
   ].forEach((field) => {
     if (!fastIsEqual(modified[field], saved[field]))

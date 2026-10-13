@@ -31,6 +31,7 @@ const getConnectedScenes = async (sceneID, active = true) => {
       timerActionRefs: 1,
       timerLinkedScene: 1,
       defaultLinkedScene: 1,
+      defaultKeyBinding: 1,
       roles: 1,
       time: 1,
       background: 1,

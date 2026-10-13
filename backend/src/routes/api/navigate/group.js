@@ -43,6 +43,7 @@ export const getSimpleScene = async (sceneId) => {
       timerActionRefs: 1,
       timerLinkedScene: 1,
       defaultLinkedScene: 1,
+      defaultKeyBinding: 1,
       time: 1,
       background: 1,
     }
@@ -119,6 +120,7 @@ const getConnectedScenes = async (sceneID, role, active = true) => {
       timerActionRefs: 1,
       timerLinkedScene: 1,
       defaultLinkedScene: 1,
+      defaultKeyBinding: 1,
       time: 1,
       background: 1,
     }

@@ -6,6 +6,10 @@ import { applyReferenceDeltas } from "./fileDao.js";
 import { getProperties } from "./scenarioDao.js";
 import { HttpStatusCode } from "axios";
 import mongoose from "mongoose";
+import {
+  defaultTriggerKeysFor,
+  hasDefaultTrigger,
+} from "../../util/keyBindings.js";
 
 /**
  * Adds a reference-count delta to a file ID entry in a map.
@@ -146,6 +150,33 @@ const assertScenesInScenario = async (scenarioId, sceneIds) => {
       status.BAD_REQUEST
     );
   }
+};
+
+// enforce that no two components (or a component and the scene link) share a key
+const assertUniqueKeyBindings = (components, scene) => {
+  const claimedBy = new Map();
+
+  (components ?? []).forEach((c) => {
+    if (!c.clickable || !c.keyBinding) return;
+    const priorClaimant = claimedBy.get(c.keyBinding);
+    if (priorClaimant && priorClaimant !== c.id) {
+      throw new HttpError(
+        `Key binding "${c.keyBinding}" is claimed by more than one component`,
+        status.BAD_REQUEST
+      );
+    }
+    claimedBy.set(c.keyBinding, c.id);
+  });
+
+  if (!hasDefaultTrigger(scene)) return;
+  defaultTriggerKeysFor(scene.defaultKeyBinding).forEach((key) => {
+    if (claimedBy.has(key)) {
+      throw new HttpError(
+        `Key binding "${key}" is claimed by both a component and the scene link`,
+        status.BAD_REQUEST
+      );
+    }
+  });
 };
 
 // reject duplicate action names within a scene's actions[]
@@ -427,6 +458,7 @@ export const duplicateScene = async (scenarioId, sceneId) => {
     time: sceneToCopy.time,
     actions: sceneToCopy.actions ?? [],
     defaultLinkedScene: sceneToCopy.defaultLinkedScene ?? null,
+    defaultKeyBinding: sceneToCopy.defaultKeyBinding ?? null,
     timerLinkedScene: sceneToCopy.timerLinkedScene ?? null,
     defaultActionRefs: sceneToCopy.defaultActionRefs ?? [],
     timerActionRefs: sceneToCopy.timerActionRefs ?? [],
@@ -591,6 +623,7 @@ const SIMPLE_FIELDS = [
   "time",
   "background",
   "defaultLinkedScene",
+  "defaultKeyBinding",
   "timerLinkedScene",
 ];
 
@@ -611,6 +644,31 @@ export async function patchScene(sceneId, patch, scenarioId) {
     timerActionRefs = { upserted: [], deleted: [] },
   } = patch;
 
+  // only the first occurrence of an id gets validated, so reject duplicates
+  const upsertedIds = components.upserted.map((c) => c.id);
+  const duplicateComponentIds = [
+    ...new Set(
+      upsertedIds.filter((id, index, ids) => ids.indexOf(id) !== index)
+    ),
+  ];
+  if (duplicateComponentIds.length > 0) {
+    throw new HttpError(
+      `Component(s) ${duplicateComponentIds.join(", ")} appear more than once in the same patch`,
+      status.BAD_REQUEST
+    );
+  }
+
+  // the bulkWrite below would re-insert a component that's deleted and updated
+  const deletedAndUpdated = upsertedIds.filter((id) =>
+    components.deleted.includes(id)
+  );
+  if (deletedAndUpdated.length > 0) {
+    throw new HttpError(
+      `Component(s) ${deletedAndUpdated.join(", ")} cannot be both deleted and updated in the same patch`,
+      status.BAD_REQUEST
+    );
+  }
+
   const allowedFields = {};
   SIMPLE_FIELDS.forEach((field) => {
     if (Object.prototype.hasOwnProperty.call(fields, field)) {
@@ -630,6 +688,7 @@ export async function patchScene(sceneId, patch, scenarioId) {
     defaultActionRefs: 1,
     timerActionRefs: 1,
     defaultLinkedScene: 1,
+    defaultKeyBinding: 1,
     timerLinkedScene: 1,
   });
   if (!existingScene)
@@ -701,6 +760,32 @@ export async function patchScene(sceneId, patch, scenarioId) {
   for (const [label, refs, existingRefs] of refLists) {
     assertActionRefsShape(refs, label);
     assertActionRefsResolve(refs, existingRefs, validActionIds, label);
+  }
+
+  // patch key binding validation
+
+  const keyBindingsMayHaveChanged =
+    components.upserted.length > 0 ||
+    components.deleted.length > 0 ||
+    defaultActionRefs.upserted.length > 0 ||
+    defaultActionRefs.deleted.length > 0 ||
+    "defaultLinkedScene" in allowedFields ||
+    "defaultKeyBinding" in allowedFields;
+
+  if (keyBindingsMayHaveChanged) {
+    const pick = (field) =>
+      field in allowedFields ? allowedFields[field] : existing[field];
+    assertUniqueKeyBindings(
+      getEffectiveArray(components, existing.components),
+      {
+        defaultLinkedScene: pick("defaultLinkedScene"),
+        defaultKeyBinding: pick("defaultKeyBinding"),
+        defaultActionRefs: getEffectiveArray(
+          defaultActionRefs,
+          existing.defaultActionRefs
+        ),
+      }
+    );
   }
 
   // file ref computation
