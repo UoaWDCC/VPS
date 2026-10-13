@@ -2825,6 +2825,11 @@ for-each@^0.3.3:
   dependencies:
     is-callable "^1.2.7"
 
+fractional-indexing@^4.0.0:
+  version "4.0.0"
+  resolved "https://registry.yarnpkg.com/fractional-indexing/-/fractional-indexing-4.0.0.tgz#07820434caec6fbf7a4d4295139a275ee6084d9a"
+  integrity sha512-Nr2P1Yyaj2sy1Qdt/wI3GcByxrUdbSKg5+cGvw8f18hT2SkQt6V72iOjBpk7IO3UkzBsdlGRs2a4z6dLrJprgw==
+
 framework-utils@^1.1.0:
   version "1.1.0"
   resolved "https://registry.yarnpkg.com/framework-utils/-/framework-utils-1.1.0.tgz#a3b528bce838dfd623148847dc92371b09d0da2d"

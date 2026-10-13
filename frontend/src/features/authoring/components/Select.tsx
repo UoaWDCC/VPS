@@ -1,39 +1,65 @@
 import { ChevronDown } from "lucide-react";
+import { useEffect, useRef } from "react";
+import { cn } from "../../../util/classnames";
 
-interface SelectInputProps<T> {
+interface BaseSelectInputProps<T> {
   values: T[];
   value: T | null;
   display?: (v: T) => string;
-  onChange: (v: T | null) => void;
-  nullable?: boolean;
   disabled?: boolean;
+  autoFocus?: boolean;
+  onBlur?: () => void;
+  error?: boolean;
 }
 
-function SelectInput<T>({
-  values,
-  value,
-  display,
-  nullable = false,
-  disabled = false,
-  onChange,
-}: SelectInputProps<T>) {
-  const render = display ?? ((v: T) => String(v));
+// onChange only receives null when the "None" option is offered
+type SelectInputProps<T> = BaseSelectInputProps<T> &
+  (
+    | { nullable: true; onChange: (v: T | null) => void }
+    | { nullable?: false; onChange: (v: T) => void }
+  );
 
-  function handleClick(v: T | null) {
+function SelectInput<T>(props: SelectInputProps<T>) {
+  const {
+    values,
+    value,
+    display,
+    disabled = false,
+    autoFocus = false,
+    onBlur,
+    error,
+  } = props;
+  const render = display ?? ((v: T) => String(v));
+  const triggerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    // only focus on mount, when this item is newly added
+    if (autoFocus) triggerRef.current?.focus();
+  }, []);
+
+  function handleClick(v: T) {
     (document.activeElement as HTMLDivElement).blur();
-    onChange(v);
+    props.onChange(v);
+  }
+
+  function handleClear() {
+    if (!props.nullable) return;
+    (document.activeElement as HTMLDivElement).blur();
+    props.onChange(null);
   }
 
   return (
-    <div
-      className={`dropdown flex-1 ${
-        disabled ? "pointer-events-none opacity-50" : ""
-      }`}
-    >
+    <div className="dropdown flex-1">
       <div
-        tabIndex={0}
+        ref={triggerRef}
+        tabIndex={disabled ? -1 : 0}
         role="button"
-        className="justify-between input mb-1 font-normal join-item w-full"
+        onBlur={onBlur}
+        aria-disabled={disabled}
+        className={cn(
+          "justify-between input font-normal join-item w-full",
+          error && "input-error"
+        )}
       >
         <span className="truncate">
           {value != null ? render(value) : "None"}
@@ -43,6 +69,7 @@ function SelectInput<T>({
       {!disabled && (
         <ul
           tabIndex={0}
+          onMouseDown={(e) => e.preventDefault()}
           className="dropdown-content menu bg-base-300 rounded-box z-1 w-70 p-2 shadow-sm"
         >
           {values.map((v, i) => (
@@ -55,9 +82,9 @@ function SelectInput<T>({
               </a>
             </li>
           ))}
-          {nullable ? (
+          {props.nullable ? (
             <li>
-              <a onClick={() => handleClick(null)}>None</a>
+              <a onClick={handleClear}>None</a>
             </li>
           ) : null}
         </ul>

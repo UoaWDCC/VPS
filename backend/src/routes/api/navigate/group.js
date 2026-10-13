@@ -7,13 +7,16 @@ import { HttpError } from "../../../util/error.js";
 import STATUS from "../../../util/status.js";
 import { getProperties } from "../../../db/daos/scenarioDao.js";
 import { setGroupProperties } from "../../../db/daos/groupDao.js";
-import { applyPropertyOperations } from "../../../util/properties/propertyOperations.js";
-import { getComponent } from "../../../db/daos/sceneDao.js";
+import {
+  runActions,
+  getLinkedSceneIds,
+} from "../../../util/actions/actionRunner.js";
 import {
   freshRemainingTime,
   resumedRemainingTime,
   movedRemainingTimeField,
 } from "./timer.js";
+import { dropStaleLinks, resolveTrigger } from "./trigger.js";
 import { normaliseString } from "../../../util/normalise.js";
 
 const createInvalidError = (roles) =>
@@ -35,10 +38,13 @@ export const getSimpleScene = async (sceneId) => {
     {
       roles: 1,
       components: 1,
-      directLink: 1,
-      directLinkKey: 1,
+      actions: 1,
+      defaultActionRefs: 1,
+      timerActionRefs: 1,
+      timerLinkedScene: 1,
+      defaultLinkedScene: 1,
+      defaultKeyBinding: 1,
       time: 1,
-      timerStateOperations: 1,
       background: 1,
     }
   ).lean();
@@ -90,6 +96,7 @@ const getGroupByIdAndUser = async (groupId, uid) => {
       stateVariables: 1,
       stateVersion: 1,
       currentSceneEnteredAt: 1,
+      currentSceneTimerFired: 1,
     }
   ).lean();
   if (!group)
@@ -102,19 +109,19 @@ const getGroupByIdAndUser = async (groupId, uid) => {
 
 const getConnectedScenes = async (sceneID, role, active = true) => {
   const scene = await getSceneConsideringRole(sceneID, role);
-  const connectedIds = scene.components
-    .filter((c) => c.clickable)
-    .map((b) => b.nextScene)
-    .filter(Boolean);
+  const connectedIds = getLinkedSceneIds(scene);
   const connectedScenes = await Scene.find(
     { _id: { $in: connectedIds } },
     {
       roles: 1,
       components: 1,
-      directLink: 1,
-      directLinkKey: 1,
+      actions: 1,
+      defaultActionRefs: 1,
+      timerActionRefs: 1,
+      timerLinkedScene: 1,
+      defaultLinkedScene: 1,
+      defaultKeyBinding: 1,
       time: 1,
-      timerStateOperations: 1,
       background: 1,
     }
   ).lean();
@@ -138,11 +145,52 @@ const addSceneToPath = async (groupId, currentSceneId, sceneId) => {
     },
     {
       $push: { path: { $each: [sceneId], $position: 0 } },
-      $set: { currentSceneEnteredAt: new Date() },
+      $set: {
+        currentSceneEnteredAt: new Date(),
+        currentSceneTimerFired: false,
+      },
     }
   );
   if (!res) throw new HttpError("Scene mismatch has occured", STATUS.CONFLICT);
   return STATUS.OK;
+};
+
+// commits a scene transition and/or a resolved property change in a single
+// conditional update
+const commitGroupTransition = async (
+  groupId,
+  currentSceneId,
+  nextSceneId,
+  stateVersion,
+  properties,
+  claimTimer = false
+) => {
+  const filter = {
+    _id: groupId,
+    $or: [{ "path.0": currentSceneId }, { path: { $size: 0 } }],
+  };
+
+  const update = {};
+  if (claimTimer) {
+    filter.currentSceneTimerFired = { $ne: true };
+    update.$set = { currentSceneTimerFired: true };
+  }
+  if (nextSceneId) {
+    update.$push = { path: { $each: [nextSceneId], $position: 0 } };
+    update.$set = {
+      currentSceneEnteredAt: new Date(),
+      currentSceneTimerFired: false,
+    };
+  }
+  if (properties) {
+    filter.stateVersion = stateVersion;
+    update.$set = { ...(update.$set ?? {}), stateVariables: properties };
+    update.$inc = { stateVersion: 1 };
+  }
+
+  const res = await Group.findOneAndUpdate(filter, update, { new: true });
+  if (!res) throw new HttpError("Scene mismatch has occured", STATUS.CONFLICT);
+  return res;
 };
 
 // Adds flags to group on scene change
@@ -210,29 +258,9 @@ const syncProperties = async (group) => {
   return [properties, group.stateVersion];
 };
 
-// Updates properties for a group
-const updateProperties = async (group, component) => {
-  if (!component || !component.stateOperations) {
-    return [group.stateVariables, group.stateVersion];
-  }
-
-  const properties = applyPropertyOperations(
-    group.stateVariables,
-    component.stateOperations
-  );
-
-  return await setGroupProperties(group._id, properties);
-};
-
 export const groupNavigate = async (req) => {
-  const {
-    uid,
-    currentScene,
-    addFlags,
-    removeFlags,
-    componentId,
-    nextScene: bodyNextScene,
-  } = req.body;
+  const { uid, currentScene, addFlags, removeFlags, trigger, componentId } =
+    req.body;
 
   const group = await getGroupByIdAndUser(req.params.groupId, uid);
   const { role } = group.users[0];
@@ -281,36 +309,67 @@ export const groupNavigate = async (req) => {
   if (group.path[0] !== currentScene)
     throw new HttpError("Scene mismatch has occured", STATUS.CONFLICT);
 
-  // Validate that the user is allowed to move to this scene
-  await getSceneConsideringRole(currentScene, role);
+  if (!trigger) throw new HttpError("trigger is required", STATUS.BAD_REQUEST);
 
-  if (bodyNextScene) {
-    const scene = await Scene.findById(currentScene, { directLink: 1 }).lean();
-    if (!scene?.directLink?.equals(bodyNextScene))
-      throw new HttpError("Invalid direct link target", STATUS.FORBIDDEN);
+  // the timer already fired for this scene entry
+  const claimTimer = trigger === "timer";
+  if (claimTimer && group.currentSceneTimerFired) {
+    return {
+      status: STATUS.OK,
+      json: {
+        properties: group.stateVariables,
+        propertyVersion: group.stateVersion,
+      },
+    };
   }
 
-  const component = componentId
-    ? await getComponent(currentScene, componentId)
-    : null;
+  // validate that the user is allowed to move to this scene
+  const scene = await getSceneConsideringRole(currentScene, role);
+
+  const resolved = await dropStaleLinks(
+    group.scenarioId,
+    resolveTrigger(scene, trigger, componentId)
+  );
+  const {
+    properties: resolvedProperties,
+    linkedScene,
+    changed,
+  } = runActions(resolved.actions, group.stateVariables);
+  const nextScene = linkedScene?.toString() ?? resolved.fallback?.toString();
 
   let scenes = null;
-
-  const nextScene = component?.nextScene ?? bodyNextScene;
+  let committedGroup = null;
 
   if (nextScene && nextScene !== currentScene) {
-    [, , , scenes] = await Promise.all([
-      addSceneToPath(group._id, currentScene, nextScene),
+    const [committed, , , connectedScenes] = await Promise.all([
+      commitGroupTransition(
+        group._id,
+        currentScene,
+        nextScene,
+        group.stateVersion,
+        changed ? resolvedProperties : null,
+        claimTimer
+      ),
       addFlagsToGroup(group._id, addFlags),
       removeFlagsFromGroup(group._id, removeFlags),
       getConnectedScenes(nextScene, role, true),
     ]);
+    committedGroup = committed;
+    scenes = connectedScenes;
+  } else if (changed || claimTimer) {
+    committedGroup = await commitGroupTransition(
+      group._id,
+      currentScene,
+      null,
+      group.stateVersion,
+      changed ? resolvedProperties : null,
+      claimTimer
+    );
   }
 
-  const [properties, propertyVersion] = await updateProperties(
-    group,
-    component
-  );
+  const [properties, propertyVersion] = committedGroup
+    ? [committedGroup.stateVariables, committedGroup.stateVersion]
+    : [group.stateVariables, group.stateVersion];
 
   return {
     status: STATUS.OK,
@@ -348,7 +407,14 @@ export const groupReset = async (req) => {
 
   await Group.updateOne(
     { _id: req.params.groupId },
-    { $set: { path: [], currentFlags: [], currentSceneEnteredAt: null } }
+    {
+      $set: {
+        path: [],
+        currentFlags: [],
+        currentSceneEnteredAt: null,
+        currentSceneTimerFired: false,
+      },
+    }
   ).exec();
 
   return { status: STATUS.OK };

@@ -4,6 +4,13 @@ import { normalizeEventKey, displayKeyBinding } from "../keyBindings";
 /**
  * Click "Set key", then press a key from availableKeys to bind it.
  * @component
+ * @param {{
+ *   value: string | null,
+ *   availableKeys: string[],
+ *   onChange: (key: string | null) => void,
+ *   disabled?: boolean,
+ *   clearValue?: string | null,
+ * }} props
  */
 export default function KeyCapture({
   value,

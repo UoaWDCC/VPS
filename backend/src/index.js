@@ -30,7 +30,23 @@ if (process.env.NODE_ENV === "production") {
   console.log("Running in production!");
 }
 
-// Connect DB first, then start server.
-connectToDatabase().then(() => {
-  app.listen(port, () => console.log(`App server listening on port ${port}!`));
+// start connecting at module load, mongoose buffers queries until connected
+const dbConnection = connectToDatabase();
+dbConnection.catch((err) => {
+  console.error("Database connection failed:", err);
+  // server selection errors hide the real cause in each server's description
+  err.reason?.servers?.forEach((server, address) =>
+    console.error(`  ${address}:`, server.error)
+  );
 });
+
+// on Vercel the app is imported and invoked as a function, so don't listen
+if (!process.env.VERCEL) {
+  dbConnection.then(() => {
+    app.listen(port, () =>
+      console.log(`App server listening on port ${port}!`)
+    );
+  });
+}
+
+export default app;

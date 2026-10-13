@@ -2,16 +2,16 @@ import { useContext } from "react";
 import ScenarioContext from "../../context/ScenarioContext";
 import { modifyComponentProp } from "../../features/authoring/scene/operations/component";
 import { getComponentBindingTargets } from "./componentBindings";
+import { XIcon } from "lucide-react";
+import SelectInput from "../../features/authoring/components/Select";
 
 export default function PropertyBinding({ component, binding }) {
   const { properties } = useContext(ScenarioContext);
-  const target = getComponentBindingTargets(component).find(
-    (candidate) => candidate.key === binding.target
-  );
+  const targets = getComponentBindingTargets(component);
+  const target = targets.find((candidate) => candidate.key === binding.target);
   const property = properties?.find(
     (candidate) => candidate.id === binding.stateVariableId
   );
-  const valid = target && property?.type === target.propertyType;
 
   function remove() {
     modifyComponentProp(
@@ -22,24 +22,28 @@ export default function PropertyBinding({ component, binding }) {
   }
 
   return (
-    <div className="bg-base-300 mt-xs px-[1rem] py-[0.5rem]">
-      <div className="flex items-center gap-xs">
-        <div className="min-w-0">
-          <div className="text--1">{target?.label ?? binding.target}</div>
-          <div
-            className={`text-xs break-words ${
-              valid ? "text-primary" : "text-warning"
-            }`}
-          >
-            {property
-              ? `${property.name} (${property.type})`
-              : "Property no longer exists"}
-          </div>
+    <li>
+      <div className="flex gap-1 items-center">
+        <div className="flex items-center join flex-1">
+          <SelectInput
+            values={properties}
+            display={(p) => p.name}
+            value={property ?? null}
+            onChange={() => {}}
+            disabled={true}
+          />
+          <SelectInput
+            values={targets}
+            display={(t) => t.label}
+            value={target ?? null}
+            onChange={() => {}}
+            disabled={true}
+          />
         </div>
-        <button className="btn btn-xs btn-phantom ml-auto" onClick={remove}>
-          Delete
+        <button className="btn btn-phantom btn-square btn-xs" onClick={remove}>
+          <XIcon size={20} />
         </button>
       </div>
-    </div>
+    </li>
   );
 }

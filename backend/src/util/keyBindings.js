@@ -1,8 +1,12 @@
-export const DEFAULT_DIRECT_LINK_KEYS = ["SPACE", "ARROWRIGHT"];
+export const DEFAULT_TRIGGER_KEYS = ["SPACE", "ARROWRIGHT"];
 
 // null = default keys, "" = custom with no key picked yet
-export function directLinkKeysFor(directLinkKey) {
-  if (directLinkKey == null) return DEFAULT_DIRECT_LINK_KEYS;
-  if (!directLinkKey) return [];
-  return [directLinkKey];
+export function defaultTriggerKeysFor(defaultKeyBinding) {
+  if (defaultKeyBinding == null) return DEFAULT_TRIGGER_KEYS;
+  if (!defaultKeyBinding) return [];
+  return [defaultKeyBinding];
+}
+
+export function hasDefaultTrigger(scene) {
+  return !!(scene.defaultLinkedScene || scene.defaultActionRefs?.length);
 }

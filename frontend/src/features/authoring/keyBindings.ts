@@ -1,4 +1,4 @@
-import type { GenericComponent } from "./types";
+import type { GenericComponent, Scene } from "./types";
 
 // "/" and "'" are excluded since they open Firefox's Quick Find
 const LETTERS = Array.from({ length: 26 }, (_, i) =>
@@ -41,15 +41,15 @@ export function normalizeEventKey(e: KeyboardEvent): string | null {
   return key && KEY_BINDING_OPTIONS.includes(key) ? key : null;
 }
 
-export const DEFAULT_DIRECT_LINK_KEYS = ["SPACE", "ARROWRIGHT"];
+export const DEFAULT_TRIGGER_KEYS = ["SPACE", "ARROWRIGHT"];
 
 // null = default keys, "" = custom with no key picked yet
-export function directLinkKeysFor(
-  directLinkKey: string | null | undefined
+export function defaultTriggerKeysFor(
+  defaultKeyBinding: string | null | undefined
 ): string[] {
-  if (directLinkKey == null) return DEFAULT_DIRECT_LINK_KEYS;
-  if (!directLinkKey) return [];
-  return [directLinkKey];
+  if (defaultKeyBinding == null) return DEFAULT_TRIGGER_KEYS;
+  if (!defaultKeyBinding) return [];
+  return [defaultKeyBinding];
 }
 
 type KeyBoundComponent = Pick<
@@ -59,14 +59,20 @@ type KeyBoundComponent = Pick<
 
 type ActionableComponent = Pick<
   GenericComponent,
-  "clickable" | "nextScene" | "stateOperations"
+  "clickable" | "actionRefs" | "linkedScene"
 >;
+
+type DefaultTrigger = Pick<Scene, "defaultLinkedScene" | "defaultActionRefs">;
 
 export function hasClickAction(component: ActionableComponent): boolean {
   return !!(
     component.clickable &&
-    (component.nextScene || (component.stateOperations?.length ?? 0) > 0)
+    (component.linkedScene || (component.actionRefs?.length ?? 0) > 0)
   );
+}
+
+export function hasDefaultTrigger(scene: Partial<DefaultTrigger>): boolean {
+  return !!(scene.defaultLinkedScene || scene.defaultActionRefs?.length);
 }
 
 export function usedComponentKeys(
@@ -85,13 +91,15 @@ export function availableKeyBindings(
   components: KeyBoundComponent[],
   options: {
     excludeComponentId?: string;
-    directLink?: string | null;
-    directLinkKey?: string | null;
+    hasDefaultTrigger?: boolean;
+    defaultKeyBinding?: string | null;
   } = {}
 ): string[] {
   const used = [
     ...usedComponentKeys(components, options.excludeComponentId),
-    ...(options.directLink ? directLinkKeysFor(options.directLinkKey) : []),
+    ...(options.hasDefaultTrigger
+      ? defaultTriggerKeysFor(options.defaultKeyBinding)
+      : []),
   ];
   return KEY_BINDING_OPTIONS.filter((k) => !used.includes(k));
 }

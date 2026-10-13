@@ -9,15 +9,50 @@ export type Component =
   | LineComponent
   | AudioComponent;
 
+export type Comparator = "=" | "!=" | "<" | ">";
+export type PropertyOperationType = "set" | "add" | "subtract";
+export type PropertyValue = string | number | boolean;
+
+export interface Condition {
+  id: string;
+  stateVariableId: string;
+  comparator: Comparator;
+  value: PropertyValue;
+}
+
+export interface Operation {
+  id: string;
+  stateVariableId: string;
+  operation: PropertyOperationType;
+  value: PropertyValue;
+}
+
+export interface Action {
+  id: string;
+  name: string;
+  linkedScene: string | null;
+  conditions: Condition[];
+  operations: Operation[];
+}
+
+export interface ActionRef {
+  id: string;
+  actionId: string;
+  index: string; // fractional for concurrent editing
+}
+
 export interface Scene {
   _id: string;
   name: string;
   components: Record<string, Component>;
   roles: string[];
   time: number | null;
-  directLink: string | null;
-  directLinkKey: string | null;
-  timerStateOperations: Record<string, unknown>[] | null;
+  actions: Action[];
+  defaultLinkedScene: string | null;
+  defaultKeyBinding: string | null;
+  defaultActionRefs: ActionRef[];
+  timerLinkedScene: string | null;
+  timerActionRefs: ActionRef[];
   background: SceneBackground | null;
 }
 
@@ -66,9 +101,9 @@ export interface GenericComponent {
   bounds: Bounds;
   zIndex: number;
   clickable?: boolean;
-  nextScene?: string | null;
-  stateOperations?: Record<string, unknown>[] | null;
   stateBindings?: PropertyBinding[];
+  actionRefs?: ActionRef[];
+  linkedScene?: string | null;
   keyBinding?: string | null;
   showKeyHint?: boolean;
   keyHintPosition?: KeyHintPosition;

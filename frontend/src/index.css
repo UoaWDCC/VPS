@@ -312,6 +312,10 @@ body,
   @apply btn-ghost font-normal text-primary hover:text-secondary border-none shadow-none bg-transparent;
 }
 
+.btn.btn-panel {
+  @apply px-1.5 py-0.5 bg-base-300 hover:bg-base-100 border-0 shadow-none text-xs font-normal h-7 w-full justify-start flex-1;
+}
+
 .border-gradient {
   border-image: linear-gradient(
       to right,
@@ -332,6 +336,19 @@ body,
 
 .input.search.search-xs {
   @apply text-xs pb-3xs h-7;
+}
+
+#canvas-side-panel .input {
+  @apply h-7 text-xs shadow-none w-full px-2;
+}
+
+#canvas-side-panel .input:is(:disabled, [disabled], [aria-disabled="true"]) {
+  @apply opacity-50 bg-base-100 border-base-content/20;
+}
+
+/* mimics daisy's disabled styling for non input elements */
+.input:is([aria-disabled="true"]) {
+  @apply cursor-not-allowed bg-base-200 border-base-200 text-base-content/40 shadow-none;
 }
 
 svg#main .box,

@@ -28,7 +28,6 @@ function ThumbOverlay({ scene }) {
   );
 }
 
-// TODO: sort out animation flickering here
 const SceneNavigator = () => {
   const { user } = useContext(AuthenticationContext);
 

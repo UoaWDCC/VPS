@@ -1,17 +1,17 @@
 import { useContext, useRef, useState, type Context } from "react";
-import useVisualScene from "../stores/visual";
-import EditAudioComponent from "./EditAudioComponent";
-import type { UploadedFile } from "../types";
+import useVisualScene from "../../stores/visual";
+import type { UploadedFile } from "../../types";
 import type { AxiosResponse } from "axios";
 import type { User } from "firebase/auth";
-import { api } from "../../../util/api";
-import { add } from "../scene/operations/modifiers";
+import { api } from "../../../../util/api";
+import { add, remove } from "../../scene/operations/modifiers";
 import { useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
-import AuthenticationContext from "../../../context/AuthenticationContext";
+import AuthenticationContext from "../../../../context/AuthenticationContext";
 import { useParams } from "react-router-dom";
-import { PlusIcon } from "lucide-react";
+import { ListMusicIcon, PlusIcon } from "lucide-react";
 import AudioSelectModal from "./AudioSelectModal";
+import AudioRow from "./AudioRow";
 
 // before calling validation of file should already be done
 async function addNewAudio(file: File, scenarioId: string, user: User) {
@@ -35,7 +35,11 @@ async function addNewAudio(file: File, scenarioId: string, user: User) {
   add(newAudio);
 }
 
-function AudioManager() {
+function deleteAudioComponent(id: string) {
+  remove([id]);
+}
+
+function AudioPanel() {
   const components = useVisualScene((state) => state.components);
   const { user } = useContext(AuthenticationContext as Context<{ user: User }>);
   const { scenarioId } = useParams<{ scenarioId: string }>();
@@ -45,6 +49,7 @@ function AudioManager() {
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   const audios = Object.values(components).filter((c) => c.type === "audio");
+  const audioNames = audios.map((a) => a.name); // for uniqueness enforcement
 
   function handleFileChange(event: React.ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0];
@@ -71,30 +76,40 @@ function AudioManager() {
 
   return (
     <>
-      <div className="mb-3 flex flex-col gap-2">
+      <div className="flex gap-2">
         <button
           type="button"
-          className="flex w-full items-center gap-2 rounded-sm border-0 bg-base-300 px-3 py-2 text-left text-sm shadow-none transition-colors hover:bg-base-100"
+          className="btn btn-panel"
           onClick={showFilePicker}
         >
-          <PlusIcon size={16} />
+          <PlusIcon size={18} />
           Upload New Audio
         </button>
         <button
           type="button"
-          className="flex w-full items-center rounded-sm border-0 bg-base-300 px-3 py-2 text-left text-sm shadow-none transition-colors hover:bg-base-100"
+          className="btn btn-panel"
           onClick={() => setModalOpen(true)}
         >
+          <ListMusicIcon size={18} />
           Select Existing Audio
         </button>
       </div>
 
       {audios.length > 0 ? (
-        audios.map((audio) => (
-          <EditAudioComponent component={audio} key={audio.id} />
-        ))
+        <ul className="mt-3 gap-1 flex flex-col">
+          {audios.map((audio) => (
+            <AudioRow
+              component={audio}
+              audioNames={audioNames}
+              key={audio.id}
+              onDelete={deleteAudioComponent}
+            />
+          ))}
+        </ul>
       ) : (
-        <p className="text-xs opacity-70">No audio elements yet.</p>
+        <p className="mt-6 text-xs text-center text-primary">
+          No audio elements yet for this scene
+        </p>
       )}
 
       <input
@@ -110,4 +125,4 @@ function AudioManager() {
   );
 }
 
-export default AudioManager;
+export default AudioPanel;

@@ -42,28 +42,58 @@ const CreateGraphData = (scenes, groupInfo) => {
       });
     });
 
-    // Loop through each component of a scene and check for the "nextScene" property and add it to edge graph
-    scenes.forEach((scene) =>
-      scene.components.forEach((obj) => {
-        if (obj.nextScene && sceneMap[obj.nextScene]) {
-          edges.push({
-            id: scene.name + "-" + sceneMap[obj.nextScene].name,
-            source: scene._id,
-            target: obj.nextScene,
-            type: "simpleFloating",
-            markerEnd: {
-              ...markerEnd,
-              color: "var(--color-primary)",
-            },
-            style: {
-              strokeWidth: 3,
-              stroke: "var(--color-primary)",
-            },
-            animated: true,
-          });
-        }
-      })
-    );
+    // loop through every path a scene can navigate from and add edges
+    const seenEdgeIds = new Set();
+    scenes.forEach((scene) => {
+      const actionsById = new Map(
+        (scene.actions ?? []).map((action) => [action.id, action])
+      );
+      const resolveActions = (actionIds) =>
+        (actionIds ?? []).map((id) => actionsById.get(id)).filter(Boolean);
+      const orderedActionIds = (refs) =>
+        (refs ?? []).map((ref) => ref.actionId);
+
+      const clickables = (scene.components ?? []).filter((c) => c.clickable);
+      const actionLists = [
+        ...clickables.map((c) => orderedActionIds(c.actionRefs)),
+        orderedActionIds(scene.defaultActionRefs),
+        orderedActionIds(scene.timerActionRefs),
+      ];
+
+      const linkedSceneIds = [
+        ...actionLists
+          .flatMap((actionIds) => resolveActions(actionIds))
+          .map((action) => action.linkedScene),
+        ...clickables.map((c) => c.linkedScene),
+        scene.defaultLinkedScene,
+        scene.timerLinkedScene,
+      ];
+
+      linkedSceneIds.forEach((linkedScene) => {
+        if (!linkedScene || !sceneMap[linkedScene]) return;
+        // multiple paths in the same scene can resolve to the same
+        // linkedScene, so we ignore dups
+        const edgeId = scene.name + "-" + sceneMap[linkedScene].name;
+        if (seenEdgeIds.has(edgeId)) return;
+        seenEdgeIds.add(edgeId);
+
+        edges.push({
+          id: edgeId,
+          source: scene._id,
+          target: linkedScene,
+          type: "simpleFloating",
+          markerEnd: {
+            ...markerEnd,
+            color: "var(--color-primary)",
+          },
+          style: {
+            strokeWidth: 3,
+            stroke: "var(--color-primary)",
+          },
+          animated: true,
+        });
+      });
+    });
 
     /**
      * Loop through group path to create the links of the students path
