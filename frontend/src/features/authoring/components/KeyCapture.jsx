@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { KeyboardIcon, XIcon } from "lucide-react";
 import { normalizeEventKey, displayKeyBinding } from "../keyBindings";
 
 /**
@@ -57,16 +58,17 @@ export default function KeyCapture({
   }, [capturing, availableKeys, onChange]);
 
   return (
-    <div className="flex items-center gap-2 flex-wrap">
+    <div className="flex flex-1 flex-wrap items-center gap-2">
       <button
         type="button"
-        className="btn btn-sm [--btn-bg:var(--color-base-100)] [--btn-border:color-mix(in_oklab,var(--color-base-content)_20%,transparent)]"
+        className="btn btn-panel"
         disabled={disabled}
         onClick={() => {
           setError(null);
           setCapturing(true);
         }}
       >
+        <KeyboardIcon size={18} />
         {capturing
           ? "Press a key… (Esc to cancel)"
           : value
@@ -76,14 +78,15 @@ export default function KeyCapture({
       {value && !capturing && (
         <button
           type="button"
-          className="btn btn-sm btn-ghost"
+          className="btn btn-panel"
           disabled={disabled}
           onClick={() => onChange(clearValue)}
         >
+          <XIcon size={18} />
           Clear
         </button>
       )}
-      {error && <span className="text-error text-xs">{error}</span>}
+      {error && <span className="text-error text-xs basis-full">{error}</span>}
     </div>
   );
 }

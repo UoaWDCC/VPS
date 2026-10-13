@@ -79,8 +79,7 @@ function DefaultKeyBindingInput() {
           />
           {!defaultKeyBinding && (
             <p className="text-warning text-xs mt-1">
-              ⚠ No key set - the player will have no way to trigger the scene
-              link until you pick one.
+              ⚠ No key set - the scene link won&apos;t trigger
             </p>
           )}
         </div>
