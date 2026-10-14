@@ -19,14 +19,20 @@ import { hasMarqueeMoved } from "../handlers/pointer/marquee";
 import LoadingOverlay from "./LoadingOverlay.tsx";
 import ImagePlaceholder from "../elements/ImagePlaceholder";
 import useEditorStore from "../stores/editor.ts";
+import { addText } from "../components/AddText.tsx";
 import { CANVAS_HEIGHT, CANVAS_WIDTH } from "../../../util/canvas";
 import Background from "../elements/Background";
+import useImageDrop from "../useImageDrop";
+
+const TextableBox = addText(Box);
+const TextableEllipse = addText(Ellipse);
+const TextableSpeech = addText(Speech);
 
 const componentMap: Record<string, React.FC<Record<string, unknown>>> = {
   textbox: (props) => <TextBox {...props} editable={true} />,
-  speech: Speech,
-  ellipse: Ellipse,
-  box: Box,
+  box: (props) => <TextableBox {...props} />,
+  ellipse: (props) => <TextableEllipse {...props} />,
+  speech: (props) => <TextableSpeech {...props} />,
   image: Image,
   line: Line,
 };
@@ -53,8 +59,6 @@ function Canvas() {
 
   const canvasRef = useRef<SVGSVGElement | null>(null);
 
-  if (!scene) return <></>;
-
   function toSVGSpace(cx: number, cy: number) {
     const boundingRect = canvasRef.current?.children[0];
     if (!boundingRect) return { x: 0, y: 0 };
@@ -63,6 +67,10 @@ function Canvas() {
     const y = ((cy - top) / height) * CANVAS_HEIGHT;
     return { x, y };
   }
+
+  const { isDraggingOver, dropHandlers } = useImageDrop(toSVGSpace);
+
+  if (!scene) return <></>;
 
   function handleMouseMove(e: React.MouseEvent) {
     handleMouseMoveGlobal(e, toSVGSpace(e.clientX, e.clientY));
@@ -100,7 +108,29 @@ function Canvas() {
         onMouseUp={handleMouseUp}
         onMouseDown={handleMouseDown}
         onContextMenu={handleContextMenu}
+        {...dropHandlers}
       >
+        {isDraggingOver && (
+          <div
+            className="
+              absolute
+              inset-0
+              z-[9998]
+              flex
+              items-center
+              justify-center
+              border-2
+              border-dashed
+              border-primary
+              bg-primary/10
+              pointer-events-none
+            "
+          >
+            <span className="bg-primary/70 text-secondary text-sm font-medium px-4 py-2 rounded-full backdrop-blur-sm">
+              Drop image to add it to this scene
+            </span>
+          </div>
+        )}
         {mode.includes("create") && (
           <div
             className="

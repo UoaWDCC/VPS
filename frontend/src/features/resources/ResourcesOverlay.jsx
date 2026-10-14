@@ -8,6 +8,7 @@ import { filterTreeByConditions } from "../../utils/propertyConditionalEvaluator
 import SkeletonBody from "./ResourcesSkeleton";
 import ResourcePreview from "./ResourcePreview";
 import PanelOverlay from "../../components/PanelOverlay";
+import ResourceTitle from "./components/ResourceTitle";
 
 // NOTE: property filters can't change while the resources panel is
 // open, so deselecting on resource hiding isn't a concern
@@ -127,11 +128,17 @@ export default function ResourcesPanel({ properties, open, onClose }) {
                 <div className="card min-h-[60dvh] overflow-auto pb-[max(1rem,env(safe-area-inset-bottom))] lg:col-span-2 lg:h-full lg:min-h-0">
                   <div className="pl-8 flex min-h-full flex-col gap-4">
                     {selectedResource ? (
-                      selectedResource?.type === "file" && (
-                        <div className="min-h-[50dvh] flex-1 lg:min-h-0">
-                          <ResourcePreview file={selectedResource} />
-                        </div>
-                      )
+                      <>
+                        <ResourceTitle
+                          resource={selectedResource}
+                          editable={false}
+                        />
+                        {selectedResource?.type === "file" && (
+                          <div className="min-h-[50dvh] flex-1 lg:min-h-0">
+                            <ResourcePreview file={selectedResource} />
+                          </div>
+                        )}
+                      </>
                     ) : (
                       <div className="min-h-[50dvh] flex flex-1 flex-col gap-4 lg:min-h-0 justify-center items-center border border-primary rounded-xl">
                         <FileTextIcon size={32} />

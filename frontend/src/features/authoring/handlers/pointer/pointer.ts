@@ -149,23 +149,33 @@ function handleComponentClick(e: React.MouseEvent, position: Vec2) {
   setMode(["normal"]);
 }
 
-function handleComponentDrag(_: React.MouseEvent, position: Vec2) {
+function handleComponentDrag(e: React.MouseEvent, position: Vec2) {
   const { selected, setMutationBounds, offset, setMode, setActiveGuides } =
     useEditorStore.getState();
   if (!selected?.length) return;
 
-  const bounds = getSelectedComponentBounds()!;
+  const bounds = getSelectedComponentBounds();
+  if (!bounds) return;
   let verts = translate(bounds.verts, subtract(position, offset));
 
-  const { components } = useVisualScene.getState();
-  const others = Object.values(components).filter(
-    (c) => c.type !== "audio" && !selected.includes(c.id)
-  );
-  const { delta, guides } = snapTranslation(verts, bounds.rotation, others, "");
-  verts = translate(verts, delta);
+  if (e.altKey) {
+    setActiveGuides([]);
+  } else {
+    const { components } = useVisualScene.getState();
+    const others = Object.values(components).filter(
+      (c) => c.type !== "audio" && !selected.includes(c.id)
+    );
+    const { delta, guides } = snapTranslation(
+      verts,
+      bounds.rotation,
+      others,
+      ""
+    );
+    verts = translate(verts, delta);
+    setActiveGuides(guides);
+  }
 
   setMutationBounds((prev) => ({ ...prev, verts }));
-  setActiveGuides(guides);
   setMode(["mutation"]);
 }
 
@@ -176,7 +186,13 @@ function handleMutationEnd() {
   if (selected.length == 1) {
     modifyComponentBounds(selected, mutationBounds);
   } else {
-    const { verts: prevVerts } = getSelectedComponentBounds()!;
+    const bounds = getSelectedComponentBounds();
+    if (!bounds) {
+      setMode(["normal"]);
+      setActiveGuides([]);
+      return;
+    }
+    const { verts: prevVerts } = bounds;
     const { verts } = mutationBounds;
 
     if (mode.includes("resize") && getHandleType() === "rotation") {
@@ -295,9 +311,12 @@ export function getSelectedComponentBounds() {
 
   const scene = useVisualScene.getState();
 
-  if (selected.length === 1) return scene.components[selected[0]].bounds;
-
   const components = selected.map((id) => scene.components[id]);
+  // A store update can render a handle before its selection has caught up.
+  // Hide the handles until every selected component is available again.
+  if (components.some((component) => !component)) return null;
+  if (components.length === 1) return components[0].bounds;
+
   return { verts: computeBounds(components), rotation: 0 };
 }
 

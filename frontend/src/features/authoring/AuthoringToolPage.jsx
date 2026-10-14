@@ -1,4 +1,5 @@
 import { useContext, useEffect, useRef, useState } from "react";
+import { unstable_batchedUpdates } from "react-dom";
 import { useParams } from "react-router-dom";
 import SceneContext from "context/SceneContext";
 import CanvasSideBar from "./CanvasSideBar/CanvasSideBar";
@@ -24,7 +25,7 @@ import {
   PlayIcon,
   UserPlusIcon,
 } from "lucide-react";
-import { handleGlobal } from "./handlers/keyboard/keyboard";
+import { handleGlobal, handleGlobalKeyUp } from "./handlers/keyboard/keyboard";
 import {
   clearHistory,
   dispatchModification,
@@ -42,6 +43,7 @@ const listeners = [
   ["cut", cut],
   ["paste", paste],
   ["keydown", handleGlobal],
+  ["keyup", handleGlobalKeyUp],
 ];
 
 // const AUTOSAVE_INTERVAL = 30000; // 30 secs
@@ -80,60 +82,59 @@ export default function AuthoringToolPage() {
       }
     }, 2500);
 
-    const listener = async ({ operation, record }) => {
-      if (operation === "undo" || operation === "redo") {
-        const editorState = useEditorStore.getState();
+    const listener = ({ operation, record }) =>
+      unstable_batchedUpdates(() => {
+        if (operation === "undo" || operation === "redo") {
+          const editorState = useEditorStore.getState();
 
-        // React 17 doesn't batch these updates outside of an event handler,
-        // so the text cursor/selection must be cleared before the document
-        // is replaced -- otherwise a render can happen in between with the
-        // restored (possibly shorter) document and the stale selection,
-        // reading past the end of the document
-        editorState.setSelection({ start: null, end: null });
-        editorState.setVisualSelection({ start: null, end: null });
+          // Discard text positions from the old document before restoring a
+          // possibly shorter one. Restore the relevant edit selection below.
+          editorState.setSelection({ start: null, end: null });
+          editorState.setVisualSelection({ start: null, end: null });
+          setSelected([]);
 
-        const batch = record;
-        const targetSceneId = batch[0]?.sceneId;
-        if (targetSceneId && targetSceneId !== sceneId) {
-          switchScene(getScene(), targetSceneId);
-        }
+          const batch = record;
+          const targetSceneId = batch[0]?.sceneId;
+          if (targetSceneId && targetSceneId !== sceneId) {
+            switchScene(getScene(), targetSceneId);
+          }
 
-        const restoredIds = [];
-        batch.forEach((item) => {
-          const state = operation === "undo" ? item.before : item.after;
-          if (state?.type === "textbox" && state.document && properties)
-            syncPropertyChips(state.document, properties);
-          replaceComponent(item.id, state);
-          if (state !== null) restoredIds.push(item.id);
-        });
-        setSelected(restoredIds);
+          const restoredIds = [];
+          batch.forEach((item) => {
+            const state = operation === "undo" ? item.before : item.after;
+            if (state?.type === "textbox" && state.document && properties)
+              syncPropertyChips(state.document, properties);
+            replaceComponent(item.id, state);
+            if (state !== null) restoredIds.push(item.id);
+          });
+          setSelected(restoredIds);
 
-        // jump straight to the exact text that was undone/redone, the way
-        // undo/redo works in any text editor, by diffing the before/after
-        // documents rather than relying on wherever the cursor used to be
-        // -- only meaningful when the batch touches a single component
-        if (batch.length === 1) {
-          const [item] = batch;
-          const state = operation === "undo" ? item.before : item.after;
-          const beforeBlocks = item.before?.document?.blocks;
-          const afterBlocks = item.after?.document?.blocks;
-          const targetBlocks = state?.document?.blocks;
-          const diff =
-            beforeBlocks?.length && afterBlocks?.length
-              ? findEditDiff(beforeBlocks, afterBlocks)
-              : null;
-          if (diff && targetBlocks?.length) {
-            const selection = diffToSelection(targetBlocks, diff);
-            editorState.setMode(["text"]);
-            editorState.setSelection(selection);
-            syncVisualCursor();
+          // jump straight to the exact text that was undone/redone, the way
+          // undo/redo works in any text editor, by diffing the before/after
+          // documents rather than relying on wherever the cursor used to be
+          // -- only meaningful when the batch touches a single component
+          if (batch.length === 1) {
+            const [item] = batch;
+            const state = operation === "undo" ? item.before : item.after;
+            const beforeBlocks = item.before?.document?.blocks;
+            const afterBlocks = item.after?.document?.blocks;
+            const targetBlocks = state?.document?.blocks;
+            const diff =
+              beforeBlocks?.length && afterBlocks?.length
+                ? findEditDiff(beforeBlocks, afterBlocks)
+                : null;
+            if (diff && targetBlocks?.length) {
+              const selection = diffToSelection(targetBlocks, diff);
+              editorState.setMode(["text"]);
+              editorState.setSelection(selection);
+              syncVisualCursor();
+            }
           }
         }
-      }
 
-      setSaving(true);
-      debounced();
-    };
+        setSaving(true);
+        debounced();
+      });
 
     historyEvents.addEventListener("update", listener);
     return () => historyEvents.removeEventListener("update", listener);

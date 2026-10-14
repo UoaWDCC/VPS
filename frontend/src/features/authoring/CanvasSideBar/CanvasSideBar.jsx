@@ -1,9 +1,37 @@
 import { useLayoutEffect, useRef, useState } from "react";
+import {
+  BoxIcon,
+  BracesIcon,
+  HeadphonesIcon,
+  MonitorCog,
+  ZapIcon,
+} from "lucide-react";
 import useEditorStore from "../stores/editor";
 import useVisualScene from "../stores/visual";
 import AudioManager from "../audio/AudioManager";
-import ComponentSettings from "./ComponentSettings";
+import PanelIcon from "./PanelIcon";
+import SidePanel from "./SidePanel";
 import SceneSettings from "./SceneSettings";
+import PropertyBindingMenu from "../../../components/Properties/PropertyBindingMenu";
+import { ObjectPropertyEditor } from "./ObjectPropertyEditor";
+import PropertyOperationMenu from "../../../components/Properties/PropertyOperationMenu";
+
+const ALWAYS_PANELS = [
+  { key: "scene", label: "Scene Details", Icon: MonitorCog },
+  { key: "audio", label: "Audio Elements", Icon: HeadphonesIcon },
+];
+
+const CONTEXTUAL_PANELS = [
+  { key: "bindings", label: "Property Bindings", Icon: BracesIcon },
+  { key: "object-properties", label: "Object Properties", Icon: BoxIcon },
+  { key: "actions", label: "Button Actions", Icon: ZapIcon },
+];
+
+const PANEL_LABELS = Object.fromEntries(
+  [...ALWAYS_PANELS, ...CONTEXTUAL_PANELS].map(({ key, label }) => [key, label])
+);
+
+const CONTEXTUAL_PANEL_KEYS = new Set(CONTEXTUAL_PANELS.map((p) => p.key));
 
 /**
  * This component displays the properties of scene components in a sidebar
@@ -24,84 +52,97 @@ export default function CanvasSideBar() {
     setActivePanel((current) => (current === panel ? null : panel));
   }
 
+  // fall back to the scene details panel
   useLayoutEffect(() => {
-    setActivePanel(null);
-  }, [selected, component?.id, component?.clickable]);
+    if (!component && CONTEXTUAL_PANEL_KEYS.has(activePanel)) {
+      setActivePanel("scene");
+    }
+  }, [component, activePanel]);
 
-  //side panel animation
+  // FLIP: when the contextual icons appear/disappear, the icon stack
+  // recenters vertically. Compensate by animating from its old position.
   useLayoutEffect(() => {
     const iconStack = iconStackRef.current;
     if (!iconStack) return;
 
+    const hasSelection = Boolean(component);
     const currentTop = iconStack.getBoundingClientRect().top;
     const previousTop = previousStackTopRef.current;
-    const contextualIcons = contextualIconsRef.current;
-    const hasSelection = Boolean(component);
-    const selectionPresenceChanged =
+    const presenceChanged =
       previousSelectionPresenceRef.current !== null &&
       previousSelectionPresenceRef.current !== hasSelection;
+
+    previousStackTopRef.current = currentTop;
+    previousSelectionPresenceRef.current = hasSelection;
+
     const reduceMotion = window.matchMedia(
       "(prefers-reduced-motion: reduce)"
     ).matches;
+    if (reduceMotion || !presenceChanged || previousTop === currentTop) return;
 
-    if (
-      !reduceMotion &&
-      selectionPresenceChanged &&
-      previousTop !== null &&
-      previousTop !== currentTop &&
-      typeof iconStack.animate === "function"
-    ) {
-      iconStack.animate(
-        [
-          { transform: `translateY(${previousTop - currentTop}px)` },
-          { transform: "translateY(0)" },
-        ],
-        { duration: 250, easing: "ease-out" }
-      );
-    }
+    iconStack.animate(
+      [
+        { transform: `translateY(${previousTop - currentTop}px)` },
+        { transform: "translateY(0)" },
+      ],
+      { duration: 150, easing: "ease-out" }
+    );
 
-    if (
-      !reduceMotion &&
-      selectionPresenceChanged &&
-      hasSelection &&
-      contextualIcons &&
-      typeof contextualIcons.animate === "function"
-    ) {
-      contextualIcons.animate(
+    if (hasSelection) {
+      contextualIconsRef.current?.animate(
         [
           { opacity: 0, transform: "translateY(12px)" },
           { opacity: 1, transform: "translateY(0)" },
         ],
-        { duration: 250, easing: "ease-out" }
+        { duration: 150, easing: "ease-out" }
       );
     }
-
-    previousStackTopRef.current = currentTop;
-    previousSelectionPresenceRef.current = hasSelection;
   }, [selected, component?.clickable, activePanel]);
 
   return (
     <div
-      className={`relative flex shrink-0 pb-m flex-col justify-center overflow-y-auto overflow-x-hidden no-scrollbar transition-[width] duration-300 ease-out motion-reduce:transition-none ${
-        activePanel ? "w-[24vw] min-w-[20rem]" : "w-24"
+      className={`flex shrink-0 items-center justify-end gap-3 overflow-hidden pb-m transition-[width] duration-150 ease-out motion-reduce:transition-none ${
+        activePanel ? "w-[calc(24rem_+_4.25rem)]" : "w-14"
       }`}
     >
-      <div ref={iconStackRef} className="flex flex-col gap-s">
-        <SceneSettings
-          open={activePanel === "scene"}
-          onToggle={() => togglePanel("scene")}
-        />
-        <AudioManager
-          open={activePanel === "audio"}
-          onToggle={() => togglePanel("audio")}
-        />
+      <SidePanel
+        label={PANEL_LABELS[activePanel]}
+        open={Boolean(activePanel)}
+        onClose={() => setActivePanel(null)}
+      >
+        {activePanel === "scene" && <SceneSettings />}
+        {activePanel === "audio" && <AudioManager />}
+        {activePanel === "bindings" && (
+          <PropertyBindingMenu component={component} />
+        )}
+        {activePanel === "object-properties" && (
+          <ObjectPropertyEditor component={component} />
+        )}
+        {activePanel === "actions" && (
+          <PropertyOperationMenu component={component} />
+        )}
+      </SidePanel>
+      <div ref={iconStackRef} className="flex shrink-0 flex-col gap-3">
+        {ALWAYS_PANELS.map(({ key, label, Icon }) => (
+          <PanelIcon
+            key={key}
+            label={label}
+            Icon={Icon}
+            active={activePanel === key}
+            onClick={() => togglePanel(key)}
+          />
+        ))}
         {component && (
-          <div ref={contextualIconsRef} className="flex flex-col gap-s">
-            <ComponentSettings
-              component={component}
-              activePanel={activePanel}
-              onTogglePanel={togglePanel}
-            />
+          <div ref={contextualIconsRef} className="flex flex-col gap-3">
+            {CONTEXTUAL_PANELS.map(({ key, label, Icon }) => (
+              <PanelIcon
+                key={key}
+                label={label}
+                Icon={Icon}
+                active={activePanel === key}
+                onClick={() => togglePanel(key)}
+              />
+            ))}
           </div>
         )}
       </div>

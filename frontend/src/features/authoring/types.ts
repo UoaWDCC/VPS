@@ -71,10 +71,11 @@ export interface PropertyBinding {
   stateVariableId: string;
 }
 
-interface ShapeComponent extends GenericComponent {
+export interface ShapeComponent extends GenericComponent {
   fill: HexString;
   stroke: HexString;
   strokeWidth: number;
+  document?: ModelDocument;
 }
 
 export interface ImageComponent extends GenericComponent {

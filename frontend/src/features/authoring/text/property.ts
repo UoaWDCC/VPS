@@ -3,6 +3,8 @@ import type { ModelDocument, ModelSpan, PropertyRef } from "../types";
 //unicode placeholder character for chip + horizontal side padding
 export const PROPERTY_CHAR = "\uFFFC";
 export const CHIP_X_PADDING = 6;
+//text rendered slightly smaller than surrounding for better fit in-chip
+export const CHIP_FONT_SCALE = 0.9;
 
 export interface Property {
   id: string;
