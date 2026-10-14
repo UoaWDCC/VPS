@@ -3,6 +3,7 @@ import type { ModelSelection, VisualSelection } from "../text/types";
 import type { BaseTextStyle, Bounds, Guide, Vec2 } from "../types";
 import { getComponent } from "../scene/scene";
 import { getStyleForSelection } from "../scene/operations/text";
+import type { Property } from "../text/property";
 
 type Mode = "normal" | "resize" | "create" | "text" | "mutation" | "marquee";
 
@@ -44,6 +45,7 @@ interface EditorState {
   visualSelection: VisualSelection;
   desiredColumn: number | null;
   activeStyle: BaseTextStyle | null;
+  properties: Property[];
 
   setLoading: (loading: boolean) => void;
   addPendingImage: (image: PendingImage) => void;
@@ -53,6 +55,7 @@ interface EditorState {
   setVisualSelection: Dynamic<VisualSelection>;
   setDesiredColumn: (column: number | null) => void;
   setActiveStyle: (style: BaseTextStyle) => void;
+  setProperties: (properties?: Property[]) => void;
 
   // modes
   mode: Mode[];
@@ -114,6 +117,7 @@ const useEditorStore = create<EditorState>((set) => ({
   selection: { start: null, end: null },
   visualSelection: { start: null, end: null },
   activeStyle: null,
+  properties: [],
   desiredColumn: null,
 
   setSelection: (selection) =>
@@ -129,6 +133,7 @@ const useEditorStore = create<EditorState>((set) => ({
   setVisualSelection: setter(set, "visualSelection"),
   setActiveStyle: (style: BaseTextStyle) => set({ activeStyle: style }),
   setDesiredColumn: (column) => set({ desiredColumn: column }),
+  setProperties: (properties) => set({ properties: properties ?? [] }),
 
   mode: ["normal"],
   setMode: (mode) => set({ mode }),

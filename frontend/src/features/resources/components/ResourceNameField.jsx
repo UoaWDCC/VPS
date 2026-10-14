@@ -8,7 +8,6 @@ export default function ResourceNameField({
   resource,
   disabled,
   onSelect,
-  isSelected,
   onRename,
   actions,
 }) {
@@ -47,27 +46,14 @@ export default function ResourceNameField({
     }
   }
 
-  const rowStyle = editing
-    ? {
-        gridTemplateColumns: "minmax(0, 1fr) auto",
-        backgroundColor: "transparent",
-        boxShadow: "none",
-        color: "var(--color-base-content)",
-        cursor: "auto",
-      }
-    : { gridTemplateColumns: "minmax(0, 1fr) auto auto" };
-
   return (
-    <div
-      className={`grid items-center overflow-hidden p-0 gap-0 ${isSelected ? "bg-base-content/5" : ""}`}
-      style={rowStyle}
-    >
+    <div className="items-center overflow-hidden p-0 gap-0 flex flex-1">
       {editing ? (
         <input
           ref={inputRef}
           type="text"
           aria-label={`Rename ${resource.name}`}
-          className="input input-bordered min-w-0 h-9"
+          className="input input-bordered min-w-0 h-9 flex-1"
           style={{
             "--input-color":
               "color-mix(in oklab, var(--color-base-content) 20%, transparent)",
@@ -91,7 +77,7 @@ export default function ResourceNameField({
         <>
           <button
             type="button"
-            className={`min-w-0 truncate bg-transparent text-left text--1 border-none cursor-pointer disabled:cursor-not-allowed focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary px-3 py-1.5 h-9 ${isTemp(resource) ? "text-primary" : ""}`}
+            className={`min-w-0 truncate bg-transparent text-left text--1 border-none cursor-pointer disabled:cursor-not-allowed focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary px-3 py-1.5 h-9 flex-1 ${isTemp(resource) ? "text-primary" : ""}`}
             title={resource.name}
             onClick={(e) => {
               e.stopPropagation();
@@ -104,7 +90,7 @@ export default function ResourceNameField({
           </button>
           <button
             type="button"
-            className="btn btn-phantom btn-xs px-1.5 h-full"
+            className="btn btn-phantom btn-xs px-1.5 h-9"
             onClick={startEditing}
             title="Rename"
             disabled={disabled}
@@ -116,7 +102,7 @@ export default function ResourceNameField({
       {editing ? (
         <button
           type="button"
-          className="btn btn-phantom btn-xs px-1.5 h-full"
+          className="btn btn-phantom btn-xs px-1.5 h-9"
           onClick={() => inputRef.current?.blur()}
           title="Confirm rename"
         >

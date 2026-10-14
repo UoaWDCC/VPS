@@ -7,6 +7,11 @@ import ScenarioContext from "../../context/ScenarioContext";
 import SelectInput from "../../features/authoring/components/Select";
 
 const DEFAULT_PROPERTY_TYPE = propertyTypes.STRING;
+const TYPE_LABELS = {
+  string: "Text",
+  number: "Number",
+  boolean: "True/False",
+};
 
 /**
  * Component used for creating properties
@@ -76,6 +81,7 @@ const CreateProperty = ({ scenarioId }) => {
           <SelectInput
             value={type}
             values={["string", "number", "boolean"]}
+            display={(value) => TYPE_LABELS[value] ?? value}
             onChange={setType}
           />
         </div>
