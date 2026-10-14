@@ -7,8 +7,9 @@ import Box from "../authoring/elements/Box";
 import Image from "../authoring/elements/Image";
 import Line from "../authoring/elements/Line";
 import { resolveSceneBindings } from "../../components/Properties/componentBindings";
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Background from "../authoring/elements/Background";
+import { getSceneGoogleFonts, loadFont } from "../authoring/text/fonts";
 
 const componentMap = {
   textbox: TextBox,
@@ -183,7 +184,30 @@ export default function PlayScenarioCanvas({
     return injectProperties(boundScene, properties);
   }, [scene, properties]);
 
-  const components = Object.values(buildVisualScene(sceneToRender).components)
+  const [fontRevision, setFontRevision] = useState(0);
+  const fontsInScene = useMemo(
+    () => getSceneGoogleFonts(sceneToRender),
+    [sceneToRender]
+  );
+
+  useEffect(() => {
+    if (fontsInScene.length === 0) return;
+
+    let cancelled = false;
+    void Promise.all(fontsInScene.map(loadFont)).then(() => {
+      if (!cancelled) setFontRevision((revision) => revision + 1);
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [fontsInScene]);
+
+  const visualScene = useMemo(
+    () => buildVisualScene(sceneToRender),
+    [sceneToRender, fontRevision]
+  );
+  const components = Object.values(visualScene.components)
     .sort((a, b) => a.zIndex - b.zIndex)
     .map((c) => {
       const resolved = resolve(c);

@@ -1,52 +1,6 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Check } from "lucide-react";
-
-const fonts = [
-  "DM Sans",
-  "IBM Plex Sans",
-  "Mona Sans",
-  "Inter",
-  "Open Sans",
-  "Roboto",
-  "Lato",
-  "Montserrat",
-  "Poppins",
-  "Source Sans 3",
-  "Work Sans",
-  "Fira Sans",
-  "Space Grotesk",
-  "Bebas Neue",
-  "Oswald",
-  "Playfair Display",
-  "Merriweather",
-  "Lora",
-  "Libre Baskerville",
-  "Cormorant Garamond",
-  "Bitter",
-  "Roboto Mono",
-  "Arial",
-  "Verdana",
-  "Tahoma",
-  "Trebuchet MS",
-  "Times New Roman",
-  "Georgia",
-  "Garamond",
-  "Courier New",
-  "Helvetica",
-];
-
-function findFonts(currentSearch = "") {
-  const normalizedSearch = currentSearch.trim().toLowerCase();
-
-  return normalizedSearch
-    ? fonts.filter((font) => font.toLowerCase().includes(normalizedSearch))
-    : fonts;
-}
-
-function findFont(fontName: string) {
-  const normalizedFontName = fontName.trim().toLowerCase();
-  return fonts.find((font) => font.toLowerCase() === normalizedFontName);
-}
+import { findFont, findFonts, loadFont } from "../text/fonts";
 
 function FontInput({
   value,
@@ -58,15 +12,23 @@ function FontInput({
   const [inputValue, setInputValue] = useState(value);
   const [searchQuery, setSearchQuery] = useState("");
   const [isOpen, setIsOpen] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const skipBlurRestore = useRef(false);
   const matchingFonts = findFonts(searchQuery);
 
   // Keep the display value in sync when the selected font changes elsewhere.
   useEffect(() => {
     setInputValue(value);
     setSearchQuery("");
+    void loadFont(value);
   }, [value]);
 
   function restoreOrSelectFont() {
+    if (skipBlurRestore.current) {
+      skipBlurRestore.current = false;
+      return;
+    }
+
     const matchingFont = findFont(inputValue);
 
     if (matchingFont) {
@@ -80,9 +42,23 @@ function FontInput({
     setIsOpen(false);
   }
 
+  function selectFont(font: string) {
+    if (inputRef.current) {
+      skipBlurRestore.current = true;
+      inputRef.current.blur();
+    }
+
+    onChange(font);
+    setInputValue(font);
+    setSearchQuery("");
+    setIsOpen(false);
+    void loadFont(font);
+  }
+
   return (
     <div className="relative">
       <input
+        ref={inputRef}
         type="text"
         className="input input-sm h-[28px] w-30"
         placeholder="Search fonts..."
@@ -125,14 +101,8 @@ function FontInput({
                 className={`flex w-full items-center justify-between px-3 py-1.5 text-left hover:bg-base-200 ${
                   font === value ? "bg-base-200" : ""
                 }`}
-                style={{ fontFamily: `"${font}", sans-serif` }}
                 onMouseDown={(event) => event.preventDefault()}
-                onClick={() => {
-                  onChange(font);
-                  setInputValue(font);
-                  setSearchQuery("");
-                  setIsOpen(false);
-                }}
+                onClick={() => selectFont(font)}
               >
                 {font}
                 {font === value && <Check size={14} />}

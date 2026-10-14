@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import type { VisualDocument } from "./types";
 import Cursor from "./Cursor.tsx";
 import Highlight from "./Highlight";
@@ -5,6 +6,10 @@ import Rectangle from "../canvas/Rectangle";
 import { buildStyle } from "./build";
 import useEditorStore from "../stores/editor";
 import TextHighlight from "./TextHighlight.tsx";
+import { isGoogleFont, loadFont } from "./fonts";
+import { buildVisualComponent } from "../pipeline";
+import { getComponent } from "../scene/scene";
+import useVisualScene from "../stores/visual";
 
 function buildGroups(doc: VisualDocument) {
   return doc.blocks.map((block, i) => (
@@ -33,6 +38,37 @@ function Text({ doc, editable }: { doc: VisualDocument; editable?: boolean }) {
   );
 
   const isSelected = editable && selected && selected[0] === doc.id;
+  const googleFonts = [
+    ...new Set(
+      doc.blocks.flatMap((block) =>
+        block.lines.flatMap((line) =>
+          line.spans.map((span) => span.style.fontFamily).filter(isGoogleFont)
+        )
+      )
+    ),
+  ];
+  const googleFontsKey = googleFonts.join(",");
+
+  useEffect(() => {
+    if (!googleFonts.length) return;
+
+    let cancelled = false;
+
+    void Promise.all(googleFonts.map(loadFont)).then(() => {
+      if (cancelled) return;
+
+      const component = editable ? getComponent(doc.id) : null;
+      if (component?.type === "textbox") {
+        useVisualScene
+          .getState()
+          .updateComponent(buildVisualComponent(component));
+      }
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [doc.id, editable, googleFontsKey]);
 
   const { bounds } = doc;
   const center = {
