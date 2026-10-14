@@ -81,7 +81,7 @@ export function useResources() {
         );
       }
       console.error(e);
-      toast.error("Something went wrong uploading the resource");
+      toast.error("Something went wrong uploading the document");
     },
   });
 
@@ -122,7 +122,7 @@ export function useResources() {
     },
     onError: (e) => {
       console.error(e);
-      toast.error("Something went wrong deleting the resource");
+      toast.error("Something went wrong deleting the document");
     },
     onSettled: () => queryClient.invalidateQueries(["resources", scenarioId]),
   });
@@ -143,7 +143,7 @@ export function useResources() {
         queryClient.setQueryData(["resources", scenarioId], context.previous);
       }
       console.error(e);
-      toast.error("Something went wrong renaming the resource");
+      toast.error("Something went wrong renaming the document");
     },
     onSettled: () => queryClient.invalidateQueries(["resources", scenarioId]),
   });

@@ -18,7 +18,6 @@ import { syncPropertyChips } from "./text/property";
 import { buildVisualComponent } from "./pipeline";
 import {
   ArrowLeftIcon,
-  FilesIcon,
   LayoutDashboardIcon,
   PencilIcon,
   PlayIcon,
@@ -195,10 +194,6 @@ export default function AuthoringToolPage() {
     window.open(`/play/${scenarioId}${startScene}`, "_blank");
   }
 
-  function goToResources() {
-    history.push(`/scenario/${scenarioId}/manage-resources`);
-  }
-
   function goToDashboard() {
     history.push(`/dashboard/${scenarioId}?from=canvas`);
   }
@@ -245,13 +240,9 @@ export default function AuthoringToolPage() {
             </div>
           )}
           <button
-            onClick={goToResources}
+            onClick={goToDashboard}
             className="btn btn-phantom text-m ml-auto"
           >
-            <FilesIcon size={20} />
-            Resources
-          </button>
-          <button onClick={goToDashboard} className="btn btn-phantom text-m">
             <LayoutDashboardIcon size={20} />
             Dashboard
           </button>
