@@ -25,7 +25,11 @@ import {
   UserPlusIcon,
 } from "lucide-react";
 import { handleGlobal } from "./handlers/keyboard/keyboard";
-import { clearHistory, historyEvents } from "./scene/history";
+import {
+  clearHistory,
+  dispatchModification,
+  historyEvents,
+} from "./scene/history";
 import { debounce } from "../../util/debounce";
 import { getScene } from "./scene/scene";
 import ShareModal from "./components/ShareModal";
@@ -189,7 +193,11 @@ export default function AuthoringToolPage() {
       changed = true;
     }
 
-    if (changed) setComponents(next);
+    if (!changed) return;
+    setComponents(next);
+    // not undoable: undo re-syncs chips to the current names, so restoring the
+    // old size would leave the box misfit -- but the change still needs saving
+    dispatchModification();
   }, [properties, sceneId]);
 
   function playScenario() {
