@@ -61,6 +61,15 @@ function generateOffsets(text: string, style: BaseTextStyle) {
   return offsets;
 }
 
+// UTF-16 indices where text can be broken without splitting a character,
+// including text.length
+function graphemeBoundaries(text: string) {
+  const segmenter = new Intl.Segmenter(undefined, { granularity: "grapheme" });
+  const boundaries = Array.from(segmenter.segment(text), (s) => s.index);
+  boundaries.push(text.length);
+  return boundaries;
+}
+
 function generateLineOffset(
   alignment: string,
   width: number,
@@ -149,27 +158,35 @@ function buildVisualLines(
     style: BaseTextStyle,
     offsets: number[]
   ) {
-    let start = 0;
+    // only break between whole graphemes, so an emoji or surrogate pair is never
+    // split across lines; offsets and start indices stay in UTF-16 units
+    const boundaries = graphemeBoundaries(ref.text);
+    // *Boundary vars index into boundaries; start/end are positions in ref.text
+    const lastBoundary = boundaries.length - 1;
+    let startBoundary = 0;
 
-    while (start < ref.text.length) {
+    while (startBoundary < lastBoundary) {
+      const start = boundaries[startBoundary];
       const base = offsets[start];
 
-      let end = start;
+      let endBoundary = startBoundary;
       while (
-        end < ref.text.length &&
-        currentLine.width + offsets[end + 1] - base <= maxWidth
+        endBoundary < lastBoundary &&
+        currentLine.width + offsets[boundaries[endBoundary + 1]] - base <=
+          maxWidth
       )
-        end++;
+        endBoundary++;
 
-      if (end === start) {
+      if (endBoundary === startBoundary) {
         // retry on an empty line; if not even one char fits, take it anyway
         if (currentLine.width > 0) {
           wrapLine();
           continue;
         }
-        end = start + 1;
+        endBoundary = startBoundary + 1;
       }
 
+      const end = boundaries[endBoundary];
       pushSpan(
         ref,
         style,
@@ -179,8 +196,8 @@ function buildVisualLines(
         offsets.slice(start, end + 1).map((offset) => offset - base)
       );
 
-      start = end;
-      if (start < ref.text.length) wrapLine();
+      startBoundary = endBoundary;
+      if (startBoundary < lastBoundary) wrapLine();
     }
   }
 
