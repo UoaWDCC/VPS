@@ -7,12 +7,13 @@ import {
   sendToBack,
 } from "../../scene/operations/component";
 import { remove } from "../../scene/operations/modifiers";
-import { getScene } from "../../scene/scene";
+import { getComponent, getScene } from "../../scene/scene";
 import useEditorStore from "../../stores/editor";
 import { handleSelectAll as handleSelectAllText } from "./text";
 import { matchesShortcut } from "./utils";
 import { setTextStyle } from "../../text/style";
-import { getComponent } from "../../scene/scene";
+import { toggleBulletShortcut } from "../../text/list";
+import { syncVisualCursor } from "../../text/cursor";
 import { getStyleForSelection } from "../../scene/operations/text";
 
 type Shortcut = {
@@ -23,8 +24,8 @@ type Shortcut = {
 
 function toggleTextStyle(
   selected: string,
-  prop: "fontWeight" | "fontStyle" | "textDecoration",
-  enabledValue: "bold" | "italic" | "underline",
+  prop: "fontWeight" | "fontStyle" | "textDecoration" | "verticalAlign",
+  enabledValue: "bold" | "italic" | "underline" | "super" | "sub",
   disabledValue: "normal" | "none"
 ) {
   const current = useEditorStore.getState().activeStyle;
@@ -90,8 +91,10 @@ const shortcuts: Shortcut[] = [
   {
     combos: ["backspace", "delete"],
     when: () => {
-      const { mode, selected } = useEditorStore.getState();
-      return !mode.includes("text") && selected.length > 0;
+      const { mode, selected, markerSelection } = useEditorStore.getState();
+      // a marker selection has its own Backspace/Delete handling (strip
+      // list formatting) -- this generic component-delete must yield to it
+      return !mode.includes("text") && !markerSelection && selected.length > 0;
     },
     run: () => {
       const { selected, setSelected } = useEditorStore.getState();
@@ -195,6 +198,36 @@ const shortcuts: Shortcut[] = [
     },
   },
   {
+    combos: ["mod+."],
+    when: () => useEditorStore.getState().mode.includes("text"),
+    run: () => {
+      const { selected } = useEditorStore.getState();
+      if (!selected.length) return;
+      toggleTextStyle(selected[0], "verticalAlign", "super", "normal");
+    },
+  },
+  {
+    combos: ["mod+,"],
+    when: () => useEditorStore.getState().mode.includes("text"),
+    run: () => {
+      const { selected } = useEditorStore.getState();
+      if (!selected.length) return;
+      toggleTextStyle(selected[0], "verticalAlign", "sub", "normal");
+    },
+  },
+  {
+    // shift+8 usually reports e.key as "*" (the shifted character) rather
+    // than "8", so both are matched to work across browsers/layouts
+    combos: ["mod+shift+8", "mod+shift+*"],
+    when: () => useEditorStore.getState().mode.includes("text"),
+    run: () => {
+      const { selected } = useEditorStore.getState();
+      if (!selected.length) return;
+      toggleBulletShortcut(selected[0]);
+      syncVisualCursor();
+    },
+  },
+  {
     combos: ["mod+shift+>"],
     when: canAdjustSelectedTextFontSize,
     run: () => adjustSelectedTextFontSize(1),
@@ -211,8 +244,21 @@ const shortcuts: Shortcut[] = [
       return mode.some((m) => m !== "normal") || selected.length > 0;
     },
     run: () => {
-      const { mode, setMode, setSelected, setActiveGuides, setMouseDown } =
-        useEditorStore.getState();
+      const {
+        mode,
+        setMode,
+        setSelected,
+        setActiveGuides,
+        setMouseDown,
+        markerSelection,
+        setMarkerSelection,
+      } = useEditorStore.getState();
+      // a marker selection is cleared on its own first, leaving the
+      // textbox itself selected
+      if (markerSelection) {
+        setMarkerSelection(null);
+        return;
+      }
       if (mode.some((m) => m !== "normal")) {
         // cancel the active drag/resize/marquee/create/text-edit
         setMode(["normal"]);
