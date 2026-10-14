@@ -177,9 +177,13 @@ export function createComponentFromBounds(
   const component = structuredClone(defaults[type]);
 
   const dims = mutate(subtract(bounds.verts[1], bounds.verts[0]), Math.abs);
+  // drags smaller than this are treated as clicks and get the default size
+  const minDrawnSize = 50;
 
-  if (dims.x > 50 && dims.y > 50) {
+  if (dims.x > minDrawnSize && dims.y > minDrawnSize) {
     component.bounds = bounds;
+    // a text box drawn to a size keeps it instead of fitting its text
+    if (type === "textbox") Object.assign(component, { autoResize: false });
   } else {
     component.bounds.verts = translate(component.bounds.verts, bounds.verts[0]);
   }

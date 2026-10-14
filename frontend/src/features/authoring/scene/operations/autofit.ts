@@ -58,7 +58,8 @@ export function recordManualHeight(
 
 // resize shape to fit text content but never drop below a height the user resized to
 export function fitTextBox(component: Component) {
-  if (component.type !== "textbox") return false;
+  if (component.type !== "textbox" || component.autoResize === false)
+    return false;
 
   const { verts, rotation } = component.bounds;
   const height = getHeight(component);
