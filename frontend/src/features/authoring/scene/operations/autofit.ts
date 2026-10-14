@@ -39,21 +39,39 @@ function getRequiredHeight(component: TextBoxComponent) {
   return last.y + last.height + component.padding * 2;
 }
 
-// resize shape to fit text: height tracks the content, width is left alone since it's what the text wraps against
+function getHeight(component: Component) {
+  const { verts } = component.bounds;
+  return Math.abs(verts[1].y - verts[0].y);
+}
+
+// a user edit that changed a box's height should be kept as the box's minimum
+export function recordManualHeight(
+  component: Component,
+  previous: Component | null
+) {
+  if (component.type !== "textbox" || previous?.type !== "textbox") return;
+
+  const height = getHeight(component);
+  if (Math.abs(height - getHeight(previous)) > EPSILON)
+    component.minHeight = height;
+}
+
+// resize shape to fit text content but never drop below a height the user resized to
 export function fitTextBox(component: Component) {
   if (component.type !== "textbox") return false;
 
   const { verts, rotation } = component.bounds;
-  const height = Math.abs(verts[1].y - verts[0].y);
+  const height = getHeight(component);
   const required = getRequiredHeight(component);
 
   if (required == null || !Number.isFinite(required)) return false;
-  if (Math.abs(height - required) <= EPSILON) return false;
+  const target = Math.max(required, component.minHeight ?? 0);
+  if (Math.abs(height - target) <= EPSILON) return false;
 
   // anchor the top edge and move the bottom one to meet the text
   const topI = verts[0].y <= verts[1].y ? 0 : 1;
   const newVerts = verts.map((vert) => ({ ...vert }));
-  newVerts[1 - topI].y = verts[topI].y + required;
+  newVerts[1 - topI].y = verts[topI].y + target;
 
   // resizing moves the box centre, which is also the rotation origin, so we need to recalculate it
   component.bounds.verts = correct(newVerts, getBoxCenter(verts), rotation);

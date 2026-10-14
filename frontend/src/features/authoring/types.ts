@@ -116,6 +116,7 @@ export interface TextBoxComponent extends ShapeComponent {
   document: ModelDocument;
   color: HexString;
   padding: number;
+  minHeight?: number;
 }
 
 interface BaseModelDocument {
