@@ -1,6 +1,16 @@
 @import "tailwindcss";
 @plugin "daisyui";
 
+@keyframes side-panel-slide-in {
+  from {
+    transform: translateX(100%);
+  }
+
+  to {
+    transform: translateX(0);
+  }
+}
+
 @theme {
   --font-ibm: "IBMPlexSans", sans-serif;
   --font-dm: "DMSans", sans-serif;
