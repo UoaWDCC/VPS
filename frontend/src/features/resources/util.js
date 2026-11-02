@@ -26,6 +26,12 @@ export function normaliseFile(resource) {
   };
 }
 
+export function flattenFiles(tree) {
+  return tree.flatMap((resource) =>
+    resource.type === "collection" ? resource.children : [resource]
+  );
+}
+
 export function filterTreeBySearch(tree, string) {
   const q = string.trim()?.toLowerCase();
   if (!q) return tree;
