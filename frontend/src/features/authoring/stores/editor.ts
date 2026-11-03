@@ -21,6 +21,18 @@ export interface PendingImage {
   settled: boolean;
 }
 
+// zoom is a scale factor, where 1 fits the whole scene in the canvas area
+export const MIN_ZOOM = 0.1;
+export const MAX_ZOOM = 5;
+const DEFAULT_ZOOM = 1;
+// each zoom in/out step multiplies/divides the zoom by this
+const ZOOM_STEP = 2;
+
+// keeps whole percentages, so the zoom shown in the controls is exact
+function clampZoom(zoom: number) {
+  return Math.min(Math.max(Math.round(zoom * 100) / 100, MIN_ZOOM), MAX_ZOOM);
+}
+
 interface EditorState {
   loading: boolean;
   pendingImages: PendingImage[];
@@ -31,6 +43,7 @@ interface EditorState {
   mutationBounds: Bounds;
   offset: Vec2;
   activeGuides: Guide[];
+  zoom: number;
 
   setSelected: (id: string[]) => void;
   setHovered: (id: string | null) => void;
@@ -39,6 +52,10 @@ interface EditorState {
   setMutationBounds: Dynamic<Bounds>;
   setOffset: (offset: Vec2) => void;
   setActiveGuides: (guides: Guide[]) => void;
+  setZoom: (zoom: number) => void;
+  zoomIn: () => void;
+  zoomOut: () => void;
+  resetZoom: () => void;
 
   // text editing
   selection: ModelSelection;
@@ -92,6 +109,7 @@ const useEditorStore = create<EditorState>((set) => ({
   mutationBounds: { verts: [], rotation: 0 },
   offset: { x: 0, y: 0 },
   activeGuides: [],
+  zoom: DEFAULT_ZOOM,
 
   setLoading: (value: boolean) => set({ loading: value }),
   setSelected: (ids) =>
@@ -124,6 +142,12 @@ const useEditorStore = create<EditorState>((set) => ({
   setMutationBounds: setter(set, "mutationBounds"),
   setOffset: (offset) => set({ offset }),
   setActiveGuides: (guides) => set({ activeGuides: guides }),
+  setZoom: (zoom) => {
+    if (Number.isFinite(zoom)) set({ zoom: clampZoom(zoom) });
+  },
+  zoomIn: () => set((state) => ({ zoom: clampZoom(state.zoom * ZOOM_STEP) })),
+  zoomOut: () => set((state) => ({ zoom: clampZoom(state.zoom / ZOOM_STEP) })),
+  resetZoom: () => set({ zoom: DEFAULT_ZOOM }),
 
   selection: { start: null, end: null },
   visualSelection: { start: null, end: null },
