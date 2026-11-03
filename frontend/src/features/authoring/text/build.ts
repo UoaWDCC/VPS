@@ -61,6 +61,15 @@ function generateOffsets(text: string, style: BaseTextStyle) {
   return offsets;
 }
 
+// UTF-16 indices where text can be broken without splitting a character,
+// including text.length
+function graphemeBoundaries(text: string) {
+  const segmenter = new Intl.Segmenter(undefined, { granularity: "grapheme" });
+  const boundaries = Array.from(segmenter.segment(text), (s) => s.index);
+  boundaries.push(text.length);
+  return boundaries;
+}
+
 function generateLineOffset(
   alignment: string,
   width: number,
@@ -104,6 +113,94 @@ function buildVisualLines(
 
   let wordBuffer: SpanRef[] = [];
 
+  function endLine() {
+    currentLine.x = generateLineOffset(alignment, maxWidth, currentLine.width);
+    currentLine.height = lineHeight * currentLine.maxFontSize;
+    currentLine.baseline = currentLine.height - currentLine.maxDescent;
+    lines.push(currentLine);
+  }
+
+  function wrapLine() {
+    endLine();
+    currentLine = createNewLine({ y: currentLine.y + currentLine.height });
+  }
+
+  function pushSpan(
+    ref: SpanRef,
+    style: BaseTextStyle,
+    text: string,
+    startIndex: number,
+    width: number,
+    charOffsets: number[]
+  ) {
+    currentLine.spans.push({
+      text,
+      charOffsets,
+      style,
+      width,
+      x: currentLine.width,
+      parentId: ref.index,
+      startIndex,
+      property: ref.span.property,
+    });
+    currentLine.width += width;
+
+    setFont(style);
+    const descent = measure("Mg").actualBoundingBoxDescent;
+    if (descent > currentLine.maxDescent) currentLine.maxDescent = descent;
+    if (style.fontSize > currentLine.maxFontSize)
+      currentLine.maxFontSize = style.fontSize;
+  }
+
+  // a word too wide for the box has no wrap point, so break between characters
+  function pushBrokenSpan(
+    ref: SpanRef,
+    style: BaseTextStyle,
+    offsets: number[]
+  ) {
+    // only break between whole graphemes, so an emoji or surrogate pair is never
+    // split across lines; offsets and start indices stay in UTF-16 units
+    const boundaries = graphemeBoundaries(ref.text);
+    // *Boundary vars index into boundaries; start/end are positions in ref.text
+    const lastBoundary = boundaries.length - 1;
+    let startBoundary = 0;
+
+    while (startBoundary < lastBoundary) {
+      const start = boundaries[startBoundary];
+      const base = offsets[start];
+
+      let endBoundary = startBoundary;
+      while (
+        endBoundary < lastBoundary &&
+        currentLine.width + offsets[boundaries[endBoundary + 1]] - base <=
+          maxWidth
+      )
+        endBoundary++;
+
+      if (endBoundary === startBoundary) {
+        // retry on an empty line; if not even one char fits, take it anyway
+        if (currentLine.width > 0) {
+          wrapLine();
+          continue;
+        }
+        endBoundary = startBoundary + 1;
+      }
+
+      const end = boundaries[endBoundary];
+      pushSpan(
+        ref,
+        style,
+        ref.text.slice(start, end),
+        ref.start + start,
+        offsets[end] - base,
+        offsets.slice(start, end + 1).map((offset) => offset - base)
+      );
+
+      startBoundary = endBoundary;
+      if (startBoundary < lastBoundary) wrapLine();
+    }
+  }
+
   function flushWordBuffer() {
     if (wordBuffer.length === 0) return;
 
@@ -128,38 +225,30 @@ function buildVisualLines(
     });
     const wordWidth = measuredParts.reduce((sum, p) => sum + p.width, 0);
 
+    // a word that fits on a line of its own moves down whole, and is only broken
+    // up if it overflows even then
     if (currentLine.width + wordWidth > maxWidth && currentLine.width > 0) {
-      currentLine.x = generateLineOffset(
-        alignment,
-        maxWidth,
-        currentLine.width
-      );
-      currentLine.height = lineHeight * currentLine.maxFontSize;
-      currentLine.baseline = currentLine.height - currentLine.maxDescent;
-      lines.push(currentLine);
-
-      currentLine = createNewLine({ y: currentLine.y + currentLine.height });
+      wrapLine();
     }
 
     for (const part of measuredParts) {
       const { ref, style, width, offsets } = part;
-      currentLine.spans.push({
-        text: ref.text,
-        charOffsets: offsets,
-        style,
-        width,
-        x: currentLine.width,
-        parentId: ref.index,
-        startIndex: ref.start,
-        property: ref.span.property,
-      });
-      currentLine.width += width;
 
-      setFont(style);
-      const descent = measure("Mg").actualBoundingBoxDescent;
-      if (descent > currentLine.maxDescent) currentLine.maxDescent = descent;
-      if (style.fontSize > currentLine.maxFontSize)
-        currentLine.maxFontSize = style.fontSize;
+      // chips are atomic; a box narrower than its padding has nothing to break against
+      const breakable =
+        !ref.span.property && ref.text.length > 0 && maxWidth > 0;
+
+      if (breakable && currentLine.width + width > maxWidth) {
+        pushBrokenSpan(ref, style, offsets);
+        continue;
+      }
+
+      // an atomic part that doesn't fit drops to the next line instead of
+      // running past the edge, so the box gains a line rather than overflowing
+      if (currentLine.width > 0 && currentLine.width + width > maxWidth)
+        wrapLine();
+
+      pushSpan(ref, style, ref.text, ref.start, width, offsets);
     }
 
     wordBuffer = [];
@@ -186,21 +275,14 @@ function buildVisualLines(
         const style = squash(blockStyle, span.style);
         setFont(style);
         const spaceWidth = measure(token).width;
-        currentLine.spans.push({
-          text: token,
+        pushSpan(
+          { span, text: token, index: j, start: offset },
           style,
-          width: spaceWidth,
-          x: currentLine.width,
-          parentId: j,
-          startIndex: offset,
-          charOffsets: generateOffsets(token, style),
-        });
-        currentLine.width += spaceWidth;
-
-        const descent = measure("Mg").actualBoundingBoxDescent;
-        if (descent > currentLine.maxDescent) currentLine.maxDescent = descent;
-        if (style.fontSize > currentLine.maxFontSize)
-          currentLine.maxFontSize = style.fontSize;
+          token,
+          offset,
+          spaceWidth,
+          generateOffsets(token, style)
+        );
       } else {
         wordBuffer.push({ span, text: token, index: j, start: offset });
       }
@@ -213,12 +295,7 @@ function buildVisualLines(
 
   flushWordBuffer();
 
-  if (currentLine.spans.length > 0) {
-    currentLine.x = generateLineOffset(alignment, maxWidth, currentLine.width);
-    currentLine.height = lineHeight * currentLine.maxFontSize;
-    currentLine.baseline = currentLine.height - currentLine.maxDescent;
-    lines.push(currentLine);
-  }
+  if (currentLine.spans.length > 0) endLine();
 
   return lines;
 }
