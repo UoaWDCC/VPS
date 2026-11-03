@@ -33,6 +33,7 @@ export const getSimpleScene = async (sceneId) => {
   const scene = await Scene.findOne(
     { _id: sceneId },
     {
+      name: 1,
       roles: 1,
       components: 1,
       directLink: 1,
